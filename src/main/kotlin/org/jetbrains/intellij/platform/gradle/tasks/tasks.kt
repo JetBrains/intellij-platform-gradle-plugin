@@ -263,10 +263,10 @@ internal inline fun <reified T : Task> Project.registerTask(
 
         /**
          * The [RuntimeAware] adjusts tasks for the running a guest IDE purpose.
-         * This configuration picks relevant Java Runtime using the [RuntimeResolver] and [RuntimeAware.runtimeArch].
+         * This configuration picks relevant Java Runtime using the [JavaRuntimePathResolver] and [RuntimeAware.runtimeArch].
          */
         if (this is RuntimeAware) {
-            val runtimeResolver = JavaRuntimePathResolver(
+            val javaRuntimePathResolver = JavaRuntimePathResolver(
                 jetbrainsRuntime = configurations.getByName(Configurations.JETBRAINS_RUNTIME),
                 intellijPlatform = intelliJPlatformConfiguration,
                 javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
@@ -274,10 +274,10 @@ internal inline fun <reified T : Task> Project.registerTask(
             )
 
             runtimeDirectory.convention(layout.dir(provider {
-                runtimeResolver.resolve().toFile()
+                javaRuntimePathResolver.resolve().toFile()
             }))
             runtimeExecutable.convention(layout.file(provider {
-                runtimeResolver.resolveExecutable().toFile()
+                javaRuntimePathResolver.resolveExecutable().toFile()
             }))
             runtimeArch.set(providers.of(ExecutableArchValueSource::class) {
                 parameters.executable.set(runtimeExecutable)
@@ -293,13 +293,13 @@ internal inline fun <reified T : Task> Project.registerTask(
          */
         if (this is PluginVerifierAware) {
             // TODO: test if no PV dependency is added to the project
-            val pluginVerifierResolver = IntelliJPluginVerifierPathResolver(
+            val intelliJPluginVerifierPathResolver = IntelliJPluginVerifierPathResolver(
                 intellijPluginVerifier = configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER),
                 localPath = extension.verifyPlugin.cliPath,
             )
 
             pluginVerifierExecutable.convention(layout.file(provider {
-                pluginVerifierResolver.resolve().toFile()
+                intelliJPluginVerifierPathResolver.resolve().toFile()
             }))
         }
 
@@ -308,15 +308,16 @@ internal inline fun <reified T : Task> Project.registerTask(
          */
         if (this is SigningAware) {
             // TODO: test if no ZIP Signer dependency is added to the project
-            val marketplaceZipSignerResolver = MarketplaceZipSignerPathResolver(
+            val marketplaceZipSignerPathResolver = MarketplaceZipSignerPathResolver(
                 marketplaceZipSigner = configurations.getByName(Configurations.MARKETPLACE_ZIP_SIGNER),
                 localPath = extension.signing.cliPath,
             )
 
             zipSignerExecutable.convention(layout.file(provider {
-                marketplaceZipSignerResolver.resolve().toFile()
+                marketplaceZipSignerPathResolver.resolve().toFile()
             }))
         }
+
         /**
          * The [JavaCompilerAware] resolves and provides the Java Compiler dependency.
          */
