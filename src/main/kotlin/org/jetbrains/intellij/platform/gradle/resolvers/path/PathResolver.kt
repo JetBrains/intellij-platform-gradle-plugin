@@ -8,6 +8,7 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.ifNull
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
+import kotlin.io.path.listDirectoryEntries
 
 /**
  * Interface for resolving a [Path] to executables or other files of any kind.
@@ -41,4 +42,12 @@ abstract class PathResolver(
         .firstOrNull()
         ?.also { log.debug("Resolved '$subject': $it") }
         .throwIfNull { GradleException("Cannot resolve '$subject'") }
+
+    /**
+     * This method of checking if the file exists is required to don't break the Gradle configuration cache and lazy resolving of some values.
+     * Calling `Path.exists()` method simply fails.
+     */
+    protected fun Path.takeIfExists() = takeIf {
+        runCatching { parent.listDirectoryEntries().contains(this) }.getOrDefault(false)
+    }
 }

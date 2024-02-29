@@ -17,7 +17,6 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.or
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
-import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.name
 
@@ -117,7 +116,7 @@ class JavaRuntimePathResolver(
 
         val jbr = listDirectoryEntries()
             .firstOrNull { it.name.startsWith("jbr") }
-            ?.takeIf { it.exists() }
+            ?.takeIfExists()
 
         return when {
             OperatingSystem.current().isMacOsX -> when {
@@ -130,7 +129,7 @@ class JavaRuntimePathResolver(
                 jbr != null -> jbr
                 else -> this
             }
-        }.takeIf { it.exists() }
+        }.takeIfExists()
     }
 
     /**
@@ -139,9 +138,9 @@ class JavaRuntimePathResolver(
      * @return The resolved path to the runtime executable, or null if the executable does not exist.
      */
     private fun Path.resolveRuntimeExecutable(): Path? {
-        val base = resolve("jre").takeIf { it.exists() }.or(this)
+        val base = resolve("jre").takeIfExists().or(this)
         val extension = ".exe".takeIf { OperatingSystem.current().isWindows }.orEmpty()
-        return base.resolve("bin/java$extension").takeIf { it.exists() }
+        return base.resolve("bin/java$extension").takeIfExists()
     }
 
     /**

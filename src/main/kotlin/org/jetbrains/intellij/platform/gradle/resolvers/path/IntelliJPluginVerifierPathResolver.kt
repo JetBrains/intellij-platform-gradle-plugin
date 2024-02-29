@@ -7,7 +7,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
-import kotlin.io.path.exists
 
 /**
  * Resolves the path to the IntelliJ Plugin Verifier executable.
@@ -30,7 +29,7 @@ class IntelliJPluginVerifierPathResolver(
                  */
                 localPath.orNull
                     ?.asPath
-                    ?.takeIf { it.exists() }
+                    ?.takeIfExists()
             },
             "$subject specified with a dependencies" to {
                 /**
