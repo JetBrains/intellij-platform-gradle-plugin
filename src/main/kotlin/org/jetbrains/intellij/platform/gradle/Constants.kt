@@ -20,6 +20,7 @@ object Constants {
     const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
     const val SEARCHABLE_OPTIONS_DIRECTORY = "searchableOptions"
     const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
+    const val VERSION_CURRENT = "current"
     const val VERSION_LATEST = "latest"
 
     object Constraints {

@@ -15,6 +15,7 @@ import org.gradle.kotlin.dsl.create
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
@@ -656,23 +657,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
     /**
      * Adds a Java Compiler dependency for code instrumentation.
-     * The version is determined by the IntelliJ Platform build number.
+     * By default, the version is determined by the IntelliJ Platform build number.
      * If the exact version is unavailable, the closest one is used, found by scanning all releases.
      */
-    fun javaCompiler() = addJavaCompilerDependency(providers.provider {
-        val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
-        val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
-
-        when (resolveClosest) {
-            true -> JavaCompilerClosestVersionResolver(productInfo).resolve().version
-            false -> productInfo.buildNumber
-        }
-    })
-
-    /**
-     * Adds a dependency on Java Compiler used for running the code instrumentation.
-     */
-    fun javaCompiler(version: String) = addJavaCompilerDependency(providers.provider { version })
+    fun javaCompiler(version: String = VERSION_CURRENT) = addJavaCompilerDependency(providers.provider { version })
 
     /**
      * Adds a dependency on Java Compiler used for running the code instrumentation.
@@ -907,10 +895,20 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = configurations.getByName(configurationName).dependencies.addLater(
         versionProvider.map { version ->
+            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
+            val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
+
             dependencies.create(
                 group = "com.jetbrains.intellij.java",
                 name = "java-compiler-ant-tasks",
-                version = version,
+                version = when (version) {
+                    VERSION_CURRENT -> when {
+                        resolveClosest -> JavaCompilerClosestVersionResolver(productInfo).resolve().version
+                        else -> productInfo.buildNumber
+                    }
+
+                    else -> version
+                },
             ).apply(action)
         }
     )
