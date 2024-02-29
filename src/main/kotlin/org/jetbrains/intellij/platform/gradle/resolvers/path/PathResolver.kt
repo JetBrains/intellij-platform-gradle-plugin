@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.resolvers.Resolver
-import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.ClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.ifNull
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
