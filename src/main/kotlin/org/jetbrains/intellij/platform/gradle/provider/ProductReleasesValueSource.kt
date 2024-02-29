@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.provider
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.*
 import org.gradle.api.resources.ResourceHandler
-import org.jetbrains.intellij.model.JetBrainsIdesReleases
+import org.jetbrains.intellij.platform.gradle.model.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
