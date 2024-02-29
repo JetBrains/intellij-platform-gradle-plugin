@@ -657,6 +657,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
     /**
      * Adds a Java Compiler dependency for code instrumentation.
+     *
      * By default, the version is determined by the IntelliJ Platform build number.
      * If the exact version is unavailable, the closest one is used, found by scanning all releases.
      */

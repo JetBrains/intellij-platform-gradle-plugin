@@ -28,7 +28,6 @@ interface PluginAware {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     @get:Optional
     val pluginXml: RegularFileProperty
-
 }
 
 /**

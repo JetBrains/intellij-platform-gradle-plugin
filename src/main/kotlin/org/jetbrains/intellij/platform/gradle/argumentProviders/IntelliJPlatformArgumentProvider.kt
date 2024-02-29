@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
@@ -38,12 +38,12 @@ class IntelliJPlatformArgumentProvider(
     @InputFile
     @PathSensitive(RELATIVE)
     @Optional
-    val coroutinesJavaAgentFile: RegularFileProperty,
+    val coroutinesJavaAgentFile: Provider<RegularFile>,
 
     @InputFile
     @PathSensitive(RELATIVE)
     @Optional
-    val pluginXml: RegularFileProperty,
+    val pluginXml: Provider<RegularFile>,
 
     @Input
     val runtimeArchProvider: Provider<String>,

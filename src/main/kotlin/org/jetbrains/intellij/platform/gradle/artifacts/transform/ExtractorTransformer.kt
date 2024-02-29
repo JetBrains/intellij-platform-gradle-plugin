@@ -40,10 +40,10 @@ abstract class ExtractorTransformer @Inject constructor(
     interface Parameters : TransformParameters {
 
         @get:Internal
-        val intellijPlatform: ConfigurableFileCollection
+        val intellijPlatformDependency: ConfigurableFileCollection
 
         @get:Internal
-        val jetbrainsRuntime: ConfigurableFileCollection
+        val jetbrainsRuntimeDependency: ConfigurableFileCollection
     }
 
     @get:InputArtifact
@@ -129,8 +129,8 @@ internal fun DependencyHandler.applyExtractorTransformer(
             .attribute(Attributes.extracted, true)
 
         parameters {
-            intellijPlatform.from(intellijPlatformDependencyConfiguration)
-            jetbrainsRuntime.from(jetbrainsRuntimeDependencyConfiguration)
+            intellijPlatformDependency.from(intellijPlatformDependencyConfiguration)
+            jetbrainsRuntimeDependency.from(jetbrainsRuntimeDependencyConfiguration)
         }
     }
 }

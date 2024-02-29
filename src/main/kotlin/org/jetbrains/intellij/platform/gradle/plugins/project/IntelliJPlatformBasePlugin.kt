@@ -226,14 +226,20 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 )
 
                 fun Configuration.extend() = extendsFrom(
+                getByName(COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(
                     intellijPlatformConfiguration,
                     intellijPlatformDependenciesConfiguration,
                 )
-
-                getByName(COMPILE_ONLY_CONFIGURATION_NAME).extend()
-                getByName(TEST_COMPILE_ONLY_CONFIGURATION_NAME).extend()
+                getByName(TEST_COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(
+                    intellijPlatformConfiguration,
+                    intellijPlatformDependenciesConfiguration,
+                )
                 pluginManager.withPlugin(JAVA_TEST_FIXTURES_PLUGIN_ID) {
                     getByName(Configurations.TEST_FIXTURES_COMPILE_ONLY).extend()
+                    getByName(Configurations.TEST_FIXTURES_COMPILE_ONLY).extendsFrom(
+                        intellijPlatformConfiguration,
+                        intellijPlatformDependenciesConfiguration,
+                    )
                 }
             }
 

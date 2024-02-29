@@ -280,7 +280,9 @@ internal inline fun <reified T : Task> Project.registerTask(
                 javaRuntimePathResolver.resolveExecutable().toFile()
             }))
             runtimeArch.set(providers.of(ExecutableArchValueSource::class) {
-                parameters.executable.set(runtimeExecutable)
+                parameters {
+                    executable.set(runtimeExecutable)
+                }
             })
 
             if (this is TestIdeTask) {
@@ -335,10 +337,10 @@ internal inline fun <reified T : Task> Project.registerTask(
 
             jvmArgumentProviders.add(
                 IntelliJPlatformArgumentProvider(
-                    intellijPlatformConfiguration = intelliJPlatformConfiguration,
-                    coroutinesJavaAgentFile = coroutinesJavaAgentFile,
-                    pluginXml = pluginXml,
-                    runtimeArchProvider = runtimeArch,
+                    intelliJPlatformConfiguration,
+                    coroutinesJavaAgentFile,
+                    pluginXml,
+                    runtimeArch,
                     options = this,
                 )
             )
@@ -350,16 +352,6 @@ internal inline fun <reified T : Task> Project.registerTask(
                     sandboxLogDirectory,
                 )
             )
-
-//                outputs.dir(sandboxSystemDirectory)
-//                    .withPropertyName("System directory")
-//                inputs.dir(sandboxConfigDirectory)
-//                    .withPropertyName("Config Directory")
-//                    .withPathSensitivity(PathSensitivity.RELATIVE)
-//                inputs.files(sandboxPluginsDirectory)
-//                    .withPropertyName("Plugins directory")
-//                    .withPathSensitivity(PathSensitivity.RELATIVE)
-//                    .withNormalizer(ClasspathNormalizer::class)
 
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
 

@@ -33,7 +33,7 @@ abstract class ExecutableArchValueSource : ValueSource<String, ExecutableArchVal
     override fun obtain() = ByteArrayOutputStream().use { os ->
         execOperations.exec {
             commandLine(
-                parameters.executable.get().asPath.absolutePathString(),
+                parameters.executable.asPath.absolutePathString(),
                 "-XshowSettings:properties",
                 "-version",
             )
