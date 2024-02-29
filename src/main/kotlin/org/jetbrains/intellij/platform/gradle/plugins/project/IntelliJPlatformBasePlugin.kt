@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
@@ -13,7 +12,6 @@ import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.BuildFeature
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
@@ -21,6 +19,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.JAVA_TEST_FIXTURES_PLUGI
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_BASE_ID
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsListTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
@@ -225,7 +224,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     description = "Java Compiler used by Ant tasks",
                 )
 
-                fun Configuration.extend() = extendsFrom(
+                val intellijPlatformTestDependenciesConfiguration = create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+                    description = "IntelliJ Platform Test Dependencies"
+                )
+
                 getByName(COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(
                     intellijPlatformConfiguration,
                     intellijPlatformDependenciesConfiguration,
@@ -233,12 +236,13 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 getByName(TEST_COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(
                     intellijPlatformConfiguration,
                     intellijPlatformDependenciesConfiguration,
+                    intellijPlatformTestDependenciesConfiguration,
                 )
                 pluginManager.withPlugin(JAVA_TEST_FIXTURES_PLUGIN_ID) {
-                    getByName(Configurations.TEST_FIXTURES_COMPILE_ONLY).extend()
                     getByName(Configurations.TEST_FIXTURES_COMPILE_ONLY).extendsFrom(
                         intellijPlatformConfiguration,
                         intellijPlatformDependenciesConfiguration,
+                        intellijPlatformTestDependenciesConfiguration,
                     )
                 }
             }

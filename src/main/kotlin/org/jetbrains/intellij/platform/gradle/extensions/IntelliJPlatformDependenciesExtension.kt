@@ -23,6 +23,7 @@ import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
@@ -656,6 +657,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun zipSigner(version: Provider<String>) = addZipSignerDependency(version)
 
     /**
+     * Adds a dependency on the `test-framework` library required for testing plugins.
+     *
+     * By default, the version is determined by the IntelliJ Platform build number.
+     * If the exact version is unavailable, the closest one is used, found by scanning all releases.
+     * */
+    fun testFramework(version: String = VERSION_CURRENT) = addTestFrameworkDependency(providers.provider { version })
+
+    /**
+     * Adds a dependency on the `test-framework` library required for testing plugins.
+     */
+    fun testFramework(version: Provider<String>) = addTestFrameworkDependency(version)
+
+    /**
      * Adds a Java Compiler dependency for code instrumentation.
      *
      * By default, the version is determined by the IntelliJ Platform build number.
@@ -912,6 +926,37 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 },
             ).apply(action)
         }
+    )
+
+    /**
+     * Adds a dependency on the `test-framework` library required for testing plugins.
+     *
+     * This dependency belongs to IntelliJ Platform repositories.
+     */
+    private fun addTestFrameworkDependency(
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+        action: DependencyAction = {},
+    ) = dependencies.addProvider(
+        configurationName,
+        versionProvider.map { version ->
+            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
+            val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
+
+            dependencies.create(
+                group = "com.jetbrains.intellij.platform",
+                name = "test-framework",
+                version = when (version) {
+                    VERSION_CURRENT -> when {
+                        resolveClosest -> TestFrameworkClosestVersionResolver(productInfo).resolve().version
+                        else -> productInfo.buildNumber
+                    }
+
+                    else -> version
+                },
+            )
+        },
+        action,
     )
 }
 
