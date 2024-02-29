@@ -75,11 +75,13 @@ object Constants {
         }
     }
 
+    const val INSTRUMENT_CODE = "instrumentCode"
+    const val INSTRUMENT_TEST_CODE = "instrumentTestCode"
+
     object Tasks {
         const val BUILD_PLUGIN = "buildPlugin" // TODO: check
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
-//        const val INSTRUMENT_CODE = "instrumentCode"
         const val INSTRUMENTED_JAR = "instrumentedJar" // TODO: check
         const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
         const val PATCH_PLUGIN_XML = "patchPluginXml" // TODO: check
@@ -92,7 +94,6 @@ object Constants {
         const val RUN_IDE = "runIde" // TODO: check
         const val SETUP_DEPENDENCIES = "setupDependencies"
         const val SIGN_PLUGIN = "signPlugin"
-        const val TEST_IDE = "testIde" // TODO: check
         const val TEST_IDE_PERFORMANCE = "testIdePerformance" // TODO: check
         const val TEST_IDE_UI = "testIdeUi" // TODO: check
         const val VERIFY_PLUGIN = "verifyPlugin" // TODO: check

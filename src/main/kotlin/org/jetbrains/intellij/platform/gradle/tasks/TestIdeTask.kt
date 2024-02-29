@@ -2,15 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
-import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
 
@@ -38,7 +34,7 @@ import kotlin.io.path.absolutePathString
  * ```
  */
 @UntrackedTask(because = "Should always run")
-abstract class TestIdeTask : Test(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
+abstract class TestIdeTask : Test(), CustomIntelliJPlatformVersionAware, SandboxAware, CoroutinesJavaAgentAware, PluginAware, RuntimeAware {
 
     init {
         group = PLUGIN_GROUP_NAME
@@ -53,31 +49,4 @@ abstract class TestIdeTask : Test(), RunnableIdeAware, CustomIntelliJPlatformVer
     }
 
     override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
-
-    companion object : Registrable {
-        // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
-        //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/property.html
-        override fun register(project: Project) =
-            project.registerTask<TestIdeTask>(Tasks.TEST_IDE) {
-
-//            systemProperty("idea.use.core.classloader.for.plugin.path", "true")
-//            systemProperty("idea.force.use.core.classloader", "true")
-//            systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
-
-                project.tasks.named<Test>("test").configure {
-                    finalizedBy(this@registerTask)
-                }
-//            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
-
-//            classpath = instrumentedCodeOutputsProvider.get() + instrumentedTestCodeOutputsProvider.get() + classpath
-//            testClassesDirs = instrumentedTestCodeOutputsProvider.get() + testClassesDirs
-
-//            doFirst {
-//                classpath += ideaDependencyLibrariesProvider.get() +
-//                        ideaConfigurationFiles.get() +
-//                        ideaPluginsConfigurationFiles.get() +
-//                        ideaClasspathFiles.get()
-//            }
-            }
-    }
 }

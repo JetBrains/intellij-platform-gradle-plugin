@@ -284,10 +284,6 @@ internal inline fun <reified T : Task> Project.registerTask(
                     executable.set(runtimeExecutable)
                 }
             })
-
-            if (this is TestIdeTask) {
-                executable(runtimeExecutable)
-            }
         }
 
         /**
