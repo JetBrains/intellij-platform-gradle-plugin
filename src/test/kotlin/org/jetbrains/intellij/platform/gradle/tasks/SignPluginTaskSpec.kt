@@ -35,7 +35,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.SIGN_PLUGIN, "--info") {
+        build(Tasks.SIGN_PLUGIN, "--debug") {
             val message = "Resolved 'Marketplace ZIP Signer': "
             val line = output.lines().find { it.contains(message) }
             assertNotNull(line)
@@ -66,7 +66,7 @@ class SignPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        build(Tasks.SIGN_PLUGIN, "--info") {
+        build(Tasks.SIGN_PLUGIN, "--debug") {
             assertContains("marketplace-zip-signer-0.1.21-cli.jar", output)
         }
     }

@@ -11,7 +11,7 @@ import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
 
 /**
- * Interface for resolving a [Path] to the executables or other files of any kind.
+ * Interface for resolving a [Path] to executables or other files of any kind.
  *
  * @param subject The name of the resource
  */
@@ -19,7 +19,7 @@ abstract class PathResolver(
     protected val subject: String,
 ) : Resolver<Path> {
 
-    private val log = Logger(ClosestVersionResolver::class.java)
+    private val log = Logger(this::class.java)
 
     /**
      * A sequence of possible locations of the [Path] we're looking for.
@@ -36,10 +36,10 @@ abstract class PathResolver(
         .also { log.debug("Resolving '$subject'.") }
         .mapNotNull { (label, block) ->
             block()
-                .ifNull { log.debug("Could not resolved '$label'.") }
+                .ifNull { log.debug("Could not resolve '$label'") }
                 ?.also { log.debug("'$label' resolved as: $it") }
         }
         .firstOrNull()
-        ?.also { log.info("Resolved '$subject': $it") }
-        .throwIfNull { GradleException("Cannot resolve '$subject'.") }
+        ?.also { log.debug("Resolved '$subject': $it") }
+        .throwIfNull { GradleException("Cannot resolve '$subject'") }
 }
