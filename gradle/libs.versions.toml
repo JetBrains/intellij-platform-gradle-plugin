@@ -1,7 +1,6 @@
 [versions]
 # libraries
 annotations = "24.1.0"
-gradleIdeaExt = "1.1.7"
 intellijStructure = "3.267"
 intellijPluginRepositoryRestClient = "2.0.39"
 jacksonDatabind = "2.16.0" # freeze because of: https://github.com/FasterXML/jackson-databind/issues/4315
@@ -16,7 +15,6 @@ gradleChangelogPlugin = "2.2.0"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
-gradleIdeaExt = { group = "gradle.plugin.org.jetbrains.gradle.plugin.idea-ext", name = "gradle-idea-ext", version.ref = "gradleIdeaExt" }
 intellijPluginRepositoryRestClient = { group = "org.jetbrains.intellij", name = "plugin-repository-rest-client", version.ref = "intellijPluginRepositoryRestClient" }
 intellijStructureBase = { group = "org.jetbrains.intellij.plugins", name = "structure-base", version.ref = "intellijStructure" }
 intellijStructureIntellij = { group = "org.jetbrains.intellij.plugins", name = "structure-intellij", version.ref = "intellijStructure" }

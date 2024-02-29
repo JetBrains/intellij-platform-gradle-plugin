@@ -29,7 +29,6 @@ description = properties("description").get()
 repositories {
     mavenCentral()
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
-    maven("https://plugins.gradle.org/m2")
 }
 
 val additionalPluginClasspath: Configuration by configurations.creating
@@ -54,7 +53,6 @@ dependencies {
     compileOnly(embeddedKotlin("gradle-plugin"))
     additionalPluginClasspath(embeddedKotlin("gradle-plugin"))
 
-    api(libs.gradleIdeaExt)
     api(libs.retrofit)
 
     testImplementation(gradleTestKit())
