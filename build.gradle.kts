@@ -27,10 +27,9 @@ group = properties("group").get()
 description = properties("description").get()
 
 repositories {
-    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
-    maven("https://cache-redirector.jetbrains.com/repo1.maven.org/maven2")
-    maven("https://plugins.gradle.org/m2")
     mavenCentral()
+    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
+    maven("https://plugins.gradle.org/m2")
 }
 
 val additionalPluginClasspath: Configuration by configurations.creating
