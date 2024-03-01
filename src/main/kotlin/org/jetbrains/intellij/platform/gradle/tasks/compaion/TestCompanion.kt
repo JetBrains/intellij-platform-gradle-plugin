@@ -18,7 +18,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
-import org.jetbrains.intellij.platform.gradle.provider.ExecutableArchValueSource
+import org.jetbrains.intellij.platform.gradle.providers.ExecutableArchValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware

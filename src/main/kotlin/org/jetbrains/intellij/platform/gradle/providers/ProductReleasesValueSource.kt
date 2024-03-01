@@ -1,6 +1,6 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.provider
+package org.jetbrains.intellij.platform.gradle.providers
 
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.*
@@ -13,7 +13,7 @@ import org.jetbrains.intellij.platform.gradle.model.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
-import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource.FilterParameters
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
 import org.jetbrains.intellij.platform.gradle.tasks.PrintProductsReleasesTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType

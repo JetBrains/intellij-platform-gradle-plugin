@@ -12,7 +12,7 @@ import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.provider.ProductReleasesValueSource
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 
 /**
  * Prints the list of binary product releases that, by default, match the currently selected IntelliJ Platform along
