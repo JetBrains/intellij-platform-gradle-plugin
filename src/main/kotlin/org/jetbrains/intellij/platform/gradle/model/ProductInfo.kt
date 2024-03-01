@@ -11,6 +11,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
+import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 import kotlin.io.path.readText
@@ -167,19 +168,3 @@ fun Path.productInfo() = json.decodeFromString<ProductInfo>(
  * @return The [ProductInfo] object containing the product information.
  */
 fun FileCollection.productInfo() = platformPath().productInfo()
-
-/**
- * Retrieves the [Path] of the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.
- *
- * @receiver The [Configuration] to retrieve the product information from.
- * @return The [Path] of the IntelliJ Platform
- */
-fun FileCollection.platformPath() = runCatching {
-    single().toPath()
-}.onFailure {
-    throw GradleException("""
-        The dependency on the IntelliJ Platform couldn't be resolved. 
-        Please ensure that this dependency is defined in your project and that the necessary repositories, where it can be located, are added.
-        See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
-    """.trimIndent())
-}.getOrThrow()

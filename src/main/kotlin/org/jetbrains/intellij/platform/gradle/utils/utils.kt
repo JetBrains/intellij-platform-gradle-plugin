@@ -2,13 +2,17 @@
 
 package org.jetbrains.intellij.platform.gradle.utils
 
+import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import java.nio.file.Path
 import kotlin.io.path.absolute
 
 fun <T> T?.or(other: T): T = this ?: other
@@ -50,3 +54,21 @@ fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
     is RegularFile -> value.asFile.exists()
     else -> true
 }
+
+/**
+ * Retrieves the [Path] of the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.
+ *
+ * @receiver The [Configuration] to retrieve the product information from.
+ * @return The [Path] of the IntelliJ Platform
+ */
+fun FileCollection.platformPath() = runCatching {
+    single().toPath()
+}.onFailure {
+    throw GradleException(
+        """
+        The dependency on the IntelliJ Platform couldn't be resolved. 
+        Please ensure that this dependency is defined in your project and that the necessary repositories, where it can be located, are added.
+        See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+    """.trimIndent()
+    )
+}.getOrThrow()

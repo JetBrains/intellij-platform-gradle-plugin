@@ -29,15 +29,11 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
-import org.jetbrains.intellij.platform.gradle.model.platformPath
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
-import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.create
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
