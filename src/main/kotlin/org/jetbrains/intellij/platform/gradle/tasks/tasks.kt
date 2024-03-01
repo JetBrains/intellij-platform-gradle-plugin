@@ -78,7 +78,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          * @see IntelliJPlatformVersionAware
          */
         if (this is IntelliJPlatformVersionAware) {
-            intelliJPlatformConfiguration.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM))
+            intelliJPlatformConfiguration.from(configurations[Configurations.INTELLIJ_PLATFORM])
         }
 
         /**
@@ -104,7 +104,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          * @see CustomIntelliJPlatformVersionAware
          */
         if (this is CustomIntelliJPlatformVersionAware) {
-            val baseIntellijPlatformConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM)
+            val baseIntellijPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM]
             val dependenciesExtension = this@registerTask.dependencies.the<IntelliJPlatformDependenciesExtension>()
             val defaultTypeProvider = provider {
                 val productInfo = baseIntellijPlatformConfiguration.productInfo()
@@ -267,7 +267,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          */
         if (this is RuntimeAware) {
             val javaRuntimePathResolver = JavaRuntimePathResolver(
-                jetbrainsRuntime = configurations.getByName(Configurations.JETBRAINS_RUNTIME),
+                jetbrainsRuntime = configurations[Configurations.JETBRAINS_RUNTIME],
                 intellijPlatform = intelliJPlatformConfiguration,
                 javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
                 javaToolchainService = project.serviceOf<JavaToolchainService>(),
@@ -292,7 +292,7 @@ internal inline fun <reified T : Task> Project.registerTask(
         if (this is PluginVerifierAware) {
             // TODO: test if no PV dependency is added to the project
             val intelliJPluginVerifierPathResolver = IntelliJPluginVerifierPathResolver(
-                intellijPluginVerifier = configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER),
+                intellijPluginVerifier = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER],
                 localPath = extension.verifyPlugin.cliPath,
             )
 
@@ -307,7 +307,7 @@ internal inline fun <reified T : Task> Project.registerTask(
         if (this is SigningAware) {
             // TODO: test if no ZIP Signer dependency is added to the project
             val marketplaceZipSignerPathResolver = MarketplaceZipSignerPathResolver(
-                marketplaceZipSigner = configurations.getByName(Configurations.MARKETPLACE_ZIP_SIGNER),
+                marketplaceZipSigner = configurations[Configurations.MARKETPLACE_ZIP_SIGNER],
                 localPath = extension.signing.cliPath,
             )
 
@@ -321,7 +321,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          */
         if (this is JavaCompilerAware) {
             // TODO: test if no Java Compiler dependency is added to the project
-            javaCompilerConfiguration.from(configurations.getByName(Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER))
+            javaCompilerConfiguration.from(configurations[Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER])
         }
 
         /**

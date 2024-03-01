@@ -8,6 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
@@ -229,17 +230,17 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     description = "IntelliJ Platform Test Dependencies"
                 )
 
-                getByName(COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(
+                configurations[COMPILE_ONLY_CONFIGURATION_NAME].extendsFrom(
                     intellijPlatformConfiguration,
                     intellijPlatformDependenciesConfiguration,
                 )
-                getByName(TEST_COMPILE_ONLY_CONFIGURATION_NAME).extendsFrom(
+                configurations[TEST_COMPILE_ONLY_CONFIGURATION_NAME].extendsFrom(
                     intellijPlatformConfiguration,
                     intellijPlatformDependenciesConfiguration,
                     intellijPlatformTestDependenciesConfiguration,
                 )
                 pluginManager.withPlugin(JAVA_TEST_FIXTURES_PLUGIN_ID) {
-                    getByName(Configurations.TEST_FIXTURES_COMPILE_ONLY).extendsFrom(
+                    configurations[Configurations.TEST_FIXTURES_COMPILE_ONLY].extendsFrom(
                         intellijPlatformConfiguration,
                         intellijPlatformDependenciesConfiguration,
                         intellijPlatformTestDependenciesConfiguration,
@@ -255,18 +256,18 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 }
 
                 applyExtractorTransformer(
-                    configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
-                    configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
-                    configurations.getByName(Configurations.INTELLIJ_PLATFORM_DEPENDENCY),
-                    configurations.getByName(Configurations.JETBRAINS_RUNTIME_DEPENDENCY),
+                    configurations[COMPILE_CLASSPATH_CONFIGURATION_NAME],
+                    configurations[TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME],
+                    configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY],
+                    configurations[Configurations.JETBRAINS_RUNTIME_DEPENDENCY],
                 )
                 applyCollectorTransformer(
-                    configurations.getByName(COMPILE_CLASSPATH_CONFIGURATION_NAME),
-                    configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME),
+                    configurations[COMPILE_CLASSPATH_CONFIGURATION_NAME],
+                    configurations[TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME],
                 )
                 applyBundledPluginsListTransformer()
                 applyPluginVerifierIdeExtractorTransformer(
-                    configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
+                    configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY],
                     extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
                 )
             }
@@ -275,10 +276,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 buildSearchableOptions.convention(true)
                 instrumentCode.convention(true)
                 platformPath.convention(layout.dir(project.provider {
-                    configurations.getByName(Configurations.INTELLIJ_PLATFORM).platformPath().toFile()
+                    configurations[Configurations.INTELLIJ_PLATFORM].platformPath().toFile()
                 }))
                 productInfo.convention(project.provider {
-                    configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
+                    configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
                 })
                 projectName.convention(project.name)
                 sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))

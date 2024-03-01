@@ -8,6 +8,7 @@ import org.gradle.api.plugins.JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NA
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaToolchainService
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.of
 import org.gradle.kotlin.dsl.support.serviceOf
@@ -54,11 +55,11 @@ class TestCompanion {
         private val Test.intelliJPlatformConfiguration
             get() = when {
                 this is TestIdeTask -> intelliJPlatformConfiguration
-                else -> project.files(project.configurations.getByName(Configurations.INTELLIJ_PLATFORM))
+                else -> project.files(project.configurations[Configurations.INTELLIJ_PLATFORM])
             }
 
         private val Test.jetbrainsRuntimeConfiguration
-            get() = project.configurations.getByName(Configurations.JETBRAINS_RUNTIME)
+            get() = project.configurations[Configurations.JETBRAINS_RUNTIME]
 
         private val Test.pluginXml
             get() = when {
@@ -104,7 +105,7 @@ class TestCompanion {
             }
 
         private val Test.testCompileClasspathConfiguration
-            get() = project.configurations.getByName(TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME)
+            get() = project.configurations[TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME]
 
         override fun register(project: Project) {
             val configuration: Test.() -> Unit = {

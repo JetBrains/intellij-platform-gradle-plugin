@@ -13,6 +13,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.kotlin.dsl.withType
@@ -229,7 +230,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 })
                 kotlinxCoroutinesLibraryPresent.convention(project.provider {
                     listOf(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).any { configurationName ->
-                        project.configurations.getByName(configurationName).dependencies.any {
+                        project.configurations[configurationName].dependencies.any {
                             it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
                         }
                     }

@@ -17,6 +17,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.create
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
@@ -727,7 +728,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
              * @param notationListProvider The list of IDE notations to be added.
              */
             private fun addIdeDependencies(notationListProvider: Provider<List<Pair<IntelliJPlatformType, String>>>) =
-                configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY).dependencies.addAllLater(notationListProvider.map { notations ->
+                configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY].dependencies.addAllLater(notationListProvider.map { notations ->
                     notations.mapNotNull { (type, value) ->
                         type.binary ?: return@mapNotNull null
 
@@ -750,7 +751,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
              * Creates and adds a local instance of the IDE as a dependency.
              */
             private fun addLocalIdeDependency(localPath: Provider<*>) =
-                configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE).dependencies.addLater(localPath.map {
+                configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE].dependencies.addLater(localPath.map {
                     val artifactPath = resolveArtifactPath(it)
                     val productInfo = artifactPath.productInfo()
 

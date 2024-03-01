@@ -13,6 +13,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.exclude
+import org.gradle.kotlin.dsl.get
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
@@ -719,7 +720,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations.getByName(configurationName).dependencies.addLater(
+    ) = configurations[configurationName].dependencies.addLater(
         typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
             dependencies.create(
                 group = type.dependency.group,
@@ -740,7 +741,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
         action: DependencyAction = {},
-    ) = configurations.getByName(configurationName).dependencies.addLater(
+    ) = configurations[configurationName].dependencies.addLater(
         localPathProvider.map { localPath ->
             val artifactPath = resolveArtifactPath(localPath)
             val productInfo = artifactPath.productInfo()
@@ -771,7 +772,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         explicitVersionProvider: Provider<String>,
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations.getByName(configurationName).dependencies.addLater(
+    ) = configurations[configurationName].dependencies.addLater(
         explicitVersionProvider.map {
             dependencies.create(
                 group = "com.jetbrains",
@@ -793,7 +794,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         plugins: Provider<List<Triple<String, String, String>>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGINS,
         action: DependencyAction = {},
-    ) = configurations.getByName(configurationName).dependencies.addAllLater(
+    ) = configurations[configurationName].dependencies.addAllLater(
         plugins.map {
             it.map { (id, version, channel) -> createIntelliJPlatformPluginDependency(id, version, channel).apply(action) }
         }
@@ -830,7 +831,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         bundledPlugins: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         action: DependencyAction = {},
-    ) = configurations.getByName(configurationName).dependencies.addAllLater(
+    ) = configurations[configurationName].dependencies.addAllLater(
         bundledPlugins.map {
             it
                 .filter { id -> id.isNotBlank() }
@@ -845,8 +846,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      */
     private fun createIntelliJPlatformBundledPluginDependency(bundledPluginId: String): Dependency {
         val id = bundledPluginId.trim()
-        val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
-        val bundledPluginsList = configurations.getByName(Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST).single().toPath().bundledPlugins()
+        val productInfo = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
+        val bundledPluginsList = configurations[Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST].single().toPath().bundledPlugins()
         val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Could not find bundled plugin with ID: '$id'") }
         val artifactPath = Path(bundledPlugin.path)
         val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
@@ -872,7 +873,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
         action: DependencyAction = {},
-    ) = configurations.getByName(configurationName).dependencies.addLater(
+    ) = configurations[configurationName].dependencies.addLater(
         versionProvider.map { version ->
             dependencies.create(
                 group = "org.jetbrains.intellij.plugins",
@@ -898,7 +899,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
         action: DependencyAction = {},
-    ) = configurations.getByName(configurationName).dependencies.addLater(
+    ) = configurations[configurationName].dependencies.addLater(
         versionProvider.map { version ->
             dependencies.create(
                 group = "org.jetbrains",
@@ -924,9 +925,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
         action: DependencyAction = {},
-    ) = configurations.getByName(configurationName).dependencies.addLater(
+    ) = configurations[configurationName].dependencies.addLater(
         versionProvider.map { version ->
-            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
+            val productInfo = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
             val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
 
             dependencies.create(
@@ -954,9 +955,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
         action: DependencyAction = {},
-    ) = configurations.getByName(configurationName).dependencies.addLater(
+    ) = configurations[configurationName].dependencies.addLater(
         typeProvider.zip(versionProvider) { type, version ->
-            val productInfo = configurations.getByName(Configurations.INTELLIJ_PLATFORM).productInfo()
+            val productInfo = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
             val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
 
             dependencies.create(

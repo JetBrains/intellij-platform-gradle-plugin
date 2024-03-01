@@ -60,6 +60,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     /**
      * Java Agent file for the Coroutines library, which is required to enable coroutines debugging.
      *
+     * TODO: move to `PROJECT/.gradle/intellijPlatform`
      * @see [CoroutinesJavaAgentAware]
      */
     @get:Internal
