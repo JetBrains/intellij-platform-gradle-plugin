@@ -661,28 +661,30 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
      *
-     * There are multiple variants available next to the [TestFrameworkType.Default], which provide additional classes for testing specific modules, like:
-     * Maven, JavaScript, Go, Jave, ReSharper, etc.
+     * There are multiple Test Framework variants available, which provide additional classes for testing specific modules, like:
+     * JUnit4, JUnit 5, Maven, JavaScript, Go, Jave, ReSharper, etc.
      *
      * The version, if absent, is determined by the IntelliJ Platform build number.
      * If the exact version is unavailable, the closest one is used, found by scanning all releases.
      *
      * @param type test framework variant type
      * @param version library version
+     * @see TestFrameworkType
      */
-    fun testFramework(type: TestFrameworkType = TestFrameworkType.Default, version: String = VERSION_CURRENT) =
+    fun testFramework(type: TestFrameworkType, version: String = VERSION_CURRENT) =
         addTestFrameworkDependency(providers.provider { type }, providers.provider { version })
 
     /**
      * Adds a dependency on the `test-framework` library required for testing plugins.
      *
-     * There are multiple variants available next to the [TestFrameworkType.Default], which provide additional classes for testing specific modules, like:
-     * Maven, JavaScript, Go, Jave, ReSharper, etc.
+     * There are multiple Test Framework variants available, which provide additional classes for testing specific modules, like:
+     * JUnit4, JUnit 5, Maven, JavaScript, Go, Jave, ReSharper, etc.
      *
      * If the exact version is unavailable, the closest one is used, found by scanning all releases.
      *
      * @param type test framework variant type
      * @param version library version
+     * @see TestFrameworkType
      */
     fun testFramework(type: Provider<TestFrameworkType>, version: Provider<String>) = addTestFrameworkDependency(type, version)
 
@@ -1071,9 +1073,7 @@ enum class TestFrameworkType(
     val groupId: String,
     val artifactId: String,
 ) {
-    Common("com.jetbrains.intellij.platform", "test-framework-common"),
-    Core("com.jetbrains.intellij.platform", "test-framework-core"),
-    Default("com.jetbrains.intellij.platform", "test-framework"),
+    JUnit4("com.jetbrains.intellij.platform", "test-framework"),
     Go("com.jetbrains.intellij.go", "go-test-framework"),
     Ruby("com.jetbrains.intellij.idea", "ruby-test-framework"),
     Java("com.jetbrains.intellij.java", "java-test-framework"),
