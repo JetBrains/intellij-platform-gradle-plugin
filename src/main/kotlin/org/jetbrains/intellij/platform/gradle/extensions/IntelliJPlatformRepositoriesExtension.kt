@@ -3,24 +3,19 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.Action
-import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
-import org.gradle.api.initialization.resolve.DependencyResolutionManagement
-import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.maven
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.model.toPublication
+import java.io.File
 import java.net.URI
 import javax.inject.Inject
-import kotlin.io.path.absolutePathString
 
 /**
  * This is an extension class for managing IntelliJ Platform repositories in a Gradle build script. It's applied to the [RepositoryHandler].
@@ -42,7 +37,7 @@ import kotlin.io.path.absolutePathString
 abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     private val repositories: RepositoryHandler,
     private val providers: ProviderFactory,
-    private val gradle: Gradle,
+    private val localPlatformArtifactsDirectory: File,
 ) {
 
     /**
@@ -179,20 +174,11 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     fun localPlatformArtifacts(action: RepositoryAction = {}) = repositories.ivy {
         // Location of Ivy files generated for the current project.
-        ivyPattern("${gradle.localPlatformArtifacts.absolutePathString()}/[organization]-[module]-[revision].[ext]")
+        setUrl(localPlatformArtifactsDirectory.toPath().toUri())
+        ivyPattern("/[organization]-[module]-[revision].[ext]")
 
         // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
         artifactPattern("/[artifact]")
-
-        /**
-         * Because artifact paths always start with `/` (see [toPublication] for details),
-         * on Windows, we have to guess to which drive letter the artifact path belongs to.
-         * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
-         * starting with `c` for the sake of micro-optimization.
-         */
-        if (OperatingSystem.current().isWindows) {
-            (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:/[artifact]") }
-        }
     }.apply {
         repositories.exclusiveContent {
             forRepositories(this@apply)

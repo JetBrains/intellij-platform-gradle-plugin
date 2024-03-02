@@ -27,6 +27,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyPluginVer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsDirectory
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.model.platformPath
 import org.jetbrains.intellij.platform.gradle.model.productInfo
@@ -336,8 +337,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         dependencies,
                         downloadDirectory,
                         extensionProvider,
-                        gradle,
                         providers,
+                        project,
                         resources,
                     )
                 }
@@ -358,14 +359,17 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 repositories,
                 dependencies,
                 providers,
-                gradle,
+                layout,
+                rootDir,
             )
 
             repositories.configureExtension<IntelliJPlatformRepositoriesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 repositories,
                 providers,
-                gradle,
+                providers.localPlatformArtifactsDirectory(
+                    rootDir
+                ),
             )
         }
     }

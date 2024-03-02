@@ -7,7 +7,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
-import org.gradle.api.invocation.Gradle
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
@@ -49,7 +49,7 @@ import kotlin.math.absoluteValue
  * @param repositories The Gradle [RepositoryHandler] to manage repositories.
  * @param dependencies The Gradle [DependencyHandler] to manage dependencies.
  * @param providers The Gradle [ProviderFactory] to create providers.
- * @param gradle The [Gradle] instance.
+ * @param rootProjectDirectory The [Directory] of the root project.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
@@ -58,7 +58,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private val repositories: RepositoryHandler,
     private val dependencies: DependencyHandler,
     private val providers: ProviderFactory,
-    private val gradle: Gradle,
+    private val layout: ProjectLayout,
+    private val rootProjectDirectory: File,
 ) {
 
     /**
@@ -748,14 +749,17 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             productInfo.validateSupportedVersion()
 
             val type = productInfo.productCode.toIntelliJPlatformType()
-            val hash = artifactPath.absolutePathString().hashCode().absoluteValue % 1000
+            val hash = artifactPath.hashCode().absoluteValue % 1000
 
             dependencies.create(
                 group = Configurations.Dependencies.LOCAL_IDE_GROUP,
                 name = type.dependency.name,
                 version = "${productInfo.version}+$hash",
             ).apply {
-                createIvyDependency(gradle, listOf(artifactPath.toPublication()))
+                createIvyDependency(
+                    providers.localPlatformArtifactsDirectory(rootProjectDirectory),
+                    listOf(artifactPath.toPublication())
+                )
             }.apply(action)
         },
     )
@@ -857,7 +861,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             name = id,
             version = "${productInfo.version}+$hash",
         ).apply {
-            createIvyDependency(gradle, jars.map { it.toPublication() })
+            createIvyDependency(
+                providers.localPlatformArtifactsDirectory(rootProjectDirectory),
+                jars.map { it.toPublication() }
+            )
         }
     }
 
