@@ -59,7 +59,7 @@ abstract class ExtractorTransformer @Inject constructor(
         val targetDirectory = listOf(
             {
                 IntelliJPlatformType.values()
-                    .find { groupId == it.dependency.group && artifactId == it.dependency.name }
+                    .find { groupId == it.dependency.groupId && artifactId == it.dependency.artifactId }
                     ?.let { "$it-$version" }
             },
             {

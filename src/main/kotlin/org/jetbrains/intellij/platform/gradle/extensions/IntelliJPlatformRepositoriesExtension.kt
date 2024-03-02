@@ -131,7 +131,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
                 forRepositories(this@createIvyRepository)
                 filter {
                     IntelliJPlatformType.AndroidStudio.binary?.let {
-                        includeModule(it.group, it.name)
+                        includeModule(it.groupId, it.artifactId)
                     }
                 }
             }
@@ -156,7 +156,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
                         .filter { it != IntelliJPlatformType.AndroidStudio }
                         .mapNotNull { it.binary }
                         .forEach {
-                            includeModule(it.group, it.name)
+                            includeModule(it.groupId, it.artifactId)
                         }
                 }
             }

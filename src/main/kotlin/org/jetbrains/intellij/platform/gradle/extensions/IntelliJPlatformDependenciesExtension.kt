@@ -24,6 +24,7 @@ import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.model.toPublication
 import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
+import org.jetbrains.intellij.platform.gradle.model.*
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
@@ -725,8 +726,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = configurations[configurationName].dependencies.addLater(
         typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
             dependencies.create(
-                group = type.dependency.group,
-                name = type.dependency.name,
+                group = type.dependency.groupId,
+                name = type.dependency.artifactId,
                 version = version,
             ).apply(action)
         },
@@ -755,7 +756,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
             dependencies.create(
                 group = Configurations.Dependencies.LOCAL_IDE_GROUP,
-                name = type.dependency.name,
+                name = type.dependency.groupId,
                 version = "${productInfo.version}+$hash",
             ).apply {
                 createIvyDependency(gradle, listOf(artifactPath.toPublication()))
@@ -963,8 +964,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
 
             dependencies.create(
-                group = type.groupId,
-                name = type.artifactId,
+                group = type.coordinates.groupId,
+                name = type.coordinates.artifactId,
                 version = when (version) {
                     VERSION_CURRENT -> when {
                         resolveClosest -> TestFrameworkClosestVersionResolver(productInfo, type).resolve().version
@@ -1069,18 +1070,15 @@ private fun arch(newFormat: Boolean): String {
     }
 }
 
-enum class TestFrameworkType(
-    val groupId: String,
-    val artifactId: String,
-) {
-    JUnit4("com.jetbrains.intellij.platform", "test-framework"),
-    Go("com.jetbrains.intellij.go", "go-test-framework"),
-    Ruby("com.jetbrains.intellij.idea", "ruby-test-framework"),
-    Java("com.jetbrains.intellij.java", "java-test-framework"),
-    JavaScript("com.jetbrains.intellij.javascript", "javascript-test-framework"),
-    JUnit5("com.jetbrains.intellij.platform", "test-framework-junit5"),
-    Maven("com.jetbrains.intellij.maven", "maven-test-framework"),
-    ReSharper("com.jetbrains.intellij.resharper", "resharper-test-framework"),
+enum class TestFrameworkType(val coordinates: Coordinates) {
+    JUnit4(Coordinates("com.jetbrains.intellij.platform", "test-framework")),
+    Go(Coordinates("com.jetbrains.intellij.go", "go-test-framework")),
+    Ruby(Coordinates("com.jetbrains.intellij.idea", "ruby-test-framework")),
+    Java(Coordinates("com.jetbrains.intellij.java", "java-test-framework")),
+    JavaScript(Coordinates("com.jetbrains.intellij.javascript", "javascript-test-framework")),
+    JUnit5(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5")),
+    Maven(Coordinates("com.jetbrains.intellij.maven", "maven-test-framework")),
+    ReSharper(Coordinates("com.jetbrains.intellij.resharper", "resharper-test-framework")),
     ;
 }
 

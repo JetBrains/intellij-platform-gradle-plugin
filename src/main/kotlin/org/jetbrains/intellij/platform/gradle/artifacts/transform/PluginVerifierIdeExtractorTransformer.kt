@@ -53,7 +53,7 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
         // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail
 
         val type = IntelliJPlatformType.values().find {
-            it.binary?.run { group == groupId && name == artifactId } == true
+            it.binary?.let { it.groupId == groupId && it.artifactId == artifactId } == true
         } ?: return
 
         val targetDirectory = parameters.downloadDirectory.dir("$type-$version").asPath

@@ -739,8 +739,8 @@ interface IntelliJPlatformExtension : ExtensionAware {
                         }
 
                         dependencies.create(
-                            group = type.binary.group,
-                            name = type.binary.name,
+                            group = type.binary.groupId,
+                            name = type.binary.artifactId,
                             version = value,
                             ext = "tar.gz",
                         )
@@ -762,7 +762,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
 
                     dependencies.create(
                         group = Configurations.Dependencies.LOCAL_IDE_GROUP,
-                        name = type.dependency.name,
+                        name = type.dependency.artifactId,
                         version = "${productInfo.version}+$hash",
                     ).apply {
                         createIvyDependency(gradle, listOf(artifactPath.toPublication()))
