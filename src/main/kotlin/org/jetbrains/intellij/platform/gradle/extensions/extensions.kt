@@ -80,8 +80,16 @@ internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
 /**
  * Returns the Gradle project cache directory.
  */
-private val Gradle.projectCacheDirectory
-    get() = (startParameter.projectCacheDir ?: this.rootProject.projectDir).toPath().resolve(".gradle")
+internal val Gradle.intellijPlatformCache
+    get() = rootProject
+        .findProperty(GradleProperties.INTELLIJ_PLATFORM_CACHE)
+        ?.toString()
+        .takeUnless { it.isNullOrEmpty() }
+        ?.let { Path(it) }
+        ?: rootProject
+            .projectDir
+            .toPath()
+            .resolve(".intellijPlatform")
 
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
@@ -91,8 +99,10 @@ private val Gradle.projectCacheDirectory
  * @see [GradleProperties.LOCAL_PLATFORM_ARTIFACTS]
  */
 internal val Gradle.localPlatformArtifacts
-    get() = runCatching { rootProject.findProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS)?.toString() }
-        .getOrNull()
+    get() = rootProject
+        .property(GradleProperties.LOCAL_PLATFORM_ARTIFACTS)
+        ?.toString()
         .takeUnless { it.isNullOrEmpty() }
         ?.let { Path(it) }
-        ?: projectCacheDirectory.resolve("intellijPlatform/ivy")
+        ?: intellijPlatformCache
+            .resolve("localPlatformArtifacts")

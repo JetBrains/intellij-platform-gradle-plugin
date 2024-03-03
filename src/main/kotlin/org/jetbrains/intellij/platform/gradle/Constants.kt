@@ -126,6 +126,7 @@ object Constants {
     }
 
     object GradleProperties {
+        const val INTELLIJ_PLATFORM_CACHE = "$PLUGIN_ID.intellijPlatformCache"
         const val LOCAL_PLATFORM_ARTIFACTS = "$PLUGIN_ID.localPlatformArtifacts"
     }
 
