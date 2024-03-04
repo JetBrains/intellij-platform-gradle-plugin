@@ -9,11 +9,13 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
@@ -135,6 +137,8 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
+                val extension = project.the<IntelliJPlatformExtension>()
+
                 offline.convention(project.gradle.startParameter.isOffline)
                 selfUpdateCheck.convention(project.isBuildFeatureEnabled(BuildFeature.SELF_UPDATE_CHECK))
                 selfUpdateLock.convention(
@@ -144,7 +148,9 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                 )
                 coroutinesJavaAgent.convention(
                     project.layout.file(project.provider {
-                        temporaryDir.resolve("coroutines-javaagent.jar")
+                        extension.cachePath.also {
+                            it.createDirectories()
+                        }.resolve("coroutines-javaagent.jar").toFile()
                     })
                 )
                 pluginVersion.convention(project.provider {
