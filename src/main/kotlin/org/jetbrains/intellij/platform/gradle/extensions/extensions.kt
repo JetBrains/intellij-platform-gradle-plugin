@@ -100,7 +100,7 @@ internal val Gradle.intellijPlatformCache
  */
 internal val Gradle.localPlatformArtifacts
     get() = rootProject
-        .property(GradleProperties.LOCAL_PLATFORM_ARTIFACTS)
+        .findProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS)
         ?.toString()
         .takeUnless { it.isNullOrEmpty() }
         ?.let { Path(it) }
