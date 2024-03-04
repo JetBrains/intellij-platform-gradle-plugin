@@ -343,7 +343,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
 
             else -> {
                 val existingValue = element.getAttribute(attributeName)?.value
-                if (!existingValue.isNullOrEmpty()) {
+                if (!existingValue.isNullOrEmpty() && existingValue != value) {
                     log.warn("Patching plugin.xml: attribute '$attributeName=[$existingValue]' of '$tagName' tag will be set to '$value'")
                 }
                 element.setAttribute(attributeName, value)
