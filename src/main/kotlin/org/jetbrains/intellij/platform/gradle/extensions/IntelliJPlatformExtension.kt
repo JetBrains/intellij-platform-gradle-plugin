@@ -53,7 +53,14 @@ import kotlin.math.absoluteValue
 @IntelliJPlatform
 abstract class IntelliJPlatformExtension @Inject constructor(
     private val configurations: ConfigurationContainer,
+    private val gradle: Gradle,
 ) : ExtensionAware {
+
+    /**
+     * Provides read-only access to the IntelliJ Platform project cache location.
+     */
+    val cachePath: Path
+        get() = gradle.intellijPlatformCache
 
     /**
      * Provides read-only access to the IntelliJ Platform dependency artifact path.

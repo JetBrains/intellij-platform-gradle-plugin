@@ -8,6 +8,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
@@ -91,7 +92,11 @@ abstract class IntelliJPlatformMigrationPlugin : Plugin<Project> {
         log.info("Configuring plugin: $PLUGIN_MIGRATION_ID")
         log.error(Messages.enabled)
 
-        project.configureExtension<IntelliJExtension>("intellij", project.configurations)
+        project.configureExtension<IntelliJExtension>(
+            "intellij",
+            project.configurations,
+            project.gradle,
+        )
 
         with(project.tasks) {
             register<DownloadRobotServerPluginTask>("downloadRobotServerPlugin")
@@ -102,8 +107,9 @@ abstract class IntelliJPlatformMigrationPlugin : Plugin<Project> {
 }
 
 abstract class IntelliJExtension @Inject constructor(
-    private val configurations: ConfigurationContainer,
-) : IntelliJPlatformExtension(configurations) {
+    configurations: ConfigurationContainer,
+    gradle: Gradle,
+) : IntelliJPlatformExtension(configurations, gradle) {
 
     @Deprecated(Messages.IntelliJ.plugins, level = DeprecationLevel.ERROR)
     abstract val plugins: ListProperty<Any>

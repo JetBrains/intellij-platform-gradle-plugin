@@ -273,6 +273,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             configureExtension<IntelliJPlatformExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 project.configurations,
+                gradle,
             ) {
                 buildSearchableOptions.convention(true)
                 instrumentCode.convention(true)
