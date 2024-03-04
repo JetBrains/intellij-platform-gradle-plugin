@@ -268,6 +268,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     companion object : Registrable {
         override fun register(project: Project) {
             val extension = project.the<IntelliJPlatformExtension>()
+            val instrumentCodeEnabled = extension.instrumentCode
             val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
 
             sourceSets.forEach { sourceSet ->
@@ -296,7 +297,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                     })
 
                     dependsOn(sourceSet.classesTaskName)
-                    onlyIf { extension.instrumentCode.get() }
+                    onlyIf { instrumentCodeEnabled.get() }
                     sourceSet.compiledBy(this)
 
                     // finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
@@ -318,7 +319,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
                 dependsOn(instrumentCodeTaskProvider)
 
-                onlyIf { extension.instrumentCode.get() }
+                onlyIf { instrumentCodeEnabled.get() }
             }
 
 //            val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)

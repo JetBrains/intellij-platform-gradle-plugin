@@ -81,6 +81,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
         override fun register(project: Project) =
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
                 val extension = project.the<IntelliJPlatformExtension>()
+                val buildSearchableOptionsEnabled = extension.buildSearchableOptions
 
                 outputDirectory.convention(
                     project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIRECTORY)
@@ -94,7 +95,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                 inputs.property("intellijPlatform.buildSearchableOptions", extension.buildSearchableOptions)
 
                 onlyIf {
-                    extension.buildSearchableOptions.get()
+                    buildSearchableOptionsEnabled.get()
                 }
             }
     }
