@@ -24,7 +24,6 @@ object Constants {
     const val VERSION_LATEST = "latest"
 
     object Constraints {
-        val MINIMAL_GRADLE_VERSION: GradleVersion = GradleVersion.version("8.1")
         val MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER = "223".toVersion()
         val MINIMAL_INTELLIJ_PLATFORM_VERSION = "2022.3".toVersion()
     }

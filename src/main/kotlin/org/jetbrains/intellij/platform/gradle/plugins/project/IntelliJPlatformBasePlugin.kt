@@ -30,7 +30,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.*
@@ -43,8 +42,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
         log.info("Configuring plugin: $PLUGIN_BASE_ID")
-
-        checkGradleVersion()
 
         with(project) {
             with(plugins) {

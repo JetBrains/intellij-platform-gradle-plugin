@@ -65,17 +65,22 @@ dependencies {
     testFixturesImplementation(libs.annotations)
 }
 
+configurations.configureEach {
+    if (isCanBeConsumed) {
+        attributes {
+            attribute(
+                GradlePluginApiVersion.GRADLE_PLUGIN_API_VERSION_ATTRIBUTE,
+                objects.named<GradlePluginApiVersion>(GradleVersion.version("8.1").version)
+            )
+        }
+    }
+}
+
 kotlin {
     jvmToolchain(11)
 }
 
 tasks {
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "11"
-        }
-    }
-
     wrapper {
         gradleVersion = properties("gradleVersion").get()
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
