@@ -5,11 +5,11 @@ package org.jetbrains.intellij.platform.gradle.providers
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.*
 import org.gradle.api.resources.ResourceHandler
-import org.jetbrains.intellij.platform.gradle.model.JetBrainsIdesReleases
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.model.AndroidStudioReleases
+import org.jetbrains.intellij.platform.gradle.model.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease
 import org.jetbrains.intellij.platform.gradle.model.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
@@ -171,10 +171,8 @@ fun ProductReleasesValueSource(
         jetbrainsIdes.set(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES.resolve())
         androidStudio.set(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO.resolve())
         channels.convention(providers.provider { ProductRelease.Channel.values().toList() })
-        types.convention(extensionProvider.flatMap {
-            it.productInfo.map { productInfo ->
-                listOf(productInfo.productCode.toIntelliJPlatformType())
-            }
+        types.convention(extensionProvider.map {
+            listOf(it.productInfo.productCode.toIntelliJPlatformType())
         })
         sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
         untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })

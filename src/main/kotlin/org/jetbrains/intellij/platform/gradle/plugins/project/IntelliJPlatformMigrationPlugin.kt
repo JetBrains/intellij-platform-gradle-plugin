@@ -7,6 +7,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
@@ -16,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
+import javax.inject.Inject
 
 private const val PLUGIN_MIGRATION_ID = "$PLUGIN_ID.migration"
 
@@ -89,7 +91,7 @@ abstract class IntelliJPlatformMigrationPlugin : Plugin<Project> {
         log.info("Configuring plugin: $PLUGIN_MIGRATION_ID")
         log.error(Messages.enabled)
 
-        project.configureExtension<IntelliJExtension>("intellij")
+        project.configureExtension<IntelliJExtension>("intellij", project.configurations)
 
         with(project.tasks) {
             register<DownloadRobotServerPluginTask>("downloadRobotServerPlugin")
@@ -99,58 +101,60 @@ abstract class IntelliJPlatformMigrationPlugin : Plugin<Project> {
     }
 }
 
-interface IntelliJExtension : IntelliJPlatformExtension {
+abstract class IntelliJExtension @Inject constructor(
+    private val configurations: ConfigurationContainer,
+) : IntelliJPlatformExtension(configurations) {
 
     @Deprecated(Messages.IntelliJ.plugins, level = DeprecationLevel.ERROR)
-    val plugins: ListProperty<Any>
+    abstract val plugins: ListProperty<Any>
 
     @Deprecated(Messages.IntelliJ.localPath, level = DeprecationLevel.ERROR)
-    val localPath: Property<String>
+    abstract val localPath: Property<String>
 
     @Deprecated(Messages.IntelliJ.localSourcesPath, level = DeprecationLevel.ERROR)
-    val localSourcesPath: Property<String>
+    abstract val localSourcesPath: Property<String>
 
     @Deprecated(Messages.IntelliJ.typeVersion, level = DeprecationLevel.ERROR)
-    val version: Property<String>
+    abstract val version: Property<String>
 
     @Deprecated(Messages.IntelliJ.typeVersion, level = DeprecationLevel.ERROR)
-    val type: Property<String>
+    abstract val type: Property<String>
 
     @Deprecated(Messages.IntelliJ.pluginName, level = DeprecationLevel.ERROR)
-    val pluginName: Property<String>
+    abstract val pluginName: Property<String>
 
     @Deprecated(Messages.sinceUntilBuild, level = DeprecationLevel.ERROR)
-    val updateSinceUntilBuild: Property<Boolean>
+    abstract val updateSinceUntilBuild: Property<Boolean>
 
     @Deprecated(Messages.sinceUntilBuild, level = DeprecationLevel.ERROR)
-    val sameSinceUntilBuild: Property<Boolean>
+    abstract val sameSinceUntilBuild: Property<Boolean>
 
     @Deprecated(
         Messages.IntelliJ.sandboxDir,
         level = DeprecationLevel.ERROR,
         replaceWith = ReplaceWith("sandboxContainer")
     )
-    val sandboxDir: Property<String>
+    abstract val sandboxDir: Property<String>
 
     @Deprecated(Messages.repositoryManagement, level = DeprecationLevel.ERROR)
-    val intellijRepository: Property<String>
+    abstract val intellijRepository: Property<String>
 
     @Suppress("IdentifierGrammar")
     @Deprecated(Messages.repositoryManagement, level = DeprecationLevel.ERROR)
-    val pluginsRepositories: Property<String>
+    abstract val pluginsRepositories: Property<String>
 
     @Deprecated(Messages.repositoryManagement, level = DeprecationLevel.ERROR)
-    val jreRepository: Property<String>
+    abstract val jreRepository: Property<String>
 
     @Deprecated(Messages.IntelliJ.downloadSources, level = DeprecationLevel.ERROR)
-    val downloadSources: Property<Boolean>
+    abstract val downloadSources: Property<Boolean>
 
     @Deprecated(
         Messages.IntelliJ.ideaDependency,
         level = DeprecationLevel.ERROR,
         replaceWith = ReplaceWith("productInfo")
     )
-    val ideaDependency: Property<Any>
+    abstract val ideaDependency: Property<Any>
 }
 
 @DisableCachingByDefault

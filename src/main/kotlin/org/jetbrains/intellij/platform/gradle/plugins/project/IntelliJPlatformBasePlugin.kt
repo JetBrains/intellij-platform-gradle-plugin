@@ -29,11 +29,13 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
-import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
-import org.jetbrains.intellij.platform.gradle.utils.*
+import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.create
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
@@ -268,15 +270,12 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 )
             }
 
-            configureExtension<IntelliJPlatformExtension>(Extensions.INTELLIJ_PLATFORM) {
+            configureExtension<IntelliJPlatformExtension>(
+                Extensions.INTELLIJ_PLATFORM,
+                project.configurations,
+            ) {
                 buildSearchableOptions.convention(true)
                 instrumentCode.convention(true)
-                platformPath.convention(layout.dir(project.provider {
-                    configurations[Configurations.INTELLIJ_PLATFORM].platformPath().toFile()
-                }))
-                productInfo.convention(project.provider {
-                    configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
-                })
                 projectName.convention(project.name)
                 sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
 
@@ -285,8 +284,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(Extensions.IDEA_VERSION) {
-                        val buildVersion = extensionProvider.flatMap {
-                            it.productInfo.map { productInfo -> productInfo.buildNumber.toVersion() }
+                        val buildVersion = extensionProvider.map {
+                            it.productInfo.buildNumber.toVersion()
                         }
                         sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
                         untilBuild.convention(buildVersion.map { "${it.major}.*" })

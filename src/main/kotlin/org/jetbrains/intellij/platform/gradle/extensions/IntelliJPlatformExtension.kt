@@ -38,7 +38,9 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.io.File
+import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
@@ -49,7 +51,21 @@ import kotlin.math.absoluteValue
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
-interface IntelliJPlatformExtension : ExtensionAware {
+abstract class IntelliJPlatformExtension @Inject constructor(
+    private val configurations: ConfigurationContainer,
+) : ExtensionAware {
+
+    /**
+     * Provides read-only access to the IntelliJ Platform dependency artifact path.
+     */
+    val platformPath: Path
+        get() = configurations[Configurations.INTELLIJ_PLATFORM].platformPath()
+
+    /**
+     * Provides read-only access to the [ProductInfo] object associated with the IntelliJ Platform dependency configured for the current project.
+     */
+    val productInfo: ProductInfo
+        get() = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
 
     /**
      * Builds an index of UI components (searchable options) for the plugin.
@@ -57,7 +73,7 @@ interface IntelliJPlatformExtension : ExtensionAware {
      *
      * Default value: `true`
      */
-    val buildSearchableOptions: Property<Boolean>
+    abstract val buildSearchableOptions: Property<Boolean>
 
     /**
      * Enables the compiled classes instrumentation.
@@ -67,31 +83,21 @@ interface IntelliJPlatformExtension : ExtensionAware {
      *
      * Default value: `true`
      */
-    val instrumentCode: Property<Boolean>
-
-    /**
-     * Provides read-only access to the IntelliJ Platform dependency artifact path.
-     */
-    val platformPath: DirectoryProperty
-
-    /**
-     * Provides read-only access to the [ProductInfo] object associated with the IntelliJ Platform dependency configured for the current project.
-     */
-    val productInfo: Property<ProductInfo>
+    abstract val instrumentCode: Property<Boolean>
 
     /**
      * Defines the project name, which is used for creating file structure and the build archive.
      *
      * Default value: [Project.getName]
      */
-    val projectName: Property<String>
+    abstract val projectName: Property<String>
 
     /**
      * The path to the sandbox container where tests and IDE instances read and write data.
      *
      * Default value: [ProjectLayout.getBuildDirectory]/[Sandbox.CONTAINER]/
      */
-    val sandboxContainer: DirectoryProperty
+    abstract val sandboxContainer: DirectoryProperty
 
     val pluginConfiguration
         get() = extensions.getByName<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION)
