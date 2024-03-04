@@ -8,7 +8,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.io.path.*
 import kotlin.test.Test
 
-class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
+class VerifyPluginProjectConfigurationTaskSpec : IntelliJPluginSpecBase() {
 
     @OptIn(ExperimentalPathApi::class)
     @BeforeTest
@@ -319,6 +319,52 @@ class VerifyPluginConfigurationTaskSpec : IntelliJPluginSpecBase() {
                 "- The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines",
                 output
             )
+        }
+    }
+
+    @Test
+    @OptIn(ExperimentalPathApi::class)
+    fun `report IntelliJ Platform cache missing in gitignore`() {
+        val message = "- The IntelliJ Platform cache directory should be excluded from the version control system. Add the '.intellijPlatform' entry to the '.gitignore' file"
+
+        pluginXml.xml(
+            """
+            <idea-plugin>
+                <name>PluginName</name>
+                <description>Lorem ipsum.</description>
+                <vendor>JetBrains</vendor>
+                <idea-version since-build="223.8836" until-build='223.*' />
+            </idea-plugin>
+            """.trimIndent()
+        )
+
+        // default IntelliJ Platform cache, missing .gitignore -> skip
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertNotContains(HEADER, output)
+        }
+
+        val gitignore = dir.resolve(".gitignore").createFile()
+
+        // default IntelliJ Platform cache, present .gitignore, entry missing -> warn
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertContains(HEADER, output)
+            assertContains(message, output)
+        }
+
+        gitignore.appendText(".intellijPlatform")
+
+        // default IntelliJ Platform cache, present .gitignore, entry present -> skip
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertNotContains(HEADER, output)
+        }
+
+        gitignore.writeText("")
+        dir.resolve(".intellijPlatform").deleteRecursively()
+        gradleProperties.appendText("org.jetbrains.intellij.platform.intellijPlatformCache=${dir.resolve(".foo")}")
+
+        // custom IntelliJ Platform cache, present .gitignore, entry missing -> skip
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertNotContains(HEADER, output)
         }
     }
 
