@@ -7,30 +7,27 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.create
-import org.gradle.kotlin.dsl.exclude
-import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.model.bundledPlugins
-import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.model.toPublication
-import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.model.*
+import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File
@@ -60,6 +57,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private val repositories: RepositoryHandler,
     private val dependencies: DependencyHandler,
     private val providers: ProviderFactory,
+    private val layout: ProjectLayout,
     private val gradle: Gradle,
 ) {
 
@@ -960,8 +958,16 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
         typeProvider.zip(versionProvider) { type, version ->
-            val productInfo = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
             val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
+            val platformPath = configurations[Configurations.INTELLIJ_PLATFORM].platformPath()
+            val productInfo = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
+
+            val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
+                parameters {
+                    intellijPlatformPath = layout.dir(providers.provider { platformPath.toFile() })
+                    intellijPlatformCache = layout.dir(providers.provider { gradle.intellijPlatformCache.toFile() })
+                }
+            }
 
             dependencies.create(
                 group = type.coordinates.groupId,
@@ -975,11 +981,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                     else -> version
                 }
             ).apply {
-                exclude("org.jetbrains.teamcity")
-                exclude("ai.grazie.utils")
-                exclude("ai.grazie.spell")
-                exclude("ai.grazie.nlp")
-                exclude("ai.grazie.model")
+                moduleDescriptors.get().forEach {
+                    exclude(it.groupId, it.artifactId)
+                }
             }.apply(action)
         },
     )
@@ -1070,16 +1074,29 @@ private fun arch(newFormat: Boolean): String {
     }
 }
 
-enum class TestFrameworkType(val coordinates: Coordinates) {
-    JUnit4(Coordinates("com.jetbrains.intellij.platform", "test-framework")),
-    Go(Coordinates("com.jetbrains.intellij.go", "go-test-framework")),
-    Ruby(Coordinates("com.jetbrains.intellij.idea", "ruby-test-framework")),
-    Java(Coordinates("com.jetbrains.intellij.java", "java-test-framework")),
-    JavaScript(Coordinates("com.jetbrains.intellij.javascript", "javascript-test-framework")),
-    JUnit5(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5")),
-    Maven(Coordinates("com.jetbrains.intellij.maven", "maven-test-framework")),
-    ReSharper(Coordinates("com.jetbrains.intellij.resharper", "resharper-test-framework")),
-    ;
+/**
+ * Definition of Test Framework types available for writing tests for IntelliJ Platform plugins.
+ */
+interface TestFrameworkType {
+
+    /**
+     * Maven coordinates of test framework artifact;
+     */
+    val coordinates: Coordinates;
+
+    enum class Platform(override val coordinates: Coordinates) : TestFrameworkType {
+        JUnit4(Coordinates("com.jetbrains.intellij.platform", "test-framework")),
+        JUnit5(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5")),
+    }
+
+    enum class Plugin(override val coordinates: Coordinates) : TestFrameworkType {
+        Go(Coordinates("com.jetbrains.intellij.go", "go-test-framework")),
+        Ruby(Coordinates("com.jetbrains.intellij.idea", "ruby-test-framework")),
+        Java(Coordinates("com.jetbrains.intellij.java", "java-test-framework")),
+        JavaScript(Coordinates("com.jetbrains.intellij.javascript", "javascript-test-framework")),
+        Maven(Coordinates("com.jetbrains.intellij.maven", "maven-test-framework")),
+        ReSharper(Coordinates("com.jetbrains.intellij.resharper", "resharper-test-framework")),
+    }
 }
 
 /**

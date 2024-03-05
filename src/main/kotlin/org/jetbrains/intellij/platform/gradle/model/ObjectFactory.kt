@@ -17,4 +17,6 @@ class ObjectFactory {
     fun createAndroidStudioReleases() = AndroidStudioReleases()
 
     fun createIvyModule() = IvyModule()
+
+    fun createModuleDescriptor() = ModuleDescriptor()
 }
