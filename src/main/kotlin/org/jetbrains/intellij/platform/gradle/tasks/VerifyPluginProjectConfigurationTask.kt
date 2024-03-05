@@ -7,6 +7,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -17,6 +18,7 @@ import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCache
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
@@ -59,8 +61,17 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
      * Root project path.
      */
     @get:InputDirectory
+    @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val rootProject: DirectoryProperty
+    abstract val intellijPlatformCache: DirectoryProperty
+
+    /**
+     * Root project path.
+     */
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val gitignoreFile: RegularFileProperty
 
     /**
      * [JavaCompile.sourceCompatibility] property defined in the build script.
@@ -194,14 +205,13 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             if (kotlinxCoroutinesLibraryPresent) {
                 yield("The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines")
             }
-            with (rootProject.asPath) {
-                val cacheDirectory = resolve(".intellijPlatform")
-                val gitignoreFile = resolve(".gitignore")
+            run {
+                val gitignore = gitignoreFile.orNull?.asPath
 
-                if (cacheDirectory.exists() && gitignoreFile.exists()) {
-                    val containsEntry = gitignoreFile.readLines().any { line -> line.contains(".intellijPlatform") }
+                if (intellijPlatformCache.asPath.exists() && gitignore != null) {
+                    val containsEntry = gitignore.readLines().any { line -> line.contains(".intellijPlatform") }
                     if (!containsEntry) {
-                        yield("The IntelliJ Platform cache directory should be excluded from the version control system. Add the '.intellijPlatform' entry to the '.gitignore' file.")
+                        this@sequence.yield("The IntelliJ Platform cache directory should be excluded from the version control system. Add the '.intellijPlatform' entry to the '.gitignore' file.")
                     }
                 }
             }
@@ -238,7 +248,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
-                rootProject.convention(project.layout.dir(project.provider { project.rootDir }))
+                intellijPlatformCache.convention(project.layout.dir(project.provider { project.gradle.intellijPlatformCache.toFile() }))
+                gitignoreFile.convention(project.layout.file(project.provider { project.rootDir.resolve(".gitignore").takeIf { it.exists() } }))
 
                 sourceCompatibility.convention(compileJavaTaskProvider.map {
                     it.sourceCompatibility
