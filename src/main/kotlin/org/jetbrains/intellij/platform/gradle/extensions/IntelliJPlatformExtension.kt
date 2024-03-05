@@ -9,7 +9,6 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.invocation.Gradle
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
@@ -53,14 +52,15 @@ import kotlin.math.absoluteValue
 @IntelliJPlatform
 abstract class IntelliJPlatformExtension @Inject constructor(
     private val configurations: ConfigurationContainer,
-    private val gradle: Gradle,
+    private val providers: ProviderFactory,
+    private val rootProjectDirectory: Path,
 ) : ExtensionAware {
 
     /**
      * Provides read-only access to the IntelliJ Platform project cache location.
      */
     val cachePath: Path
-        get() = gradle.intellijPlatformCache
+        get() = providers.intellijPlatformCachePath(rootProjectDirectory)
 
     /**
      * Provides read-only access to the IntelliJ Platform dependency artifact path.
@@ -603,10 +603,9 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             internal val downloadDirectory: DirectoryProperty,
             internal val extensionProvider: Provider<IntelliJPlatformExtension>,
             internal val providers: ProviderFactory,
-            project: Project,
             internal val resources: ResourceHandler,
+            internal val rootProjectDirectory: Path,
         ) {
-            private val rootDir = project.rootDir
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -680,7 +679,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param localPath The provider for the type of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
              */
             fun localIde(localPath: Provider<*>) = addLocalIdeDependency(
-                localPlatformArtifactsDirectory = providers.localPlatformArtifactsDirectory(rootDir),
+                localPlatformArtifactsDirectory = providers.localPlatformArtifactsPath(rootProjectDirectory),
                 localPath = localPath,
             )
 
@@ -724,9 +723,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see listProductReleases
              * @see ProductReleasesValueSource
              */
-            fun select(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) = addIdeDependencies(listProductReleases(configure).map { notationListValue ->
-                notationListValue.map { it.parseIdeNotation() }
-            })
+            fun select(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) =
+                addIdeDependencies(listProductReleases(configure).map { notationListValue ->
+                    notationListValue.map { it.parseIdeNotation() }
+                })
 
             /**
              * Prepares a [ProductReleasesValueSource] instance for the further usage, so it's possible to retrieve and filter IDEs based on the currently
@@ -768,7 +768,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * Creates and adds a local instance of the IDE as a dependency.
              */
             private fun addLocalIdeDependency(
-                localPlatformArtifactsDirectory: File,
+                localPlatformArtifactsDirectory: Path,
                 localPath: Provider<*>,
             ) =
                 configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE].dependencies.addLater(localPath.map {
@@ -778,14 +778,17 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     productInfo.validateSupportedVersion()
 
                     val type = productInfo.productCode.toIntelliJPlatformType()
-                    val hash = artifactPath.absolutePathString().hashCode().absoluteValue % 1000
+                    val hash = artifactPath.hashCode().absoluteValue % 1000
 
                     dependencies.create(
                         group = Configurations.Dependencies.LOCAL_IDE_GROUP,
                         name = type.dependency.artifactId,
                         version = "${productInfo.version}+$hash",
                     ).apply {
-                        createIvyDependency(localPlatformArtifactsDirectory, listOf(artifactPath.toPublication()))
+                        createIvyDependency(
+                            localPlatformArtifactsPath = localPlatformArtifactsDirectory,
+                            publications = listOf(artifactPath.toPublication()),
+                        )
                     }
                 })
         }

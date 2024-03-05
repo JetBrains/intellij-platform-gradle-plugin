@@ -9,7 +9,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_SETTINGS_ID
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
-import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsDirectory
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import javax.inject.Inject
@@ -26,16 +25,13 @@ abstract class IntelliJPlatformSettingsPlugin @Inject constructor(
 
         checkGradleVersion()
 
-        val rootDir = settings.gradle.startParameter.projectDir ?: settings.rootDir
-        val localPlatformArtifactsDirectory = providers.localPlatformArtifactsDirectory(rootDir)
-
         @Suppress("UnstableApiUsage")
         with(settings.dependencyResolutionManagement.repositories) {
             configureExtension<IntelliJPlatformRepositoriesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 this,
                 providers,
-                localPlatformArtifactsDirectory,
+                settings.rootDir.toPath(),
             )
         }
     }

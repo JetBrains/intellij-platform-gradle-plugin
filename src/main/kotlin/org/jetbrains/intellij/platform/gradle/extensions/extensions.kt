@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.file.Directory
-import org.gradle.api.invocation.Gradle
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.BuildException
@@ -15,6 +14,7 @@ import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.io.File
+import java.nio.file.Path
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.io.path.*
@@ -28,15 +28,12 @@ annotation class IntelliJPlatform
 /**
  * Creates an Ivy dependency XML file for an external module.
  *
- * @param gradle The [Gradle] instance.
+ * @param localPlatformArtifactsPath The [Path] to the local IntelliJ Platform artifacts directory.
  * @param publications The list of [IvyModule.Publication] objects to be included in the Ivy file.
  */
-internal fun ExternalModuleDependency.createIvyDependency(
-    localPlatformArtifactsDirectory: File,
-    publications: List<IvyModule.Publication>,
-) {
-    val ivyFile = localPlatformArtifactsDirectory.toPath()
-        .div("$group/$name/$version/ivy-$version.xml")
+internal fun ExternalModuleDependency.createIvyDependency(localPlatformArtifactsPath: Path, publications: List<IvyModule.Publication>) {
+    val ivyFile = localPlatformArtifactsPath
+        .resolve("$group-$name-$version.xml")
         .takeUnless { it.exists() }
         ?: return
 
@@ -85,18 +82,11 @@ internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
 /**
  * Returns the Gradle project cache directory.
  */
-internal val Gradle.intellijPlatformCache
-    get() = rootProject
-        .findProperty(GradleProperties.INTELLIJ_PLATFORM_CACHE)
-        ?.toString()
-        .takeUnless { it.isNullOrEmpty() }
+internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
+    gradleProperty(GradleProperties.INTELLIJ_PLATFORM_CACHE).orNull
+        .takeUnless { it.isNullOrBlank() }
         ?.let { Path(it) }
-        ?: rootProject
-            .projectDir
-            .toPath()
-            .resolve(CACHE_DIRECTORY)
-
-internal const val localPlatformArtifactsDirectory = ".gradle/intellijPlatform/ivy"
+        ?: rootProjectDirectory.resolve(CACHE_DIRECTORY)
 
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
@@ -105,23 +95,9 @@ internal const val localPlatformArtifactsDirectory = ".gradle/intellijPlatform/i
  * @see [IntelliJPlatformRepositoriesExtension.localPlatformArtifacts]
  * @see [GradleProperties.LOCAL_PLATFORM_ARTIFACTS]
  */
-internal val Gradle.localPlatformArtifacts
-    get() = rootProject
-        .findProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS)
-        ?.toString()
-        .takeUnless { it.isNullOrEmpty() }
+internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
+    gradleProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS).orNull
+        .takeUnless { it.isNullOrBlank() }
         ?.let { Path(it) }
-        ?: intellijPlatformCache
+        ?: intellijPlatformCachePath(rootProjectDirectory)
             .resolve("localPlatformArtifacts")
-
-internal fun ProviderFactory.localPlatformArtifactsDirectory(
-    rootProjectDir: File,
-): File {
-    // gradleProperties are always safe to call get/orNull
-    val customLocalPlatformArtifactsDirectory = gradleProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS).orNull
-    return if (customLocalPlatformArtifactsDirectory != null) {
-        File(customLocalPlatformArtifactsDirectory)
-    } else {
-        rootProjectDir.resolve(localPlatformArtifactsDirectory)
-    }
-}

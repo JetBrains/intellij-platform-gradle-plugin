@@ -30,9 +30,9 @@ import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File
+import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.listDirectoryEntries
 import kotlin.math.absoluteValue
 
@@ -47,7 +47,8 @@ import kotlin.math.absoluteValue
  * @param repositories The Gradle [RepositoryHandler] to manage repositories.
  * @param dependencies The Gradle [DependencyHandler] to manage dependencies.
  * @param providers The Gradle [ProviderFactory] to create providers.
- * @param rootProjectDirectory The [Directory] of the root project.
+ * @param layout The Gradle [ProjectLayout] to manage layout providers.
+ * @param rootProjectDirectory The root project directory location.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
@@ -57,8 +58,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private val dependencies: DependencyHandler,
     private val providers: ProviderFactory,
     private val layout: ProjectLayout,
-    private val layout: ProjectLayout,
-    private val rootProjectDirectory: File,
+    private val rootProjectDirectory: Path,
 ) {
 
     /**
@@ -758,8 +758,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 version = "${productInfo.version}+$hash",
             ).apply {
                 createIvyDependency(
-                    providers.localPlatformArtifactsDirectory(rootProjectDirectory),
-                    listOf(artifactPath.toPublication())
+                    localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+                    publications = listOf(artifactPath.toPublication()),
                 )
             }.apply(action)
         },
@@ -855,7 +855,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Could not find bundled plugin with ID: '$id'") }
         val artifactPath = Path(bundledPlugin.path)
         val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
-        val hash = artifactPath.absolutePathString().hashCode().absoluteValue % 1000
+        val hash = artifactPath.hashCode().absoluteValue % 1000
 
         return dependencies.create(
             group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
@@ -863,8 +863,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             version = "${productInfo.version}+$hash",
         ).apply {
             createIvyDependency(
-                providers.localPlatformArtifactsDirectory(rootProjectDirectory),
-                jars.map { it.toPublication() }
+                localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+                publications = jars.map { it.toPublication() },
             )
         }
     }
@@ -971,7 +971,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
                 parameters {
                     intellijPlatformPath = layout.dir(providers.provider { platformPath.toFile() })
-                    intellijPlatformCache = layout.dir(providers.provider { gradle.intellijPlatformCache.toFile() })
+                    intellijPlatformCache = layout.dir(providers.provider { providers.intellijPlatformCachePath(rootProjectDirectory).toFile() })
                 }
             }
 

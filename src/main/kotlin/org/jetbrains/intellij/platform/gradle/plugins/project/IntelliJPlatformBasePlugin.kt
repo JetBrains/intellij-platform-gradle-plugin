@@ -28,7 +28,6 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyPluginVer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
-import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsDirectory
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
@@ -274,7 +273,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             configureExtension<IntelliJPlatformExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 project.configurations,
-                gradle,
+                project.providers,
+                project.rootDir.toPath(),
             ) {
                 buildSearchableOptions.convention(true)
                 instrumentCode.convention(true)
@@ -335,8 +335,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         downloadDirectory,
                         extensionProvider,
                         providers,
-                        project,
                         resources,
+                        rootDir.toPath()
                     )
                 }
 
@@ -357,16 +357,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 dependencies,
                 providers,
                 layout,
-                gradle,
+                rootDir.toPath(),
             )
 
             repositories.configureExtension<IntelliJPlatformRepositoriesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 repositories,
                 providers,
-                providers.localPlatformArtifactsDirectory(
-                    rootDir
-                ),
+                rootDir.toPath(),
             )
         }
     }

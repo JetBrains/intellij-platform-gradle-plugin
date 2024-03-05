@@ -3,8 +3,10 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.Action
+import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
+import org.gradle.api.initialization.resolve.DependencyResolutionManagement
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.maven
@@ -13,8 +15,8 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import java.io.File
 import java.net.URI
+import java.nio.file.Path
 import javax.inject.Inject
 
 /**
@@ -31,13 +33,14 @@ import javax.inject.Inject
  *
  * @param repositories The Gradle [RepositoryHandler] to manage repositories.
  * @param providers The Gradle [ProviderFactory] to create providers.
+ * @param rootProjectDirectory The root project directory location.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
 abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     private val repositories: RepositoryHandler,
     private val providers: ProviderFactory,
-    private val localPlatformArtifactsDirectory: File,
+    private val rootProjectDirectory: Path,
 ) {
 
     /**
@@ -172,16 +175,15 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun localPlatformArtifacts(action: RepositoryAction = {}) = gradle.rootProject {
+    fun localPlatformArtifacts(action: RepositoryAction = {}) = run {
         repositories.ivy {
             // Location of Ivy files generated for the current project.
-            setUrl(localPlatformArtifactsDirectory.toPath().toUri())
-        ivyPattern("/[organization]-[module]-[revision].[ext]")
+            val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
+            setUrl(localPlatformArtifactsPath.toUri())
+            ivyPattern("/[organization]-[module]-[revision].[ext]")
 
             // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
             artifactPattern("/[artifact]")
-
-
         }.apply {
             repositories.exclusiveContent {
                 forRepositories(this@apply)

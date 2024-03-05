@@ -19,7 +19,7 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCache
+import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCachePath
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
@@ -261,9 +261,15 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
 
-                rootDirectory.convention(project.provider { project.rootDir })
-                intellijPlatformCache.convention(project.layout.dir(project.provider { project.gradle.intellijPlatformCache.toFile() }))
-                gitignoreFile.convention(project.layout.file(project.provider { project.rootDir.resolve(".gitignore").takeIf { it.exists() } }))
+                rootDirectory.convention(project.provider {
+                    project.rootProject.rootDir
+                })
+                intellijPlatformCache.convention(project.layout.dir(project.provider {
+                    project.providers.intellijPlatformCachePath(project.rootProject.rootDir.toPath()).toFile()
+                }))
+                gitignoreFile.convention(project.layout.file(project.provider {
+                    project.rootProject.rootDir.resolve(".gitignore").takeIf { it.exists() }
+                }))
 
                 sourceCompatibility.convention(compileJavaTaskProvider.map {
                     it.sourceCompatibility

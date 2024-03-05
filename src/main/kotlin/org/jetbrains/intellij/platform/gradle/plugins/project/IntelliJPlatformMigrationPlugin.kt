@@ -8,9 +8,9 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
-import org.gradle.api.invocation.Gradle
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
@@ -18,6 +18,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
+import java.nio.file.Path
 import javax.inject.Inject
 
 private const val PLUGIN_MIGRATION_ID = "$PLUGIN_ID.migration"
@@ -95,7 +96,8 @@ abstract class IntelliJPlatformMigrationPlugin : Plugin<Project> {
         project.configureExtension<IntelliJExtension>(
             "intellij",
             project.configurations,
-            project.gradle,
+            project.providers,
+            project.rootDir.toPath(),
         )
 
         with(project.tasks) {
@@ -108,8 +110,9 @@ abstract class IntelliJPlatformMigrationPlugin : Plugin<Project> {
 
 abstract class IntelliJExtension @Inject constructor(
     configurations: ConfigurationContainer,
-    gradle: Gradle,
-) : IntelliJPlatformExtension(configurations, gradle) {
+    providers: ProviderFactory,
+    rootProjectDirectory: Path,
+) : IntelliJPlatformExtension(configurations, providers, rootProjectDirectory) {
 
     @Deprecated(Messages.IntelliJ.plugins, level = DeprecationLevel.ERROR)
     abstract val plugins: ListProperty<Any>
