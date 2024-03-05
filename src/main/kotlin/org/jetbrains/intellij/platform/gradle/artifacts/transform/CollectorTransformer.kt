@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MA
 import org.jetbrains.intellij.platform.gradle.model.ProductInfo
 import org.jetbrains.intellij.platform.gradle.model.productInfo
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.listDirectoryEntries
@@ -48,23 +49,29 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
             }
         } else {
             // IntelliJ Platform SDK dependency
-            val productInfo = input.productInfo()
-            val os = with(OperatingSystem.current()) {
-                when {
-                    isLinux -> ProductInfo.Launch.OS.Linux
-                    isWindows -> ProductInfo.Launch.OS.Windows
-                    isMacOsX -> ProductInfo.Launch.OS.macOS
-                    else -> ProductInfo.Launch.OS.Linux
-                }
-            }
-
-            productInfo.launch
-                .filter { it.os == os }
-                .flatMap { it.bootClassPathJarNames }
-                .mapNotNull { name -> input.resolve("lib/$name").takeIf { it.exists() } }
+            collectIntelliJPlatformJars(input.productInfo(), input)
                 .forEach { outputs.file(it) }
         }
     }
+}
+
+internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatformPath: Path): List<Path> {
+    val os = with(OperatingSystem.current()) {
+        when {
+            isLinux -> ProductInfo.Launch.OS.Linux
+            isWindows -> ProductInfo.Launch.OS.Windows
+            isMacOsX -> ProductInfo.Launch.OS.macOS
+            else -> ProductInfo.Launch.OS.Linux
+        }
+    }
+
+    return productInfo.launch
+        .filter { it.os == os }
+        .flatMap { it.bootClassPathJarNames }
+        .toSet()
+        .mapNotNull { name ->
+            intellijPlatformPath.resolve("lib/$name").takeIf { it.exists() }
+        }
 }
 
 internal fun DependencyHandler.applyCollectorTransformer(
