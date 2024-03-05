@@ -17,7 +17,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-abstract class IntelliJPluginSpecBase : IntelliJPlatformTestBase() {
+abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
     val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
 

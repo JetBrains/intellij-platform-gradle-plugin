@@ -6,7 +6,7 @@ import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_SUFFIX
 
-abstract class SearchableOptionsSpecBase : IntelliJPluginSpecBase() {
+abstract class SearchableOptionsTestBase : IntelliJPluginTestBase() {
 
     @Language("XML")
     fun getPluginXmlWithSearchableConfigurable() = """

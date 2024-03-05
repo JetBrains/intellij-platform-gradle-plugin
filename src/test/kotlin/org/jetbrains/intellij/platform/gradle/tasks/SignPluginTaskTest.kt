@@ -4,14 +4,14 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
-class SignPluginTaskSpec : IntelliJPluginSpecBase() {
+class SignPluginTaskTest : IntelliJPluginTestBase() {
 
     private val tripleQuote = "\"\"\""
 

@@ -4,13 +4,13 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.*
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PrepareSandboxTaskSpec : IntelliJPluginSpecBase() {
+class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     private val sandbox get() = buildDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijPlatformType-$intellijPlatformVersion")
 

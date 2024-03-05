@@ -5,11 +5,11 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.internal.impldep.org.testng.annotations.BeforeTest
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.*
 import kotlin.test.Test
 
-class VerifyPluginProjectConfigurationTaskSpec : IntelliJPluginSpecBase() {
+class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
     @OptIn(ExperimentalPathApi::class)
     @BeforeTest

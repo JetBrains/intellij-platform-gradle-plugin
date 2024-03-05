@@ -4,12 +4,12 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class PublishPluginTaskSpec : IntelliJPluginSpecBase() {
+class PublishPluginTaskTest : IntelliJPluginTestBase() {
 
     @BeforeTest
     override fun setup() {

@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.executableResolver
 
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -11,7 +11,7 @@ const val TASK_NAME = "testJbrResolver"
 
 @Ignore
 @Deprecated("Requires refactoring")
-class JbrResolverTest : IntelliJPluginSpecBase() {
+class JbrResolverTest : IntelliJPluginTestBase() {
 
     private val operatingSystem = OperatingSystem.current()
     private val platform = ""//JetBrainsRuntimeResolver.JbrArtifact.platform(operatingSystem)

@@ -4,13 +4,13 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
-class ProcessResourcesTaskSpec : IntelliJPluginSpecBase() {
+class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
 
     private val outputPluginXml = lazy { buildDirectory.resolve("resources/main/META-INF/").listDirectoryEntries().first() }
 

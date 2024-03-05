@@ -3,10 +3,10 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.test.Test
 
-class PrintProductsReleasesTaskSpec : IntelliJPluginSpecBase() {
+class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `print product releases`() {

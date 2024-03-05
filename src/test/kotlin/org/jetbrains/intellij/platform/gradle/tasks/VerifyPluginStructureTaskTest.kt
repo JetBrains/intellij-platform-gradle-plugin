@@ -3,11 +3,11 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.deleteIfExists
 import kotlin.test.Test
 
-class VerifyPluginStructureTaskSpec : IntelliJPluginSpecBase() {
+class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not fail on warning by default`() {

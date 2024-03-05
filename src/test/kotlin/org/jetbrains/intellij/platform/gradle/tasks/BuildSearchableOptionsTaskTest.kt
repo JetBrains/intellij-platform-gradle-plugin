@@ -3,11 +3,11 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
+import org.jetbrains.intellij.platform.gradle.SearchableOptionsTestBase
 import kotlin.io.path.readText
 import kotlin.test.Test
 
-class BuildSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
+class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
 
     @Test
     fun `build searchable options produces XML`() {

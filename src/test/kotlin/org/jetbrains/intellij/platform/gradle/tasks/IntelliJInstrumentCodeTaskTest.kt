@@ -4,14 +4,14 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
 @Ignore
 @Deprecated("Instrumentation is not yet available")
-class IntelliJInstrumentCodeTaskSpec : IntelliJPluginSpecBase() {
+class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `instrument code with nullability annotations`() {

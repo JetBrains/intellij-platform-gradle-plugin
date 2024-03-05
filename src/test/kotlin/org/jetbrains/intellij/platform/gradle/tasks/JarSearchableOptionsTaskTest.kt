@@ -3,13 +3,13 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.SearchableOptionsSpecBase
+import org.jetbrains.intellij.platform.gradle.SearchableOptionsTestBase
 import kotlin.io.path.exists
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-class JarSearchableOptionsTaskSpec : SearchableOptionsSpecBase() {
+class JarSearchableOptionsTaskTest : SearchableOptionsTestBase() {
 
     @Test
     fun `jar searchable options produces archive`() {

@@ -21,7 +21,7 @@ import kotlin.test.*
 
 @Ignore
 @Deprecated("Requires refactoring")
-class IntelliJPluginSpec : IntelliJPluginSpecBase() {
+class IntelliJPluginTest : IntelliJPluginTestBase() {
 
     companion object {
         @JvmStatic
@@ -728,7 +728,7 @@ class IntelliJPluginSpec : IntelliJPluginSpecBase() {
         .also {
             println("Command: $it")
         }
-        .let(IntelliJPluginSpec::ProcessProperties)
+        .let(IntelliJPluginTest::ProcessProperties)
 
     class ProcessProperties(command: String) {
 

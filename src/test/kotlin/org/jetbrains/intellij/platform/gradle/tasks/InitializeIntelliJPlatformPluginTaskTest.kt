@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
@@ -14,7 +14,7 @@ import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-class InitializeIntelliJPlatformPluginTaskSpec : IntelliJPluginSpecBase() {
+class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `report outdated plugin`() {
