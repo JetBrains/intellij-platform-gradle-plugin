@@ -4,23 +4,8 @@ on: [ workflow_call ]
 
 jobs:
   gradleValidation:
-    name: Gradle Wrapper
+    name: Gradle Wrapper Validation
     runs-on: ubuntu-latest
     steps:
-
-      - name: Fetch Sources
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: zulu
-          java-version: 11
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-home-cache-cleanup: true
-
-      - name: Gradle Wrapper Validation
-        uses: gradle/wrapper-validation-action@v2.1.1
+      - uses: actions/checkout@v4
+      - uses: gradle/wrapper-validation-action@v2.1.1
