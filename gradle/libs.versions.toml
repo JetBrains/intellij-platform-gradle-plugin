@@ -8,7 +8,7 @@ retrofit = "2.9.0"
 xmlutil = "0.86.3"
 
 # plugins
-dokka = "1.9.10"
+dokka = "1.9.20"
 gradlePluginPublish = "1.2.1"
 gradleChangelogPlugin = "2.2.0"
 
