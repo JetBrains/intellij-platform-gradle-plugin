@@ -269,28 +269,25 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
                 val intellijPluginVerifierIdesConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES]
-
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
                 val extension = project.the<IntelliJPlatformExtension>()
 
                 extension.verifyPlugin.let {
-                    ides.from(intellijPluginVerifierIdesConfiguration)
                     freeArgs.convention(it.freeArgs)
+                    failureLevel.convention(it.failureLevel)
+                    verificationReportsDirectory.convention(it.verificationReportsDirectory)
+                    verificationReportsFormats.convention(it.verificationReportsFormats)
+                    externalPrefixes.convention(it.externalPrefixes)
+                    teamCityOutputFormat.convention(it.teamCityOutputFormat)
+                    subsystemsToCheck.convention(it.subsystemsToCheck)
+                    ignoredProblemsFile.convention(it.ignoredProblemsFile)
                 }
 
-                failureLevel.convention(extension.verifyPlugin.failureLevel)
+                ides.from(intellijPluginVerifierIdesConfiguration)
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
-                verificationReportsDirectory.convention(extension.verifyPlugin.verificationReportsDirectory)
-                verificationReportsFormats.convention(extension.verifyPlugin.verificationReportsFormats)
-                externalPrefixes.convention(extension.verifyPlugin.externalPrefixes)
-                teamCityOutputFormat.convention(extension.verifyPlugin.teamCityOutputFormat)
-                subsystemsToCheck.convention(extension.verifyPlugin.subsystemsToCheck)
-
-                ignoredProblemsFile.convention(extension.verifyPlugin.ignoredProblemsFile)
                 offline.convention(project.gradle.startParameter.isOffline)
 
                 dependsOn(buildPluginTaskProvider)
-//                dependsOn(Tasks.VERIFY_PLUGIN)
             }
     }
 

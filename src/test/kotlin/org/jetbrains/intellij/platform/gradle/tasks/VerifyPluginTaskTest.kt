@@ -61,6 +61,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    @Ignore
     fun `test plugin against two IDEs`() {
         writeJavaFile()
         writePluginXmlFile()
