@@ -137,8 +137,6 @@ class VerifyPluginTaskSpec : IntelliJPluginSpecBase() {
             """.trimIndent()
         )
 
-        println("buildFile = ${buildFile}")
-
         build(Tasks.VERIFY_PLUGIN) {
             val reportsDirectory = buildDirectory.resolve("foo")
             assertContains("Verification reports directory: ${reportsDirectory.toRealPath()}", output)
