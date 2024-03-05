@@ -181,9 +181,6 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         repositories.ivy {
             // Location of Ivy files generated for the current project.
             val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
-            // TODO: check against tests
-            //  setUrl(localPlatformArtifactsPath.toUri())
-            //  ivyPattern("/[organization]-[module]-[revision].[ext]")
             ivyPattern("${localPlatformArtifactsPath.absolutePathString()}/[organization]-[module]-[revision].[ext]")
 
             // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files

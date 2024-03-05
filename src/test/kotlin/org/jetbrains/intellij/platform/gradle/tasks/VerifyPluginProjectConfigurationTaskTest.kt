@@ -342,7 +342,8 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
         gitignore.writeText("")
         dir.resolve(CACHE_DIRECTORY).deleteRecursively()
-        gradleProperties.properties("org.jetbrains.intellij.platform.intellijPlatformCache=${dir.resolve(".foo")}")
+        val cachePath = dir.resolve(".foo").invariantSeparatorsPathString
+        gradleProperties.properties("org.jetbrains.intellij.platform.intellijPlatformCache=$cachePath")
 
         // custom IntelliJ Platform cache, present .gitignore, entry missing -> skip
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
