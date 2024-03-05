@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.internal.impldep.org.testng.annotations.BeforeTest
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginSpecBase
 import kotlin.io.path.*
@@ -325,7 +326,7 @@ class VerifyPluginProjectConfigurationTaskSpec : IntelliJPluginSpecBase() {
     @Test
     @OptIn(ExperimentalPathApi::class)
     fun `report IntelliJ Platform cache missing in gitignore`() {
-        val message = "- The IntelliJ Platform cache directory should be excluded from the version control system. Add the '.intellijPlatform' entry to the '.gitignore' file"
+        val message = "- The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file"
 
         pluginXml.xml(
             """
@@ -351,7 +352,7 @@ class VerifyPluginProjectConfigurationTaskSpec : IntelliJPluginSpecBase() {
             assertContains(message, output)
         }
 
-        gitignore.appendText(".intellijPlatform")
+        gitignore.appendText(CACHE_DIRECTORY)
 
         // default IntelliJ Platform cache, present .gitignore, entry present -> skip
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
@@ -359,8 +360,8 @@ class VerifyPluginProjectConfigurationTaskSpec : IntelliJPluginSpecBase() {
         }
 
         gitignore.writeText("")
-        dir.resolve(".intellijPlatform").deleteRecursively()
-        gradleProperties.appendText("org.jetbrains.intellij.platform.intellijPlatformCache=${dir.resolve(".foo")}")
+        dir.resolve(CACHE_DIRECTORY).deleteRecursively()
+        gradleProperties.properties("org.jetbrains.intellij.platform.intellijPlatformCache=${dir.resolve(".foo")}")
 
         // custom IntelliJ Platform cache, present .gitignore, entry missing -> skip
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {

@@ -16,6 +16,7 @@ import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCache
@@ -23,6 +24,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.*
+import java.io.File
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
 
@@ -60,13 +62,19 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     /**
      * Root project path.
      */
+    @get:Internal
+    abstract val rootDirectory: Property<File>
+
+    /**
+     * IntelliJ Platform cache directory.
+     */
     @get:InputDirectory
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val intellijPlatformCache: DirectoryProperty
 
     /**
-     * Root project path.
+     * The `.gitignore` file located in the [rootDirectory], tracked for content change.
      */
     @get:InputFile
     @get:Optional
@@ -206,13 +214,17 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 yield("The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines")
             }
             run {
-                val gitignore = gitignoreFile.orNull?.asPath
+                val gitignore = gitignoreFile.orNull?.asPath ?: return@run
+                val cache = intellijPlatformCache.asPath.takeIf { it.exists() } ?: return@run
+                val root = rootDirectory.get().toPath()
 
-                if (intellijPlatformCache.asPath.exists() && gitignore != null) {
-                    val containsEntry = gitignore.readLines().any { line -> line.contains(".intellijPlatform") }
-                    if (!containsEntry) {
-                        this@sequence.yield("The IntelliJ Platform cache directory should be excluded from the version control system. Add the '.intellijPlatform' entry to the '.gitignore' file.")
-                    }
+                if (cache != root.resolve(CACHE_DIRECTORY)) {
+                    return@run
+                }
+
+                val containsEntry = gitignore.readLines().any { line -> line.contains(CACHE_DIRECTORY) }
+                if (!containsEntry) {
+                    this@sequence.yield("The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file.")
                 }
             }
         }
@@ -248,6 +260,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
+
+                rootDirectory.convention(project.provider { project.rootDir })
                 intellijPlatformCache.convention(project.layout.dir(project.provider { project.gradle.intellijPlatformCache.toFile() }))
                 gitignoreFile.convention(project.layout.file(project.provider { project.rootDir.resolve(".gitignore").takeIf { it.exists() } }))
 

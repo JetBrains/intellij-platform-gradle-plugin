@@ -12,9 +12,10 @@ object Constants {
     const val PLUGIN_BASE_ID = "$PLUGIN_ID.base"
     const val PLUGIN_SETTINGS_ID = "$PLUGIN_ID.settings"
     const val PLUGIN_TASKS_ID = "$PLUGIN_ID.tasks"
+    const val PLUGIN_GROUP_NAME = "intellij platform"
     const val LOG_PREFIX = "[$PLUGIN_ID]"
 
-    const val PLUGIN_GROUP_NAME = "intellij platform"
+    const val CACHE_DIRECTORY = ".intellijPlatform"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
     const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
     const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"

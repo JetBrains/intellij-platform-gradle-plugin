@@ -7,6 +7,7 @@ import org.gradle.api.file.Directory
 import org.gradle.api.invocation.Gradle
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.BuildException
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.model.IvyModule
 import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
@@ -89,7 +90,7 @@ internal val Gradle.intellijPlatformCache
         ?: rootProject
             .projectDir
             .toPath()
-            .resolve(".intellijPlatform")
+            .resolve(CACHE_DIRECTORY)
 
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
