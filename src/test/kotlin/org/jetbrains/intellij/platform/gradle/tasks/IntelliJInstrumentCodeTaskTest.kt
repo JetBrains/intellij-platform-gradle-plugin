@@ -86,12 +86,6 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        gradleProperties.properties(
-            """
-            kotlin.incremental.useClasspathSnapshot=false
-            """.trimIndent()
-        )
-
         dir.resolve("src/main/kotlin/pack/AppKt.form").xml(
             """
             <?xml version="1.0" encoding="UTF-8"?>

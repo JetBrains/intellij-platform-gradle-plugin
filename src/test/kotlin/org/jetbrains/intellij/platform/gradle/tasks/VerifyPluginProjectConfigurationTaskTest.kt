@@ -25,12 +25,6 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not show errors when configuration is valid`() {
-        gradleProperties.properties(
-            """
-            kotlin.incremental.useClasspathSnapshot = false
-            """.trimIndent()
-        )
-
         pluginXml.xml(
             """
             <idea-plugin>
@@ -136,12 +130,6 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not report too high patch number in Kotlin apiVersion`() {
-        gradleProperties.properties(
-            """
-            kotlin.incremental.useClasspathSnapshot = false
-            """.trimIndent()
-        )
-
         pluginXml.xml(
             """
             <idea-plugin>
@@ -207,12 +195,6 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 <vendor>JetBrains</vendor>
                 <idea-version since-build="212" until-build='212.*' />
             </idea-plugin>
-            """.trimIndent()
-        )
-
-        gradleProperties.properties(
-            """
-            kotlin.incremental.useClasspathSnapshot = false
             """.trimIndent()
         )
 
@@ -283,7 +265,6 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = true
-            kotlin.incremental.useClasspathSnapshot = false
             systemProp.org.gradle.unsafe.kotlin.assignment = true
             """.trimIndent()
         )

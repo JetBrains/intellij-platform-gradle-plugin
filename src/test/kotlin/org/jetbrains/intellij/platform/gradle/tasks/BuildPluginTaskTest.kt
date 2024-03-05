@@ -114,12 +114,6 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        gradleProperties.properties(
-            """
-            kotlin.incremental.useClasspathSnapshot = false
-            """.trimIndent()
-        )
-
         build(Tasks.BUILD_PLUGIN)
 
         val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")

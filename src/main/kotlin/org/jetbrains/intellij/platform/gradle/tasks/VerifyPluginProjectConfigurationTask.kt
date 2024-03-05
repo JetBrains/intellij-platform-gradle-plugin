@@ -30,7 +30,6 @@ import kotlin.io.path.writeText
 
 private const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
 private const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME = "kotlin.stdlib.default.dependency"
-private const val KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT = "kotlin.incremental.useClasspathSnapshot"
 private const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
 
 /**
@@ -130,12 +129,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     abstract val kotlinStdlibDefaultDependency: Property<Boolean>
 
     /**
-     * `kotlin.incremental.useClasspathSnapshot` property value defined in the `gradle.properties` file.
-     */
-    @get:Internal
-    abstract val kotlinIncrementalUseClasspathSnapshot: Property<Boolean>
-
-    /**
      * This variable represents whether the Kotlin Coroutines library is added explicitly to the project dependencies.
      */
     @get:Internal
@@ -157,11 +150,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         val targetCompatibilityJavaVersion = JavaVersion.toVersion(targetCompatibility.get())
         val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.let { JavaVersion.toVersion(it) }
         val kotlinApiVersion = kotlinApiVersion.orNull?.toVersion()
-        val kotlinIncrementalUseClasspathSnapshot = kotlinIncrementalUseClasspathSnapshot.orNull == null
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.toVersion()
         val kotlinPluginAvailable = kotlinPluginAvailable.get()
         val kotlinStdlibDefaultDependency = kotlinStdlibDefaultDependency.orNull == null
-        val kotlinVersion = kotlinVersion.orNull?.toVersion()
         val kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get()
         val platformKotlinLanguageVersion = getPlatformKotlinVersion(platformBuild)?.run { "$major.$minor".toVersion() }
 
@@ -170,7 +161,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 ?.let { file ->
                     val sinceBuild = file.parse { ideaVersion.sinceBuild.toVersion() }
                     val sinceBuildJavaVersion = getPlatformJavaVersion(sinceBuild)
-                    val sinceBuildKotlinApiVersion = getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
+                    val sinceBuildKotlinApiVersion =
+                        getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
 
                     if (sinceBuild.major < platformBuild.major) {
                         yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuild.major}.")
@@ -207,9 +199,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             if (kotlinPluginAvailable && kotlinStdlibDefaultDependency) {
                 yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
             }
-            if (kotlinPluginAvailable && kotlinIncrementalUseClasspathSnapshot && kotlinVersion >= Version(1, 8, 20) && kotlinVersion < Version(1, 9)) {
-                yield("The Kotlin plugin in version $kotlinVersion used with the IntelliJ Platform Gradle Plugin leads to the 'java.lang.OutOfMemoryError: Java heap space' exception, see: https://jb.gg/intellij-platform-kotlin-oom")
-            }
             if (kotlinxCoroutinesLibraryPresent) {
                 yield("The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines")
             }
@@ -244,9 +233,11 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             }
     }
 
-    private fun getPlatformJavaVersion(buildNumber: Version) = PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value
+    private fun getPlatformJavaVersion(buildNumber: Version) =
+        PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value
 
-    private fun getPlatformKotlinVersion(buildNumber: Version) = PlatformKotlinVersions.entries.firstOrNull { buildNumber >= it.key }?.value
+    private fun getPlatformKotlinVersion(buildNumber: Version) =
+        PlatformKotlinVersions.entries.firstOrNull { buildNumber >= it.key }?.value
 
     private operator fun JavaVersion?.compareTo(other: JavaVersion?) = other?.let { this?.compareTo(it) } ?: 0
 
@@ -278,7 +269,10 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                     it.targetCompatibility
                 })
                 kotlinxCoroutinesLibraryPresent.convention(project.provider {
-                    listOf(JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME, JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME).any { configurationName ->
+                    listOf(
+                        JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME,
+                        JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME
+                    ).any { configurationName ->
                         project.configurations[configurationName].dependencies.any {
                             it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
                         }
@@ -294,7 +288,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                             dependsOn(this@registerTask)
                         }
                     }.map {
-                        it.withGroovyBuilder { getProperty("kotlinOptions") }.withGroovyBuilder { getProperty("options") }
+                        it.withGroovyBuilder { getProperty("kotlinOptions") }
+                            .withGroovyBuilder { getProperty("options") }
                     }
 
                     kotlinJvmTarget.convention(kotlinOptionsProvider.flatMap {
@@ -313,13 +308,12 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                             .map { value -> value as String }
                     })
                     kotlinVersion.convention(project.provider {
-                        project.extensions.getByName("kotlin").withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
+                        project.extensions.getByName("kotlin")
+                            .withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
                     })
                     kotlinStdlibDefaultDependency.convention(
-                        project.providers.gradleProperty(KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME).map { it.toBoolean() }
-                    )
-                    kotlinIncrementalUseClasspathSnapshot.convention(
-                        project.providers.gradleProperty(KOTLIN_INCREMENTAL_USE_CLASSPATH_SNAPSHOT).map { it.toBoolean() }
+                        project.providers.gradleProperty(KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME)
+                            .map { it.toBoolean() }
                     )
                 }
 
