@@ -28,6 +28,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyPluginVer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsDirectory
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
@@ -333,8 +334,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         dependencies,
                         downloadDirectory,
                         extensionProvider,
-                        gradle,
                         providers,
+                        project,
                         resources,
                     )
                 }
@@ -363,7 +364,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 Extensions.INTELLIJ_PLATFORM,
                 repositories,
                 providers,
-                gradle,
+                providers.localPlatformArtifactsDirectory(
+                    rootDir
+                ),
             )
         }
     }

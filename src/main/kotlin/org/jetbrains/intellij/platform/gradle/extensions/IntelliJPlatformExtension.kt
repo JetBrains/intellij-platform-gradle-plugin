@@ -602,10 +602,11 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             internal val dependencies: DependencyHandler,
             internal val downloadDirectory: DirectoryProperty,
             internal val extensionProvider: Provider<IntelliJPlatformExtension>,
-            internal val gradle: Gradle,
             internal val providers: ProviderFactory,
+            project: Project,
             internal val resources: ResourceHandler,
         ) {
+            private val rootDir = project.rootDir
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -678,7 +679,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param localPath The provider for the type of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
              */
-            fun localIde(localPath: Provider<*>) = addLocalIdeDependency(localPath)
+            fun localIde(localPath: Provider<*>) = addLocalIdeDependency(
+                localPlatformArtifactsDirectory = providers.localPlatformArtifactsDirectory(rootDir),
+                localPath = localPath,
+            )
 
             /**
              * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
@@ -763,7 +767,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             /**
              * Creates and adds a local instance of the IDE as a dependency.
              */
-            private fun addLocalIdeDependency(localPath: Provider<*>) =
+            private fun addLocalIdeDependency(
+                localPlatformArtifactsDirectory: File,
+                localPath: Provider<*>,
+            ) =
                 configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE].dependencies.addLater(localPath.map {
                     val artifactPath = resolveArtifactPath(it)
                     val productInfo = artifactPath.productInfo()
@@ -778,7 +785,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         name = type.dependency.artifactId,
                         version = "${productInfo.version}+$hash",
                     ).apply {
-                        createIvyDependency(gradle, listOf(artifactPath.toPublication()))
+                        createIvyDependency(localPlatformArtifactsDirectory, listOf(artifactPath.toPublication()))
                     }
                 })
         }

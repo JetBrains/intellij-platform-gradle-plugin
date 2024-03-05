@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.extensions
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.file.Directory
 import org.gradle.api.invocation.Gradle
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.BuildException
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
@@ -30,9 +31,12 @@ annotation class IntelliJPlatform
  * @param gradle The [Gradle] instance.
  * @param publications The list of [IvyModule.Publication] objects to be included in the Ivy file.
  */
-internal fun ExternalModuleDependency.createIvyDependency(gradle: Gradle, publications: List<IvyModule.Publication>) {
-    val ivyFile = gradle.localPlatformArtifacts
-        .resolve("$group-$name-$version.xml")
+internal fun ExternalModuleDependency.createIvyDependency(
+    localPlatformArtifactsDirectory: File,
+    publications: List<IvyModule.Publication>,
+) {
+    val ivyFile = localPlatformArtifactsDirectory.toPath()
+        .div("$group/$name/$version/ivy-$version.xml")
         .takeUnless { it.exists() }
         ?: return
 
@@ -92,6 +96,8 @@ internal val Gradle.intellijPlatformCache
             .toPath()
             .resolve(CACHE_DIRECTORY)
 
+internal const val localPlatformArtifactsDirectory = ".gradle/intellijPlatform/ivy"
+
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
  *
@@ -107,3 +113,15 @@ internal val Gradle.localPlatformArtifacts
         ?.let { Path(it) }
         ?: intellijPlatformCache
             .resolve("localPlatformArtifacts")
+
+internal fun ProviderFactory.localPlatformArtifactsDirectory(
+    rootProjectDir: File,
+): File {
+    // gradleProperties are always safe to call get/orNull
+    val customLocalPlatformArtifactsDirectory = gradleProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS).orNull
+    return if (customLocalPlatformArtifactsDirectory != null) {
+        File(customLocalPlatformArtifactsDirectory)
+    } else {
+        rootProjectDir.resolve(localPlatformArtifactsDirectory)
+    }
+}
