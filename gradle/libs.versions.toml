@@ -14,10 +14,10 @@ gradleChangelogPlugin = "2.2.0"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
-intellijPluginRepositoryRestClient = { group = "org.jetbrains.intellij", name = "plugin-repository-rest-client", version.ref = "intellijPluginRepositoryRestClient" }
-intellijStructureBase = { group = "org.jetbrains.intellij.plugins", name = "structure-base", version.ref = "intellijStructure" }
-intellijStructureIntellij = { group = "org.jetbrains.intellij.plugins", name = "structure-intellij", version.ref = "intellijStructure" }
-kotlinxSerializationJson = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+intellij-pluginRepositoryRestClient = { group = "org.jetbrains.intellij", name = "plugin-repository-rest-client", version.ref = "intellijPluginRepositoryRestClient" }
+intellij-structure-base = { group = "org.jetbrains.intellij.plugins", name = "structure-base", version.ref = "intellijStructure" }
+intellij-structure-intellij = { group = "org.jetbrains.intellij.plugins", name = "structure-intellij", version.ref = "intellijStructure" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 xmlutil = { group = "io.github.pdvrieze.xmlutil", name = "serialization-jvm", version.ref = "xmlutil" }
 

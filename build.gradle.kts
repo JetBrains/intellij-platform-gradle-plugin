@@ -35,19 +35,20 @@ val additionalPluginClasspath: Configuration by configurations.creating
 
 dependencies {
     implementation(libs.annotations)
-    implementation(libs.intellijStructureBase) {
+    implementation(libs.intellij.structure.base) {
         exclude("org.jetbrains.kotlin")
     }
-    implementation(libs.intellijStructureIntellij) {
+    implementation(libs.intellij.structure.intellij) {
         exclude("org.jetbrains.kotlin")
     }
-    implementation(libs.intellijPluginRepositoryRestClient) {
+    implementation(libs.intellij.pluginRepositoryRestClient) {
         exclude("org.jetbrains.kotlin")
         exclude("org.slf4j")
     }
 
     implementation(libs.kotlinxSerializationJson)
     implementation(libs.xmlutil)
+    implementation(libs.kotlinx.serialization.json)
 
     compileOnly(embeddedKotlin("gradle-plugin"))
     additionalPluginClasspath(embeddedKotlin("gradle-plugin"))
