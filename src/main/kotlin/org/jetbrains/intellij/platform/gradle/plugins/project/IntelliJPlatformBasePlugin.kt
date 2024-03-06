@@ -13,6 +13,7 @@ import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
@@ -48,6 +49,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         checkGradleVersion()
 
+        val rootProjectDirectory = project.rootProject.rootDir.toPath()
+
         with(project) {
             with(plugins) {
                 apply(JavaPlugin::class)
@@ -55,12 +58,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
 
             /**
-             * Configure the [IdeaPlugin] and set the `idea.module.downloadSources` flag to `true`
-             * to tell IDE that sources are required when working with IntelliJ Platform Gradle Plugin.
+             * Configure the [IdeaPlugin] to:
+             * - set the `idea.module.downloadSources` flag to `true` to tell IDE that sources are required when working with IntelliJ Platform Gradle Plugin
+             * - exclude the [CACHE_DIRECTORY] from the IDEA module
              */
             pluginManager.withPlugin("idea") {
                 project.extensions.configure<IdeaModel>("idea") {
                     module.isDownloadSources = isBuildFeatureEnabled(BuildFeature.DOWNLOAD_SOURCES).get()
+                    module.excludeDirs.add(rootProjectDirectory.resolve(CACHE_DIRECTORY).toFile())
                 }
             }
 
@@ -274,7 +279,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 Extensions.INTELLIJ_PLATFORM,
                 project.configurations,
                 project.providers,
-                project.rootDir.toPath(),
+                rootProjectDirectory,
             ) {
                 buildSearchableOptions.convention(true)
                 instrumentCode.convention(true)
@@ -336,7 +341,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         extensionProvider,
                         providers,
                         resources,
-                        rootDir.toPath()
+                        rootProjectDirectory,
                     )
                 }
 
@@ -357,14 +362,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 dependencies,
                 providers,
                 layout,
-                rootDir.toPath(),
+                rootProjectDirectory,
             )
 
             repositories.configureExtension<IntelliJPlatformRepositoriesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 repositories,
                 providers,
-                rootDir.toPath(),
+                rootProjectDirectory,
             )
         }
     }
