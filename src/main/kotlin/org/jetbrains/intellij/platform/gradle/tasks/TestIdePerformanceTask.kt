@@ -10,7 +10,7 @@ import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.PerformanceTestArgumentProvider
-import org.jetbrains.intellij.platform.gradle.model.PerformanceTestResult
+import org.jetbrains.intellij.platform.gradle.models.PerformanceTestResult
 import org.jetbrains.intellij.platform.gradle.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradle.performanceTest.TestExecutionFailException
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.IdeaLogParser

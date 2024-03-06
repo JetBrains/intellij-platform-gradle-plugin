@@ -2,15 +2,15 @@
 
 package org.jetbrains.intellij.platform.gradle.providers
 
+import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectIntelliJPlatformJars
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
-import org.jetbrains.intellij.platform.gradle.model.Coordinates
-import org.jetbrains.intellij.platform.gradle.model.ModuleDescriptor
-import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
-import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.models.ModuleDescriptor
+import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.util.jar.JarFile
@@ -51,7 +51,7 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             .entries()
             .asSequence()
             .filter { it.name.endsWith(".xml") }
-            .map { XmlExtractor<ModuleDescriptor>().unmarshal(jarFile.getInputStream(it)) }
+            .map { XML.decodeFromString(ModuleDescriptor.serializer(), jarFile.getInputStream(it).bufferedReader().use { it.readText() }) }
             .map { it.key to Coordinates(it.groupId, it.artifactId) }
             .groupBy(keySelector = { it.first }, valueTransform = { it.second })
             .filterKeys { collectedJars.contains(it) }

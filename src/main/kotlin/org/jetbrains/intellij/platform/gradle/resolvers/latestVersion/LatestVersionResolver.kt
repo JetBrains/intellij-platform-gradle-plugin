@@ -2,9 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
 
+import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.GradleException
-import org.jetbrains.intellij.platform.gradle.model.MavenMetadata
-import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradle.models.MavenMetadata
 import org.jetbrains.intellij.platform.gradle.resolvers.Resolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
@@ -21,7 +21,7 @@ import java.net.URL
 abstract class LatestVersionResolver(
     protected val subject: String,
     protected val url: String,
-): Resolver<Version> {
+) : Resolver<Version> {
 
     private val log: Logger
         get() = Logger(LatestVersionResolver::class.java)
@@ -35,7 +35,10 @@ abstract class LatestVersionResolver(
     protected fun fromMaven(): Version {
         log.debug(message = "Resolving the latest '$subject' version from: $url")
         return URL(url).openStream().use { inputStream ->
-            XmlExtractor<MavenMetadata>().unmarshal(inputStream).versioning?.latest?.toVersion()
+            XML.decodeFromString(MavenMetadata.serializer(), inputStream.bufferedReader().use { it.readText() })
+                .versioning
+                ?.latest
+                ?.toVersion()
                 ?: throw GradleException("Cannot resolve the latest '$subject' version from: $url")
         }
     }

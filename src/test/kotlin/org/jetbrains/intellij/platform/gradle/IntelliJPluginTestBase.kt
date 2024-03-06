@@ -7,7 +7,6 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.Constants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
-import java.io.BufferedReader
 import java.io.FileOutputStream
 import java.nio.file.*
 import java.util.zip.ZipFile
@@ -227,8 +226,8 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
     protected fun Path.toZip() = ZipFile(toFile())
 
-    protected fun fileText(zipFile: ZipFile, path: String) = zipFile.getInputStream(zipFile.getEntry(path)).use {
-        it.bufferedReader().use(BufferedReader::readText).replace("\r", "").trim()
+    protected fun fileText(zipFile: ZipFile, path: String) = zipFile.getInputStream(zipFile.getEntry(path)).use { inputStream ->
+        inputStream.bufferedReader().use { it.readText() }.replace("\r", "").trim()
     }
 
     protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()

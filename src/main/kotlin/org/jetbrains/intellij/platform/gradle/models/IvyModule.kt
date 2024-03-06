@@ -1,70 +1,46 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.model
+package org.jetbrains.intellij.platform.gradle.models
 
+import kotlinx.serialization.Serializable
+import nl.adaptivity.xmlutil.serialization.XmlChildrenName
+import nl.adaptivity.xmlutil.serialization.XmlElement
+import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import java.nio.file.Path
-import javax.xml.bind.annotation.XmlAttribute
-import javax.xml.bind.annotation.XmlElement
-import javax.xml.bind.annotation.XmlElementWrapper
-import javax.xml.bind.annotation.XmlRootElement
 import kotlin.io.path.extension
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.isDirectory
 
-@XmlRootElement(name = "ivy-module")
+@Serializable
+@XmlSerialName("ivy-module")
 data class IvyModule(
-
-    @set:XmlAttribute
-    var version: String = "2.0",
-
-    @set:XmlElement
-    var info: Info? = null,
-
-    @set:XmlElement(name = "conf")
-    @set:XmlElementWrapper
-    var configurations: List<Configuration> = mutableListOf(),
-
-    @set:XmlElement(name = "artifact")
-    @set:XmlElementWrapper
-    var publications: List<Publication> = mutableListOf(),
+    val version: String = "2.0",
+    @XmlElement @XmlSerialName("info") val info: Info?,
+    @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration>,
+    @XmlElement @XmlChildrenName("artifact") val publications: List<Publication>,
 ) {
+
+    @Serializable
     data class Configuration(
-
-        @set:XmlAttribute
-        var name: String? = null,
-
-        @set:XmlAttribute
-        var visibility: String? = null,
+        val name: String?,
+        val visibility: String?,
     )
 
+    @Serializable
     data class Info(
-
-        @set:XmlAttribute
-        var organisation: String? = null,
-
-        @set:XmlAttribute
-        var module: String? = null,
-
-        @set:XmlAttribute
-        var revision: String? = null,
-
-        @set:XmlAttribute
-        var publication: String? = null,
+        val organisation: String?,
+        val module: String?,
+        val revision: String?,
+        val publication: String?,
     )
 
+    @Serializable
     data class Publication(
-        @set:XmlAttribute
-        var name: String? = null,
-
-        @set:XmlAttribute
-        var type: String? = null,
-
-        @set:XmlAttribute
-        var ext: String? = null,
-
-        @set:XmlAttribute
-        var conf: String? = null,
+        val name: String?,
+        val type: String?,
+        val ext: String?,
+        val conf: String?,
     )
 }
 

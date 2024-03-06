@@ -2,22 +2,28 @@
 
 package org.jetbrains.intellij.platform.gradle.providers
 
+import kotlinx.serialization.Serializable
+import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.*
 import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.model.AndroidStudioReleases
-import org.jetbrains.intellij.platform.gradle.model.JetBrainsIdesReleases
-import org.jetbrains.intellij.platform.gradle.model.ProductRelease
-import org.jetbrains.intellij.platform.gradle.model.ProductRelease.Channel
-import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradle.models.AndroidStudioReleases
+import org.jetbrains.intellij.platform.gradle.models.JetBrainsIdesReleases
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
 import org.jetbrains.intellij.platform.gradle.tasks.PrintProductsReleasesTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.*
+import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import kotlin.io.path.readText
 
 /**
  * Provides a complete list of binary IntelliJ Platform product releases matching the given [FilterParameters] criteria.
@@ -74,12 +80,11 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
     override fun obtain(): List<String>? = with(parameters) {
         val jetbrainsIdesReleases = jetbrainsIdes.orNull
             ?.let {
-                runCatching { XmlExtractor<JetBrainsIdesReleases>().unmarshal(it.asPath) }
+                runCatching { XML.decodeFromString(JetBrainsIdesReleases.serializer(), it.asPath.readText()) }
                     .onFailure { log.warn("Failed to get products releases list: ${it.message}", it) }
                     .getOrNull()
             }
-            .or { JetBrainsIdesReleases() }
-            .let {
+            ?.let {
                 sequence {
                     it.products.forEach { product ->
                         product.channels.forEach channel@{ channelEntry ->
@@ -110,16 +115,17 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                     }
                 }
             }
+            .orEmpty()
             .toList()
 
         val androidStudioReleases = androidStudio.orNull
             ?.let {
-                runCatching { XmlExtractor<AndroidStudioReleases>().unmarshal(it.asPath) }
+                runCatching { XML.decodeFromString(AndroidStudioReleases.serializer(), it.asPath.readText()) }
                     .onFailure { log.warn("Failed to get products releases list: ${it.message}", it) }
                     .getOrNull()
             }
-            .or { AndroidStudioReleases() }
-            .items.mapNotNull { item ->
+            ?.items
+            ?.mapNotNull { item ->
                 val channel = runCatching { Channel.valueOf(item.channel.uppercase()) }.getOrNull() ?: return@mapNotNull null
 
                 ProductRelease(
@@ -131,6 +137,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                     id = item.version,
                 )
             }
+            .orEmpty()
 
         val since = sinceBuild.map { it.toVersion() }.get()
         val until = untilBuild.map { it.replace("*", "99999").toVersion() }.orNull
@@ -201,3 +208,26 @@ fun IntelliJPlatformExtension.VerifyPlugin.Ides.ProductReleasesValueSource(confi
         extensionProvider,
         configure,
     )
+
+
+@Serializable
+data class Data(
+    @XmlSerialName("item")
+    val items: List<Item>,
+) {
+    @Serializable
+    data class Item(
+        val name: String
+    )
+}
+
+//@Serializable
+//data class Data(
+//    val items: List<Item>,
+//) {
+//    @Serializable
+//    @XmlSerialName("item")
+//    data class Item(
+//        val name: String
+//    )
+//}

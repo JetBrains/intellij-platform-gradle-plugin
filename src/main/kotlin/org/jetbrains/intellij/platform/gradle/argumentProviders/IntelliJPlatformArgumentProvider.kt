@@ -11,10 +11,10 @@ import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.model.ProductInfo
-import org.jetbrains.intellij.platform.gradle.model.launchFor
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
+import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
-import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath

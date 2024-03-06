@@ -177,34 +177,32 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun localPlatformArtifacts(action: RepositoryAction = {}) = run {
-        repositories.ivy {
-            // Location of Ivy files generated for the current project.
-            val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
-            ivyPattern("${localPlatformArtifactsPath.absolutePathString()}/[organization]-[module]-[revision].[ext]")
+    fun localPlatformArtifacts(action: RepositoryAction = {}) = repositories.ivy {
+        // Location of Ivy files generated for the current project.
+        val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
+        ivyPattern("${localPlatformArtifactsPath.absolutePathString()}/[organization]-[module]-[revision].[ext]")
 
-            // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
-            artifactPattern("/[artifact]")
+        // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
+        artifactPattern("/[artifact]")
 
-            /**
-             * Because artifact paths always start with `/` (see [toPublication] for details),
-             * on Windows, we have to guess to which drive letter the artifact path belongs to.
-             * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
-             * starting with `c` for the sake of micro-optimization.
-             */
-            if (OperatingSystem.current().isWindows) {
-                (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:/[artifact]") }
-            }
-        }.apply {
-            repositories.exclusiveContent {
-                forRepositories(this@apply)
-                filter {
-                    includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
-                    includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
-                }
-            }
-            action()
+        /**
+         * Because artifact paths always start with `/` (see [toPublication] for details),
+         * on Windows, we have to guess to which drive letter the artifact path belongs to.
+         * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
+         * starting with `c` for the sake of micro-optimization.
+         */
+        if (OperatingSystem.current().isWindows) {
+            (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:/[artifact]") }
         }
+    }.apply {
+        repositories.exclusiveContent {
+            forRepositories(this@apply)
+            filter {
+                includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
+                includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
+            }
+        }
+        action()
     }
 
     /**

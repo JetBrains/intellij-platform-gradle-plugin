@@ -6,8 +6,8 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.process.ExecOperations
-import org.jetbrains.intellij.platform.gradle.model.ProductInfo
-import org.jetbrains.intellij.platform.gradle.model.launchFor
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
+import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject

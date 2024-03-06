@@ -1,12 +1,11 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.model
+package org.jetbrains.intellij.platform.gradle.models
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.Version
 
 data class ProductRelease(
-
     val name: String,
     val type: IntelliJPlatformType,
     val channel: Channel,

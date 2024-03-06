@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
+import kotlinx.serialization.encodeToString
+import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.ProviderFactory
@@ -9,8 +11,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.BuildException
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
-import org.jetbrains.intellij.platform.gradle.model.IvyModule
-import org.jetbrains.intellij.platform.gradle.model.XmlExtractor
+import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.io.File
@@ -37,7 +38,6 @@ internal fun ExternalModuleDependency.createIvyDependency(localPlatformArtifacts
         .takeUnless { it.exists() }
         ?: return
 
-    val extractor = XmlExtractor<IvyModule>()
     val ivyModule = IvyModule(
         info = IvyModule.Info(
             organisation = group,
@@ -54,9 +54,13 @@ internal fun ExternalModuleDependency.createIvyDependency(localPlatformArtifacts
         publications = publications,
     )
 
-    ivyFile.parent.createDirectories()
-    ivyFile.createFile()
-    extractor.marshal(ivyModule, ivyFile)
+    with(ivyFile) {
+        parent.createDirectories()
+        createFile()
+        writeText(XML {
+            indentString = "  "
+        }.encodeToString(ivyModule))
+    }
 }
 
 /**

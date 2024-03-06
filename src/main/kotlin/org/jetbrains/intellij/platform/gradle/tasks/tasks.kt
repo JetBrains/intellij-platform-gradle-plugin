@@ -22,9 +22,9 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.model.ProductInfo
-import org.jetbrains.intellij.platform.gradle.model.launchFor
-import org.jetbrains.intellij.platform.gradle.model.productInfo
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
+import org.jetbrains.intellij.platform.gradle.models.launchFor
+import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.providers.ExecutableArchValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver

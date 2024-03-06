@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.GradleException
-import org.jetbrains.intellij.platform.gradle.model.Coordinates
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
 
 /**
  * Describes all IntelliJ Platform types available to be used for plugin development, dependency resolution, and plugin verification.

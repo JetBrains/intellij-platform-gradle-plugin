@@ -9,10 +9,10 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
-import org.jetbrains.intellij.platform.gradle.model.ProductInfo
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
-import org.jetbrains.intellij.platform.gradle.model.productInfo
-import org.jetbrains.intellij.platform.gradle.model.validateSupportedVersion
+import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
 import java.nio.file.Path
 
 /**

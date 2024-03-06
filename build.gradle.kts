@@ -46,9 +46,8 @@ dependencies {
         exclude("org.slf4j")
     }
 
-    implementation(libs.jacksonDatabind)
     implementation(libs.kotlinxSerializationJson)
-    implementation(libs.jaxbApi)
+    implementation(libs.xmlutil)
 
     compileOnly(embeddedKotlin("gradle-plugin"))
     additionalPluginClasspath(embeddedKotlin("gradle-plugin"))

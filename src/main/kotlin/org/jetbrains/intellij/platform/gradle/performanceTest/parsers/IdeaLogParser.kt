@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.performanceTest.parsers
 
-import org.jetbrains.intellij.platform.gradle.model.PerformanceTestStatistic
+import org.jetbrains.intellij.platform.gradle.models.PerformanceTestStatistic
 import kotlin.io.path.Path
 import kotlin.io.path.forEachLine
 

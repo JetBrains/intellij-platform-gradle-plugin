@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradle.resolvers.closestVersion
 
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.extensions.TestFrameworkType
-import org.jetbrains.intellij.platform.gradle.model.ProductInfo
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 class TestFrameworkClosestVersionResolver(private val productInfo: ProductInfo, type: TestFrameworkType) : ClosestVersionResolver(

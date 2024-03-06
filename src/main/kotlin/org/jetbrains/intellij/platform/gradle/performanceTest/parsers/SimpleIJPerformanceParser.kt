@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.performanceTest.parsers
 
-import org.jetbrains.intellij.platform.gradle.model.PerformanceTestScript
+import org.jetbrains.intellij.platform.gradle.models.PerformanceTestScript
 import java.nio.file.Path
 import java.time.Duration
 import java.util.concurrent.TimeUnit
