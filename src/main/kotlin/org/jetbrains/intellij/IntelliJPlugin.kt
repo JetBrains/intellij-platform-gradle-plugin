@@ -1609,6 +1609,7 @@ abstract class IntelliJPlugin : Plugin<Project> {
             onlyIf {
                 !selfUpdateLockPath.get().exists() || !coroutinesJavaAgentPath.get().exists()
             }
+            mustRunAfter("clean")
         }
     }
 
