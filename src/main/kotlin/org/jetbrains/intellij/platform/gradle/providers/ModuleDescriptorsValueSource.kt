@@ -61,7 +61,7 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
     }
 
     private inline val ModuleDescriptor.key
-        get() = resources.resourceRoot.path.removePrefix("../")
+        get() = resources?.resourceRoot?.path?.removePrefix("../")
 
     private inline val ModuleDescriptor.groupId
         get() = name.split('.').take(2).joinToString(".", prefix = "com.jetbrains.")

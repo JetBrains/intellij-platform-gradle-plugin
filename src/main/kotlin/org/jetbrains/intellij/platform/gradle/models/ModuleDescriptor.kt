@@ -3,14 +3,15 @@
 package org.jetbrains.intellij.platform.gradle.models
 
 import kotlinx.serialization.Serializable
+import nl.adaptivity.xmlutil.serialization.XmlChildrenName
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 data class ModuleDescriptor(
     val name: String,
-    @XmlElement @XmlSerialName("module") val dependencies: List<Dependency>,
-    @XmlElement val resources: Resources,
+    @XmlElement @XmlChildrenName("module") val dependencies: List<Dependency>,
+    @XmlElement @XmlSerialName("resources") val resources: Resources?,
 ) {
 
     @Serializable
