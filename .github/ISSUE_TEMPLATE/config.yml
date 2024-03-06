@@ -5,4 +5,4 @@ contact_links:
     about: Browse the IntelliJ Platform Gradle Plugin documentation.
   - name: Getting Help
     url: https://plugins.jetbrains.com/docs/intellij/getting-help.html
-    about: Check if you search for a help in plugin development.
+    about: For help with plugin development.
