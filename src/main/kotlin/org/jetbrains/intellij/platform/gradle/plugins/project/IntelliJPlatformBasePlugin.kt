@@ -273,6 +273,13 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY],
                     extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
                 )
+
+                pluginManager.withPlugin(JAVA_TEST_FIXTURES_PLUGIN_ID) {
+                    configurations[Configurations.TEST_FIXTURES_COMPILE_CLASSPATH]
+                        .attributes
+                        .attribute(Attributes.extracted, true)
+                        .attribute(Attributes.collected, true)
+                }
             }
 
             configureExtension<IntelliJPlatformExtension>(

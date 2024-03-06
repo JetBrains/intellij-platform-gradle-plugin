@@ -62,6 +62,7 @@ object Constants {
         const val JETBRAINS_RUNTIME_DEPENDENCY = "jetbrainsRuntimeDependency"
         const val JETBRAINS_RUNTIME_LOCAL_INSTANCE = "jetbrainsRuntimeLocalInstance"
         const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
+        const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
 
         object Attributes {
             val bundledPluginsList = Attribute.of("intellijPlatformBundledPluginsList", Boolean::class.javaObjectType)
