@@ -2,26 +2,15 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.gradle.internal.impldep.org.testng.annotations.BeforeTest
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.*
 import kotlin.test.Test
 
+private const val HEADER = "The following plugin configuration issues were found"
+
 class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
-
-    @OptIn(ExperimentalPathApi::class)
-    @BeforeTest
-    override fun setup() {
-        super.setup()
-
-        gradleArguments.add("-Duser.home=$gradleHome")
-        gradleHome.resolve(".pluginVerifier/ides").run {
-            deleteRecursively()
-            createDirectories()
-        }
-    }
 
     @Test
     fun `do not show errors when configuration is valid`() {
@@ -68,7 +57,10 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
-            assertContains("- The 'since-build' property is lower than the target IntelliJ Platform major version: 211 < 223.", output)
+            assertContains(
+                "- The 'since-build' property is lower than the target IntelliJ Platform major version: 211 < 223.",
+                output
+            )
         }
     }
 
@@ -124,7 +116,10 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
-            assertContains("- The Kotlin configuration specifies jvmTarget=19 but IntelliJ Platform 2022.3.3 requires jvmTarget=17.", output)
+            assertContains(
+                "- The Kotlin configuration specifies jvmTarget=19 but IntelliJ Platform 2022.3.3 requires jvmTarget=17.",
+                output
+            )
         }
     }
 
@@ -181,7 +176,10 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
-            assertContains("- The Kotlin configuration specifies apiVersion=1.9 but since-build='223.8836' property requires apiVersion=1.7.", output)
+            assertContains(
+                "- The Kotlin configuration specifies apiVersion=1.9 but since-build='223.8836' property requires apiVersion=1.7.",
+                output
+            )
         }
     }
 
@@ -307,7 +305,8 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     @Test
     @OptIn(ExperimentalPathApi::class)
     fun `report IntelliJ Platform cache missing in gitignore`() {
-        val message = "- The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file"
+        val message =
+            "- The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file"
 
         pluginXml.xml(
             """
@@ -351,7 +350,4 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         }
     }
 
-    companion object {
-        const val HEADER = "The following plugin configuration issues were found"
-    }
 }
