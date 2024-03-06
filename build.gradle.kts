@@ -66,16 +66,10 @@ dependencies {
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
 }
 
 tasks {
-    withType<KotlinCompile> {
-        kotlinOptions {
-            jvmTarget = "11"
-        }
-    }
-
     wrapper {
         gradleVersion = properties("gradleVersion").get()
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
