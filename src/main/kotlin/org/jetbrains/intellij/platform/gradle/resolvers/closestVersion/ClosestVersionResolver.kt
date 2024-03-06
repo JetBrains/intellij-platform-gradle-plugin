@@ -23,7 +23,7 @@ abstract class ClosestVersionResolver(
     protected val url: String,
 ) : Resolver<Version> {
 
-    private val log = Logger(ClosestVersionResolver::class.java)
+    private val log = Logger(javaClass)
 
     /**
      * Resolves the closest version to the provided [version] of the artifact available in Maven repository.

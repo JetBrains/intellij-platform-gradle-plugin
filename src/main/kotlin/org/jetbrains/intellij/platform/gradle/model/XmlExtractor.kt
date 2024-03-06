@@ -6,7 +6,6 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.jdom2.Document
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
-import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.io.InputStream
 import java.io.StringWriter
 import java.nio.file.Path
@@ -18,8 +17,6 @@ import kotlin.io.path.writeText
 
 class XmlExtractor<T>(private val context: String? = null) {
 
-    private val log = Logger(javaClass)
-    
     private val jaxbContext by lazy {
         JAXBContext.newInstance("org.jetbrains.intellij.platform.gradle.model", ObjectFactory::class.java.classLoader)
     }
@@ -40,11 +37,6 @@ class XmlExtractor<T>(private val context: String? = null) {
             .use { JDOMUtil.loadDocument(it) }
             .let { transformXml(it, path) }
     }
-
-    fun fetch(path: Path) =
-        runCatching { unmarshal(path) }
-            .onFailure { log.warn("Failed to get products releases list: ${it.message}", it) }
-            .getOrNull()
 }
 
 internal fun transformXml(document: Document, path: Path) {

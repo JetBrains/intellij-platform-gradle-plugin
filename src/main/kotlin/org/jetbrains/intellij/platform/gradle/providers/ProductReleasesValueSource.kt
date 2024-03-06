@@ -69,9 +69,15 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val channels: ListProperty<Channel>
     }
 
+    private val log = Logger(javaClass)
+
     override fun obtain(): List<String>? = with(parameters) {
         val jetbrainsIdesReleases = jetbrainsIdes.orNull
-            ?.let { XmlExtractor<JetBrainsIdesReleases>().fetch(it.asPath) }
+            ?.let {
+                runCatching { XmlExtractor<JetBrainsIdesReleases>().unmarshal(it.asPath) }
+                    .onFailure { log.warn("Failed to get products releases list: ${it.message}", it) }
+                    .getOrNull()
+            }
             .or { JetBrainsIdesReleases() }
             .let {
                 sequence {
@@ -107,7 +113,11 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .toList()
 
         val androidStudioReleases = androidStudio.orNull
-            ?.let { XmlExtractor<AndroidStudioReleases>().fetch(it.asPath) }
+            ?.let {
+                runCatching { XmlExtractor<AndroidStudioReleases>().unmarshal(it.asPath) }
+                    .onFailure { log.warn("Failed to get products releases list: ${it.message}", it) }
+                    .getOrNull()
+            }
             .or { AndroidStudioReleases() }
             .items.mapNotNull { item ->
                 val channel = runCatching { Channel.valueOf(item.channel.uppercase()) }.getOrNull() ?: return@mapNotNull null
@@ -156,7 +166,7 @@ fun ProductReleasesValueSource(
     extensionProvider: Provider<IntelliJPlatformExtension>,
     configure: FilterParameters.() -> Unit = {},
 ) = providers.of(ProductReleasesValueSource::class.java) {
-    val log = Logger(ProductReleasesValueSource::class.java)
+    val log = Logger(javaClass)
 
     // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
     fun String.resolve() = resources.text

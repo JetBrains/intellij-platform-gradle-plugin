@@ -19,7 +19,7 @@ abstract class PathResolver(
     protected val subject: String,
 ) : Resolver<Path> {
 
-    private val log = Logger(this::class.java)
+    private val log = Logger(javaClass)
 
     /**
      * A sequence of possible locations of the [Path] we're looking for.
