@@ -10,18 +10,18 @@ import kotlin.test.assertNotNull
 
 class LatestVersionResolverTest : IntelliJPluginTestBase() {
 
-    private val url = resourceUrl("resolvers/latestVersion.xml")
+    private val url = resourceUrl("resolvers/latestVersion.xml").run {
+        assertNotNull(this)
+    }
 
     @Test
     fun `match latest version`() {
-        assertNotNull(url)
+        val resolvedVersion = createResolver().resolve()
 
-        val version = "0.1.24".toVersion()
-        val resolver = object : LatestVersionResolver("test", url) {
-            override fun resolve() = fromMaven()
-        }
-        val resolvedVersion = resolver.resolve()
+        assertEquals("0.1.24".toVersion(), resolvedVersion)
+    }
 
-        assertEquals(version, resolvedVersion)
+    private fun createResolver() = object : LatestVersionResolver("test", url) {
+        override fun resolve() = fromMaven()
     }
 }
