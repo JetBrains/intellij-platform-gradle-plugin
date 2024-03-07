@@ -37,7 +37,7 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
     @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
-    override fun transform(outputs: TransformOutputs) {
+    override fun transform(outputs: TransformOutputs) = runLogging {
         val input = inputArtifact.asPath
 
         if (input.name.startsWith(JETBRAINS_MARKETPLACE_MAVEN_GROUP)) {

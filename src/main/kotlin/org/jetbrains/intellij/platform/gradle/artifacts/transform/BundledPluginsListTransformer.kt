@@ -28,7 +28,10 @@ import org.jetbrains.intellij.platform.gradle.models.BundledPlugins
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.absolutePathString
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
 
 /**
  * Resolves bundled plugins from the IntelliJ Platform dependency.
@@ -48,7 +51,7 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
 
     private val log = Logger(javaClass)
 
-    override fun transform(outputs: TransformOutputs) {
+    override fun transform(outputs: TransformOutputs) = runLogging {
         val input = inputArtifact.asPath
         val json = Json { ignoreUnknownKeys = true }
         val data = input.resolve("plugins")

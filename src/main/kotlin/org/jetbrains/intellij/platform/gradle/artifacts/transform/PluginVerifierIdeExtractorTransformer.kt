@@ -46,7 +46,7 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
     @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
-    override fun transform(outputs: TransformOutputs) {
+    override fun transform(outputs: TransformOutputs) = runLogging {
         val path = inputArtifact.asPath
         val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
         val (groupId, artifactId, version) = path.absolutePathString().split(separator).dropLast(2).takeLast(3)
@@ -54,7 +54,7 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
 
         val type = IntelliJPlatformType.values().find {
             it.binary?.let { it.groupId == groupId && it.artifactId == artifactId } == true
-        } ?: return
+        } ?: return@runLogging
 
         val targetDirectory = parameters.downloadDirectory.dir("$type-$version").asPath
         outputs.file("path.txt").writeText(targetDirectory.absolutePathString())

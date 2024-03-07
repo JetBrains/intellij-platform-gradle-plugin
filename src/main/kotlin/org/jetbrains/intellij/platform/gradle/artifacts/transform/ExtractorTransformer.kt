@@ -50,7 +50,7 @@ abstract class ExtractorTransformer @Inject constructor(
     @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
-    override fun transform(outputs: TransformOutputs) {
+    override fun transform(outputs: TransformOutputs) = runLogging {
         val path = inputArtifact.asPath
         val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
         val (groupId, artifactId, version) = path.absolutePathString().split(separator).dropLast(2).takeLast(3)
@@ -78,7 +78,7 @@ abstract class ExtractorTransformer @Inject constructor(
         )
             .firstNotNullOfOrNull { it() }
             ?.let { outputs.dir(it) }
-            ?: return
+            ?: return@runLogging
 
         when (extension) {
             ".zip", ".sit" -> {
