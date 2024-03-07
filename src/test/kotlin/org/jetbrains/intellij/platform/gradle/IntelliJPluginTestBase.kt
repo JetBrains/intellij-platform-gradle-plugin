@@ -239,15 +239,15 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         .map { it.relativeTo(directory).invariantSeparatorsPathString }
         .toSet()
 
-    protected fun resource(path: String) = path.let {
-        javaClass.classLoader.getResource(it)?.let { url ->
-            Paths.get(url.toURI()).invariantSeparatorsPathString
-        }
+    protected fun resourceUrl(path: String) = javaClass.classLoader.getResource(path)
+
+    protected fun resource(path: String) = resourceUrl(path)?.let { url ->
+        Paths.get(url.toURI()).invariantSeparatorsPathString
     }
 
     protected fun resourceContent(path: String) = resource(path)?.let { Path(it).readText() }
 
-    // Methods can be simplified, when following tickets will be handled:
+    // Methods can be simplified when the following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
     fun Path.xml(@Language("XML") content: String) = append(content)

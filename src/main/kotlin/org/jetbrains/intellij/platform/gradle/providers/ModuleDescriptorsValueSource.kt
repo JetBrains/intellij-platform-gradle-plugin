@@ -10,6 +10,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectIntelli
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.ModuleDescriptor
+import org.jetbrains.intellij.platform.gradle.models.decode
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -51,7 +52,8 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             .entries()
             .asSequence()
             .filter { it.name.endsWith(".xml") }
-            .map { XML.decodeFromString(ModuleDescriptor.serializer(), jarFile.getInputStream(it).bufferedReader().use { it.readText() }) }
+            .map { jarFile.getInputStream(it) }
+            .mapNotNull { XML.decode<ModuleDescriptor>(it) }
             .map { it.key to Coordinates(it.groupId, it.artifactId) }
             .groupBy(keySelector = { it.first }, valueTransform = { it.second })
             .filterKeys { collectedJars.contains(it) }

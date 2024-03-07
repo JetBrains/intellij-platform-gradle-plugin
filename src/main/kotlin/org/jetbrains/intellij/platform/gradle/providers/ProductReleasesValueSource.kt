@@ -15,6 +15,7 @@ import org.jetbrains.intellij.platform.gradle.models.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradle.models.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
+import org.jetbrains.intellij.platform.gradle.models.decode
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
 import org.jetbrains.intellij.platform.gradle.tasks.PrintProductsReleasesTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
@@ -23,7 +24,6 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
-import kotlin.io.path.readText
 
 /**
  * Provides a complete list of binary IntelliJ Platform product releases matching the given [FilterParameters] criteria.
@@ -80,7 +80,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
     override fun obtain(): List<String>? = with(parameters) {
         val jetbrainsIdesReleases = jetbrainsIdes.orNull
             ?.let {
-                runCatching { XML.decodeFromString(JetBrainsIdesReleases.serializer(), it.asPath.readText()) }
+                runCatching { XML.decode<JetBrainsIdesReleases>(it.asPath) }
                     .onFailure { log.warn("Failed to get products releases list: ${it.message}", it) }
                     .getOrNull()
             }
@@ -120,7 +120,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
 
         val androidStudioReleases = androidStudio.orNull
             ?.let {
-                runCatching { XML.decodeFromString(AndroidStudioReleases.serializer(), it.asPath.readText()) }
+                runCatching { XML.decode<AndroidStudioReleases>(it.asPath) }
                     .onFailure { log.warn("Failed to get products releases list: ${it.message}", it) }
                     .getOrNull()
             }
@@ -217,7 +217,7 @@ data class Data(
 ) {
     @Serializable
     data class Item(
-        val name: String
+        val name: String,
     )
 }
 

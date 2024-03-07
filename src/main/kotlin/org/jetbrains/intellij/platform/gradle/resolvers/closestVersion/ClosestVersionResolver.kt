@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.resolvers.closestVersion
 import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.models.MavenMetadata
+import org.jetbrains.intellij.platform.gradle.models.decode
 import org.jetbrains.intellij.platform.gradle.resolvers.Resolver
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.net.URL
@@ -17,7 +18,7 @@ import java.net.URL
  */
 abstract class ClosestVersionResolver(
     protected val subject: String,
-    protected val url: String,
+    protected val url: URL,
 ) : Resolver<Version> {
 
     private val log = Logger(javaClass)
@@ -30,14 +31,12 @@ abstract class ClosestVersionResolver(
     @Throws(GradleException::class)
     protected fun inMaven(version: Version): Version {
         log.debug(message = "Resolving the $subject version closest to $version")
-        return URL(url).openStream().use { inputStream ->
-            XML.decodeFromString(MavenMetadata.serializer(), inputStream.bufferedReader().use { it.readText() })
-                .versioning
-                ?.versions
-                .throwIfNull { GradleException("Cannot resolve the $subject version closest to $version") }
-                .map { it.toVersion() }
-                .filter { it <= version }
-                .maxOf { it }
-        }
+        return XML.decode<MavenMetadata>(url)
+            ?.versioning
+            ?.versions
+            .throwIfNull { GradleException("Cannot resolve the $subject version closest to $version") }
+            .map { it.toVersion() }
+            .filter { it <= version }
+            .maxOf { it }
     }
 }
