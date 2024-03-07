@@ -6,6 +6,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 class ClosestVersionResolverTest : IntelliJPluginTestBase() {
@@ -13,7 +14,7 @@ class ClosestVersionResolverTest : IntelliJPluginTestBase() {
     private val url = resourceUrl("resolvers/closestVersion.xml")
 
     @Test
-    fun `match exact version if present`() {
+    fun `match exact version`() {
         assertNotNull(url)
 
         val version = "0.1.8".toVersion()
@@ -23,5 +24,19 @@ class ClosestVersionResolverTest : IntelliJPluginTestBase() {
         val resolvedVersion = resolver.resolve()
 
         assertEquals(version, resolvedVersion)
+    }
+
+    @Test
+    fun `match closest version`() {
+        assertNotNull(url)
+
+        val version = "0.1.22".toVersion()
+        val resolver = object : ClosestVersionResolver("test", url) {
+            override fun resolve() = inMaven(version)
+        }
+        val resolvedVersion = resolver.resolve()
+
+        assertNotEquals(version, resolvedVersion)
+        assertEquals("0.1.21".toVersion(), resolvedVersion)
     }
 }
