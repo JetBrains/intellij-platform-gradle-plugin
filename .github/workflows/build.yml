@@ -9,10 +9,11 @@ on:
     paths-ignore: [ '**.md', '.teamcity/**' ]
 
 
+# TODO disabled for now
 # This allows a subsequently queued workflow run to interrupt previous runs
-concurrency:
-  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
-  cancel-in-progress: true
+#concurrency:
+#  group: '${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}'
+#  cancel-in-progress: true
 
 jobs:
 
