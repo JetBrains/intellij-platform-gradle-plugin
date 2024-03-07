@@ -10,6 +10,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.LOG_PREFIX
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
 import kotlin.io.path.*
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -19,7 +20,8 @@ abstract class IntelliJPlatformTestBase {
     var debugEnabled = !(System.getenv("CI") ?: "false").toBoolean()
     val gradleDefault = System.getProperty("test.gradle.default")
     val gradleScan = System.getProperty("test.gradle.scan").toBoolean()
-    val gradleArguments = System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
+    val gradleArguments =
+        System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
     val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
     val gradleHome = Path(System.getProperty("test.gradle.home"))
@@ -30,12 +32,18 @@ abstract class IntelliJPlatformTestBase {
     val intellijPlatformVersion = System.getProperty("test.intellijPlatform.version").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellijPlatform.version' isn't provided")
 
-    var dir = createTempDirectory("tmp")
+    lateinit var dir: Path
 
     @BeforeTest
     open fun setup() {
         dir = createTempDirectory("tmp")
         println("Build directory: $dir")
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    @AfterTest
+    open fun tearDown() {
+        dir.deleteRecursively()
     }
 
     protected fun build(
