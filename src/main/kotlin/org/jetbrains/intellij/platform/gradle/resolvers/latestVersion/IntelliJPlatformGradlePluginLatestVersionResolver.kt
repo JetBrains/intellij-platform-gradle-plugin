@@ -4,10 +4,11 @@ package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
 
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import java.net.URL
 
 class IntelliJPlatformGradlePluginLatestVersionResolver : LatestVersionResolver(
     subject = Constants.PLUGIN_NAME,
-    url = Locations.GITHUB_REPOSITORY,
+    url = URL(Locations.GITHUB_REPOSITORY),
 ) {
 
     // TODO: use when 2.0 published to GPP

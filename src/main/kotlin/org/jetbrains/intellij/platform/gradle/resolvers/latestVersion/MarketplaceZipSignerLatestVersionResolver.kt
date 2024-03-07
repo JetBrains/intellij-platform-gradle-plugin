@@ -3,10 +3,11 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
 
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import java.net.URL
 
 class MarketplaceZipSignerLatestVersionResolver : LatestVersionResolver(
     subject = "Marketplace ZIP Signer",
-    url = "${Locations.MAVEN_REPOSITORY}/org/jetbrains/marketplace-zip-signer/maven-metadata.xml",
+    url = URL("${Locations.MAVEN_REPOSITORY}/org/jetbrains/marketplace-zip-signer/maven-metadata.xml"),
 ) {
 
     override fun resolve() = fromMaven()

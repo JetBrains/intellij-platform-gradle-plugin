@@ -3,10 +3,11 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
 
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import java.net.URL
 
 class IntelliJPluginVerifierLatestVersionResolver : LatestVersionResolver(
     subject = "IntelliJ Plugin Verifier",
-    url = "${Locations.MAVEN_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml",
+    url = URL("${Locations.MAVEN_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"),
 ) {
 
     override fun resolve() = fromMaven()

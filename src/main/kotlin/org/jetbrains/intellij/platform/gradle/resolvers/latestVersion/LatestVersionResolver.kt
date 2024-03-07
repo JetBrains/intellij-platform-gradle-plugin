@@ -21,7 +21,7 @@ import java.net.URL
  */
 abstract class LatestVersionResolver(
     protected val subject: String,
-    protected val url: String,
+    protected val url: URL,
 ) : Resolver<Version> {
 
     private val log: Logger
