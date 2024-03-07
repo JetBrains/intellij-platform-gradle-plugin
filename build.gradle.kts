@@ -88,30 +88,7 @@ tasks {
     }
 
     test {
-        val testGradleHome = properties("testGradleUserHome")
-            .map { File(it) }
-            .getOrElse(
-                layout.buildDirectory.asFile.map { it.resolve("testGradleHome") }.get()
-            )
-
-        systemProperties["test.gradle.home"] = testGradleHome
-        systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
-        systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
-        systemProperties["test.gradle.default"] = properties("gradleVersion").get()
-        systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
-        systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
-        systemProperties["test.intellijPlatform.type"] = properties("testIntellijPlatformType").get()
-        systemProperties["test.intellijPlatform.version"] = properties("testIntellijPlatformVersion").get()
-        systemProperties["test.ci"] = environment("CI").orElse("false")
-        systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
-        systemProperties["plugins.repository"] = properties("pluginsRepository").get()
-        outputs.dir(testGradleHome)
-
-// Verbose tests output used for debugging tasks:
-//        testLogging {
-//            outputs.upToDateWhen { false }
-//            showStandardStreams = true
-//        }
+        configureTests()
     }
 
     jar {
@@ -156,30 +133,49 @@ testing {
             targets {
                 all {
                     testTask.configure {
-                        val testGradleHome = properties("testGradleUserHome")
-                            .map { File(it) }
-                            .getOrElse(
-                                layout.buildDirectory.asFile
-                                    .map { it.resolve("testGradleHome") }
-                                    .get()
-                            )
-
-                        systemProperties["test.gradle.home"] = testGradleHome
-                        systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
-                        systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
-                        systemProperties["test.gradle.default"] = properties("gradleVersion").get()
-                        systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
-                        systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
-                        systemProperties["test.intellijPlatform.type"] = properties("testIntellijPlatformType").get()
-                        systemProperties["test.intellijPlatform.version"] = properties("testIntellijPlatformVersion").get()
-                        systemProperties["test.ci"] = environment("CI").orElse("false")
-                        systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
-                        systemProperties["plugins.repository"] = properties("pluginsRepository").get()
+                        configureTests()
                     }
                 }
             }
         }
     }
+}
+
+fun Test.configureTests() {
+    val testGradleHome = properties("testGradleUserHome")
+        .map { File(it) }
+        .getOrElse(
+            layout.buildDirectory.asFile
+                .map { it.resolve("testGradleHome") }
+                .get()
+        )
+
+    systemProperties["test.gradle.home"] = testGradleHome
+    systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
+    systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
+    systemProperties["test.gradle.default"] = properties("gradleVersion").get()
+    systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
+    systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
+    systemProperties["test.intellijPlatform.type"] = properties("testIntellijPlatformType").get()
+    systemProperties["test.intellijPlatform.version"] = properties("testIntellijPlatformVersion").get()
+    systemProperties["test.ci"] = environment("CI").orElse("false")
+    systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
+    systemProperties["plugins.repository"] = properties("pluginsRepository").get()
+
+    jvmArgs(
+        "--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
+        "--add-opens=java.base/java.net=ALL-UNNAMED",
+    )
+
+    // Verbose tests output used for debugging tasks:
+    //   testLogging {
+    //       outputs.upToDateWhen { false }
+    //       showStandardStreams = true
+    //   }
+
+    outputs.dir(testGradleHome)
 }
 
 val dokkaHtml by tasks.existing(DokkaTask::class)
