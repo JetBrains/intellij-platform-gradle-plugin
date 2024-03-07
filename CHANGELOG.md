@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Fix for: `coroutinesJavaAgentPath` specifies file `.../build/tmp/initializeIntelliJPlugin/coroutines-javaagent.jar` which doesn't exist
+
 ## [1.17.2] - 2024-02-20
 
 ### Added
