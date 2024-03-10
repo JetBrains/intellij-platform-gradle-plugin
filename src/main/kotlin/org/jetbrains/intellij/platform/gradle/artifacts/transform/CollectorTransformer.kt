@@ -13,7 +13,6 @@ import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
@@ -55,24 +54,25 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
     }
 }
 
-internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatformPath: Path): List<Path> {
-    val os = with(OperatingSystem.current()) {
-        when {
-            isLinux -> ProductInfo.Launch.OS.Linux
-            isWindows -> ProductInfo.Launch.OS.Windows
-            isMacOsX -> ProductInfo.Launch.OS.macOS
-            else -> ProductInfo.Launch.OS.Linux
-        }
-    }
-
+internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatformPath: Path): Set<Path> {
     return productInfo.launch
-        .filter { it.os == os }
+        .filter { it.os == ProductInfo.Launch.OS.current }
         .flatMap { it.bootClassPathJarNames }
+        .asSequence()
+        .map { intellijPlatformPath.resolve("lib/$it") }
+        .mapNotNull { it.takeIf { it.exists() } }
         .toSet()
-        .mapNotNull { name ->
-            intellijPlatformPath.resolve("lib/$name").takeIf { it.exists() }
-        }
 }
+
+internal fun collectBundledPluginsJars(intellijPlatformPath: Path) =
+    intellijPlatformPath
+        .resolve("plugins")
+        .listDirectoryEntries()
+        .asSequence()
+        .map { it.resolve("lib") }
+        .mapNotNull { it.takeIf { it.exists() } }
+        .flatMap { it.listDirectoryEntries("*.jar") }
+        .toSet()
 
 internal fun DependencyHandler.applyCollectorTransformer(
     compileClasspathConfiguration: Configuration,

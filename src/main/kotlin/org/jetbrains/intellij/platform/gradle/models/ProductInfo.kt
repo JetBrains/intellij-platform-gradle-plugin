@@ -12,6 +12,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
+import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 import kotlin.io.path.readText
@@ -80,7 +81,20 @@ data class ProductInfo(
          */
         @Suppress("EnumEntryName")
         enum class OS {
-            Linux, Windows, macOS
+            Linux, Windows, macOS;
+
+            companion object {
+                fun from(os: OperatingSystem) = with(os) {
+                    when {
+                        isLinux -> ProductInfo.Launch.OS.Linux
+                        isWindows -> ProductInfo.Launch.OS.Windows
+                        isMacOsX -> ProductInfo.Launch.OS.macOS
+                        else -> ProductInfo.Launch.OS.Linux
+                    }
+                }
+
+                val current by lazy { from(OperatingSystem.current()) }
+            }
         }
     }
 
@@ -122,7 +136,8 @@ fun ProductInfo.validateSupportedVersion() {
  * @throws GradleException If the specified architecture is not supported.
  * @throws GradleException If the launch information for the current OS and architecture is not found.
  */
-internal fun ProductInfo.launchFor(architecture: String, os: OperatingSystem = OperatingSystem.current()): ProductInfo.Launch = with(os) {
+@Throws(GradleException::class)
+internal fun ProductInfo.launchFor(architecture: String, os: OperatingSystem = OperatingSystem.current()): ProductInfo.Launch {
     val availableArchitectures = launch.mapNotNull { it.arch }.toSet()
     val arch = with(availableArchitectures) {
         when {
@@ -133,16 +148,10 @@ internal fun ProductInfo.launchFor(architecture: String, os: OperatingSystem = O
         }
     }
 
-    launch.find {
-        when {
-            isLinux -> ProductInfo.Launch.OS.Linux
-            isWindows -> ProductInfo.Launch.OS.Windows
-            isMacOsX -> ProductInfo.Launch.OS.macOS
-            else -> ProductInfo.Launch.OS.Linux
-        } == it.os && arch == it.arch
-    } ?: throw GradleException("Could not find launch information for the current OS: $name ($arch)")
-}.run {
-    copy(additionalJvmArguments = additionalJvmArguments.map { it.trim('"') })
+    return launch
+        .find { ProductInfo.Launch.OS.current == it.os && arch == it.arch }
+        .throwIfNull { GradleException("Could not find launch information for the current OS: $name ($arch)") }
+        .run { copy(additionalJvmArguments = additionalJvmArguments.map { it.trim('"') }) }
 }
 
 /**
