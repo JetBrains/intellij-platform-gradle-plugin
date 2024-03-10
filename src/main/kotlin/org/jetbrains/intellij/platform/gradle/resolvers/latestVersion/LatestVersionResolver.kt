@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
 
-import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.models.MavenMetadata
 import org.jetbrains.intellij.platform.gradle.models.decode
@@ -35,7 +34,7 @@ abstract class LatestVersionResolver(
     @Throws(GradleException::class)
     protected fun fromMaven(): Version {
         log.debug(message = "Resolving the latest '$subject' version from: $url")
-        return XML.decode<MavenMetadata>(url)
+        return decode<MavenMetadata>(url)
             ?.versioning
             ?.latest
             ?.toVersion()

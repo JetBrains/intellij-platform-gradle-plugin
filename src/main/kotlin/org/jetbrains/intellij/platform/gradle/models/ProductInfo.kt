@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.models
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
@@ -15,7 +14,6 @@ import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
-import kotlin.io.path.readText
 
 /**
  * Represents information about the IntelliJ Platform product.
@@ -155,20 +153,15 @@ internal fun ProductInfo.launchFor(architecture: String, os: OperatingSystem = O
 }
 
 /**
- * JSON object used for parsing and serializing JSON data.
- * The `ignoreUnknownKeys` property is set to `true` to ignore unknown keys during deserialization.
- */
-private val json = Json { ignoreUnknownKeys = true }
-
-/**
  * Retrieves the [ProductInfo] for the IntelliJ Platform from the root directory.
  *
  * @receiver The [Path] representing the IntelliJ Platform root directory.
  * @return The [ProductInfo] object containing the product information.
  */
-fun Path.productInfo() = json.decodeFromString<ProductInfo>(
-    ProductInfoPathResolver(this).resolve().readText()
-)
+fun Path.productInfo() = ProductInfoPathResolver(this)
+    .resolve()
+    .let { decode<ProductInfo>(it) }
+    .throwIfNull { GradleException("Could not find product info for: $this") }
 
 /**
  * Retrieves the [ProductInfo] for the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.

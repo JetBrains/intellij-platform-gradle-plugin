@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.providers
 
 import kotlinx.serialization.Serializable
-import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.*
@@ -79,11 +78,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
 
     override fun obtain(): List<String>? = with(parameters) {
         val jetbrainsIdesReleases = jetbrainsIdes.orNull
-            ?.let {
-                runCatching { XML.decode<JetBrainsIdesReleases>(it.asPath) }
-                    .onFailure { log.warn("Failed to get products releases list: ${it.message}", it) }
-                    .getOrNull()
-            }
+            ?.let { decode<JetBrainsIdesReleases>(it.asPath) }
             ?.let {
                 sequence {
                     it.products.forEach { product ->
@@ -119,11 +114,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .toList()
 
         val androidStudioReleases = androidStudio.orNull
-            ?.let {
-                runCatching { XML.decode<AndroidStudioReleases>(it.asPath) }
-                    .onFailure { log.warn("Failed to get products releases list: ${it.message}", it) }
-                    .getOrNull()
-            }
+            ?.let { decode<AndroidStudioReleases>(it.asPath) }
             ?.items
             ?.mapNotNull { item ->
                 val channel = runCatching { Channel.valueOf(item.channel.uppercase()) }.getOrNull() ?: return@mapNotNull null

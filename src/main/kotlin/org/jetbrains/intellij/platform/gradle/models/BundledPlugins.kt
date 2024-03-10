@@ -3,12 +3,11 @@
 package org.jetbrains.intellij.platform.gradle.models
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import org.gradle.api.GradleException
+import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.name
-import kotlin.io.path.readText
 
 @Serializable
 data class BundledPlugins(
@@ -29,5 +28,6 @@ internal fun Path.resolveBundledPluginsPath(name: String = "bundled-plugins.json
         .find { it.name == name && it.exists() }
         ?: throw GradleException("Could not resolve '$name' file in: $this")
 
-private val json = Json { ignoreUnknownKeys = true }
-fun Path.bundledPlugins() = json.decodeFromString<BundledPlugins>(readText())
+@Throws(GradleException::class)
+fun Path.bundledPlugins() = decode<BundledPlugins>(this)
+    .throwIfNull { GradleException("Could not find bundled plugins for: $this") }

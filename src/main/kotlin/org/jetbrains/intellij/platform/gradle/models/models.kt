@@ -4,6 +4,9 @@ package org.jetbrains.intellij.platform.gradle.models
 
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
+import nl.adaptivity.xmlutil.serialization.XML
+import org.gradle.api.GradleException
 import org.jdom2.Document
 import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
@@ -16,33 +19,43 @@ import java.nio.file.Path
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
-internal fun transformXml(document: Document, path: Path) {
-    val xmlOutput = XMLOutputter()
-    xmlOutput.format.apply {
-        indent = "  "
-        omitDeclaration = true
-        textMode = Format.TextMode.TRIM
-    }
+private val json = Json { ignoreUnknownKeys = true }
+private val xml = XML
 
-    StringWriter().use {
-        xmlOutput.output(document, it)
-        path.writeText(it.toString())
+/**
+ * @throws GradleException
+ */
+@Throws(GradleException::class)
+private inline fun <reified T> obtainStringFormat(): StringFormat {
+    return when (T::class) {
+        AndroidStudioReleases::class,
+        IvyModule::class,
+        JetBrainsIdesReleases::class,
+        MavenMetadata::class,
+        ModuleDescriptor::class,
+        -> xml
+
+        BundledPlugins::class,
+        ProductInfo::class,
+        -> json
+
+        else -> throw GradleException("Unknown type: ${T::class.java.name}")
     }
 }
 
-internal inline fun <reified T> StringFormat.decode(url: URL) = decode<T>(url.openStream())
+internal inline fun <reified T> decode(url: URL) = decode<T>(url.openStream())
 
-internal inline fun <reified T> StringFormat.decode(inputStream: InputStream) = decode<T>(inputStream.bufferedReader().use { it.readText() })
+internal inline fun <reified T> decode(path: Path): T? = decode<T>(path.readText())
 
-internal inline fun <reified T> StringFormat.decode(path: Path) = decode<T>(path.readText())
+internal inline fun <reified T> decode(inputStream: InputStream) = decode<T>(inputStream.bufferedReader().use { it.readText() })
 
-internal inline fun <reified T> StringFormat.decode(input: String) =
-    runCatching { decodeFromString<T>(input) }
+internal inline fun <reified T> decode(input: String, stringFormat: StringFormat = obtainStringFormat<T>()) =
+    runCatching { stringFormat.decodeFromString<T>(input) }
         .onFailure { exception ->
             Logger(T::class.java).error(
                 """
-                Cannot parse the provided XML input as ${T::class.java.name}.
-                Please file an issue attaching the XML content and exception message to: $GITHUB_REPOSITORY/issues/new
+                Cannot parse the provided input as ${T::class.java.name}.
+                Please file an issue attaching the content and exception message to: $GITHUB_REPOSITORY/issues/new
                 
                 ## Model:
                 ```
@@ -62,3 +75,17 @@ internal inline fun <reified T> StringFormat.decode(input: String) =
             )
         }
         .getOrNull()
+
+internal fun transformXml(document: Document, path: Path) {
+    val xmlOutput = XMLOutputter()
+    xmlOutput.format.apply {
+        indent = "  "
+        omitDeclaration = true
+        textMode = Format.TextMode.TRIM
+    }
+
+    StringWriter().use {
+        xmlOutput.output(document, it)
+        path.writeText(it.toString())
+    }
+}

@@ -2,10 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.providers
 
-import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectBundledPluginsJars
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectIntelliJPlatformJars
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
@@ -40,9 +40,8 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
         val productInfo = parameters.intellijPlatformPath.asPath.productInfo()
         val platformPath = parameters.intellijPlatformPath.asPath
 
-        val collectedJars = collectIntelliJPlatformJars(productInfo, platformPath).map {
-            platformPath.relativize(it).pathString
-        }
+        val collectedJars = (collectIntelliJPlatformJars(productInfo, platformPath) + collectBundledPluginsJars(platformPath) + setOf(platformPath.resolve("lib/testFramework.jar")))
+            .map { platformPath.relativize(it).pathString }
 
         val resolver = ModuleDescriptorsPathResolver(platformPath, parameters.intellijPlatformCache.asPath)
         val moduleDescriptorsFile = resolver.resolve()
@@ -53,7 +52,7 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             .asSequence()
             .filter { it.name.endsWith(".xml") }
             .map { jarFile.getInputStream(it) }
-            .mapNotNull { XML.decode<ModuleDescriptor>(it) }
+            .mapNotNull { decode<ModuleDescriptor>(it) }
             .map { it.key to Coordinates(it.groupId, it.artifactId) }
             .groupBy(keySelector = { it.first }, valueTransform = { it.second })
             .filterKeys { collectedJars.contains(it) }

@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.closestVersion
 
-import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.models.MavenMetadata
 import org.jetbrains.intellij.platform.gradle.models.decode
@@ -31,7 +30,7 @@ abstract class ClosestVersionResolver(
     @Throws(GradleException::class)
     protected fun inMaven(version: Version): Version {
         log.debug(message = "Resolving the $subject version closest to $version")
-        return XML.decode<MavenMetadata>(url)
+        return decode<MavenMetadata>(url)
             ?.versioning
             ?.versions
             .throwIfNull { GradleException("Cannot resolve the $subject version closest to $version") }
