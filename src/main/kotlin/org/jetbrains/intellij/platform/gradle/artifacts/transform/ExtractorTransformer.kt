@@ -21,6 +21,7 @@ import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File.separator
 import javax.inject.Inject
@@ -54,12 +55,13 @@ abstract class ExtractorTransformer @Inject constructor(
         val path = inputArtifact.asPath
         val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
         val (groupId, artifactId, version) = path.absolutePathString().split(separator).dropLast(2).takeLast(3)
+        val coordinates = Coordinates(groupId, artifactId)
         // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail
 
         val targetDirectory = listOf(
             {
                 IntelliJPlatformType.values()
-                    .find { groupId == it.dependency.groupId && artifactId == it.dependency.artifactId }
+                    .find { it.dependency == coordinates }
                     ?.let { "$it-$version" }
             },
             {

@@ -17,6 +17,7 @@ import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File.separator
 import javax.inject.Inject
@@ -50,10 +51,11 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
         val path = inputArtifact.asPath
         val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
         val (groupId, artifactId, version) = path.absolutePathString().split(separator).dropLast(2).takeLast(3)
+        val coordinates = Coordinates(groupId, artifactId)
         // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail
 
-        val type = IntelliJPlatformType.values().find {
-            it.binary?.let { it.groupId == groupId && it.artifactId == artifactId } == true
+        val type = IntelliJPlatformType.values().find { type ->
+            type.binary?.let { it == coordinates } == true
         } ?: return@runLogging
 
         val targetDirectory = parameters.downloadDirectory.dir("$type-$version").asPath

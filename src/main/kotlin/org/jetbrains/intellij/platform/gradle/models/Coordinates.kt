@@ -2,4 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.models
 
-data class Coordinates(val groupId: String, val artifactId: String)
+data class Coordinates(val groupId: String, val artifactId: String) {
+
+    override fun toString() = "$groupId:$artifactId"
+}
