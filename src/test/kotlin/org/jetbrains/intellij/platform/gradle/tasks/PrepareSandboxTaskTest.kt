@@ -98,27 +98,29 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             collectPaths(sandbox),
         )
 
-        val jar = sandbox.resolve("plugins/myPluginName/lib/projectName-1.0.0.jar").toZip()
-        assertEquals(
-            setOf(
-                "META-INF/",
-                "META-INF/MANIFEST.MF",
-                "App.class",
-                "META-INF/plugin.xml",
-            ),
-            collectPaths(jar),
-        )
+        sandbox.resolve("plugins/myPluginName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+            assertEquals(
+                setOf(
+                    "META-INF/",
+                    "META-INF/MANIFEST.MF",
+                    "App.class",
+                    "META-INF/plugin.xml",
+                ),
+                collectPaths(jar),
+            )
+        }
 
-        val nestedProjectJar = sandbox.resolve("plugins/myNestedPluginName/lib/nestedProject-1.0.0.jar").toZip()
-        assertEquals(
-            setOf(
-                "META-INF/",
-                "META-INF/MANIFEST.MF",
-                "NestedAppFile.class",
-                "META-INF/plugin.xml",
-            ),
-            collectPaths(nestedProjectJar),
-        )
+        sandbox.resolve("plugins/myNestedPluginName/lib/nestedProject-1.0.0.jar").toZip().use { jar ->
+            assertEquals(
+                setOf(
+                    "META-INF/",
+                    "META-INF/MANIFEST.MF",
+                    "NestedAppFile.class",
+                    "META-INF/plugin.xml",
+                ),
+                collectPaths(jar),
+            )
+        }
     }
 
     @Test
@@ -171,27 +173,29 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             collectPaths(sandbox),
         )
 
-        val jar = sandbox.resolve("plugins/myPluginName/lib/projectName-1.0.0.jar").toZip()
-        assertEquals(
-            setOf(
-                "META-INF/",
-                "META-INF/MANIFEST.MF",
-                "App.class",
-                "META-INF/plugin.xml",
-            ),
-            collectPaths(jar),
-        )
+        sandbox.resolve("plugins/myPluginName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+            assertEquals(
+                setOf(
+                    "META-INF/",
+                    "META-INF/MANIFEST.MF",
+                    "App.class",
+                    "META-INF/plugin.xml",
+                ),
+                collectPaths(jar),
+            )
+        }
 
-        val nestedProjectJar = sandbox.resolve("plugins/myNestedPluginName/lib/nestedProject-1.0.0.jar").toZip()
-        assertEquals(
-            setOf(
-                "META-INF/",
-                "META-INF/MANIFEST.MF",
-                "NestedAppFile.class",
-                "META-INF/plugin.xml",
-            ),
-            collectPaths(nestedProjectJar),
-        )
+        sandbox.resolve("plugins/myNestedPluginName/lib/nestedProject-1.0.0.jar").toZip().use { jar ->
+            assertEquals(
+                setOf(
+                    "META-INF/",
+                    "META-INF/MANIFEST.MF",
+                    "NestedAppFile.class",
+                    "META-INF/plugin.xml",
+                ),
+                collectPaths(jar),
+            )
+        }
     }
 
     @Test
@@ -267,31 +271,32 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             collectPaths(sandbox),
         )
 
-        val jar = sandbox.resolve("plugins/projectName/lib/projectName-1.0.0.jar").toZip()
-        assertEquals(
-            setOf(
-                "META-INF/",
-                "META-INF/MANIFEST.MF",
-                "App.class",
-                "META-INF/nonIncluded.xml",
-                "META-INF/other.xml",
-                "META-INF/plugin.xml",
-            ),
-            collectPaths(jar),
-        )
+        sandbox.resolve("plugins/projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+            assertEquals(
+                setOf(
+                    "META-INF/",
+                    "META-INF/MANIFEST.MF",
+                    "App.class",
+                    "META-INF/nonIncluded.xml",
+                    "META-INF/other.xml",
+                    "META-INF/plugin.xml",
+                ),
+                collectPaths(jar),
+            )
 
-        assertZipContent(
-            jar,
-            "META-INF/plugin.xml",
-            """
-            <idea-plugin>
-              <idea-version since-build="223.8836" until-build="223.*" />
-              <version>1.0.0</version>
-              <name>myPluginName</name>
-              <depends config-file="other.xml" />
-            </idea-plugin>
-            """.trimIndent()
-        )
+            assertZipContent(
+                jar,
+                "META-INF/plugin.xml",
+                """
+                <idea-plugin>
+                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <version>1.0.0</version>
+                  <name>myPluginName</name>
+                  <depends config-file="other.xml" />
+                </idea-plugin>
+                """.trimIndent()
+            )
+        }
     }
 
     @Test

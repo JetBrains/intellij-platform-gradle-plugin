@@ -159,10 +159,9 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
             else -> dir
         }
         val file = directory.resolve(split.last())
-        val outputStream = FileOutputStream(file.toFile())
-        val zipOutputStream = ZipOutputStream(outputStream)
-        zipOutputStream.close()
-        outputStream.close()
+        FileOutputStream(file.toFile()).use { outputStream ->
+            ZipOutputStream(outputStream).close()
+        }
         return file
     }
 
@@ -220,8 +219,10 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) = assertEquals(expectedContent, fileText(zip, path))
 
     protected fun ZipFile.extract(path: String) = Files.createTempFile("gradle-test", "").apply {
-        Files.newOutputStream(this, StandardOpenOption.DELETE_ON_CLOSE)
-        Files.copy(getInputStream(getEntry(path)), this, StandardCopyOption.REPLACE_EXISTING)
+        getInputStream(getEntry(path)).use { inputStream ->
+            Files.newOutputStream(this, StandardOpenOption.DELETE_ON_CLOSE)
+            Files.copy(inputStream, this, StandardCopyOption.REPLACE_EXISTING)
+        }
     }
 
     protected fun Path.toZip() = ZipFile(toFile())
