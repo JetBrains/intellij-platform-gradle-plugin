@@ -2,22 +2,15 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption
-import kotlin.io.path.createDirectories
 
 /**
- * Resolves the path to the IntelliJ Plugin Verifier executable.
+ * Resolves the path to the `module-descriptors.jar` file used to exclude the transitive dependencies of IntelliJ Platform dependencies,
+ * such as Test Framework.
  *
- * @property intellijPluginVerifier The [Configurations.INTELLIJ_PLUGIN_VERIFIER] configuration.
- * @property localPath The local path to the IntelliJ Plugin Verifier file.
+ * @property platformPath The path to the currently used IntelliJ Platform.
  */
-class ModuleDescriptorsPathResolver(
-    private val platformPath: Path,
-    private val cacheDirectory: Path,
-) : PathResolver(
+class ModuleDescriptorsPathResolver(private val platformPath: Path) : PathResolver(
     subject = "Module Descriptors",
 ) {
 
@@ -31,28 +24,5 @@ class ModuleDescriptorsPathResolver(
                     .resolve("modules/module-descriptors.jar")
                     .takeIfExists()
             },
-            /**
-             * Resolves the `module-descriptors.jar` file from the IntelliJ Platform cache.
-             */
-            "$subject available in the IntelliJ Platform cache" to {
-                cacheDirectory
-                    .resolve("module-descriptors.jar")
-                    .takeIfExists()
-            },
-            /**
-             * Copies the `module-descriptors.jar` file from resources into the IntelliJ Platform cache and passes its path.
-             */
-            "$subject copied from resources into the IntelliJ Platform cache" to {
-                cacheDirectory
-                    .createDirectories()
-                    .resolve("module-descriptors.jar")
-                    .also { jar ->
-                        javaClass.classLoader
-                            .getResource("module-descriptors.jar")
-                            ?.openStream()
-                            ?.let { Files.copy(it, jar, StandardCopyOption.REPLACE_EXISTING) }
-                    }
-                    .takeIfExists()
-            }
         )
 }

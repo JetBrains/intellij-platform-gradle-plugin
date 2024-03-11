@@ -18,7 +18,7 @@ import java.util.jar.JarFile
 import kotlin.io.path.pathString
 
 /**
- * Obtains the list of coordinates from module descriptors provided with the IntelliJ Platform.
+ * Obtains the list of coordinates from module descriptors provided by the IntelliJ Platform.
  *
  * Such a list is used, i.e., to exclude transitive dependencies of the [IntelliJPlatformDependenciesExtension.testFramework] dependencies.
  */
@@ -29,22 +29,26 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
          * IntelliJ Platform location
          */
         val intellijPlatformPath: DirectoryProperty
-
-        /**
-         * IntelliJ Platform cache directory
-         */
-        val intellijPlatformCache: DirectoryProperty
     }
 
     override fun obtain(): Set<Coordinates> {
         val productInfo = parameters.intellijPlatformPath.asPath.productInfo()
         val platformPath = parameters.intellijPlatformPath.asPath
 
-        val collectedJars = (collectIntelliJPlatformJars(productInfo, platformPath) + collectBundledPluginsJars(platformPath) + setOf(platformPath.resolve("lib/testFramework.jar")))
-            .map { platformPath.relativize(it).pathString }
+        val moduleDescriptorsFile = ModuleDescriptorsPathResolver(platformPath)
+            .runCatching { resolve() }
+            .getOrNull()
 
-        val resolver = ModuleDescriptorsPathResolver(platformPath, parameters.intellijPlatformCache.asPath)
-        val moduleDescriptorsFile = resolver.resolve()
+        // Fallback to the hardcoded transitive dependencies list to be excluded if there's no `modules/module-descriptor.jar` file present to read from.
+        if (moduleDescriptorsFile == null) {
+            return fallbackExclusions + explicitExclusions
+        }
+
+        val collectedJars =
+            collectIntelliJPlatformJars(productInfo, platformPath)
+                .plus(collectBundledPluginsJars(platformPath))
+                .map { platformPath.relativize(it).pathString }
+
         val jarFile = JarFile(moduleDescriptorsFile.toFile())
 
         return jarFile
@@ -59,6 +63,7 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             .values
             .flatten()
             .toSet()
+            .plus(explicitExclusions)
     }
 
     private inline val ModuleDescriptor.key
@@ -81,3 +86,52 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             .replace(Regex("([a-z])([A-Z])"), "$1-$2")
             .lowercase()
 }
+
+private val explicitExclusions = setOf(
+    Coordinates("junit", "junit"),
+    Coordinates("org.jetbrains", "jetCheck"),
+    Coordinates("org.hamcrest", "hamcrest-core"),
+)
+
+private val fallbackExclusions = setOf(
+    // TestFrameworkType.Platform.JUnit4
+    Coordinates("org.jetbrains.kotlin", "kotlin-stdlib"),
+    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm"),
+    Coordinates("org.jetbrains.kotlin", "kotlin-stdlib-jdk8"),
+    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8"),
+    Coordinates("com.jetbrains.intellij.java", "java-resources-en"),
+    Coordinates("com.jetbrains.intellij.java", "java-rt"),
+    Coordinates("com.jetbrains.intellij.platform", "boot"),
+    Coordinates("com.jetbrains.intellij.platform", "code-style-impl"),
+    Coordinates("com.jetbrains.intellij.platform", "core-ui"),
+    Coordinates("com.jetbrains.intellij.platform", "execution-impl"),
+    Coordinates("com.jetbrains.intellij.platform", "ide-impl"),
+    Coordinates("com.jetbrains.intellij.platform", "ide-util-io-impl"),
+    Coordinates("com.jetbrains.intellij.platform", "ide-util-io"),
+    Coordinates("com.jetbrains.intellij.platform", "ide-util-netty"),
+    Coordinates("com.jetbrains.intellij.platform", "images"),
+    Coordinates("com.jetbrains.intellij.platform", "lang-impl"),
+    Coordinates("com.jetbrains.intellij.platform", "lang"),
+    Coordinates("com.jetbrains.intellij.platform", "resources"),
+    Coordinates("com.jetbrains.intellij.platform", "service-container"),
+    Coordinates("com.jetbrains.intellij.platform", "util-class-loader"),
+    Coordinates("com.jetbrains.intellij.platform", "util-jdom"),
+    Coordinates("com.jetbrains.intellij.platform", "workspace-model-jps"),
+    Coordinates("com.jetbrains.intellij.platform", "workspace-model-storage"),
+    Coordinates("com.jetbrains.intellij.regexp", "regexp"),
+    Coordinates("com.jetbrains.intellij.xml", "xml-dom-impl"),
+
+    // TestFrameworkType.Plugin.Java
+    Coordinates("com.jetbrains.intellij.java", "java-compiler-impl"),
+    Coordinates("com.jetbrains.intellij.java", "java-debugger-impl"),
+    Coordinates("com.jetbrains.intellij.java", "java-execution-impl"),
+    Coordinates("com.jetbrains.intellij.java", "java-execution"),
+    Coordinates("com.jetbrains.intellij.java", "java-impl-refactorings"),
+    Coordinates("com.jetbrains.intellij.java", "java-impl"),
+    Coordinates("com.jetbrains.intellij.java", "java-plugin"),
+    Coordinates("com.jetbrains.intellij.java", "java-ui"),
+    Coordinates("com.jetbrains.intellij.java", "java"),
+    Coordinates("com.jetbrains.intellij.platform", "external-system-impl"),
+    Coordinates("com.jetbrains.intellij.platform", "jps-build"),
+    Coordinates("com.jetbrains.intellij.platform", "util"),
+)

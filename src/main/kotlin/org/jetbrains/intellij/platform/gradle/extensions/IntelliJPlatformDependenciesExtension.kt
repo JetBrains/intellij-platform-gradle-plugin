@@ -966,13 +966,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         typeProvider.zip(versionProvider) { type, version ->
             val resolveClosest = BuildFeature.USE_CLOSEST_JAVA_COMPILER_VERSION.getValue(providers).get()
             val platformPath = configurations[Configurations.INTELLIJ_PLATFORM].platformPath().toFile()
-            val intellijPlatformCachePath = providers.intellijPlatformCachePath(rootProjectDirectory).toFile()
             val productInfo = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
 
             val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
                 parameters {
                     intellijPlatformPath = layout.dir(providers.provider { platformPath })
-                    intellijPlatformCache = layout.dir(providers.provider { intellijPlatformCachePath })
                 }
             }
 
