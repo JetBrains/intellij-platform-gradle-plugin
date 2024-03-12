@@ -2,15 +2,87 @@
 
 package org.jetbrains.intellij.platform.gradle.providers
 
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import kotlin.io.path.readLines
 import kotlin.test.Test
-import kotlin.test.assertContains
+import kotlin.test.assertEquals
+
+private const val TASK_NAME = "generateProductReleasesList"
 
 class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
-    fun `list product releases`() {
+    fun `list RELEASE, EAP releases for IC, AS in 223-233 range`() {
+        prepareGradleTask(
+            sinceBuild = "223",
+            untilBuild = "233",
+            types = listOf(
+                IntelliJPlatformType.IntellijIdeaCommunity,
+                IntelliJPlatformType.AndroidStudio,
+            ),
+            channels = listOf(
+                ProductRelease.Channel.RELEASE,
+                ProductRelease.Channel.EAP,
+            )
+        )
+
+        build(TASK_NAME)
+
+        assertEquals(
+            listOf(
+                "IC-2023.2.6",
+                "IC-2023.1.6",
+                "IC-223.8836.26",
+                "AI-2023.2.1.23",
+                "AI-2023.1.1.26",
+                "AI-2022.3.1.18",
+            ),
+            dir.resolve("output.txt").readLines(),
+        )
+    }
+
+    @Test
+    fun `list EAP releases for RR in 232-233 range`() {
+        prepareGradleTask(
+            sinceBuild = "232",
+            untilBuild = "233",
+            types = listOf(
+                IntelliJPlatformType.RustRover,
+            ),
+            channels = listOf(
+                ProductRelease.Channel.EAP,
+            )
+        )
+
+        build(TASK_NAME)
+
+        assertEquals(
+            listOf("RR-232.9921.62"),
+            dir.resolve("output.txt").readLines(),
+        )
+    }
+
+    @Test
+    fun `list no releases for 231-230 range`() {
+        prepareGradleTask(
+            sinceBuild = "231",
+            untilBuild = "230",
+            types = listOf(
+                IntelliJPlatformType.IntellijIdeaCommunity,
+            ),
+            channels = listOf(
+                ProductRelease.Channel.EAP,
+            )
+        )
+
+        build(TASK_NAME)
+
+        assert(dir.resolve("output.txt").readLines().isEmpty())
+    }
+
+    private fun prepareGradleTask(sinceBuild: String, untilBuild: String, types: List<IntelliJPlatformType>, channels: List<ProductRelease.Channel>) {
         buildFile.kotlin(
             """
             tasks {
@@ -20,21 +92,19 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
                         jetbrainsIdes = file("${resource("products-releases/idea-releases-list.xml")}")
                         androidStudio = file("${resource("products-releases/android-studio-releases-list.xml")}")
             
-                        sinceBuild = "223"
-                        untilBuild = "233"
+                        sinceBuild = "$sinceBuild"
+                        untilBuild = "$untilBuild"
             
                         types.addAll(
-                            IntelliJPlatformType.IntellijIdeaCommunity,
-                            IntelliJPlatformType.AndroidStudio,
+                            ${types.joinToString(", ") { "IntelliJPlatformType.fromCode(\"${it.code}\")" }}
                         )
                         channels.addAll(
-                            ProductRelease.Channel.RELEASE,
-                            ProductRelease.Channel.EAP,
+                            ${channels.joinToString(", ") { "ProductRelease.Channel.valueOf(\"${it.name}\")" }}
                         )
                     }
                 }
             
-                val generateProductReleasesList by registering {
+                val $TASK_NAME by registering {
                     doLast {
                         val content = productReleases.get().joinToString(System.lineSeparator())
                         outputFile.writeText(content)
@@ -43,17 +113,5 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
             }
             """.trimIndent()
         )
-
-        build("generateProductReleasesList")
-
-        val outputFile = dir.resolve("output.txt")
-        val content = outputFile.readLines()
-
-        assertContains(content, "IC-2023.2.6")
-        assertContains(content, "IC-2023.1.6")
-        assertContains(content, "IC-223.8836.26")
-        assertContains(content, "AI-2023.2.1.23")
-        assertContains(content, "AI-2023.1.1.26")
-        assertContains(content, "AI-2022.3.1.18")
     }
 }
