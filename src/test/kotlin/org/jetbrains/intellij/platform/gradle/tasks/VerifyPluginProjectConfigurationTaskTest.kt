@@ -249,7 +249,8 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         gradleProperties.properties(
             """
             systemProp.org.gradle.unsafe.kotlin.assignment = true
-            """.trimIndent()
+            """.trimIndent(),
+            override = true,
         )
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
@@ -264,21 +265,27 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
             """
             kotlin.stdlib.default.dependency = true
             systemProp.org.gradle.unsafe.kotlin.assignment = true
-            """.trimIndent()
+            """.trimIndent(),
+            override = true,
         )
 
         build("clean", Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
+            assertContains(
+                "- The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib",
+                output
+            )
         }
 
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false
             systemProp.org.gradle.unsafe.kotlin.assignment = true
-            """.trimIndent()
+            """.trimIndent(),
+            override = true,
         )
 
-        build("clean", Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertNotContains(HEADER, output)
         }
     }

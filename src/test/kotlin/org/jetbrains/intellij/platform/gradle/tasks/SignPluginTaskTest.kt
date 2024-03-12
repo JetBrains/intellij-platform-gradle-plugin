@@ -35,7 +35,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
         )
 
         build(Tasks.SIGN_PLUGIN, "--debug") {
-            val message = "Resolved 'Marketplace ZIP Signer': "
+            val message = "'Marketplace ZIP Signer specified with dependencies' resolved as: "
             val line = output.lines().find { it.contains(message) }
             assertNotNull(line)
 

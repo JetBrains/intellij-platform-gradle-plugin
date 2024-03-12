@@ -29,7 +29,7 @@ class MarketplaceZipSignerPathResolver(
                 ?.asPath
                 ?.takeIfExists()
         },
-        "$subject specified with a dependencies" to {
+        "$subject specified with dependencies" to {
             /**
              * Resolves the Marketplace ZIP Signer CLI tool with the [Configurations.MARKETPLACE_ZIP_SIGNER] configuration.
              */

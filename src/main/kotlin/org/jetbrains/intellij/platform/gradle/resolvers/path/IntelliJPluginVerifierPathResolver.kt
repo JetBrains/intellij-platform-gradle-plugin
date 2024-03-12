@@ -29,7 +29,7 @@ class IntelliJPluginVerifierPathResolver(
                 ?.asPath
                 ?.takeIfExists()
         },
-        "$subject specified with a dependencies" to {
+        "$subject specified with dependencies" to {
             /**
              * Resolves the IntelliJ Plugin Verifier CLI tool with the [Configurations.INTELLIJ_PLUGIN_VERIFIER] configuration.
              */
