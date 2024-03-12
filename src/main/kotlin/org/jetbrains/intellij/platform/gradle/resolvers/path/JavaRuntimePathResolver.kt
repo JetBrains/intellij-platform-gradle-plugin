@@ -47,6 +47,15 @@ class JavaRuntimePathResolver(
                 .ensureExecutableExists()
         },
         /**
+         * The bundled JetBrains Runtime within the current IntelliJ Platform.
+         */
+        "JetBrains Runtime bundled within the IntelliJ Platform" to {
+            intellijPlatform.singleOrNull()
+                ?.toPath()
+                .resolveRuntimeDirectory()
+                .ensureExecutableExists()
+        },
+        /**
          * Java Toolchain if the toolchain vendor matches [JETBRAINS_RUNTIME_VENDOR].
          */
         "JetBrains Runtime specified with Java Toolchain" to {
@@ -58,15 +67,6 @@ class JavaRuntimePathResolver(
                 ?.metadata
                 ?.installationPath
                 ?.asPath
-                .resolveRuntimeDirectory()
-                .ensureExecutableExists()
-        },
-        /**
-         * The bundled JetBrains Runtime within the current IntelliJ Platform.
-         */
-        "JetBrains Runtime bundled within the IntelliJ Platform" to {
-            intellijPlatform.singleOrNull()
-                ?.toPath()
                 .resolveRuntimeDirectory()
                 .ensureExecutableExists()
         },
@@ -115,18 +115,6 @@ class JavaRuntimePathResolver(
             .firstOrNull { it.name.startsWith("jbr") }
             ?.takeIfExists()
             ?: this
-
-//        return with(baseDirectory) {
-//            when {
-//                OperatingSystem.current().isMacOsX -> when {
-//                    endsWith("Contents/Home") -> this
-//                    jbr != null -> jbr.resolve("Contents/Home")
-//                    else -> resolve("jdk/Contents/Home")
-//                }
-//
-//                else -> baseDirectory
-//            }
-//        }.takeIfExists()
 
         return sequenceOf(
             { baseDirectory.resolve("Contents/Home") },
