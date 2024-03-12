@@ -9,7 +9,7 @@ import kotlin.test.Test
 class ExecutableArchValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
-    fun `convert module-descriptors file into a set of coordinates`() {
+    fun `resolve the architecture of the provided JVM`() {
         val executablePath = Jvm.current().javaExecutable
         val currentArch = System.getProperty("os.arch")
 

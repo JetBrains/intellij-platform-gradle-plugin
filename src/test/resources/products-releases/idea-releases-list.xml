@@ -502,20 +502,24 @@
   <product name="Aqua">
     <code>QA</code>
     <channel id="QA-EAP-licensing-EAP" name="Aqua EAP licensing:EAP" status="eap" url="https://www.jetbrains.com/aqua/download/" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="233.11555" version="2023.3 Public Preview" fullNumber="233.11555.14">
+      <build number="233.14475" version="2023.3 Public Preview" fullNumber="233.14475.33">
         <blogPost url="https://blog.jetbrains.com/qa/"/>
         <message><![CDATA[<h1>The new update of Aqua is out!</h1> 
 <p>Aqua is a powerful new IDE for test automation.</p> 
 <ul> 
- <li>Locator completion suggests data-attribute locators first (<a href="https://youtrack.jetbrains.com/issue/AQUA-569">AQUA-569</a>)</li> 
- <li>Role-based locators for Playwright (<a href="https://youtrack.jetbrains.com/issue/AQUA-609">AQUA-609</a>)</li> 
- <li>Playwright tests run by line number and don't use -g in CLI (<a href="https://youtrack.jetbrains.com/issue/AQUA-606">AQUA-606</a>)</li> 
- <li><p>Addresses multiple issues, including:</p> 
+ <li>Cypress Custom Commands support (<a href="https://youtrack.jetbrains.com/issue/AQUA-590">AQUA-590</a>) 
   <ul> 
-   <li>Playwright: Tests not running if the test.describe title contains a variable (<a href="https://youtrack.jetbrains.com/issue/AQUA-492">AQUA-492</a>) </li> 
-   <li>Playwright runner fails with option "All tests" (<a href="https://youtrack.jetbrains.com/issue/AQUA-638">AQUA-638</a>)</li> 
-   <li>Editor locator validator uses trimmed locator (<a href="https://youtrack.jetbrains.com/issue/AQUA-664">AQUA-664</a>)</li> 
+   <li>Command detection</li> 
+   <li>Navigation</li> 
+   <li>Rename refactoring</li> 
+   <li>Generation of TS declaration</li> 
+   <li>Code inspections</li> 
+   <li>Inlay features</li> 
   </ul> </li> 
+ <li>Runners for Playwright tests with fixtures (<a href="https://youtrack.jetbrains.com/issue/AQUA-711">AQUA-711</a>)</li> 
+ <li>Correct validation of <code>page.locator()</code> locator type in Playwright (<a href="https://youtrack.jetbrains.com/issue/AQUA-697">AQUA-697</a>) </li> 
+ <li>Attribute value completion in Selenide calls for Java (<a href="https://youtrack.jetbrains.com/issue/AQUA-297">AQUA-297</a>)</li> 
+ <li>Addressed multiple cosmetic issues, improved user experience</li> 
 </ul>]]></message>
         <button name="Download" url="https://www.jetbrains.com/aqua/download/" download="true"/>
         <button name="More Information" url="https://blog.jetbrains.com/qa/"/>
@@ -566,18 +570,45 @@
   </product>
   <product name="CLion">
     <code>CL</code>
-    <channel id="CL-EAP-licensing-EAP" name="CLion EAP" status="eap" url="https://www.jetbrains.com/clion/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
+    <channel id="CL-EAP-licensing-EAP" name="CLion EAP" status="eap" url="https://www.jetbrains.com/clion/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.14494" version="2024.1 EAP" fullNumber="241.14494.27">
+        <blogPost url="https://blog.jetbrains.com/clion/2024/03/clion-2024-1-eap-5-improved-stl-container-rendering-in-the-debugger-and-vcs-enhancements"/>
+        <message><![CDATA[<h3>A new CLion 2024.1 EAP build is here!</h3> 
+<ul> 
+ <li>We've addressed an issue with CMake reloads stalling when working with the remote host toolchain.</li> 
+ <li>Debugger: 
+  <ul> 
+   <li>CLion now shows the size of STL containers in the <em>Debugger</em> view.</li> 
+   <li>The presentation of <code>std::span</code> and <code>std::optional</code> has been improved.</li> 
+   <li>We've addressed the <em>Null value return for children</em> error that occurred while rendering <code>fs::path</code> values in the <em>Debugger</em> view.</li> 
+  </ul> </li> 
+ <li>The <em>Assembly</em> view is now more accurate for remote toolchains and cases with cross-compilation.</li> 
+ <li>Numerous improvements for VCS support.</li> 
+</ul> 
+<p>For more details, please see the <a href="https://blog.jetbrains.com/clion/2024/03/clion-2024-1-eap-5-improved-stl-container-rendering-in-the-debugger-and-vcs-enhancements">blog post</a>.</p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/clion/nextversion" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/CPP-A-230654291"/>
+        <button name="More Information" url="https://blog.jetbrains.com/clion/2024/03/clion-2024-1-eap-5-improved-stl-container-rendering-in-the-debugger-and-vcs-enhancements"/>
+        <patch from="241.13688" size="from 226 to 479" fullFrom="241.13688.39"/>
+      </build>
+      <build number="241.13688" version="2024.1 EAP" fullNumber="241.13688.39">
+        <blogPost url="https://blog.jetbrains.com/clion/2024/02/clion-2024-1-eap-4-switch-to-clion-nova-in-clion-classic"/>
+        <patch from="241.12662" size="from 571 to 848" fullFrom="241.12662.59"/>
+      </build>
+      <build number="241.12662" version="2024.1 EAP" fullNumber="241.12662.59">
+        <blogPost url="https://blog.jetbrains.com/clion/2024/02/clion-2024-1-eap-3-assembly-view-enhancements"/>
+        <patch from="241.11761" size="from 917 to 1167" fullFrom="241.11761.23"/>
+      </build>
+      <build number="241.11761" version="2024.1 EAP" fullNumber="241.11761.23">
+        <blogPost url="https://blog.jetbrains.com/clion/2024/02/clion-2024-1-eap-2-improved-terminal-and-other-ux-enhancements"/>
+        <patch from="241.8102" size="from 368 to 630" fullFrom="241.8102.118"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.37">
+        <blogPost url="https://blog.jetbrains.com/clion/2023/11/clion-2023-3-goes-beta"/>
+        <patch from="233.11555" size="from 230 to 432" fullFrom="233.11555.2"/>
+      </build>
       <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.2">
         <blogPost url="https://blog.jetbrains.com/clion/2023/11/clion-2023-3-eap6-support-for-intel-syntax-in-assembly-views"/>
-        <message><![CDATA[<h3>A new CLion 2023.3 EAP build is here!</h3> 
-<ul> 
- <li>Support for x86 assembly (Intel) syntax in <em>Assembly</em> and <em>Disassembly</em> views</li> 
- <li>Ability to view raw output in <em>Assembly</em> view</li> 
-</ul> 
-<p>The full release notes are available <a href="https://blog.jetbrains.com/clion/2023/11/clion-2023-3-eap6-support-for-intel-syntax-in-assembly-views">here</a>.</p>]]></message>
-        <button name="Download" url="https://www.jetbrains.com/clion/nextversion" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/CPP-A-230654273"/>
-        <button name="More Information" url="https://blog.jetbrains.com/clion/2023/11/clion-2023-3-eap6-support-for-intel-syntax-in-assembly-views"/>
         <patch from="233.11361" size="from 223 to 443" fullFrom="233.11361.11"/>
       </build>
       <build number="233.11361" version="2023.3 EAP" fullNumber="233.11361.11">
@@ -649,18 +680,45 @@
       </build>
     </channel>
     <channel id="CL-RELEASE-licensing-RELEASE" name="CLion RELEASE" status="release" url="https://www.jetbrains.com/clion/download" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
-      <build number="232.9921" version="2023.2.2" releaseDate="20230726" fullNumber="232.9921.42">
-        <blogPost url="https://blog.jetbrains.com/clion/2023/09/clion-2023-2-2-bug-fix-update"/>
-        <message><![CDATA[<p>A bug-fix update, CLion 2023.2.2, is available for download!</p> 
-<p>This update's main highlights include:</p> 
+      <build number="233.14475" version="2023.3.4" releaseDate="20231206" fullNumber="233.14475.31">
+        <message><![CDATA[<p>The <strong>CLion 2023.3.4</strong> bug-fix update is here!</p> 
+<p>Here are the highlights:</p> 
 <ul> 
- <li>We fixed the Clangd memory leakage (<a href="https://youtrack.jetbrains.com/issue/CPP-33894">CPP-33894</a>).</li> 
- <li>We fixed the issue that caused the Visual Studio C++ toolchain environment to load in an incorrect order when the environment file is used (<a href="https://youtrack.jetbrains.com/issue/CPP-34153">CPP-34153</a>).</li> 
- <li>Conan's <em>CMakeUserPresets.json</em> file no longer breaks the project on reload (<a href="https://youtrack.jetbrains.com/issue/CPP-34818">CPP-34818</a>).</li> 
+ <li>We've addressed the issue with Clazy inspections, and now they are shown in the Editor correctly (<a href="https://youtrack.jetbrains.com/issue/CPP-36752">CPP-36752</a>).</li> 
+ <li>We've addressed the issue with the <em>Settings Sync</em> functionality, and now, instead of reporting an authorization problem, the IDE prompts you to log in with your JetBrains Account (<a href="https://youtrack.jetbrains.com/issue/IDEA-343073">IDEA-343073</a>).</li> 
+ <li>Customizing inspection severities is once again accessible in <em>Settings/Preferences</em> | <em>Editor</em> | <em>Inspections</em> (<a href="https://youtrack.jetbrains.com/issue/IDEA-341773">IDEA-341773</a>).</li> 
 </ul>]]></message>
         <button name="Download" url="https://www.jetbrains.com/clion/download" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/CPP-A-230654256"/>
-        <button name="More Information" url="https://blog.jetbrains.com/clion/2023/09/clion-2023-2-2-bug-fix-update"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/CPP-A-230654286"/>
+        <patch from="233.14015" size="from 202 to 426" fullFrom="233.14015.92"/>
+        <patch from="232.10300" size="from 354 to 589" fullFrom="232.10300.41"/>
+      </build>
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.92">
+        <patch from="233.13135" size="from 207 to 430" fullFrom="233.13135.93"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.93">
+        <blogPost url="https://blog.jetbrains.com/clion/2023/12/clion-2023-3-2-bug-fix-update"/>
+        <patch from="233.11799" size="from 226 to 429" fullFrom="233.11799.287"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.287">
+        <patch from="233.11799" size="from 220 to 422" fullFrom="233.11799.238"/>
+        <patch from="232.9921" size="from 389 to 588" fullFrom="232.9921.42"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.238">
+        <blogPost url="https://www.jetbrains.com/clion/whatsnew/"/>
+        <patch from="233.11799" size="from 223 to 425" fullFrom="233.11799.171"/>
+        <patch from="232.9921" size="from 389 to 588" fullFrom="232.9921.42"/>
+      </build>
+      <build number="232.10300" version="2023.2.3" releaseDate="20230726" fullNumber="232.10300.41">
+        <message><![CDATA[<p>CLion 2023.2.3 is out.</p> 
+<p>This bug-fix update brings fixes and improvements to strengthen the IDE's overall stability. Get the full details in the <a href="https://youtrack.jetbrains.com/articles/CPP-A-230654287">release notes</a>.</p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/clion/download/other.html#version20232" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/CPP-A-230654287"/>
+        <patch from="232.9921" size="from 228 to 405" fullFrom="232.9921.42"/>
+        <patch from="231.9414" size="from 624 to 801" fullFrom="231.9414.12"/>
+      </build>
+      <build number="232.9921" version="2023.2.2" releaseDate="20230726" fullNumber="232.9921.42">
+        <blogPost url="https://blog.jetbrains.com/clion/2023/09/clion-2023-2-2-bug-fix-update"/>
         <patch from="232.9559" size="from 223 to 401" fullFrom="232.9559.58"/>
       </build>
       <build number="232.9559" version="2023.2.1" releaseDate="20230726" fullNumber="232.9559.58">
@@ -672,16 +730,14 @@
         <patch from="231.9225" size="from 599 to 774" fullFrom="231.9225.21"/>
         <patch from="232.8660" size="from 213 to 390" fullFrom="232.8660.139"/>
       </build>
-      <build number="231.9225" version="2023.1.5" releaseDate="20230329" fullNumber="231.9225.21">
-        <message><![CDATA[<p>A bug-fix update, CLion 2023.1.5, is available for download!</p> 
-<p>The main highlights include:</p> 
-<ul> 
- <li>We fixed an issue with <em>Memory View</em> when big chunks of memory is loaded per request (<a href="https://youtrack.jetbrains.com/issue/CPP-33250/">CPP-33250</a>).</li> 
- <li>Custom code style settings are now correctly preserved by the IDE (<a href="https://youtrack.jetbrains.com/issue/IDEA-318457/">IDEA-318457</a>).</li> 
- <li>Starting up the IDE no longer fails with the <em>"CannotActivateException: Address already in use: bind"</em> error (<a href="https://youtrack.jetbrains.com/issue/IDEA-323836">IDEA-323836</a>).</li> 
-</ul>]]></message>
+      <build number="231.9414" version="2023.1.6" releaseDate="20230329" fullNumber="231.9414.12">
+        <message><![CDATA[<p>CLion 2023.1.6 is out.</p> 
+<p>This bug-fix update brings fixes and improvements to strengthen the IDE's overall stability. Get the full details in the <a href="">release notes</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/clion/download/other.html#version20231" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/CPP-A-230654250/CLion-2023.1.5-231.9225.21-build-Release-Notes"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/CPP-A-230654288"/>
+        <patch from="231.9225" size="from 226 to 344" fullFrom="231.9225.21"/>
+      </build>
+      <build number="231.9225" version="2023.1.5" releaseDate="20230329" fullNumber="231.9225.21">
         <patch from="231.9161" size="from 217 to 336" fullFrom="231.9161.40"/>
       </build>
       <build number="231.9161" version="2023.1.4" releaseDate="20230329" fullNumber="231.9161.40">
@@ -1206,6 +1262,10 @@
       </build>
     </channel>
     <channel id="CL-EAP-licensing-RELEASE" name="CLion EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/clion/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.11799" version="2023.3 Release Candidate" fullNumber="233.11799.171">
+        <blogPost url="https://blog.jetbrains.com/clion/2023/11/clion-2023-3-release-candidate"/>
+        <patch from="233.11799" size="from 245 to 448" fullFrom="233.11799.37"/>
+      </build>
       <build number="232.8660" version="2023.2 Release Candidate" fullNumber="232.8660.139">
         <blogPost url="https://blog.jetbrains.com/clion/2023/07/clion-2023-2-release-candidate"/>
         <patch from="232.8660" size="from 215 to 392" fullFrom="232.8660.49"/>
@@ -1234,29 +1294,38 @@
   </product>
   <product name="DataGrip">
     <code>DB</code>
-    <channel id="DB-EAP-licensing-EAP" name="DataGrip EAP" status="eap" url="https://www.jetbrains.com/datagrip/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.17">
-        <message><![CDATA[<h3>DataGrip 2023.3 EAP 3 is Out!</h3> 
-<h4>[Oracle] Support for functions returning ref cursors</h4> 
-<p>We've closed the ticket <a href="https://youtrack.jetbrains.com/issue/DBE-6807/Database-console-should-show-results-from-PL-SQL-functions-Oracle-that-return-cursors">DBE-6807</a>: <em>Database console should show results from PL/SQL functions (Oracle) that return cursors</em>.</p> 
-<p>Starting from 2023.3, the support for ref cursors has improved.</p> 
+    <channel id="DB-EAP-licensing-EAP" name="DataGrip EAP" status="eap" url="https://www.jetbrains.com/datagrip/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.14024" version="2024.1 EAP" fullNumber="241.14024.11">
+        <message><![CDATA[<h3>Simplification of sessions</h3> 
+<p>Over the last few years, we've received tons of feedback from users who say that they don't understand the concept of sessions and that this functionality has contributed significantly to DataGrip's learning curve. Here are several examples:</p> 
 <ul> 
- <li>If the function you run returns a result containing only one ref cursor, DataGrip immediately navigates to the result from the ref cursor. </li> 
- <br> 
- <li>In more complex cases where the result contains several ref cursors or something other than a ref cursor, DataGrip shows the main result and gives you the opportunity to view results from other ref cursors. From the cell with the ref cursor, you can go to the corresponding result set (<em>Enter/Double-click</em>) and vice versa (<em>Ctrl+Cmd+B</em>) </li> 
+ <li><i>The project-first and separate-console-session model is way over the top overkill. This model makes opening and executing a simple SQL file a real chore. If I just want to open and execute a script I have to first create a project, then add the file to the project, then open a console, then open a session, and then attach the file to the session. What a gigantic PAIN. </i></li> 
+ <li><i>Coming from SQL Server Management Studio, DataGrip's UI is a lot more complex. In SSMS you basically just have servers, queries and results. In DataGrip there's sessions and consoles and scratch files, etc., etc., making the tool much less intuitive for new users. </i></li> 
+ <li><i>Some of the way the UI works is clunky and non-obvious. When I have to select a console to run a script on, it's not entirely clear to me why I have to do this or what the ramifications of the selection are. This shouldn't really be the default behavior. </i></li> 
 </ul> 
-<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2023/11/ezgif-2-NEW.gif" alt="" width="550" height="" border="1"> 
-<h4>[SQL Server] Support for import/export tables via BCP</h4> 
-<p></p>We've added the support for the 
-<a href="https://learn.microsoft.com/en-us/sql/relational-databases/import-export/import-and-export-bulk-data-by-using-the-bcp-utility-sql-server?view=sql-server-ver16">BCP</a> tool, which lets you export and import tables in SQL Server.
-<p></p> 
-<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2023/11/pasted-image-0.png" alt="" width="550" height="" border="1"> 
-<h4>Important fixes</h4> 
-<ul> 
- <li><a href="https://youtrack.jetbrains.com/issue/DBE-625">DBE-625</a>: We fixed a bug with the qualification of custom types in <em>Run Function</em></li> 
- <li><a href="https://youtrack.jetbrains.com/issue/DBE-625">DBE-625</a>: We fixed the focus jumping to the result after <em>Run Function</em></li> 
- <li><a href="https://youtrack.jetbrains.com/issue/DBE-19097">DBE-19097</a>: Number formats are now applied after <em>Refresh</em></li> 
-</ul>]]></message>
+<p>In DataGrip, "session" is a technical term that refers to the container for a connection. In other words, connections can be established, stopped, and re-established within one session. For each connection, there is one session. <br> The ability to attach sessions is a powerful mechanism, but in the majority of cases, users just need to set the context (data source and database or schema) for the queries to be run. <br> Starting from version 2024.1, users will no longer need to manually choose which session to run queries in, and this will be the case for all types of queries. Sessions are still there under the hood, but you won't need to worry about them. <br> Let's take a deep dive into how this change affects DataGrip's main use cases.<br> </p> 
+<h4>Attaching and switching data sources</h4> 
+<p>To attach a file, you now simply need to select the data source, rather than the session. After selecting the data source, you choose the schema.</p> 
+<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2024/02/1-1.gif" alt="" width="550" height="" border="0"> 
+<h4>Switching sessions</h4> 
+<p>The <i>Switch Session</i> action now only appears in the client context menu in the <i>Services</i> tool window. It allows you to switch the session only within the current data source. </p> 
+<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2024/02/2-2.png" alt="" width="550" height="" border="0"> 
+<h4>Running functions</h4> 
+<p>You no longer need to select a session before launching a function. In the function launch window, a <i>Run From</i> option allows you to select the console or file from which the function will be launched. </p> 
+<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2024/02/3-2.png" alt="" width="550" height="" border="0"> 
+<h3>Record view</h3> 
+<p>You can now focus on one record in the data editor. To open a record view, use the shortcut Ctrl/Cmd+Shift+Enter or the <i>Show Record View</i> button on the toolbar:</p> 
+<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2024/02/4-1.png" alt="" width="550" height="" border="0"> 
+<p>A record view will open in the side panel, where the value editor and aggregate view are located:</p> 
+<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2024/02/5-2.png" alt="" width="550" height="" border="0"> 
+<p>The cells in record view are editable if they are editable in the main grid.</p> 
+<h3>Code completion: custom symbols to accept suggestions</h3> 
+<p>We've added to specify which symbols you will use to accept code completion suggestions, allowing you to write SQL even faster. <br> To make this work, you need to enable two options.<br> This one: </p> 
+<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2024/02/6-2.png" alt="" width="550" height="" border="0"> 
+<p>And this one:</p> 
+<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2024/02/7-2.png" alt="" width="550" height="" border="0"> 
+<p>This feature can be especially useful when using operators: </p> 
+<img class="alignnone size-large wp-image-123893" src="https://blog.jetbrains.com/wp-content/uploads/2024/02/8-1.gif" alt="" width="550" height="" border="0">]]></message>
         <button name="Download" url="https://www.jetbrains.com/datagrip/nextversion" download="true"/>
       </build>
       <build number="231.8109" version="2023.1 EAP" fullNumber="231.8109.78">
@@ -1269,9 +1338,30 @@
       </build>
     </channel>
     <channel id="DB-RELEASE-licensing-RELEASE" name="DataGrip RELEASE" status="release" url="https://www.jetbrains.com/datagrip/download" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14015" version="2023.3.4" releaseDate="20231206" fullNumber="233.14015.137">
+        <message><![CDATA[<h3>DataGrip 2023.3.4 is Out!</h3>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/datagrip/download" download="true"/>
+        <patch from="232.10203" size="from 228 to 229" fullFrom="232.10203.8"/>
+        <patch from="233.14015" size="from 17 to 18" fullFrom="233.14015.29"/>
+      </build>
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.29">
+        <patch from="232.10203" size="from 228 to 229" fullFrom="232.10203.8"/>
+        <patch from="233.13135" size="from 34 to 35" fullFrom="233.13135.68"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.68">
+        <patch from="232.10203" size="from 217 to 218" fullFrom="232.10203.8"/>
+        <patch from="233.11799" size="from 25 to 26" fullFrom="233.11799.296"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.296">
+        <patch from="232.10203" size="from 216 to 217" fullFrom="232.10203.8"/>
+        <patch from="233.11799" size="from 24 to 25" fullFrom="233.11799.235"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.235">
+        <patch from="232.10203" size="214" fullFrom="232.10203.8"/>
+      </build>
       <build number="232.10203" version="2023.2.3" releaseDate="20230720" fullNumber="232.10203.8">
         <message><![CDATA[<h3>DataGrip 2023.2.3 is Out!</h3>]]></message>
-        <button name="Download" url="https://www.jetbrains.com/datagrip/download" download="true"/>
+        <button name="Download" url="https://confluence.jetbrains.com/display/DBE/DataGrip+previous+releases#version20232" download="true"/>
         <patch from="231.9011" size="from 398 to 416" fullFrom="231.9011.35"/>
         <patch from="232.10072" size="from 23 to 25" fullFrom="232.10072.15"/>
       </build>
@@ -1701,20 +1791,32 @@
   <product name="DataSpell">
     <code>DS</code>
     <code>PD</code>
-    <channel id="DS-EAP-licensing-EAP" name="DataSpell EAP" status="eap" url="https://www.jetbrains.com/dataspell/nextversion/" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
+    <channel id="DS-EAP-licensing-EAP" name="DataSpell EAP" status="eap" url="https://www.jetbrains.com/dataspell/nextversion/" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.10840" version="2024.1 EAP" fullNumber="241.10840.15">
+        <blogPost url="https://blog.jetbrains.com/dataspell/2024/02/2024-1-eap-2/"/>
+        <message><![CDATA[<h4>DataSpell 2024.1 EAP 2 is out!</h4> 
+<p>Here are the highlights of the second build:</p> 
+<ul> 
+ <li>dbt Core code completion improvements</li> 
+ <li>Ability to add environment variables to the run configurations</li> 
+ <li>Run, test, or preview dbt models from an SQL file</li> 
+</ul> 
+<p>Check out the <a href="https://blog.jetbrains.com/dataspell/2024/02/2024-1-eap-2/">blog post</a> for a detailed overview and please share your feedback in our <a href="https://youtrack.jetbrains.com/issues/DS">issue tracker</a>.</p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/dataspell/nextversion/" download="true"/>
+        <button name="More Information" url="https://blog.jetbrains.com/dataspell/2024/02/2024-1-eap-2/"/>
+        <patch from="241.8102" size="from 459 to 472" fullFrom="241.8102.135"/>
+        <patch from="233.14015" size="from 629 to 642" fullFrom="233.14015.111"/>
+      </build>
+      <build number="241.8102" version="2024.1 EAP" fullNumber="241.8102.135">
+        <patch from="233.13135" size="from 440 to 442" fullFrom="233.13135.105"/>
+      </build>
+      <build number="233.11799" version="2023.3 EAP" fullNumber="233.11799.29">
+        <blogPost url="https://blog.jetbrains.com/dataspell/2023/11/2023-3-eap-4/"/>
+        <patch from="232.10227" size="from 377 to 380" fullFrom="232.10227.10"/>
+        <patch from="233.11361" size="from 257 to 258" fullFrom="233.11361.11"/>
+      </build>
       <build number="233.11361" version="2023.3 EAP" fullNumber="233.11361.11">
         <blogPost url="https://blog.jetbrains.com/dataspell/2023/11/2023-3-eap-3/"/>
-        <message><![CDATA[<h4>DataSpell 2023.3 EAP 3 Is Out!</h4> 
-<p>Here are the highlights of the third build:</p> 
-<ul> 
- <li>dbt support</li> 
- <li>AI Assistant actions via the context menu</li> 
- <li>Fast access to column statistics</li> 
- <li>Data distribution histograms in tables</li> 
-</ul> 
-<p>Check the <a href="https://blog.jetbrains.com/dataspell/2023/11/2023-3-eap-3/">blog post</a> for a detailed overview and please share your feedback in our <a href="https://youtrack.jetbrains.com/issues/DS">issue tracker</a>.</p>]]></message>
-        <button name="Download" url="https://www.jetbrains.com/dataspell/nextversion/" download="true"/>
-        <button name="More Information" url="https://blog.jetbrains.com/dataspell/2023/11/2023-3-eap-3/"/>
         <patch from="232.10203" size="402" fullFrom="232.10203.19"/>
         <patch from="233.9102" size="from 306 to 307" fullFrom="233.9102.195"/>
       </build>
@@ -1754,10 +1856,43 @@
       </build>
     </channel>
     <channel id="DS-RELEASE-licensing-RELEASE" name="DataSpell RELEASE" status="release" url="https://www.jetbrains.com/dataspell" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
-      <build number="232.10203" version="2023.2.4" releaseDate="20230727" fullNumber="232.10203.19">
-        <message><![CDATA[<h4>DataSpell 2023.2.4 is out!</h4> 
-<p>If you have any feedback or encounter any issues, please let us know in our <a href="https://youtrack.jetbrains.com/issues/DS">issue tracker</a>.</p>]]></message>
+      <build number="233.14475" version="2023.3.4" releaseDate="20231206" fullNumber="233.14475.37">
+        <message><![CDATA[<h4>DataSpell 2023.3.4 is out!</h4> 
+<p> If you have any feedback or encounter any issues, please let us know in our <a href="https://youtrack.jetbrains.com/issues/DS">issue tracker</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/dataspell" download="true"/>
+        <patch from="233.14475" size="234" fullFrom="233.14475.8"/>
+        <patch from="233.14015" size="from 363 to 364" fullFrom="233.14015.111"/>
+        <patch from="232.10300" size="from 465 to 468" fullFrom="232.10300.41"/>
+      </build>
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.111">
+        <patch from="233.14015" size="from 252 to 253" fullFrom="233.14015.67"/>
+        <patch from="233.13135" size="from 256 to 258" fullFrom="233.13135.105"/>
+        <patch from="232.10227" size="from 389 to 392" fullFrom="232.10227.10"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.105">
+        <patch from="233.11799" size="from 255 to 256" fullFrom="233.11799.285"/>
+        <patch from="232.10227" size="from 385 to 389" fullFrom="232.10227.10"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.285">
+        <patch from="233.11799" size="from 253 to 254" fullFrom="233.11799.244"/>
+        <patch from="232.10227" size="from 385 to 389" fullFrom="232.10227.10"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.244">
+        <patch from="233.11799" size="from 256 to 257" fullFrom="233.11799.180"/>
+        <patch from="232.10227" size="from 385 to 389" fullFrom="232.10227.10"/>
+      </build>
+      <build number="232.10300" version="2023.2.6" releaseDate="20230727" fullNumber="232.10300.41">
+        <message><![CDATA[<h4>DataSpell 2023.2.6 is out!</h4> 
+<p>If you have any feedback or encounter any issues, please let us know in our <a href="https://youtrack.jetbrains.com/issues/DS">issue tracker</a>.</p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/dataspell/download/other.html#version20232" download="true"/>
+        <patch from="232.10227" size="from 269 to 271" fullFrom="232.10227.10"/>
+        <patch from="231.9414" size="from 623 to 639" fullFrom="231.9414.12"/>
+      </build>
+      <build number="232.10227" version="2023.2.5" releaseDate="20230727" fullNumber="232.10227.10">
+        <patch from="232.10203" size="from 272 to 273" fullFrom="232.10203.19"/>
+        <patch from="231.9225" size="from 628 to 645" fullFrom="231.9225.14"/>
+      </build>
+      <build number="232.10203" version="2023.2.4" releaseDate="20230727" fullNumber="232.10203.19">
         <patch from="232.10072" size="from 267 to 269" fullFrom="232.10072.29"/>
         <patch from="231.9225" size="from 626 to 643" fullFrom="231.9225.14"/>
       </build>
@@ -1780,10 +1915,14 @@
         <patch from="232.8660" size="from 267 to 269" fullFrom="232.8660.158"/>
         <patch from="231.9225" size="from 613 to 630" fullFrom="231.9225.14"/>
       </build>
-      <build number="231.9225" version="2023.1.4" releaseDate="20230330" fullNumber="231.9225.14">
-        <message><![CDATA[<h4>DataSpell 2023.1.4 is out!</h4> If you have any feedback or encounter any issues, please let us know in our 
+      <build number="231.9414" version="2023.1.5" releaseDate="20230330" fullNumber="231.9414.12">
+        <message><![CDATA[<h4>DataSpell 2023.1.5 is out!</h4> If you have any feedback or encounter any issues, please let us know in our 
 <a href="https://youtrack.jetbrains.com/issues/DS">issue tracker</a>.]]></message>
         <button name="Download" url="https://www.jetbrains.com/dataspell/download/other.html#version20231" download="true"/>
+        <patch from="223.8836" size="from 369 to 371" fullFrom="223.8836.46"/>
+        <patch from="231.9225" size="from 295 to 296" fullFrom="231.9225.14"/>
+      </build>
+      <build number="231.9225" version="2023.1.4" releaseDate="20230330" fullNumber="231.9225.14">
         <patch from="223.8836" size="from 364 to 367" fullFrom="223.8836.46"/>
         <patch from="231.9161" size="from 288 to 290" fullFrom="231.9161.44"/>
       </build>
@@ -1914,6 +2053,18 @@
       </build>
     </channel>
     <channel id="DS-EAP-licensing-RELEASE" name="DataSpell EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/dataspell/nextversion/" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14475" version="2023.3.4 Release Candidate" releaseDate="20231206" fullNumber="233.14475.8">
+        <patch from="232.10227" size="from 467 to 469" fullFrom="232.10227.10"/>
+        <patch from="233.14015" size="from 363 to 364" fullFrom="233.14015.111"/>
+      </build>
+      <build number="233.14015" version="2023.3.3 Release Candidate" releaseDate="20231206" fullNumber="233.14015.67">
+        <patch from="232.10227" size="from 389 to 392" fullFrom="232.10227.10"/>
+        <patch from="233.13135" size="from 256 to 258" fullFrom="233.13135.105"/>
+      </build>
+      <build number="233.11799" version="2023.3 Release Candidate" fullNumber="233.11799.180">
+        <patch from="232.10227" size="from 385 to 388" fullFrom="232.10227.10"/>
+        <patch from="233.11799" size="from 269 to 270" fullFrom="233.11799.29"/>
+      </build>
       <build number="232.9921" version="2023.2.2 Release Candidate" releaseDate="20230727" fullNumber="232.9921.30">
         <patch from="232.9559" size="from 277 to 278" fullFrom="232.9559.63"/>
         <patch from="231.9225" size="from 622 to 638" fullFrom="231.9225.14"/>
@@ -1953,16 +2104,45 @@
   </product>
   <product name="Gateway">
     <code>GW</code>
-    <channel id="GW-EAP-licensing-EAP" name="Gateway EAP" status="eap" url="https://www.jetbrains.com/remote-development/gateway" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.11">
-        <message><![CDATA[The Gateway 2023.3 EAP 7 is out with the following updates: 
+    <channel id="GW-EAP-licensing-EAP" name="Gateway EAP" status="eap" url="https://www.jetbrains.com/remote-development/gateway" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.14494" version="2024.1 Beta" fullNumber="241.14494.32">
+        <message><![CDATA[The Gateway 2024.1 Beta is out with the following updates: 
 <ul> 
- <li>Minor changes to icons.</li> 
+ <li>Improvements in the action subsystem.</li> 
 </ul> 
-<p>For more details, please refer to the release notes.</p> If you have any feedback or encounter any issues, please let us know in our 
-<a href="https://youtrack.jetbrains.com/issues/GTW">issue tracker</a>.]]></message>
+<p>For more details, please refer to the release notes.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/remote-development/gateway" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GTW-A-91/Remote-Development-2023.3-EAP-7-233.11555.11-build-Release-Notes"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GTW-A-121/Remote-Development-2024.1-Beta-241.14494.17-build-Release-Notes"/>
+        <patch from="241.14024" size="from 8 to 11" fullFrom="241.14024.15"/>
+      </build>
+      <build number="241.14024" version="2024.1 EAP" fullNumber="241.14024.15">
+        <patch from="241.12662" size="from 11 to 13" fullFrom="241.12662.61"/>
+      </build>
+      <build number="241.12662" version="2024.1 EAP" fullNumber="241.12662.61">
+        <patch from="241.11761" size="from 38 to 41" fullFrom="241.11761.25"/>
+      </build>
+      <build number="241.11761" version="2024.1 EAP" fullNumber="241.11761.25">
+        <patch from="241.10840" size="from 69 to 75" fullFrom="241.10840.29"/>
+      </build>
+      <build number="241.10840" version="2024.1 EAP" fullNumber="241.10840.29">
+        <patch from="241.9959" size="from 13 to 14" fullFrom="241.9959.37"/>
+      </build>
+      <build number="241.9959" version="2024.1 EAP" fullNumber="241.9959.37">
+        <patch from="241.8102" size="from 75 to 81" fullFrom="241.8102.129"/>
+      </build>
+      <build number="233.11799" version="2023.3 RC" fullNumber="233.11799.206">
+        <patch from="233.11799" size="from 10 to 11" fullFrom="233.11799.72"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.72">
+        <patch from="233.11799" size="9" fullFrom="233.11799.30"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.30">
+        <patch from="233.11799" size="13" fullFrom="233.11799.6"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.6">
+        <patch from="233.11555" size="from 9 to 10" fullFrom="233.11555.11"/>
+      </build>
+      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.11">
         <patch from="233.11361" size="9" fullFrom="233.11361.10"/>
       </build>
       <build number="233.11361" version="2023.3 EAP" fullNumber="233.11361.10">
@@ -2031,6 +2211,26 @@
       </build>
     </channel>
     <channel id="GW-RELEASE-licensing-RELEASE" name="Gateway RELEASE" status="release" url="https://www.jetbrains.com/remote-development/gateway" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14475" version="2023.3.4" releaseDate="20231206" fullNumber="233.14475.30">
+        <message><![CDATA[The Gateway 2023.3.4 Beta is out with minor updates.]]></message>
+        <button name="Download" url="https://www.jetbrains.com/remote-development/gateway" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GTW-A-117/Remote-Development-2023.3.4-233.14475.28-build-Release-Notes"/>
+        <patch from="233.14015" size="from 10 to 11" fullFrom="233.14015.129"/>
+      </build>
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.129">
+        <patch from="233.13135" size="12" fullFrom="233.13135.102"/>
+        <patch from="233.14015" size="from 7 to 8" fullFrom="233.14015.42"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.102">
+        <patch from="233.13135" size="from 7 to 8" fullFrom="233.13135.56"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.302">
+        <patch from="233.11799" size="from 8 to 9" fullFrom="233.11799.240"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.240">
+        <patch from="232.10203" size="from 74 to 75" fullFrom="232.10203.10"/>
+        <patch from="233.11799" size="from 8 to 9" fullFrom="233.11799.206"/>
+      </build>
       <build number="232.10203" version="2023.2.4" releaseDate="20230726" fullNumber="232.10203.10">
         <message><![CDATA[The Gateway 2023.2.4 Release is out with the following updates: 
 <ul> 
@@ -2038,7 +2238,7 @@
 </ul> 
 <p>For more details, please refer to the release notes.</p> If you have any feedback or encounter any issues, please let us know in our 
 <a href="https://youtrack.jetbrains.com/issues/GTW">issue tracker</a>.]]></message>
-        <button name="Download" url="https://www.jetbrains.com/remote-development/gateway" download="true"/>
+        <button name="Download" url="https://www.jetbrains.com/remote-development/gateway#version20232" download="true"/>
         <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GTW-A-88/Remote-Development-2023.2.4-232.10203.10-build-Release-Notes"/>
         <patch from="232.10072" size="from 10 to 11" fullFrom="232.10072.27"/>
         <patch from="231.9161" size="from 134 to 146" fullFrom="231.9161.32"/>
@@ -2121,6 +2321,9 @@
       </build>
     </channel>
     <channel id="GW-EAP-licensing-RELEASE" name="Gateway EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/remote-development/gateway" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14015" version="2023.3.3 RC" releaseDate="20231206" fullNumber="233.14015.42">
+        <patch from="233.13135" size="12" fullFrom="233.13135.102"/>
+      </build>
       <build number="232.9921" version="2023.2.2 RC" releaseDate="20230726" fullNumber="232.9921.28">
         <patch from="232.9559" size="from 12 to 13" fullFrom="232.9559.62"/>
       </build>
@@ -2158,14 +2361,68 @@
   </product>
   <product name="GoLand">
     <code>GO</code>
-    <channel id="GO-EAP-licensing-EAP" name="GoLand EAP" status="eap" url="https://www.jetbrains.com/go/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.11">
-        <message><![CDATA[<p><b>GoLand 2023.3 EAP #7 is out!</b></p> 
-<p>What's new:</p> 
-<p>In this build, we introduced a highly anticipated feature that allows you to set up <code>printf-like</code> hints for custom string functions.</p> 
-<p>Please see the release notes below for the complete list of fixes and improvements.</p>]]></message>
+    <channel id="GO-EAP-licensing-EAP" name="GoLand EAP" status="eap" url="https://www.jetbrains.com/go/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.14494" version="2024.1 Beta" fullNumber="241.14494.33">
+        <blogPost url="https://blog.jetbrains.com/go/2024/03/07/goland-2024-1-beta-is-out/"/>
+        <message><![CDATA[<h3>GoLand 2024.1 Beta is now available!</h3> 
+<p> The Beta version includes all of the new features and improvements from our current EAP cycle that are expected to appear in the upcoming 2024.1 release: </p> 
+<b>AI features:</b> 
+<ul> 
+ <li>Full line completion</li> 
+ <li>Cloud-based completion for structs and interfaces</li> 
+ <li>Documentation generation for fields</li> 
+</ul> 
+<b>Support for Go 1.22:</b> 
+<ul> 
+ <li>Support for range for integers and functions</li> 
+ <li>Vendoring support for Go workspaces</li> 
+</ul> 
+<b>Performance improvements:</b> 
+<ul> 
+ <li>More highlighting while indexing</li> 
+ <li>Improved indexing performance</li> 
+</ul> 
+<b>UX and technologies support</b> 
+<ul> 
+ <li>Data flow analysis update</li> 
+ <li>New terminal</li> 
+ <li>Option to scale down the entire IDE</li> 
+ <li>Updated product icons</li> 
+</ul> 
+<p> Please see <a href="https://blog.jetbrains.com/go/2024/03/07/goland-2024-1-beta-is-out/">the blog post</a> for more details or <a href="https://youtrack.jetbrains.com/articles/GO-A-231735859">the release notes</a> for the complete list of fixes and improvements. </p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/go/nextversion" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GO-A-231735831"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GO-A-231735859"/>
+        <button name="More Information" url="https://blog.jetbrains.com/go/2024/03/07/goland-2024-1-beta-is-out/"/>
+        <patch from="241.14024" size="from 81 to 84" fullFrom="241.14024.16"/>
+      </build>
+      <build number="241.14024" version="2024.1 EAP" fullNumber="241.14024.16">
+        <patch from="241.13688" size="from 35 to 38" fullFrom="241.13688.19"/>
+      </build>
+      <build number="241.13688" version="2024.1 EAP" fullNumber="241.13688.19">
+        <patch from="241.12662" size="from 264 to 266" fullFrom="241.12662.60"/>
+      </build>
+      <build number="241.12662" version="2024.1 EAP" fullNumber="241.12662.60">
+        <patch from="241.11761" size="from 124 to 127" fullFrom="241.11761.29"/>
+      </build>
+      <build number="241.11761" version="2024.1 EAP" fullNumber="241.11761.29">
+        <patch from="241.10840" size="from 99 to 103" fullFrom="241.10840.30"/>
+      </build>
+      <build number="241.10840" version="2024.1 EAP" fullNumber="241.10840.30">
+        <patch from="241.9959" size="from 80 to 82" fullFrom="241.9959.38"/>
+      </build>
+      <build number="241.9959" version="2024.1 EAP" fullNumber="241.9959.38">
+        <patch from="241.8102" size="from 300 to 314" fullFrom="241.8102.131"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.68">
+        <patch from="233.11799" size="from 42 to 43" fullFrom="233.11799.38"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.38">
+        <patch from="233.11799" size="from 65 to 66" fullFrom="233.11799.10"/>
+      </build>
+      <build number="233.11799" version="2023.3 EAP" fullNumber="233.11799.10">
+        <patch from="233.11555" size="from 72 to 73" fullFrom="233.11555.11"/>
+      </build>
+      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.11">
         <patch from="233.11361" size="from 66 to 67" fullFrom="233.11361.11"/>
       </build>
       <build number="233.11361" version="2023.3 EAP" fullNumber="233.11361.11">
@@ -2238,12 +2495,48 @@
       </build>
     </channel>
     <channel id="GO-RELEASE-licensing-RELEASE" name="GoLand RELEASE" status="release" url="https://www.jetbrains.com/go/download" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
-      <build number="232.10203" version="2023.2.4" releaseDate="20230727" fullNumber="232.10203.20">
-        <message><![CDATA[<p><b>GoLand 2023.2.4 is out!</b></p> 
-<p>What's new:</p> 
-<p> This version fixes several bugs, including a recently discovered one that prevented GoLand from attaching the debugger to some processes. </p>]]></message>
+      <build number="233.14475" version="2023.3.4" releaseDate="20231206" fullNumber="233.14475.38">
+        <message><![CDATA[<p><b>The GoLand 2023.3.4 is available!</b></p> 
+<p> In this version, we have introduced several minor updates and bug fixes. </p> 
+<p> Beyond those, the new version brings support for the range-over-int statement introduced in Go 1.22. </p> 
+<p> Please see the release notes below for the complete list of fixes and improvements. </p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/go/download" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GO-A-231735828/"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GO-A-231735849"/>
+        <patch from="232.10227" size="from 213 to 214" fullFrom="232.10227.11"/>
+        <patch from="233.14015" size="from 87 to 88" fullFrom="233.14015.113"/>
+      </build>
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.113">
+        <patch from="232.10227" size="from 218 to 220" fullFrom="232.10227.11"/>
+        <patch from="233.13135" size="from 94 to 96" fullFrom="233.13135.104"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.104">
+        <patch from="232.10227" size="from 206 to 208" fullFrom="232.10227.11"/>
+        <patch from="233.11799" size="from 68 to 69" fullFrom="233.11799.286"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.286">
+        <blogPost url="https://blog.jetbrains.com/go/2023/12/04/goland-2023-3-is-available/"/>
+        <patch from="232.10227" size="from 206 to 207" fullFrom="232.10227.11"/>
+        <patch from="233.11799" size="from 35 to 36" fullFrom="233.11799.228"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.228">
+        <blogPost url="https://blog.jetbrains.com/go/2023/12/04/goland-2023-3-is-available/"/>
+        <patch from="232.10227" size="from 206 to 207" fullFrom="232.10227.11"/>
+        <patch from="233.11799" size="from 35 to 36" fullFrom="233.11799.194"/>
+      </build>
+      <build number="232.10300" version="2023.2.6" releaseDate="20230727" fullNumber="232.10300.41">
+        <message><![CDATA[<p><b>GoLand 2023.2.6 is out!</b></p> 
+<p>What's new:</p> 
+<p> This build includes several bug fixes and other improvements. </p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/go/download/other.html#version20232" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GO-A-231735851"/>
+        <patch from="231.9414" size="from 492 to 509" fullFrom="231.9414.13"/>
+        <patch from="232.10227" size="from 40 to 41" fullFrom="232.10227.11"/>
+      </build>
+      <build number="232.10227" version="2023.2.5" releaseDate="20230727" fullNumber="232.10227.11">
+        <patch from="231.9225" size="from 456 to 473" fullFrom="231.9225.16"/>
+        <patch from="232.10203" size="from 40 to 41" fullFrom="232.10203.20"/>
+      </build>
+      <build number="232.10203" version="2023.2.4" releaseDate="20230727" fullNumber="232.10203.20">
         <patch from="231.9225" size="from 454 to 471" fullFrom="231.9225.16"/>
         <patch from="232.10072" size="from 36 to 38" fullFrom="232.10072.27"/>
       </build>
@@ -2264,12 +2557,16 @@
         <patch from="231.9225" size="from 429 to 447" fullFrom="231.9225.16"/>
         <patch from="232.8660" size="from 33 to 35" fullFrom="232.8660.149"/>
       </build>
-      <build number="231.9225" version="2023.1.4" releaseDate="20230403" fullNumber="231.9225.16">
-        <message><![CDATA[<p><b>The GoLand 2023.1.4 is available!</b></p> 
+      <build number="231.9414" version="2023.1.5" releaseDate="20230403" fullNumber="231.9414.13">
+        <message><![CDATA[<p><b>The GoLand 2023.1.5 is available!</b></p> 
 <p>The highlights:</p> 
 <p> This minor update includes several bug fixes and other improvements. </p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/go/download/other.html#version20231" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GO-A-231735809"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/GO-A-231735850"/>
+        <patch from="223.8836" size="from 184 to 185" fullFrom="223.8836.56"/>
+        <patch from="231.9225" size="from 86 to 87" fullFrom="231.9225.16"/>
+      </build>
+      <build number="231.9225" version="2023.1.4" releaseDate="20230403" fullNumber="231.9225.16">
         <patch from="223.8836" size="from 207 to 208" fullFrom="223.8836.56"/>
         <patch from="231.9161" size="from 81 to 82" fullFrom="231.9161.41"/>
       </build>
@@ -2531,6 +2828,9 @@
       </build>
     </channel>
     <channel id="GO-EAP-licensing-RELEASE" name="GoLand EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/go/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.11799" version="2023.3 Release Candidate" fullNumber="233.11799.194">
+        <patch from="233.11799" size="from 38 to 39" fullFrom="233.11799.68"/>
+      </build>
       <build number="232.8660" version="2023.2 Release Candidate" fullNumber="232.8660.149">
         <blogPost url="https://blog.jetbrains.com/go/2023/07/21/goland-2023-2-release-candidate/"/>
         <patch from="232.8660" size="from 63 to 65" fullFrom="232.8660.55"/>
@@ -2547,20 +2847,59 @@
   <product name="IntelliJ IDEA">
     <code>IC</code>
     <code>IU</code>
-    <channel id="IC-IU-EAP-licensing-EAP" name="IntelliJ IDEA EAP" status="eap" url="https://www.jetbrains.com/idea/nextversion" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2023" licensing="eap">
+    <channel id="IC-IU-EAP-licensing-EAP" name="IntelliJ IDEA EAP" status="eap" url="https://www.jetbrains.com/idea/nextversion" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2024" licensing="eap">
+      <build number="241.14494" version="2024.1 Beta" fullNumber="241.14494.17">
+        <blogPost url="https://blog.jetbrains.com/idea/2024/03/intellij-idea-2024-1-beta/"/>
+        <message><![CDATA[IntelliJ IDEA 2024.1 Beta is out with the following updates: 
+<ul> 
+ <li>Revamped <em>Detected Conflicts</em> dialog</li> 
+ <li>Enhanced Terraform support</li> 
+ <li>Support for Maven Shade Plugin renaming</li> 
+</ul> For more details, refer to our 
+<a href="https://blog.jetbrains.com/idea/2024/03/intellij-idea-2024-1-beta/">blog post</a>.]]></message>
+        <button name="Download" url="https://www.jetbrains.com/idea/nextversion" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/IDEA-A-2100661885/IntelliJ-IDEA-2024.1-Beta-241.14494.17-build-Release-Notes"/>
+        <button name="More Information" url="https://blog.jetbrains.com/idea/2024/03/intellij-idea-2024-1-beta/"/>
+        <patch from="241.14024" size="from 30 to 122" fullFrom="241.14024.14"/>
+      </build>
+      <build number="241.14024" version="2024.1 EAP" fullNumber="241.14024.14">
+        <blogPost url="https://blog.jetbrains.com/idea/2024/02/intellij-idea-2024-1-eap-7/"/>
+        <patch from="241.13688" size="from 29 to 39" fullFrom="241.13688.18"/>
+      </build>
+      <build number="241.13688" version="2024.1 EAP" fullNumber="241.13688.18">
+        <blogPost url="https://blog.jetbrains.com/idea/2024/02/intellij-idea-2024-1-eap-6/"/>
+        <patch from="241.12662" size="from 44 to 287" fullFrom="241.12662.62"/>
+      </build>
+      <build number="241.12662" version="2024.1 EAP" fullNumber="241.12662.62">
+        <blogPost url="https://blog.jetbrains.com/idea/2024/02/intellij-idea-2024-1-eap-5/"/>
+        <patch from="241.11761" size="from 41 to 100" fullFrom="241.11761.10"/>
+      </build>
+      <build number="241.11761" version="2024.1 EAP" fullNumber="241.11761.10">
+        <blogPost url="https://blog.jetbrains.com/idea/2024/02/intellij-idea-2024-1-eap-4/"/>
+        <patch from="241.10840" size="from 93 to 109" fullFrom="241.10840.26"/>
+      </build>
+      <build number="241.10840" version="2024.1 EAP" fullNumber="241.10840.26">
+        <blogPost url="https://blog.jetbrains.com/idea/2024/01/intellij-idea-2024-1-eap-3/"/>
+        <patch from="241.9959" size="from 78 to 94" fullFrom="241.9959.31"/>
+      </build>
+      <build number="241.9959" version="2024.1 EAP" fullNumber="241.9959.31">
+        <blogPost url="https://blog.jetbrains.com/idea/2024/01/intellij-idea-2024-1-eap-2/"/>
+        <patch from="241.8102" size="from 237 to 270" fullFrom="241.8102.112"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.67">
+        <blogPost url="https://blog.jetbrains.com/idea/2023/11/intellij-idea-2023-3-beta-3"/>
+        <patch from="233.11799" size="from 30 to 44" fullFrom="233.11799.30"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.30">
+        <blogPost url="https://blog.jetbrains.com/idea/2023/11/intellij-idea-2023-3-beta-2/"/>
+        <patch from="233.11799" size="from 29 to 38" fullFrom="233.11799.6"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.6">
+        <blogPost url="https://blog.jetbrains.com/idea/2023/11/intellij-idea-2023-3-beta/"/>
+        <patch from="233.11555" size="from 31 to 44" fullFrom="233.11555.11"/>
+      </build>
       <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.11">
         <blogPost url="https://blog.jetbrains.com/idea/2023/11/intellij-idea-2023-3-eap-7/"/>
-        <message><![CDATA[IntelliJ IDEA 2023.3 EAP 7 is out, featuring: 
-<ul> 
- <li>Import of Kubernetes cluster contexts from files</li> 
- <li>Support for 'import' blocks in Terraform</li> 
- <li>Better code analysis for constant conditional expressions in Java</li> 
- <li>Reworked code completion for static methods</li> 
-</ul> Learn more about these and other updates in our 
-<a href="https://blog.jetbrains.com/idea/2023/11/intellij-idea-2023-3-eap-7/">blog post</a>.]]></message>
-        <button name="Download" url="https://www.jetbrains.com/idea/nextversion" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/IDEA-A-2100661727/IntelliJ-IDEA-2023.3-EAP-7-233.11555.11-build-Release-Notes"/>
-        <button name="More Information" url="https://blog.jetbrains.com/idea/2023/11/intellij-idea-2023-3-eap-7/"/>
         <patch from="233.11361" size="from 29 to 40" fullFrom="233.11361.10"/>
       </build>
       <build number="233.11361" version="2023.3 EAP" fullNumber="233.11361.10">
@@ -2641,20 +2980,64 @@
       </build>
     </channel>
     <channel id="IC-IU-RELEASE-licensing-RELEASE" name="IntelliJ IDEA RELEASE" status="release" url="https://www.jetbrains.com/idea/download" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2023" licensing="release">
+      <build number="233.14475" version="2023.3.4" releaseDate="20231206" fullNumber="233.14475.28">
+        <blogPost url="https://blog.jetbrains.com/idea/2024/02/intellij-idea-2023-3-4/"/>
+        <message><![CDATA[IntelliJ IDEA 2023.3.4 is out with the following updates: 
+<ul> 
+ <li>The progress bar for building tasks in Gradle projects is once again displayed. [<a href="https://youtrack.jetbrains.com/issue/IDEA-344392/Return-progress-indicator-for-compiling-Gradle-tasks">IDEA-344392</a>]</li> 
+ <li>We've addressed the issue with the <em>Settings Sync</em> functionality, and now, instead of reporting an authorization problem, the IDE prompts you to log in with your JetBrains Account. [<a href="https://youtrack.jetbrains.com/issue/IDEA-343073/Setting-Sync-sync-failed.-couldnt-get-settings-from-server-Authentication-required">IDEA-343073</a>]</li> 
+ <li>The IDE now successfully adds Kubernetes сontexts from config files. [<a href="https://youtrack.jetbrains.com/issue/IDEA-341416/Kubernetes-plugin-crashes-when-trying-to-load-config">IDEA-341416</a>]</li> 
+ <li>Customizing inspection severities is once again accessible in <em>Settings/Preferences | Editor | Inspections</em>. [<a href="https://youtrack.jetbrains.com/issue/IDEA-341773/Inspections-Edit-severities-no-longer-opens-the-Severities-Editor">IDEA-341773</a>]</li> 
+ <li>The IDE once again properly recognizes and resolves custom DataSource configuration properties. [<a href="https://youtrack.jetbrains.com/issue/IDEA-343779/ConfigurationProperties-method-keys-with-library-return-type-not-collected">IDEA-343779</a>]</li> 
+ <li>We've addressed several issues that were occurring when working with the HTTP Client. [<a href="https://youtrack.jetbrains.com/issue/IDEA-330341/">IDEA-330341</a>], [<a href="https://youtrack.jetbrains.com/issue/IDEA-334527/">IDEA-334527</a>], [<a href="https://youtrack.jetbrains.com/issue/IDEA-337644/">IDEA-337644</a>], [<a href="https://youtrack.jetbrains.com/issue/IDEA-338836/">IDEA-338836</a>], [<a href="https://youtrack.jetbrains.com/issue/IDEA-338958/">IDEA-338958</a>]</li> 
+</ul> For more details, please refer to this 
+<a href="https://blog.jetbrains.com/idea/2024/02/intellij-idea-2023-3-4/">blog post</a>.]]></message>
+        <button name="Download" url="https://www.jetbrains.com/idea/download" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/IDEA-A-2100661858/IntelliJ-IDEA-2023.3.4-233.14475.28-build-Release-Notes"/>
+        <button name="More Information" url="https://blog.jetbrains.com/idea/2024/02/intellij-idea-2023-3-4/"/>
+        <patch from="233.14475" size="from 28 to 35" fullFrom="233.14475.9"/>
+        <patch from="232.10227" size="from 227 to 288" fullFrom="232.10227.8"/>
+        <patch from="233.14015" size="from 31 to 39" fullFrom="233.14015.106"/>
+      </build>
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.106">
+        <blogPost url="https://blog.jetbrains.com/idea/2024/01/intellij-idea-2023-3-3/"/>
+        <patch from="233.14015" size="from 28 to 35" fullFrom="233.14015.23"/>
+        <patch from="232.10227" size="from 225 to 286" fullFrom="232.10227.8"/>
+        <patch from="233.13135" size="from 57 to 70" fullFrom="233.13135.103"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.103">
+        <blogPost url="https://blog.jetbrains.com/idea/2023/12/intellij-idea-2023-3-2/"/>
+        <patch from="233.13135" size="from 28 to 38" fullFrom="233.13135.65"/>
+        <patch from="232.10227" size="from 196 to 255" fullFrom="232.10227.8"/>
+        <patch from="233.11799" size="from 33 to 45" fullFrom="233.11799.300"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.300">
+        <blogPost url="https://blog.jetbrains.com/idea/2023/12/intellij-idea-2023-3-1/"/>
+        <patch from="233.11799" size="from 29 to 36" fullFrom="233.11799.241"/>
+        <patch from="232.10227" size="from 195 to 253" fullFrom="232.10227.8"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.241">
+        <patch from="233.11799" size="from 29 to 37" fullFrom="233.11799.196"/>
+        <patch from="232.10227" size="from 195 to 253" fullFrom="232.10227.8"/>
+      </build>
+      <build number="232.10300" version="2023.2.6" releaseDate="20230726" fullNumber="232.10300.40">
+        <message><![CDATA[IntelliJ IDEA 2023.2.6 is out with the following updates: 
+<ul> 
+ <li>Progress indicators no longer endlessly display running tasks upon Maven project opening. [<a href="https://youtrack.jetbrains.com/issue/IDEA-327274/Indefinite-progress-indicators-after-project-opening">IDEA-327274</a>]</li> 
+ <li>We've implemented improvements to strengthen the IDE's overall stability.</li> 
+</ul> Learn more in the release notes.]]></message>
+        <button name="Download" url="https://www.jetbrains.com/idea/download/other.html#version20232" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/IDEA-A-2100661863/IntelliJ-IDEA-2023.2.6-232.10300.40-build-Release-Notes"/>
+        <patch from="232.10227" size="from 29 to 42" fullFrom="232.10227.8"/>
+        <patch from="231.9392" size="from 520 to 602" fullFrom="231.9392.1"/>
+      </build>
+      <build number="232.10227" version="2023.2.5" releaseDate="20230726" fullNumber="232.10227.8">
+        <blogPost url="https://blog.jetbrains.com/idea/2023/11/intellij-idea-2023-2-5/"/>
+        <patch from="232.10203" size="from 31 to 41" fullFrom="232.10203.10"/>
+        <patch from="231.9392" size="from 521 to 601" fullFrom="231.9392.1"/>
+      </build>
       <build number="232.10203" version="2023.2.4" releaseDate="20230726" fullNumber="232.10203.10">
         <blogPost url="https://blog.jetbrains.com/idea/2023/10/intellij-idea-2023-2-4/"/>
-        <message><![CDATA[IntelliJ IDEA 2023.2.4 is out with the following improvements: 
-<ul> 
- <li>The IDE now properly recognizes Spring configuration files when importing projects from Bazel. [<a href="https://youtrack.jetbrains.com/issue/IDEA-324807/">IDEA-324807</a>]</li> 
- <li>The IDE no longer hangs when deploying a WAR artifact to a remote Tomcat server. [<a href="https://youtrack.jetbrains.com/issue/IDEA-326787/Tomcat-service-will-not-deploy-to-remote-server-TomcatRemoteModel-cannot-be-cast-to-TomcatLocalModel">IDEA-326787</a>]</li> 
- <li>The list of directories is again correctly rendered in the <em>Project</em> tool window. [<a href="https://youtrack.jetbrains.com/issue/IDEA-326394">IDEA-326394</a>]</li> 
- <li>Absolute directory paths in the <em>Commit</em> tool window no longer take up too much space as a result of redundantly replicating parent paths. [<a href="https://youtrack.jetbrains.com/issue/IDEA-326271/Commit-window-shows-full-path-irregularly">IDEA-326271</a>]</li> 
- <li>The IDE now properly recognizes configuration properties inherited from superclasses when working with Spring Boot projects. [<a href="https://youtrack.jetbrains.com/issue/IDEA-330037/Spring-Boot-Inherited-POJO-properties-are-not-resolved-in-ConfigurationProperties">IDEA-330037</a>] </li> 
-</ul> For more details, please refer to this 
-<a href="https://blog.jetbrains.com/idea/2023/10/intellij-idea-2023-2-4/">blog post</a>.]]></message>
-        <button name="Download" url="https://www.jetbrains.com/idea/download" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/IDEA-A-2100661715/IntelliJ-IDEA-2023.2.4-232.10203.10-build-Release-Notes"/>
-        <button name="More Information" url="https://blog.jetbrains.com/idea/2023/10/intellij-idea-2023-2-4/"/>
         <patch from="232.10072" size="from 28 to 38" fullFrom="232.10072.27"/>
         <patch from="231.9392" size="from 519 to 599" fullFrom="231.9392.1"/>
       </build>
@@ -2680,17 +3063,15 @@
         <patch from="232.8660" size="from 49 to 57" fullFrom="232.8660.142"/>
         <patch from="231.9392" size="from 491 to 565" fullFrom="231.9392.1"/>
       </build>
+      <build number="231.9414" version="2023.1.6" releaseDate="20230328" fullNumber="231.9414.13">
+        <message><![CDATA[IntelliJ IDEA 2023.1.6 is out. This bug-fix update brings fixes and improvements to strengthen the IDE's overall stability. Get the full details in the release notes.]]></message>
+        <button name="Download" url="https://www.jetbrains.com/idea/download/other.html#version20231" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/IDEA-A-2100661865/IntelliJ-IDEA-2023.1.6-231.9414.13-build-Release-Notes"/>
+        <patch from="231.9392" size="from 40 to 52" fullFrom="231.9392.1"/>
+        <patch from="223.8836" size="from 230 to 351" fullFrom="223.8836.41"/>
+      </build>
       <build number="231.9392" version="2023.1.5" releaseDate="20230328" fullNumber="231.9392.1">
         <blogPost url="https://blog.jetbrains.com/idea/2023/07/intellij-idea-2023-1-5/"/>
-        <message><![CDATA[IntelliJ IDEA 2023.1.5 is out with the following improvements: 
-<ul> 
- <li>We've fixed the issue that caused Maven reimport to fail with the <em>java.io.FileNotFoundException</em> exception. [<a href="https://youtrack.jetbrains.com/issue/IDEA-322338">IDEA-322338</a>]</li> 
- <li>We've fixed the issue that caused running JPQL queries in the JPA console to fail with the <em>java.lang.NoSuchFieldError. </em>[<a href="https://youtrack.jetbrains.com/issue/IDEA-322154">IDEA-322154</a>]</li> 
-</ul> For more details, please refer to this 
-<a href="https://blog.jetbrains.com/idea/2023/07/intellij-idea-2023-1-5/">blog post</a>.]]></message>
-        <button name="Download" url="https://www.jetbrains.com/idea/download/other.html#version20231" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/IDEA-A-2100661623/IntelliJ-IDEA-2023.1.5-231.9392.1-build-Release-Notes"/>
-        <button name="More Information" url="https://blog.jetbrains.com/idea/2023/07/intellij-idea-2023-1-5/"/>
         <patch from="231.9225" size="from 34 to 42" fullFrom="231.9225.16"/>
         <patch from="223.8836" size="from 227 to 345" fullFrom="223.8836.41"/>
       </build>
@@ -3102,6 +3483,19 @@
       </build>
     </channel>
     <channel id="IC-IU-EAP-licensing-RELEASE" name="IntelliJ IDEA EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/idea/nextversion" feedback="https://youtrack.jetbrains.com/issues/IDEA" majorVersion="2023" licensing="release">
+      <build number="233.14475" version="2023.3.4 Release Candidate" releaseDate="20231206" fullNumber="233.14475.9">
+        <patch from="233.14015" size="from 31 to 39" fullFrom="233.14015.106"/>
+      </build>
+      <build number="233.14015" version="2023.3.3 Release Candidate" releaseDate="20231206" fullNumber="233.14015.23">
+        <patch from="233.13135" size="from 58 to 71" fullFrom="233.13135.103"/>
+      </build>
+      <build number="233.13135" version="2023.3.2 Release Candidate" releaseDate="20231206" fullNumber="233.13135.65">
+        <patch from="233.11799" size="from 34 to 46" fullFrom="233.11799.300"/>
+      </build>
+      <build number="233.11799" version="2023.3 Release Candidate" fullNumber="233.11799.196">
+        <blogPost url="https://blog.jetbrains.com/idea/2023/11/intellij-idea-2023-3-release-candidate/"/>
+        <patch from="233.11799" size="from 32 to 40" fullFrom="233.11799.67"/>
+      </build>
       <build number="232.9921" version="2023.2.2 Release Candidate" releaseDate="20230726" fullNumber="232.9921.28">
         <patch from="232.9559" size="from 31 to 41" fullFrom="232.9559.62"/>
       </build>
@@ -3522,6 +3916,22 @@
   <product name="MPS">
     <code>MPS</code>
     <channel id="MPS-RELEASE-licensing-RELEASE" name="MPS RELEASE" status="release" url="https://www.jetbrains.com/mps/download" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.13135" version="2023.3" releaseDate="20240307" fullNumber="233.13135.979">
+        <message><![CDATA[<ul> 
+ <li>Support for the new UI</li> 
+ <li>Documentation facet</li> 
+ <li>Updated dialog design for tooltips</li> 
+ <li>Inspector tool window position change</li> 
+ <li>Ability to convert concepts into interface concepts</li> 
+ <li>Improved dependency detection during the make process</li> 
+ <li>Show History action for modules in the Logical View tool window</li> 
+ <li>VCS: Git menu for root nodes in the Logical View tool window</li> 
+ <li>Group file changes by extension</li> 
+</ul> 
+<p>If you want to learn more, please read our <a href="https://blog.jetbrains.com/mps/2024/02/mps-2023-3-is-out/">blog post</a>.</p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/mps/download" download="true"/>
+        <button name="Release Notes" url="https://blog.jetbrains.com/mps/2024/02/mps-2023-3-is-out/"/>
+      </build>
       <build number="232.10072" version="2023.2" releaseDate="20231030" fullNumber="232.10072.781">
         <message><![CDATA[<ul> 
  <li>The constraint rules update</li> 
@@ -3532,33 +3942,23 @@
  <li>BaseLanguage improvements</li> 
 </ul> 
 <p>If you want to learn more, please read our <a href="https://blog.jetbrains.com/mps/2023/10/mps-2023-2-is-now-available/">blog post</a>.</p>]]></message>
-        <button name="Download" url="https://www.jetbrains.com/mps/download" download="true"/>
+        <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20232" download="true"/>
         <button name="Release Notes" url="https://blog.jetbrains.com/mps/2023/10/mps-2023-2-is-now-available/"/>
       </build>
-      <build number="223.8836" version="2022.3" releaseDate="20230502" fullNumber="223.8836.1185">
-        <message><![CDATA[<ul> 
- <li>The constraint rules update</li> 
- <li>Improved support in MPS Kotlin</li> 
- <li>Migration sync with MPS extensions</li> 
- <li>Additional utility methods in the language definition</li> 
- <li>Kotlin stubs for JVM</li> 
- <li>Kotlin edition improvements</li> 
- <li>Transformation to create a constructor from a type</li> 
- <li>Improvements to extension functions in Scopes</li> 
-</ul> 
-<p>If you want to learn more, please read our <a href="https://blog.jetbrains.com/mps/2023/05/mps-2022-3-is-finally-here/">blog post</a>.</p>]]></message>
+      <build number="223.8836" version="2022.3.1" releaseDate="20230502" fullNumber="223.8836.1366">
+        <message><![CDATA[<p>If you want to learn more, please check our <a href="https://youtrack.jetbrains.com/releaseNotes/MPS?q=%23Resolved+Fix+versions%3A+2022.3.1&amp;title=MPS%202022.3.1%20Release%20Notes">issue tracker</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20223" download="true"/>
-        <button name="Release Notes" url="https://blog.jetbrains.com/mps/2023/05/mps-2022-3-is-finally-here/"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes/MPS?q=%23Resolved+Fix+versions%3A+2022.3.1&amp;title=MPS%202022.3.1%20Release%20Notes"/>
       </build>
-      <build number="222.4554" version="2022.2.1" releaseDate="20221101" fullNumber="222.4554.1426">
-        <message><![CDATA[<p>If you want to learn more, please check our <a href="https://youtrack.jetbrains.com/releaseNotes/MPS?q=%23Resolved+Fix+versions%3A+2022.2.1&amp;title=MPS%202022.2.1%20Release%20Notes">issue tracker</a>.</p>]]></message>
+      <build number="222.4554" version="2022.2.2" releaseDate="20221101" fullNumber="222.4554.1547">
+        <message><![CDATA[<p>If you want to learn more, please check our <a href="https://youtrack.jetbrains.com/releaseNotes/MPS?q=%23Resolved+Fix+versions%3A+2022.2.2&amp;title=MPS%202022.2.2%20Release%20Notes">issue tracker</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20222" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes/MPS?q=%23Resolved+Fix+versions%3A+2022.2.1&amp;title=MPS%202022.2.1%20Release%20Notes"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes/MPS?q=%23Resolved+Fix+versions%3A+2022.2.2&amp;title=MPS%202022.2.2%20Release%20Notes"/>
       </build>
-      <build number="213.7172" version="2021.3.4" releaseDate="20220215" fullNumber="213.7172.1146">
-        <message><![CDATA[<p>If you want to learn more, please check our <a href="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20Fix%20versions:%202021.3.4">issue tracker</a>.</p>]]></message>
+      <build number="213.7172" version="2021.3.5" releaseDate="20220215" fullNumber="213.7172.1189">
+        <message><![CDATA[<p>If you want to learn more, please check our <a href="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20Fix%20versions:%202021.3.5">issue tracker</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version20213" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20Fix%20versions:%202021.3.4"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20Fix%20versions:%202021.3.5"/>
       </build>
       <build number="212.5284" version="2021.2.6" releaseDate="20211006" fullNumber="212.5284.1433">
         <message><![CDATA[<p>If you want to learn more, please check our <a href="https://youtrack.jetbrains.com/issues/MPS?q=%23Resolved%20%20project:%20MPS%20version:%202021.2.6">issue tracker</a>.</p>]]></message>
@@ -3651,7 +4051,7 @@
       </build>
     </channel>
     <channel id="MPS33" name="MPS 3.3" status="release" url="https://www.jetbrains.com/mps/download" feedback="https://youtrack.jetbrains.com" majorVersion="3" licensing="release">
-      <build number="143.1301" version="3.3.5" releaseDate="20161223">
+      <build number="143.1301" version="3.3.5" releaseDate="20151223">
         <message><![CDATA[JetBrains MPS 3.3.5 is available.]]></message>
         <button name="Download" url="https://www.jetbrains.com/mps/download/previous.html#version33" download="true"/>
         <button name="Release Notes" url="https://youtrack.jetbrains.com/releaseNotes?q=%23MPS+Fix+versions%3A+3.3+State%3A+Fixed+&amp;title=MPS+3.3+Release+notes"/>
@@ -3667,36 +4067,64 @@
   </product>
   <product name="PhpStorm">
     <code>PS</code>
-    <channel id="PS-EAP-licensing-EAP" name="PhpStorm EAP" status="eap" url="https://www.jetbrains.com/phpstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.19">
-        <message><![CDATA[<h1>PhpStorm 2023.3 EAP #6 is now available</h1> 
+    <channel id="PS-EAP-licensing-EAP" name="PhpStorm EAP" status="eap" url="https://www.jetbrains.com/phpstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.14494" version="2024.1 Beta" fullNumber="241.14494.28">
+        <message><![CDATA[<h1>PhpStorm 2024.1 Beta is now available</h1> 
 <p>This build brings a bunch of bug fixes and quality-of-life improvements.</p> 
 <br> 
 <p>Here are the most notable changes and bug fixes in this build:</p> 
-<div id="content"> 
-</div>
+<div id="content"></div>
 <ul> 
- <li>New: GitLab - Creating draft merge request notes [<a href="https://youtrack.jetbrains.com/issue/IDEA-318276">IDEA-318276</a>]</li> 
- <li>Fix: Prettier is converting vue html attributes to single quotes. Only want JavaScript strings to be single quote. [<a href="https://youtrack.jetbrains.com/issue/WEB-50619">WEB-50619</a>]</li> 
- <li>Fix: Vue3 script setup: no resolve/completion for properties exposed with defineExpose [<a href="https://youtrack.jetbrains.com/issue/WEB-56696">WEB-56696</a>]</li> 
- <li>New: Enable color preview for color-like values in JSON [<a href="https://youtrack.jetbrains.com/issue/WEB-47664">WEB-47664</a>]</li> 
- <li>Fix: Mongoose: properties added via module augmentation in d.ts files not resolved [<a href="https://youtrack.jetbrains.com/issue/WEB-54904">WEB-54904</a>]</li> 
- <li>Fix: Some artifacts are blinks at the top edge of the screen when enter full-screen mode [<a href="https://youtrack.jetbrains.com/issue/IDEA-323662">IDEA-323662</a>]</li> 
- <li>Fix: VCS widget: branch on the widget is displayed truncated sometimes when there is enough space [<a href="https://youtrack.jetbrains.com/issue/IDEA-312648">IDEA-312648</a>]</li> 
- <li>New: Vue 3.3: Support defineSlots [<a href="https://youtrack.jetbrains.com/issue/WEB-61142">WEB-61142</a>]</li> 
- <li>New: Support Vitest `describe` and `test` advanced extensions: skipIf, runIf, etc. [<a href="https://youtrack.jetbrains.com/issue/WEB-58760">WEB-58760</a>]</li> 
- <li>Fix: Typescript property completion adds extra dot for partial and for optional parameters [<a href="https://youtrack.jetbrains.com/issue/WEB-63103">WEB-63103</a>]</li> 
- <li>Fix: Debugger freezes [<a href="https://youtrack.jetbrains.com/issue/WEB-53630">WEB-53630</a>]</li> 
- <li>Fix: Vitest: test suite is not recognized when using describe with 3 parameters [<a href="https://youtrack.jetbrains.com/issue/WEB-58803">WEB-58803</a>]</li> 
- <li>New: Support "exports" field of package.json for TypeScript files [<a href="https://youtrack.jetbrains.com/issue/WEB-60536">WEB-60536</a>]</li> 
- <li>Fix: JSX attribute quotes/braces autocompletion 'based on type' not working in TSX files [<a href="https://youtrack.jetbrains.com/issue/WEB-61670">WEB-61670</a>]</li> 
- <li>Fix: "Couldn't check commit: check failed" due to uninformative assertion [<a href="https://youtrack.jetbrains.com/issue/IDEA-325652">IDEA-325652</a>]</li> 
- <li>Fix: Navigation bar is absent [<a href="https://youtrack.jetbrains.com/issue/IDEA-335693">IDEA-335693</a>]</li> 
+ <li>Fix: XDebug / PHPStorm Step Debugging - modified values aren't detected [<a href="https://youtrack.jetbrains.com/issue/WI-75372">WI-75372</a>]</li> 
+ <li>Fix: Autocomplete showing duplicate methods if class implements interface [<a href="https://youtrack.jetbrains.com/issue/WI-72549">WI-72549</a>]</li> 
+ <li>Fix: Feature test gutter icons automatically assume Behat configuration even if Codeception is enabled [<a href="https://youtrack.jetbrains.com/issue/WI-73166">WI-73166</a>]</li> 
+ <li>Fix: Use symfony console to install importmap module via quick-fix [<a href="https://youtrack.jetbrains.com/issue/WI-76170">WI-76170</a>]</li> 
+ <li>Fix: Rename "Project from Version Control" action in the Project Widget [<a href="https://youtrack.jetbrains.com/issue/WI-76392">WI-76392</a>]</li> 
+ <li>Fix: Module isn't installed in importmap: title contains injected value [<a href="https://youtrack.jetbrains.com/issue/WI-76389">WI-76389</a>]</li> 
+ <li>Fix: Module isn't installed in importmap: Inspection is placed under wrong group [<a href="https://youtrack.jetbrains.com/issue/WI-76388">WI-76388</a>]</li> 
+ <li>Fix: Pest plugin doesn't get published on Marketplace anymore so IDEA users can't update it [<a href="https://youtrack.jetbrains.com/issue/WI-76382">WI-76382</a>]</li> 
+ <li>Fix: Pest Inspections: change naming from 'must' to 'should' [<a href="https://youtrack.jetbrains.com/issue/WI-76369">WI-76369</a>]</li> 
+ <li>Fix: Convert intention to run importmap:require to inspection [<a href="https://youtrack.jetbrains.com/issue/WI-76172">WI-76172</a>]</li> 
+ <li>Fix: Import of js module in subproject is highlighted as not installed even if it is present in importmap.php [<a href="https://youtrack.jetbrains.com/issue/WI-76167">WI-76167</a>]</li> 
+ <li>Fix: Deployment: Freeze on batch apply of changes in diff dialog [<a href="https://youtrack.jetbrains.com/issue/WI-75812">WI-75812</a>]</li> 
+ <li>New: Pest: Add Go To "method -&gt; test" and "test -&gt; method" [<a href="https://youtrack.jetbrains.com/issue/WI-75699">WI-75699</a>]</li> 
+ <li>Fix: Deployment: Exception after uploading same file to remote host twice [<a href="https://youtrack.jetbrains.com/issue/WI-75226">WI-75226</a>]</li> 
+ <li>Fix: Pest plugin: Type of $this in Pest test is inferred wrong in subproject [<a href="https://youtrack.jetbrains.com/issue/WI-75198">WI-75198</a>]</li> 
+ <li>Fix: Type of $this in closure in Pest test should be resolved to target Pest test class [<a href="https://youtrack.jetbrains.com/issue/WI-75120">WI-75120</a>]</li> 
+ <li>Fix: Symlink files/folders are not shown in the UI as being linked (New UI) [<a href="https://youtrack.jetbrains.com/issue/IDEA-295555">IDEA-295555</a>]</li> 
+ <li>Fix: Pressing Ctrl+tab causes an exception. java.lang.AssertionError: Can't create key stroke for control 36 [<a href="https://youtrack.jetbrains.com/issue/IDEA-270009">IDEA-270009</a>]</li> 
+ <li>Fix: IllegalArgumentException at ChildInfoImpl.&lt;init&gt; [<a href="https://youtrack.jetbrains.com/issue/IDEA-259257">IDEA-259257</a>]</li> 
 </ul> 
 <br> 
-<p> For the full list of changes in this build, please see the <a href="https://youtrack.jetbrains.com/articles/WI-A-231736085">release notes</a>. </p>]]></message>
+<p>The full list of changes in PhpStorm 2024.1 Beta is available in the <a href="https://youtrack.jetbrains.com/articles/WI-A-231736106">release notes</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/phpstorm/nextversion/" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WI-A-231736085/PhpStorm-2023.3-EAP-6-233.11555.19-build-Release-Notes"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WI-A-231736106"/>
+        <patch from="241.14024" size="from 165 to 168" fullFrom="241.14024.21"/>
+      </build>
+      <build number="241.14024" version="2024.1 EAP" fullNumber="241.14024.21">
+        <patch from="241.13688" size="from 35 to 37" fullFrom="241.13688.22"/>
+      </build>
+      <build number="241.13688" version="2024.1 EAP" fullNumber="241.13688.22">
+        <patch from="241.12662" size="from 120 to 123" fullFrom="241.12662.49"/>
+      </build>
+      <build number="241.12662" version="2024.1 EAP" fullNumber="241.12662.49">
+        <patch from="241.11761" size="from 93 to 97" fullFrom="241.11761.30"/>
+      </build>
+      <build number="241.11761" version="2024.1 EAP" fullNumber="241.11761.30">
+        <patch from="241.10840" size="from 98 to 103" fullFrom="241.10840.21"/>
+      </build>
+      <build number="241.10840" version="2024.1 EAP" fullNumber="241.10840.21">
+        <patch from="241.8102" size="from 268 to 282" fullFrom="241.8102.119"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.55">
+        <blogPost url="https://blog.jetbrains.com/phpstorm/2023/11/phpstorm-2023-3-beta-2"/>
+        <patch from="233.11799" size="from 43 to 45" fullFrom="233.11799.21"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.21">
+        <blogPost url="https://blog.jetbrains.com/phpstorm/2023/11/phpstorm-2023-3-beta/"/>
+        <patch from="233.11555" size="from 50 to 51" fullFrom="233.11555.19"/>
+      </build>
+      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.19">
         <patch from="233.11361" size="from 42 to 43" fullFrom="233.11361.11"/>
       </build>
       <build number="233.11361" version="2023.3 EAP" fullNumber="233.11361.11">
@@ -3767,18 +4195,16 @@
       </build>
     </channel>
     <channel id="PS-RELEASE-licensing-RELEASE" name="PhpStorm RELEASE" status="release" url="https://www.jetbrains.com/phpstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
-      <build number="232.10072" version="2023.2.3" releaseDate="20230803" fullNumber="232.10072.32">
-        <message><![CDATA[<h1>PhpStorm 2023.2.3 is now available</h1> 
-<p>PhpStorm 2023.2.3 is a minor update, and it includes a host of bug fixes and quality-of-life improvements. </p> 
+      <build number="233.14808" version="2023.3.5" releaseDate="20231206" fullNumber="233.14808.18">
+        <message><![CDATA[<h1>PhpStorm 2023.3.5 is now available</h1> 
+<p>PhpStorm 2023.3.5 is a minor update, and it includes a host of bug fixes and quality-of-life improvements. </p> 
 <p>Here are the most notable changes and bug fixes in this build:</p> 
 <div id="content"></div>
 <ul> 
- <li>Fix: Unexpected, funny file encoding in completely blank files [<a href="https://youtrack.jetbrains.com/issue/WI-72288">WI-72288</a>]</li> 
- <li>Fix: Deadlock in indexes due to calling FileBasedIndex recursively [<a href="https://youtrack.jetbrains.com/issue/IDEA-324412">IDEA-324412</a>]</li> 
- <li>Fix: Can't open some projects in 2023.2 due to "Access is allowed from Event Dispatch Thread (EDT) only" error [<a href="https://youtrack.jetbrains.com/issue/IDEA-327168">IDEA-327168</a>]</li> 
- <li>Fix: Angular: Component out of scope inspection on HTML "tr"/"td" tags when using @angular/cdk [<a href="https://youtrack.jetbrains.com/issue/WEB-62508">WEB-62508</a>]</li> 
+ <li>Fix: "Project Errors" tab continues showing outdated project errors even when they are resolved [<a href="https://youtrack.jetbrains.com/issue/IDEA-344500">IDEA-344500</a>]</li> 
+ <li>Fix: Wrong screen scaling set randomly, sometimes becomes normal after IDE restart [<a href="https://youtrack.jetbrains.com/issue/IDEA-341318">IDEA-341318</a>]</li> 
 </ul> 
-<p>The full list of changes in PhpStorm 2023.2.3 is available in the <a href="https://youtrack.jetbrains.com/articles/WI-A-231736082">release notes</a>.</p> 
+<p>The full list of changes in PhpStorm 2023.3.5 is available in the <a href="https://youtrack.jetbrains.com/articles/WI-A-231736107">release notes</a>.</p> 
 <hr> 
 <ul> 
  <li><a href="https://www.jetbrains.com/phpstorm/download">Download PhpStorm</a></li> 
@@ -3786,7 +4212,54 @@
  <li>Report bugs to our <a href="https://youtrack.jetbrains.com/issues/WI">issue tracker</a></li> 
 </ul>]]></message>
         <button name="Download" url="https://www.jetbrains.com/phpstorm/download" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WI-A-231736082/PhpStorm-2023.2.3-232.10072.32-build-Release-Notes"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WI-A-231736100"/>
+        <patch from="232.10300" size="from 183 to 184" fullFrom="232.10300.41"/>
+        <patch from="233.14475" size="from 34 to 35" fullFrom="233.14475.35"/>
+      </build>
+      <build number="233.14475" version="2023.3.4" releaseDate="20231206" fullNumber="233.14475.35">
+        <patch from="232.10227" size="from 185 to 186" fullFrom="232.10227.13"/>
+        <patch from="233.14015" size="from 37 to 38" fullFrom="233.14015.96"/>
+        <patch from="233.14475" size="from 34 to 35" fullFrom="233.14475.7"/>
+      </build>
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.96">
+        <patch from="232.10227" size="from 183 to 185" fullFrom="232.10227.13"/>
+        <patch from="233.13135" size="from 46 to 47" fullFrom="233.13135.108"/>
+        <patch from="233.14015" size="from 34 to 35" fullFrom="233.14015.25"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.108">
+        <patch from="233.11799" size="from 46 to 47" fullFrom="233.11799.297"/>
+        <patch from="233.13135" size="from 41 to 42" fullFrom="233.13135.67"/>
+        <patch from="232.10227" size="from 179 to 181" fullFrom="232.10227.13"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.297">
+        <blogPost url="https://blog.jetbrains.com/phpstorm/2023/12/phpstorm-2023-3-is-now-available"/>
+        <patch from="232.10227" size="from 178 to 179" fullFrom="232.10227.13"/>
+        <patch from="233.11799" size="from 35 to 36" fullFrom="233.11799.232"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.232">
+        <blogPost url="https://blog.jetbrains.com/phpstorm/2023/12/phpstorm-2023-3-is-now-available"/>
+        <patch from="232.10227" size="from 178 to 179" fullFrom="232.10227.13"/>
+        <patch from="233.11799" size="from 42 to 43" fullFrom="233.11799.172"/>
+      </build>
+      <build number="232.10300" version="2023.2.5" releaseDate="20230803" fullNumber="232.10300.41">
+        <message><![CDATA[<h1>PhpStorm 2023.2.5 is now available</h1> 
+<p>PhpStorm 2023.2.5 is a minor update, and it includes improvements to strengthen the IDE's overall stability. </p> 
+<hr> 
+<ul> 
+ <li><a href="https://www.jetbrains.com/phpstorm/download">Download PhpStorm</a></li> 
+ <li><a href="https://twitter.com/phpstorm">Tweet us</a></li> 
+ <li>Report bugs to our <a href="https://youtrack.jetbrains.com/issues/WI">issue tracker</a></li> 
+</ul>]]></message>
+        <button name="Download" url="https://confluence.jetbrains.com/display/PhpStorm/Previous+PhpStorm+Releases#version20232" download="true"/>
+        <patch from="232.10227" size="from 39 to 41" fullFrom="232.10227.13"/>
+        <patch from="231.9225" size="from 427 to 445" fullFrom="231.9225.18"/>
+      </build>
+      <build number="232.10227" version="2023.2.4" releaseDate="20230803" fullNumber="232.10227.13">
+        <blogPost url="https://blog.jetbrains.com/phpstorm/2023/11/phpstorm-now-supports-php-8-3/"/>
+        <patch from="232.10072" size="from 45 to 46" fullFrom="232.10072.32"/>
+        <patch from="231.9225" size="from 428 to 445" fullFrom="231.9225.18"/>
+      </build>
+      <build number="232.10072" version="2023.2.3" releaseDate="20230803" fullNumber="232.10072.32">
         <patch from="232.9921" size="from 38 to 40" fullFrom="232.9921.55"/>
         <patch from="231.9225" size="from 425 to 442" fullFrom="231.9225.18"/>
       </build>
@@ -3807,26 +4280,21 @@
         <patch from="231.9225" size="from 397 to 415" fullFrom="231.9225.18"/>
         <patch from="232.8660" size="from 32 to 34" fullFrom="232.8660.153"/>
       </build>
+      <build number="231.9414" version="2023.1.5" releaseDate="20230403" fullNumber="231.9414.10">
+        <message><![CDATA[<h1>PhpStorm 2023.1.5 is now available</h1> 
+<p>PhpStorm 2023.1.5 is a minor update, and it includes improvements to strengthen the IDE's overall stability. </p> 
+<hr> 
+<ul> 
+ <li><a href="https://www.jetbrains.com/phpstorm/download">Download PhpStorm</a></li> 
+ <li><a href="https://twitter.com/phpstorm">Tweet us</a></li> 
+ <li>Report bugs to our <a href="https://youtrack.jetbrains.com/issues/WI">issue tracker</a></li> 
+</ul>]]></message>
+        <button name="Download" url="https://confluence.jetbrains.com/display/PhpStorm/Previous+PhpStorm+Releases#version20231" download="true"/>
+        <patch from="231.9225" size="from 48 to 49" fullFrom="231.9225.18"/>
+        <patch from="223.8836" size="from 165 to 166" fullFrom="223.8836.42"/>
+      </build>
       <build number="231.9225" version="2023.1.4" releaseDate="20230403" fullNumber="231.9225.18">
         <blogPost url="https://blog.jetbrains.com/phpstorm/2023/07/phpstorm-2023-1-4-is-released/"/>
-        <message><![CDATA[<h3 class="">PhpStorm 2023.1.4 is now available</h3> 
-<br>
-<br> 
-<p>This build brings a bunch of bug fixes and quality-of-life improvements.</p> 
-<p>Notable changes:</p> 
-<div id="content"> 
-</div> 
-<ul> 
- <li>"Copy Reference" on a line in Editor no longer copies "Path From Content Root" (instead it copies the path from the parent root e.g. source root, test root) [<a href="https://youtrack.jetbrains.com/issue/IDEA-316752">IDEA-316752</a>] </li> 
- <li>File Cache Conflict when using an external formatter since 2023.1.1 [<a href="https://youtrack.jetbrains.com/issue/WI-72733">WI-72733</a>] </li> 
- <li>File cache conflict when use External Formatter and live template in interface [<a href="https://youtrack.jetbrains.com/issue/WI-73178">WI-73178</a>] </li> 
- <li>IDE start fails with "CannotActivateException: Address already in use: bind" [<a href="https://youtrack.jetbrains.com/issue/IDEA-323836">IDEA-323836</a>] </li> 
-</ul> 
-<p><br></p> 
-<p class=""> For the full list of changes in this build, please see the <a href="https://youtrack.jetbrains.com/articles/WI-A-231736068">release notes</a>. </p>]]></message>
-        <button name="Download" url="https://blog.jetbrains.com/phpstorm/2023/07/phpstorm-2023-1-4-is-released/" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WI-A-231736068/PhpStorm-2023.1.4-231.9225.18-build-Release-Notes"/>
-        <button name="More Information" url="https://blog.jetbrains.com/phpstorm/2023/07/phpstorm-2023-1-4-is-released/"/>
         <patch from="231.9225" size="from 40 to 41" fullFrom="231.9225.7"/>
         <patch from="231.9161" size="from 40 to 41" fullFrom="231.9161.47"/>
         <patch from="223.8836" size="from 162 to 163" fullFrom="223.8836.42"/>
@@ -4263,6 +4731,19 @@
       </build>
     </channel>
     <channel id="PS-EAP-licensing-RELEASE" name="PhpStorm EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/phpstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14475" version="2023.3.4 Release Candidate" releaseDate="20231206" fullNumber="233.14475.7">
+        <patch from="233.14015" size="from 37 to 39" fullFrom="233.14015.96"/>
+      </build>
+      <build number="233.14015" version="2023.3.3 Release Candidate" releaseDate="20231206" fullNumber="233.14015.25">
+        <patch from="233.13135" size="from 46 to 47" fullFrom="233.13135.108"/>
+      </build>
+      <build number="233.13135" version="2023.3.2 Release Candidate" releaseDate="20231206" fullNumber="233.13135.67">
+        <patch from="233.11799" size="from 48 to 49" fullFrom="233.11799.297"/>
+      </build>
+      <build number="233.11799" version="2023.3 Release Candidate" fullNumber="233.11799.172">
+        <blogPost url="https://blog.jetbrains.com/phpstorm/2023/11/phpstorm-2023-3-rc"/>
+        <patch from="233.11799" size="from 42 to 43" fullFrom="233.11799.55"/>
+      </build>
       <build number="232.9921" version="2023.2.2 RC" releaseDate="20230803" fullNumber="232.9921.29">
         <patch from="232.9559" size="from 39 to 40" fullFrom="232.9559.64"/>
       </build>
@@ -4372,18 +4853,62 @@
     <code>PCA</code>
     <code>PY</code>
     <code>PYA</code>
-    <channel id="PC-PY-EAP-licensing-EAP" name="PyCharm EAP" status="eap" url="https://www.jetbrains.com/pycharm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
+    <channel id="PC-PY-EAP-licensing-EAP" name="PyCharm EAP" status="eap" url="https://www.jetbrains.com/pycharm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.14494" version="2024.1 EAP" fullNumber="241.14494.19">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2024/03/pycharm-2024-1-eap-8/"/>
+        <message><![CDATA[<h3>PyCharm 2024.1 EAP 8 is out with the following updates:</h3> 
+<ul> 
+ <li>Enhanced Terraform support</li> 
+</ul> 
+<p>For more details, refer to our <a href="https://blog.jetbrains.com/pycharm/2024/03/pycharm-2024-1-eap-8/">blog post</a>.</p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/pycharm/nextversion/" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/PY-A-233538186/PyCharm-2024.1-EAP-8-241.14494.19-build-Release-Notes"/>
+        <button name="More Information" url="https://blog.jetbrains.com/pycharm/2024/03/pycharm-2024-1-eap-8/"/>
+        <patch from="241.14024" size="from 77 to 98" fullFrom="241.14024.28"/>
+        <patch from="233.14475" size="from 366 to 589" fullFrom="233.14475.56"/>
+      </build>
+      <build number="241.14024" version="2024.1 EAP" fullNumber="241.14024.28">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2024/02/2024-1-eap-7/"/>
+        <patch from="241.13688" size="from 75 to 85" fullFrom="241.13688.16"/>
+        <patch from="233.14475" size="from 366 to 586" fullFrom="233.14475.56"/>
+      </build>
+      <build number="241.13688" version="2024.1 EAP" fullNumber="241.13688.16">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2024/02/2024-1-eap-6/"/>
+        <patch from="241.12662" size="from 91 to 292" fullFrom="241.12662.44"/>
+        <patch from="233.13763" size="from 366 to 612" fullFrom="233.13763.11"/>
+      </build>
+      <build number="241.12662" version="2024.1 EAP" fullNumber="241.12662.44">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2024/02/2024-1-eap-5/"/>
+        <patch from="241.11761" size="from 158 to 213" fullFrom="241.11761.13"/>
+        <patch from="233.13763" size="from 356 to 458" fullFrom="233.13763.11"/>
+      </build>
+      <build number="241.11761" version="2024.1 EAP" fullNumber="241.11761.13">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2024/02/2024-1-eap-4/"/>
+        <patch from="241.10840" size="from 141 to 154" fullFrom="241.10840.16"/>
+        <patch from="233.13763" size="from 281 to 348" fullFrom="233.13763.11"/>
+      </build>
+      <build number="241.10840" version="2024.1 EAP" fullNumber="241.10840.16">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2024/02/2024-1-eap-3/"/>
+        <patch from="241.9959" size="from 90 to 106" fullFrom="241.9959.30"/>
+        <patch from="233.13763" size="from 344 to 407" fullFrom="233.13763.11"/>
+      </build>
+      <build number="241.9959" version="2024.1 EAP" fullNumber="241.9959.30">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2024/01/2024-1-eap2/"/>
+        <patch from="241.8102" size="from 286 to 320" fullFrom="241.8102.133"/>
+        <patch from="233.13135" size="from 359 to 426" fullFrom="233.13135.95"/>
+      </build>
+      <build number="233.11799" version="2023.3 EAP" fullNumber="233.11799.32">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2023/11/2023-3-eap-7"/>
+        <patch from="233.11799" size="from 74 to 87" fullFrom="233.11799.20"/>
+        <patch from="232.10227" size="from 186 to 259" fullFrom="232.10227.11"/>
+      </build>
+      <build number="233.11799" version="2023.3 EAP" fullNumber="233.11799.20">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2023/11/2023-3-eap-6"/>
+        <patch from="233.11555" size="from 76 to 95" fullFrom="233.11555.5"/>
+        <patch from="232.10203" size="from 189 to 262" fullFrom="232.10203.26"/>
+      </build>
       <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.5">
         <blogPost url="https://blog.jetbrains.com/pycharm/2023/11/2023-3-eap-5/"/>
-        <message><![CDATA[<h3>PyCharm EAP 5 is out with the following improvements: </h3> 
-<ul> 
- <li>Support for PEP 698 (<code>@override</code> decorator in static types)</li> 
- <li>New UI for the <em>Django Server</em> run configuration</li> 
-</ul> 
-<p> Read our <a href="https://blog.jetbrains.com/pycharm/2023/11/2023-3-eap-5">blog post</a> for more details. </p>]]></message>
-        <button name="Download" url="https://www.jetbrains.com/pycharm/nextversion/" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/PY-A-233538142/PyCharm-2023.3-EAP-5-233.11555.5-build-Release-Notes"/>
-        <button name="More Information" url="https://blog.jetbrains.com/pycharm/2023/11/2023-3-eap-5/"/>
         <patch from="233.11361" size="from 75 to 90" fullFrom="233.11361.11"/>
         <patch from="232.10072" size="from 189 to 255" fullFrom="232.10072.31"/>
       </build>
@@ -4444,13 +4969,58 @@
       </build>
     </channel>
     <channel id="PC-PY-RELEASE-licensing-RELEASE" name="PyCharm RELEASE" status="release" url="https://www.jetbrains.com/pycharm/download" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14475" version="2023.3.4" releaseDate="20231206" fullNumber="233.14475.56">
+        <blogPost url="https://www.jetbrains.com/pycharm/whatsnew/"/>
+        <message><![CDATA[<h3>PyCharm 2023.3.4 is out!</h3> 
+<p>This release's updates include:</p> 
+<ul> 
+ <li>AI Assistant: Django components generation and insights into DataFrames</li> 
+ <li><em>Django Structure</em>: easy model registration and navigation to <code>settings.py</code></li> 
+ <li>Documentation preview for Python type annotations</li> 
+</ul> 
+<p> Read our <a href="https://www.jetbrains.com/pycharm/whatsnew/">What's New page</a> for more details. </p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/pycharm/download" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/PY-A-233538182/PyCharm-2023.3.4-233.14475.56-build-Release-Notes"/>
+        <button name="More Information" url="https://www.jetbrains.com/pycharm/whatsnew/"/>
+        <patch from="233.14475" size="from 78 to 90" fullFrom="233.14475.49"/>
+        <patch from="232.10300" size="from 193 to 281" fullFrom="232.10300.41"/>
+        <patch from="233.13763" size="from 82 to 96" fullFrom="233.13763.11"/>
+      </build>
+      <build number="233.13763" version="2023.3.3" releaseDate="20231206" fullNumber="233.13763.11">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2024/01/2023-3-3/"/>
+        <patch from="233.13763" size="from 78 to 90" fullFrom="233.13763.9"/>
+        <patch from="232.10227" size="from 192 to 281" fullFrom="232.10227.11"/>
+        <patch from="233.13135" size="from 80 to 100" fullFrom="233.13135.95"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.95">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2023/12/2023-3-2/"/>
+        <patch from="233.13135" size="from 79 to 92" fullFrom="233.13135.26"/>
+        <patch from="232.10227" size="from 191 to 274" fullFrom="232.10227.11"/>
+        <patch from="233.11799" size="from 83 to 98" fullFrom="233.11799.298"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.298">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2023/12/2023-3-1/"/>
+        <patch from="233.11799" size="from 79 to 90" fullFrom="233.11799.259"/>
+        <patch from="232.10227" size="from 191 to 273" fullFrom="232.10227.11"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.259">
+        <patch from="233.11799" size="from 80 to 91" fullFrom="233.11799.209"/>
+        <patch from="232.10227" size="from 191 to 273" fullFrom="232.10227.11"/>
+      </build>
+      <build number="232.10300" version="2023.2.6" releaseDate="20230726" fullNumber="232.10300.41">
+        <message><![CDATA[<h3>PyCharm 2023.2.6 is out!</h3> 
+<p>This bug-fix update brings fixes and improvements to strengthen the IDE's overall stability. Get the full details in the release notes.</p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/pycharm/download/other.html#version20232" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/PY-A-233538175/PyCharm-2023.2.6-232.10300.41-build-Release-Notes"/>
+        <patch from="232.10227" size="from 68 to 83" fullFrom="232.10227.11"/>
+        <patch from="231.9225" size="from 426 to 537" fullFrom="231.9225.15"/>
+      </build>
+      <build number="232.10227" version="2023.2.5" releaseDate="20230726" fullNumber="232.10227.11">
+        <patch from="231.9225" size="from 426 to 537" fullFrom="231.9225.15"/>
+        <patch from="232.10203" size="from 70 to 83" fullFrom="232.10203.26"/>
+      </build>
       <build number="232.10203" version="2023.2.4" releaseDate="20230726" fullNumber="232.10203.26">
         <blogPost url="https://blog.jetbrains.com/pycharm/2023/11/2023-2-4/"/>
-        <message><![CDATA[<h3>PyCharm 2023.2.4 is now available.</h3> 
-<p><a href="https://blog.jetbrains.com/pycharm/2023/11/2023-2-4/">Visit our blog</a> to learn more about the new functionality and the latest enhancements.</p>]]></message>
-        <button name="Download" url="https://www.jetbrains.com/pycharm/download" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/PY-A-233538141/PyCharm-2023.2.4-232.10203.26-build-Release-Notes"/>
-        <button name="More Information" url="https://blog.jetbrains.com/pycharm/2023/11/2023-2-4/"/>
         <patch from="232.10072" size="from 66 to 79" fullFrom="232.10072.31"/>
         <patch from="231.9225" size="from 424 to 535" fullFrom="231.9225.15"/>
       </build>
@@ -4476,10 +5046,15 @@
         <patch from="232.8660" size="from 66 to 76" fullFrom="232.8660.146"/>
         <patch from="231.9225" size="from 394 to 487" fullFrom="231.9225.15"/>
       </build>
-      <build number="231.9225" version="2023.1.4" releaseDate="20230330" fullNumber="231.9225.15">
-        <message><![CDATA[<h3>PyCharm 2023.1.4 is out!</h3>]]></message>
+      <build number="231.9414" version="2023.1.5" releaseDate="20230330" fullNumber="231.9414.12">
+        <message><![CDATA[<h3>PyCharm 2023.1.5 is out!</h3> 
+<p>This bug-fix update brings fixes and improvements to strengthen the IDE's overall stability. Get the full details in the release notes.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/pycharm/download/other.html#version20231" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/PY-A-233538124/PyCharm-2023.1.4-231.9225.15-build-Release-Notes"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/PY-A-233538174/PyCharm-2023.1.5-231.9414.12-build-Release-Notes"/>
+        <patch from="231.9225" size="from 79 to 91" fullFrom="231.9225.15"/>
+        <patch from="223.8836" size="from 158 to 208" fullFrom="223.8836.43"/>
+      </build>
+      <build number="231.9225" version="2023.1.4" releaseDate="20230330" fullNumber="231.9225.15">
         <patch from="231.9225" size="from 73 to 83" fullFrom="231.9225.5"/>
         <patch from="231.9161" size="from 73 to 83" fullFrom="231.9161.41"/>
         <patch from="223.8836" size="from 154 to 205" fullFrom="223.8836.43"/>
@@ -4827,6 +5402,29 @@
       </build>
     </channel>
     <channel id="PC-PY-EAP-licensing-RELEASE" name="PyCharm EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/pycharm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14475" version="2023.3.4 Release Candidate" releaseDate="20231206" fullNumber="233.14475.49">
+        <patch from="233.14475" size="from 78 to 90" fullFrom="233.14475.22"/>
+      </build>
+      <build number="233.14475" version="2023.3.4 Release Candidate" releaseDate="20231206" fullNumber="233.14475.22">
+        <patch from="233.13763" size="from 82 to 96" fullFrom="233.13763.11"/>
+        <patch from="232.10227" size="from 195 to 283" fullFrom="232.10227.11"/>
+      </build>
+      <build number="233.13763" version="2023.3.3 Release Candidate" releaseDate="20231206" fullNumber="233.13763.9">
+        <patch from="233.13763" size="from 79 to 92" fullFrom="233.13763.5"/>
+      </build>
+      <build number="233.13763" version="2023.3.3 Release Candidate" releaseDate="20231206" fullNumber="233.13763.5">
+        <patch from="233.13135" size="from 80 to 99" fullFrom="233.13135.95"/>
+        <patch from="232.10227" size="from 192 to 281" fullFrom="232.10227.11"/>
+      </build>
+      <build number="233.13135" version="2023.3.2 Release Candidate" releaseDate="20231206" fullNumber="233.13135.26">
+        <patch from="233.11799" size="from 83 to 98" fullFrom="233.11799.298"/>
+        <patch from="232.10227" size="from 192 to 275" fullFrom="232.10227.11"/>
+      </build>
+      <build number="233.11799" version="2023.3 Release Candidate" fullNumber="233.11799.209">
+        <blogPost url="https://blog.jetbrains.com/pycharm/2023/11/2023-3-release-candidate/"/>
+        <patch from="233.11799" size="from 91 to 120" fullFrom="233.11799.32"/>
+        <patch from="232.10227" size="from 190 to 272" fullFrom="232.10227.11"/>
+      </build>
       <build number="232.9921" version="2023.2.2 Release Candidate" releaseDate="20230726" fullNumber="232.9921.36">
         <patch from="232.9559" size="from 75 to 109" fullFrom="232.9559.58"/>
         <patch from="231.9225" size="from 420 to 530" fullFrom="231.9225.15"/>
@@ -5351,7 +5949,7 @@
       </build>
     </channel>
     <channel id="pycharmEdu2" name="PyCharm Edu 2.0" status="release" url="https://www.jetbrains.com/edu-products/download" feedback="https://youtrack.jetbrains.com" majorVersion="2" licensing="release">
-      <build number="143.237" version="2.0.4" releaseDate="20150928">
+      <build number="143.2370" version="2.0.4" releaseDate="20150928" fullNumber="143.2370.37">
         <message><![CDATA[JetBrains PyCharm Edu 2.0.4 is available.]]></message>
         <button name="Download" url="https://www.jetbrains.com/edu-products/download#version20" download="true"/>
       </build>
@@ -5359,18 +5957,46 @@
   </product>
   <product name="Rider">
     <code>RD</code>
-    <channel id="RD-EAP-licensing-EAP" name="Rider EAP" status="eap" url="https://www.jetbrains.com/rider/eap" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="233.11555" version="2023.3 EAP6" fullNumber="233.11555.23">
-        <message><![CDATA[<h3>Rider 2023.3 EAP 6 comes with the following updates:</h3> 
-<ul> 
- <li>Ability to easily create and navigate through unit tests.</li> 
- <li>Support for C# 12 interceptors.</li> 
- <li>Improved UX for inlay hints, incl. the ability to right-click an inlay hint to reveal the context menu, and the ability to navigate to declarations with <code>Ctrl</code>+<code>Click</code><em>.</em></li> 
- <li>Code analysis performance improvements.</li> 
- <li>Debugger DFA mode switcher for the <em>Editor </em>window.</li> 
-</ul> 
-<p>For the full list of changes in this build, please refer to <a href="https://youtrack.jetbrains.com/issues/RIDER?q=available%20in:%20%7B2023.3%20EAP%206*%7D">our issue tracker</a>.</p>]]></message>
+    <channel id="RD-EAP-licensing-EAP" name="Rider EAP" status="eap" url="https://www.jetbrains.com/rider/eap" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.14494" version="2024.1 EAP8" fullNumber="241.14494.14">
+        <message><![CDATA[<h3>Rider 2024.1 EAP 8 comes with the following updates:</h3> 
+<h4>Code With Me</h4> 
+<p>After much anticipation, preliminary Code With Me support has finally been added to Rider! To enable it, go to <code>Tools | Enable Code With Me</code>. Please share your feedback with us by commenting on <a href="https://youtrack.jetbrains.com/issue/RIDER-73077/Code-With-Me-support-in-Rider">the corresponding YouTrack issue</a>!</p> 
+<h4>Blazor support</h4> 
+<p>You can now generate additional files like <code>.razor.cs</code>, <code>.razor.css</code>, <code>.razor.js </code>on generating a <em>Blazor Component</em> file template. </p> 
+<h4>Refactorings</h4> 
+<p>We’ve made several improvements to the <em>Change Signature</em> refactoring. For more details, refer to <a href="https://www.jetbrains.com/resharper/nextversion/">the ReSharper page</a>.</p> 
+<h4>Unity support</h4> 
+<p>We’ve dropped the extended support for Unity versions predating 2019.2. This means Rider no longer offers features related to Unity Editor integration.</p> 
+<p>For the full list of changes included in this build, please refer to the <a href="https://youtrack.jetbrains.com/issues/RIDER?q=available%20in:%20%7B2024.1%20EAP%208*%7D">issue tracker</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/rider/eap" download="true"/>
+        <patch from="241.14024" size="from 92 to 96" fullFrom="241.14024.36"/>
+      </build>
+      <build number="241.14024" version="2024.1 EAP7" fullNumber="241.14024.36">
+        <patch from="241.13688" size="from 81 to 87" fullFrom="241.13688.41"/>
+      </build>
+      <build number="241.13688" version="2024.1 EAP6" fullNumber="241.13688.41">
+        <patch from="241.12662" size="from 526 to 552" fullFrom="241.12662.57"/>
+      </build>
+      <build number="241.12662" version="2024.1 EAP5" fullNumber="241.12662.57">
+        <patch from="241.11761" size="from 127 to 133" fullFrom="241.11761.31"/>
+      </build>
+      <build number="241.11761" version="2024.1 EAP4" fullNumber="241.11761.31">
+        <patch from="241.10840" size="from 148 to 151" fullFrom="241.10840.28"/>
+      </build>
+      <build number="241.10840" version="2024.1 EAP3" fullNumber="241.10840.28">
+        <patch from="241.9959" size="from 161 to 168" fullFrom="241.9959.26"/>
+      </build>
+      <build number="241.8102" version="2024.1 EAP1" fullNumber="241.8102.132">
+        <patch from="233.13135" size="from 206 to 291" fullFrom="233.13135.100"/>
+      </build>
+      <build number="233.11799" version="2023.3 EAP8" fullNumber="233.11799.49">
+        <patch from="233.11799" size="from 84 to 87" fullFrom="233.11799.22"/>
+      </build>
+      <build number="233.11799" version="2023.3 EAP7" fullNumber="233.11799.22">
+        <patch from="233.11555" size="from 92 to 95" fullFrom="233.11555.23"/>
+      </build>
+      <build number="233.11555" version="2023.3 EAP6" fullNumber="233.11555.23">
         <patch from="233.11361" size="from 196 to 209" fullFrom="233.11361.12"/>
       </build>
       <build number="233.11361" version="2023.3 EAP5" fullNumber="233.11361.12">
@@ -5447,21 +6073,63 @@
       </build>
     </channel>
     <channel id="RD-RELEASE-licensing-RELEASE" name="Rider RELEASE" status="release" url="https://www.jetbrains.com/rider/download" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.60">
+        <blogPost url="https://www.jetbrains.com/rider/whatsnew/"/>
+        <message><![CDATA[<div style="max-width: 700px"> 
+ <h3 id="rider_is_out_with_the_following_fixes">Rider 2023.3.3 is out with the following fixes:</h3> 
+ <ul> 
+  <li>MAUI projects can once again be deployed to physical iOS devices. [<a href="https://youtrack.jetbrains.com/issue/RIDER-76794/Cannot-deploy-MAUI-project-to-physical-iOS-device-because-of-RuntimeIdentifier">RIDER-76794</a>]</li> 
+  <li>The <em>Export to file</em> action works correctly for type dependency diagrams. [<a href="https://youtrack.jetbrains.com/issue/RIDER-103400/Export-to-file-does-not-work-for-Type-dependency-diagrams">RIDER-103400</a>]</li> 
+  <li>Text in the <em>Editor </em>window no longer freezes when being scrolled. [<a href="https://youtrack.jetbrains.com/issue/RIDER-103794/Text-window-freezes-in-place">RIDER-103794</a>]</li> 
+  <li>Xamarin.Android Designer now works as intended. [<a href="https://youtrack.jetbrains.com/issue/RIDER-99102/.axml-designer-doesnt-work">RIDER-99102</a>]</li> 
+  <li><em>Rename</em> works correctly for references between files in Rider 2023.3. [<a href="https://youtrack.jetbrains.com/issue/RSRP-495217/Rename-doesnt-work-for-references-between-files-in-latest-2023.3">RSRP-495217</a>]</li> 
+  <li>Abbreviations are no longer falsely flagged as spelling mistakes. [<a href="https://youtrack.jetbrains.com/issue/RSRP-495107/Abbreviations-no-longer-honored-and-detected-as-spelling-mistakes-in-2023.3-RC-1">RSRP-495107</a>]</li> 
+  <li>String length checks for Entity Framework entities no longer generate incorrect hints when <code>MaxLength</code> is set by static and constant values. [<a href="https://youtrack.jetbrains.com/issue/RSRP-495160/Possible-performance-issues-due-to-unlimited-string-length-HasMaxLengthstatic">RSRP-495160</a>]</li> 
+  <li>Primary constructor attribute inheritance no longer triggers false positive warnings. [<a href="https://youtrack.jetbrains.com/issue/RSRP-495253/False-Positive-Primary-Constructor-Attribute-inheritance">RSRP-495253</a>]</li> 
+  <li>The IDE's suggestion to dispose of the <code>IEnumerator GetEnumerator()</code> was retained, while the corresponding quick-fixes were adjusted. See <a href="https://youtrack.jetbrains.com/issue/RSRP-494839/Resharper-asks-to-dispose-IEnumerator-which-does-not-implement-IDisposable#focus=Comments-27-8820116.0-0">this comment</a> for details. [<a href="https://youtrack.jetbrains.com/issue/RSRP-494839/Resharper-asks-to-dispose-IEnumerator-which-does-not-implement-IDisposable">RSRP-494839</a>]</li> 
+  <li><em>Error executing shell command pm list packages</em> no longer occurs when attempting to debug on a physical Android 13 device. [<a href="https://youtrack.jetbrains.com/issue/RIDER-81549/Error-executing-shell-command-pm-list-packages">RIDER-81549</a>]</li> 
+  <li>The IDE no longer sends erroneous update notifications for disabled plugins. [<a href="https://youtrack.jetbrains.com/issue/IDEA-273418/IDEA-insists-on-updating-bundled-plugins-even-though-they-are-disabled">IDEA-273418</a>]</li> 
+  <li>Marking GitHub pull request files as "reviewed" works as expected. [<a href="https://youtrack.jetbrains.com/issue/IDEA-338906/GitHub-plugin-Can-no-longer-pull-request-files-mark-as-read">IDEA-338906</a>]</li> 
+  <li>The search functionality in the <em>Emoji &amp; Symbols</em> popup dialog works on Linux. [<a href="https://youtrack.jetbrains.com/issue/IDEA-327171/Not-working-search-emoji-after-upgrade-to-version-2023.2">IDEA-327171</a>]</li> 
+  <li>The IDE correctly displays the chosen file in the <em>Commit </em>dialog when executing the <em>Commit File</em> action for one of the modified files. [<a href="https://youtrack.jetbrains.com/issue/IDEA-336983/">IDEA-336983</a>]</li> 
+ </ul> 
+ <p>For the full list of resolved issues, please refer <a href="https://youtrack.jetbrains.com/issues/RIDER?q=Available%20in:%202023.3.3*">to our issue tracker</a>.</p> 
+</div>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/rider/download" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/issues/RIDER?q=available%20in:%202023.3.3*"/>
+        <button name="More Information" url="https://www.jetbrains.com/rider/whatsnew/"/>
+        <patch from="233.13135" size="from 75 to 160" fullFrom="233.13135.100"/>
+        <patch from="232.10203" size="from 589 to 615" fullFrom="232.10203.29"/>
+        <patch from="231.9225" size="from 864 to 893" fullFrom="231.9225.23"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.100">
+        <blogPost url="https://www.jetbrains.com/rider/whatsnew/"/>
+        <patch from="233.11799" size="from 78 to 81" fullFrom="233.11799.303"/>
+        <patch from="232.10203" size="from 526 to 585" fullFrom="232.10203.29"/>
+        <patch from="231.9225" size="from 844 to 878" fullFrom="231.9225.23"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.303">
+        <blogPost url="https://www.jetbrains.com/rider/whatsnew/"/>
+        <patch from="233.11799" size="from 59 to 62" fullFrom="233.11799.261"/>
+        <patch from="232.10203" size="from 524 to 583" fullFrom="232.10203.29"/>
+        <patch from="231.9225" size="from 843 to 877" fullFrom="231.9225.23"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.261">
+        <blogPost url="https://www.jetbrains.com/rider/whatsnew/"/>
+        <patch from="233.11799" size="from 69 to 113" fullFrom="233.11799.183"/>
+        <patch from="232.10203" size="from 523 to 583" fullFrom="232.10203.29"/>
+        <patch from="231.9225" size="from 842 to 877" fullFrom="231.9225.23"/>
+      </build>
+      <build number="232.10300" version="2023.2.4" releaseDate="20230802" fullNumber="232.10300.49">
+        <blogPost url="https://www.jetbrains.com/rider/whatsnew/"/>
+        <message><![CDATA[<p>Rider 2023.2.4 is out! This bug-fix update brings fixes and improvements to strengthen the IDE's overall stability.</p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/rider/download/other.html#version20232" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/issues/RIDER?q=available%20in:%202023.2.4*"/>
+        <button name="More Information" url="https://www.jetbrains.com/rider/whatsnew/"/>
+        <patch from="232.10203" size="from 60 to 64" fullFrom="232.10203.29"/>
+      </build>
       <build number="232.10203" version="2023.2.3" releaseDate="20230802" fullNumber="232.10203.29">
         <blogPost url="https://www.jetbrains.com/rider/whatsnew/"/>
-        <message><![CDATA[<h3>Rider 2023.2.3 is out with the following bug fixes:</h3> 
-<ul> 
- <li>Rider once again correctly displays Unity's declarations on macOS. [<a href="https://youtrack.jetbrains.com/issue/RIDER-93883/Rider-2023.1-and-later-cannot-show-Unitys-declaration.">RIDER-93883</a>]</li> 
- <li>The IDE's ability to discover and deploy apps to iOS 17 devices has been restored. [<a href="https://youtrack.jetbrains.com/issue/RIDER-99240/Deploy-Debug-to-physical-iOS-17-devices-via-XCode-15-using-Xamarin-16.4.0.18">RIDER-99240</a>]</li> 
- <li>The list of directories is again correctly rendered in the <em>Solution Explorer</em>. [<a href="https://youtrack.jetbrains.com/issue/IDEA-326394">IDEA-326394</a>]</li> 
- <li>Absolute directory paths in the <em>Commit</em> tool window no longer take up too much space as a result of redundantly replicating parent paths. [<a href="https://youtrack.jetbrains.com/issue/IDEA-326271/Commit-window-shows-full-path-irregularly">IDEA-326271</a>]</li> 
- <li>We've addressed the issue that made it impossible to copy text from a local machine's editor and paste it into the editor on Windows Remote Desktop. [<a href="https://youtrack.jetbrains.com/issue/IDEA-313776/Can-not-paste-the-text-data-on-the-windows-remote-desktop-copied-from-IDEA-editor">IDEA-313776</a>].</li> 
- <li>This build also includes support for <code>@</code> variables in <a href="https://www.jetbrains.com/help/rider/Http_client_in__product__code_editor.html">HTTP Client</a>. [<a href="https://youtrack.jetbrains.com/issue/RIDER-98743/HTTP-Client-232-support-variables">RIDER-98743</a>, <a href="https://youtrack.jetbrains.com/issue/IDEA-320823/HTTP-Client-Support-for-variables">IDEA-320823</a>]</li> 
-</ul> 
-<h3><br>For the full list of resolved issues, please refer to <a href="https://youtrack.jetbrains.com/issues/RIDER?q=Available%20in:%202023.2.3*">our issue tracker</a>.</h3>]]></message>
-        <button name="Download" url="https://www.jetbrains.com/rider/download" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/issues/RIDER?q=available%20in:%202023.2.3*"/>
-        <button name="More Information" url="https://www.jetbrains.com/rider/whatsnew/"/>
         <patch from="231.9225" size="from 585 to 607" fullFrom="231.9225.23"/>
         <patch from="223.8836" size="from 683 to 714" fullFrom="223.8836.53"/>
         <patch from="232.9921" size="from 63 to 77" fullFrom="232.9921.83"/>
@@ -5854,6 +6522,9 @@
       </build>
     </channel>
     <channel id="RD-EAP-licensing-RELEASE" name="Rider EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/rider/eap" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.11799" version="2023.3 RC" fullNumber="233.11799.183">
+        <patch from="233.11799" size="from 96 to 100" fullFrom="233.11799.49"/>
+      </build>
       <build number="232.8660" version="2023.2 RC" fullNumber="232.8660.194">
         <patch from="232.8660" size="from 66 to 70" fullFrom="232.8660.134"/>
       </build>
@@ -6066,21 +6737,43 @@
   </product>
   <product name="RubyMine">
     <code>RM</code>
-    <channel id="RM-EAP-licensing-EAP" name="RubyMine EAP" status="eap" url="https://www.jetbrains.com/ruby/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.8">
-        <message><![CDATA[<h3>RubyMine 2023.3 EAP 6 is Out!</h3> 
-<p>Fixes and improvements:</p> 
-<ul> 
- <li>Implemented code insight for Rails 7.1 strict locals: <a href="https://youtrack.jetbrains.com/issue/RUBY-31987">RUBY-31987</a></li> 
- <li>Fixed an issue with working directories in Rack run/debug configurations: <a href="https://youtrack.jetbrains.com/issue/RUBY-31751">RUBY-31751</a></li> 
- <li>Fixed an issue that caused freezes on IDE exit: <a href="https://youtrack.jetbrains.com/issue/IDEA-335883">IDEA-335883</a></li> 
- <li>Added support for OAuth to Postman Converter: <a href="https://youtrack.jetbrains.com/issue/IDEA-334632">IDEA-334632</a></li> 
- <li>Implemented color preview for color-like values in JSON files: <a href="https://youtrack.jetbrains.com/issue/WEB-47664">WEB-47664</a></li> 
-</ul> 
-<p>For more details, refer to the <a href="https://youtrack.jetbrains.com/articles/RUBY-A-220365117">release notes</a>.</p>]]></message>
+    <channel id="RM-EAP-licensing-EAP" name="RubyMine EAP" status="eap" url="https://www.jetbrains.com/ruby/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.14494" version="2024.1 BETA" fullNumber="241.14494.13">
+        <blogPost url="https://blog.jetbrains.com/ruby/2024/03/rubymine-2024-1-beta-is-out/"/>
+        <message><![CDATA[<h3>RubyMine 2024.1 Beta is Out!</h3> 
+<p>This build includes fixes and improvements in preparation for the forthcoming release. To learn more, check out our latest <a href="https://blog.jetbrains.com/ruby/2024/03/rubymine-2024-1-beta-is-out/">blog post</a>. </p> 
+<p>For the full list of fixed tickets, refer to the <a href="https://youtrack.jetbrains.com/articles/RUBY-A-220365152">release notes</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/ruby/nextversion" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/RUBY-A-220365117"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/RUBY-A-220365152"/>
+        <button name="More Information" url="https://blog.jetbrains.com/ruby/2024/03/rubymine-2024-1-beta-is-out/"/>
         <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
+        <patch from="241.14024" size="from 39 to 41" fullFrom="241.14024.10"/>
+      </build>
+      <build number="241.14024" version="2024.1 EAP" fullNumber="241.14024.10">
+        <patch from="241.13688" size="from 35 to 37" fullFrom="241.13688.11"/>
+      </build>
+      <build number="241.13688" version="2024.1 EAP" fullNumber="241.13688.11">
+        <patch from="241.12662" size="from 217 to 220" fullFrom="241.12662.50"/>
+      </build>
+      <build number="241.12662" version="2024.1 EAP" fullNumber="241.12662.50">
+        <patch from="241.11761" size="from 94 to 97" fullFrom="241.11761.9"/>
+      </build>
+      <build number="241.11761" version="2024.1 EAP" fullNumber="241.11761.9">
+        <patch from="241.10840" size="from 99 to 103" fullFrom="241.10840.7"/>
+      </build>
+      <build number="241.10840" version="2024.1 EAP" fullNumber="241.10840.7">
+        <patch from="241.8102" size="from 267 to 281" fullFrom="241.8102.116"/>
+      </build>
+      <build number="233.11799" version="2023.3 BETA" fullNumber="233.11799.62">
+        <patch from="233.11799" size="from 42 to 43" fullFrom="233.11799.28"/>
+      </build>
+      <build number="233.11799" version="2023.3 BETA" fullNumber="233.11799.28">
+        <patch from="233.11799" size="from 37 to 38" fullFrom="233.11799.7"/>
+      </build>
+      <build number="233.11799" version="2023.3 BETA" fullNumber="233.11799.7">
+        <patch from="233.11555" size="from 46 to 47" fullFrom="233.11555.8"/>
+      </build>
+      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.8">
         <patch from="233.10527" size="49" fullFrom="233.10527.23"/>
       </build>
       <build number="233.10527" version="2023.3 EAP" fullNumber="233.10527.23">
@@ -6161,12 +6854,52 @@
       </build>
     </channel>
     <channel id="RM-RELEASE-licensing-RELEASE" name="RubyMine RELEASE" status="release" url="https://www.jetbrains.com/ruby/download" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
-      <build number="232.10203" version="2023.2.4" releaseDate="20230726" fullNumber="232.10203.15">
-        <message><![CDATA[<h3>RubyMine 2023.2.4 is Out! </h3> 
-<p> This build comes with a number of fixes and improvements. For more details, refer to the <a href="https://youtrack.jetbrains.com/articles/RUBY-A-220365115">release notes</a>. </p>]]></message>
+      <build number="233.14808" version="2023.3.5" releaseDate="20231206" fullNumber="233.14808.14">
+        <message><![CDATA[<h3>RubyMine 2023.3.5 is Out! </h3> 
+<p> This build comes with a number of bug fixes and improvements. For more details, refer to the <a href="https://youtrack.jetbrains.com/articles/RUBY-A-220365153">release notes</a>. </p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/ruby/download" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/RUBY-A-220365115"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/RUBY-A-220365153"/>
         <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
+        <patch from="233.14475" size="from 34 to 35" fullFrom="233.14475.27"/>
+        <patch from="232.10300" size="from 191 to 192" fullFrom="232.10300.41"/>
+      </build>
+      <build number="233.14475" version="2023.3.4" releaseDate="20231206" fullNumber="233.14475.27">
+        <patch from="232.10227" size="from 194 to 195" fullFrom="232.10227.6"/>
+        <patch from="233.14475" size="from 34 to 35" fullFrom="233.14475.6"/>
+        <patch from="233.14015" size="from 37 to 39" fullFrom="233.14015.117"/>
+      </build>
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.117">
+        <patch from="232.10227" size="from 191 to 194" fullFrom="232.10227.6"/>
+        <patch from="233.14015" size="from 34 to 35" fullFrom="233.14015.16"/>
+        <patch from="233.13135" size="from 41 to 43" fullFrom="233.13135.91"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.91">
+        <patch from="232.10227" size="from 188 to 190" fullFrom="232.10227.6"/>
+        <patch from="233.13135" size="from 36 to 37" fullFrom="233.13135.14"/>
+        <patch from="233.11799" size="from 42 to 43" fullFrom="233.11799.290"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.290">
+        <patch from="232.10227" size="from 186 to 187" fullFrom="232.10227.6"/>
+        <patch from="233.11799" size="from 34 to 35" fullFrom="233.11799.227"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.227">
+        <patch from="232.10227" size="from 186 to 187" fullFrom="232.10227.6"/>
+        <patch from="233.11799" size="from 37 to 38" fullFrom="233.11799.188"/>
+      </build>
+      <build number="232.10300" version="2023.2.6" releaseDate="20230726" fullNumber="232.10300.41">
+        <message><![CDATA[<h3>RubyMine 2023.2.6 is Out!</h3> 
+<p> This build includes a number of bug fixes. For more details, refer to the <a href="https://youtrack.jetbrains.com/articles/RUBY-A-220365149">release notes</a>. </p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/ruby/download/other.html#version20232" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/RUBY-A-220365149"/>
+        <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
+        <patch from="232.10227" size="from 41 to 42" fullFrom="232.10227.6"/>
+        <patch from="231.9414" size="from 409 to 426" fullFrom="231.9414.10"/>
+      </build>
+      <build number="232.10227" version="2023.2.5" releaseDate="20230726" fullNumber="232.10227.6">
+        <patch from="232.10203" size="from 41 to 42" fullFrom="232.10203.15"/>
+        <patch from="231.9392" size="from 414 to 431" fullFrom="231.9392.3"/>
+      </build>
+      <build number="232.10203" version="2023.2.4" releaseDate="20230726" fullNumber="232.10203.15">
         <patch from="232.10072" size="from 36 to 38" fullFrom="232.10072.21"/>
         <patch from="231.9392" size="from 412 to 429" fullFrom="231.9392.3"/>
       </build>
@@ -6188,17 +6921,16 @@
         <patch from="231.9392" size="from 388 to 406" fullFrom="231.9392.3"/>
         <patch from="232.8660" size="from 34 to 35" fullFrom="232.8660.143"/>
       </build>
-      <build number="231.9392" version="2023.1.5" releaseDate="20230329" fullNumber="231.9392.3">
-        <message><![CDATA[<h3>RubyMine 2023.1.5 is available!</h3> 
-<p>Fixes and improvements:</p> 
-<ul> 
- <li>RubyMine now reports the correct version: <a href="https://youtrack.jetbrains.com/issue/RUBY-31581">RUBY-31581</a>.</li> 
- <li>Fixed a problem related to updating the project after updating to RubyMine 2023.1: <a href="https://youtrack.jetbrains.com/issue/IDEA-316752">IDEA-316752</a>.</li> 
-</ul> 
-<p>Learn more in <a href="https://youtrack.jetbrains.com/articles/RUBY-A-220365093">our release notes</a>.</p>]]></message>
+      <build number="231.9414" version="2023.1.6" releaseDate="20230329" fullNumber="231.9414.10">
+        <message><![CDATA[<h3>RubyMine 2023.1.6 is Out! </h3> 
+<p> This is a bug-fix update. For more details, refer to the <a href="https://youtrack.jetbrains.com/articles/RUBY-A-220365148">release notes</a>. </p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/ruby/download/other.html#version20231" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/RUBY-A-220365093"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/RUBY-A-220365148"/>
         <button name="Learn RubyMine" url="https://www.jetbrains.com/ruby/learn/"/>
+        <patch from="223.8836" size="from 161 to 162" fullFrom="223.8836.42"/>
+        <patch from="231.9392" size="from 48 to 49" fullFrom="231.9392.3"/>
+      </build>
+      <build number="231.9392" version="2023.1.5" releaseDate="20230329" fullNumber="231.9392.3">
         <patch from="223.8836" size="from 157 to 158" fullFrom="223.8836.42"/>
         <patch from="231.9225" size="from 40 to 41" fullFrom="231.9225.12"/>
       </build>
@@ -6764,6 +7496,18 @@
       </build>
     </channel>
     <channel id="RM-EAP-licensing-RELEASE" name="RubyMine EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/ruby/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14475" version="2023.3.4 RC" releaseDate="20231206" fullNumber="233.14475.6">
+        <patch from="233.14015" size="from 37 to 39" fullFrom="233.14015.117"/>
+      </build>
+      <build number="233.14015" version="2023.3.3 RC" releaseDate="20231206" fullNumber="233.14015.16">
+        <patch from="233.13135" size="from 41 to 43" fullFrom="233.13135.91"/>
+      </build>
+      <build number="233.13135" version="2023.3.2 RC" releaseDate="20231206" fullNumber="233.13135.14">
+        <patch from="233.11799" size="from 43 to 44" fullFrom="233.11799.290"/>
+      </build>
+      <build number="233.11799" version="2023.3 RC" fullNumber="233.11799.188">
+        <patch from="233.11799" size="from 36 to 37" fullFrom="233.11799.62"/>
+      </build>
       <build number="232.9921" version="2023.2.2 RC" releaseDate="20230726" fullNumber="232.9921.7">
         <patch from="232.9559" size="from 41 to 42" fullFrom="232.9559.58"/>
       </build>
@@ -6889,19 +7633,53 @@
   <product name="RustRover">
     <code>RR</code>
     <channel id="RR-EAP-licensing-EAP" name="RustRover EAP" status="eap" url="https://www.jetbrains.com/rust/download/" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="233.10527" version="2023.3 EAP" fullNumber="233.10527.39">
+      <build number="233.14015" version="2023.3 EAP" fullNumber="233.14015.155">
         <blogPost url="https://blog.jetbrains.com/rust/"/>
-        <message><![CDATA[<h1>The RustRover 2023.3 EAP 3 build is now available!</h1> 
+        <message><![CDATA[<h1>The RustRover 2023.3 EAP 12 build is now available!</h1> 
 <p>Here are the highlights:</p> 
 <ul> 
- <li>Stability of the IDE was improved - a lot of exceptions and errors were resolved</li> 
- <li>Stuck in analyzing with p256 crate, highlighting and completion break [<a href="https://youtrack.jetbrains.com/issue/RUST-11763">RUST-11763</a>]</li> 
- <li>Improved RegExp injection support [<a href="https://youtrack.jetbrains.com/issue/RUST-10972">RUST-10972</a>], [<a href="https://youtrack.jetbrains.com/issue/RUST-10411">RUST-10411</a>]</li> 
- <li>Provide an ability to attach file right from "New Rust file" action [<a href="https://youtrack.jetbrains.com/issue/RUST-12441">RUST-12441</a>]</li> 
-</ul> 
-<p> <a href="https://youtrack.jetbrains.com/articles/RUST-A-25">Full release notes</a> </p>]]></message>
+ <li>Improved highlighting for type inference errors: [<a href="https://youtrack.jetbrains.com/issue/RUST-13054">RUST-13054</a>], [<a href="https://youtrack.jetbrains.com/issue/RUST-8047">RUST-8047</a>], [<a href="https://youtrack.jetbrains.com/issue/RUST-5175">RUST-5175</a>], [<a href="https://youtrack.jetbrains.com/issue/RUST-13124">RUST-13124</a>]</li> 
+ <li>More Quick Fixes &amp; automatic imports insertion are now available in macro calls [<a href="https://youtrack.jetbrains.com/issue/RUST-13359">RUST-13359</a>], [<a href="https://youtrack.jetbrains.com/issue/RUST-13021">RUST-13021</a>], [<a href="https://youtrack.jetbrains.com/issue/RUST-13009">RUST-13009</a>]</li> 
+ <li>Typing assist for cargo.toml now is available immediately after IDE start[<a href="https://youtrack.jetbrains.com/issue/RUST-12933">RUST-12933</a>]</li> 
+</ul>]]></message>
         <button name="Download" url="https://www.jetbrains.com/rust/download/" download="true"/>
         <button name="More Information" url="https://blog.jetbrains.com/rust/"/>
+        <patch from="233.14015" size="from 151 to 164" fullFrom="233.14015.153"/>
+      </build>
+      <build number="233.14015" version="2023.3 EAP" fullNumber="233.14015.153">
+        <blogPost url="https://blog.jetbrains.com/rust/"/>
+        <patch from="233.14015" size="from 116 to 129" fullFrom="233.14015.152"/>
+      </build>
+      <build number="233.14015" version="2023.3 EAP" fullNumber="233.14015.152">
+        <blogPost url="https://blog.jetbrains.com/rust/"/>
+        <patch from="233.14015" size="from 117 to 130" fullFrom="233.14015.147"/>
+      </build>
+      <build number="233.14015" version="2023.3 EAP" fullNumber="233.14015.147">
+        <blogPost url="https://blog.jetbrains.com/rust/"/>
+        <patch from="233.13135" size="from 124 to 137" fullFrom="233.13135.127"/>
+      </build>
+      <build number="233.13135" version="2023.3 EAP" fullNumber="233.13135.127">
+        <blogPost url="https://blog.jetbrains.com/rust/"/>
+        <patch from="233.13135" size="from 117 to 130" fullFrom="233.13135.116"/>
+      </build>
+      <build number="233.13135" version="2023.3 EAP" fullNumber="233.13135.116">
+        <blogPost url="https://blog.jetbrains.com/rust/"/>
+        <patch from="233.11799" size="from 122 to 135" fullFrom="233.11799.306"/>
+      </build>
+      <build number="233.11799" version="2023.3 EAP" fullNumber="233.11799.306">
+        <blogPost url="https://blog.jetbrains.com/rust/"/>
+        <patch from="233.11799" size="from 115 to 127" fullFrom="233.11799.284"/>
+      </build>
+      <build number="233.11799" version="2023.3 EAP" fullNumber="233.11799.284">
+        <blogPost url="https://blog.jetbrains.com/rust/"/>
+        <patch from="233.10527" size="from 142 to 155" fullFrom="233.10527.212"/>
+      </build>
+      <build number="233.10527" version="2023.3 EAP" fullNumber="233.10527.212">
+        <blogPost url="https://blog.jetbrains.com/rust/"/>
+        <patch from="233.10527" size="from 116 to 129" fullFrom="233.10527.39"/>
+      </build>
+      <build number="233.10527" version="2023.3 EAP" fullNumber="233.10527.39">
+        <blogPost url="https://blog.jetbrains.com/rust/"/>
         <patch from="233.8264" size="from 179 to 196" fullFrom="233.8264.32"/>
       </build>
       <build number="233.8264" version="2023.3 EAP" fullNumber="233.8264.32">
@@ -6928,22 +7706,56 @@
   </product>
   <product name="WebStorm">
     <code>WS</code>
-    <channel id="WS-EAP-licensing-EAP" name="WebStorm EAP" status="eap" url="https://www.jetbrains.com/webstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.12">
-        <blogPost url="https://blog.jetbrains.com/webstorm/2023/10/webstorm-2023-3-eap2/"/>
-        <message><![CDATA[<p><b>WebStorm 2023.3 EAP #7</b> is now available!</p> 
+    <channel id="WS-EAP-licensing-EAP" name="WebStorm EAP" status="eap" url="https://www.jetbrains.com/webstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2024" licensing="eap">
+      <build number="241.14494" version="2024.1 Beta" fullNumber="241.14494.25">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2024/03/webstorm-2024-1-eap3/"/>
+        <message><![CDATA[<p><b>WebStorm 2024.1 Beta</b> is now available!</p> 
 <p>What's new:</p> 
 <ul> 
- <li>We've added initial support for find usages and refactoring across IDEA modules boundaries(<a href="https://youtrack.jetbrains.com/issue/WEB-37907/">WEB-37907</a>).</li> 
- <li>We've added options to configure interpolations formatting for Angular HTML templates (<a href="https://youtrack.jetbrains.com/issue/WEB-31573/">WEB-31573</a>).</li> 
- <li>We've added support for nested classes in HTML completion (<a href="https://youtrack.jetbrains.com/issue/WEB-61968">WEB-61968</a>).</li> 
- <li>We've updated the Prisma LSP to 5.5.0 (<a href="https://youtrack.jetbrains.com/issue/WEB-63544">WEB-63544</a>).</li> 
- <li>We've added basic support for Angular 17 syntax: <code>@if</code>, <code>@for</code>, <code>@defer</code> and <code>@switch</code> blocks (<a href="https://youtrack.jetbrains.com/issue/WEB-63624">WEB-63624</a>).</li> 
+ <li>We've implemented a quick-fix for React.js to add <code>useState</code> when using a non-existent reference in a component (<a href="https://youtrack.jetbrains.com/issue/WEB-63921">WEB-63921</a>).</li> 
+ <li>We've fixed the issue causing TypeScript type checking inconsistencies on inferred types of RxJS (<a href="https://youtrack.jetbrains.com/issue/WEB-60039">WEB-60039</a>).</li> 
+ <li>We've added an option in <em>Settings</em> to enable the new TypeScript engine (WebStorm@next) (<a href="https://youtrack.jetbrains.com/issue/WEB-65789">WEB-65789</a>).</li> 
+ <li>We've improved the GraphQL performance (<a href="https://youtrack.jetbrains.com/issue/WEB-63258">WEB-63258</a>).</li> 
+ <li>We've improved the formatting in the <em>Quick Documentation</em> popup (<a href="https://youtrack.jetbrains.com/issue/WEB-62329">WEB-62329</a>).</li> 
 </ul> 
-<p>For more details, please see the release notes.</p>]]></message>
+<p>For an overview of the recent features included in the EAP builds, please see the <a href="https://blog.jetbrains.com/webstorm/2024/03/webstorm-2024-1-eap3/">blog post</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/webstorm/nextversion" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WEB-A-233538448/WebStorm-2023.3-EAP-7-233.11555.12-build-Release-Notes"/>
-        <button name="More Information" url="https://blog.jetbrains.com/webstorm/2023/10/webstorm-2023-3-eap2/"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WEB-A-233538478/WebStorm-2024.1-Beta-241.14494.25-build-Release-Notes"/>
+        <button name="More Information" url="https://blog.jetbrains.com/webstorm/2024/03/webstorm-2024-1-eap3/"/>
+        <patch from="241.14024" size="from 46 to 48" fullFrom="241.14024.30"/>
+      </build>
+      <build number="241.14024" version="2024.1 EAP" fullNumber="241.14024.30">
+        <patch from="241.13688" size="from 35 to 37" fullFrom="241.13688.21"/>
+      </build>
+      <build number="241.13688" version="2024.1 EAP" fullNumber="241.13688.21">
+        <patch from="241.12662" size="from 229 to 232" fullFrom="241.12662.63"/>
+      </build>
+      <build number="241.12662" version="2024.1 EAP" fullNumber="241.12662.63">
+        <patch from="241.11761" size="from 94 to 97" fullFrom="241.11761.28"/>
+      </build>
+      <build number="241.11761" version="2024.1 EAP" fullNumber="241.11761.28">
+        <patch from="241.10840" size="from 98 to 103" fullFrom="241.10840.2"/>
+      </build>
+      <build number="241.10840" version="2024.1 EAP" fullNumber="241.10840.2">
+        <patch from="241.9959" size="from 50 to 52" fullFrom="241.9959.35"/>
+      </build>
+      <build number="241.9959" version="2024.1 EAP" fullNumber="241.9959.35">
+        <patch from="241.8102" size="from 250 to 264" fullFrom="241.8102.134"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.95">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2023/11/webstorm-2023-3-eap-3/"/>
+        <patch from="233.11799" size="from 43 to 44" fullFrom="233.11799.31"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.31">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2023/11/webstorm-2023-3-eap-3/"/>
+        <patch from="233.11799" size="from 37 to 38" fullFrom="233.11799.11"/>
+      </build>
+      <build number="233.11799" version="2023.3 Beta" fullNumber="233.11799.11">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2023/11/webstorm-2023-3-eap-3/"/>
+        <patch from="233.11555" size="from 44 to 45" fullFrom="233.11555.12"/>
+      </build>
+      <build number="233.11555" version="2023.3 EAP" fullNumber="233.11555.12">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2023/10/webstorm-2023-3-eap2/"/>
         <patch from="233.11361" size="from 37 to 38" fullFrom="233.11361.11"/>
       </build>
       <build number="233.11361" version="2023.3 EAP" fullNumber="233.11361.11">
@@ -7025,17 +7837,64 @@
       </build>
     </channel>
     <channel id="WS-RELEASE-licensing-RELEASE" name="WebStorm RELEASE" status="release" url="https://www.jetbrains.com/webstorm/download" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
-      <build number="232.10203" version="2023.2.4" releaseDate="20230724" fullNumber="232.10203.14">
-        <blogPost url="https://blog.jetbrains.com/webstorm/2023/10/webstorm-2023-2-4/"/>
-        <message><![CDATA[<p><b>WebStorm 2023.2.4</b> is now available!</p> 
+      <build number="233.14475" version="2023.3.4" releaseDate="20231206" fullNumber="233.14475.40">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2024/02/webstorm-2023-3-4/"/>
+        <message><![CDATA[<p><b>WebStorm 2023.3.4</b> is now available!</p> 
 <p>What's fixed:</p> 
 <ul> 
- <li>We've fixed the issue causing the list of directories in the <em>Project</em> tool window to be rendered incorrectly (<a href="https://youtrack.jetbrains.com/issue/IDEA-326394">IDEA-326394</a>).</li> 
+ <li>We've fixed the issue causing errors thrown outside Vitest tests to not be reported (<a href="https://youtrack.jetbrains.com/issue/WEB-65015">WEB-65015</a>).</li> 
+ <li>We've addressed the issue with the <em>Settings Sync</em> functionality reporting an authorization problem (<a href="https://youtrack.jetbrains.com/issue/IDEA-343073">IDEA-343073</a>).</li> 
+ <li>Customizing inspection severities is once again accessible in <em>Settings | Editor | Inspections</em> (<a href="https://youtrack.jetbrains.com/issue/IDEA-341773">IDEA-341773</a>).</li> 
 </ul> 
-<p>For more details, please see the <a href="https://blog.jetbrains.com/webstorm/2023/10/webstorm-2023-2-4/">blog post</a>.</p>]]></message>
+<p>For more details, please see the <a href="https://blog.jetbrains.com/webstorm/2024/02/webstorm-2023-3-4/">blog post</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/webstorm/download" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WEB-A-233538446/WebStorm-2023.2.4-232.10203.14-build-Release-Notes"/>
-        <button name="More Information" url="https://blog.jetbrains.com/webstorm/2023/10/webstorm-2023-2-4/"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WEB-A-233538470/WebStorm-2023.3.4-233.14475.40-build-Release-Notes"/>
+        <button name="More Information" url="https://blog.jetbrains.com/webstorm/2024/02/webstorm-2023-3-4/"/>
+        <patch from="233.14475" size="from 34 to 35" fullFrom="233.14475.2"/>
+        <patch from="233.14015" size="from 37 to 38" fullFrom="233.14015.89"/>
+        <patch from="232.10300" size="from 173 to 175" fullFrom="232.10300.41"/>
+      </build>
+      <build number="233.14015" version="2023.3.3" releaseDate="20231206" fullNumber="233.14015.89">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2024/01/webstorm-2023-3-3/"/>
+        <patch from="233.13135" size="from 41 to 42" fullFrom="233.13135.92"/>
+        <patch from="233.14015" size="from 33 to 35" fullFrom="233.14015.54"/>
+        <patch from="232.10227" size="from 173 to 175" fullFrom="232.10227.9"/>
+      </build>
+      <build number="233.13135" version="2023.3.2" releaseDate="20231206" fullNumber="233.13135.92">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2023/12/webstorm-2023-3-2/"/>
+        <patch from="233.13135" size="from 36 to 37" fullFrom="233.13135.66"/>
+        <patch from="233.11799" size="from 41 to 43" fullFrom="233.11799.293"/>
+        <patch from="232.10227" size="from 170 to 172" fullFrom="232.10227.9"/>
+      </build>
+      <build number="233.11799" version="2023.3.1" releaseDate="20231206" fullNumber="233.11799.293">
+        <patch from="233.11799" size="from 35 to 36" fullFrom="233.11799.229"/>
+        <patch from="232.10227" size="from 169 to 170" fullFrom="232.10227.9"/>
+      </build>
+      <build number="233.11799" version="2023.3" releaseDate="20231206" fullNumber="233.11799.229">
+        <patch from="233.11799" size="from 35 to 36" fullFrom="233.11799.192"/>
+        <patch from="232.10227" size="from 168 to 170" fullFrom="232.10227.9"/>
+      </build>
+      <build number="232.10300" version="2023.2.6" releaseDate="20230724" fullNumber="232.10300.41">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2024/02/webstorm-2023-2-6/"/>
+        <message><![CDATA[<p><b>WebStorm 2023.2.6</b> is now available!</p> 
+<p>What's fixed:</p> 
+<ul> 
+ <li>We've implemented improvements to strengthen the IDE's overall stability.</li> 
+</ul> 
+<p>For more details, please see the <a href="https://blog.jetbrains.com/webstorm/2024/02/webstorm-2023-2-6/">blog post</a>.</p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/webstorm/download/other.html#version20232" download="true"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WEB-A-233538469/WebStorm-2023.2.6-232.10300.41-build-Release-Notes"/>
+        <button name="More Information" url="https://blog.jetbrains.com/webstorm/2024/02/webstorm-2023-2-6/"/>
+        <patch from="232.10227" size="from 40 to 41" fullFrom="232.10227.9"/>
+        <patch from="231.9414" size="from 421 to 439" fullFrom="231.9414.9"/>
+      </build>
+      <build number="232.10227" version="2023.2.5" releaseDate="20230724" fullNumber="232.10227.9">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2023/11/webstorm-2023-2-5/"/>
+        <patch from="232.10203" size="from 40 to 41" fullFrom="232.10203.14"/>
+        <patch from="231.9225" size="from 427 to 444" fullFrom="231.9225.18"/>
+      </build>
+      <build number="232.10203" version="2023.2.4" releaseDate="20230724" fullNumber="232.10203.14">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2023/10/webstorm-2023-2-4/"/>
         <patch from="232.10072" size="from 36 to 37" fullFrom="232.10072.28"/>
       </build>
       <build number="232.10072" version="2023.2.3" releaseDate="20230724" fullNumber="232.10072.28">
@@ -7057,18 +7916,22 @@
         <patch from="231.9225" size="from 400 to 418" fullFrom="231.9225.18"/>
         <patch from="232.8660" size="from 32 to 34" fullFrom="232.8660.129"/>
       </build>
-      <build number="231.9225" version="2023.1.4" releaseDate="20230328" fullNumber="231.9225.18">
-        <blogPost url="https://blog.jetbrains.com/webstorm/2023/07/webstorm-2023-1-4/"/>
-        <message><![CDATA[<p><b>WebStorm 2023.1.4</b> is now available!</p> 
+      <build number="231.9414" version="2023.1.5" releaseDate="20230328" fullNumber="231.9414.9">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2024/02/webstorm-2023-1-5/"/>
+        <message><![CDATA[<p><b>WebStorm 2023.1.5</b> is now available!</p> 
 <p>What's fixed:</p> 
 <ul> 
- <li>We fixed the issue with missing custom code style settings and they are now correctly preserved by the IDE (<a href="https://youtrack.jetbrains.com/issue/IDEA-318457">IDEA-318457</a>).</li> 
- <li>Starting up the IDE no longer fails with the "CannotActivateException: Address already in use: bind" error (<a href="https://youtrack.jetbrains.com/issue/IDEA-323836">IDEA-323836</a>).</li> 
+ <li>We've implemented improvements to strengthen the IDE's overall stability.</li> 
 </ul> 
-<p>For more details, please see the <a href="https://blog.jetbrains.com/webstorm/2023/07/webstorm-2023-1-4/">blog post</a></p>]]></message>
+<p>For more details, please see the <a href="https://blog.jetbrains.com/webstorm/2024/02/webstorm-2023-1-5/">blog post</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/webstorm/download/other.html#version20231" download="true"/>
-        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WEB-A-233538430"/>
-        <button name="More Information" url="https://blog.jetbrains.com/webstorm/2023/07/webstorm-2023-1-4/"/>
+        <button name="Release Notes" url="https://youtrack.jetbrains.com/articles/WEB-A-233538467"/>
+        <button name="More Information" url="https://blog.jetbrains.com/webstorm/2024/02/webstorm-2023-1-5/"/>
+        <patch from="223.8836" size="from 153 to 154" fullFrom="223.8836.50"/>
+        <patch from="231.9225" size="from 48 to 49" fullFrom="231.9225.18"/>
+      </build>
+      <build number="231.9225" version="2023.1.4" releaseDate="20230328" fullNumber="231.9225.18">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2023/07/webstorm-2023-1-4/"/>
         <patch from="231.9161" size="from 40 to 41" fullFrom="231.9161.29"/>
       </build>
       <build number="231.9161" version="2023.1.3" releaseDate="20230328" fullNumber="231.9161.29">
@@ -7401,6 +8264,19 @@
       </build>
     </channel>
     <channel id="WS-EAP-licensing-RELEASE" name="WebStorm EAP licensing:RELEASE" status="eap" url="https://www.jetbrains.com/webstorm/nextversion" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="release">
+      <build number="233.14475" version="2023.3.4 RC" releaseDate="20231206" fullNumber="233.14475.2">
+        <patch from="233.14015" size="from 37 to 38" fullFrom="233.14015.89"/>
+      </build>
+      <build number="233.14015" version="2023.3.3 RC" releaseDate="20231206" fullNumber="233.14015.54">
+        <patch from="233.13135" size="from 41 to 42" fullFrom="233.13135.92"/>
+      </build>
+      <build number="233.13135" version="2023.3.2 RC" releaseDate="20231206" fullNumber="233.13135.66">
+        <patch from="233.11799" size="from 42 to 44" fullFrom="233.11799.293"/>
+      </build>
+      <build number="233.11799" version="2023.3 RC" fullNumber="233.11799.192">
+        <blogPost url="https://blog.jetbrains.com/webstorm/2023/11/webstorm-2023-3-rc/"/>
+        <patch from="233.11799" size="from 38 to 39" fullFrom="233.11799.95"/>
+      </build>
       <build number="232.9921" version="2023.2.2 Release Candidate" releaseDate="20230724" fullNumber="232.9921.26">
         <patch from="232.9559" size="from 40 to 42" fullFrom="232.9559.58"/>
       </build>
@@ -7520,20 +8396,23 @@
   <product name="Writerside">
     <code>WRS</code>
     <channel id="WRS-EAP-licensing-EAP" name="Writerside EAP" status="eap" url="https://www.jetbrains.com/writerside/download/" feedback="https://youtrack.jetbrains.com" majorVersion="2023" licensing="eap">
-      <build number="232.10165" version="2023.2 EAP">
-        <message><![CDATA[<h1>The first public EAP of Writerside is out!</h1> 
-<p>Writerside is a new documentation authoring solution by JetBrains.</p> 
+      <build number="233.14389" version="2023.3 EAP">
+        <message><![CDATA[<h1>A hotfix release for the third public EAP of Writerside is out!</h1> 
+<p>This version contains fixes for the new PDF export feature, which was introduced in <a href="https://www.jetbrains.com/help/writerside/14272.html">233.14272</a>. </p>]]></message>
+        <button name="Download" url="https://www.jetbrains.com/writerside/download/" download="true"/>
+      </build>
+      <build number="232.10275" version="2023.2 EAP">
+        <message><![CDATA[<p><b>Writerside 2023.2 EAP #2</b> is now available!</p> 
+<p>Most notable changes:</p> 
 <ul> 
- <li>Combine the simplicity of vanilla Markdown with fully structured semantic markup</li> 
- <li>Single-source to multiple outputs </li> 
- <li>Preview content as you type exactly the way it will be published </li> 
- <li>Harness the power of JetBrains IntelliJ-based IDEs for intelligent writing assistance </li> 
- <li>Use built-in Git integration for streamlined version control</li> 
- <li>Import from existing Markdown sources or create a new playground project </li> 
- <li>Start writing with templates, not empty topics</li> 
- <li>Generate API documentation from an OpenAPI specification</li> 
+ <li>Support for PlantUML diagrams</li> 
+ <li>Paste images into the editor from the clipboard</li> 
+ <li>API docs: Markdown in object descriptions, references to objects and parameters, multiple <code>&lt;sample&gt;</code> elements</li> 
+ <li>MD import: first imported topic becomes the home page, all files are selected for import by default</li> 
+ <li>Better error reporting in the build log</li> 
+ <li>Support for non-latin characters</li> 
 </ul> 
-<p> <br> <a href="https://www.jetbrains.com/writerside/">Product website</a> <br> <a href="https://www.jetbrains.com/help/writerside/">Documentation</a> </p>]]></message>
+<p> For a full list of new features, improvements, and fixes, see <a href="https://www.jetbrains.com/help/writerside/10275.html">What's new in 232.10275</a>.</p>]]></message>
         <button name="Download" url="https://www.jetbrains.com/writerside/download/" download="true"/>
       </build>
     </channel>

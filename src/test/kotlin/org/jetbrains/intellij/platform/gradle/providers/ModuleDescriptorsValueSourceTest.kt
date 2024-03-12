@@ -15,12 +15,12 @@ class ModuleDescriptorsValueSourceTest : IntelliJPluginTestBase() {
         buildFile.kotlin(
             """
             tasks {
+                val outputFile = file("output.txt")
                 val moduleDescriptors = providers.of(org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource::class) {
                     parameters {
                         intellijPlatformPath = layout.dir(provider { intellijPlatform.platformPath.toFile() })
                     }
                 }
-                val outputFile = file("output.txt")
             
                 val generateModuleDescriptors by registering {
                     doLast {

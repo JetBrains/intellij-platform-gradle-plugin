@@ -74,8 +74,6 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val channels: ListProperty<Channel>
     }
 
-    private val log = Logger(javaClass)
-
     override fun obtain(): List<String>? = with(parameters) {
         val jetbrainsIdesReleases = jetbrainsIdes.orNull
             ?.let { decode<JetBrainsIdesReleases>(it.asPath) }
@@ -200,7 +198,6 @@ fun IntelliJPlatformExtension.VerifyPlugin.Ides.ProductReleasesValueSource(confi
         configure,
     )
 
-
 @Serializable
 data class Data(
     @XmlSerialName("item")
@@ -211,14 +208,3 @@ data class Data(
         val name: String,
     )
 }
-
-//@Serializable
-//data class Data(
-//    val items: List<Item>,
-//) {
-//    @Serializable
-//    @XmlSerialName("item")
-//    data class Item(
-//        val name: String
-//    )
-//}
