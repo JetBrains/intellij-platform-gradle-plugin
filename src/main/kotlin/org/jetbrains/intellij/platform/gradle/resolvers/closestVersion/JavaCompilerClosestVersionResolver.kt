@@ -8,9 +8,10 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.net.URL
 
 class JavaCompilerClosestVersionResolver(private val productInfo: ProductInfo) : ClosestVersionResolver(
-    subject = "Java Compiler",
     url = URL("${Locations.INTELLIJ_REPOSITORY}/releases/com/jetbrains/intellij/java/java-compiler-ant-tasks/maven-metadata.xml"),
 ) {
+
+    override val subject = "Java Compiler"
 
     override fun resolve() = inMaven(productInfo.buildNumber.toVersion())
 }

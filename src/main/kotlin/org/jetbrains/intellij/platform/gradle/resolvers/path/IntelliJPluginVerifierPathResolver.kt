@@ -6,7 +6,6 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.nio.file.Path
 
 /**
  * Resolves the path to the IntelliJ Plugin Verifier executable.
@@ -15,28 +14,27 @@ import java.nio.file.Path
  * @property localPath The local path to the IntelliJ Plugin Verifier file.
  */
 class IntelliJPluginVerifierPathResolver(
-    val intellijPluginVerifier: FileCollection,
-    val localPath: RegularFileProperty,
-) : PathResolver(
-    subject = "IntelliJ Plugin Verifier",
-) {
+    private val intellijPluginVerifier: FileCollection,
+    private val localPath: RegularFileProperty,
+) : PathResolver() {
 
-    override val predictions: Sequence<Pair<String, () -> Path?>>
-        get() = sequenceOf(
-            "$subject specified with a local path" to {
-                /**
-                 * Checks if the provided [localPath] points to the IntelliJ Plugin Verifier CLI tool.
-                 */
-                localPath.orNull
-                    ?.asPath
-                    ?.takeIfExists()
-            },
-            "$subject specified with a dependencies" to {
-                /**
-                 * Resolves the IntelliJ Plugin Verifier CLI tool with the [Configurations.INTELLIJ_PLUGIN_VERIFIER] configuration.
-                 */
-                intellijPluginVerifier.singleOrNull()
-                    ?.toPath()
-            },
-        )
+    override val subject = "IntelliJ Plugin Verifier"
+
+    override val predictions = sequenceOf(
+        "$subject specified with a local path" to {
+            /**
+             * Checks if the provided [localPath] points to the IntelliJ Plugin Verifier CLI tool.
+             */
+            localPath.orNull
+                ?.asPath
+                ?.takeIfExists()
+        },
+        "$subject specified with a dependencies" to {
+            /**
+             * Resolves the IntelliJ Plugin Verifier CLI tool with the [Configurations.INTELLIJ_PLUGIN_VERIFIER] configuration.
+             */
+            intellijPluginVerifier.singleOrNull()
+                ?.toPath()
+        },
+    )
 }

@@ -15,36 +15,35 @@ private const val PRODUCT_INFO_NAME = "product-info.json"
  */
 class ProductInfoPathResolver(
     private val intellijPlatformDirectory: Path,
-) : PathResolver(
-    subject = PRODUCT_INFO_NAME,
-) {
+) : PathResolver() {
 
-    override val predictions: Sequence<Pair<String, () -> Path?>>
-        get() = sequenceOf(
-            /**
-             * Check if [intellijPlatformDirectory] is, by any reason, our [PRODUCT_INFO_NAME].
-             */
-            PRODUCT_INFO_NAME to {
-                intellijPlatformDirectory
-                    .takeIf { it.name == PRODUCT_INFO_NAME }
-            },
-            /**
-             * Check if [PRODUCT_INFO_NAME] is located directly in [intellijPlatformDirectory].
-             */
-            PRODUCT_INFO_NAME to {
-                intellijPlatformDirectory
-                    .listDirectoryEntries(PRODUCT_INFO_NAME)
-                    .firstOrNull()
-            },
-            /**
-             * Check if [PRODUCT_INFO_NAME] is located directly in `[intellijPlatformDirectory]/Resources`.
-             */
-            PRODUCT_INFO_NAME to {
-                intellijPlatformDirectory
-                    .listDirectoryEntries("Resources")
-                    .firstOrNull()
-                    ?.listDirectoryEntries(PRODUCT_INFO_NAME)
-                    ?.firstOrNull()
-            },
-        )
+    override val subject = PRODUCT_INFO_NAME
+
+    override val predictions = sequenceOf(
+        /**
+         * Check if [intellijPlatformDirectory] is, by any reason, our [PRODUCT_INFO_NAME].
+         */
+        PRODUCT_INFO_NAME to {
+            intellijPlatformDirectory
+                .takeIf { it.name == PRODUCT_INFO_NAME }
+        },
+        /**
+         * Check if [PRODUCT_INFO_NAME] is located directly in [intellijPlatformDirectory].
+         */
+        PRODUCT_INFO_NAME to {
+            intellijPlatformDirectory
+                .listDirectoryEntries(PRODUCT_INFO_NAME)
+                .firstOrNull()
+        },
+        /**
+         * Check if [PRODUCT_INFO_NAME] is located directly in `[intellijPlatformDirectory]/Resources`.
+         */
+        PRODUCT_INFO_NAME to {
+            intellijPlatformDirectory
+                .listDirectoryEntries("Resources")
+                .firstOrNull()
+                ?.listDirectoryEntries(PRODUCT_INFO_NAME)
+                ?.firstOrNull()
+        },
+    )
 }

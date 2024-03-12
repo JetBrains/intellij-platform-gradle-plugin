@@ -6,9 +6,10 @@ import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import java.net.URL
 
 class IntelliJPluginVerifierLatestVersionResolver : LatestVersionResolver(
-    subject = "IntelliJ Plugin Verifier",
     url = URL("${Locations.MAVEN_REPOSITORY}/org/jetbrains/intellij/plugins/verifier-cli/maven-metadata.xml"),
 ) {
+
+    override val subject = "IntelliJ Plugin Verifier"
 
     override fun resolve() = fromMaven()
 }

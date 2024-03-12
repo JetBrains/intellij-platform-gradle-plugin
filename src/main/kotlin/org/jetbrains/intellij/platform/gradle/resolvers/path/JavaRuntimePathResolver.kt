@@ -6,7 +6,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.internal.jvm.Jvm
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.jvm.toolchain.JavaToolchainSpec
 import org.gradle.jvm.toolchain.internal.DefaultJvmVendorSpec
@@ -14,7 +13,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_RUNTIME_VENDOR
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.or
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
 import kotlin.io.path.listDirectoryEntries
@@ -29,72 +27,71 @@ import kotlin.io.path.name
  * @param javaToolchainService The [JavaToolchainService] used for finding a matching launcher.
  */
 class JavaRuntimePathResolver(
-    val jetbrainsRuntime: FileCollection,
-    val intellijPlatform: FileCollection,
-    val javaToolchainSpec: JavaToolchainSpec,
-    val javaToolchainService: JavaToolchainService,
-) : PathResolver(
-    subject = "Java Runtime",
-) {
+    private val jetbrainsRuntime: FileCollection,
+    private val intellijPlatform: FileCollection,
+    private val javaToolchainSpec: JavaToolchainSpec,
+    private val javaToolchainService: JavaToolchainService,
+) : PathResolver() {
 
-    override val predictions: Sequence<Pair<String, () -> Path?>>
-        get() = sequenceOf(
-            /**
-             * The exact JetBrains Runtime archive provided to the [Configurations.JETBRAINS_RUNTIME] configuration using
-             * the [IntelliJPlatformDependenciesExtension.jetbrainsRuntime] dependencies extensions.
-             */
-            "JetBrains Runtime specified with dependencies" to {
-                jetbrainsRuntime.singleOrNull()
-                    ?.toPath()
-                    .resolveRuntimeDirectory()
-                    .ensureExecutableExists()
-            },
-            /**
-             * Java Toolchain if the toolchain vendor matches [JETBRAINS_RUNTIME_VENDOR].
-             */
-            "JetBrains Runtime specified with Java Toolchain" to {
-                @Suppress("UnstableApiUsage")
-                javaToolchainSpec.vendor.orNull
-                    .takeUnless { it == DefaultJvmVendorSpec.any() }
-                    ?.takeIf { it.matches(JETBRAINS_RUNTIME_VENDOR) }
-                    ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
-                    ?.metadata
-                    ?.installationPath
-                    ?.asPath
-                    .resolveRuntimeDirectory()
-                    .ensureExecutableExists()
-            },
-            /**
-             * The bundled JetBrains Runtime within the current IntelliJ Platform.
-             */
-            "JetBrains Runtime bundled within the IntelliJ Platform" to {
-                intellijPlatform.singleOrNull()
-                    ?.toPath()
-                    .resolveRuntimeDirectory()
-                    .ensureExecutableExists()
-            },
-            /**
-             * Any other runtime resolved with the Java Toolchain.
-             */
-            "Java Runtime specified with Java Toolchain" to {
-                javaToolchainSpec.languageVersion.orNull
-                    ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
-                    ?.metadata
-                    ?.installationPath
-                    ?.asPath
-                    .resolveRuntimeDirectory()
-                    .ensureExecutableExists()
-            },
-            /**
-             * The current JVM used for running Gradle.
-             */
-            "Current JVM" to {
-                Jvm.current().javaHome
-                    .toPath()
-                    .resolveRuntimeDirectory()
-                    .ensureExecutableExists()
-            },
-        )
+    override val subject = "Java Runtime"
+
+    override val predictions = sequenceOf(
+        /**
+         * The exact JetBrains Runtime archive provided to the [Configurations.JETBRAINS_RUNTIME] configuration using
+         * the [IntelliJPlatformDependenciesExtension.jetbrainsRuntime] dependencies extensions.
+         */
+        "JetBrains Runtime specified with dependencies" to {
+            jetbrainsRuntime.singleOrNull()
+                ?.toPath()
+                .resolveRuntimeDirectory()
+                .ensureExecutableExists()
+        },
+        /**
+         * Java Toolchain if the toolchain vendor matches [JETBRAINS_RUNTIME_VENDOR].
+         */
+        "JetBrains Runtime specified with Java Toolchain" to {
+            @Suppress("UnstableApiUsage")
+            javaToolchainSpec.vendor.orNull
+                .takeUnless { it == DefaultJvmVendorSpec.any() }
+                ?.takeIf { it.matches(JETBRAINS_RUNTIME_VENDOR) }
+                ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
+                ?.metadata
+                ?.installationPath
+                ?.asPath
+                .resolveRuntimeDirectory()
+                .ensureExecutableExists()
+        },
+        /**
+         * The bundled JetBrains Runtime within the current IntelliJ Platform.
+         */
+        "JetBrains Runtime bundled within the IntelliJ Platform" to {
+            intellijPlatform.singleOrNull()
+                ?.toPath()
+                .resolveRuntimeDirectory()
+                .ensureExecutableExists()
+        },
+        /**
+         * Any other runtime resolved with the Java Toolchain.
+         */
+        "Java Runtime specified with Java Toolchain" to {
+            javaToolchainSpec.languageVersion.orNull
+                ?.let { javaToolchainService.launcherFor(javaToolchainSpec).get() }
+                ?.metadata
+                ?.installationPath
+                ?.asPath
+                .resolveRuntimeDirectory()
+                .ensureExecutableExists()
+        },
+        /**
+         * The current JVM used for running Gradle.
+         */
+        "Current JVM" to {
+            Jvm.current().javaHome
+                .toPath()
+                .resolveRuntimeDirectory()
+                .ensureExecutableExists()
+        },
+    )
 
     /**
      * Resolves an exact Java Runtime executable.
@@ -114,22 +111,30 @@ class JavaRuntimePathResolver(
     private fun Path?.resolveRuntimeDirectory(): Path? {
         this ?: return null
 
-        val jbr = listDirectoryEntries()
+        val baseDirectory = listDirectoryEntries()
             .firstOrNull { it.name.startsWith("jbr") }
             ?.takeIfExists()
+            ?: this
 
-        return when {
-            OperatingSystem.current().isMacOsX -> when {
-                endsWith("Contents/Home") -> this
-                jbr != null -> jbr.resolve("Contents/Home")
-                else -> resolve("jdk/Contents/Home")
-            }
+//        return with(baseDirectory) {
+//            when {
+//                OperatingSystem.current().isMacOsX -> when {
+//                    endsWith("Contents/Home") -> this
+//                    jbr != null -> jbr.resolve("Contents/Home")
+//                    else -> resolve("jdk/Contents/Home")
+//                }
+//
+//                else -> baseDirectory
+//            }
+//        }.takeIfExists()
 
-            else -> when {
-                jbr != null -> jbr
-                else -> this
-            }
-        }.takeIfExists()
+        return sequenceOf(
+            { baseDirectory.resolve("Contents/Home") },
+            { baseDirectory.resolve("jdk/Contents/Home") },
+            { baseDirectory },
+        ).firstNotNullOfOrNull {
+            it().takeIfExists()
+        }
     }
 
     /**
@@ -138,9 +143,14 @@ class JavaRuntimePathResolver(
      * @return The resolved path to the runtime executable, or null if the executable does not exist.
      */
     private fun Path.resolveRuntimeExecutable(): Path? {
-        val base = resolve("jre").takeIfExists().or(this)
-        val extension = ".exe".takeIf { OperatingSystem.current().isWindows }.orEmpty()
-        return base.resolve("bin/java$extension").takeIfExists()
+        val baseDirectory = resolve("jre").takeIfExists() ?: this
+
+        return sequenceOf(
+            { baseDirectory.resolve("bin/java") },
+            { baseDirectory.resolve("bin/java.exe") },
+        ).firstNotNullOfOrNull {
+            it().takeIfExists()
+        }
     }
 
     /**

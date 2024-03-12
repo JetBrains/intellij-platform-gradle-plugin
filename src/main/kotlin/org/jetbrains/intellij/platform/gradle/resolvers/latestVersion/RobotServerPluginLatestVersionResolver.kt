@@ -6,9 +6,10 @@ import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import java.net.URL
 
 class RobotServerPluginLatestVersionResolver : LatestVersionResolver(
-    subject = "Robot Server Plugin",
     url = URL("${Locations.INTELLIJ_DEPENDENCIES_REPOSITORY}/com/intellij/remoterobot/robot-server-plugin/maven-metadata.xml"),
 ) {
+
+    override val subject = "Robot Server Plugin"
 
     override fun resolve() = fromMaven()
 }

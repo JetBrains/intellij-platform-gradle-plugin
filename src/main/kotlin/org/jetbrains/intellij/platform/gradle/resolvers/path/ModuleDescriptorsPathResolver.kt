@@ -10,19 +10,18 @@ import java.nio.file.Path
  *
  * @property platformPath The path to the currently used IntelliJ Platform.
  */
-class ModuleDescriptorsPathResolver(private val platformPath: Path) : PathResolver(
-    subject = "Module Descriptors",
-) {
+class ModuleDescriptorsPathResolver(private val platformPath: Path) : PathResolver() {
 
-    override val predictions: Sequence<Pair<String, () -> Path?>>
-        get() = sequenceOf(
-            /**
-             * Checks if there is `modules/module-descriptors.jar` file bundled within the current IntelliJ Platform.
-             */
-            "$subject bundled within the IntelliJ Platform" to {
-                platformPath
-                    .resolve("modules/module-descriptors.jar")
-                    .takeIfExists()
-            },
-        )
+    override val subject = "Module Descriptors"
+
+    override val predictions = sequenceOf(
+        /**
+         * Checks if there is `modules/module-descriptors.jar` file bundled within the current IntelliJ Platform.
+         */
+        "$subject bundled within the IntelliJ Platform" to {
+            platformPath
+                .resolve("modules/module-descriptors.jar")
+                .takeIfExists()
+        },
+    )
 }

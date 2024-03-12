@@ -12,15 +12,11 @@ import java.net.URL
 /**
  * Interface for resolving the closest [Version] of any entity to the provided value.
  *
- * @param subject The name of the resource
  * @param url The URL where versions list is available for parsing
  */
 abstract class ClosestVersionResolver(
-    protected val subject: String,
     protected val url: URL,
 ) : Resolver<Version> {
-
-    private val log = Logger(javaClass)
 
     /**
      * Resolves the closest version to the provided [version] of the artifact available in Maven repository.

@@ -6,7 +6,6 @@ import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.models.MavenMetadata
 import org.jetbrains.intellij.platform.gradle.models.decode
 import org.jetbrains.intellij.platform.gradle.resolvers.Resolver
-import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.net.HttpURLConnection
@@ -19,12 +18,9 @@ import java.net.URL
  * @param url The URL where versions list is available for parsing
  */
 abstract class LatestVersionResolver(
-    protected val subject: String,
     protected val url: URL,
 ) : Resolver<Version> {
 
-    private val log: Logger
-        get() = Logger(LatestVersionResolver::class.java)
 
     /**
      * Resolves the latest version of the artifact available in Maven repository.

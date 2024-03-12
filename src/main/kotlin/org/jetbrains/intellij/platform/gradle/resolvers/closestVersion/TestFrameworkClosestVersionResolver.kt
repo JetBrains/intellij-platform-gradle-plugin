@@ -9,9 +9,10 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.net.URL
 
 class TestFrameworkClosestVersionResolver(private val productInfo: ProductInfo, type: TestFrameworkType) : ClosestVersionResolver(
-    subject = "Test Framework",
     url = URL("${Locations.INTELLIJ_REPOSITORY}/releases/${type.coordinates.groupId.replace('.', '/')}/${type.coordinates.artifactId}/maven-metadata.xml"),
 ) {
+
+    override val subject = "Test Framework"
 
     override fun resolve() = inMaven(productInfo.buildNumber.toVersion())
 }
