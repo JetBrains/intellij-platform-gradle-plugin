@@ -177,9 +177,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                         yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
                     }
                 }
-                .ifNull {
-                    yield("The plugin.xml file not found.")
-                }
+                ?: yield("The plugin.xml file not found.")
+
 
             if (platformBuild < Version(223)) {
                 yield("The minimal supported IntelliJ Platform version is 2022.3 (223.0), which is higher than provided: $platformVersion ($platformBuild)")

@@ -15,19 +15,10 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import java.nio.file.Path
 import kotlin.io.path.absolute
 
-fun <T> T?.or(other: T): T = this ?: other
-
-inline fun <T> T?.or(block: () -> T): T = this ?: block()
-
-inline fun <T> T?.ifNull(block: () -> Unit): T? = this ?: block().let { null }
-
 inline fun <T> T?.throwIfNull(block: () -> Exception) = this ?: throw block()
 
 internal val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()
-
-internal val <T : FileSystemLocation> Provider<T>.asFile
-    get() = get().asFile
 
 internal val <T : FileSystemLocation> Provider<T>.asPath
     get() = get().asFile.toPath().absolute()
