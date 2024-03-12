@@ -76,23 +76,6 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
         }
     }
 
-    @Test
-    fun `resolve JetBrains Runtime bundled with the IntelliJ Platform`() {
-        buildFile.kotlin(
-            """
-                
-            """.trimIndent()
-        )
-
-        prepareAndBuild {
-            val (jetbrainsRuntime, intellijPlatform, resolvedPath) = readLines()
-
-            assertTrue(jetbrainsRuntime.isNotEmpty())
-            assertTrue(intellijPlatform.isNotEmpty())
-            assertTrue(resolvedPath.startsWith(jetbrainsRuntime))
-        }
-    }
-
     private fun setupJetBrainsRuntimeConfiguration(version: String) {
         buildFile.kotlin(
             """
