@@ -257,13 +257,39 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
     // Methods can be simplified when the following tickets will be handled:
     // https://youtrack.jetbrains.com/issue/KT-24517
     // https://youtrack.jetbrains.com/issue/KTIJ-1001
-    fun Path.xml(@Language("XML") content: String) = append(content)
+    fun Path.xml(
+        @Language("XML") content: String,
+        override: Boolean = false,
+        prepend: Boolean = false,
+    ) = append(content, override, prepend)
 
-    fun Path.java(@Language("Java") content: String) = append(content)
+    fun Path.java(
+        @Language("Java") content: String,
+        override: Boolean = false,
+        prepend: Boolean = false,
+    ) = append(content, override, prepend)
 
-    fun Path.kotlin(@Language("kotlin") content: String) = append(content)
+    fun Path.kotlin(
+        @Language("kotlin") content: String,
+        override: Boolean = false,
+        prepend: Boolean = false,
+    ) = append(content, override, prepend)
 
-    fun Path.properties(@Language("Properties") content: String) = append(content)
+    fun Path.properties(
+        @Language("Properties") content: String,
+        override: Boolean = false,
+        prepend: Boolean = false,
+    ) = append(content, override, prepend)
 
-    private fun Path.append(content: String) = ensureFileExists().also { appendText(content + "\n") }
+    private fun Path.append(
+        content: String,
+        override: Boolean,
+        prepend: Boolean,
+    ) = ensureFileExists().also {
+        when {
+            prepend -> writeText(content + System.lineSeparator() + readText() + System.lineSeparator())
+            override -> writeText(content + System.lineSeparator())
+            else -> appendText(content + System.lineSeparator())
+        }
+    }
 }

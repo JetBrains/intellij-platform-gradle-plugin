@@ -48,8 +48,8 @@ class IntelliJPluginTest : IntelliJPluginTestBase() {
     fun `intellij-specific tasks`() {
         assumeFalse(Version.parse(gradleVersion) < Version.parse("6.9"))
         assertEquals(
-            ALL_TASKS.joinToString("\n"),
-            tasks(PLUGIN_GROUP_NAME).joinToString("\n"),
+            ALL_TASKS.joinToString(System.lineSeparator()),
+            tasks(PLUGIN_GROUP_NAME).joinToString(System.lineSeparator()),
         )
     }
 
@@ -169,13 +169,13 @@ class IntelliJPluginTest : IntelliJPluginTestBase() {
     fun `ide dependencies are added to test fixtures compile only classpath`() {
         writeTestFile()
         val originalBuildFile = buildFile.readText()
-        buildFile.writeText("")
         buildFile.kotlin(
             """
             plugins {
                 id "java-test-fixtures"
             }
-            """.trimIndent()
+            """.trimIndent(),
+            override = true,
         )
         buildFile.kotlin(originalBuildFile)
         buildFile.kotlin(
@@ -317,7 +317,6 @@ class IntelliJPluginTest : IntelliJPluginTestBase() {
             gradleHome.parent.resolve("local-ides"),
             "com/jetbrains/intellij/goland/goland/2022.1/goland-2022.1.zip"
         )
-        buildFile.writeText("")
         buildFile.kotlin(
             """
             plugins {
@@ -329,7 +328,8 @@ class IntelliJPluginTest : IntelliJPluginTestBase() {
                 localPath = '$localPath'
                 plugins = ['org.jetbrains.plugins.go']
             }
-            """.trimIndent()
+            """.trimIndent(),
+            override = true,
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:go:ideaLocal-GO").let {
@@ -353,7 +353,6 @@ class IntelliJPluginTest : IntelliJPluginTestBase() {
             "com/jetbrains/intellij/idea/ideaIC/2022.1.4/ideaIC-2022.1.4.zip"
         )
 
-        buildFile.writeText("")
         buildFile.kotlin(
             """
             plugins {
@@ -365,7 +364,8 @@ class IntelliJPluginTest : IntelliJPluginTestBase() {
                 localPath = '$localPath'
                 plugins = ['org.jetbrains.plugins.go:221.6008.13']
             }
-            """.trimIndent()
+            """.trimIndent(),
+            override = true,
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:org.jetbrains.plugins.go").let {
@@ -431,7 +431,6 @@ class IntelliJPluginTest : IntelliJPluginTestBase() {
             gradleHome.parent.resolve("local-ides"),
             "com/jetbrains/intellij/idea/ideaIU/2022.1.4/ideaIU-2022.1.4.zip"
         )
-        buildFile.writeText("")
         buildFile.kotlin(
             """
             plugins {
@@ -443,7 +442,8 @@ class IntelliJPluginTest : IntelliJPluginTestBase() {
                 localPath = '$localPath'
                 plugins = ['com.intellij.spring']
             }
-            """.trimIndent()
+            """.trimIndent(),
+            override = true,
         )
 
         printSourceArtifacts("unzipped.com.jetbrains.plugins:Spring:ideaLocal-IU-221.6008.13").let {

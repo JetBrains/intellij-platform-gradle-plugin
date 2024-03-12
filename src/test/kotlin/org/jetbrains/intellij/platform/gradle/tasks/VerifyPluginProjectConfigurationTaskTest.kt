@@ -246,7 +246,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         )
 
         // kotlin.stdlib.default.dependency gets unset
-        gradleProperties.writeText(
+        gradleProperties.properties(
             """
             systemProp.org.gradle.unsafe.kotlin.assignment = true
             """.trimIndent()
