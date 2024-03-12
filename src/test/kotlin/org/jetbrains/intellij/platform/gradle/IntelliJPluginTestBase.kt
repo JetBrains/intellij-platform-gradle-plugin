@@ -109,18 +109,6 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
             """.trimIndent()
         )
 
-        if (gradleVersion.toVersion() >= "8.4".toVersion()) {
-            buildFile.kotlin(
-                """
-                kotlin {
-                    jvmToolchain {
-                        vendor = JvmVendorSpec.JETBRAINS
-                    }
-                }
-                """.trimIndent()
-            )
-        }
-
         gradleProperties.properties(
             """
             kotlin.stdlib.default.dependency = false

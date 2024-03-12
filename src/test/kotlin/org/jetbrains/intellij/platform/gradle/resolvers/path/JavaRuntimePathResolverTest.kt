@@ -3,11 +3,13 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.gradle.internal.jvm.Jvm
+import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.readLines
+import kotlin.io.path.readText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -16,12 +18,25 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve current JVM by default`() {
+        buildFile.readText()
+            .replace(
+                """
+                kotlin {
+                    jvmToolchain(17)
+                }
+                """.trimIndent(),
+                "",
+            )
+            .apply { buildFile.kotlin(this, override = true) }
+
         prepareAndBuild {
-            val (jetbrainsRuntime, intellijPlatform, resolvedPath) = readLines()
+            val (jetbrainsRuntime, intellijPlatform, resolvedPath) = it.readLines()
 
             assertTrue(jetbrainsRuntime.isEmpty())
             assertTrue(intellijPlatform.isNotEmpty())
             assertEquals(Jvm.current().javaHome.absolutePath, resolvedPath)
+
+            assertContains("'Current JVM' resolved as: $resolvedPath", output)
         }
     }
 
@@ -31,7 +46,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
 
         setupJetBrainsRuntimeConfiguration(version)
         prepareAndBuild {
-            val (jetbrainsRuntime, intellijPlatform, resolvedPath) = readLines()
+            val (jetbrainsRuntime, intellijPlatform, resolvedPath) = it.readLines()
 
             assertTrue(jetbrainsRuntime.isNotEmpty())
             assertTrue(intellijPlatform.isNotEmpty())
@@ -39,6 +54,8 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             assertTrue(jetbrainsRuntime.endsWith(version))
             assertTrue(resolvedPath.endsWith("$version/$version"))
             assertTrue(Path(resolvedPath).resolve("bin/java").exists())
+
+            assertContains("'JetBrains Runtime specified with dependencies' resolved as: $resolvedPath", output)
         }
     }
 
@@ -48,7 +65,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
 
         setupJetBrainsRuntimeConfiguration(version)
         prepareAndBuild {
-            val (jetbrainsRuntime, intellijPlatform, resolvedPath) = readLines()
+            val (jetbrainsRuntime, intellijPlatform, resolvedPath) = it.readLines()
 
             assertTrue(jetbrainsRuntime.isNotEmpty())
             assertTrue(intellijPlatform.isNotEmpty())
@@ -56,6 +73,8 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             assertTrue(jetbrainsRuntime.endsWith(version))
             assertTrue(resolvedPath.endsWith("$version/$version/Contents/Home"))
             assertTrue(Path(resolvedPath).resolve("bin/java").exists())
+
+            assertContains("'JetBrains Runtime specified with dependencies' resolved as: $resolvedPath", output)
         }
     }
 
@@ -65,7 +84,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
 
         setupJetBrainsRuntimeConfiguration(version)
         prepareAndBuild {
-            val (jetbrainsRuntime, intellijPlatform, resolvedPath) = readLines()
+            val (jetbrainsRuntime, intellijPlatform, resolvedPath) = it.readLines()
 
             assertTrue(jetbrainsRuntime.isNotEmpty())
             assertTrue(intellijPlatform.isNotEmpty())
@@ -73,6 +92,8 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             assertTrue(jetbrainsRuntime.endsWith(version))
             assertTrue(resolvedPath.endsWith("$version/$version"))
             assertTrue(Path(resolvedPath).resolve("bin/java.exe").exists())
+
+            assertContains("'JetBrains Runtime specified with dependencies' resolved as: $resolvedPath", output)
         }
     }
 
@@ -93,7 +114,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
         )
     }
 
-    private fun prepareAndBuild(block: Path.() -> Unit = {}) {
+    private fun prepareAndBuild(block: BuildResult.(output: Path) -> Unit = {}) {
         val taskName = "resolveJavaRuntimePath"
         val outputFileName = "output.txt"
 
@@ -145,8 +166,8 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        build(taskName) {
-            dir.resolve(outputFileName).apply(block)
+        build(taskName, args = listOf("--debug")) {
+            block(dir.resolve(outputFileName))
         }
     }
 }
