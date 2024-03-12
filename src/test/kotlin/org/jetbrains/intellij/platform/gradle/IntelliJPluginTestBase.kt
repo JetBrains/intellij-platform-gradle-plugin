@@ -100,6 +100,12 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 buildSearchableOptions = false
                 instrumentCode = false
             }
+            
+            tasks {
+                wrapper {
+                    gradleVersion = "$gradleVersion"
+                }
+            }
             """.trimIndent()
         )
 
