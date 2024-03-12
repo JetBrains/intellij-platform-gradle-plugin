@@ -19,13 +19,9 @@ import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.resolvers.ExtractorTransformerTargetNameResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.io.File.separator
 import javax.inject.Inject
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
 
@@ -53,34 +49,13 @@ abstract class ExtractorTransformer @Inject constructor(
 
     override fun transform(outputs: TransformOutputs) = runLogging {
         val path = inputArtifact.asPath
-        val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
-        val (groupId, artifactId, version) = path.absolutePathString().split(separator).dropLast(2).takeLast(3)
-        val coordinates = Coordinates(groupId, artifactId)
-        // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail
-
-        val targetDirectory = listOf(
-            {
-                IntelliJPlatformType.values()
-                    .find { it.dependency == coordinates }
-                    ?.let { "$it-$version" }
-            },
-            {
-                version
-                    .takeIf { groupId == "com.jetbrains" && artifactId == "jbr" }
-            },
-            {
-                val channel = when {
-                    groupId == JETBRAINS_MARKETPLACE_MAVEN_GROUP -> ""
-                    groupId.endsWith(".$JETBRAINS_MARKETPLACE_MAVEN_GROUP") -> groupId.dropLast(JETBRAINS_MARKETPLACE_MAVEN_GROUP.length + 1)
-                    else -> null
-                }
-
-                "$groupId-$artifactId-$version" + "@$channel".takeUnless { channel.isNullOrEmpty() }.orEmpty()
-            },
-        )
-            .firstNotNullOfOrNull { it() }
-            ?.let { outputs.dir(it) }
+        val targetName = ExtractorTransformerTargetNameResolver(path,)
+            .runCatching { resolve() }
+            .getOrNull()
             ?: return@runLogging
+
+        val targetDirectory = outputs.dir(targetName)
+        val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
 
         when (extension) {
             ".zip", ".sit" -> {
