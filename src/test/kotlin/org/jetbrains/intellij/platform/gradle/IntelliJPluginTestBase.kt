@@ -38,7 +38,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
             settingsFile.kotlin(
                 """                    
                 plugins {
-                    id("com.gradle.enterprise") version "3.12.6"
+                    id("com.gradle.enterprise") version "3.16.2"
                 }
                 gradleEnterprise {
                     buildScan {
