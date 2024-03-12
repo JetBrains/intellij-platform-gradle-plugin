@@ -78,9 +78,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
             }
             
             kotlin {
-                jvmToolchain {
-                    languageVersion = JavaLanguageVersion.of(17)
-                }
+                jvmToolchain(17)
             }
             
             repositories {
