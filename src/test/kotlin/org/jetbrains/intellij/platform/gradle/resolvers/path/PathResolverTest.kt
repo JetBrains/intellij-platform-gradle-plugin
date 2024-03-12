@@ -52,8 +52,10 @@ class PathResolverTest : IntelliJPluginTestBase() {
         }
     }
 
-    private fun createResolver(vararg elements: Pair<String, () -> Path?>) = object : PathResolver("test") {
-        override val predictions: Sequence<Pair<String, () -> Path?>>
-            get() = elements.asSequence()
+    private fun createResolver(vararg elements: Pair<String, () -> Path?>) = object : PathResolver() {
+
+        override val subject = "test"
+
+        override val predictions = elements.asSequence()
     }
 }

@@ -33,7 +33,10 @@ class ClosestVersionResolverTest : IntelliJPluginTestBase() {
         assertEquals("0.1.21".toVersion(), resolvedVersion)
     }
 
-    private fun createResolver(version: Version) = object : ClosestVersionResolver("test", url) {
+    private fun createResolver(version: Version) = object : ClosestVersionResolver(url) {
+
+        override val subject = "test"
+
         override fun resolve() = inMaven(version)
     }
 }

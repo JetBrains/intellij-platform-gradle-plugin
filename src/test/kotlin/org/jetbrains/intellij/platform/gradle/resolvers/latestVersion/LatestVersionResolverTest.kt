@@ -21,7 +21,10 @@ class LatestVersionResolverTest : IntelliJPluginTestBase() {
         assertEquals("0.1.24".toVersion(), resolvedVersion)
     }
 
-    private fun createResolver() = object : LatestVersionResolver("test", url) {
+    private fun createResolver() = object : LatestVersionResolver(url) {
+
+        override val subject = "test"
+
         override fun resolve() = fromMaven()
     }
 }
