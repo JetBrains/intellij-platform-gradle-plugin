@@ -1,21 +1,15 @@
 // Copyright 2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
+package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import org.jetbrains.intellij.platform.gradle.resolvers.path.PathResolver
 import java.nio.file.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
 
 class PathResolverTest : IntelliJPluginTestBase() {
-
-    private val url = resourceUrl("resolvers/latestVersion.xml").run {
-        assertNotNull(this)
-    }
 
     @Test
     fun `resolve path with the second prediction`() {
