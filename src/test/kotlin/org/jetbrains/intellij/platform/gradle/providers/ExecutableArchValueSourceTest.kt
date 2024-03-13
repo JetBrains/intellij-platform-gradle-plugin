@@ -4,13 +4,14 @@ package org.jetbrains.intellij.platform.gradle.providers
 
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 
 class ExecutableArchValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve the architecture of the provided JVM`() {
-        val executablePath = Jvm.current().javaExecutable
+        val executablePath = Jvm.current().javaExecutable.toPath().invariantSeparatorsPathString
         val currentArch = System.getProperty("os.arch")
 
         buildFile.kotlin(

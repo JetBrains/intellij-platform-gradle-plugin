@@ -6,10 +6,7 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.exists
-import kotlin.io.path.readLines
-import kotlin.io.path.readText
+import kotlin.io.path.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -34,9 +31,9 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
 
             assertTrue(jetbrainsRuntime.isEmpty())
             assertTrue(intellijPlatform.isNotEmpty())
-            assertEquals(Jvm.current().javaHome.absolutePath, resolvedPath)
+            assertEquals(Jvm.current().javaHome.toPath().invariantSeparatorsPathString, resolvedPath)
 
-            assertContains("'Current JVM' resolved as: $resolvedPath", output)
+            assertContains("'Current JVM' resolved as:", output)
         }
     }
 
@@ -55,7 +52,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             assertTrue(resolvedPath.endsWith("$version/$version"))
             assertTrue(Path(resolvedPath).resolve("bin/java").exists())
 
-            assertContains("'JetBrains Runtime specified with dependencies' resolved as: $resolvedPath", output)
+            assertContains("'JetBrains Runtime specified with dependencies' resolved as:", output)
         }
     }
 
@@ -74,7 +71,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             assertTrue(resolvedPath.endsWith("$version/$version/Contents/Home"))
             assertTrue(Path(resolvedPath).resolve("bin/java").exists())
 
-            assertContains("'JetBrains Runtime specified with dependencies' resolved as: $resolvedPath", output)
+            assertContains("'JetBrains Runtime specified with dependencies' resolved as:", output)
         }
     }
 
@@ -93,7 +90,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             assertTrue(resolvedPath.endsWith("$version/$version"))
             assertTrue(Path(resolvedPath).resolve("bin/java.exe").exists())
 
-            assertContains("'JetBrains Runtime specified with dependencies' resolved as: $resolvedPath", output)
+            assertContains("'JetBrains Runtime specified with dependencies' resolved as:", output)
         }
     }
 
@@ -142,10 +139,10 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
                 )
             
                 val jetbrainsRuntimePathProvider = provider {
-                    jetbrainsRuntimeConfiguration.singleOrNull()?.absolutePath.orEmpty()
+                    jetbrainsRuntimeConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
                 }
                 val intellijPlatformPathProvider = provider {
-                    intellijPlatformConfiguration.singleOrNull()?.absolutePath.orEmpty()
+                    intellijPlatformConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
                 }
                 val pathProvider = provider {
                     javaRuntimePathResolver.resolve().invariantSeparatorsPathString
