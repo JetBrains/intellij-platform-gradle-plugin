@@ -425,22 +425,24 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val archive = buildDirectory.resolve("distributions").resolve("projectName-1.0.0.zip")
-        archive.toZip().extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
-            fileText(jar, "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
-                assertNotNull(it)
+        archive.toZip().use { zip ->
+            zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                fileText(jar, "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
+                    assertNotNull(it)
 
-                assertEquals("1.0", it.getValue("Manifest-Version"))
-                assertEquals("Gradle $gradleVersion", it.getValue("Created-By"))
-                assertEquals("1.0.0", it.getValue("Version"))
-                assertEquals(Jvm.current().toString(), it.getValue("Build-JVM"))
-                assertEquals(OperatingSystem.current().toString(), it.getValue("Build-OS"))
-                assertEquals(PLUGIN_NAME, it.getValue("Build-Plugin"))
-                assertEquals("0.0.0", it.getValue("Build-Plugin-Version"))
-                assertEquals(intellijPlatformType, it.getValue("Platform-Type"))
-                assertEquals(intellijPlatformVersion, it.getValue("Platform-Version"))
-                assertEquals("223.8836.41", it.getValue("Platform-Build"))
-                assertEquals("false", it.getValue("Kotlin-Stdlib-Bundled"))
-                assertEquals(null, it.getValue("Kotlin-Version"))
+                    assertEquals("1.0", it.getValue("Manifest-Version"))
+                    assertEquals("Gradle $gradleVersion", it.getValue("Created-By"))
+                    assertEquals("1.0.0", it.getValue("Version"))
+                    assertEquals(Jvm.current().toString(), it.getValue("Build-JVM"))
+                    assertEquals(OperatingSystem.current().toString(), it.getValue("Build-OS"))
+                    assertEquals(PLUGIN_NAME, it.getValue("Build-Plugin"))
+                    assertEquals("0.0.0", it.getValue("Build-Plugin-Version"))
+                    assertEquals(intellijPlatformType, it.getValue("Platform-Type"))
+                    assertEquals(intellijPlatformVersion, it.getValue("Platform-Version"))
+                    assertEquals("223.8836.41", it.getValue("Platform-Build"))
+                    assertEquals("false", it.getValue("Kotlin-Stdlib-Bundled"))
+                    assertEquals(null, it.getValue("Kotlin-Version"))
+                }
             }
         }
     }
