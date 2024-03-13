@@ -19,7 +19,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.resolvers.ExtractorTransformerTargetNameResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.ExtractorTransformerTargetResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import javax.inject.Inject
 import kotlin.io.path.name
@@ -41,6 +41,9 @@ abstract class ExtractorTransformer @Inject constructor(
 
         @get:Internal
         val jetbrainsRuntimeDependency: ConfigurableFileCollection
+
+        @get:Internal
+        val intellijPlatformPlugins: ConfigurableFileCollection
     }
 
     @get:InputArtifact
@@ -49,13 +52,15 @@ abstract class ExtractorTransformer @Inject constructor(
 
     override fun transform(outputs: TransformOutputs) = runLogging {
         val path = inputArtifact.asPath
-        val targetName = ExtractorTransformerTargetNameResolver(path)
-            .runCatching { resolve() }
-            .getOrNull()
-            ?: return@runLogging
+        val targetName = ExtractorTransformerTargetResolver(
+            path,
+            parameters.intellijPlatformDependency,
+            parameters.jetbrainsRuntimeDependency,
+            parameters.intellijPlatformPlugins,
+        ).resolve()
 
-        val targetDirectory = outputs.dir(targetName)
         val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
+        val targetDirectory = outputs.dir(targetName)
 
         when (extension) {
             ".zip", ".sit" -> {
@@ -82,6 +87,7 @@ internal fun DependencyHandler.applyExtractorTransformer(
     testCompileClasspathConfiguration: Configuration,
     intellijPlatformDependencyConfiguration: Configuration,
     jetbrainsRuntimeDependencyConfiguration: Configuration,
+    intellijPlatformPluginsConfiguration: Configuration,
 ) {
     artifactTypes.maybeCreate(ZIP_TYPE)
         .attributes
@@ -108,6 +114,7 @@ internal fun DependencyHandler.applyExtractorTransformer(
         parameters {
             intellijPlatformDependency.from(intellijPlatformDependencyConfiguration)
             jetbrainsRuntimeDependency.from(jetbrainsRuntimeDependencyConfiguration)
+            intellijPlatformPlugins.from(intellijPlatformPluginsConfiguration)
         }
     }
 }

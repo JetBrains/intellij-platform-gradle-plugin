@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.resolvers
 
 import org.gradle.api.GradleException
+import org.gradle.api.file.FileCollection
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
@@ -19,47 +20,69 @@ import kotlin.io.path.absolutePathString
  *
  * @param artifactPath The path of the artifact to handle.
  */
-class ExtractorTransformerTargetNameResolver(
+class ExtractorTransformerTargetResolver(
     private val artifactPath: Path,
+    private val intellijPlatformDependency: FileCollection,
+    private val jetbrainsRuntimeDependency: FileCollection,
+    private val intellijPlatformPlugins: FileCollection,
 ) : Resolver<String> {
 
-    override val subject = "Extractor Transformer Target Name"
+    override val subject = "Extractor Transformer Target"
     override val log = Logger(javaClass)
 
-    private val coordinates by lazy {
-        runCatching {
+    private val coordinates
+        get() = runCatching {
             val (groupId, artifactId, version) = artifactPath.absolutePathString().split(separator).dropLast(2).takeLast(3)
             Triple(groupId, artifactId, version)
         }.onFailure {
             throw GradleException("Unknown structure of the artifact path: $artifactPath", it)
-        }.getOrNull()
-    }
+        }.getOrThrow()
 
-    override fun resolve() = sequenceOf(
-        "$subject for IntelliJ Platform dependency" to {
-            val (groupId, artifactId, version) = coordinates ?: return@to null
+    private val groupId
+        get() = coordinates.first
+
+    private val artifactId
+        get() = coordinates.second
+
+    private val version
+        get() = coordinates.third
+
+    override fun resolve() = when (obtainArtifactType()) {
+        ArtifactType.INTELLIJ_PLATFORM -> {
             val coordinates = Coordinates(groupId, artifactId)
-
             IntelliJPlatformType.values()
                 .firstOrNull { it.dependency == coordinates }
                 ?.let { "$it-$version" }
-        },
-        "$subject for JetBrains Runtime dependency" to {
-            val (groupId, artifactId, version) = coordinates ?: return@to null
+        }
 
+        ArtifactType.JETBRAINS_RUNTIME -> {
             version
                 .takeIf { groupId == "com.jetbrains" && artifactId == "jbr" }
-        },
-        "$subject for JetBrains Marketplace plugin dependency" to {
-            val (groupId, artifactId, version) = coordinates ?: return@to null
+        }
 
+        ArtifactType.INTELLIJ_PLATFORM_PLUGINS -> {
             val channel = when {
                 groupId == JETBRAINS_MARKETPLACE_MAVEN_GROUP -> ""
                 groupId.endsWith(".$JETBRAINS_MARKETPLACE_MAVEN_GROUP") -> groupId.dropLast(JETBRAINS_MARKETPLACE_MAVEN_GROUP.length + 1)
                 else -> null
-            } ?: return@to null
+            }
 
-            "$groupId-$artifactId-$version" + "@$channel".takeUnless { channel.isEmpty() }.orEmpty()
+            channel?.let {
+                "$groupId-$artifactId-$version" + "@$channel".takeUnless { channel.isEmpty() }.orEmpty()
+            }
         }
-    ).resolve()
+
+        else -> null
+    } ?: throw GradleException("Cannot resolve '$subject' for: $artifactPath")
+
+    private fun obtainArtifactType() = when (artifactPath.toFile()) {
+        in intellijPlatformDependency -> ArtifactType.INTELLIJ_PLATFORM
+        in jetbrainsRuntimeDependency -> ArtifactType.JETBRAINS_RUNTIME
+        in intellijPlatformPlugins -> ArtifactType.INTELLIJ_PLATFORM_PLUGINS
+        else -> null
+    }
+
+    private enum class ArtifactType {
+        INTELLIJ_PLATFORM, JETBRAINS_RUNTIME, INTELLIJ_PLATFORM_PLUGINS,
+    }
 }

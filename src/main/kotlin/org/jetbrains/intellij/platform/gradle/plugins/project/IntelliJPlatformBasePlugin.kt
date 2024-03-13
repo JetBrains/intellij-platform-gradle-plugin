@@ -263,6 +263,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     configurations[TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME],
                     configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY],
                     configurations[Configurations.JETBRAINS_RUNTIME_DEPENDENCY],
+                    configurations[Configurations.INTELLIJ_PLATFORM_PLUGINS],
                 )
                 applyCollectorTransformer(
                     configurations[COMPILE_CLASSPATH_CONFIGURATION_NAME],
