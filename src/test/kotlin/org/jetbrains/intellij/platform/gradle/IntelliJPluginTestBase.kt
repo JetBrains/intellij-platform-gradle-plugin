@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.GradleException
 import org.gradle.api.internal.project.ProjectInternal
+import org.gradle.testkit.runner.BuildResult
 import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.Constants.DEFAULT_INTELLIJ_PLUGINS_REPOSITORY
 import java.io.FileOutputStream
@@ -28,6 +29,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
     val settingsFile get() = dir.resolve("settings.gradle.kts")
     val pluginXml get() = dir.resolve("src/main/resources/META-INF/plugin.xml")
     val buildDirectory get() = dir.resolve("build")
+    val randomTaskName = "task_" + (1..1000).random()
 
     @BeforeTest
     override fun setup() {
@@ -210,6 +212,23 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
     @Suppress("SameParameterValue")
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) = assertEquals(expectedContent, fileText(zip, path))
+
+    protected fun BuildResult.assertLogValue(label: String, block: (String) -> Unit): String {
+        assertContains(label, output)
+        return output
+            .lineSequence()
+            .filter { it.contains(label) }
+            .map { it.substringAfter(label).trim() }
+            .toList()
+            .let { lines ->
+                assertEquals(1, lines.size, "Expected only one log line containing: $label")
+                lines
+                    .first()
+                    .removePrefix(label)
+                    .trim()
+                    .also(block)
+            }
+    }
 
     protected fun ZipFile.extract(path: String) = Files.createTempFile("gradle-test", "").apply {
         getInputStream(getEntry(path)).use { inputStream ->

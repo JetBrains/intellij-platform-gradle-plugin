@@ -2,11 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers
 
-import org.gradle.testkit.runner.BuildResult
-import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import java.nio.file.Path
-import kotlin.io.path.readLines
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -29,43 +25,42 @@ class ExtractorTransformerTargetResolverTest : IntelliJPluginTestBase() {
             }
             """.trimIndent()
         )
-        prepareAndBuild(
-            """
-            val artifactPath = intellijPlatformPlugins.single().toPath()
-            """.trimIndent()
-        ) {
-            val (
-                intellijPlatformDependencyPath,
-                jetbrainsRuntimeDependencyPath,
-                intellijPlatformPluginsPath,
-                target,
-            ) = it.readLines()
 
-            assertTrue(intellijPlatformDependencyPath.endsWith("/ideaIC-2022.3.3.zip"))
-            assertEquals("", jetbrainsRuntimeDependencyPath)
-            assertTrue(intellijPlatformPluginsPath.endsWith("/org.intellij.scala-2024.1.9.zip"))
-            assertEquals("com.jetbrains.plugins-org.intellij.scala-2024.1.9", target)
+        prepareTest(artifactPathValue = "intellijPlatformPlugins.single().toPath()")
+
+        build(randomTaskName) {
+            assertLogValue("intellijPlatformDependencyPath: ") {
+                assertTrue(it.endsWith("/ideaIC-2022.3.3.zip"))
+            }
+            assertLogValue("jetbrainsRuntimeDependencyPath: ") {
+                assertTrue(it.isEmpty())
+            }
+            assertLogValue("intellijPlatformPluginsPath: ") {
+                assertTrue(it.endsWith("/org.intellij.scala-2024.1.9.zip"))
+            }
+            assertLogValue("target: ") {
+                assertEquals("com.jetbrains.plugins-org.intellij.scala-2024.1.9", it)
+            }
         }
     }
 
     @Test
     fun `resolve name for IntelliJ Platform dependency`() {
-        prepareAndBuild(
-            """
-            val artifactPath = intellijPlatformDependency.single().toPath()
-            """.trimIndent()
-        ) {
-            val (
-                intellijPlatformDependencyPath,
-                jetbrainsRuntimeDependencyPath,
-                intellijPlatformPluginsPath,
-                target,
-            ) = it.readLines()
+        prepareTest(artifactPathValue = "intellijPlatformDependency.single().toPath()")
 
-            assertTrue(intellijPlatformDependencyPath.endsWith("/ideaIC-2022.3.3.zip"))
-            assertEquals("", jetbrainsRuntimeDependencyPath)
-            assertEquals("", intellijPlatformPluginsPath)
-            assertEquals("IC-2022.3.3", target)
+        build(randomTaskName) {
+            assertLogValue("intellijPlatformDependencyPath: ") {
+                assertTrue(it.endsWith("/ideaIC-2022.3.3.zip"))
+            }
+            assertLogValue("jetbrainsRuntimeDependencyPath: ") {
+                assertTrue(it.isEmpty())
+            }
+            assertLogValue("intellijPlatformPluginsPath: ") {
+                assertTrue(it.isEmpty())
+            }
+            assertLogValue("target: ") {
+                assertEquals("IC-2022.3.3", it)
+            }
         }
     }
 
@@ -85,29 +80,25 @@ class ExtractorTransformerTargetResolverTest : IntelliJPluginTestBase() {
             }
             """.trimIndent()
         )
-        prepareAndBuild(
-            """
-            val artifactPath = jetbrainsRuntimeDependency.single().toPath()
-            """.trimIndent()
-        ) {
-            val (
-                intellijPlatformDependencyPath,
-                jetbrainsRuntimeDependencyPath,
-                intellijPlatformPluginsPath,
-                target,
-            ) = it.readLines()
+        prepareTest(artifactPathValue = "jetbrainsRuntimeDependency.single().toPath()")
 
-            assertTrue(intellijPlatformDependencyPath.endsWith("/ideaIC-2022.3.3.zip"))
-            assertTrue(jetbrainsRuntimeDependencyPath.endsWith("/jbr-jbr_jcef-17.0.10-osx-aarch64-b1087.21.tar.gz"))
-            assertEquals("", intellijPlatformPluginsPath)
-            assertEquals("jbr_jcef-17.0.10-osx-aarch64-b1087.21", target)
+        build(randomTaskName) {
+            assertLogValue("intellijPlatformDependencyPath: ") {
+                assertTrue(it.endsWith("/ideaIC-2022.3.3.zip"))
+            }
+            assertLogValue("jetbrainsRuntimeDependencyPath: ") {
+                assertTrue(it.endsWith("/jbr-jbr_jcef-17.0.10-osx-aarch64-b1087.21.tar.gz"))
+            }
+            assertLogValue("intellijPlatformPluginsPath: ") {
+                assertTrue(it.isEmpty())
+            }
+            assertLogValue("target: ") {
+                assertEquals("jbr_jcef-17.0.10-osx-aarch64-b1087.21", it)
+            }
         }
     }
 
-    private fun prepareAndBuild(@Language("kotlin") artifactPathSnippet: String, block: BuildResult.(output: Path) -> Unit = {}) {
-        val taskName = "resolveExtractorTransformerTargetResolver"
-        val outputFileName = "output.txt"
-
+    private fun prepareTest(artifactPathValue: String) {
         buildFile.kotlin(
             """
             import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -117,11 +108,10 @@ class ExtractorTransformerTargetResolverTest : IntelliJPluginTestBase() {
             """.trimIndent(),
             prepend = true,
         )
+
         buildFile.kotlin(
             """
             tasks {
-                val outputFile = file("$outputFileName")
-                
                 val intellijPlatformDependency = configurations.getByName(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
                 val jetbrainsRuntimeDependency = configurations.getByName(Configurations.JETBRAINS_RUNTIME_DEPENDENCY)
                 val intellijPlatformPlugins = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PLUGINS)
@@ -136,10 +126,9 @@ class ExtractorTransformerTargetResolverTest : IntelliJPluginTestBase() {
                     intellijPlatformPlugins.toList().joinToString(":") { it.toPath().invariantSeparatorsPathString }
                 }
                 val targetProvider = provider {
-                    $artifactPathSnippet
                     runCatching {
                         ExtractorTransformerTargetResolver(
-                            artifactPath,
+                            artifactPath = $artifactPathValue,
                             intellijPlatformDependency,
                             jetbrainsRuntimeDependency,
                             intellijPlatformPlugins,
@@ -147,24 +136,16 @@ class ExtractorTransformerTargetResolverTest : IntelliJPluginTestBase() {
                     }.getOrNull()
                 }
             
-                register("$taskName") {
+                register("$randomTaskName") {
                     doLast {
-                        outputFile.writeText(
-                            listOf(
-                                intellijPlatformDependencyPathProvider.get(),
-                                jetbrainsRuntimeDependencyPathProvider.get(),
-                                intellijPlatformPluginsPathProvider.get(),
-                                targetProvider.get(),
-                            ).joinToString(System.lineSeparator())
-                        )
+                        println("intellijPlatformDependencyPath: " + intellijPlatformDependencyPathProvider.get())
+                        println("jetbrainsRuntimeDependencyPath: " + jetbrainsRuntimeDependencyPathProvider.get())
+                        println("intellijPlatformPluginsPath: " + intellijPlatformPluginsPathProvider.get())
+                        println("target: " + targetProvider.get())
                     }
                 }
             }
             """.trimIndent()
         )
-
-        build(taskName) {
-            block(dir.resolve(outputFileName))
-        }
     }
 }

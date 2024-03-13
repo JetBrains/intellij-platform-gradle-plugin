@@ -5,16 +5,15 @@ package org.jetbrains.intellij.platform.gradle.providers
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
-import java.nio.file.Path
-import kotlin.io.path.readLines
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
     fun `list RELEASE, EAP releases for IC, AS in 223-233 range`() {
-        prepareAndBuild(
+        prepareTest(
             sinceBuild = "223",
             untilBuild = "233",
             types = listOf(
@@ -25,24 +24,29 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
                 ProductRelease.Channel.RELEASE,
                 ProductRelease.Channel.EAP,
             )
-        ) {
-            assertEquals(
-                listOf(
-                    "IC-2023.2.6",
-                    "IC-2023.1.6",
-                    "IC-223.8836.26",
-                    "AI-2023.2.1.23",
-                    "AI-2023.1.1.26",
-                    "AI-2022.3.1.18",
-                ),
-                readLines(),
-            )
+        )
+
+        build(randomTaskName) {
+            assertLogValue("Product releases: ") {
+                val content = it.split(";")
+                assertEquals(
+                    listOf(
+                        "IC-2023.2.6",
+                        "IC-2023.1.6",
+                        "IC-223.8836.26",
+                        "AI-2023.2.1.23",
+                        "AI-2023.1.1.26",
+                        "AI-2022.3.1.18",
+                    ),
+                    content,
+                )
+            }
         }
     }
 
     @Test
     fun `list EAP releases for RR in 232-233 range`() {
-        prepareAndBuild(
+        prepareTest(
             sinceBuild = "232",
             untilBuild = "233",
             types = listOf(
@@ -51,17 +55,19 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
             channels = listOf(
                 ProductRelease.Channel.EAP,
             ),
-        ) {
-            assertEquals(
-                listOf("RR-232.9921.62"),
-                readLines(),
-            )
+        )
+
+        build(randomTaskName) {
+            assertLogValue("Product releases: ") {
+                val content = it.split(";")
+                assertEquals(listOf("RR-232.9921.62"), content)
+            }
         }
     }
 
     @Test
     fun `list no releases for 231-230 range`() {
-        prepareAndBuild(
+        prepareTest(
             sinceBuild = "231",
             untilBuild = "230",
             types = listOf(
@@ -70,25 +76,24 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
             channels = listOf(
                 ProductRelease.Channel.EAP,
             ),
-        ) {
-            assert(readLines().isEmpty())
+        )
+
+        build(randomTaskName) {
+            assertLogValue("Product releases: ") {
+                assertTrue(it.isEmpty())
+            }
         }
     }
 
-    private fun prepareAndBuild(
+    private fun prepareTest(
         sinceBuild: String,
         untilBuild: String,
         types: List<IntelliJPlatformType>,
         channels: List<ProductRelease.Channel>,
-        block: Path.() -> Unit = {},
     ) {
-        val taskName = "generateProductReleasesList"
-        val outputFileName = "output.txt"
-
         buildFile.kotlin(
             """
             tasks {
-                val outputFile = file("$outputFileName")
                 val productReleases = providers.of(org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource::class) {
                     parameters {
                         jetbrainsIdes = file("${resource("products-releases/idea-releases-list.xml")}")
@@ -106,18 +111,13 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
                     }
                 }
             
-                val $taskName by registering {
+                register("$randomTaskName") {
                     doLast {
-                        val content = productReleases.get().joinToString(System.lineSeparator())
-                        outputFile.writeText(content)
+                        println("Product releases: " + productReleases.get().joinToString(";"))
                     }
                 }
             }
             """.trimIndent()
         )
-
-        build(taskName) {
-            dir.resolve(outputFileName).apply(block)
-        }
     }
 }

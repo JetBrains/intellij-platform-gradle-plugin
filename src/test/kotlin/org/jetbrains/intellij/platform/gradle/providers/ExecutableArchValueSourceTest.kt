@@ -6,6 +6,7 @@ import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class ExecutableArchValueSourceTest : IntelliJPluginTestBase() {
 
@@ -23,7 +24,7 @@ class ExecutableArchValueSourceTest : IntelliJPluginTestBase() {
                     }
                 }
                 
-                val resolveExecutableArch by registering {
+                register("$randomTaskName") {
                     doLast {
                         println("Executable Arch: " + executableArch.get())
                     }
@@ -32,8 +33,10 @@ class ExecutableArchValueSourceTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        build("resolveExecutableArch") {
-            assertContains("Executable Arch: $currentArch", output)
+        build(randomTaskName) {
+            assertLogValue("Executable Arch: ") {
+                assertEquals(currentArch, it)
+            }
         }
     }
 }
