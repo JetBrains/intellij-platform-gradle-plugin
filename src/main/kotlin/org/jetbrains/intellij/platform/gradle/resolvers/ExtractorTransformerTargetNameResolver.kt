@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers
 
+import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
@@ -26,15 +27,17 @@ class ExtractorTransformerTargetNameResolver(
     override val log = Logger(javaClass)
 
     private val coordinates by lazy {
-        val (groupId, artifactId, version) = artifactPath.absolutePathString().split(separator).dropLast(2).takeLast(3)
-        Triple(groupId, artifactId, version)
+        runCatching {
+            val (groupId, artifactId, version) = artifactPath.absolutePathString().split(separator).dropLast(2).takeLast(3)
+            Triple(groupId, artifactId, version)
+        }.onFailure {
+            throw GradleException("Unknown structure of the artifact path: $artifactPath", it)
+        }.getOrNull()
     }
-    private val groupId by coordinates::first
-    private val artifactId by coordinates::second
-    private val version by coordinates::third
 
     override fun resolve() = sequenceOf(
         "$subject for IntelliJ Platform dependency" to {
+            val (groupId, artifactId, version) = coordinates ?: return@to null
             val coordinates = Coordinates(groupId, artifactId)
 
             IntelliJPlatformType.values()
@@ -42,17 +45,21 @@ class ExtractorTransformerTargetNameResolver(
                 ?.let { "$it-$version" }
         },
         "$subject for JetBrains Runtime dependency" to {
+            val (groupId, artifactId, version) = coordinates ?: return@to null
+
             version
                 .takeIf { groupId == "com.jetbrains" && artifactId == "jbr" }
         },
         "$subject for JetBrains Marketplace plugin dependency" to {
+            val (groupId, artifactId, version) = coordinates ?: return@to null
+
             val channel = when {
                 groupId == JETBRAINS_MARKETPLACE_MAVEN_GROUP -> ""
                 groupId.endsWith(".$JETBRAINS_MARKETPLACE_MAVEN_GROUP") -> groupId.dropLast(JETBRAINS_MARKETPLACE_MAVEN_GROUP.length + 1)
                 else -> null
-            }
+            } ?: return@to null
 
-            "$groupId-$artifactId-$version" + "@$channel".takeUnless { channel.isNullOrEmpty() }.orEmpty()
+            "$groupId-$artifactId-$version" + "@$channel".takeUnless { channel.isEmpty() }.orEmpty()
         }
     ).resolve()
 }

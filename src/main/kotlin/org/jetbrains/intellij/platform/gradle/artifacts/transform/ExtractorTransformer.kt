@@ -49,7 +49,7 @@ abstract class ExtractorTransformer @Inject constructor(
 
     override fun transform(outputs: TransformOutputs) = runLogging {
         val path = inputArtifact.asPath
-        val targetName = ExtractorTransformerTargetNameResolver(path,)
+        val targetName = ExtractorTransformerTargetNameResolver(path)
             .runCatching { resolve() }
             .getOrNull()
             ?: return@runLogging
