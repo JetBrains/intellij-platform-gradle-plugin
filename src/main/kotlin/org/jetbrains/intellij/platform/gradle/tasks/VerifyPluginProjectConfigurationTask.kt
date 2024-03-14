@@ -17,6 +17,8 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCachePath
@@ -38,17 +40,13 @@ private const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
  * - The [PatchPluginXmlTask.sinceBuild] property can't be lower than the target IntelliJ Platform major version.
  * - The Java/Kotlin `sourceCompatibility` and `targetCompatibility` properties should align Java versions required by [PatchPluginXmlTask.sinceBuild] and the currently used IntelliJ Platform.
  * - The Kotlin API version should align the version required by [PatchPluginXmlTask.sinceBuild] and the currently used IntelliJ Platform.
- * - The used IntelliJ Platform version should be higher than `2022.3` (`223.0`).
- * - The dependency on the <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a> should be excluded.
- * - The Kotlin plugin in version `1.8.20` is not used with IntelliJ Platform Gradle Plugin due to the 'java.lang.OutOfMemoryError: Java heap space' exception.
- * - The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform.
+ * - The used IntelliJ Platform version must be equal or higher than the minimum supported version `2022.3` (`223`) defined in [MINIMAL_INTELLIJ_PLATFORM_VERSION].
+ * - The dependency on the [Kotlin Standard Library](https://jb.gg/intellij-platform-kotlin-stdlib) should be excluded.
+ * - The Kotlin Coroutines library [must not be added explicitly](https://jb.gg/intellij-platform-kotlin-coroutines) to the project as it is already provided with the IntelliJ Platform.
  *
- * @see <a href="https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html">Build Number Ranges</a>
- * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#kotlin-standard-library">Kotlin Standard Library</a>
- * @see <a href="https://plugins.jetbrains.com/docs/intellij/using-kotlin.html#incremental-compilation">Kotlin Incremental Compilation</a>
- *
- * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
+ * @see <a href="https://jb.gg/intellij-platform-versions">Build Number Ranges</a>
  */
+// TODO: Use Reporting for handling verification report output? https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
 @CacheableTask
 abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, PluginAware {
 
@@ -111,7 +109,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     abstract val kotlinLanguageVersion: Property<String?>
 
     /**
-     * The version of the Kotlin used in the project.
+     * The version of Kotlin used in the project.
      */
     @get:Internal
     abstract val kotlinVersion: Property<String?>
@@ -138,7 +136,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
     init {
         group = PLUGIN_GROUP_NAME
-        description = "Checks if Java and Kotlin compilers configuration meet IntelliJ SDK requirements"
+        description = "Validates the plugin project configuration"
     }
 
     @TaskAction
@@ -165,35 +163,35 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                         getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
 
                     if (sinceBuild.major < platformBuild.major) {
-                        yield("The 'since-build' property is lower than the target IntelliJ Platform major version: $sinceBuild < ${platformBuild.major}.")
+                        yield("The since-build='$sinceBuild' is lower than the target IntelliJ Platform major version: '${platformBuild.major}'.")
                     }
                     if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
-                        yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility=$sinceBuildJavaVersion.")
+                        yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility='$sinceBuildJavaVersion'.")
                     }
                     if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
-                        yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but since-build='$sinceBuild' property requires jvmTarget=$sinceBuildJavaVersion.")
+                        yield("The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but since-build='$sinceBuild' property requires jvmTarget='$sinceBuildJavaVersion'.")
                     }
                     if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
-                        yield("The Kotlin configuration specifies apiVersion=$kotlinApiVersion but since-build='$sinceBuild' property requires apiVersion=$sinceBuildKotlinApiVersion.")
+                        yield("The Kotlin configuration specifies apiVersion='$kotlinApiVersion' but since-build='$sinceBuild' property requires apiVersion='$sinceBuildKotlinApiVersion'.")
                     }
                 }
-                ?: yield("The plugin.xml file not found.")
+                ?: yield("The plugin.xml descriptor file could not be found.")
 
 
-            if (platformBuild < Version(223)) {
-                yield("The minimal supported IntelliJ Platform version is 2022.3 (223.0), which is higher than provided: $platformVersion ($platformBuild)")
+            if (platformBuild < MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
+                yield("The minimal supported IntelliJ Platform version is `$MINIMAL_INTELLIJ_PLATFORM_VERSION` (branch `$MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER`), current: '$platformVersion' ('$platformBuild')")
             }
             if (platformJavaVersion > sourceCompatibilityJavaVersion) {
-                yield("The Java configuration specifies sourceCompatibility=$sourceCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires sourceCompatibility=$platformJavaVersion.")
+                yield("The Java configuration specifies sourceCompatibility='$sourceCompatibilityJavaVersion' but IntelliJ Platform '$platformVersion' requires sourceCompatibility='$platformJavaVersion'.")
             }
             if (platformKotlinLanguageVersion > kotlinLanguageVersion) {
-                yield("The Kotlin configuration specifies languageVersion=$kotlinLanguageVersion but IntelliJ Platform $platformVersion requires languageVersion=$platformKotlinLanguageVersion.")
+                yield("The Kotlin configuration specifies languageVersion='$kotlinLanguageVersion' but IntelliJ Platform '$platformVersion' requires languageVersion='$platformKotlinLanguageVersion'.")
             }
             if (platformJavaVersion < targetCompatibilityJavaVersion) {
-                yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but IntelliJ Platform $platformVersion requires targetCompatibility=$platformJavaVersion.")
+                yield("The Java configuration specifies targetCompatibility='$targetCompatibilityJavaVersion' but IntelliJ Platform '$platformVersion' requires targetCompatibility='$platformJavaVersion'.")
             }
             if (platformJavaVersion < jvmTargetJavaVersion) {
-                yield("The Kotlin configuration specifies jvmTarget=$jvmTargetJavaVersion but IntelliJ Platform $platformVersion requires jvmTarget=$platformJavaVersion.")
+                yield("The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but IntelliJ Platform '$platformVersion' requires jvmTarget='$platformJavaVersion'.")
             }
             if (kotlinPluginAvailable && kotlinStdlibDefaultDependency) {
                 yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
