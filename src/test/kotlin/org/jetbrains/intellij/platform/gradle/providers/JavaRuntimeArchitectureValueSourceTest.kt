@@ -8,7 +8,7 @@ import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ExecutableArchValueSourceTest : IntelliJPluginTestBase() {
+class JavaRuntimeArchitectureValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve the architecture of the provided JVM`() {
@@ -18,7 +18,7 @@ class ExecutableArchValueSourceTest : IntelliJPluginTestBase() {
         buildFile.kotlin(
             """
             tasks {
-                val executableArch = providers.of(org.jetbrains.intellij.platform.gradle.providers.ExecutableArchValueSource::class) {
+                val runtimeArchitecture = providers.of(org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeArchitectureValueSource::class) {
                     parameters {
                         executable = file("$executablePath")
                     }
@@ -26,7 +26,7 @@ class ExecutableArchValueSourceTest : IntelliJPluginTestBase() {
                 
                 register("$randomTaskName") {
                     doLast {
-                        println("Executable Arch: " + executableArch.get())
+                        println("Runtime Architecture: " + runtimeArchitecture.get())
                     }
                 }
             }
@@ -34,7 +34,7 @@ class ExecutableArchValueSourceTest : IntelliJPluginTestBase() {
         )
 
         build(randomTaskName) {
-            assertLogValue("Executable Arch: ") {
+            assertLogValue("Runtime Architecture: ") {
                 assertEquals(currentArch, it)
             }
         }

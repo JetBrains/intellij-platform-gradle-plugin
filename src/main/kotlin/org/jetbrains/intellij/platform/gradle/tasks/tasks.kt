@@ -25,10 +25,11 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.providers.ExecutableArchValueSource
+import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeArchitectureValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSignerPathResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.ALL_TASKS
@@ -263,7 +264,7 @@ internal inline fun <reified T : Task> Project.registerTask(
 
         /**
          * The [RuntimeAware] adjusts tasks for the running a guest IDE purpose.
-         * This configuration picks relevant Java Runtime using the [JavaRuntimePathResolver] and [RuntimeAware.runtimeArch].
+         * This configuration picks relevant Java Runtime using the [JavaRuntimePathResolver] and [RuntimeAware.runtimeArchitecture].
          */
         if (this is RuntimeAware) {
             val javaRuntimePathResolver = JavaRuntimePathResolver(
@@ -276,12 +277,11 @@ internal inline fun <reified T : Task> Project.registerTask(
             runtimeDirectory.convention(layout.dir(provider {
                 javaRuntimePathResolver.resolve().toFile()
             }))
-            runtimeExecutable.convention(layout.file(provider {
-                javaRuntimePathResolver.resolveExecutable().toFile()
-            }))
-            runtimeArch.set(providers.of(ExecutableArchValueSource::class) {
+            runtimeArchitecture.set(providers.of(JavaRuntimeArchitectureValueSource::class) {
                 parameters {
-                    executable.set(runtimeExecutable)
+                    executable.set(layout.file(
+                        runtimeDirectory.map { it.asPath.resolveJavaRuntimeExecutable().toFile() }
+                    ))
                 }
             })
         }
@@ -336,7 +336,7 @@ internal inline fun <reified T : Task> Project.registerTask(
                     intelliJPlatformConfiguration,
                     coroutinesJavaAgentFile,
                     pluginXml,
-                    runtimeArch,
+                    runtimeArchitecture,
                     options = this,
                 )
             )
@@ -357,7 +357,7 @@ internal inline fun <reified T : Task> Project.registerTask(
                 classpath += files(
                     provider {
                         productInfo
-                            .launchFor(runtimeArch.get())
+                            .launchFor(runtimeArchitecture.get())
                             .bootClassPathJarNames
                             .map { platformPath.resolve("lib/$it") }
                     }
@@ -390,7 +390,7 @@ internal inline fun <reified T : Task> Project.registerTask(
 internal fun DirectoryProperty.configureSandbox(
     sandboxContainer: DirectoryProperty,
     suffixProvider: Provider<String>,
-    name: String
+    name: String,
 ) {
     convention(sandboxContainer.zip(suffixProvider) { container, suffix ->
         container.dir(name + suffix).apply { asPath.createDirectories() }

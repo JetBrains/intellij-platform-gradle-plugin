@@ -18,8 +18,9 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
-import org.jetbrains.intellij.platform.gradle.providers.ExecutableArchValueSource
+import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeArchitectureValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -73,7 +74,7 @@ class TestCompanion {
             }
 
         private val Test.runtimeArch
-            get() = project.providers.of(ExecutableArchValueSource::class) {
+            get() = project.providers.of(JavaRuntimeArchitectureValueSource::class) {
                 parameters {
                     executable.set(runtimeExecutable)
                 }
@@ -81,7 +82,12 @@ class TestCompanion {
 
         private val Test.runtimeExecutable
             get() = when {
-                this is TestIdeTask -> runtimeExecutable
+                this is TestIdeTask -> project.layout.file(
+                    runtimeDirectory.map {
+                        it.asPath.resolveJavaRuntimeExecutable().toFile()
+                    }
+                )
+
                 else -> {
                     val javaRuntimePathResolver = JavaRuntimePathResolver(
                         jetbrainsRuntime = jetbrainsRuntimeConfiguration,
@@ -91,7 +97,7 @@ class TestCompanion {
                     )
 
                     project.layout.file(project.provider {
-                        javaRuntimePathResolver.resolveExecutable().toFile()
+                        javaRuntimePathResolver.resolve().resolveJavaRuntimeExecutable().toFile()
                     })
                 }
             }

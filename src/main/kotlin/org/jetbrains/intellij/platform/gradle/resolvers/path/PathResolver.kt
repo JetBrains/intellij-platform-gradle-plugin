@@ -24,12 +24,12 @@ abstract class PathResolver : Resolver<Path> {
      */
     @Throws(GradleException::class)
     override fun resolve() = predictions.resolve()
+}
 
-    /**
-     * This method of checking if the file exists is required to don't break the Gradle configuration cache and lazy resolving of some values.
-     * Calling `Path.exists()` method simply fails.
-     */
-    protected fun Path.takeIfExists() = takeIf {
-        runCatching { parent.listDirectoryEntries().contains(this) }.getOrDefault(false)
-    }
+/**
+ * This method of checking if the file exists is required to don't break the Gradle configuration cache and lazy resolving of some values.
+ * Calling `Path.exists()` method simply fails.
+ */
+internal fun Path.takeIfExists() = takeIf {
+    runCatching { parent.listDirectoryEntries().contains(this) }.getOrDefault(false)
 }

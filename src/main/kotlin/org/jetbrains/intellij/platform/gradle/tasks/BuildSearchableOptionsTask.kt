@@ -13,6 +13,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_DIREC
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
+import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -75,7 +76,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
         super.exec()
     }
 
-    override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
+    override fun getExecutable() = runtimeDirectory.asPath.resolveJavaRuntimeExecutable().absolutePathString()
 
     companion object : Registrable {
         override fun register(project: Project) =

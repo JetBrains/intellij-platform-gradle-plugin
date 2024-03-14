@@ -18,7 +18,7 @@ import kotlin.io.path.absolutePathString
  *
  * It is used to properly pick the [ProductInfo.Launch] when calling the [ProductInfo.launchFor] helper method.
  */
-abstract class ExecutableArchValueSource : ValueSource<String, ExecutableArchValueSource.Parameters> {
+abstract class JavaRuntimeArchitectureValueSource : ValueSource<String, JavaRuntimeArchitectureValueSource.Parameters> {
 
     @get:Inject
     abstract val execOperations: ExecOperations

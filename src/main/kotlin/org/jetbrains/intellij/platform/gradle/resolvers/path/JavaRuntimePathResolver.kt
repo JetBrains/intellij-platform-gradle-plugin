@@ -100,7 +100,7 @@ class JavaRuntimePathResolver(
      * @return Java Runtime executable
      */
     fun resolveExecutable() = resolve()
-        .resolveRuntimeExecutable()
+        .resolveJavaRuntimeExecutable()
         .throwIfNull { GradleException("No Java Runtime executable found") }
 
     /**
@@ -126,27 +126,29 @@ class JavaRuntimePathResolver(
     }
 
     /**
-     * Resolves the path to the Java Runtime executable within the parent directory.
-     *
-     * @return The resolved path to the runtime executable, or null if the executable does not exist.
-     */
-    private fun Path.resolveRuntimeExecutable(): Path? {
-        val baseDirectory = resolve("jre").takeIfExists() ?: this
-
-        return sequenceOf(
-            { baseDirectory.resolve("bin/java") },
-            { baseDirectory.resolve("bin/java.exe") },
-        ).firstNotNullOfOrNull {
-            it().takeIfExists()
-        }
-    }
-
-    /**
      * Ensures that the current Java Runtime directory contains executable.
      *
      * @return The original Java Runtime directory path if contains executable or null.
      */
-    private fun Path?.ensureExecutableExists() = this
-        ?.resolveRuntimeExecutable()
-        ?.let { this }
+    private fun Path?.ensureExecutableExists() = runCatching {
+        this?.resolveJavaRuntimeExecutable().let { this }
+    }.getOrNull()
+}
+
+/**
+ * Resolves the path to the Java Runtime executable within the parent directory.
+ *
+ * @return The resolved path to the runtime executable, or null if the executable does not exist.
+ * @throws GradleException
+ */
+@Throws(GradleException::class)
+internal fun Path.resolveJavaRuntimeExecutable(): Path {
+    val baseDirectory = resolve("jre").takeIfExists() ?: this
+
+    return sequenceOf(
+        { baseDirectory.resolve("bin/java") },
+        { baseDirectory.resolve("bin/java.exe") },
+    ).firstNotNullOfOrNull {
+        it().takeIfExists()
+    } ?: throw GradleException("No Java Runtime executable found")
 }

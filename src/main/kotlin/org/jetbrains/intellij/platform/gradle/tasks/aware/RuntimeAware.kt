@@ -3,9 +3,11 @@
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
 
 /**
@@ -23,15 +25,8 @@ interface RuntimeAware : IntelliJPlatformVersionAware {
     val runtimeDirectory: DirectoryProperty
 
     /**
-     * Path to the Java Runtime executable.
-     */
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    val runtimeExecutable: RegularFileProperty
-
-    /**
      * An architecture of the Java Runtime currently used for running Gradle.
      */
     @get:Internal
-    val runtimeArch: Property<String>
+    val runtimeArchitecture: Property<String>
 }

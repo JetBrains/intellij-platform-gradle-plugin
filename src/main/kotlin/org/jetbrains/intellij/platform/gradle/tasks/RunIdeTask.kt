@@ -10,6 +10,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -58,7 +59,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
         super.exec()
     }
 
-    override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
+    override fun getExecutable() = runtimeDirectory.asPath.resolveJavaRuntimeExecutable().absolutePathString()
 
     companion object : Registrable {
         // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache

@@ -8,6 +8,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -42,7 +43,7 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatf
         super.exec()
     }
 
-    override fun getExecutable() = runtimeExecutable.asPath.absolutePathString()
+    override fun getExecutable() = runtimeDirectory.asPath.resolveJavaRuntimeExecutable().absolutePathString()
 
     companion object : Registrable {
         override fun register(project: Project) =
