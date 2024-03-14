@@ -34,22 +34,24 @@ class PathResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `fail on first prediction`() {
-        assertFailsWith<Exception>("called") {
+        val exception = assertFailsWith<Exception> {
             createResolver(
                 "first" to { throw Exception("called") },
                 "second" to { dir }
             ).resolve()
         }
+        assertEquals("called", exception.message)
     }
 
     @Test
     fun `fail as cannot be resolved with any prediction`() {
-        assertFailsWith<GradleException>("Cannot resolve 'test'") {
+        val exception = assertFailsWith<GradleException> {
             createResolver(
                 "first" to { null },
                 "second" to { null }
             ).resolve()
         }
+        assertEquals("Cannot resolve 'test'", exception.message)
     }
 
     private fun createResolver(vararg elements: Pair<String, () -> Path?>) = object : PathResolver() {

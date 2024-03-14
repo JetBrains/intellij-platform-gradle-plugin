@@ -31,9 +31,10 @@ class ModuleDescriptorsPathResolverTest : IntelliJPluginTestBase() {
             platformPath = dir
         )
 
-        assertFailsWith<GradleException>("Foo") {
+        val exception = assertFailsWith<GradleException> {
             resolver.resolve()
         }
+        assertEquals("Cannot resolve 'Module Descriptors'", exception.message)
     }
 
     @Test
