@@ -20,10 +20,25 @@ enum class IntelliJPlatformType(
         dependency = Coordinates("com.google.android.studio", "android-studio"),
         binary = Coordinates("com.google.android.studio", "android-studio"),
     ),
+    Aqua(
+        code = "QA",
+        dependency = null,
+        binary = Coordinates("aqua", "aqua"),
+    ),
     CLion(
         code = "CL",
         dependency = Coordinates("com.jetbrains.intellij.clion", "clion"),
         binary = Coordinates("cpp", "CLion"),
+    ),
+    DataGrip(
+        code = "DB",
+        dependency = null,
+        binary = Coordinates("datagrip", "datagrip"),
+    ),
+    DataSpell(
+        code = "DS",
+        dependency = null,
+        binary = Coordinates("python", "dataspell"),
     ),
     Fleet(
         code = "FLIJ",
@@ -75,6 +90,11 @@ enum class IntelliJPlatformType(
         code = "RD",
         dependency = Coordinates("com.jetbrains.intellij.rider", "riderRD"),
         binary = Coordinates("rider", "JetBrains.Rider"),
+    ),
+    RubyMine(
+        code = "RM",
+        dependency = null,
+        binary = Coordinates("ruby", "RubyMine"),
     ),
     RustRover(
         code = "RR",
