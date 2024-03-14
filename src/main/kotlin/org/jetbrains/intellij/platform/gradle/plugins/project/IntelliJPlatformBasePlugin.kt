@@ -100,7 +100,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                             throw GradleException("No IntelliJ Platform dependency found")
                         }
 
-                        val identifiers = IntelliJPlatformType.values().map { it.dependency.toString() }
+                        val identifiers = IntelliJPlatformType.values().mapNotNull { it.dependency?.toString() }
                         val matched = dependencies.filter { identifiers.contains(it.toString()) }
                         if (matched.size > 1) {
                             throw GradleException(

@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
+import org.gradle.api.GradleException
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -723,6 +724,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
         typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
+            type.dependency ?: throw GradleException("Specified type '$type' has no dependency available.")
             dependencies.create(
                 group = type.dependency.groupId,
                 name = type.dependency.artifactId,
@@ -749,8 +751,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
             productInfo.validateSupportedVersion()
 
-            val type = productInfo.productCode.toIntelliJPlatformType()
             val hash = artifactPath.hashCode().absoluteValue % 1000
+            val type = productInfo.productCode.toIntelliJPlatformType()
+            type.dependency ?: throw GradleException("Specified type '$type' has no dependency available.")
 
             dependencies.create(
                 group = Configurations.Dependencies.LOCAL_IDE_GROUP,

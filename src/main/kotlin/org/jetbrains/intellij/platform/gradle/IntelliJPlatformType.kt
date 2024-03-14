@@ -12,7 +12,7 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
  */
 enum class IntelliJPlatformType(
     val code: String,
-    val dependency: Coordinates,
+    val dependency: Coordinates?,
     val binary: Coordinates?,
 ) {
     AndroidStudio(
@@ -57,7 +57,7 @@ enum class IntelliJPlatformType(
     //        artifactId = "",
     //    ),
     PhpStorm(
-        code =   "PS",
+        code = "PS",
         dependency = Coordinates("com.jetbrains.intellij.phpstorm", "phpstorm"),
         binary = Coordinates("webide", "PhpStorm"),
     ),
