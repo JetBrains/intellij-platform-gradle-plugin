@@ -3,7 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.gradle.api.file.FileCollection
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Provider
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 
@@ -15,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
  */
 class MarketplaceZipSignerPathResolver(
     private val marketplaceZipSigner: FileCollection,
-    private val localPath: RegularFileProperty,
+    private val localPath: Provider<RegularFile>,
 ) : PathResolver() {
 
     override val subject = "Marketplace ZIP Signer"
