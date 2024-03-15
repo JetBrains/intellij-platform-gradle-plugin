@@ -71,6 +71,11 @@ enum class IntelliJPlatformType(
     //        groupId = "",
     //        artifactId = "",
     //    ),
+    MPS(
+        code = "MPS",
+        dependency = null,
+        binary = Coordinates("mps", "MPS"),
+    ),
     PhpStorm(
         code = "PS",
         dependency = Coordinates("com.jetbrains.intellij.phpstorm", "phpstorm"),

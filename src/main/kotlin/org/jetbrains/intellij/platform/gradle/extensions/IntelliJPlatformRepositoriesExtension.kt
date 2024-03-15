@@ -6,6 +6,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
+import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.initialization.resolve.DependencyResolutionManagement
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
@@ -113,7 +114,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     fun jetbrainsRuntime(action: RepositoryAction = {}) = createIvyRepository(
         name = "JetBrains Runtime",
         url = Locations.JETBRAINS_RUNTIME_REPOSITORY,
-        pattern = "[revision].tar.gz",
+        patterns = listOf("[revision].tar.gz"),
         action = action,
     )
 
@@ -125,7 +126,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     fun binaryReleasesAndroidStudio(action: RepositoryAction = {}) = createIvyRepository(
         name = "Android Studio Binary Releases",
         url = Locations.ANDROID_STUDIO_BINARY_RELEASES,
-        pattern = "/ide-zips/[revision]/[artifact]-[revision]-[classifier].[ext]",
+        patterns = listOf("/ide-zips/[revision]/[artifact]-[revision]-[classifier].[ext]"),
         action = {
             repositories.exclusiveContent {
                 forRepositories(this@createIvyRepository)
@@ -144,25 +145,28 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun binaryReleases(action: RepositoryAction = {}) = createIvyRepository(
-        name = "IntelliJ IDEA Binary Releases",
-        url = Locations.DOWNLOAD,
-        pattern = "[organization]/[module]-[revision].[ext]",
-        action = {
-            repositories.exclusiveContent {
-                forRepositories(this@createIvyRepository)
-                filter {
-                    IntelliJPlatformType.values()
-                        .filter { it != IntelliJPlatformType.AndroidStudio }
-                        .mapNotNull { it.binary }
-                        .forEach {
+    fun binaryReleases(action: RepositoryAction = {}): IvyArtifactRepository {
+        val binaryTypes = IntelliJPlatformType.values()
+            .filter { it != IntelliJPlatformType.AndroidStudio }
+            .mapNotNull { it.binary }
+
+        return createIvyRepository(
+            name = "IntelliJ Platform Binary Releases",
+            url = Locations.DOWNLOAD,
+            patterns = listOf("[organization]/[module]-[revision].[ext]", "[organization]/[revision]/[module]-[revision].[ext]"),
+            action = {
+                repositories.exclusiveContent {
+                    forRepositories(this@createIvyRepository)
+                    filter {
+                        binaryTypes.forEach {
                             includeModule(it.groupId, it.artifactId)
                         }
+                    }
                 }
-            }
-            action()
-        },
-    )
+                action()
+            },
+        )
+    }
 
     // TODO: check the case when marketplace() is higher on the list — most likely it takes the precedence over ivy and fails on built-in java plugin
     //       see https://stackoverflow.com/questions/23023069/gradle-download-and-unzip-file-from-url/34327202#34327202 and exclusiveContent
@@ -259,12 +263,12 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     private fun createIvyRepository(
         name: String,
         url: String,
-        pattern: String = "",
+        patterns: List<String> = emptyList(),
         action: RepositoryAction = {},
     ) = repositories.ivy {
         this.name = name
         this.url = URI(url)
-        patternLayout { artifact(pattern) }
+        patternLayout { patterns.forEach { artifact(it) } }
         metadataSources { artifact() }
         action()
     }
