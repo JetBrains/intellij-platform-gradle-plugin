@@ -74,9 +74,12 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val channels: ListProperty<Channel>
     }
 
+    private val log = Logger(javaClass)
+
     override fun obtain(): List<String>? = with(parameters) {
-        val jetbrainsIdesReleases = jetbrainsIdes.orNull
-            ?.let { decode<JetBrainsIdesReleases>(it.asPath) }
+        val jetbrainsIdesReleases = jetbrainsIdes.orNull?.asPath
+            ?.also { log.info("Reading JetBrains IDEs releases from: $it") }
+            ?.let { decode<JetBrainsIdesReleases>(it) }
             ?.let {
                 sequence {
                     it.products.forEach { product ->
@@ -111,8 +114,9 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .orEmpty()
             .toList()
 
-        val androidStudioReleases = androidStudio.orNull
-            ?.let { decode<AndroidStudioReleases>(it.asPath) }
+        val androidStudioReleases = androidStudio.orNull?.asPath
+            ?.also { log.info("Reading Android Studio releases from: $it") }
+            ?.let { decode<AndroidStudioReleases>(it) }
             ?.items
             ?.mapNotNull { item ->
                 val channel = runCatching { Channel.valueOf(item.channel.uppercase()) }.getOrNull() ?: return@mapNotNull null
@@ -140,6 +144,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
 
         val types = types.get()
         val channels = channels.get()
+
+        log.info("Filtering releases with since='$since', until='$until', types='${types.joinToString(",")}', channels='${channels.joinToString(",")}'")
 
         (jetbrainsIdesReleases + androidStudioReleases)
             .filter { it.type in types }
