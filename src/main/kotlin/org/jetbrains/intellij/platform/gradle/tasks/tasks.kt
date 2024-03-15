@@ -20,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
@@ -336,6 +337,13 @@ internal inline fun <reified T : Task> Project.registerTask(
         }
 
         /**
+         * The [SplitModeAware] allows to run IDE in Split Mode.
+         */
+        if (this is SplitModeAware) {
+            splitMode.convention(false)
+        }
+
+        /**
          * The [RunnableIdeAware] is more complex one than [RuntimeAware] as it preconfigures also the
          * [JavaForkOptions]-based tasks by setting JVM Arguments providers and classpath.
          */
@@ -376,6 +384,12 @@ internal inline fun <reified T : Task> Project.registerTask(
 
                 classpath += files(
                     runtimeDirectory.map { it.file("lib/tools") }
+                )
+
+                argumentProviders.add(
+                    SplitModeArgumentProvider(
+                        splitMode,
+                    )
                 )
             }
         }
