@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
+import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
@@ -18,8 +19,8 @@ import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.runLogging
 import java.io.File.separator
 import javax.inject.Inject
 import kotlin.io.path.absolutePathString
@@ -48,40 +49,46 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
     @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
-    override fun transform(outputs: TransformOutputs) = runLogging {
-        val path = inputArtifact.asPath
-        val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
-        val (groupId, artifactId, version) = path.absolutePathString().split(separator).dropLast(2).takeLast(3)
-        val coordinates = Coordinates(groupId, artifactId)
-        // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail
+    private val log = Logger(javaClass)
 
-        val type = IntelliJPlatformType.values().find { type ->
-            type.binary?.let { it == coordinates } == true
-        } ?: return@runLogging
+    override fun transform(outputs: TransformOutputs) {
+        runCatching {
+            val path = inputArtifact.asPath
+            val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
+            val (groupId, artifactId, version) = path.absolutePathString().split(separator).dropLast(2).takeLast(3)
+            val coordinates = Coordinates(groupId, artifactId)
+            // TODO: if a local ZIP file, i.e. with local plugin will be passed to PLUGIN configuration — that most likely will fail
 
-        val targetDirectory = parameters.downloadDirectory.dir("$type-$version").asPath
-        outputs.file("path.txt").writeText(targetDirectory.absolutePathString())
+            val type = IntelliJPlatformType.values().find { type ->
+                type.binary?.let { it == coordinates } == true
+            } ?: throw GradleException("Cannot detect platform type for: $coordinates")
 
-        when (extension) {
-            ".zip", ".sit" -> {
-                fileSystemOperations.copy {
-                    from(archiveOperations.zipTree(path))
-                    into(targetDirectory)
-                }
-            }
+            val targetDirectory = parameters.downloadDirectory.dir("$type-$version").asPath
+            outputs.file("path.txt").writeText(targetDirectory.absolutePathString())
 
-            ".tar.gz" -> {
-                fileSystemOperations.copy {
-                    from(archiveOperations.tarTree(path))
-                    into(targetDirectory)
-                    includeEmptyDirs = false
-                    eachFile {
-                        this.path = this.path.split('/', limit = 2).last()
+            when (extension) {
+                ".zip", ".sit" -> {
+                    fileSystemOperations.copy {
+                        from(archiveOperations.zipTree(path))
+                        into(targetDirectory)
                     }
                 }
-            }
 
-            else -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
+                ".tar.gz" -> {
+                    fileSystemOperations.copy {
+                        from(archiveOperations.tarTree(path))
+                        into(targetDirectory)
+                        includeEmptyDirs = false
+                        eachFile {
+                            this.path = this.path.split('/', limit = 2).last()
+                        }
+                    }
+                }
+
+                else -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
+            }
+        }.onFailure {
+            log.error("${javaClass.canonicalName} execution failed.", it)
         }
     }
 }

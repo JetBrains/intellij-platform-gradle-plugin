@@ -731,21 +731,31 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
             type.dependency ?: throw GradleException("Specified type '$type' has no dependency available.")
 
-            val downloadLink = providers.of(AndroidStudioDownloadLinkValueSource::class) {
-                parameters {
-                    androidStudio = resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
-                    androidStudioVersion = version
-                }
-            }.orNull ?: throw GradleException("Couldn't resolve Android Studio download URL for version: $version")
-            val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
+            when (type) {
+                IntelliJPlatformType.AndroidStudio -> {
+                    val downloadLink = providers.of(AndroidStudioDownloadLinkValueSource::class) {
+                        parameters {
+                            androidStudio = resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
+                            androidStudioVersion = version
+                        }
+                    }.orNull ?: throw GradleException("Couldn't resolve Android Studio download URL for version: $version")
+                    val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
 
-            dependencies.create(
-                group = type.dependency.groupId,
-                name = type.dependency.artifactId,
-                classifier = classifier,
-                ext = extension,
-                version = version,
-            ).apply(action)
+                    dependencies.create(
+                        group = type.dependency.groupId,
+                        name = type.dependency.artifactId,
+                        classifier = classifier,
+                        ext = extension,
+                        version = version,
+                    )
+                }
+
+                else -> dependencies.create(
+                    group = type.dependency.groupId,
+                    name = type.dependency.artifactId,
+                    version = version,
+                )
+            }.apply(action)
         },
     )
 

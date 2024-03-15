@@ -14,7 +14,6 @@ import org.jetbrains.intellij.platform.gradle.models.decode
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource.Parameters
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.runLogging
 
 /**
  * Fetches the Android Studio releases list from [Locations.PRODUCTS_RELEASES_ANDROID_STUDIO] and finds the release matching the [Parameters.androidStudioVersion].
@@ -38,7 +37,7 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
 
     private val log = Logger(javaClass)
 
-    override fun obtain() = runLogging {
+    override fun obtain() = runCatching {
         val androidStudioReleases = parameters.androidStudio.orNull?.asPath
             ?.also { log.info("Reading Android Studio releases from: $it") }
             ?.let { decode<AndroidStudioReleases>(it) }
@@ -72,5 +71,7 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
             })
             .firstOrNull()
             ?: throw GradleException("Failed to obtain download link for version: $version")
-    }
+    }.onFailure {
+        log.error("${javaClass.canonicalName} execution failed.", it)
+    }.getOrNull()
 }

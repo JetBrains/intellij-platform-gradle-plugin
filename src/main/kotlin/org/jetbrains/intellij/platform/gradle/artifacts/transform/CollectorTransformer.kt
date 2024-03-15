@@ -19,8 +19,8 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.runLogging
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
@@ -37,20 +37,25 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
     @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
-    override fun transform(outputs: TransformOutputs) = runLogging {
-        val input = inputArtifact.asPath
+    private val log = Logger(javaClass)
+    override fun transform(outputs: TransformOutputs) {
+        runCatching {
+            val input = inputArtifact.asPath
 
-        if (input.name.startsWith(JETBRAINS_MARKETPLACE_MAVEN_GROUP)) {
-            // Plugin dependency
-            input.forEachDirectoryEntry { entry ->
-                entry.resolve("lib")
-                    .listDirectoryEntries("*.jar")
+            if (input.name.startsWith(JETBRAINS_MARKETPLACE_MAVEN_GROUP)) {
+                // Plugin dependency
+                input.forEachDirectoryEntry { entry ->
+                    entry.resolve("lib")
+                        .listDirectoryEntries("*.jar")
+                        .forEach { outputs.file(it) }
+                }
+            } else {
+                // IntelliJ Platform SDK dependency
+                collectIntelliJPlatformJars(input.productInfo(), input)
                     .forEach { outputs.file(it) }
             }
-        } else {
-            // IntelliJ Platform SDK dependency
-            collectIntelliJPlatformJars(input.productInfo(), input)
-                .forEach { outputs.file(it) }
+        }.onFailure {
+            log.error("${javaClass.canonicalName} execution failed.", it)
         }
     }
 }

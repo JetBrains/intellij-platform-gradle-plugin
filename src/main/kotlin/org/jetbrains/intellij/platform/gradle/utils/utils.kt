@@ -71,9 +71,3 @@ internal fun ResourceHandler.resolve(url: String) = text
     .runCatching { asFile("UTF-8") }
     .onFailure { Logger(javaClass).error("Cannot resolve product releases", it) }
     .getOrNull()
-
-internal fun <T> Any.runLogging(block: () -> T) = runCatching {
-    block()
-}.onFailure {
-    Logger(javaClass).error("Execution of '${javaClass.canonicalName}' failed.", it)
-}.getOrNull()

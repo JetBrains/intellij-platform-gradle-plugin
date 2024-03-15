@@ -27,7 +27,6 @@ import org.jetbrains.intellij.platform.gradle.models.BundledPlugin
 import org.jetbrains.intellij.platform.gradle.models.BundledPlugins
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.runLogging
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createTempDirectory
@@ -52,28 +51,32 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
 
     private val log = Logger(javaClass)
 
-    override fun transform(outputs: TransformOutputs) = runLogging {
-        val input = inputArtifact.asPath
-        val json = Json { ignoreUnknownKeys = true }
-        val data = input.resolve("plugins")
-            .listDirectoryEntries()
-            .filter { it.isDirectory() }
-            .mapNotNull { pluginDirectory ->
-                pluginDirectory.resolvePlugin()?.run {
-                    BundledPlugin(
-                        id = pluginId ?: "",
-                        name = pluginName ?: "",
-                        version = pluginVersion ?: "",
-                        path = pluginDirectory.absolutePathString(),
-                        dependencies = dependencies.filterNot { it.isOptional }.map { it.id },
-                    )
+    override fun transform(outputs: TransformOutputs) {
+        runCatching {
+            val input = inputArtifact.asPath
+            val json = Json { ignoreUnknownKeys = true }
+            val data = input.resolve("plugins")
+                .listDirectoryEntries()
+                .filter { it.isDirectory() }
+                .mapNotNull { pluginDirectory ->
+                    pluginDirectory.resolvePlugin()?.run {
+                        BundledPlugin(
+                            id = pluginId ?: "",
+                            name = pluginName ?: "",
+                            version = pluginVersion ?: "",
+                            path = pluginDirectory.absolutePathString(),
+                            dependencies = dependencies.filterNot { it.isOptional }.map { it.id },
+                        )
+                    }
                 }
-            }
-            .let { BundledPlugins(it) }
+                .let { BundledPlugins(it) }
 
-        outputs
-            .file("bundled-plugins.json")
-            .writeText(json.encodeToString(data))
+            outputs
+                .file("bundled-plugins.json")
+                .writeText(json.encodeToString(data))
+        }.onFailure {
+            log.error("${javaClass.canonicalName} execution failed.", it)
+        }
     }
 
     private fun Path.resolvePlugin(): IdePlugin? {

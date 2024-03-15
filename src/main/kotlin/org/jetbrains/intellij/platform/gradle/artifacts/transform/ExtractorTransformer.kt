@@ -17,8 +17,8 @@ import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.resolvers.ExtractorTransformerTargetResolver
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.runLogging
 import javax.inject.Inject
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension
@@ -48,36 +48,42 @@ abstract class ExtractorTransformer @Inject constructor(
     @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
-    override fun transform(outputs: TransformOutputs) = runLogging {
-        val path = inputArtifact.asPath
-        val targetName = ExtractorTransformerTargetResolver(
-            path,
-            parameters.intellijPlatformDependency,
-            parameters.jetbrainsRuntimeDependency,
-            parameters.intellijPlatformPlugins,
-        ).resolve()
+    private val log = Logger(javaClass)
 
-        val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
-        val targetDirectory = outputs.dir(targetName)
+    override fun transform(outputs: TransformOutputs) {
+        kotlin.runCatching {
+            val path = inputArtifact.asPath
+            val targetName = ExtractorTransformerTargetResolver(
+                path,
+                parameters.intellijPlatformDependency,
+                parameters.jetbrainsRuntimeDependency,
+                parameters.intellijPlatformPlugins,
+            ).resolve()
 
-        val archiveOperator = when (extension) {
-            ".zip", ".sit" -> archiveOperations::zipTree
-            ".tar.gz" -> archiveOperations::tarTree
-            else -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
-        }
+            val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
+            val targetDirectory = outputs.dir(targetName)
 
-        fileSystemOperations.copy {
-            from(archiveOperator(path))
-            into(targetDirectory)
-            eachFile {
-                val segments = with(relativePath.segments) {
-                    when {
-                        size > 2 && get(0).endsWith(".app") && get(1) == "Contents" -> drop(2).toTypedArray()
-                        else -> this
-                    }
-                }
-                relativePath = RelativePath(true, *segments)
+            val archiveOperator = when (extension) {
+                ".zip", ".sit" -> archiveOperations::zipTree
+                ".tar.gz" -> archiveOperations::tarTree
+                else -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
             }
+
+            fileSystemOperations.copy {
+                from(archiveOperator(path))
+                into(targetDirectory)
+                eachFile {
+                    val segments = with(relativePath.segments) {
+                        when {
+                            size > 2 && get(0).endsWith(".app") && get(1) == "Contents" -> drop(2).toTypedArray()
+                            else -> this
+                        }
+                    }
+                    relativePath = RelativePath(true, *segments)
+                }
+            }
+        }.onFailure {
+            log.error("${javaClass.canonicalName} execution failed.", it)
         }
     }
 }
