@@ -69,7 +69,7 @@ enum class BuildFeature(private val defaultValue: Boolean) {
      * This method requires an additional remote repository request.
      * If undesired, this feature can be disabled to strictly match dependencies to your build version.
      */
-    USE_CLOSEST_JAVA_COMPILER_VERSION(true),
+    USE_CLOSEST_VERSION_RESOLVING(true),
     ;
 
     fun getValue(providers: ProviderFactory) = providers.gradleProperty(toString())
