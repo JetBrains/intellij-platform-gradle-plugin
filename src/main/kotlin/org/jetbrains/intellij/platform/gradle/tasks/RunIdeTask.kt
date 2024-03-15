@@ -53,8 +53,13 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
     @TaskAction
     override fun exec() {
         validateIntelliJPlatformVersion()
+        validateSplitModeSupport()
 
         workingDir = platformPath.toFile()
+
+        if (splitMode.get()) {
+            environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.absolutePathString())
+        }
 
         super.exec()
     }
