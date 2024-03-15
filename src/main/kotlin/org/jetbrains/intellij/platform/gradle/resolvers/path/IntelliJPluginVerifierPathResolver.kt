@@ -23,7 +23,7 @@ class IntelliJPluginVerifierPathResolver(
 
     override val subjectInput
         get() = "intellijPluginVerifier[${intellijPluginVerifier.joinToString(":")}]," +
-                "localPath[${localPath.asPath}]"
+                "localPath[${localPath.orNull?.asPath}]"
 
     override val predictions = sequenceOf(
         "$subject specified with a local path" to {
