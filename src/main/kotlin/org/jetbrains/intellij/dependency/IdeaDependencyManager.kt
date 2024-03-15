@@ -359,22 +359,28 @@ abstract class IdeaDependencyManager @Inject constructor(
                         it.version == version || it.build == "$PLATFORM_TYPE_ANDROID_STUDIO-$version"
                     } ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
 
-                    val arch = System.getProperty("os.arch")
-                    val hasAppleM1Link by lazy { release.downloads.any { it.link.contains("-mac_arm.zip") } }
-                    val suffix = with(OperatingSystem.current()) {
+                    val os = with(OperatingSystem.current()) {
                         when {
-                            isMacOsX -> when {
-                                arch == "aarch64" && hasAppleM1Link -> "-mac_arm.zip"
-                                else -> "-mac.zip"
-                            }
-
-                            isLinux -> "-linux.tar.gz"
-                            else -> "-windows.zip"
+                            isMacOsX -> "mac"
+                            isLinux -> "linux"
+                            isWindows -> "windows"
+                            else -> throw GradleException("Unsupported OS: $this")
                         }
                     }
+                    val supportedExtensions = setOf("zip", "tar.gz", "sit")
                     val url = release.downloads
-                        .find { it.link.endsWith(suffix) }
-                        ?.link
+                        .asSequence()
+                        .map { it.link }
+                        .filter { link -> supportedExtensions.any { link.endsWith(it) } }
+                        .filter { link -> link.substringAfterLast('/').contains(os) }
+                        .sortedWith(compareByDescending { link ->
+                            val arch = when {
+                                os == "mac" && System.getProperty("os.arch") == "aarch64" -> "arm"
+                                else -> ""
+                            }
+                            link.substringAfterLast('/').contains(arch)
+                        })
+                        .firstOrNull()
                         ?: throw GradleException("Cannot resolve Android Studio with provided version: $version")
 
                     ivyRepository(url)
