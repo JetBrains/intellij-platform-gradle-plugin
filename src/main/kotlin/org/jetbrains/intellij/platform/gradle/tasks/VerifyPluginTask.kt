@@ -205,7 +205,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         ByteArrayOutputStream().use { os ->
             standardOutput = TeeOutputStream(System.out, os)
             super.exec()
-            verifyOutput(os)
+            verifyOutput(os.toString())
         }
     }
 
@@ -251,11 +251,21 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         return args
     }
 
-    private fun verifyOutput(os: ByteArrayOutputStream) {
+    private fun verifyOutput(output: String) {
         log.debug("Current failure levels: ${FailureLevel.values().joinToString(", ")}")
 
+        val invalidFilesMessage = "The following files specified for the verification are not valid plugins:"
+        if (output.contains(invalidFilesMessage)) {
+            val errorMessage = output.lines()
+                .dropWhile { it != invalidFilesMessage }
+                .dropLastWhile { !it.startsWith(" ") }
+                .joinToString(System.lineSeparator())
+
+            throw GradleException(errorMessage)
+        }
+
         FailureLevel.values().forEach { level ->
-            if (failureLevel.get().contains(level) && os.toString().contains(level.sectionHeading)) {
+            if (failureLevel.get().contains(level) && output.contains(level.sectionHeading)) {
                 log.debug("Failing task on '$failureLevel' failure level")
                 throw GradleException(
                     "$level: ${level.message} Check Plugin Verifier report for more details.\n" +
