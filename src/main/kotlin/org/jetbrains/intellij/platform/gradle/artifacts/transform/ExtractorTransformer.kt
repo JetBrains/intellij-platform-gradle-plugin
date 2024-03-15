@@ -9,10 +9,7 @@ import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
-import org.gradle.api.file.ArchiveOperations
-import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.FileSystemLocation
-import org.gradle.api.file.FileSystemOperations
+import org.gradle.api.file.*
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Internal
@@ -62,22 +59,24 @@ abstract class ExtractorTransformer @Inject constructor(
         val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
         val targetDirectory = outputs.dir(targetName)
 
-        when (extension) {
-            ".zip", ".sit" -> {
-                fileSystemOperations.copy {
-                    from(archiveOperations.zipTree(path))
-                    into(targetDirectory)
-                }
-            }
-
-            ".tar.gz" -> {
-                fileSystemOperations.copy {
-                    from(archiveOperations.tarTree(path))
-                    into(targetDirectory)
-                }
-            }
-
+        val archiveOperator = when (extension) {
+            ".zip", ".sit" -> archiveOperations::zipTree
+            ".tar.gz" -> archiveOperations::tarTree
             else -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
+        }
+
+        fileSystemOperations.copy {
+            from(archiveOperator(path))
+            into(targetDirectory)
+            eachFile {
+                val segments = with(relativePath.segments) {
+                    when {
+                        size > 2 && get(0).endsWith(".app") && get(1) == "Contents" -> drop(2).toTypedArray()
+                        else -> this
+                    }
+                }
+                relativePath = RelativePath(true, *segments)
+            }
         }
     }
 }
