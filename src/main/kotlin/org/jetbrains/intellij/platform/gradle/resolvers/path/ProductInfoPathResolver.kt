@@ -19,6 +19,8 @@ class ProductInfoPathResolver(
 
     override val subject = PRODUCT_INFO_NAME
 
+    override val subjectInput = intellijPlatformDirectory
+
     override val predictions = sequenceOf(
         /**
          * Check if [intellijPlatformDirectory] is, by any reason, our [PRODUCT_INFO_NAME].

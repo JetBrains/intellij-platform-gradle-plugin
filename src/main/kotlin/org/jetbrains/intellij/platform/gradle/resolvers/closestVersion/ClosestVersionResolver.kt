@@ -18,6 +18,8 @@ abstract class ClosestVersionResolver(
     protected val url: URL,
 ) : Resolver<Version> {
 
+    override val subjectInput = url
+
     /**
      * Resolves the closest version to the provided [version] of the artifact available in Maven repository.
      *

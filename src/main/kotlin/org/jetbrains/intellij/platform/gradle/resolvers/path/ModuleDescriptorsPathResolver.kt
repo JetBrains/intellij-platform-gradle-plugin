@@ -14,6 +14,8 @@ class ModuleDescriptorsPathResolver(private val platformPath: Path) : PathResolv
 
     override val subject = "Module Descriptors"
 
+    override val subjectInput = platformPath
+
     override val predictions = sequenceOf(
         /**
          * Checks if there is `modules/module-descriptors.jar` file bundled within the current IntelliJ Platform.

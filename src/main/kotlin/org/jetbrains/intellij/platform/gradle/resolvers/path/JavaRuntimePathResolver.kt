@@ -35,6 +35,11 @@ class JavaRuntimePathResolver(
 
     override val subject = "Java Runtime"
 
+    override val subjectInput
+        get() = "jetbrainsRuntime[${jetbrainsRuntime.joinToString(":")}]," +
+                "intellijPlatform[${intellijPlatform.joinToString(":")}]," +
+                "javaToolchainSpec[vendor=${javaToolchainSpec.vendor},languageVersion=${javaToolchainSpec.languageVersion}]"
+
     override val predictions = sequenceOf(
         /**
          * The exact JetBrains Runtime archive provided to the [Configurations.JETBRAINS_RUNTIME] configuration using

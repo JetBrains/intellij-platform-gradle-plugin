@@ -28,6 +28,9 @@ class ExtractorTransformerTargetResolver(
 ) : Resolver<String> {
 
     override val subject = "Extractor Transformer Target"
+
+    override val subjectInput = artifactPath
+
     override val log = Logger(javaClass)
 
     private val coordinates

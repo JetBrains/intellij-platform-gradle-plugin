@@ -13,6 +13,9 @@ interface Resolver<T> {
 
     val subject: String
 
+    val subjectInput: Any?
+        get() = null
+
     val log: Logger
         get() = Logger(javaClass)
 
@@ -30,5 +33,5 @@ interface Resolver<T> {
         .firstNotNullOfOrNull { (label, block) ->
             block()?.also { log.debug("'$label' resolved as: $it") }
         }
-        .throwIfNull { GradleException("Cannot resolve '$subject'") }
+        .throwIfNull { GradleException("Cannot resolve '$subject'" + subjectInput?.let { " with: $it" }.orEmpty()) }
 }

@@ -21,6 +21,9 @@ class MarketplaceZipSignerPathResolver(
 
     override val subject = "Marketplace ZIP Signer"
 
+    override val subjectInput
+        get() = "localPath[$localPath],marketplaceZipSigner[${marketplaceZipSigner.joinToString(":")}]"
+
     override val predictions = sequenceOf(
         "$subject specified with a local path" to {
             /**

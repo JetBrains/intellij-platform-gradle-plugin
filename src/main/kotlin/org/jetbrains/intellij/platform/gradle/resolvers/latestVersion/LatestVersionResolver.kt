@@ -21,6 +21,7 @@ abstract class LatestVersionResolver(
     protected val url: URL,
 ) : Resolver<Version> {
 
+    override val subjectInput = url
 
     /**
      * Resolves the latest version of the artifact available in Maven repository.
