@@ -15,8 +15,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
 
 /**
  * Resolves Java Runtime.
@@ -116,10 +114,7 @@ class JavaRuntimePathResolver(
     private fun Path?.resolveRuntimeDirectory(): Path? {
         this ?: return null
 
-        val baseDirectory = listDirectoryEntries()
-            .firstOrNull { it.name.startsWith("jbr") }
-            ?.takeIfExists()
-            ?: this
+        val baseDirectory = resolveEntry("jbr*") ?: this
 
         return sequenceOf(
             { baseDirectory.resolve("Contents/Home") },

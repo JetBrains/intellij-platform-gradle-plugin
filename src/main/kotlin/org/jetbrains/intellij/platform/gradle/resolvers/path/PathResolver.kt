@@ -33,3 +33,8 @@ abstract class PathResolver : Resolver<Path> {
 internal fun Path.takeIfExists() = takeIf {
     runCatching { parent.listDirectoryEntries().contains(this) }.getOrDefault(false)
 }
+
+/**
+ * Resolves the fist matching entry using provided [glob].
+ */
+internal fun Path?.resolveEntry(glob: String = "*") = this?.listDirectoryEntries(glob)?.firstOrNull()

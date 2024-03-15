@@ -34,18 +34,15 @@ class ProductInfoPathResolver(
          */
         PRODUCT_INFO_NAME to {
             intellijPlatformDirectory
-                .listDirectoryEntries(PRODUCT_INFO_NAME)
-                .firstOrNull()
+                .resolveEntry(PRODUCT_INFO_NAME)
         },
         /**
          * Check if [PRODUCT_INFO_NAME] is located directly in `[intellijPlatformDirectory]/Resources`.
          */
         PRODUCT_INFO_NAME to {
             intellijPlatformDirectory
-                .listDirectoryEntries("Resources")
-                .firstOrNull()
-                ?.listDirectoryEntries(PRODUCT_INFO_NAME)
-                ?.firstOrNull()
+                .resolveEntry("Resources")
+                .resolveEntry(PRODUCT_INFO_NAME)
         },
     )
 }
