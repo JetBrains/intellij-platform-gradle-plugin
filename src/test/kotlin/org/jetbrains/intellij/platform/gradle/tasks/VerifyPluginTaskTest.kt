@@ -243,7 +243,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         pluginXml.deleteIfExists()
 
-        build(Tasks.VERIFY_PLUGIN) {
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("The plugin descriptor 'plugin.xml' is not found.", output)
         }
     }
