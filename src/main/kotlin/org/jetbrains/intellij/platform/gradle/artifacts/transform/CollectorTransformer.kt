@@ -20,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MA
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.runLogging
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry

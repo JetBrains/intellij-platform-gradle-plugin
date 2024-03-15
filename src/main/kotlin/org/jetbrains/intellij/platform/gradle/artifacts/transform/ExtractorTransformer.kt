@@ -18,6 +18,7 @@ import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.resolvers.ExtractorTransformerTargetResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.runLogging
 import javax.inject.Inject
 import kotlin.io.path.name
 import kotlin.io.path.nameWithoutExtension

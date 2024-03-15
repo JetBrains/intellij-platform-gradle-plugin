@@ -19,10 +19,7 @@ import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSour
 import org.jetbrains.intellij.platform.gradle.tasks.PrintProductsReleasesTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.Version
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import org.jetbrains.intellij.platform.gradle.utils.*
 
 /**
  * Provides a complete list of binary IntelliJ Platform product releases matching the given [FilterParameters] criteria.
@@ -168,20 +165,11 @@ fun ProductReleasesValueSource(
     extensionProvider: Provider<IntelliJPlatformExtension>,
     configure: FilterParameters.() -> Unit = {},
 ) = providers.of(ProductReleasesValueSource::class.java) {
-    val log = Logger(javaClass)
-
-    // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
-    fun String.resolve() = resources.text
-        .fromUri(this)
-        .runCatching { asFile("UTF-8") }
-        .onFailure { log.error("Cannot resolve product releases", it) }
-        .getOrNull()
-
     val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
 
     with(parameters) {
-        jetbrainsIdes.set(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES.resolve())
-        androidStudio.set(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO.resolve())
+        jetbrainsIdes.set(resources.resolve(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES))
+        androidStudio.set(resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO))
         channels.convention(providers.provider { ProductRelease.Channel.values().toList() })
         types.convention(extensionProvider.map {
             listOf(it.productInfo.productCode.toIntelliJPlatformType())

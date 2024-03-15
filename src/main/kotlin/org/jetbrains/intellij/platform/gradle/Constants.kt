@@ -113,7 +113,7 @@ object Constants {
     }
 
     object Locations {
-        const val ANDROID_STUDIO_BINARY_RELEASES = "https://redirector.gvt1.com/edgedl/android/studio/ide-zips"
+        const val ANDROID_STUDIO_BINARY_RELEASES = "https://redirector.gvt1.com/edgedl/android/studio"
         const val DOWNLOAD = "https://download.jetbrains.com"
         const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
         const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"

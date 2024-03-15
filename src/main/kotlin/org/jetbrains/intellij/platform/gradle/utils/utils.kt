@@ -10,6 +10,7 @@ import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import java.nio.file.Path
@@ -63,3 +64,16 @@ fun FileCollection.platformPath() = runCatching {
     """.trimIndent()
     )
 }.getOrThrow()
+
+// TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
+internal fun ResourceHandler.resolve(url: String) = text
+    .fromUri(url)
+    .runCatching { asFile("UTF-8") }
+    .onFailure { Logger(javaClass).error("Cannot resolve product releases", it) }
+    .getOrNull()
+
+internal fun <T> Any.runLogging(block: () -> T) = runCatching {
+    block()
+}.onFailure {
+    Logger(javaClass).error("Execution of '${javaClass.canonicalName}' failed.", it)
+}.getOrNull()

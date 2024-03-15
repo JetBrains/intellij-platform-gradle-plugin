@@ -369,6 +369,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 repositories,
                 dependencies,
                 providers,
+                resources,
                 layout,
                 rootProjectDirectory,
             )

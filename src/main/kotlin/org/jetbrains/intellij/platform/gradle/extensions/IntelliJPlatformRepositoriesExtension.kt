@@ -125,7 +125,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     fun binaryReleasesAndroidStudio(action: RepositoryAction = {}) = createIvyRepository(
         name = "Android Studio Binary Releases",
         url = Locations.ANDROID_STUDIO_BINARY_RELEASES,
-        pattern = "/[revision]/android-studio-[revision]-linux.tar.gz",
+        pattern = "/ide-zips/[revision]/[artifact]-[revision]-[classifier].[ext]",
         action = {
             repositories.exclusiveContent {
                 forRepositories(this@createIvyRepository)

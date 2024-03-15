@@ -11,15 +11,18 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.resources.ResourceHandler
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.*
+import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
@@ -28,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.Marketplac
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
+import org.jetbrains.intellij.platform.gradle.utils.resolve
 import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File
@@ -58,6 +62,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private val repositories: RepositoryHandler,
     private val dependencies: DependencyHandler,
     private val providers: ProviderFactory,
+    private val resources: ResourceHandler,
     private val layout: ProjectLayout,
     private val rootProjectDirectory: Path,
 ) {
@@ -725,9 +730,20 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = configurations[configurationName].dependencies.addLater(
         typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
             type.dependency ?: throw GradleException("Specified type '$type' has no dependency available.")
+
+            val downloadLink = providers.of(AndroidStudioDownloadLinkValueSource::class) {
+                parameters {
+                    androidStudio = resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
+                    androidStudioVersion = version
+                }
+            }.orNull ?: throw GradleException("Couldn't resolve Android Studio download URL for version: $version")
+            val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
+
             dependencies.create(
                 group = type.dependency.groupId,
                 name = type.dependency.artifactId,
+                classifier = classifier,
+                ext = extension,
                 version = version,
             ).apply(action)
         },

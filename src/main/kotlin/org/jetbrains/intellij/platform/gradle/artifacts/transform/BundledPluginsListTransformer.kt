@@ -27,6 +27,7 @@ import org.jetbrains.intellij.platform.gradle.models.BundledPlugin
 import org.jetbrains.intellij.platform.gradle.models.BundledPlugins
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.runLogging
 import java.nio.file.Path
 import kotlin.io.path.absolutePathString
 import kotlin.io.path.createTempDirectory
