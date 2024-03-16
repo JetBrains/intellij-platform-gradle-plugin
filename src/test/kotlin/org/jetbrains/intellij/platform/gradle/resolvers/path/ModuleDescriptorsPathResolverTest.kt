@@ -6,7 +6,6 @@ import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
-import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -35,7 +34,7 @@ class ModuleDescriptorsPathResolverTest : IntelliJPluginTestBase() {
         val exception = assertFailsWith<GradleException> {
             resolver.resolve()
         }
-        assertEquals("Cannot resolve 'Module Descriptors' with: ${dir.invariantSeparatorsPathString}", exception.message)
+        assertEquals("Cannot resolve 'Module Descriptors' with: $dir", exception.message)
     }
 
     @Test
