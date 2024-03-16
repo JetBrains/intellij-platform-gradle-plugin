@@ -13,7 +13,7 @@
 The Gradle IntelliJ Plugin is a plugin for the Gradle build system to help configuring your environment for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs.
 
 > [!IMPORTANT]  
-> THe **Gradle IntelliJ Plugin 1.x** is currently in the **feature-freeze** state and receives only fixes for critical bugs.
+> The **Gradle IntelliJ Plugin 1.x** is currently in the **feature-freeze** state and receives only fixes for critical bugs.
 > 
 > The **IntelliJ Platform Gradle Plugin 2.0 EAP** is already available for testing.
 >
