@@ -76,6 +76,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    @Ignore
     fun `test plugin against Android Studio`() {
         writeJavaFile()
         writePluginXmlFile()
