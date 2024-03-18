@@ -2,7 +2,7 @@
 # libraries
 annotations = "24.1.0"
 ddPlist = "1.28"
-gradleIdeaExt = "1.1.7"
+gradleIdeaExt = "1.1.8"
 intellijStructure = "3.269"
 intellijPluginRepositoryRestClient = "2.0.39"
 jacksonDatabind = "2.16.0" # freeze because of: https://github.com/FasterXML/jackson-databind/issues/4315
