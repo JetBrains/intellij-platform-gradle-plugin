@@ -26,7 +26,6 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
 
             listOf(
                 InitializeIntelliJPlatformPluginTask,
-                SetupDependenciesTask,
                 PatchPluginXmlTask,
                 VerifyPluginProjectConfigurationTask,
                 PrintBundledPluginsTask,
