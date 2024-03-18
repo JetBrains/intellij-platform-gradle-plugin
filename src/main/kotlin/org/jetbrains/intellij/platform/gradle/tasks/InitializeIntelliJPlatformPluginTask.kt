@@ -9,6 +9,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
+import org.gradle.kotlin.dsl.of
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
@@ -17,13 +18,13 @@ import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
+import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.net.URL
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
@@ -153,25 +154,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                         }.resolve("coroutines-javaagent.jar").toFile()
                     })
                 )
-                pluginVersion.convention(project.provider {
-                    InitializeIntelliJPlatformPluginTask::class.java
-                        .run { getResource("$simpleName.class") }
-                        .runCatching {
-                            val manifestPath = with(this?.path) {
-                                when {
-                                    this == null -> return@runCatching null
-                                    startsWith("jar:") -> this
-                                    startsWith("file:") -> "jar:$this"
-                                    else -> return@runCatching null
-                                }
-                            }.run { substring(0, lastIndexOf("!") + 1) } + "/META-INF/MANIFEST.MF"
-
-                            log.info("Resolving $PLUGIN_NAME version with: $manifestPath")
-                            URL(manifestPath).openStream().use {
-                                Manifest(it).mainAttributes.getValue("Version")
-                            }
-                        }.getOrNull() ?: "0.0.0"
-                })
+                pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
 
                 onlyIf {
                     !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
