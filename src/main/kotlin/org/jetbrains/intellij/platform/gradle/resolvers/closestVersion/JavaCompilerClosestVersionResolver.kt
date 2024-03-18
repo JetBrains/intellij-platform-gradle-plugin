@@ -2,13 +2,16 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.closestVersion
 
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
-import java.net.URL
 
-class JavaCompilerClosestVersionResolver(private val productInfo: ProductInfo) : ClosestVersionResolver(
-    url = URL("${Locations.INTELLIJ_REPOSITORY}/releases/com/jetbrains/intellij/java/java-compiler-ant-tasks/maven-metadata.xml"),
+class JavaCompilerClosestVersionResolver(
+    private val productInfo: ProductInfo,
+    repositoryUrls: List<String>,
+    coordinates: Coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
+) : ClosestVersionResolver(
+    urls = repositoryUrls.map { url -> createMavenMetadataUrl(url, coordinates) }
 ) {
 
     override val subject = "Java Compiler"

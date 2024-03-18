@@ -2,19 +2,18 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.closestVersion
 
+import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
+import java.net.URL
+import kotlin.test.*
 
 class ClosestVersionResolverTest : IntelliJPluginTestBase() {
 
-    private val url = resourceUrl("resolvers/closestVersion.xml").run {
+    private val defaultUrls = listOf(resourceUrl("resolvers/closestVersion.xml").run {
         assertNotNull(this)
-    }
+    })
 
     @Test
     fun `match exact version`() {
@@ -33,7 +32,26 @@ class ClosestVersionResolverTest : IntelliJPluginTestBase() {
         assertEquals("0.1.21".toVersion(), resolvedVersion)
     }
 
-    private fun createResolver(version: Version) = object : ClosestVersionResolver(url) {
+    @Test
+    fun `ignore unresolvable URLs`() {
+        val version = "0.1.8".toVersion()
+        val urls = defaultUrls + URL("file:///foo")
+        val resolvedVersion = createResolver(version, urls).resolve()
+
+        assertEquals(version, resolvedVersion)
+    }
+
+    @Test
+    fun `fail when no version is available for matching`() {
+        val version = "0.1.8".toVersion()
+
+        val exception = assertFailsWith<GradleException> {
+            createResolver(version, emptyList()).resolve()
+        }
+        assertEquals("Cannot resolve the test version closest to $version", exception.message)
+    }
+
+    private fun createResolver(version: Version, urls: List<URL> = defaultUrls) = object : ClosestVersionResolver(urls) {
 
         override val subject = "test"
 

@@ -7,6 +7,7 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.UrlArtifactRepository
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Provider
@@ -971,7 +972,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 name = "java-compiler-ant-tasks",
                 version = when (version) {
                     VERSION_CURRENT -> when {
-                        resolveClosest -> JavaCompilerClosestVersionResolver(productInfo).resolve().version
+                        resolveClosest -> JavaCompilerClosestVersionResolver(
+                            productInfo,
+                            repositories.urls(),
+                        ).resolve().version
+
                         else -> productInfo.buildNumber
                     }
 
@@ -1008,7 +1013,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 name = type.coordinates.artifactId,
                 version = when (version) {
                     VERSION_CURRENT -> when {
-                        resolveClosest -> TestFrameworkClosestVersionResolver(productInfo, type).resolve().version
+                        resolveClosest -> TestFrameworkClosestVersionResolver(
+                            productInfo,
+                            repositories.urls(),
+                            type.coordinates,
+                        ).resolve().version
+
                         else -> productInfo.buildNumber
                     }
 
@@ -1021,6 +1031,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             }.apply(action)
         },
     )
+
+    private fun RepositoryHandler.urls() = mapNotNull { (it as? UrlArtifactRepository)?.url?.toString() }
 }
 
 private fun String.parsePluginNotation() = trim()
