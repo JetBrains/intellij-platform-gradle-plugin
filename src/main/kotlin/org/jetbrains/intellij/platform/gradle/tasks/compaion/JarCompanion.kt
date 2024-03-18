@@ -8,7 +8,7 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.attributes
-import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.of
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.jetbrains.intellij.platform.gradle.Constants
@@ -16,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
+import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.Registrable
 import org.jetbrains.intellij.platform.gradle.tasks.registerTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
@@ -42,9 +42,7 @@ class JarCompanion {
                         else -> ""
                     }
                 }
-
-                val initializeIntelliJPlatformPluginTaskProvider =
-                    project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
+                val currentPluginVersionProvider = project.providers.of(CurrentPluginVersionValueSource::class) {}
                 val gradleVersionProvider = project.provider { project.gradle.gradleVersion }
                 val versionProvider = project.provider { project.version }
 
@@ -58,15 +56,13 @@ class JarCompanion {
                     "Build-JVM" to Jvm.current(),
                     "Build-OS" to OperatingSystem.current(),
                     "Build-Plugin" to Constants.PLUGIN_NAME,
-                    "Build-Plugin-Version" to initializeIntelliJPlatformPluginTaskProvider.flatMap { it.pluginVersion },
+                    "Build-Plugin-Version" to currentPluginVersionProvider,
                     "Platform-Type" to productInfoProvider.map { it.productCode.toIntelliJPlatformType() },
                     "Platform-Version" to productInfoProvider.map { it.version },
                     "Platform-Build" to productInfoProvider.map { it.buildNumber },
                     "Kotlin-Stdlib-Bundled" to kotlinStdlibBundled,
                     "Kotlin-Version" to kotlinVersionProvider,
                 )
-
-                dependsOn(initializeIntelliJPlatformPluginTaskProvider)
             }
     }
 }
