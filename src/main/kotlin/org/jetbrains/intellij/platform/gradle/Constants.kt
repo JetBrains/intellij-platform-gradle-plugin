@@ -19,6 +19,7 @@ object Constants {
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
     const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
     const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
+    const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
     const val SEARCHABLE_OPTIONS_DIRECTORY = "searchableOptions"
     const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
     const val VERSION_CURRENT = "current"
@@ -94,7 +95,6 @@ object Constants {
         const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val PUBLISH_PLUGIN = "publishPlugin"
         const val RUN_IDE = "runIde" // TODO: check
-        const val SETUP_DEPENDENCIES = "setupDependencies"
         const val SIGN_PLUGIN = "signPlugin"
         const val TEST_IDE_PERFORMANCE = "testIdePerformance" // TODO: check
         const val TEST_IDE_UI = "testIdeUi" // TODO: check
@@ -130,6 +130,7 @@ object Constants {
     object GradleProperties {
         const val INTELLIJ_PLATFORM_CACHE = "$PLUGIN_ID.intellijPlatformCache"
         const val LOCAL_PLATFORM_ARTIFACTS = "$PLUGIN_ID.localPlatformArtifacts"
+        const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY = "kotlin.stdlib.default.dependency"
     }
 
     const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
