@@ -19,6 +19,8 @@ import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
+import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
+import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCachePath
@@ -30,8 +32,6 @@ import java.io.File
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
 
-private const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
-private const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME = "kotlin.stdlib.default.dependency"
 private const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
 
 /**
@@ -309,7 +309,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                             .withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
                     })
                     kotlinStdlibDefaultDependency.convention(
-                        project.providers.gradleProperty(KOTLIN_STDLIB_DEFAULT_DEPENDENCY_PROPERTY_NAME)
+                        project.providers
+                            .gradleProperty(GradleProperties.KOTLIN_STDLIB_DEFAULT_DEPENDENCY)
                             .map { it.toBoolean() }
                     )
                 }
