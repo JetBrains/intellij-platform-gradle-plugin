@@ -2,14 +2,16 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.closestVersion
 
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
-import org.jetbrains.intellij.platform.gradle.extensions.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
-import java.net.URL
 
-class TestFrameworkClosestVersionResolver(private val productInfo: ProductInfo, type: TestFrameworkType) : ClosestVersionResolver(
-    url = URL("${Locations.INTELLIJ_REPOSITORY}/releases/${type.coordinates.groupId.replace('.', '/')}/${type.coordinates.artifactId}/maven-metadata.xml"),
+class TestFrameworkClosestVersionResolver(
+    private val productInfo: ProductInfo,
+    repositoryUrls: List<String>,
+    coordinates: Coordinates,
+) : ClosestVersionResolver(
+    urls = repositoryUrls.map { url -> createMavenMetadataUrl(url, coordinates) }
 ) {
 
     override val subject = "Test Framework"
