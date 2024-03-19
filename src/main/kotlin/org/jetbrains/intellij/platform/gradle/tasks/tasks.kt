@@ -246,8 +246,7 @@ internal inline fun <reified T : Task> Project.registerTask(
                     else -> Tasks.PREPARE_SANDBOX
                 } + "_$suffix".takeUnless { isBuiltInTask }.orEmpty()
 
-                val prepareSandboxTask = tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName)
-                dependsOn(prepareSandboxTask)
+                dependsOn(tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName))
             }
         }
 

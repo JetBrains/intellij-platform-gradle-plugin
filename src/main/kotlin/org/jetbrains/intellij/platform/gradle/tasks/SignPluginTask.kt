@@ -8,7 +8,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.bundling.Zip
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
@@ -254,7 +253,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<SignPluginTask>(Tasks.SIGN_PLUGIN) {
-                val buildPluginTaskProvider = project.tasks.named<Zip>(Tasks.BUILD_PLUGIN)
+                val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
                 val extension = project.the<IntelliJPlatformExtension>()
 
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })

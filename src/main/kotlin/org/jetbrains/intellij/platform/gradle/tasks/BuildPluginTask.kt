@@ -33,18 +33,18 @@ abstract class BuildPluginTask : Zip() {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<BuildPluginTask>(Tasks.BUILD_PLUGIN) {
-                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)
+                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val extension = project.the<IntelliJPlatformExtension>()
 
                 archiveBaseName.convention(extension.projectName)
 
-                from(prepareSandboxTaskProvider.zip(extension.projectName) { task, name ->
-                    task.destinationDir.resolve(name)
-                })
                 from(jarSearchableOptionsTaskProvider.flatMap { it.archiveFile }) {
                     into("lib")
                 }
+                from(prepareSandboxTaskProvider.zip(extension.projectName) { task, name ->
+                    task.destinationDir.resolve(name)
+                })
                 into(archiveBaseName)
 
                 dependsOn(jarSearchableOptionsTaskProvider)
