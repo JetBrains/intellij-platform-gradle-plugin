@@ -19,7 +19,6 @@ abstract class CurrentPluginVersionValueSource : ValueSource<String, ValueSource
         .run { getResource("${simpleName.substringBefore('$')}.class") }
         .runCatching {
             val manifestPath = with(this?.path) {
-                log.warn("foo $this")
                 when {
                     this == null -> return@runCatching null
                     startsWith("jar:") -> this

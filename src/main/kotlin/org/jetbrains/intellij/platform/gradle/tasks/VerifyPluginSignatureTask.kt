@@ -8,9 +8,10 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
-import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -128,23 +129,17 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginSignatureTask>(Tasks.VERIFY_PLUGIN_SIGNATURE) {
-                val signPluginTaskProvider = project.tasks.named<SignPluginTask>(Tasks.SIGN_PLUGIN)
+                val extension = project.the<IntelliJPlatformExtension>()
+                val inputProvider =
+                    project.layout.buildDirectory.flatMap {
+                        extension.projectName.zip(extension.pluginConfiguration.version) { name, version ->
+                            it.file("distributions/${name}-${version}-signed.zip")
+                        }
+                    }
 
-                inputArchiveFile.convention(signPluginTaskProvider.flatMap { it.signedArchiveFile })
-                certificateChainFile.convention(
-                    signPluginTaskProvider
-                        .flatMap { it.certificateChainFile }
-                        // workaround due to https://github.com/JetBrains/marketplace-zip-signer/issues/142
-                        .orElse(
-                            signPluginTaskProvider
-                                .flatMap {
-                                    it.certificateChain.map { content -> createTemporaryCertificateChainFile(content).toFile() }
-                                }
-                                .let { project.layout.file(it) }
-                        )
-                )
-
-                dependsOn(signPluginTaskProvider)
+                inputArchiveFile.convention(inputProvider)
+                certificateChain.convention(extension.signing.certificateChain)
+                certificateChainFile.convention(extension.signing.certificateChainFile)
             }
     }
 }
