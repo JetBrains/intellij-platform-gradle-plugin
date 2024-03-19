@@ -8,7 +8,7 @@ intellijPluginRepositoryRestClient = "2.0.39"
 jacksonDatabind = "2.16.0" # freeze because of: https://github.com/FasterXML/jackson-databind/issues/4315
 jaxbApi = "2.4.0-b180830.0359"
 kotlinxSerializationJson = "1.6.3"
-retrofit = "2.9.0"
+retrofit = "2.10.0"
 
 # plugins
 dokka = "1.9.20"
