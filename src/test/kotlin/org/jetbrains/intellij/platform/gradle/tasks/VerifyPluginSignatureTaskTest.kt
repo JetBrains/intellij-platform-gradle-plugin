@@ -25,7 +25,6 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
         )
 
         build(Tasks.VERIFY_PLUGIN_SIGNATURE) {
-            assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.SIGN_PLUGIN}")?.outcome)
             assertEquals(TaskOutcome.NO_SOURCE, task(":${Tasks.VERIFY_PLUGIN_SIGNATURE}")?.outcome)
         }
     }

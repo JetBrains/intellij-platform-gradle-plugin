@@ -29,5 +29,5 @@ abstract class CurrentPluginVersionValueSource : ValueSource<String, ValueSource
             URL(manifestPath).openStream().use {
                 Manifest(it).mainAttributes.getValue("Version")
             }
-        }.getOrNull() ?: "0.0.1"
+        }.getOrNull() ?: "0.0.0"
 }
