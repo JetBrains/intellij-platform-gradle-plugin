@@ -10,10 +10,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
 import kotlin.io.path.*
-import kotlin.test.AfterTest
-import kotlin.test.BeforeTest
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
+import kotlin.test.*
 
 abstract class IntelliJPlatformTestBase {
 
@@ -137,6 +134,16 @@ abstract class IntelliJPlatformTestBase {
                 *args.toTypedArray(),
             )//, "-Dorg.gradle.debug=true")
 
+    protected fun assertContains(expected: String, actual: String) {
+        // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
+        assertTrue(
+            actual.contains(expected),
+            """
+            expected:<$expected> but was:<$actual>
+            """.trimIndent()
+        )
+    }
+
     protected fun assertNotContains(expected: String, actual: String) {
         // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
         assertFalse(
@@ -145,6 +152,23 @@ abstract class IntelliJPlatformTestBase {
             expected:<$expected> but was:<$actual>
             """.trimIndent()
         )
+    }
+
+    protected fun BuildResult.assertLogValue(label: String, block: (String) -> Unit): String {
+        assertContains(label, output)
+        return output
+            .lineSequence()
+            .filter { it.contains(label) }
+            .map { it.substringAfter(label).trim() }
+            .toList()
+            .let { lines ->
+                assertEquals(1, lines.size, "Expected only one log line containing: $label")
+                lines
+                    .first()
+                    .removePrefix(label)
+                    .trim()
+                    .also(block)
+            }
     }
 
     protected fun assertFileContent(path: Path?, @Language("xml") expectedContent: String) =

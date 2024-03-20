@@ -200,35 +200,8 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
-    protected fun assertContains(expected: String, actual: String) {
-        // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
-        assertTrue(
-            actual.contains(expected),
-            """
-            expected:<$expected> but was:<$actual>
-            """.trimIndent()
-        )
-    }
-
     @Suppress("SameParameterValue")
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) = assertEquals(expectedContent, fileText(zip, path))
-
-    protected fun BuildResult.assertLogValue(label: String, block: (String) -> Unit): String {
-        assertContains(label, output)
-        return output
-            .lineSequence()
-            .filter { it.contains(label) }
-            .map { it.substringAfter(label).trim() }
-            .toList()
-            .let { lines ->
-                assertEquals(1, lines.size, "Expected only one log line containing: $label")
-                lines
-                    .first()
-                    .removePrefix(label)
-                    .trim()
-                    .also(block)
-            }
-    }
 
     protected fun ZipFile.extract(path: String) = Files.createTempFile("gradle-test", "").apply {
         getInputStream(getEntry(path)).use { inputStream ->
