@@ -21,12 +21,6 @@ import java.time.format.DateTimeFormatter
 import kotlin.io.path.*
 
 /**
- * Represents an annotation to mark DSL elements related to the IntelliJ Platform.
- */
-@DslMarker
-annotation class IntelliJPlatform
-
-/**
  * Creates an Ivy dependency XML file for an external module.
  *
  * @param localPlatformArtifactsPath The [Path] to the local IntelliJ Platform artifacts directory.
