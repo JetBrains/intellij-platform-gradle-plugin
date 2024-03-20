@@ -34,7 +34,7 @@ abstract class IntelliJPlatformTestBase {
     @BeforeTest
     open fun setup() {
         dir = createTempDirectory("tmp")
-        println("Build directory: $dir")
+        println("Build directory: ${dir.toUri()}")
     }
 
     @OptIn(ExperimentalPathApi::class)
