@@ -15,14 +15,14 @@ import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin.ID
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.nio.file.Path
 import javax.inject.Inject
 
-private const val PLUGIN_MIGRATION_ID = "$PLUGIN_ID.migration"
+private const val PLUGIN_MIGRATION_ID = "$ID.migration"
 
 // language=TEXT
 private object Docs {

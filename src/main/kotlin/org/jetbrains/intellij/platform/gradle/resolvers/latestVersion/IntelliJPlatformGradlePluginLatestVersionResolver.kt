@@ -2,15 +2,15 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
 
-import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import java.net.URL
 
 class IntelliJPlatformGradlePluginLatestVersionResolver : LatestVersionResolver(
     url = URL(Locations.GITHUB_REPOSITORY),
 ) {
 
-    override val subject = Constants.PLUGIN_NAME
+    override val subject = Plugin.NAME
 
     // TODO: use when 2.0 published to GPP
     //  latestFromMaven(

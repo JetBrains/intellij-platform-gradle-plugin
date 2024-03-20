@@ -7,14 +7,6 @@ import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 object Constants {
-    const val PLUGIN_NAME = "IntelliJ Platform Gradle Plugin"
-    const val PLUGIN_ID = "org.jetbrains.intellij.platform"
-    const val PLUGIN_BASE_ID = "$PLUGIN_ID.base"
-    const val PLUGIN_SETTINGS_ID = "$PLUGIN_ID.settings"
-    const val PLUGIN_TASKS_ID = "$PLUGIN_ID.tasks"
-    const val PLUGIN_GROUP_NAME = "intellij platform"
-    const val LOG_PREFIX = "[$PLUGIN_ID]"
-
     const val CACHE_DIRECTORY = ".intellijPlatform"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
     const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
@@ -24,6 +16,19 @@ object Constants {
     const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
     const val VERSION_CURRENT = "current"
     const val VERSION_LATEST = "latest"
+
+    object Plugin {
+        const val ID = "org.jetbrains.intellij.platform"
+        const val NAME = "IntelliJ Platform Gradle Plugin"
+        const val GROUP_NAME = "intellij platform"
+        const val LOG_PREFIX = "[$ID]"
+    }
+
+    object Plugins {
+        const val BASE = "${Plugin.ID}.base"
+        const val TASKS ="${Plugin.ID}.tasks"
+        const val SETTINGS = "${Plugin.ID}.settings"
+    }
 
     object Constraints {
         val MINIMAL_GRADLE_VERSION: GradleVersion = GradleVersion.version("8.1")
@@ -82,7 +87,7 @@ object Constants {
     const val INSTRUMENT_TEST_CODE = "instrumentTestCode"
 
     object Tasks {
-        const val BUILD_PLUGIN = "buildPlugin" // TODO: check
+        const val BUILD_PLUGIN = "buildPlugin"
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
         const val INSTRUMENTED_JAR = "instrumentedJar" // TODO: check
@@ -128,8 +133,8 @@ object Constants {
     }
 
     object GradleProperties {
-        const val INTELLIJ_PLATFORM_CACHE = "$PLUGIN_ID.intellijPlatformCache"
-        const val LOCAL_PLATFORM_ARTIFACTS = "$PLUGIN_ID.localPlatformArtifacts"
+        const val INTELLIJ_PLATFORM_CACHE = "${Plugin.ID}.intellijPlatformCache"
+        const val LOCAL_PLATFORM_ARTIFACTS = "${Plugin.ID}.localPlatformArtifacts"
         const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY = "kotlin.stdlib.default.dependency"
     }
 

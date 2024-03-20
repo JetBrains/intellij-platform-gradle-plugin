@@ -7,7 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.PerformanceTestArgumentProvider
 import org.jetbrains.intellij.platform.gradle.models.PerformanceTestResult
@@ -70,7 +70,7 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, CustomInte
     private val log = Logger(javaClass)
 
     init {
-        group = PLUGIN_GROUP_NAME
+        group = Plugin.GROUP_NAME
         description = "Runs performance tests on the IDE with the developed plugin installed."
     }
 

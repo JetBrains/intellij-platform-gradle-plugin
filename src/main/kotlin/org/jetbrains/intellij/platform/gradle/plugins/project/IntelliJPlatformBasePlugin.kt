@@ -19,7 +19,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_BASE_ID
+import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsListTransformer
@@ -45,7 +45,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
     private val log = Logger(javaClass)
 
     override fun apply(project: Project) {
-        log.info("Configuring plugin: $PLUGIN_BASE_ID")
+        log.info("Configuring plugin: ${Plugins.BASE}")
 
         checkGradleVersion()
 

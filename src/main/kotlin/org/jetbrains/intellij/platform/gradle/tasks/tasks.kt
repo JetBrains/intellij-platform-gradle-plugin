@@ -15,7 +15,6 @@ import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.Constants.LOG_PREFIX
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
@@ -32,10 +31,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSigne
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.ALL_TASKS
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.create
-import org.jetbrains.intellij.platform.gradle.utils.isSpecified
+import org.jetbrains.intellij.platform.gradle.utils.*
 import java.util.*
 import kotlin.io.path.createDirectories
 
@@ -55,10 +51,10 @@ internal inline fun <reified T : Task> Project.registerTask(
     configureWithType: Boolean = true,
     noinline configuration: T.() -> Unit = {},
 ) {
-
     // Register new tasks of T type if it does not exist yet
+    val log = Logger(javaClass)
     names.forEach { name ->
-        project.logger.info("$LOG_PREFIX Configuring task: $name")
+        log.info("Configuring task: $name")
         tasks.maybeCreate<T>(name)
     }
 

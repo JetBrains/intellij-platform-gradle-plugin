@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import java.util.jar.Manifest
@@ -435,7 +435,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                     assertEquals("1.0.0", it.getValue("Version"))
                     assertEquals(Jvm.current().toString(), it.getValue("Build-JVM"))
                     assertEquals(OperatingSystem.current().toString(), it.getValue("Build-OS"))
-                    assertEquals(PLUGIN_NAME, it.getValue("Build-Plugin"))
+                    assertEquals(Plugin.NAME, it.getValue("Build-Plugin"))
                     assertEquals("0.0.0", it.getValue("Build-Plugin-Version"))
                     assertEquals(intellijPlatformType, it.getValue("Platform-Type"))
                     assertEquals(intellijPlatformVersion, it.getValue("Platform-Version"))

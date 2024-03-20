@@ -6,7 +6,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_SETTINGS_ID
+import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
@@ -21,7 +21,7 @@ abstract class IntelliJPlatformSettingsPlugin @Inject constructor(
     private val log = Logger(javaClass)
 
     override fun apply(settings: Settings) {
-        log.info("Configuring plugin: $PLUGIN_SETTINGS_ID")
+        log.info("Configuring plugin: ${Plugins.SETTINGS}")
 
         checkGradleVersion()
 
