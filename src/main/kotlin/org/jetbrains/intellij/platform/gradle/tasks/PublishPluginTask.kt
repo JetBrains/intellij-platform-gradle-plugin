@@ -175,6 +175,7 @@ abstract class PublishPluginTask : DefaultTask() {
                 channels.convention(extension.publishing.channels)
                 hidden.convention(extension.publishing.hidden)
 
+                // TODO: can this be done in any other way?
                 archiveFile.convention(
                     signPluginTaskProvider
                         .map { it.didWork }
