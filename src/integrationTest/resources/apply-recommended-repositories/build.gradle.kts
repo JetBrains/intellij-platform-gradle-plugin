@@ -7,36 +7,29 @@ plugins {
     id("org.jetbrains.intellij.platform")
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 repositories {
     mavenCentral()
 
     intellijPlatform {
-        releases()
+        defaultRepositories()
     }
 }
 
 dependencies {
     intellijPlatform {
         create(providers.gradleProperty("intellijPlatform.type"), providers.gradleProperty("intellijPlatform.version"))
+        instrumentationTools()
     }
 }
 
-kotlin {
-    jvmToolchain {
-        languageVersion = languageVersionProperty
-    }
-}
-
-intellijPlatform {
-    buildSearchableOptions = false
-
-    pluginConfiguration {
-        ideaVersion {
-            sinceBuild = sinceBuildProperty
-        }
-    }
-
-    verifyPlugin {
-        downloadDirectory = downloadDirectoryProperty
-    }
+afterEvaluate {
+    repositories
+        .filterIsInstance<UrlArtifactRepository>()
+        .mapNotNull { it.url }
+        .joinToString(";", prefix = "repositories = ")
+        .let { println(it) }
 }

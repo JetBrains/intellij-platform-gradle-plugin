@@ -136,6 +136,7 @@ open class IntelliJPlatformIntegrationTestBase(
     /**
      * Path to the IDE plugins cache directory., e.g., `/Users/hsz/.gradle/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins`.
      */
+    @Deprecated("Obsolete in 2.0")
     val pluginsCacheDirectory
         get() = gradleCacheDirectory.resolve("com.jetbrains.intellij.idea/unzipped.com.jetbrains.plugins")
             .also {
