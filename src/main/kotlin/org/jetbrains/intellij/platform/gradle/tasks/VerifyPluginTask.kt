@@ -296,8 +296,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 ides.from(intellijPluginVerifierIdesConfiguration)
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 offline.convention(project.gradle.startParameter.isOffline)
-
-                dependsOn(buildPluginTaskProvider)
             }
     }
 
