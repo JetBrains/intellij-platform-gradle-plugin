@@ -11,7 +11,7 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -51,7 +51,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
     private val log = Logger(javaClass)
 
     init {
-        group = PLUGIN_GROUP_NAME
+        group = Plugin.GROUP_NAME
         description = "Creates a JAR file with searchable options to be distributed with the plugin."
 
         includeEmptyDirs = false

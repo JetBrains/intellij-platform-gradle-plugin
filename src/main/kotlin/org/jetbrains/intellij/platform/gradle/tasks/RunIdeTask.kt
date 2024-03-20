@@ -8,7 +8,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
@@ -43,7 +43,7 @@ import kotlin.io.path.absolutePathString
 abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
 
     init {
-        group = PLUGIN_GROUP_NAME
+        group = Plugin.GROUP_NAME
         description = "Runs the IDE instance with the developed plugin installed."
     }
 

@@ -7,7 +7,7 @@ import org.gradle.api.plugins.PluginInstantiationException
 import org.gradle.kotlin.dsl.create
 import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 
 internal inline fun <reified T : Any> Any.configureExtension(name: String, vararg constructionArguments: Any, noinline configuration: T.() -> Unit = {}) {
     with((this as ExtensionAware).extensions) {
@@ -18,6 +18,6 @@ internal inline fun <reified T : Any> Any.configureExtension(name: String, varar
 
 internal fun checkGradleVersion() {
     if (GradleVersion.current() < Constraints.MINIMAL_GRADLE_VERSION) {
-        throw PluginInstantiationException("$PLUGIN_NAME requires Gradle ${Constraints.MINIMAL_GRADLE_VERSION} and higher")
+        throw PluginInstantiationException("${Plugin.NAME} requires Gradle ${Constraints.MINIMAL_GRADLE_VERSION} and higher")
     }
 }

@@ -11,9 +11,9 @@ import org.gradle.kotlin.dsl.attributes
 import org.gradle.kotlin.dsl.of
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withGroovyBuilder
-import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_GRADLE_PLUGIN_ID
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource
@@ -55,7 +55,7 @@ class JarCompanion {
                     "Version" to versionProvider,
                     "Build-JVM" to Jvm.current(),
                     "Build-OS" to OperatingSystem.current(),
-                    "Build-Plugin" to Constants.PLUGIN_NAME,
+                    "Build-Plugin" to Plugin.NAME,
                     "Build-Plugin-Version" to currentPluginVersionProvider,
                     "Platform-Type" to productInfoProvider.map { it.productCode.toIntelliJPlatformType() },
                     "Platform-Version" to productInfoProvider.map { it.version },

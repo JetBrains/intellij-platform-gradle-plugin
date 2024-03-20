@@ -4,10 +4,10 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.provider.ProviderFactory
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID as prefix
 
 /**
  * The IntelliJ Platform Gradle Plugin build features dedicated to control some of the low-level Gradle plugin behaviors.
@@ -84,7 +84,7 @@ enum class BuildFeature(private val defaultValue: Boolean) {
             transform = { it.replaceFirstChar { c -> c.uppercase() } },
         )
         .replaceFirstChar { c -> c.lowercase() }
-        .let { "$prefix.buildFeature.$it" }
+        .let { "${Plugin.ID}.buildFeature.$it" }
 }
 
 /**

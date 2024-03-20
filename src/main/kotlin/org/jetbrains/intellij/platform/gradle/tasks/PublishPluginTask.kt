@@ -15,7 +15,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -104,7 +104,7 @@ abstract class PublishPluginTask : DefaultTask() {
     private val log = Logger(javaClass)
 
     init {
-        group = PLUGIN_GROUP_NAME
+        group = Plugin.GROUP_NAME
         description = "Publishes plugin to the remote Marketplace repository."
     }
 

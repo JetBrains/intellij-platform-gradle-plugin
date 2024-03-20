@@ -12,9 +12,7 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.of
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
@@ -77,7 +75,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     private val log = Logger(javaClass)
 
     init {
-        group = PLUGIN_GROUP_NAME
+        group = Plugin.GROUP_NAME
         description = "Initializes the IntelliJ Platform Gradle Plugin"
     }
 
@@ -99,7 +97,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
             val version = Version.parse(pluginVersion.get())
             val latestVersion = IntelliJPlatformGradlePluginLatestVersionResolver().resolve()
             if (version < latestVersion) {
-                log.warn("$PLUGIN_NAME is outdated: $version. Update `$PLUGIN_ID` to: $latestVersion")
+                log.warn("${Plugin.NAME} is outdated: $version. Update `${Plugin.ID}` to: $latestVersion")
             }
 
             with(selfUpdateLock.asPath) {

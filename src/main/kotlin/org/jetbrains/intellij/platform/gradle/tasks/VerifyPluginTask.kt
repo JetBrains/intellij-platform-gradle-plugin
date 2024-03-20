@@ -16,7 +16,7 @@ import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
@@ -169,7 +169,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     private val log = Logger(javaClass)
 
     init {
-        group = PLUGIN_GROUP_NAME
+        group = Plugin.GROUP_NAME
         description = "Runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IDE builds."
 
         mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")

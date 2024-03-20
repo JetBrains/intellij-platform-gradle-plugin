@@ -10,7 +10,7 @@ import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_GROUP_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
@@ -149,7 +149,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     private val log = Logger(javaClass)
 
     init {
-        group = PLUGIN_GROUP_NAME
+        group = Plugin.GROUP_NAME
         description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
 
         mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")

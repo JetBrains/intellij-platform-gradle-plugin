@@ -2,8 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_ID
-import org.jetbrains.intellij.platform.gradle.Constants.PLUGIN_NAME
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
@@ -27,14 +26,14 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
             val latestVersion = IntelliJPlatformGradlePluginLatestVersionResolver().resolve()
 
-            assertContains("$PLUGIN_NAME is outdated: 0.0.0. Update `$PLUGIN_ID` to: $latestVersion", output)
+            assertContains("${Plugin.NAME} is outdated: 0.0.0. Update `${Plugin.ID}` to: $latestVersion", output)
         }
     }
 
     @Test
     fun `skip version check when offline`() {
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN, "--offline") {
-            assertNotContains("$PLUGIN_NAME is outdated: 0.0.0.", output)
+            assertNotContains("${Plugin.NAME} is outdated: 0.0.0.", output)
         }
     }
 
@@ -47,7 +46,7 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
         )
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
-            assertNotContains("$PLUGIN_NAME is outdated: 0.0.0.", output)
+            assertNotContains("${Plugin.NAME} is outdated: 0.0.0.", output)
         }
     }
 
@@ -68,7 +67,7 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
         assertTrue(file.exists())
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
-            assertNotContains("$PLUGIN_NAME is outdated: 0.0.0.", output)
+            assertNotContains("${Plugin.NAME} is outdated: 0.0.0.", output)
         }
     }
 
