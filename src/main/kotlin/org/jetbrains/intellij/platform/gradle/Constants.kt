@@ -26,8 +26,13 @@ object Constants {
 
     object Plugins {
         const val BASE = "${Plugin.ID}.base"
-        const val TASKS ="${Plugin.ID}.tasks"
+        const val BUILD = "${Plugin.ID}.build"
+        const val MODULE = "${Plugin.ID}.module"
+        const val PUBLISH = "${Plugin.ID}.publish"
+        const val RUN = "${Plugin.ID}.run"
         const val SETTINGS = "${Plugin.ID}.settings"
+        const val TEST = "${Plugin.ID}.test"
+        const val VERIFY = "${Plugin.ID}.verify"
     }
 
     object Constraints {
@@ -121,7 +126,7 @@ object Constants {
         const val ANDROID_STUDIO_BINARY_RELEASES = "https://redirector.gvt1.com/edgedl/android/studio"
         const val DOWNLOAD = "https://download.jetbrains.com"
         const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
-        const val GITHUB_REPOSITORY = "https://github.com/jetbrains/gradle-intellij-plugin"
+        const val GITHUB_REPOSITORY = "https://github.com/jetbrains/intellij-platform-gradle-plugin"
         const val INTELLIJ_REPOSITORY = "$CACHE_REDIRECTOR/intellij-repository"
         const val INTELLIJ_DEPENDENCIES_REPOSITORY = "$CACHE_REDIRECTOR/intellij-dependencies"
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
