@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MA
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource

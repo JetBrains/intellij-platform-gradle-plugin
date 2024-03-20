@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
-import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
@@ -19,7 +19,7 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
     private val log = Logger(javaClass)
 
     override fun apply(project: Project) {
-        log.info("Configuring plugin: ${Constants.Plugins.TASKS}")
+        log.info("Configuring plugin: ${Plugins.TASKS}")
 
         with(project) {
             plugins.apply(IntelliJPlatformBasePlugin::class)
