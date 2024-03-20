@@ -1,7 +1,7 @@
 [versions]
 # libraries
 annotations = "24.1.0"
-intellijStructure = "3.269"
+intellijStructure = "3.270"
 intellijPluginRepositoryRestClient = "2.0.39"
 kotlinxSerializationJson = "1.6.3"
 retrofit = "2.10.0"
