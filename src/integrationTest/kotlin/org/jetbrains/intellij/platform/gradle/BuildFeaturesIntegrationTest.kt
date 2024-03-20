@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle
 
 import kotlin.io.path.deleteIfExists
 import kotlin.io.path.writeText
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -13,36 +12,37 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     private val defaultArgs = listOf("--info")
 
+    private val defaultProjectProperties = mapOf(
+        "intellijPlatform.version" to intellijPlatformVersion,
+        "intellijPlatform.type" to intellijPlatformType,
+        "buildSearchableOptions" to false,
+    )
+
     @Test
     fun `selfUpdateCheck is disabled`() {
         val flag = BuildFeature.SELF_UPDATE_CHECK.toString()
+        println("flag = ${flag}")
 
         build(
             "assemble",
-            projectProperties = mapOf(
-                "instrumentCode" to false,
-                flag to false,
-            ),
+            projectProperties = defaultProjectProperties + mapOf(flag to false),
             args = defaultArgs,
         ) {
             output containsText "Build feature is disabled: $flag"
         }
     }
 
-    @Ignore
     @Test
     fun `noSearchableOptionsWarning is disabled`() {
         val flag = BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING.toString()
 
         build(
             "jarSearchableOptions",
-            projectProperties = mapOf(
-                "instrumentCode" to false,
-                flag to false,
-            ),
+            projectProperties = defaultProjectProperties + mapOf(flag to false, "buildSearchableOptions" to true),
             args = defaultArgs,
         ) {
             output containsText "Build feature is disabled: $flag"
+            output notContainsText "No searchable options found."
         }
     }
 
@@ -52,12 +52,10 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             "jarSearchableOptions",
-            projectProperties = mapOf(
-                "instrumentCode" to true,
-                flag to true,
-            ),
+            projectProperties = defaultProjectProperties + mapOf(flag to true, "buildSearchableOptions" to true),
             args = defaultArgs,
         ) {
+            output containsText "Build feature is enabled: $flag"
             output containsText "No searchable options found."
         }
     }
@@ -68,10 +66,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             "buildSearchableOptions",
-            projectProperties = mapOf(
-                "instrumentCode" to false,
-                flag to false,
-            ),
+            projectProperties = defaultProjectProperties + mapOf(flag to false, "buildSearchableOptions" to true),
             args = defaultArgs,
         ) {
             output containsText "Build feature is disabled: $flag"
@@ -79,7 +74,6 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     }
 
     @Test
-    @Ignore
     fun `paidPluginSearchableOptionsWarning is enabled`() {
         val flag = BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING.toString()
 
@@ -99,10 +93,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             "buildSearchableOptions",
-            projectProperties = mapOf(
-                "instrumentCode" to true,
-                flag to true,
-            ),
+            projectProperties = defaultProjectProperties + mapOf(flag to true, "buildSearchableOptions" to true),
             args = defaultArgs,
         ) {
             output containsText "Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin."
