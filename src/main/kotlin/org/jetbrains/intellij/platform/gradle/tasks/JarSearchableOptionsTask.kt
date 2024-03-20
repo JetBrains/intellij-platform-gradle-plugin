@@ -19,7 +19,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.createDirectories
@@ -79,6 +78,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
         override fun register(project: Project) =
             project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
                 val extension = project.the<IntelliJPlatformExtension>()
+                val projectName = extension.projectName
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
                 val buildSearchableOptionsEnabled = extension.buildSearchableOptions.zip(buildSearchableOptionsTaskProvider) { enabled, task ->
                     enabled && task.enabled
@@ -95,9 +95,8 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
                     it
                         .takeIf { it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) }
                         ?.run {
-                            val pluginName = pluginXml.parse { name }.get()
                             sandboxPluginsDirectory.asPath
-                                .resolve(pluginName)
+                                .resolve(projectName.get())
                                 .resolve("lib")
                                 .resolve(name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX))
                         }

@@ -6,7 +6,6 @@ import java.nio.file.FileSystems
 import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.io.path.*
-import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @OptIn(ExperimentalPathApi::class)
@@ -21,11 +20,6 @@ open class IntelliJPlatformIntegrationTestBase(
         if (resourceName != null) {
             use(resourceName)
         }
-    }
-
-    @AfterTest
-    fun cleanup() {
-        dir.deleteRecursively()
     }
 
     protected fun use(resourceName: String) {

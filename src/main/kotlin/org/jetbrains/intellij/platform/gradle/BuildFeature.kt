@@ -98,10 +98,10 @@ fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
         .getValue(providers)
         .map { value ->
             value.also {
+                val log = Logger(BuildFeature::class.java)
                 when (value) {
-                    true -> "Build feature is enabled: $feature"
-                    false -> "Build feature is disabled: $feature"
+                    true -> log.info("Build feature is enabled: $feature")
+                    false -> log.info("Build feature is disabled: $feature")
                 }
-                    .also { Logger(BuildFeature::class.java).info(value.toString()) }
             }
         }
