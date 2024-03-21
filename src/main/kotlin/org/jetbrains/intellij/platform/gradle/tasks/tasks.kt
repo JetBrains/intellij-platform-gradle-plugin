@@ -103,79 +103,8 @@ internal inline fun <reified T : Task> Project.registerTask(
         if (this is CustomIntelliJPlatformVersionAware) {
             val baseIntellijPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM]
             val dependenciesExtension = this@registerTask.dependencies.the<IntelliJPlatformDependenciesExtension>()
-            val defaultTypeProvider = provider {
-                val productInfo = baseIntellijPlatformConfiguration.productInfo()
-                productInfo.productCode.toIntelliJPlatformType()
-            }
-            val defaultVersionProvider = provider {
-                val productInfo = baseIntellijPlatformConfiguration.productInfo()
-                IdeVersion.createIdeVersion(productInfo.version).toString()
-            }
 
             with(configurations) {
-                /**
-                 * A custom IntelliJ Platform Dependency configuration to which we add a new artifact
-                 * using [CustomIntelliJPlatformVersionAware.type]
-                 * and [CustomIntelliJPlatformVersionAware.version].
-                 * As both parameters default to the base IntelliJ Platform values, this configuration
-                 * always holds some dependency.
-                 * This configuration is ignored if [CustomIntelliJPlatformVersionAware.localPath] is set.
-                 */
-                val intellijPlatformDependencyConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix",
-                    description = "Custom IntelliJ Platform dependency archive",
-                ) {
-                    dependenciesExtension.create(
-                        type = type.orElse(defaultTypeProvider),
-                        version = version.orElse(defaultVersionProvider),
-                        configurationName = name,
-                    )
-                }
-
-                /**
-                 * A custom IntelliJ Platform Local Instance configuration to which we add a
-                 * new artifact using [CustomIntelliJPlatformVersionAware.localPath].
-                 */
-                val intellijPlatformLocalInstanceConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE}_$suffix",
-                    description = "Custom IntelliJ Platform local instance",
-                ) {
-                    dependenciesExtension.local(
-                        localPath = localPath,
-                        configurationName = name,
-                    )
-                }
-
-                /**
-                 * A high-level configuration to extract the configuration defined with
-                 * `intellijPlatformDependencyConfiguration`.
-                 */
-                val intellijPlatformConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM}_$suffix",
-                    description = "Custom IntelliJ Platform",
-                ) {
-                    attributes {
-                        attribute(Attributes.extracted, true)
-                    }
-
-                    extendsFrom(intellijPlatformDependencyConfiguration)
-                }
-
-                /**
-                 * A high-level configuration to extract the configuration defined with
-                 * `intellijPlatformLocalInstanceConfiguration`.
-                 */
-                val intellijPlatformForLocalInstanceConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM}_forLocalInstance_$suffix",
-                    description = "Custom IntelliJ Platform for local instance",
-                ) {
-                    attributes {
-                        attribute(Attributes.extracted, true)
-                    }
-
-                    extendsFrom(intellijPlatformLocalInstanceConfiguration)
-                }
-
                 /**
                  * Override the default [intelliJPlatformConfiguration] with a custom IntelliJ Platform configuration
                  * so the current task can refer to it.
@@ -188,8 +117,82 @@ internal inline fun <reified T : Task> Project.registerTask(
                  */
                 intelliJPlatformConfiguration.setFrom(provider {
                     when {
-                        localPath.isSpecified() -> intellijPlatformForLocalInstanceConfiguration
-                        type.isSpecified() || version.isSpecified() -> intellijPlatformConfiguration
+                        localPath.isSpecified() -> {
+                            /**
+                             * A custom IntelliJ Platform Local Instance configuration to which we add a
+                             * new artifact using [CustomIntelliJPlatformVersionAware.localPath].
+                             */
+                            val intellijPlatformLocalInstanceConfiguration = create(
+                                name = "${Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE}_$suffix",
+                                description = "Custom IntelliJ Platform local instance",
+                            ) {
+                                dependenciesExtension.local(
+                                    localPath = localPath,
+                                    configurationName = name,
+                                )
+                            }
+
+                            /**
+                             * A high-level configuration to extract the configuration defined with
+                             * `intellijPlatformLocalInstanceConfiguration`.
+                             */
+                            create(
+                                name = "${Configurations.INTELLIJ_PLATFORM}_forLocalInstance_$suffix",
+                                description = "Custom IntelliJ Platform for local instance",
+                            ) {
+                                attributes {
+                                    attribute(Attributes.extracted, true)
+                                }
+
+                                extendsFrom(intellijPlatformLocalInstanceConfiguration)
+                            }
+                        }
+
+                        type.isSpecified() || version.isSpecified() -> {
+                            val defaultTypeProvider = provider {
+                                val productInfo = baseIntellijPlatformConfiguration.productInfo()
+                                productInfo.productCode.toIntelliJPlatformType()
+                            }
+                            val defaultVersionProvider = provider {
+                                val productInfo = baseIntellijPlatformConfiguration.productInfo()
+                                IdeVersion.createIdeVersion(productInfo.version).toString()
+                            }
+
+                            /**
+                             * A custom IntelliJ Platform Dependency configuration to which we add a new artifact
+                             * using [CustomIntelliJPlatformVersionAware.type]
+                             * and [CustomIntelliJPlatformVersionAware.version].
+                             * As both parameters default to the base IntelliJ Platform values, this configuration
+                             * always holds some dependency.
+                             * This configuration is ignored if [CustomIntelliJPlatformVersionAware.localPath] is set.
+                             */
+                            val intellijPlatformDependencyConfiguration = create(
+                                name = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix",
+                                description = "Custom IntelliJ Platform dependency archive",
+                            ) {
+                                dependenciesExtension.create(
+                                    type = type.orElse(defaultTypeProvider),
+                                    version = version.orElse(defaultVersionProvider),
+                                    configurationName = name,
+                                )
+                            }
+
+                            /**
+                             * A high-level configuration to extract the configuration defined with
+                             * `intellijPlatformDependencyConfiguration`.
+                             */
+                            create(
+                                name = "${Configurations.INTELLIJ_PLATFORM}_$suffix",
+                                description = "Custom IntelliJ Platform",
+                            ) {
+                                attributes {
+                                    attribute(Attributes.extracted, true)
+                                }
+
+                                extendsFrom(intellijPlatformDependencyConfiguration)
+                            }
+                        }
+
                         else -> baseIntellijPlatformConfiguration
                     }
                 })
