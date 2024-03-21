@@ -91,7 +91,7 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
             }
         }
     }
-    
+
     private fun prepareTest(localPathValue: String = "layout.file(provider { null })") {
         buildFile.kotlin(
             """

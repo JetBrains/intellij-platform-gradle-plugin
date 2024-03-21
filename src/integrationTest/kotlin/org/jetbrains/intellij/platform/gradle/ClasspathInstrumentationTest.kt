@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import kotlin.io.path.exists
 import kotlin.test.Test
 
 class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
@@ -23,12 +22,12 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
                 +--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
-            
+
             safeLogs containsText """
                 intellijPlatformDependency - IntelliJ Platform dependency archive
                 \--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
             """.trimIndent()
-            
+
             safeLogs containsText """
                 intellijPlatformPlugins - IntelliJ Platform plugins
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
@@ -62,11 +61,11 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
         build("test", projectProperties = defaultProjectProperties) {
             buildDirectory.resolve("jacoco/test.exec").let {
-                assert(it.exists()) { "expect that $it exists" }
+                assertExists(it)
             }
 
             buildDirectory.resolve("reports/jacoco/test/jacocoTestReport.xml").let {
-                assert(it.exists())  { "expect that $it exists" }
+                assertExists(it)
 
                 it containsText """
                     <method name="getRandomNumber" desc="()I" line="7">

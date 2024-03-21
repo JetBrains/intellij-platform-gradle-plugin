@@ -5,7 +5,10 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import kotlin.io.path.*
+import kotlin.io.path.Path
+import kotlin.io.path.extension
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -40,7 +43,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
             assertNotNull(line)
 
             val path = Path(line.substringAfter(message))
-            assertTrue(path.exists())
+            assertExists(path)
             assertTrue(path.name.startsWith("marketplace-zip-signer-"))
             assertEquals("jar", path.extension)
         }

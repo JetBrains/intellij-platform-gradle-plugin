@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
 import kotlin.io.path.createFile
 import kotlin.io.path.invariantSeparatorsPathString
@@ -92,7 +91,7 @@ class MarketplaceZipSignerPathResolverTest : IntelliJPluginTestBase() {
             }
         }
     }
-    
+
     private fun prepareTest(localPathValue: String = "layout.file(provider { null })") {
         buildFile.kotlin(
             """

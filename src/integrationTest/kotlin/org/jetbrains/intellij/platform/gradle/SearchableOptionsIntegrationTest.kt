@@ -10,10 +10,13 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `test manifest file`() {
-        build(":jarSearchableOptions", projectProperties = mapOf(
-            "intellijPlatform.version" to intellijPlatformVersion,
-            "intellijPlatform.type" to intellijPlatformType,
-        )) {
+        build(
+            ":jarSearchableOptions",
+            projectProperties = mapOf(
+                "intellijPlatform.version" to intellijPlatformVersion,
+                "intellijPlatform.type" to intellijPlatformType,
+            )
+        ) {
 //            pluginJar containsFileInArchive "META-INF/MANIFEST.MF"
 //            with(pluginJar readEntry "META-INF/MANIFEST.MF") {
 //                this containsText "Version: 1.0.0"

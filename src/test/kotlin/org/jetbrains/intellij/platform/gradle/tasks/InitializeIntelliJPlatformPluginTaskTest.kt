@@ -11,7 +11,6 @@ import kotlin.io.path.exists
 import kotlin.io.path.name
 import kotlin.test.Test
 import kotlin.test.assertFalse
-import kotlin.test.assertTrue
 
 class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
 
@@ -64,7 +63,7 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        assertTrue(file.exists())
+        assertExists(file)
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
             assertNotContains("${Plugin.NAME} is outdated: 0.0.0.", output)
@@ -89,6 +88,6 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
 
-        assertTrue(file.exists())
+        assertExists(file)
     }
 }
