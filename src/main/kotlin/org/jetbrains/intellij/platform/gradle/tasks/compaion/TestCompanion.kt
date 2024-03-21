@@ -140,7 +140,7 @@ class TestCompanion {
                 systemProperty("idea.force.use.core.classloader", "true")
                 // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-                classpath = instrumentedCode + classpath + testCompileClasspathConfiguration
+                classpath = instrumentedCode + instrumentedTestCode + classpath + testCompileClasspathConfiguration
                 testClassesDirs = instrumentedTestCode + testClassesDirs
 
                 val executablePathProvider = project.provider {
