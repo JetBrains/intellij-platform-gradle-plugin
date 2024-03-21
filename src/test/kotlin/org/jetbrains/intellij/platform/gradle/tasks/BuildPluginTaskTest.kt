@@ -8,7 +8,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import java.util.jar.Manifest
-import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.*
 
@@ -59,7 +58,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertTrue(distribution.exists())
+        assertExists(distribution)
 
         distribution.toZip().use { zip ->
             assertEquals(
@@ -119,7 +118,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertTrue(distribution.exists())
+        assertExists(distribution)
 
         distribution.toZip().use { zip ->
             assertEquals(
@@ -185,7 +184,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertTrue(distribution.exists())
+        assertExists(distribution)
         distribution.toZip().use { zip ->
             assertEquals(
                 setOf(
@@ -265,7 +264,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertTrue(distribution.exists())
+        assertExists(distribution)
 
         distribution.toZip().use { zip ->
             zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
@@ -318,7 +317,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertTrue(distribution.exists())
+        assertExists(distribution)
 
         distribution.toZip().use { zip ->
             zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
@@ -341,7 +340,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertTrue(distribution.exists())
+        assertExists(distribution)
 
         distribution.toZip().use { zip ->
             assertEquals(
@@ -385,7 +384,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.BUILD_PLUGIN)
 
         val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertTrue(distribution.exists())
+        assertExists(distribution)
 
         distribution.toZip().use { zip ->
             assertEquals(

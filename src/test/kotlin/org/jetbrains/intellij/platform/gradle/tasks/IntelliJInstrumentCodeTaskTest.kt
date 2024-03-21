@@ -6,7 +6,6 @@ import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.test.BeforeTest
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

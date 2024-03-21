@@ -21,17 +21,17 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 
             buildDirectory.resolve("classes/java/main").let {
                 it.resolve("ExampleAction.class").let { file ->
-                    assert(file.exists())
+                    assertExists(file)
                     assert(file.fileSize() == 625L)
                 }
                 it.resolve("Main.class").let { file ->
-                    assert(file.exists())
+                    assertExists(file)
                     assert(file.fileSize() == 658L)
                 }
             }
             buildDirectory.resolve("classes/kotlin/main").let {
                 it.resolve("MainKt.class").let { file ->
-                    assert(file.exists())
+                    assertExists(file)
                     assert(file.fileSize() == 957L)
                 }
             }
@@ -66,15 +66,15 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 
             buildDirectory.resolve("instrumented/instrumentCode").let {
                 it.resolve("ExampleAction.class").let { file ->
-                    assert(file.exists())
+                    assertExists(file)
                     assert(file.fileSize() == 1028L)
                 }
                 it.resolve("Main.class").let { file ->
-                    assert(file.exists())
+                    assertExists(file)
                     assert(file.fileSize() == 1015L)
                 }
                 it.resolve("MainKt.class").let { file ->
-                    assert(file.exists())
+                    assertExists(file)
                     assert(file.fileSize() == 1015L)
                 }
             }

@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle
 
 import kotlin.io.path.appendText
-import kotlin.io.path.exists
 import kotlin.io.path.fileSize
 import kotlin.test.Test
 
@@ -24,27 +23,27 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
     fun `produce instrumented jar`() {
         build("buildPlugin", args = defaultArgs) {
             buildDirectory.resolve("classes/java/main/Main.class").let {
-                assert(it.exists())
+                assertExists(it)
                 assert(it.fileSize() == 658L)
             }
             buildDirectory.resolve("classes/java/main/CustomMain.class").let {
-                assert(it.exists())
+                assertExists(it)
                 assert(it.fileSize() == 683L)
             }
             buildDirectory.resolve("tmp/instrumentCode/Main.class").let {
-                assert(it.exists())
+                assertExists(it)
                 assert(it.fileSize() == 1015L)
             }
             buildDirectory.resolve("classes/java/main/Form.class").let {
-                assert(it.exists())
+                assertExists(it)
                 assert(it.fileSize() == 482L)
             }
             buildDirectory.resolve("tmp/instrumentCode/Form.class").let {
-                assert(it.exists())
+                assertExists(it)
                 assert(it.fileSize() == 1269L)
             }
             buildDirectory.resolve("classes/kotlin/main/MainKt.class").let {
-                assert(it.exists())
+                assertExists(it)
                 assert(it.fileSize() == 782L)
             }
 

@@ -332,7 +332,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
             assertNotNull(line)
 
             val path = Path(line.substringAfter(message))
-            assertTrue(path.exists())
+            assertExists(path)
             assertEquals("IC-223.8836.26", path.name)
         }
     }

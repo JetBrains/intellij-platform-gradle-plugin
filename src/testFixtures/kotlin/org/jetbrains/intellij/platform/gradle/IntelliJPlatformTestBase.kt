@@ -183,6 +183,8 @@ abstract class IntelliJPlatformTestBase {
     protected fun assertFileContent(path: Path?, @Language("xml") expectedContent: String) =
         assertEquals(expectedContent.trim(), path?.readText()?.replace("\r", "")?.trim())
 
+    protected fun assertExists(path: Path) = assert(path.exists()) { "expect that '$path' exists" }
+
     protected val BuildResult.safeOutput: String
         get() = output.replace("\r", "")
 
