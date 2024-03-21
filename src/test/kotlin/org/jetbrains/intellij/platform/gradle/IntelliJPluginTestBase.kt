@@ -18,11 +18,7 @@ import kotlin.test.assertTrue
 
 abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
-    val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-
-    val testMarkdownPluginVersion = System.getProperty("test.markdownPlugin.version")
-        .takeUnless { it.isNullOrEmpty() }
-        ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
+//    val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
 
     val gradleProperties get() = dir.resolve("gradle.properties")
     val buildFile get() = dir.resolve("build.gradle.kts")
@@ -86,8 +82,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 mavenCentral()
                 
                 intellijPlatform {
-                    localPlatformArtifacts()
-                    releases()
+                    defaultRepositories()
                 }
             }
             
