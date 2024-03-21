@@ -5,18 +5,32 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-@Ignore
-@Deprecated("Instrumentation is not yet available")
 class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
+
+    private val defaultArgs = listOf("--info")
+
+    @BeforeTest
+    override fun setup() {
+        disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+
+        super.setup()
+    }
 
     @Test
     fun `instrument code with nullability annotations`() {
         buildFile.kotlin(
             """
+            dependencies {
+                intellijPlatform {
+                    instrumentationTools()
+                }
+            }
+            
             intellijPlatform {
                 instrumentCode = true
             }
@@ -25,9 +39,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         writeJavaFile()
 
-        disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
-
-        build("buildSourceSet", "--info") {
+        build("assemble", args = defaultArgs) {
             assertContains("Added @NotNull assertions to 1 files", output)
         }
     }
@@ -38,14 +50,19 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         buildFile.kotlin(
             """
+            dependencies {
+                intellijPlatform {
+                    instrumentationTools()
+                }
+            }
+            
             intellijPlatform {
                 instrumentCode = true
             }
             """.trimIndent()
         )
-        disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        build("buildTestSourceSet", "--info") {
+        build("test", args = defaultArgs) {
             assertContains("Added @NotNull assertions to 1 files", output)
         }
     }
@@ -62,14 +79,14 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         writeJavaFile()
 
-        build("buildSourceSet", "--info") {
+        build("assemble", args = defaultArgs) {
             assertNotContains("Added @NotNull", output)
         }
     }
 
     @Test
     fun `do not instrument code on empty source sets`() {
-        build("buildSourceSet", "--info") {
+        build("assemble", args = defaultArgs) {
             assertNotContains("Compiling forms and instrumenting code", output)
         }
     }
@@ -80,6 +97,12 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         buildFile.kotlin(
             """
+            dependencies {
+                intellijPlatform {
+                    instrumentationTools()
+                }
+            }
+            
             intellijPlatform {
                 instrumentCode = true
             }
@@ -103,9 +126,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
-
-        build("buildSourceSet", "--info") {
+        build("assemble", args = defaultArgs) {
             assertContains("Compiling forms and instrumenting code", output)
         }
     }
@@ -113,11 +134,23 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `instrumentation does not invalidate compile tasks`() {
         writeJavaFile()
-        disableDebug("Gradle runs ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        build("buildSourceSet")
+        buildFile.kotlin(
+            """
+            dependencies {
+                intellijPlatform {
+                    instrumentationTools()
+                }
+            }
+            
+            intellijPlatform {
+                instrumentCode = true
+            }
+            """.trimIndent()
+        )
 
-        build("buildSourceSet") {
+        build("assemble")
+        build("assemble") {
             assertEquals(TaskOutcome.UP_TO_DATE, task(":${JavaPlugin.CLASSES_TASK_NAME}")?.outcome)
         }
     }
