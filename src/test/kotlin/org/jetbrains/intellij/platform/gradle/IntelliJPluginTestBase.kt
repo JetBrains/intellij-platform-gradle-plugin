@@ -129,12 +129,6 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
-    @Suppress("SameParameterValue")
-    protected fun disableDebug(reason: String) {
-        println("Debugging is disabled for test with the following reason: $reason")
-        debugEnabled = false
-    }
-
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
         val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2
         drop(start).takeWhile { !it.startsWith('-') }.dropLast(1).map { it.substringBefore(' ') }.filterNot { it.isEmpty() }

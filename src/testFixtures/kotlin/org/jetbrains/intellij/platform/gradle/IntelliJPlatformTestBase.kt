@@ -137,6 +137,12 @@ abstract class IntelliJPlatformTestBase {
                 *args.toTypedArray(),
             )//, "-Dorg.gradle.debug=true")
 
+    @Suppress("SameParameterValue")
+    protected fun disableDebug(reason: String) {
+        println("Debugging is disabled for test with the following reason: $reason")
+        debugEnabled = false
+    }
+
     protected fun assertContains(expected: String, actual: String) {
         // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
         assertTrue(
