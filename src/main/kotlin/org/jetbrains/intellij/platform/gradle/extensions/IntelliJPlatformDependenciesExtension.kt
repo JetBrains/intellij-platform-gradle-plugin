@@ -1036,6 +1036,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private fun RepositoryHandler.urls() = mapNotNull { (it as? UrlArtifactRepository)?.url?.toString() }
 }
 
+/**
+ * Parses the plugin notation into the `<id, version, channel` triple.
+ *
+ * Possible notations are `id:version` or `id:version@channel`.
+ */
 private fun String.parsePluginNotation() = trim()
     .takeIf { it.isNotEmpty() }
     ?.split(":", "@")
