@@ -9,59 +9,63 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "classpath",
 ) {
 
-    @Test
-    fun `dependencies should not contain IDEA if setupDependencies not called`() {
-        build("dependencies") {
-            safeLogs containsText """
-                \--- org.jetbrains:markdown:0.3.1
-                     \--- org.jetbrains:markdown-jvm:0.3.1
-                          +--- org.jetbrains.kotlin:kotlin-stdlib:1.5.31
-                          |    +--- org.jetbrains:annotations:13.0
-                          |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
-                          \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
-            """.trimIndent()
-        }
-    }
+    private val defaultProjectProperties = mapOf(
+        "intellijPlatform.version" to intellijPlatformVersion,
+        "intellijPlatform.type" to intellijPlatformType,
+        "markdownPlugin.version" to markdownPluginVersion,
+    )
 
     @Test
-    fun `dependencies should contain IDEA after calling setupDependencies`() {
-        build("setupDependencies", "dependencies") {
+    fun `dependencies should contain IntelliJ Platform and Markdown plugin`() {
+        build("dependencies", projectProperties = defaultProjectProperties) {
             safeLogs containsText """
-                +--- org.jetbrains:markdown:0.3.1
-                |    \--- org.jetbrains:markdown-jvm:0.3.1
-                |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.5.31
-                |         |    +--- org.jetbrains:annotations:13.0 -> 24.0.1
-                |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
-                |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.5.31
-                +--- org.jetbrains:annotations:24.0.1
-                \--- com.jetbrains:ideaIC:2022.1
+                compileClasspath - Compile classpath for null/main.
+                +--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
+                \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
+            """.trimIndent()
+            
+            safeLogs containsText """
+                intellijPlatformDependency - IntelliJ Platform dependency archive
+                \--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
+            """.trimIndent()
+            
+            safeLogs containsText """
+                intellijPlatformPlugins - IntelliJ Platform plugins
+                \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
 
-            safeOutput containsText """
-                implementation - Implementation only dependencies for null/main. (n)
-                \--- org.jetbrains:markdown:0.3.1 (n)
-            """.trimIndent()
-
-            safeOutput containsText """
-                z10_intellijDefaultDependencies
-                \--- org.jetbrains:annotations:24.0.1
-            """.trimIndent()
-
-            safeOutput containsText """
-                z90_intellij
-                \--- com.jetbrains:ideaIC:2022.1
+            safeLogs containsText """
+                intellijPlatformJavaCompiler - Java Compiler used by Ant tasks
+                \--- com.jetbrains.intellij.java:java-compiler-ant-tasks:223.8836.41
+                     +--- com.jetbrains.intellij.java:java-gui-forms-compiler:223.8836.41
+                     |    +--- com.jetbrains.intellij.platform:util-jdom:223.8836.41
+                     |    |    +--- jaxen:jaxen:1.2.0
+                     |    |    \--- org.jetbrains:annotations:23.0.0
+                     |    +--- com.jetbrains.intellij.java:java-gui-forms-rt:223.8836.41
+                     |    +--- org.jetbrains.intellij.deps:asm-all:9.2
+                     |    +--- com.jgoodies:forms:1.1-preview
+                     |    +--- com.jetbrains.intellij.java:java-compiler-instrumentation-util:223.8836.41
+                     |    |    \--- org.jetbrains.intellij.deps:asm-all:9.2
+                     |    \--- org.jetbrains:annotations:23.0.0
+                     +--- com.jetbrains.intellij.java:java-gui-forms-rt:223.8836.41
+                     +--- org.jetbrains.intellij.deps:asm-all:9.2
+                     +--- com.jetbrains.intellij.java:java-compiler-instrumentation-util:223.8836.41 (*)
+                     \--- com.jetbrains.intellij.java:java-compiler-instrumentation-util-java8:223.8836.41
+                          \--- com.jetbrains.intellij.java:java-compiler-instrumentation-util:223.8836.41 (*)
             """.trimIndent()
         }
     }
 
     @Test
     fun `jacoco should work`() {
-        build("build") {
+        disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+
+        build("test", projectProperties = defaultProjectProperties) {
             buildDirectory.resolve("jacoco/test.exec").let {
                 assert(it.exists()) { "expect that $it exists" }
             }
 
-            buildDirectory.resolve("reports/jacoco.xml").let {
+            buildDirectory.resolve("reports/jacoco/test/jacocoTestReport.xml").let {
                 assert(it.exists())  { "expect that $it exists" }
 
                 it containsText """

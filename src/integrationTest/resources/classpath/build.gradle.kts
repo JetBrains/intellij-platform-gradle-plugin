@@ -1,32 +1,43 @@
 // Copyright 2000-2022 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
+import org.jetbrains.intellij.platform.gradle.extensions.TestFrameworkType
+
+val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
+val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
+val markdownPluginNotationProperty = providers.gradleProperty("markdownPlugin.version").map { "org.intellij.plugins.markdown:$it" }
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform")
     id("jacoco")
 }
 
+kotlin {
+    jvmToolchain(17)
+}
+
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 dependencies {
-    implementation("org.jetbrains:markdown:0.3.1")
+    intellijPlatform {
+        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
+        plugin(markdownPluginNotationProperty)
+        instrumentationTools()
+        testFramework(TestFrameworkType.Platform.JUnit4)
+    }
 }
 
-kotlin {
-    jvmToolchain(11)
-}
-
-intellij {
-    version.set("2022.1.4")
+intellijPlatform {
+    buildSearchableOptions = false
 }
 
 tasks {
-    buildSearchableOptions {
-        enabled = false
-    }
-
     withType<Test> {
         configure<JacocoTaskExtension> {
             isIncludeNoLocationClasses = true
@@ -35,20 +46,12 @@ tasks {
     }
 
     test {
-        // <workaround>
-        // apply JUnit compatibility workaround
-        // https://youtrack.jetbrains.com/issue/IDEA-278926#focus=Comments-27-5561012.0-0
-        isScanForTestClasses = false
-        include("**/*Test.class")
-        // </workaround>
-
         finalizedBy(jacocoTestReport)
     }
 
     jacocoTestReport {
         reports {
-            xml.required.set(true)
-            xml.outputLocation.set(buildDir.resolve("reports/jacoco.xml"))
+            xml.required = true
         }
     }
 }
