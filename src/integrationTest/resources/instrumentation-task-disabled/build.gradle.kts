@@ -1,23 +1,38 @@
+import org.jetbrains.intellij.platform.gradle.extensions.TestFrameworkType
+
+val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
+val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
 val instrumentCodeProperty = project.property("instrumentCode") == "true"
+
+version = "1.0.0"
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform")
 }
 
-version = "1.0.0"
+kotlin {
+    jvmToolchain(17)
+}
 
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
-kotlin {
-    jvmToolchain(11)
+dependencies {
+    intellijPlatform {
+        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
+        instrumentationTools()
+    }
 }
 
-intellij {
-    version.set("2022.1.4")
-    instrumentCode.set(instrumentCodeProperty)
+intellijPlatform {
+    buildSearchableOptions = false
+    instrumentCode = instrumentCodeProperty
 }
 
 tasks {
@@ -28,9 +43,5 @@ tasks {
             outputs.upToDateWhen { false }
             showStandardStreams = true
         }
-    }
-
-    buildSearchableOptions {
-        enabled = false
     }
 }

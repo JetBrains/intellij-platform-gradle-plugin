@@ -2,18 +2,30 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import kotlin.io.path.*
+import kotlin.io.path.fileSize
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.notExists
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "instrumentation-task-disabled",
 ) {
 
     private val defaultArgs = listOf("--configuration-cache")
+    private val defaultProjectProperties = mapOf(
+        "intellijPlatform.version" to intellijPlatformVersion,
+        "intellijPlatform.type" to intellijPlatformType,
+    )
 
     @Test
     fun `skip instrumentCode task if disabled`() {
-        build("build", args = defaultArgs, projectProperties = mapOf("instrumentCode" to false)) {
+        build(
+            "build",
+            args = defaultArgs,
+            projectProperties = defaultProjectProperties + mapOf("instrumentCode" to false),
+        ) {
             output containsText "> Task :instrumentCode SKIPPED"
 
             buildDirectory containsFile "libs/test-1.0.0.jar"
@@ -22,17 +34,17 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
             buildDirectory.resolve("classes/java/main").let {
                 it.resolve("ExampleAction.class").let { file ->
                     assertExists(file)
-                    assert(file.fileSize() == 625L)
+                    assertEquals(576, file.fileSize())
                 }
                 it.resolve("Main.class").let { file ->
                     assertExists(file)
-                    assert(file.fileSize() == 658L)
+                    assertEquals(607, file.fileSize())
                 }
             }
             buildDirectory.resolve("classes/kotlin/main").let {
                 it.resolve("MainKt.class").let { file ->
                     assertExists(file)
-                    assert(file.fileSize() == 957L)
+                    assertEquals(957, file.fileSize())
                 }
             }
 
@@ -43,13 +55,13 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
                 jar readEntry "META-INF/plugin.xml" containsText "<action id=\"ExampleAction\" class=\"ExampleAction\" text=\"Example Action\">"
 
                 jar containsFileInArchive "ExampleAction.class"
-                assert((jar readEntry "ExampleAction.class").length == 625)
+                assertEquals(576, (jar readEntry "ExampleAction.class").length)
 
                 jar containsFileInArchive "Main.class"
-                assert((jar readEntry "Main.class").length == 658)
+                assertEquals(607, (jar readEntry "Main.class").length)
 
                 jar containsFileInArchive "MainKt.class"
-                assert((jar readEntry "MainKt.class").length == 955)
+                assertEquals(955, (jar readEntry "MainKt.class").length)
             }
 
             assert(buildDirectory.resolve("instrumented").notExists())
@@ -58,7 +70,13 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 
     @Test
     fun `produce instrumented artifact when instrumentation is enabled`() {
-        build("buildPlugin", args = defaultArgs, projectProperties = mapOf("instrumentCode" to true)) {
+        disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+
+        build(
+            "buildPlugin",
+            args = defaultArgs,
+            projectProperties = defaultProjectProperties + mapOf("instrumentCode" to true),
+        ) {
             output notContainsText "> Task :instrumentCode SKIPPED"
 
             buildDirectory containsFile "libs/test-1.0.0.jar"
@@ -67,15 +85,15 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
             buildDirectory.resolve("instrumented/instrumentCode").let {
                 it.resolve("ExampleAction.class").let { file ->
                     assertExists(file)
-                    assert(file.fileSize() == 1028L)
+                    assertEquals(979, file.fileSize())
                 }
                 it.resolve("Main.class").let { file ->
                     assertExists(file)
-                    assert(file.fileSize() == 1015L)
+                    assertEquals(964, file.fileSize())
                 }
                 it.resolve("MainKt.class").let { file ->
                     assertExists(file)
-                    assert(file.fileSize() == 1015L)
+                    assertEquals(957, file.fileSize())
                 }
             }
 
@@ -86,13 +104,13 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
                 jar readEntry "META-INF/plugin.xml" containsText "<action id=\"ExampleAction\" class=\"ExampleAction\" text=\"Example Action\">"
 
                 jar containsFileInArchive "ExampleAction.class"
-                assert((jar readEntry "ExampleAction.class").length == 625)
+                assertEquals(576, (jar readEntry "ExampleAction.class").length)
 
                 jar containsFileInArchive "Main.class"
-                assert((jar readEntry "Main.class").length == 658)
+                assertEquals(607, (jar readEntry "Main.class").length)
 
                 jar containsFileInArchive "MainKt.class"
-                assert((jar readEntry "MainKt.class").length == 955)
+                assertEquals(955, (jar readEntry "MainKt.class").length)
             }
 
             buildDirectory.resolve("instrumented").let {
@@ -104,7 +122,11 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 
     @Test
     fun `run tests and print nulls when instrumentation is disabled`() {
-        build("test", args = defaultArgs, projectProperties = mapOf("instrumentCode" to false)) {
+        build(
+            "test",
+            args = defaultArgs,
+            projectProperties = defaultProjectProperties + mapOf("instrumentCode" to false),
+        ) {
             safeOutput containsText """
                 InstrumentationTests > fooTest STANDARD_OUT
                     null
@@ -119,7 +141,13 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 
     @Test
     fun `run tests and throw unmet assertion exceptions when instrumentation is enabled`() {
-        buildAndFail("test", args = defaultArgs, projectProperties = mapOf("instrumentCode" to true)) {
+        disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+
+        buildAndFail(
+            "test",
+            args = defaultArgs,
+            projectProperties = defaultProjectProperties + mapOf("instrumentCode" to true),
+        ) {
             safeOutput containsText """
                 InstrumentationTests > fooTest FAILED
                     java.lang.IllegalArgumentException at InstrumentationTests.java:12
