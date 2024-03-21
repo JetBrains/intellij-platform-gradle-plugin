@@ -28,6 +28,9 @@ abstract class IntelliJPlatformTestBase {
         ?: throw GradleException("'test.intellijPlatform.type' isn't provided")
     val intellijPlatformVersion = System.getProperty("test.intellijPlatform.version").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellijPlatform.version' isn't provided")
+    val markdownPluginVersion = System.getProperty("test.markdownPlugin.version")
+        .takeUnless { it.isNullOrEmpty() }
+        ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
 
     lateinit var dir: Path
 

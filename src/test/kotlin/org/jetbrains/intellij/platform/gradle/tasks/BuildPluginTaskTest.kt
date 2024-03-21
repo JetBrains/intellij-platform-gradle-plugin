@@ -256,7 +256,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
             
             dependencies {
                 intellijPlatform {
-                    plugin("org.intellij.plugins.markdown", "$testMarkdownPluginVersion")
+                    plugin("org.intellij.plugins.markdown", "$markdownPluginVersion")
                 }
             }
             """.trimIndent()
