@@ -19,7 +19,7 @@ abstract class IntelliJPlatformTasksPlugin : Plugin<Project> {
     private val log = Logger(javaClass)
 
     override fun apply(project: Project) {
-        log.info("Configuring plugin: ${Plugins.TASKS}")
+        log.info("Configuring plugin: ${Plugins.BUILD}")
 
         with(project) {
             plugins.apply(IntelliJPlatformBasePlugin::class)

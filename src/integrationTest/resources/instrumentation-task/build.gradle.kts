@@ -1,18 +1,34 @@
-// Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+import org.jetbrains.intellij.platform.gradle.extensions.TestFrameworkType
+
+val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
+val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
+
+version = "1.0.0"
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform")
 }
 
-version = "1.0.0"
+kotlin {
+    jvmToolchain(17)
+}
 
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
 dependencies {
-    implementation(project(":submodule", "instrumentedJar"))
+    intellijPlatform {
+        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
+        instrumentationTools()
+        testFramework(TestFrameworkType.Platform.JUnit4)
+        instrumentedModule(":submodule")
+    }
 }
 
 sourceSets {
@@ -21,16 +37,6 @@ sourceSets {
     }
 }
 
-kotlin {
-    jvmToolchain(11)
-}
-
-intellij {
-    version.set("2022.1.4")
-}
-
-tasks {
-    buildSearchableOptions {
-        enabled = false
-    }
+intellijPlatform {
+    buildSearchableOptions = false
 }

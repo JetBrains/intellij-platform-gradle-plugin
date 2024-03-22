@@ -16,12 +16,14 @@ import org.gradle.api.file.FileType
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.jvm.tasks.Jar
+import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.jetbrains.intellij.platform.gradle.BuildException
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.INSTRUMENT_CODE
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -319,18 +321,11 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                 dependsOn(instrumentCodeTaskProvider)
 
                 onlyIf { instrumentCodeEnabled.get() }
+
+                project.artifacts.add(Configurations.INSTRUMENTED_JAR, archiveFile) {
+                    builtBy(this@registerTask)
+                }
             }
-
-//            val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
-//            val instrumentedJarConfiguration = project.configurations.create("instrumentedJar")
-//                .apply {
-//                    isCanBeConsumed = true
-//                    isCanBeResolved = false
-//
-//                    extendsFrom(project.configurations["implementation"], project.configurations["runtimeOnly"])
-//                }
-
-//            project.artifacts.add(instrumentedJarConfiguration.name, instrumentedJarTaskProvider)
         }
     }
 }

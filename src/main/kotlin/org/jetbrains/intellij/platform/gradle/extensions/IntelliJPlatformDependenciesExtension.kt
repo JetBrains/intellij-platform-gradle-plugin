@@ -717,6 +717,33 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     }
 
     /**
+     * Adds a dependency on an instrumented module.
+     * Usage:
+     *
+     * ```
+     * dependencies {
+     *   intellijPlatform {
+     *     instrumentedModule(":moduleName")
+     *   }
+     * }
+     * ```
+     *
+     * This is a shorthand function for:
+     *
+     * ```
+     * dependencies {
+     *   implementation(project(":moduleName", "instrumentedJar"))
+     * }
+     * ```
+     */
+    fun instrumentedModule(name: String)  = configurations[Configurations.External.IMPLEMENTATION].dependencies.add(
+        dependencies.project(
+            path = name,
+            configuration = Configurations.INSTRUMENTED_JAR,
+        )
+    )
+
+    /**
      * A base method for adding a dependency on IntelliJ Platform.
      *
      * @param typeProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
