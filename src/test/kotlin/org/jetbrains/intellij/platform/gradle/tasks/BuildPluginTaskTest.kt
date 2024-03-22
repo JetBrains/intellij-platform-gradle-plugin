@@ -4,9 +4,9 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import java.util.jar.Manifest
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.*
@@ -57,46 +57,47 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertExists(distribution)
+        buildDirectory.resolve("distributions/projectName-1.0.0.zip").let { distribution ->
+            assertExists(distribution)
 
-        distribution.toZip().use { zip ->
-            assertEquals(
-                setOf(
-                    "projectName/",
-                    "projectName/lib/",
-                    "projectName/lib/joda-time-2.8.1.jar",
-                    "projectName/lib/projectName-1.0.0.jar",
-                    "projectName/lib/searchableOptions-1.0.0.jar",
-                ),
-                collectPaths(zip)
-            )
-
-            zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+            distribution.toZip().use { zip ->
                 assertEquals(
                     setOf(
-                        "App.class",
-                        "META-INF/",
-                        "META-INF/MANIFEST.MF",
-                        "META-INF/nonIncluded.xml",
-                        "META-INF/other.xml",
-                        "META-INF/plugin.xml",
+                        "projectName/",
+                        "projectName/lib/",
+                        "projectName/lib/joda-time-2.8.1.jar",
+                        "projectName/lib/projectName-1.0.0.jar",
+                        "projectName/lib/searchableOptions-1.0.0.jar",
                     ),
-                    collectPaths(jar)
+                    collectPaths(zip)
                 )
 
-                assertEquals(
-                    """
-                    <idea-plugin>
-                      <idea-version since-build="223.8836" until-build="223.*" />
-                      <version>1.0.0</version>
-                      <name>MyPluginName</name>
-                      <vendor>JetBrains</vendor>
-                      <depends config-file="other.xml" />
-                    </idea-plugin>
-                    """.trimIndent(),
-                    fileText(jar, "META-INF/plugin.xml"),
-                )
+                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                    assertEquals(
+                        setOf(
+                            "App.class",
+                            "META-INF/",
+                            "META-INF/MANIFEST.MF",
+                            "META-INF/nonIncluded.xml",
+                            "META-INF/other.xml",
+                            "META-INF/plugin.xml",
+                        ),
+                        collectPaths(jar)
+                    )
+
+                    assertEquals(
+                        """
+                        <idea-plugin>
+                          <idea-version since-build="223.8836" until-build="223.*" />
+                          <version>1.0.0</version>
+                          <name>MyPluginName</name>
+                          <vendor>JetBrains</vendor>
+                          <depends config-file="other.xml" />
+                        </idea-plugin>
+                        """.trimIndent(),
+                        fileText(jar, "META-INF/plugin.xml"),
+                    )
+                }
             }
         }
     }
@@ -117,33 +118,34 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertExists(distribution)
+        buildDirectory.resolve("distributions/projectName-1.0.0.zip").let { distribution ->
+            assertExists(distribution)
 
-        distribution.toZip().use { zip ->
-            assertEquals(
-                setOf(
-                    "projectName/",
-                    "projectName/lib/",
-                    "projectName/lib/projectName-1.0.0.jar",
-                    "projectName/lib/searchableOptions-1.0.0.jar",
-                ),
-                collectPaths(zip),
-            )
-
-            zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+            distribution.toZip().use { zip ->
                 assertEquals(
                     setOf(
-                        "App.class",
-                        "pack/",
-                        "pack/AppKt.class",
-                        "META-INF/",
-                        "META-INF/MANIFEST.MF",
-                        "META-INF/plugin.xml",
-                        "META-INF/projectName.kotlin_module",
+                        "projectName/",
+                        "projectName/lib/",
+                        "projectName/lib/projectName-1.0.0.jar",
+                        "projectName/lib/searchableOptions-1.0.0.jar",
                     ),
-                    collectPaths(jar),
+                    collectPaths(zip),
                 )
+
+                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                    assertEquals(
+                        setOf(
+                            "App.class",
+                            "pack/",
+                            "pack/AppKt.class",
+                            "META-INF/",
+                            "META-INF/MANIFEST.MF",
+                            "META-INF/plugin.xml",
+                            "META-INF/projectName.kotlin_module",
+                        ),
+                        collectPaths(jar),
+                    )
+                }
             }
         }
     }
@@ -183,19 +185,21 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertExists(distribution)
-        distribution.toZip().use { zip ->
-            assertEquals(
-                setOf(
-                    "projectName/",
-                    "projectName/lib/",
-                    "projectName/lib/joda-time-2.8.1.jar",
-                    "projectName/lib/projectName-1.0.0.jar",
-                    "projectName/lib/searchableOptions-1.0.0.jar",
-                ),
-                collectPaths(zip)
-            )
+        buildDirectory.resolve("distributions/projectName-1.0.0.zip").let { distribution ->
+            assertExists(distribution)
+
+            distribution.toZip().use { zip ->
+                assertEquals(
+                    setOf(
+                        "projectName/",
+                        "projectName/lib/",
+                        "projectName/lib/joda-time-2.8.1.jar",
+                        "projectName/lib/projectName-1.0.0.jar",
+                        "projectName/lib/searchableOptions-1.0.0.jar",
+                    ),
+                    collectPaths(zip)
+                )
+            }
         }
     }
 
@@ -213,9 +217,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.BUILD_PLUGIN)
 
         assertEquals(
-            setOf(
-                "projectName-1.0.0.zip",
-            ),
+            setOf("projectName-1.0.0.zip"),
             buildDirectory.resolve("distributions").toFile().list()?.toSet(),
         )
     }
@@ -263,12 +265,13 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertExists(distribution)
+        buildDirectory.resolve("distributions/projectName-1.0.0.zip").let { distribution ->
+            assertExists(distribution)
 
-        distribution.toZip().use { zip ->
-            zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
-                assertTrue(collectPaths(jar).contains("App.class"))
+            distribution.toZip().use { zip ->
+                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                    assertTrue(collectPaths(jar).contains("App.class"))
+                }
             }
         }
     }
@@ -316,12 +319,13 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertExists(distribution)
+        buildDirectory.resolve("distributions/projectName-1.0.0.zip").let { distribution ->
+            assertExists(distribution)
 
-        distribution.toZip().use { zip ->
-            zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
-                assertTrue(collectPaths(jar).contains("App.class"))
+            distribution.toZip().use { zip ->
+                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                    assertTrue(collectPaths(jar).contains("App.class"))
+                }
             }
         }
     }
@@ -339,29 +343,30 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertExists(distribution)
+        buildDirectory.resolve("distributions/projectName-1.0.0.zip").let { distribution ->
+            assertExists(distribution)
 
-        distribution.toZip().use { zip ->
-            assertEquals(
-                setOf(
-                    "projectName/",
-                    "projectName/lib/",
-                    "projectName/lib/projectName-1.0.0.jar",
-                    "projectName/lib/searchableOptions-1.0.0.jar",
-                ),
-                collectPaths(zip)
-            )
-
-            zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+            distribution.toZip().use { zip ->
                 assertEquals(
                     setOf(
-                        "META-INF/",
-                        "META-INF/MANIFEST.MF",
-                        "META-INF/plugin.xml",
+                        "projectName/",
+                        "projectName/lib/",
+                        "projectName/lib/projectName-1.0.0.jar",
+                        "projectName/lib/searchableOptions-1.0.0.jar",
                     ),
-                    collectPaths(jar)
+                    collectPaths(zip)
                 )
+
+                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                    assertEquals(
+                        setOf(
+                            "META-INF/",
+                            "META-INF/MANIFEST.MF",
+                            "META-INF/plugin.xml",
+                        ),
+                        collectPaths(jar)
+                    )
+                }
             }
         }
     }
@@ -379,33 +384,38 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        buildFile.kotlin("version = \"1.0.1\"")
+        buildFile.kotlin(
+            """
+            version = "1.0.1"
+        """.trimIndent()
+        )
 
         build(Tasks.BUILD_PLUGIN)
 
-        val distribution = buildDirectory.resolve("distributions/projectName-1.0.0.zip")
-        assertExists(distribution)
+        buildDirectory.resolve("distributions/projectName-1.0.0.zip").let { distribution ->
+            assertExists(distribution)
 
-        distribution.toZip().use { zip ->
-            assertEquals(
-                setOf(
-                    "projectName/",
-                    "projectName/lib/",
-                    "projectName/lib/projectName-1.0.0.jar",
-                    "projectName/lib/searchableOptions-1.0.0.jar",
-                ),
-                collectPaths(zip)
-            )
-
-            zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+            distribution.toZip().use { zip ->
                 assertEquals(
                     setOf(
-                        "META-INF/",
-                        "META-INF/MANIFEST.MF",
-                        "META-INF/plugin.xml",
+                        "projectName/",
+                        "projectName/lib/",
+                        "projectName/lib/projectName-1.0.0.jar",
+                        "projectName/lib/searchableOptions-1.0.0.jar",
                     ),
-                    collectPaths(jar)
+                    collectPaths(zip)
                 )
+
+                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                    assertEquals(
+                        setOf(
+                            "META-INF/",
+                            "META-INF/MANIFEST.MF",
+                            "META-INF/plugin.xml",
+                        ),
+                        collectPaths(jar)
+                    )
+                }
             }
         }
     }
@@ -423,24 +433,25 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.BUILD_PLUGIN)
 
-        val archive = buildDirectory.resolve("distributions").resolve("projectName-1.0.0.zip")
-        archive.toZip().use { zip ->
-            zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
-                fileText(jar, "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
-                    assertNotNull(it)
+        buildDirectory.resolve("distributions").resolve("projectName-1.0.0.zip").let { archive ->
+            archive.toZip().use { zip ->
+                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                    fileText(jar, "META-INF/MANIFEST.MF").byteInputStream().use { Manifest(it).mainAttributes }.let {
+                        assertNotNull(it)
 
-                    assertEquals("1.0", it.getValue("Manifest-Version"))
-                    assertEquals("Gradle $gradleVersion", it.getValue("Created-By"))
-                    assertEquals("1.0.0", it.getValue("Version"))
-                    assertEquals(Jvm.current().toString(), it.getValue("Build-JVM"))
-                    assertEquals(OperatingSystem.current().toString(), it.getValue("Build-OS"))
-                    assertEquals(Plugin.NAME, it.getValue("Build-Plugin"))
-                    assertEquals("0.0.0", it.getValue("Build-Plugin-Version"))
-                    assertEquals(intellijPlatformType, it.getValue("Platform-Type"))
-                    assertEquals(intellijPlatformVersion, it.getValue("Platform-Version"))
-                    assertEquals("223.8836.41", it.getValue("Platform-Build"))
-                    assertEquals("false", it.getValue("Kotlin-Stdlib-Bundled"))
-                    assertEquals(null, it.getValue("Kotlin-Version"))
+                        assertEquals("1.0", it.getValue("Manifest-Version"))
+                        assertEquals("Gradle $gradleVersion", it.getValue("Created-By"))
+                        assertEquals("1.0.0", it.getValue("Version"))
+                        assertEquals(Jvm.current().toString(), it.getValue("Build-JVM"))
+                        assertEquals(OperatingSystem.current().toString(), it.getValue("Build-OS"))
+                        assertEquals(Plugin.NAME, it.getValue("Build-Plugin"))
+                        assertEquals("0.0.0", it.getValue("Build-Plugin-Version"))
+                        assertEquals(intellijPlatformType, it.getValue("Platform-Type"))
+                        assertEquals(intellijPlatformVersion, it.getValue("Platform-Version"))
+                        assertEquals("223.8836.41", it.getValue("Platform-Build"))
+                        assertEquals("false", it.getValue("Kotlin-Stdlib-Bundled"))
+                        assertEquals(null, it.getValue("Kotlin-Version"))
+                    }
                 }
             }
         }

@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 import kotlin.test.assertContains
 
@@ -16,7 +17,7 @@ class ApplyRecommendedRepositoriesIntegrationTest : IntelliJPlatformIntegrationT
 
     @Test
     fun `attach bundled plugin sources`() {
-        build("clean", projectProperties = defaultProjectProperties) {
+        build(Tasks.External.CLEAN, projectProperties = defaultProjectProperties) {
             assertLogValue("repositories = ") {
                 val repositories = it.split(";")
 

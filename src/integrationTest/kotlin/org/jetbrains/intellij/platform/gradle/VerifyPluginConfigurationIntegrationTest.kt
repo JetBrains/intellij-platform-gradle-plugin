@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
 class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -24,8 +25,8 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     @Test
     fun `should not report issues on valid configuration`() {
         build(
-            "clean",
-            "verifyPluginConfiguration",
+            Tasks.External.CLEAN,
+            Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties,
         ) {
@@ -36,8 +37,8 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     @Test
     fun `should report incorrect source compatibility`() {
         build(
-            "clean",
-            "verifyPluginConfiguration",
+            Tasks.External.CLEAN,
+            Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("languageVersion" to "11"),
         ) {
@@ -49,8 +50,8 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     @Test
     fun `should report incorrect target compatibility`() {
         build(
-            "clean",
-            "verifyPluginConfiguration",
+            Tasks.External.CLEAN,
+            Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("sinceBuild" to "203"),
         ) {

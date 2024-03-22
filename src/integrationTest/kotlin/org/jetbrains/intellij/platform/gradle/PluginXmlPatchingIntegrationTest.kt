@@ -2,15 +2,24 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import java.nio.file.Path
 import kotlin.test.Test
 
 class PluginXmlPatchingIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "plugin-xml-patching",
 ) {
 
+    /**
+     * Path to the patched `plugin.xml` file located within the build directory of the integration tests single project,
+     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/patchedPluginXmlFiles/plugin.xml`.
+     */
+    val patchedPluginXml: Path
+        get() = buildDirectory.resolve("patchedPluginXmlFiles/plugin.xml").also(::assertExists) // TODO: fix location
+
     @Test
     fun `patch plugin_xml`() {
-        build("build") {
+        build(Tasks.BUILD_PLUGIN) {
             output containsText ":patchPluginXml"
 
             buildDirectory containsFile "patchedPluginXmlFiles/plugin.xml" // TODO: fix location

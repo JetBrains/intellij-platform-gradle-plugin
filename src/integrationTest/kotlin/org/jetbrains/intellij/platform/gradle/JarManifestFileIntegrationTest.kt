@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
 class JarManifestFileIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -10,7 +11,9 @@ class JarManifestFileIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `test manifest file`() {
-        build("assemble") {
+        build(Tasks.External.ASSEMBLE) {
+            val pluginJar = buildDirectory.resolve("libs/test-1.0.0.jar").also(::assertExists)
+
             pluginJar containsFileInArchive "META-INF/MANIFEST.MF"
             with(pluginJar readEntry "META-INF/MANIFEST.MF") {
                 this containsText "Version: 1.0.0"

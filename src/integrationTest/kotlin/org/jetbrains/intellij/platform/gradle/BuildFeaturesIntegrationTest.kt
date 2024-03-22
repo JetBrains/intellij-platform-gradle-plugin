@@ -2,8 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import kotlin.io.path.deleteIfExists
-import kotlin.io.path.writeText
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
 class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -21,10 +20,9 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `selfUpdateCheck is disabled`() {
         val flag = BuildFeature.SELF_UPDATE_CHECK.toString()
-        println("flag = ${flag}")
 
         build(
-            "assemble",
+            Tasks.External.ASSEMBLE,
             projectProperties = defaultProjectProperties + mapOf(flag to false),
             args = defaultArgs,
         ) {
@@ -37,7 +35,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
         val flag = BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING.toString()
 
         build(
-            "jarSearchableOptions",
+            Tasks.JAR_SEARCHABLE_OPTIONS,
             projectProperties = defaultProjectProperties + mapOf(flag to false, "buildSearchableOptions" to true),
             args = defaultArgs,
         ) {
@@ -51,7 +49,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
         val flag = BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING.toString()
 
         build(
-            "jarSearchableOptions",
+            Tasks.JAR_SEARCHABLE_OPTIONS,
             projectProperties = defaultProjectProperties + mapOf(flag to true, "buildSearchableOptions" to true),
             args = defaultArgs,
         ) {
@@ -65,7 +63,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
         val flag = BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING.toString()
 
         build(
-            "buildSearchableOptions",
+            Tasks.BUILD_SEARCHABLE_OPTIONS,
             projectProperties = defaultProjectProperties + mapOf(flag to false, "buildSearchableOptions" to true),
             args = defaultArgs,
         ) {
@@ -77,22 +75,8 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     fun `paidPluginSearchableOptionsWarning is enabled`() {
         val flag = BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING.toString()
 
-        dir.resolve("src/main/resources/META-INF/plugin.xml").also {
-            it.deleteIfExists()
-            it.ensureFileExists().writeText(
-                """
-                <idea-plugin>
-                    <id>test</id>
-                    <name>Test</name>
-                    <vendor>JetBrains</vendor>
-                    <product-descriptor code="GIJP" release-date="20220701" release-version="20221"/>
-                </idea-plugin>
-                """.trimIndent()
-            )
-        }
-
         build(
-            "buildSearchableOptions",
+            Tasks.BUILD_SEARCHABLE_OPTIONS,
             projectProperties = defaultProjectProperties + mapOf(flag to true, "buildSearchableOptions" to true),
             args = defaultArgs,
         ) {

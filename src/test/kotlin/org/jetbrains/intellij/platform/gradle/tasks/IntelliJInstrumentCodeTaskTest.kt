@@ -3,8 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.testkit.runner.TaskOutcome
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -38,7 +38,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         writeJavaFile()
 
-        build("assemble", args = defaultArgs) {
+        build(Tasks.External.ASSEMBLE, args = defaultArgs) {
             assertContains("Added @NotNull assertions to 1 files", output)
         }
     }
@@ -61,7 +61,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        build("test", args = defaultArgs) {
+        build(Tasks.External.TEST, args = defaultArgs) {
             assertContains("Added @NotNull assertions to 1 files", output)
         }
     }
@@ -78,14 +78,14 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         writeJavaFile()
 
-        build("assemble", args = defaultArgs) {
+        build(Tasks.External.ASSEMBLE, args = defaultArgs) {
             assertNotContains("Added @NotNull", output)
         }
     }
 
     @Test
     fun `do not instrument code on empty source sets`() {
-        build("assemble", args = defaultArgs) {
+        build(Tasks.External.ASSEMBLE, args = defaultArgs) {
             assertNotContains("Compiling forms and instrumenting code", output)
         }
     }
@@ -125,7 +125,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        build("assemble", args = defaultArgs) {
+        build(Tasks.External.ASSEMBLE, args = defaultArgs) {
             assertContains("Compiling forms and instrumenting code", output)
         }
     }
@@ -148,8 +148,8 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        build("assemble")
-        build("assemble") {
+        build(Tasks.External.ASSEMBLE)
+        build(Tasks.External.ASSEMBLE) {
             assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.External.CLASSES}")?.outcome)
         }
     }

@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import java.io.File
 import kotlin.test.Test
 
@@ -11,7 +12,7 @@ class TestClasspathProjectResourcesIntegrationTest : IntelliJPlatformIntegration
 
     @Test
     fun `verify classpath entries`() {
-        build("test") {
+        build(Tasks.External.TEST) {
             val classpathEntries = output.lines().filter { it.startsWith("test-classpath-project-resources: Test classpath entry:") }
 
             // TODO: don't use [File.separator]

@@ -1,0 +1,6 @@
+<idea-plugin>
+    <id>test</id>
+    <name>Test</name>
+    <vendor>JetBrains</vendor>
+    <product-descriptor code="GIJP" release-date="20220701" release-version="20221"/>
+</idea-plugin>

@@ -2,9 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.*
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -785,7 +785,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `prepareTestingSandbox runs before test`() {
         writeJavaFile()
-        dir.resolve("additional/some-file").ensureFileExists()
+        dir.resolve("additional/some-file").also(::ensureFileExists)
 
         pluginXml.xml("<idea-plugin />")
 
@@ -799,7 +799,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        build("test")
+        build(Tasks.External.TEST)
 
         assertEquals(
             setOf(

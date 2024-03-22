@@ -4,7 +4,9 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.internal.tasks.JvmConstants
+import org.gradle.api.plugins.HelpTasksPlugin
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
@@ -91,6 +93,7 @@ object Constants {
 
         object Dependencies {
             const val LOCAL_IDE_GROUP = "localIde"
+            const val BINARY_RELEASE_GROUP = "binaryRelease"
             const val BUNDLED_PLUGIN_GROUP = "bundledPlugin"
         }
 
@@ -131,9 +134,12 @@ object Constants {
         const val VERIFY_PLUGIN_SIGNATURE = "verifyPluginSignature"
 
         object External {
+            const val ASSEMBLE = LifecycleBasePlugin.ASSEMBLE_TASK_NAME
             const val CLASSES = JavaPlugin.CLASSES_TASK_NAME
+            const val CLEAN = LifecycleBasePlugin.CLEAN_TASK_NAME
             const val COMPILE_JAVA = JavaPlugin.COMPILE_JAVA_TASK_NAME
             const val COMPILE_KOTLIN = "compileKotlin"
+            const val DEPENDENCIES = HelpTasksPlugin.DEPENDENCIES_TASK
             const val JAR = JavaPlugin.JAR_TASK_NAME
             const val PROCESS_RESOURCES = JavaPlugin.PROCESS_RESOURCES_TASK_NAME
             const val TEST = JavaPlugin.TEST_TASK_NAME

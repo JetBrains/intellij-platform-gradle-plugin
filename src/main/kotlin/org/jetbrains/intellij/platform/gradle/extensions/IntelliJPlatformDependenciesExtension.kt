@@ -736,7 +736,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * }
      * ```
      */
-    fun instrumentedModule(name: String)  = configurations[Configurations.External.IMPLEMENTATION].dependencies.add(
+    fun instrumentedModule(name: String) = configurations[Configurations.External.IMPLEMENTATION].dependencies.add(
         dependencies.project(
             path = name,
             configuration = Configurations.INSTRUMENTED_JAR,
@@ -808,11 +808,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
             val hash = artifactPath.hashCode().absoluteValue % 1000
             val type = productInfo.productCode.toIntelliJPlatformType()
-            type.dependency ?: throw GradleException("Specified type '$type' has no dependency available.")
+            val coordinates = type.dependency ?: type.binary ?: throw GradleException("Specified type '$type' has no dependency available.")
 
             dependencies.create(
                 group = Configurations.Dependencies.LOCAL_IDE_GROUP,
-                name = type.dependency.groupId,
+                name = coordinates.groupId,
                 version = "${productInfo.version}+$hash",
             ).apply {
                 createIvyDependency(
