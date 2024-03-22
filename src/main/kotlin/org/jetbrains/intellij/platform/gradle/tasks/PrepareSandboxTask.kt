@@ -201,10 +201,10 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, Tasks.PREPARE_UI_TEST_SANDBOX) {
 
 //            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-                val runtimeConfiguration = project.configurations[JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME]
+                val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
                 val intellijPlatformPluginsConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED]
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
-                val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
+                val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
                 val extension = project.the<IntelliJPlatformExtension>()
 
 //            val ideaDependencyJarFiles = ideaDependencyProvider.map {

@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
@@ -18,7 +19,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
     fun `use patched plugin xml files`() {
         pluginXml.xml("<idea-plugin />")
 
-        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        build(Tasks.External.PROCESS_RESOURCES)
 
         assertFileContent(
             outputPluginXml.value,
@@ -35,10 +36,10 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
     fun `do not break incremental processing`() {
         pluginXml.xml("<idea-plugin />")
 
-        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        build(Tasks.External.PROCESS_RESOURCES)
 
-        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
-            assertEquals(TaskOutcome.UP_TO_DATE, task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome)
+        build(Tasks.External.PROCESS_RESOURCES) {
+            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.External.PROCESS_RESOURCES}")?.outcome)
         }
     }
 
@@ -46,7 +47,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
     fun `update resources on updated patched xml files`() {
         pluginXml.xml("<idea-plugin />")
 
-        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME)
+        build(Tasks.External.PROCESS_RESOURCES)
 
         buildFile.kotlin(
             """
@@ -60,8 +61,8 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        build(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
-            assertNotEquals(TaskOutcome.UP_TO_DATE, task(":${JavaPlugin.PROCESS_RESOURCES_TASK_NAME}")?.outcome)
+        build(Tasks.External.PROCESS_RESOURCES) {
+            assertNotEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.External.PROCESS_RESOURCES}")?.outcome)
 
             assertFileContent(
                 outputPluginXml.value,

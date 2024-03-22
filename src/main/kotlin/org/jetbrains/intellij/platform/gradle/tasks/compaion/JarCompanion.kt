@@ -3,17 +3,16 @@
 package org.jetbrains.intellij.platform.gradle.tasks.compaion
 
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.tasks.bundling.Jar
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.attributes
 import org.gradle.kotlin.dsl.of
 import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
-import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
+import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource
@@ -24,7 +23,7 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 class JarCompanion {
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<Jar>(JavaPlugin.JAR_TASK_NAME, Tasks.INSTRUMENTED_JAR) {
+            project.registerTask<Jar>(Tasks.External.JAR, configureWithType = false) {
                 val extension = project.the<IntelliJPlatformExtension>()
                 val productInfoProvider = project.provider {
                     extension.productInfo
@@ -34,7 +33,7 @@ class JarCompanion {
                     .map { it.toBoolean() }
                 val kotlinVersionProvider = project.provider {
                     when {
-                        project.pluginManager.hasPlugin(KOTLIN_GRADLE_PLUGIN_ID) ->
+                        project.pluginManager.hasPlugin(Plugins.External.KOTLIN) ->
                             project.extensions
                                 .getByName("kotlin")
                                 .withGroovyBuilder { getProperty("coreLibrariesVersion") as String }

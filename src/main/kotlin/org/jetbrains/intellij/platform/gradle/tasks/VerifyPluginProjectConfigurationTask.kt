@@ -8,7 +8,6 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
@@ -17,11 +16,12 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withGroovyBuilder
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
-import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_GRADLE_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
+import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCachePath
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
@@ -31,8 +31,6 @@ import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
-
-private const val COMPILE_KOTLIN_TASK_NAME = "compileKotlin"
 
 /**
  * Validates the plugin project configuration:
@@ -245,7 +243,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             project.registerTask<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
                 log.info("Configuring plugin configuration verification task")
 
-                val compileJavaTaskProvider = project.tasks.named<JavaCompile>(JavaPlugin.COMPILE_JAVA_TASK_NAME)
+                val compileJavaTaskProvider = project.tasks.named<JavaCompile>(Tasks.External.COMPILE_JAVA)
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
 
@@ -267,8 +265,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 })
                 kotlinxCoroutinesLibraryPresent.convention(project.provider {
                     listOf(
-                        JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME,
-                        JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME
+                        Configurations.External.IMPLEMENTATION,
+                        Configurations.External.COMPILE_ONLY,
                     ).any { configurationName ->
                         project.configurations[configurationName].dependencies.any {
                             it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
@@ -277,10 +275,10 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 })
 
                 kotlinPluginAvailable.convention(project.provider {
-                    project.pluginManager.hasPlugin(KOTLIN_GRADLE_PLUGIN_ID)
+                    project.pluginManager.hasPlugin(Plugins.External.KOTLIN)
                 })
-                project.pluginManager.withPlugin(KOTLIN_GRADLE_PLUGIN_ID) {
-                    val kotlinOptionsProvider = project.tasks.named(COMPILE_KOTLIN_TASK_NAME).apply {
+                project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
+                    val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).apply {
                         configure {
                             dependsOn(this@registerTask)
                         }

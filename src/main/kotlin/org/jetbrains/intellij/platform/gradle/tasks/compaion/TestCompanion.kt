@@ -3,8 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.tasks.compaion
 
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.testing.Test
 import org.gradle.jvm.toolchain.JavaToolchainService
@@ -111,7 +109,7 @@ class TestCompanion {
             }
 
         private val Test.testCompileClasspathConfiguration
-            get() = project.configurations[TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME]
+            get() = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH]
 
         override fun register(project: Project) {
             val configuration: Test.() -> Unit = {
@@ -152,7 +150,7 @@ class TestCompanion {
                 }
             }
 
-            project.registerTask<Test>(JavaPlugin.TEST_TASK_NAME, configureWithType = false, configuration = configuration)
+            project.registerTask<Test>(Tasks.External.TEST, configureWithType = false, configuration = configuration)
             project.registerTask<TestIdeTask>(configuration = configuration)
         }
     }
