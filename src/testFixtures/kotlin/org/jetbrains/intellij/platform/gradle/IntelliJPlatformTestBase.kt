@@ -9,8 +9,12 @@ import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
-import kotlin.io.path.*
-import kotlin.test.*
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.Path
+import kotlin.io.path.readText
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.assertEquals
 
 abstract class IntelliJPlatformTestBase {
 
@@ -43,7 +47,7 @@ abstract class IntelliJPlatformTestBase {
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
     open fun tearDown() {
-        dir.deleteRecursively()
+//        dir.deleteRecursively()
     }
 
     protected fun build(
@@ -143,26 +147,6 @@ abstract class IntelliJPlatformTestBase {
         debugEnabled = false
     }
 
-    protected fun assertContains(expected: String, actual: String) {
-        // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
-        assertTrue(
-            actual.contains(expected),
-            """
-            expected:<$expected> but was:<$actual>
-            """.trimIndent()
-        )
-    }
-
-    protected fun assertNotContains(expected: String, actual: String) {
-        // https://stackoverflow.com/questions/10934743/formatting-output-so-that-intellij-idea-shows-diffs-for-two-texts
-        assertFalse(
-            actual.contains(expected),
-            """
-            expected:<$expected> but was:<$actual>
-            """.trimIndent()
-        )
-    }
-
     protected fun BuildResult.assertLogValue(label: String, block: (String) -> Unit): String {
         assertContains(label, output)
         return output
@@ -180,10 +164,7 @@ abstract class IntelliJPlatformTestBase {
             }
     }
 
-    protected fun assertFileContent(path: Path?, @Language("xml") expectedContent: String) =
-        assertEquals(expectedContent.trim(), path?.readText()?.replace("\r", "")?.trim())
 
-    protected fun assertExists(path: Path) = assert(path.exists()) { "expect that '$path' exists" }
 
     protected val BuildResult.safeOutput: String
         get() = output.replace("\r", "")
@@ -191,10 +172,5 @@ abstract class IntelliJPlatformTestBase {
     protected val BuildResult.safeLogs: String
         get() = safeOutput.lineSequence().filterNot { it.startsWith(Plugin.LOG_PREFIX) }.joinToString("\n")
 
-    protected fun Path.ensureFileExists() = apply {
-        parent.createDirectories()
-        if (!exists()) {
-            createFile()
-        }
-    }
+
 }

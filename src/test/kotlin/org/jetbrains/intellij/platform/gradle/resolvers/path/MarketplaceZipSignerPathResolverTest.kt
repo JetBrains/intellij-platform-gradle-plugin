@@ -3,6 +3,9 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.assertContains
+import org.jetbrains.intellij.platform.gradle.buildFile
+import org.jetbrains.intellij.platform.gradle.kotlin
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
 import kotlin.io.path.createFile
 import kotlin.io.path.invariantSeparatorsPathString

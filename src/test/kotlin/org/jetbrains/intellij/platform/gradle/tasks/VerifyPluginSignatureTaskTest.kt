@@ -5,6 +5,9 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.assertContains
+import org.jetbrains.intellij.platform.gradle.buildFile
+import org.jetbrains.intellij.platform.gradle.kotlin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 

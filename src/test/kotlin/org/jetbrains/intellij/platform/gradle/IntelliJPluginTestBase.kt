@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.internal.project.ProjectInternal
-import org.intellij.lang.annotations.Language
 import java.io.FileOutputStream
 import java.nio.file.*
 import java.util.zip.ZipFile
@@ -14,13 +13,6 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
-//    val pluginsRepository: String = System.getProperty("plugins.repository", DEFAULT_INTELLIJ_PLUGINS_REPOSITORY)
-
-    val gradleProperties get() = dir.resolve("gradle.properties")
-    val buildFile get() = dir.resolve("build.gradle.kts")
-    val settingsFile get() = dir.resolve("settings.gradle.kts")
-    val pluginXml get() = dir.resolve("src/main/resources/META-INF/plugin.xml")
-    val buildDirectory get() = dir.resolve("build")
     val randomTaskName = "task_" + (1..1000).random()
 
     @BeforeTest
@@ -145,7 +137,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         return file
     }
 
-    protected fun writeJavaFile() = dir.resolve("src/main/java/App.java").ensureFileExists().java(
+    protected fun writeJavaFile() = dir.resolve("src/main/java/App.java").also(::ensureFileExists).java(
         """
         import java.lang.String;
         import java.util.Arrays;
@@ -159,7 +151,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
-    protected fun writeKotlinFile() = dir.resolve("src/main/kotlin/App.kt").ensureFileExists().kotlin(
+    protected fun writeKotlinFile() = dir.resolve("src/main/kotlin/App.kt").also(::ensureFileExists).kotlin(
         """
         object App {
             @JvmStatic
@@ -170,7 +162,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         """.trimIndent()
     )
 
-    protected fun writeKotlinUIFile() = dir.resolve("src/main/kotlin/pack/AppKt.kt").ensureFileExists().kotlin(
+    protected fun writeKotlinUIFile() = dir.resolve("src/main/kotlin/pack/AppKt.kt").also(::ensureFileExists).kotlin(
         """
         package pack
         
@@ -218,42 +210,4 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
     protected fun resourceContent(path: String) = resource(path)?.let { Path(it).readText() }
 
-    // Methods can be simplified when the following tickets will be handled:
-    // https://youtrack.jetbrains.com/issue/KT-24517
-    // https://youtrack.jetbrains.com/issue/KTIJ-1001
-    fun Path.xml(
-        @Language("XML") content: String,
-        override: Boolean = false,
-        prepend: Boolean = false,
-    ) = append(content, override, prepend)
-
-    fun Path.java(
-        @Language("Java") content: String,
-        override: Boolean = false,
-        prepend: Boolean = false,
-    ) = append(content, override, prepend)
-
-    fun Path.kotlin(
-        @Language("kotlin") content: String,
-        override: Boolean = false,
-        prepend: Boolean = false,
-    ) = append(content, override, prepend)
-
-    fun Path.properties(
-        @Language("Properties") content: String,
-        override: Boolean = false,
-        prepend: Boolean = false,
-    ) = append(content, override, prepend)
-
-    private fun Path.append(
-        content: String,
-        override: Boolean,
-        prepend: Boolean,
-    ) = ensureFileExists().also {
-        when {
-            prepend -> writeText(content + System.lineSeparator() + readText() + System.lineSeparator())
-            override -> writeText(content + System.lineSeparator())
-            else -> appendText(content + System.lineSeparator())
-        }
-    }
 }

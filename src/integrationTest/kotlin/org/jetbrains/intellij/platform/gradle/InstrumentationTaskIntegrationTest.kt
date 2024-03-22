@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.appendText
 import kotlin.io.path.fileSize
 import kotlin.test.BeforeTest
@@ -28,7 +29,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `instrument NotNull annotations`() {
         build(
-            "buildPlugin",
+            Tasks.BUILD_PLUGIN,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {
@@ -39,7 +40,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `produce instrumented jar`() {
         build(
-            "buildPlugin",
+            Tasks.BUILD_PLUGIN,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {
@@ -98,12 +99,12 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `test incremental build`() {
         build(
-            "buildPlugin",
+            Tasks.BUILD_PLUGIN,
             projectProperties = defaultProjectProperties,
         )
 
         build(
-            "jar",
+            Tasks.External.JAR,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {
@@ -114,7 +115,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
         dir.resolve("src/main/kotlin/MainKt.kt").appendText("// foo\n")
 
         build(
-            "jar",
+            Tasks.External.JAR,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {
@@ -125,7 +126,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
         dir.resolve("src/main/java/Main.java").appendText("// foo\n")
 
         build(
-            "jar",
+            Tasks.External.JAR,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {
@@ -136,7 +137,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
         dir.resolve("src/main/java/Form.form").appendText("<!-- foo -->\n")
 
         build(
-            "jar",
+            Tasks.External.JAR,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {

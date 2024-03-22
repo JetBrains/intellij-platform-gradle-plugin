@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.fileSize
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -22,7 +23,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
     @Test
     fun `skip instrumentCode task if disabled`() {
         build(
-            "build",
+            Tasks.BUILD_PLUGIN,
             args = defaultArgs,
             projectProperties = defaultProjectProperties + mapOf("instrumentCode" to false),
         ) {
@@ -73,7 +74,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
         disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
         build(
-            "buildPlugin",
+            Tasks.BUILD_PLUGIN,
             args = defaultArgs,
             projectProperties = defaultProjectProperties + mapOf("instrumentCode" to true),
         ) {
@@ -123,7 +124,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
     @Test
     fun `run tests and print nulls when instrumentation is disabled`() {
         build(
-            "test",
+            Tasks.External.TEST,
             args = defaultArgs,
             projectProperties = defaultProjectProperties + mapOf("instrumentCode" to false),
         ) {

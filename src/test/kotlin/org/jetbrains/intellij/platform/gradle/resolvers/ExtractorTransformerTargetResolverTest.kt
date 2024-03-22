@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.resolvers
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.buildFile
+import org.jetbrains.intellij.platform.gradle.kotlin
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue

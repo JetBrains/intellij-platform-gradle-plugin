@@ -4,8 +4,9 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import java.nio.file.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -13,7 +14,8 @@ import kotlin.test.assertNotEquals
 
 class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
 
-    private val outputPluginXml = lazy { buildDirectory.resolve("resources/main/META-INF/").listDirectoryEntries().first() }
+    private val outputPluginXml
+        get() = buildDirectory.resolve("resources/main/META-INF/").listDirectoryEntries().first()
 
     @Test
     fun `use patched plugin xml files`() {
@@ -22,7 +24,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
         build(Tasks.External.PROCESS_RESOURCES)
 
         assertFileContent(
-            outputPluginXml.value,
+            outputPluginXml,
             """
             <idea-plugin>
               <idea-version since-build="223.8836" until-build="223.*" />
@@ -65,7 +67,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
             assertNotEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.External.PROCESS_RESOURCES}")?.outcome)
 
             assertFileContent(
-                outputPluginXml.value,
+                outputPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="Oh" until-build="223.*" />

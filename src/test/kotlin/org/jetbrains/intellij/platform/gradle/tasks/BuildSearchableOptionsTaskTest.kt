@@ -2,8 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.SearchableOptionsTestBase
 import org.junit.Ignore
 import kotlin.io.path.readText
 import kotlin.test.Test

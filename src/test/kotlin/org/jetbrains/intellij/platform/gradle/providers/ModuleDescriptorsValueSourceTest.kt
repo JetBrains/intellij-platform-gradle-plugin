@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.providers
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.buildFile
+import org.jetbrains.intellij.platform.gradle.kotlin
 import kotlin.test.Test
 import kotlin.test.assertContains
 

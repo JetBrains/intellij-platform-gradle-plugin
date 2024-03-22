@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.gradle.internal.jvm.Jvm
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.*
 import kotlin.io.path.Path
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.readText

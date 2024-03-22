@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
 class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -11,7 +12,7 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `test manifest file`() {
         build(
-            ":jarSearchableOptions",
+            Tasks.JAR_SEARCHABLE_OPTIONS,
             projectProperties = mapOf(
                 "intellijPlatform.version" to intellijPlatformVersion,
                 "intellijPlatform.type" to intellijPlatformType,

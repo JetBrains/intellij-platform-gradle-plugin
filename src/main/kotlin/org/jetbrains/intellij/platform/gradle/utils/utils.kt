@@ -54,12 +54,18 @@ fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
  * @return The [Path] of the IntelliJ Platform
  */
 fun FileCollection.platformPath() = runCatching {
-    single().toPath()
+    val entries = toList()
+
+    when (entries.size) {
+        0 -> throw IllegalArgumentException("No IntelliJ Platform dependency found.")
+        1 -> entries.single().toPath()
+        else -> throw IllegalArgumentException("More than one IntelliJ Platform dependency found.")
+    }
 }.onFailure {
     throw GradleException(
         """
-        The dependency on the IntelliJ Platform couldn't be resolved. 
-        Please ensure that this dependency is defined in your project and that the necessary repositories, where it can be located, are added.
+        ${it.message}
+        Please ensure there is a single IntelliJ Platform dependency defined in your project and that the necessary repositories, where it can be located, are added.
         See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
     """.trimIndent()
     )

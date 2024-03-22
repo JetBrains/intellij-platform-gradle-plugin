@@ -4,6 +4,8 @@ package org.jetbrains.intellij.platform.gradle.providers
 
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.buildFile
+import org.jetbrains.intellij.platform.gradle.kotlin
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertEquals

@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.assertContains
 import kotlin.test.Test
 
 class PrintBundledPluginsTaskTest : IntelliJPluginTestBase() {

@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
 class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
@@ -16,7 +17,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `dependencies should contain IntelliJ Platform and Markdown plugin`() {
-        build("dependencies", projectProperties = defaultProjectProperties) {
+        build(Tasks.External.DEPENDENCIES, projectProperties = defaultProjectProperties) {
             safeLogs containsText """
                 compileClasspath - Compile classpath for null/main.
                 +--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
@@ -59,7 +60,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     fun `jacoco should work`() {
         disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
 
-        build("test", projectProperties = defaultProjectProperties) {
+        build(Tasks.External.TEST, projectProperties = defaultProjectProperties) {
             buildDirectory.resolve("jacoco/test.exec").let {
                 assertExists(it)
             }

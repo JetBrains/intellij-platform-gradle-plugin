@@ -2,9 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.io.path.*
 import kotlin.test.Test
 
@@ -269,7 +269,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
             override = true,
         )
 
-        build("clean", Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+        build(Tasks.External.CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
                 "- The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib",

@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.executableResolver
 
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.*
 import kotlin.test.Ignore
 import kotlin.test.Test
 
