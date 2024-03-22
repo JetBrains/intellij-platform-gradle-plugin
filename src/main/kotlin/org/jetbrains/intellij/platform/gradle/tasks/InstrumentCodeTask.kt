@@ -14,7 +14,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileType
 import org.gradle.api.logging.LogLevel
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
@@ -304,8 +303,8 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                 }
             }
 
-            val jarTaskProvider = project.tasks.named<Jar>(JavaPlugin.JAR_TASK_NAME)
-            val instrumentCodeTaskProvider = project.tasks.named<InstrumentCodeTask>("instrumentCode")
+            val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
+            val instrumentCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE)
 
             project.registerTask<Jar>(Tasks.INSTRUMENTED_JAR, configureWithType = false) {
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE

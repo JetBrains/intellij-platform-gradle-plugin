@@ -15,7 +15,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.registerTask
 class ProcessResourcesCompanion {
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<ProcessResources>(JavaPlugin.PROCESS_RESOURCES_TASK_NAME) {
+            project.registerTask<ProcessResources>(Tasks.External.PROCESS_RESOURCES) {
                 val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
 
                 from(patchPluginXmlTaskProvider) {

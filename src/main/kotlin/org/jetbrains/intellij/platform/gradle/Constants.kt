@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.attributes.Attribute
+import org.gradle.api.internal.tasks.JvmConstants
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
@@ -10,8 +12,6 @@ object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
     const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
-    const val JAVA_TEST_FIXTURES_PLUGIN_ID = "java-test-fixtures"
-    const val KOTLIN_GRADLE_PLUGIN_ID = "org.jetbrains.kotlin.jvm"
     const val SEARCHABLE_OPTIONS_DIRECTORY = "searchableOptions"
     const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
     const val VERSION_CURRENT = "current"
@@ -33,6 +33,11 @@ object Constants {
         const val SETTINGS = "${Plugin.ID}.settings"
         const val TEST = "${Plugin.ID}.test"
         const val VERIFY = "${Plugin.ID}.verify"
+
+        object External {
+            const val JAVA_TEST_FIXTURES = "java-test-fixtures"
+            const val KOTLIN = "org.jetbrains.kotlin.jvm"
+        }
     }
 
     object Constraints {
@@ -70,6 +75,7 @@ object Constants {
         const val INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY = "intellijPluginVerifierIdesDependency"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE = "intellijPluginVerifierIdesLocalInstance"
         const val MARKETPLACE_ZIP_SIGNER = "marketplaceZipSigner"
+        const val INSTRUMENTED_JAR = "instrumentedJar"
         const val JETBRAINS_RUNTIME = "jetbrainsRuntime"
         const val JETBRAINS_RUNTIME_DEPENDENCY = "jetbrainsRuntimeDependency"
         const val JETBRAINS_RUNTIME_LOCAL_INSTANCE = "jetbrainsRuntimeLocalInstance"
@@ -87,8 +93,18 @@ object Constants {
             const val LOCAL_IDE_GROUP = "localIde"
             const val BUNDLED_PLUGIN_GROUP = "bundledPlugin"
         }
+
+        object External {
+            const val COMPILE_CLASSPATH = JvmConstants.COMPILE_CLASSPATH_CONFIGURATION_NAME
+            const val COMPILE_ONLY = JvmConstants.COMPILE_ONLY_CONFIGURATION_NAME
+            const val IMPLEMENTATION = JvmConstants.IMPLEMENTATION_CONFIGURATION_NAME
+            const val RUNTIME_CLASSPATH = JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
+            const val TEST_COMPILE_CLASSPATH = JvmConstants.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
+            const val TEST_COMPILE_ONLY = JvmConstants.TEST_COMPILE_ONLY_CONFIGURATION_NAME
+        }
     }
 
+    // TODO: fix that
     const val INSTRUMENT_CODE = "instrumentCode"
     const val INSTRUMENT_TEST_CODE = "instrumentTestCode"
 
@@ -96,7 +112,7 @@ object Constants {
         const val BUILD_PLUGIN = "buildPlugin"
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
-        const val INSTRUMENTED_JAR = "instrumentedJar" // TODO: check
+        const val INSTRUMENTED_JAR = "instrumentedJar"
         const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
         const val PATCH_PLUGIN_XML = "patchPluginXml" // TODO: check
         const val PREPARE_SANDBOX = "prepareSandbox" // TODO: check
@@ -113,6 +129,15 @@ object Constants {
         const val VERIFY_PLUGIN_STRUCTURE = "verifyPluginStructure" // TODO: check
         const val VERIFY_PLUGIN_PROJECT_CONFIGURATION = "verifyPluginProjectConfiguration" // TODO: check
         const val VERIFY_PLUGIN_SIGNATURE = "verifyPluginSignature"
+
+        object External {
+            const val CLASSES = JavaPlugin.CLASSES_TASK_NAME
+            const val COMPILE_JAVA = JavaPlugin.COMPILE_JAVA_TASK_NAME
+            const val COMPILE_KOTLIN = "compileKotlin"
+            const val JAR = JavaPlugin.JAR_TASK_NAME
+            const val PROCESS_RESOURCES = JavaPlugin.PROCESS_RESOURCES_TASK_NAME
+            const val TEST = JavaPlugin.TEST_TASK_NAME
+        }
     }
 
     object Sandbox {

@@ -6,7 +6,6 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPlugin.*
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.the
@@ -17,7 +16,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
-import org.jetbrains.intellij.platform.gradle.Constants.JAVA_TEST_FIXTURES_PLUGIN_ID
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
@@ -233,16 +231,16 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     description = "IntelliJ Platform Test Dependencies"
                 )
 
-                configurations[COMPILE_ONLY_CONFIGURATION_NAME].extendsFrom(
+                configurations[Configurations.External.COMPILE_ONLY].extendsFrom(
                     intellijPlatformConfiguration,
                     intellijPlatformDependenciesConfiguration,
                 )
-                configurations[TEST_COMPILE_ONLY_CONFIGURATION_NAME].extendsFrom(
+                configurations[Configurations.External.TEST_COMPILE_ONLY].extendsFrom(
                     intellijPlatformConfiguration,
                     intellijPlatformDependenciesConfiguration,
                     intellijPlatformTestDependenciesConfiguration,
                 )
-                pluginManager.withPlugin(JAVA_TEST_FIXTURES_PLUGIN_ID) {
+                pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {
                     configurations[Configurations.TEST_FIXTURES_COMPILE_ONLY].extendsFrom(
                         intellijPlatformConfiguration,
                         intellijPlatformDependenciesConfiguration,
@@ -259,15 +257,15 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 }
 
                 applyExtractorTransformer(
-                    configurations[COMPILE_CLASSPATH_CONFIGURATION_NAME],
-                    configurations[TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME],
+                    configurations[Configurations.External.COMPILE_CLASSPATH],
+                    configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
                     configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY],
                     configurations[Configurations.JETBRAINS_RUNTIME_DEPENDENCY],
                     configurations[Configurations.INTELLIJ_PLATFORM_PLUGINS],
                 )
                 applyCollectorTransformer(
-                    configurations[COMPILE_CLASSPATH_CONFIGURATION_NAME],
-                    configurations[TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME],
+                    configurations[Configurations.External.COMPILE_CLASSPATH],
+                    configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
                 )
                 applyBundledPluginsListTransformer()
                 applyPluginVerifierIdeExtractorTransformer(
@@ -275,7 +273,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
                 )
 
-                pluginManager.withPlugin(JAVA_TEST_FIXTURES_PLUGIN_ID) {
+                pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {
                     configurations[Configurations.TEST_FIXTURES_COMPILE_CLASSPATH]
                         .attributes
                         .attribute(Attributes.extracted, true)

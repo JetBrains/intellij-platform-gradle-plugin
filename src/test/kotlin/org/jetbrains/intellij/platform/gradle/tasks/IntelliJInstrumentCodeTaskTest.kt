@@ -2,8 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -150,7 +150,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         build("assemble")
         build("assemble") {
-            assertEquals(TaskOutcome.UP_TO_DATE, task(":${JavaPlugin.CLASSES_TASK_NAME}")?.outcome)
+            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.External.CLASSES}")?.outcome)
         }
     }
 }
