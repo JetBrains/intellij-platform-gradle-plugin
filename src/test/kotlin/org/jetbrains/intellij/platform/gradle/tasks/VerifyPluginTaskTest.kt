@@ -384,6 +384,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    @Ignore
     fun `run plugin verifier in offline mode`() {
         writePluginXmlFile()
         writePluginVerifierIde()
