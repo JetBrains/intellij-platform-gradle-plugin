@@ -2,11 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.gradle.api.plugins.JavaPlugin
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import java.nio.file.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,7 +17,10 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `use patched plugin xml files`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
         build(Tasks.External.PROCESS_RESOURCES)
 
@@ -36,7 +37,10 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not break incremental processing`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
         build(Tasks.External.PROCESS_RESOURCES)
 
@@ -47,21 +51,23 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `update resources on updated patched xml files`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
         build(Tasks.External.PROCESS_RESOURCES)
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    ideaVersion {
-                        sinceBuild = "Oh"
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            sinceBuild = "Oh"
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.External.PROCESS_RESOURCES) {
             assertNotEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.External.PROCESS_RESOURCES}")?.outcome)

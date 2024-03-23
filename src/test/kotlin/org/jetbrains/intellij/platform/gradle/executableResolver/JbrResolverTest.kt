@@ -45,22 +45,21 @@ class JbrResolverTest : IntelliJPluginTestBase() {
     fun `resolve 11_0_13b1751_16 in fd variant`() = testJbrResolving("11_0_13b1751.16", "jbr_fd-11_0_13-$platform-$arch-b1751.16", "fd")
 
     private fun testJbrResolving(version: String, expected: String, variant: String? = null) {
-        buildFile.kotlin(
-            """
-            runIde {
-                jbrVersion = "$version"
-                ${"jbrVariant = \"$variant\"".takeIf { variant != null }.orEmpty()}
-            }
-                
-            def projectExecutableProvider = tasks.named("runIde").flatMap { it.projectExecutable }
-                        
-            task $TASK_NAME {
-                doLast {
-                    println(projectExecutableProvider.get())
+        buildFile write //language=kotlin
+                """
+                runIde {
+                    jbrVersion = "$version"
+                    ${"jbrVariant = \"$variant\"".takeIf { variant != null }.orEmpty()}
                 }
-            }
-            """.trimIndent()
-        )
+                    
+                def projectExecutableProvider = tasks.named("runIde").flatMap { it.projectExecutable }
+                            
+                task $TASK_NAME {
+                    doLast {
+                        println(projectExecutableProvider.get())
+                    }
+                }
+                """.trimIndent()
 
         build(TASK_NAME) {
             assertContains(expected, output)

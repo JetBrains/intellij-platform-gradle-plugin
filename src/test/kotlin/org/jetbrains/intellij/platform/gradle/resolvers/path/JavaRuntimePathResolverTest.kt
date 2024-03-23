@@ -15,16 +15,15 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve current JVM by default`() {
-        buildFile.readText()
-            .replace(
-                """
-                kotlin {
-                    jvmToolchain(17)
-                }
-                """.trimIndent(),
-                "",
-            )
-            .apply { buildFile.kotlin(this, override = true) }
+        buildFile overwrite //language=kotlin
+                buildFile.readText().replace(
+                    """
+                    kotlin {
+                        jvmToolchain(17)
+                    }
+                    """.trimIndent(),
+                    "",
+                )
 
         prepareTest()
 
@@ -118,64 +117,60 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
     }
 
     private fun setupJetBrainsRuntimeConfiguration(version: String) {
-        buildFile.kotlin(
-            """
-            dependencies {
-                intellijPlatform {
-                    jetbrainsRuntime("$version")
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        jetbrainsRuntime("$version")
+                    }
                 }
-            }
-            repositories {
-                intellijPlatform {
-                    jetbrainsRuntime()
+                repositories {
+                    intellijPlatform {
+                        jetbrainsRuntime()
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 
     private fun prepareTest() {
-        buildFile.kotlin(
-            """
-            import org.gradle.api.internal.project.ProjectInternal
-            import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-            import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
-            import kotlin.io.path.invariantSeparatorsPathString
-            """.trimIndent(),
-            prepend = true,
-        )
+        buildFile prepend  //language=kotlin
+                """
+                import org.gradle.api.internal.project.ProjectInternal
+                import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+                import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
+                import kotlin.io.path.invariantSeparatorsPathString
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            tasks {
-                val jetbrainsRuntimeConfiguration = configurations.getByName(Configurations.JETBRAINS_RUNTIME)
-                val intellijPlatformConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM)
-                val javaRuntimePathResolver = JavaRuntimePathResolver(
-                    jetbrainsRuntime = jetbrainsRuntimeConfiguration,
-                    intellijPlatform = intellijPlatformConfiguration,
-                    javaToolchainSpec = project.extensions.findByType(JavaPluginExtension::class.java)!!.toolchain,
-                    javaToolchainService = (project as ProjectInternal).services.get(JavaToolchainService::class.java),
-                )
-            
-                val jetbrainsRuntimePathProvider = provider {
-                    jetbrainsRuntimeConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
-                }
-                val intellijPlatformPathProvider = provider {
-                    intellijPlatformConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
-                }
-                val pathProvider = provider {
-                    javaRuntimePathResolver.resolve().invariantSeparatorsPathString
-                }
-            
-                register("$randomTaskName") {
-                    doLast {
-                        println("jetbrainsRuntimePath: " + jetbrainsRuntimePathProvider.get())
-                        println("intellijPlatformPath: " + intellijPlatformPathProvider.get())
-                        println("resolvedPath: " + pathProvider.get())
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    val jetbrainsRuntimeConfiguration = configurations.getByName(Configurations.JETBRAINS_RUNTIME)
+                    val intellijPlatformConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM)
+                    val javaRuntimePathResolver = JavaRuntimePathResolver(
+                        jetbrainsRuntime = jetbrainsRuntimeConfiguration,
+                        intellijPlatform = intellijPlatformConfiguration,
+                        javaToolchainSpec = project.extensions.findByType(JavaPluginExtension::class.java)!!.toolchain,
+                        javaToolchainService = (project as ProjectInternal).services.get(JavaToolchainService::class.java),
+                    )
+                
+                    val jetbrainsRuntimePathProvider = provider {
+                        jetbrainsRuntimeConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
+                    }
+                    val intellijPlatformPathProvider = provider {
+                        intellijPlatformConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
+                    }
+                    val pathProvider = provider {
+                        javaRuntimePathResolver.resolve().invariantSeparatorsPathString
+                    }
+                
+                    register("$randomTaskName") {
+                        doLast {
+                            println("jetbrainsRuntimePath: " + jetbrainsRuntimePathProvider.get())
+                            println("intellijPlatformPath: " + intellijPlatformPathProvider.get())
+                            println("resolvedPath: " + pathProvider.get())
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 }

@@ -17,43 +17,47 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
     override fun setup() {
         super.setup()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                buildSearchableOptions = true
-            }
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    buildSearchableOptions = true
+                }
+                """.trimIndent()
     }
 
     @Test
     fun `build plugin distribution`() {
         writeJavaFile()
 
-        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-              <name>MyPluginName</name>
-              <vendor>JetBrains</vendor>
-              <depends config-file="other.xml" />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            dependencies {
-                implementation("joda-time:joda-time:2.8.1")
-                
-                intellijPlatform {
-                    bundledPlugin("com.intellij.copyright")
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <name>MyPluginName</name>
+                  <vendor>JetBrains</vendor>
+                  <depends config-file="other.xml" />
+                </idea-plugin>
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation("joda-time:joda-time:2.8.1")
+                    
+                    intellijPlatform {
+                        bundledPlugin("com.intellij.copyright")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 
@@ -107,14 +111,13 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         writeJavaFile()
         writeKotlinUIFile()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyPluginName</name>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 
@@ -154,34 +157,39 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
     fun `use custom sandbox for distribution`() {
         writeJavaFile()
 
-        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin >
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-                <depends config-file="other.xml" />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyPluginName</name>
+                    <vendor>JetBrains</vendor>
+                    <depends config-file="other.xml" />
+                </idea-plugin>
+                """.trimIndent()
 
         val sandboxPath = dir.resolve("customSandbox").invariantSeparatorsPathString
-        buildFile.kotlin(
-            """
-            dependencies {
-                implementation("joda-time:joda-time:2.8.1")
-                intellijPlatform {
-                    bundledPlugin("com.intellij.copyright")
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation("joda-time:joda-time:2.8.1")
+                    intellijPlatform {
+                        bundledPlugin("com.intellij.copyright")
+                    }
                 }
-            }
-            
-            intellijPlatform { 
-                sandboxContainer = file("$sandboxPath")
-            }
-            """.trimIndent()
-        )
+                
+                intellijPlatform { 
+                    sandboxContainer = file("$sandboxPath")
+                }
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 
@@ -205,14 +213,13 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `use gradle project name for distribution if plugin name is not defined`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyPluginName</name>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 
@@ -224,44 +231,41 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `can compile classes that depends on external plugins`() {
-        dir.resolve("src/main/java/App.java").java(
-            """
-            import java.lang.String;
-            import org.jetbrains.annotations.NotNull;
-            import org.intellij.plugins.markdown.lang.MarkdownLanguage;
-            
-            class App {
-                public static void main(@NotNull String[] strings) {
-                    System.out.println(MarkdownLanguage.INSTANCE.getDisplayName());
+        dir.resolve("src/main/java/App.java") write //language=java
+                """
+                import java.lang.String;
+                import org.jetbrains.annotations.NotNull;
+                import org.intellij.plugins.markdown.lang.MarkdownLanguage;
+                
+                class App {
+                    public static void main(@NotNull String[] strings) {
+                        System.out.println(MarkdownLanguage.INSTANCE.getDisplayName());
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyPluginName</name>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            repositories {
-                intellijPlatform {
-                    marketplace()
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        marketplace()
+                    }
                 }
-            }
-            
-            dependencies {
-                intellijPlatform {
-                    plugin("org.intellij.plugins.markdown", "$markdownPluginVersion")
+                
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.intellij.plugins.markdown", "$markdownPluginVersion")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 
@@ -278,44 +282,41 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `can compile classes that depend on external plugin with classes directory`() {
-        dir.resolve("src/main/java/App.java").java(
-            """
-            import java.lang.String;
-            import org.jetbrains.annotations.NotNull;
-            import org.asciidoc.intellij.AsciiDocPlugin;
-            
-            class App {
-                public static void main(@NotNull String[] strings) {
-                    System.out.println(AsciiDocPlugin.PLUGIN_ID);
+        dir.resolve("src/main/java/App.java") write //language=java
+                """
+                import java.lang.String;
+                import org.jetbrains.annotations.NotNull;
+                import org.asciidoc.intellij.AsciiDocPlugin;
+                
+                class App {
+                    public static void main(@NotNull String[] strings) {
+                        System.out.println(AsciiDocPlugin.PLUGIN_ID);
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyPluginName</name>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            repositories {
-                intellijPlatform {
-                    marketplace()
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        marketplace()
+                    }
                 }
-            }
-            
-            dependencies {
-                intellijPlatform {
-                    plugin("org.asciidoctor.intellij.asciidoc", "0.39.11")
+                
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.asciidoctor.intellij.asciidoc", "0.39.11")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 
@@ -332,14 +333,13 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `build plugin without sources`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyPluginName</name>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 
@@ -373,22 +373,20 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `include only relevant searchableOptions_jar`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyPluginName</name>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 
-        buildFile.kotlin(
-            """
-            version = "1.0.1"
-        """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                version = "1.0.1"
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 
@@ -422,14 +420,13 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `provide MANIFEST_MF with build details`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>MyPluginName</name>
-                <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyPluginName</name>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
 

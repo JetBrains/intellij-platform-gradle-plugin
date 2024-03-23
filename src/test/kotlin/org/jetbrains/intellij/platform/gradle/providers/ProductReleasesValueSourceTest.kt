@@ -2,10 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.providers
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.kotlin
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -93,33 +90,32 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
         types: List<IntelliJPlatformType>,
         channels: List<ProductRelease.Channel>,
     ) {
-        buildFile.kotlin(
-            """
-            tasks {
-                val productReleases = providers.of(org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource::class) {
-                    parameters {
-                        jetbrainsIdes = file("${resource("products-releases/idea-releases-list.xml")}")
-                        androidStudio = file("${resource("products-releases/android-studio-releases-list.xml")}")
-            
-                        sinceBuild = "$sinceBuild"
-                        untilBuild = "$untilBuild"
-            
-                        types.addAll(
-                            ${types.joinToString(", ") { "IntelliJPlatformType.fromCode(\"${it.code}\")" }}
-                        )
-                        channels.addAll(
-                            ${channels.joinToString(", ") { "ProductRelease.Channel.valueOf(\"${it.name}\")" }}
-                        )
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    val productReleases = providers.of(org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource::class) {
+                        parameters {
+                            jetbrainsIdes = file("${resource("products-releases/idea-releases-list.xml")}")
+                            androidStudio = file("${resource("products-releases/android-studio-releases-list.xml")}")
+                
+                            sinceBuild = "$sinceBuild"
+                            untilBuild = "$untilBuild"
+                
+                            types.addAll(
+                                ${types.joinToString(", ") { "IntelliJPlatformType.fromCode(\"${it.code}\")" }}
+                            )
+                            channels.addAll(
+                                ${channels.joinToString(", ") { "ProductRelease.Channel.valueOf(\"${it.name}\")" }}
+                            )
+                        }
+                    }
+                
+                    register("$randomTaskName") {
+                        doLast {
+                            println("Product releases: " + productReleases.get().joinToString(";"))
+                        }
                     }
                 }
-            
-                register("$randomTaskName") {
-                    doLast {
-                        println("Product releases: " + productReleases.get().joinToString(";"))
-                    }
-                }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 }

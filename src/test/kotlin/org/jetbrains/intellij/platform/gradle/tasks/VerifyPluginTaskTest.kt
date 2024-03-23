@@ -8,7 +8,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPl
 import java.util.*
 import kotlin.io.path.*
 import kotlin.test.*
-import kotlin.test.assertContains
 
 // todo must use test-local PV directory for storing downloaded IDEs instead of default one (machine)
 class VerifyPluginTaskTest : IntelliJPluginTestBase() {
@@ -84,15 +83,14 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde("AI", "2022.3.1.18")
 
-        buildFile.kotlin(
-            """
-            repositories {
-                intellijPlatform {
-                    binaryReleasesAndroidStudio()
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        binaryReleasesAndroidStudio()
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             assertContains("Plugin MyName:1.0.0 against AI-223.8836.35.2231.10406996: Compatible", output)
@@ -106,15 +104,14 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             val directory = buildDirectory.resolve("foo")
@@ -129,16 +126,15 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
-                    verificationReportsFormats = listOf(VerificationReportsFormats.MARKDOWN, VerificationReportsFormats.PLAIN)
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
+                        verificationReportsFormats = listOf(VerificationReportsFormats.MARKDOWN, VerificationReportsFormats.PLAIN)
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             val reportsDirectory = buildDirectory.resolve("foo")
@@ -159,16 +155,15 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    verificationReportsFormats.empty()
-                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        verificationReportsFormats.empty()
+                        verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             val reportsDirectory = buildDirectory.resolve("foo")
@@ -189,15 +184,14 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             val reportsDirectory = buildDirectory.resolve("foo")
@@ -221,15 +215,14 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         val lines = listOf("MyName:1.0.0:Reference to a missing property.*")
         val ignoredProblems = createTempFile("ignored-problems", ".txt").writeLines(lines)
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    ignoredProblemsFile = file("${ignoredProblems.invariantSeparatorsPathString}")
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        ignoredProblemsFile = file("${ignoredProblems.invariantSeparatorsPathString}")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             assertContains("Compatible. 1 usage of scheduled for removal API and 1 usage of deprecated API. 1 usage of internal API", output)
@@ -257,15 +250,14 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    failureLevel = listOf(FailureLevel.DEPRECATED_API_USAGES)
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        failureLevel = listOf(FailureLevel.DEPRECATED_API_USAGES)
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
@@ -292,17 +284,16 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginXmlFile()
         writePluginVerifierDependency()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    ides {
-                        ide("foo")
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        ides {
+                            ide("foo")
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Could not find idea:ideaIC:foo.", output)
@@ -315,17 +306,16 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginXmlFile()
         writePluginVerifierDependency()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    ides {
-                        recommended()
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        ides {
+                            recommended()
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             val message = "Reading IDE "
@@ -345,15 +335,14 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        buildFile.kotlin(
-            """            
-            intellijPlatform {
-                verifyPlugin {
-                    failureLevel = FailureLevel.ALL
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        failureLevel = FailureLevel.ALL
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
@@ -368,15 +357,14 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        buildFile.kotlin(
-            """
-            tasks {
-                verifyPlugin {
-                    failureLevel = VerifyPluginTask.FailureLevel.NONE
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    verifyPlugin {
+                        failureLevel = VerifyPluginTask.FailureLevel.NONE
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
@@ -408,16 +396,15 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
-                    freeArgs = listOf("-verification-reports-formats", "plain") 
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
+                        freeArgs = listOf("-verification-reports-formats", "plain") 
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             val reportsDirectory = buildDirectory.resolve("foo")
@@ -438,15 +425,14 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    freeArgs = listOf("-suppress-internal-api-usages", "jetbrains-plugins") 
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        freeArgs = listOf("-suppress-internal-api-usages", "jetbrains-plugins") 
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
             assertNotContains("Internal API usages (2):", output)
@@ -454,100 +440,94 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     private fun writePluginVerifierDependency(version: String? = null) {
-        buildFile.kotlin(
-            """
-            repositories {
-                intellijPlatform {
-                    binaryReleases()
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        binaryReleases()
+                    }
                 }
-            }
-            dependencies {
-                intellijPlatform {
-                    pluginVerifier(${version?.let { "\"$it\"" }.orEmpty()})
+                dependencies {
+                    intellijPlatform {
+                        pluginVerifier(${version?.let { "\"$it\"" }.orEmpty()})
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 
     private fun writePluginVerifierIde(type: String = intellijPlatformType, version: String = intellijPlatformVersion) {
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                verifyPlugin {
-                    ides {
-                        ide("$type", "$version")
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    verifyPlugin {
+                        ides {
+                            ide("$type", "$version")
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 
     private fun writeJavaFileWithDeprecation() {
-        dir.resolve("src/main/java/App.java").java(
-            """  
-            import java.lang.String;
-            import org.jetbrains.annotations.NotNull;
-            import com.intellij.openapi.util.text.StringUtil;
-            
-            class App {
-            
-                public static void main(@NotNull String[] strings) {
-                    StringUtil.escapeXml("<foo>");
+        dir.resolve("src/main/java/App.java") write //language=java
+                """
+                import java.lang.String;
+                import org.jetbrains.annotations.NotNull;
+                import com.intellij.openapi.util.text.StringUtil;
+                
+                class App {
+                
+                    public static void main(@NotNull String[] strings) {
+                        StringUtil.escapeXml("<foo>");
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 
     private fun writeJavaFileWithPluginProblems(classNameSuffix: String) {
         @Suppress("UnresolvedPropertyKey", "ResultOfMethodCallIgnored")
-        dir.resolve("src/main/java/App$classNameSuffix.java").java(
-            """  
-            class App$classNameSuffix {
-                public static String message(@org.jetbrains.annotations.PropertyKey(resourceBundle = "messages.ActionsBundle") String key, Object... params) {
-                    return null;
-                }
-            
-                public static void main(String[] args) {
-                    App$classNameSuffix.message("somemessage", "someparam1");
+        dir.resolve("src/main/java/App$classNameSuffix.java") write //language=java
+                """
+                class App$classNameSuffix {
+                    public static String message(@org.jetbrains.annotations.PropertyKey(resourceBundle = "messages.ActionsBundle") String key, Object... params) {
+                        return null;
+                    }
                 
-                    System.out.println(com.intellij.openapi.project.ProjectCoreUtil.theProject);
+                    public static void main(String[] args) {
+                        App$classNameSuffix.message("somemessage", "someparam1");
                     
-                    com.intellij.openapi.project.ProjectCoreUtil util = new com.intellij.openapi.project.ProjectCoreUtil();
-                    System.out.println(util.theProject);
-                    
-                    System.out.println(com.intellij.openapi.project.Project.DIRECTORY_STORE_FOLDER);
-                    com.intellij.openapi.components.ServiceManager.getService(String.class);
+                        System.out.println(com.intellij.openapi.project.ProjectCoreUtil.theProject);
+                        
+                        com.intellij.openapi.project.ProjectCoreUtil util = new com.intellij.openapi.project.ProjectCoreUtil();
+                        System.out.println(util.theProject);
+                        
+                        System.out.println(com.intellij.openapi.project.Project.DIRECTORY_STORE_FOLDER);
+                        com.intellij.openapi.components.ServiceManager.getService(String.class);
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 
     private fun writeJavaFileWithInternalApiUsage() {
-        dir.resolve("src/main/java/App.java").java(
-            """  
-            class App {
-                public static void main(String[] args) {
-                    new com.intellij.DynamicBundle.LanguageBundleEP();
+        dir.resolve("src/main/java/App.java") write //language=java
+                """
+                class App {
+                    public static void main(String[] args) {
+                        new com.intellij.DynamicBundle.LanguageBundleEP();
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 
     private fun writePluginXmlFile() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>MyName</name>
-                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-                <vendor>JetBrains</vendor>
-                <depends>com.intellij.modules.platform</depends>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyName</name>
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <vendor>JetBrains</vendor>
+                    <depends>com.intellij.modules.platform</depends>
+                </idea-plugin>
+                """.trimIndent()
     }
 }

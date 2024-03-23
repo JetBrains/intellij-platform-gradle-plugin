@@ -21,15 +21,6 @@ fun assertContains(expected: String, actual: String) = assertTrue(
 )
 
 /**
- * Checks if the given [path] exists in the filesystem.
- */
-fun assertExists(path: Path) =
-    assert(path.exists()) { "expect that '$path' exists" }
-
-fun assertFileContent(path: Path?, @Language("xml") expected: String) =
-    assertEquals(expected.trim(), path?.readText()?.replace("\r", "")?.trim())
-
-/**
  * Checks if the given [actual] value doesn't contain the [expected] part.
  */
 fun assertNotContains(expected: String, actual: String) = assertFalse(
@@ -38,3 +29,12 @@ fun assertNotContains(expected: String, actual: String) = assertFalse(
     expected:<$expected> but was:<$actual>
     """.trimIndent(),
 )
+
+/**
+ * Checks if the given [path] exists in the filesystem.
+ */
+fun assertExists(path: Path) =
+    assert(path.exists()) { "expect that '$path' exists" }
+
+fun assertFileContent(path: Path?, @Language("xml") expected: String) =
+    assertEquals(expected.trim(), path?.readText()?.replace("\r", "")?.trim())

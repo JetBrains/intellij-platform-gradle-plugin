@@ -20,102 +20,98 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         super.setup()
 
         if (gradleScan) {
-            settingsFile.kotlin(
-                """                    
+            settingsFile write //language=kotlin
+                    """                    
+                    plugins {
+                        id("com.gradle.enterprise") version "3.16.2"
+                    }
+                    gradleEnterprise {
+                        buildScan {
+                            server = "https://ge.jetbrains.com"
+                            termsOfServiceUrl = "https://ge.jetbrains.com/terms-of-service"
+                            termsOfServiceAgree = "yes"
+                        }
+                    }
+                    """.trimIndent()
+        }
+
+        settingsFile write //language=kotlin
+                """
+                rootProject.name = "projectName"
+                
                 plugins {
-                    id("com.gradle.enterprise") version "3.16.2"
+                    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
                 }
-                gradleEnterprise {
-                    buildScan {
-                        server = "https://ge.jetbrains.com"
-                        termsOfServiceUrl = "https://ge.jetbrains.com/terms-of-service"
-                        termsOfServiceAgree = "yes"
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                import java.util.*
+                import org.jetbrains.intellij.platform.gradle.*
+                import org.jetbrains.intellij.platform.gradle.models.*
+                import org.jetbrains.intellij.platform.gradle.tasks.*
+                import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
+                import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
+                
+                version = "1.0.0"
+                
+                plugins {
+                    id("java")
+                    id("org.jetbrains.intellij.platform")
+                    id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
+                }
+                
+                kotlin {
+                    jvmToolchain(17)
+                }
+                
+                repositories {
+                    mavenCentral()
+                    
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                    }
+                }
+                            
+                intellijPlatform {
+                    buildSearchableOptions = false
+                    instrumentCode = false
+                }
+                
+                tasks {
+                    wrapper {
+                        gradleVersion = "$gradleVersion"
                     }
                 }
                 """.trimIndent()
-            )
-        }
-        settingsFile.kotlin(
-            """
-            rootProject.name = "projectName"
-            
-            plugins {
-                id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
-            }
-            """.trimIndent()
-        )
 
-        buildFile.kotlin(
-            """
-            import java.util.*
-            import org.jetbrains.intellij.platform.gradle.*
-            import org.jetbrains.intellij.platform.gradle.models.*
-            import org.jetbrains.intellij.platform.gradle.tasks.*
-            import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
-            import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
-            
-            version = "1.0.0"
-            
-            plugins {
-                id("java")
-                id("org.jetbrains.intellij.platform")
-                id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
-            }
-            
-            kotlin {
-                jvmToolchain(17)
-            }
-            
-            repositories {
-                mavenCentral()
-                
-                intellijPlatform {
-                    defaultRepositories()
-                }
-            }
-            
-            dependencies {
-                intellijPlatform {
-                    create("$intellijPlatformType", "$intellijPlatformVersion")
-                }
-            }
-                        
-            intellijPlatform {
-                buildSearchableOptions = false
-                instrumentCode = false
-            }
-            
-            tasks {
-                wrapper {
-                    gradleVersion = "$gradleVersion"
-                }
-            }
-            """.trimIndent()
-        )
-
-        gradleProperties.properties(
-            """
-            kotlin.stdlib.default.dependency = false
-            org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = false
-            systemProp.org.gradle.unsafe.kotlin.assignment = true
-            """.trimIndent()
-        )
+        gradleProperties write //language=properties
+                """
+                kotlin.stdlib.default.dependency = false
+                org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = false
+                systemProp.org.gradle.unsafe.kotlin.assignment = true
+                """.trimIndent()
     }
 
-    fun writeTestFile() = dir.resolve("src/test/java/AppTest.java").java(
-        """
-        import java.lang.String;
-        import org.junit.Test;
-        import org.jetbrains.annotations.NotNull;
-        
-        public class AppTest {
-            @Test
-            public void testSomething() {}
-        
-            private void print(@NotNull String s) { System.out.println(s); }
-        }
-        """.trimIndent()
-    )
+    fun writeTestFile() = dir.resolve("src/test/java/AppTest.java") write //language=java
+            """
+            import java.lang.String;
+            import org.junit.Test;
+            import org.jetbrains.annotations.NotNull;
+            
+            public class AppTest {
+                @Test
+                public void testSomething() {}
+            
+                private void print(@NotNull String s) { System.out.println(s); }
+            }
+            """.trimIndent()
 
     fun tasks(groupName: String): List<String> = build(ProjectInternal.TASKS_TASK).output.lines().run {
         val start = indexOfFirst { it.equals("$groupName tasks", ignoreCase = true) } + 2
@@ -137,45 +133,42 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         return file
     }
 
-    protected fun writeJavaFile() = dir.resolve("src/main/java/App.java").also(::ensureFileExists).java(
-        """
-        import java.lang.String;
-        import java.util.Arrays;
-        import org.jetbrains.annotations.NotNull;
-        
-        class App {
-            public static void main(@NotNull String[] strings) {
-                System.out.println(Arrays.toString(strings));
+    protected fun writeJavaFile() = dir.resolve("src/main/java/App.java").ensureExists() write //language=java
+            """
+            import java.lang.String;
+            import java.util.Arrays;
+            import org.jetbrains.annotations.NotNull;
+            
+            class App {
+                public static void main(@NotNull String[] strings) {
+                    System.out.println(Arrays.toString(strings));
+                }
             }
-        }
-        """.trimIndent()
-    )
+            """.trimIndent()
 
-    protected fun writeKotlinFile() = dir.resolve("src/main/kotlin/App.kt").also(::ensureFileExists).kotlin(
-        """
-        object App {
-            @JvmStatic
-            fun main(args: Array<String>) {
-                println(args.joinToString())
+    protected fun writeKotlinFile() = dir.resolve("src/main/kotlin/App.kt").ensureExists() write //language=kotlin
+            """
+            object App {
+                @JvmStatic
+                fun main(args: Array<String>) {
+                    println(args.joinToString())
+                }
             }
-        }
-        """.trimIndent()
-    )
+            """.trimIndent()
 
-    protected fun writeKotlinUIFile() = dir.resolve("src/main/kotlin/pack/AppKt.kt").also(::ensureFileExists).kotlin(
-        """
-        package pack
-        
-        import javax.swing.JPanel
-        
-        class AppKt {
-            private lateinit var panel: JPanel
-            init {
-                panel.toString()
+    protected fun writeKotlinUIFile() = dir.resolve("src/main/kotlin/pack/AppKt.kt").ensureExists() write //language=kotlin
+            """
+            package pack
+            
+            import javax.swing.JPanel
+            
+            class AppKt {
+                private lateinit var panel: JPanel
+                init {
+                    panel.toString()
+                }
             }
-        }
-        """.trimIndent()
-    )
+            """.trimIndent()
 
     @Suppress("SameParameterValue")
     protected fun assertZipContent(zip: ZipFile, path: String, expectedContent: String) = assertEquals(expectedContent, fileText(zip, path))
@@ -209,5 +202,4 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
     }
 
     protected fun resourceContent(path: String) = resource(path)?.let { Path(it).readText() }
-
 }

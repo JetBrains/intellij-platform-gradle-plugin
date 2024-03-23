@@ -19,68 +19,72 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     fun `prepare sandbox for two plugins`() {
         writeJavaFile()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-              <id>org.intellij.test.plugin</id>
-              <name>Test</name>
-              <version>1.0</version>
-              <vendor url="https://jetbrains.com">JetBrains</vendor>
-              <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-              <change-notes/>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <id>org.intellij.test.plugin</id>
+                    <name>Test</name>
+                    <version>1.0</version>
+                    <vendor url="https://jetbrains.com">JetBrains</vendor>
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <change-notes/>
+                </idea-plugin>
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            dependencies {
-                implementation(project("nestedProject"))
-            }
-            
-            intellijPlatform {
-                pluginConfiguration {
-                    name = "myPluginName"
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation(project("nestedProject"))
                 }
-            }
-            """.trimIndent()
-        )
-
-        settingsFile.kotlin("include(\"nestedProject\")")
-
-        dir.resolve("nestedProject/build.gradle.kts").kotlin(
-            """
-            plugins {
-                id("org.jetbrains.intellij.platform")
-            }
-            
-            version = "1.0.0"
-            
-            repositories { 
-                mavenCentral()
                 
                 intellijPlatform {
-                    releases()
+                    pluginConfiguration {
+                        name = "myPluginName"
+                    }
                 }
-            }
-            
-            dependencies {
-                intellijPlatform {
-                    create("$intellijPlatformType", "$intellijPlatformVersion")
-                }
-            }
-            
-            intellijPlatform {
-                instrumentCode = false
-                pluginConfiguration {
-                    name = "myNestedPluginName"
-                }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        dir.resolve("nestedProject/src/main/java/NestedAppFile.java").java("class NestedAppFile {}")
-        dir.resolve("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
+        settingsFile write //language=kotlin
+                """
+                include("nestedProject")
+                """.trimIndent()
+
+        dir.resolve("nestedProject/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform")
+                }
+                
+                version = "1.0.0"
+                
+                repositories { 
+                    mavenCentral()
+                    
+                    intellijPlatform {
+                        releases()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                    }
+                }
+                
+                intellijPlatform {
+                    instrumentCode = false
+                    pluginConfiguration {
+                        name = "myNestedPluginName"
+                    }
+                }
+                """.trimIndent()
+
+        dir.resolve("nestedProject/src/main/java/NestedAppFile.java") write //language=java
+                """
+                class NestedAppFile {}
+                """.trimIndent()
+
+        dir.resolve("nestedProject/src/main/resources/META-INF/plugin.xml") write pluginXml.readText()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -128,39 +132,45 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     fun `prepare sandbox for two plugins with evaluated project`() {
         writeJavaFile()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-              <id>org.intellij.test.plugin</id>
-              <name>Test</name>
-              <version>1.0</version>
-              <vendor url="https://jetbrains.com">JetBrains</vendor>
-              <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-              <change-notes/>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <id>org.intellij.test.plugin</id>
+                  <name>Test</name>
+                  <version>1.0</version>
+                  <vendor url="https://jetbrains.com">JetBrains</vendor>
+                  <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                  <change-notes/>
+                </idea-plugin>
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            dependencies {
-                implementation(project(":nestedProject"))
-            }
-            
-            project(":nestedProject") {
-                intellijPlatform {
-                    instrumentCode = false
-                    pluginConfiguration {
-                        name = "myNestedPluginName"            
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation(project(":nestedProject"))
+                }
+                
+                project(":nestedProject") {
+                    intellijPlatform {
+                        instrumentCode = false
+                        pluginConfiguration {
+                            name = "myNestedPluginName"            
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        settingsFile.kotlin("include(\"nestedProject\")")
-        dir.resolve("nestedProject/src/main/java/NestedAppFile.java").java("class NestedAppFile {}")
-        dir.resolve("nestedProject/src/main/resources/META-INF/plugin.xml").xml(pluginXml.readText())
+        settingsFile write //language=kotlin
+                """
+                include("nestedProject")
+                """.trimIndent()
+
+        dir.resolve("nestedProject/src/main/java/NestedAppFile.java") write //language=java
+                """
+                class NestedAppFile {}
+                """.trimIndent()
+
+        dir.resolve("nestedProject/src/main/resources/META-INF/plugin.xml") write pluginXml.readText()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -202,21 +212,20 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     fun `prepare sandbox task without plugin_xml`() {
         writeJavaFile()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    name = "myPluginName"
-                }
-            }
-            dependencies {
-                implementation("joda-time:joda-time:2.8.1")
+        buildFile write //language=kotlin
+                """
                 intellijPlatform {
-                    bundledPlugin("com.intellij.copyright")
+                    pluginConfiguration {
+                        name = "myPluginName"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                dependencies {
+                    implementation("joda-time:joda-time:2.8.1")
+                    intellijPlatform {
+                        bundledPlugin("com.intellij.copyright")
+                    }
+                }
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -233,32 +242,37 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `prepare sandbox task`() {
         writeJavaFile()
-        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-              <depends config-file="other.xml" />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    name = "myPluginName"
-                }
-            }
-            dependencies {
-                implementation("joda-time:joda-time:2.8.1")
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <depends config-file="other.xml" />
+                </idea-plugin>
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
                 intellijPlatform {
-                    bundledPlugin("com.intellij.copyright")
+                    pluginConfiguration {
+                        name = "myPluginName"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                dependencies {
+                    implementation("joda-time:joda-time:2.8.1")
+                    intellijPlatform {
+                        bundledPlugin("com.intellij.copyright")
+                    }
+                }
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -303,29 +317,34 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     @Ignore
     fun `prepare ui tests sandbox task`() {
         writeJavaFile()
-        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <depends config-file="other.xml" />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            dependencies {
-                implementation("joda-time:joda-time:2.8.1")
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <depends config-file="other.xml" />
+                </idea-plugin>
+                """.trimIndent()
 
-                intellijPlatform {
-                    bundledPlugin("com.intellij.copyright")
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation("joda-time:joda-time:2.8.1")
+    
+                    intellijPlatform {
+                        bundledPlugin("com.intellij.copyright")
+                    }
                 }
-            }
-//            downloadRobotServerPlugin.version = '0.11.1'
-            """.trimIndent()
-        )
+    //            downloadRobotServerPlugin.version = '0.11.1'
+                """.trimIndent()
 
         build(Tasks.PREPARE_UI_TEST_SANDBOX)
 
@@ -344,22 +363,24 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     fun `prepare sandbox with external jar-type plugin`() {
         writeJavaFile()
 
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            repositories {
-                intellijPlatform {
-                    marketplace()
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        marketplace()
+                    }
                 }
-            }
-            dependencies {
-                intellijPlatform {
-                    plugin("org.jetbrains.postfixCompletion", "0.8-beta")
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.jetbrains.postfixCompletion", "0.8-beta")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -377,22 +398,24 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     fun `prepare sandbox with external zip-type plugin`() {
         writeJavaFile()
 
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            repositories {
-                intellijPlatform {
-                    marketplace()
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        marketplace()
+                    }
                 }
-            }
-            dependencies {
-                intellijPlatform {
-                    plugin("org.intellij.plugins.markdown", "$markdownPluginVersion")
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.intellij.plugins.markdown", "$markdownPluginVersion")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -413,16 +436,18 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
         writeJavaFile()
 
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            intellij {
-                plugins = ['${plugin.invariantSeparatorsPathString}']
-                pluginName = 'myPluginName'
-            }
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                intellij {
+                    plugins = ['${plugin.invariantSeparatorsPathString}']
+                    pluginName = 'myPluginName'
+                }
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -444,50 +469,54 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             resolve("someResources.properties").createFile()
         }
         it.resolve("META-INF").createDirectory().apply {
-            resolve("plugin.xml").xml(
-                """
-                <idea-plugin>
-                  <id>$name</id>
-                  <name>Test</name>
-                  <version>1.0</version>
-                  <idea-version since-build="221.6008" until-build="221.*" />
-                  <vendor url="https://jetbrains.com">JetBrains</vendor>
-                  <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-                  <change-notes/>
-                </idea-plugin>
-                """.trimIndent()
-            )
+            resolve("plugin.xml") write //language=xml
+                    """
+                    <idea-plugin>
+                      <id>$name</id>
+                      <name>Test</name>
+                      <version>1.0</version>
+                      <idea-version since-build="221.6008" until-build="221.*" />
+                      <vendor url="https://jetbrains.com">JetBrains</vendor>
+                      <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                      <change-notes/>
+                    </idea-plugin>
+                    """.trimIndent()
         }
     }
 
     @Test
     fun `prepare custom sandbox task`() {
         writeJavaFile()
-        dir.resolve("src/main/resources/META-INF/other.xml").xml("<idea-plugin />")
-        dir.resolve("src/main/resources/META-INF/nonIncluded.xml").xml("<idea-plugin />")
+        dir.resolve("src/main/resources/META-INF/other.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <depends config-file="other.xml" />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        dir.resolve("src/main/resources/META-INF/nonIncluded.xml") write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <depends config-file="other.xml" />
+                </idea-plugin>
+                """.trimIndent()
 
         val customSandbox = dir.resolve("customSandbox")
-        buildFile.kotlin(
-            """
-            dependencies {
-                implementation("joda-time:joda-time:2.8.1")
-                intellijPlatform {
-                    bundledPlugin("com.intellij.copyright")
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation("joda-time:joda-time:2.8.1")
+                    intellijPlatform {
+                        bundledPlugin("com.intellij.copyright")
+                    }
                 }
-            }
-            intellijPlatform {
-                sandboxContainer = file("${customSandbox.invariantSeparatorsPathString}")
-            }
-            """.trimIndent()
-        )
+                intellijPlatform {
+                    sandboxContainer = file("${customSandbox.invariantSeparatorsPathString}")
+                }
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -503,7 +532,10 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `use gradle project name if plugin name is not defined`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -518,7 +550,10 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `disable ide update without updates_xml`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -536,18 +571,19 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `disable ide update without updates component`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml")
-        updatesFile.xml(
-            """
-            <application>
-                <component name="SomeOtherComponent">
-                    <option name="SomeOption" value="false" />
-                </component>
-            </application>
-            """.trimIndent()
-        )
+        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
+                """
+                <application>
+                    <component name="SomeOtherComponent">
+                        <option name="SomeOption" value="false" />
+                    </component>
+                </application>
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -568,18 +604,19 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `disable ide update without check_needed option`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml")
-        updatesFile.xml(
-            """
-            <application>
-                <component name="UpdatesConfigurable">
-                    <option name="SomeOption" value="false" />
-                </component>
-            </application>
-            """.trimIndent()
-        )
+        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
+                """
+                <application>
+                    <component name="UpdatesConfigurable">
+                        <option name="SomeOption" value="false" />
+                    </component>
+                </application>
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -598,17 +635,19 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `disable ide update without value attribute`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml").xml(
-            """
-            <application>
-                <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" />
-                </component>
-            </application>
-            """.trimIndent()
-        )
+        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
+                """
+                <application>
+                    <component name="UpdatesConfigurable">
+                        <option name="CHECK_NEEDED" />
+                    </component>
+                </application>
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -626,17 +665,19 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `disable ide update`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml").xml(
-            """
-            <application>
-                <component name="UpdatesConfigurable">
-                    <option name="CHECK_NEEDED" value="true" />
-                </component>
-            </application>
-            """.trimIndent()
-        )
+        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
+                """
+                <application>
+                    <component name="UpdatesConfigurable">
+                        <option name="CHECK_NEEDED" value="true" />
+                    </component>
+                </application>
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -654,9 +695,12 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `disable ide update with updates_xml empty`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml").xml("")
+        val updatesFile = sandbox.resolve("config/options/updates.xml") write ""
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -674,30 +718,32 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `disable ide update with complex updates_xml`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml").xml(
-            """
-            <application>
-                <component name="UpdatesConfigurable">
-                    <enabledExternalComponentSources>
-                        <item value="Android SDK" />
-                    </enabledExternalComponentSources>
-                    <option name="externalUpdateChannels">
-                        <map>
-                            <entry key="Android SDK" value="Stable Channel" />
-                        </map>
-                    </option>
-                    <knownExternalComponentSources>
-                        <item value="Android SDK" />
-                    </knownExternalComponentSources>
-                    <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
-                    <option name="LAST_TIME_CHECKED" value="1622537478550" />
-                    <option name="CHECK_NEEDED" value="false" />
-                </component>
-            </application>
-            """.trimIndent()
-        )
+        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
+                """
+                <application>
+                    <component name="UpdatesConfigurable">
+                        <enabledExternalComponentSources>
+                            <item value="Android SDK" />
+                        </enabledExternalComponentSources>
+                        <option name="externalUpdateChannels">
+                            <map>
+                                <entry key="Android SDK" value="Stable Channel" />
+                            </map>
+                        </option>
+                        <knownExternalComponentSources>
+                            <item value="Android SDK" />
+                        </knownExternalComponentSources>
+                        <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
+                        <option name="LAST_TIME_CHECKED" value="1622537478550" />
+                        <option name="CHECK_NEEDED" value="false" />
+                    </component>
+                </application>
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -728,15 +774,17 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `replace jar on version changing`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
-        buildFile.kotlin(
-            """
-            version = "1.0.1"
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                version = "1.0.1"
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -756,16 +804,15 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         emptyZipFile("three/core.jar")
         writeJavaFile()
 
-        buildFile.kotlin(
-            """
-            dependencies {
-                implementation("joda-time:joda-time:2.8.1")
-                implementation(fileTree("one"))
-                implementation(fileTree("two"))
-                implementation(fileTree("three"))
-            }
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation("joda-time:joda-time:2.8.1")
+                    implementation(fileTree("one"))
+                    implementation(fileTree("two"))
+                    implementation(fileTree("three"))
+                }
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -785,19 +832,21 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `prepareTestingSandbox runs before test`() {
         writeJavaFile()
-        dir.resolve("additional/some-file").also(::ensureFileExists)
+        dir.resolve("additional/some-file").ensureExists()
 
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            tasks {
-                ${Tasks.PREPARE_TEST_SANDBOX} {
-                    from("additional")
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    ${Tasks.PREPARE_TEST_SANDBOX} {
+                        from("additional")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.External.TEST)
 

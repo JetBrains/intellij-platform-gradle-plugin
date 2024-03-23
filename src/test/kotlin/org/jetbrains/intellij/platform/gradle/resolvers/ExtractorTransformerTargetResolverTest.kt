@@ -2,9 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.kotlin
+import org.jetbrains.intellij.platform.gradle.*
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -13,20 +11,19 @@ class ExtractorTransformerTargetResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve name for JetBrains Marketplace plugin dependency`() {
-        buildFile.kotlin(
-            """
-            dependencies {
-                intellijPlatform {
-                    plugin("org.intellij.scala:2024.1.9")
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.intellij.scala:2024.1.9")
+                    }
                 }
-            }
-            repositories {
-                intellijPlatform {
-                    marketplace()
+                repositories {
+                    intellijPlatform {
+                        marketplace()
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         prepareTest(artifactPathValue = "intellijPlatformPlugins.single().toPath()")
 
@@ -68,20 +65,20 @@ class ExtractorTransformerTargetResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve name for JetBrains Runtime dependency`() {
-        buildFile.kotlin(
-            """
-            dependencies {
-                intellijPlatform {
-                    jetbrainsRuntime("jbr_jcef-17.0.10-osx-aarch64-b1087.21")
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        jetbrainsRuntime("jbr_jcef-17.0.10-osx-aarch64-b1087.21")
+                    }
                 }
-            }
-            repositories {
-                intellijPlatform {
-                    jetbrainsRuntime()
+                repositories {
+                    intellijPlatform {
+                        jetbrainsRuntime()
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
+
         prepareTest(artifactPathValue = "jetbrainsRuntimeDependency.single().toPath()")
 
         build(randomTaskName) {
@@ -101,53 +98,50 @@ class ExtractorTransformerTargetResolverTest : IntelliJPluginTestBase() {
     }
 
     private fun prepareTest(artifactPathValue: String) {
-        buildFile.kotlin(
-            """
-            import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-            import org.jetbrains.intellij.platform.gradle.resolvers.ExtractorTransformerTargetResolver
-            import kotlin.io.path.Path
-            import kotlin.io.path.invariantSeparatorsPathString
-            """.trimIndent(),
-            prepend = true,
-        )
+        buildFile prepend //language=kotlin
+                """
+                import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+                import org.jetbrains.intellij.platform.gradle.resolvers.ExtractorTransformerTargetResolver
+                import kotlin.io.path.Path
+                import kotlin.io.path.invariantSeparatorsPathString
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            tasks {
-                val intellijPlatformDependency = configurations.getByName(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
-                val jetbrainsRuntimeDependency = configurations.getByName(Configurations.JETBRAINS_RUNTIME_DEPENDENCY)
-                val intellijPlatformPlugins = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PLUGINS)
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    val intellijPlatformDependency = configurations.getByName(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
+                    val jetbrainsRuntimeDependency = configurations.getByName(Configurations.JETBRAINS_RUNTIME_DEPENDENCY)
+                    val intellijPlatformPlugins = configurations.getByName(Configurations.INTELLIJ_PLATFORM_PLUGINS)
+                    
+                    val intellijPlatformDependencyPathProvider = provider {
+                        intellijPlatformDependency.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
+                    }
+                    val jetbrainsRuntimeDependencyPathProvider = provider {
+                        jetbrainsRuntimeDependency.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
+                    }
+                    val intellijPlatformPluginsPathProvider = provider {
+                        intellijPlatformPlugins.toList().joinToString(":") { it.toPath().invariantSeparatorsPathString }
+                    }
+                    val targetProvider = provider {
+                        runCatching {
+                            ExtractorTransformerTargetResolver(
+                                artifactPath = $artifactPathValue,
+                                intellijPlatformDependency,
+                                jetbrainsRuntimeDependency,
+                                intellijPlatformPlugins,
+                            ).resolve()
+                        }.getOrNull()
+                    }
                 
-                val intellijPlatformDependencyPathProvider = provider {
-                    intellijPlatformDependency.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
-                }
-                val jetbrainsRuntimeDependencyPathProvider = provider {
-                    jetbrainsRuntimeDependency.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
-                }
-                val intellijPlatformPluginsPathProvider = provider {
-                    intellijPlatformPlugins.toList().joinToString(":") { it.toPath().invariantSeparatorsPathString }
-                }
-                val targetProvider = provider {
-                    runCatching {
-                        ExtractorTransformerTargetResolver(
-                            artifactPath = $artifactPathValue,
-                            intellijPlatformDependency,
-                            jetbrainsRuntimeDependency,
-                            intellijPlatformPlugins,
-                        ).resolve()
-                    }.getOrNull()
-                }
-            
-                register("$randomTaskName") {
-                    doLast {
-                        println("intellijPlatformDependencyPath: " + intellijPlatformDependencyPathProvider.get())
-                        println("jetbrainsRuntimeDependencyPath: " + jetbrainsRuntimeDependencyPathProvider.get())
-                        println("intellijPlatformPluginsPath: " + intellijPlatformPluginsPathProvider.get())
-                        println("target: " + targetProvider.get())
+                    register("$randomTaskName") {
+                        doLast {
+                            println("intellijPlatformDependencyPath: " + intellijPlatformDependencyPathProvider.get())
+                            println("jetbrainsRuntimeDependencyPath: " + jetbrainsRuntimeDependencyPathProvider.get())
+                            println("intellijPlatformPluginsPath: " + intellijPlatformPluginsPathProvider.get())
+                            println("target: " + targetProvider.get())
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 }

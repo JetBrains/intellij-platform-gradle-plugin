@@ -8,7 +8,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_SUFFI
 
 abstract class SearchableOptionsTestBase : IntelliJPluginTestBase() {
 
-    @Language("XML")
+    //language=xml
     fun getPluginXmlWithSearchableConfigurable() = """
         <idea-plugin>
            <name>PluginName</name>

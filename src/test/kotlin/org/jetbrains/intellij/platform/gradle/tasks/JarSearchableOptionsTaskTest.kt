@@ -11,15 +11,16 @@ class JarSearchableOptionsTaskTest : SearchableOptionsTestBase() {
 
     @Test
     fun `jar searchable options produces archive`() {
-        pluginXml.xml(getPluginXmlWithSearchableConfigurable())
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                buildSearchableOptions = true
-            }
-            """.trimIndent()
-        )
-        getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
+        pluginXml write getPluginXmlWithSearchableConfigurable()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    buildSearchableOptions = true
+                }
+                """.trimIndent()
+
+        getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
 
         build(Tasks.JAR_SEARCHABLE_OPTIONS)
 
