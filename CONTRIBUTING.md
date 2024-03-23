@@ -15,10 +15,37 @@ Read the [IntelliJ Platform Gradle Plugin Integration Tests](INTEGRATION_TESTS.m
 
 ## Link With Your Project
 It is possible to link your plugin project with the IntelliJ Platform Gradle Plugin project, so it'll be loaded and built as a module.
-To integrate it with another consumer-like project, add the following line in the Gradle settings file and refresh your Gradle configuration:
+
+To integrate it with another consumer-like project, you can add it as a local build:
+
+1. Add the following line in the Gradle settings file, `settings.gradle.kts`, pointing to the local repository:
 
 ```kotlin
 includeBuild("/path/to/gradle-intellij-plugin")
+```
+
+2. To ensure you're not pulling in the changes from the remote repository, comment the lines from `gradle/libs.versions.toml`
+
+```toml
+[versions]
+...
+# intelliJPlatform = "2.0.0-SNAPSHOT"
+...
+[plugins]
+...
+# intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
+```
+
+3. In `build.gradle.kts`, replace the plugin dependency with the local one:
+
+```kotlin
+// alias(libs.plugins.gradleIntelliJPlugin) // Gradle IntelliJ Plugin
+id("org.jetbrains.intellij")
+```
+4. Clean and build the project:
+
+```shell
+./gradlew clean buildPlugin
 ```
 
 ## Pull Requests
