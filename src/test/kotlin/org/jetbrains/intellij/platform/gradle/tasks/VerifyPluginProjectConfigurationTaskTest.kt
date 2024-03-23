@@ -14,16 +14,15 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not show errors when configuration is valid`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>PluginName</name>
-                <description>Lorem ipsum.</description>
-                <vendor>JetBrains</vendor>
-                <idea-version since-build="212" until-build='212.*' />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="212" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertNotContains(HEADER, output)
@@ -32,119 +31,108 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `report too low since-build`() {
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    ideaVersion {
-                        sinceBuild = "211"
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            sinceBuild = "211"
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>PluginName</name>
-                <description>Lorem ipsum.</description>
-                <vendor>JetBrains</vendor>
-                <idea-version since-build="211" until-build='212.*' />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="211" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The since-build='211' is lower than the target IntelliJ Platform major version: '223'.",
-                output
+                "- The since-build='211' is lower than the target IntelliJ Platform major version: '223'.", output
             )
         }
     }
 
     @Test
     fun `report too low Java sourceCompatibility`() {
-        buildFile.kotlin(
-            """
-            java {
-                sourceCompatibility = JavaVersion.VERSION_1_8
-            }
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                java {
+                    sourceCompatibility = JavaVersion.VERSION_1_8
+                }
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Java configuration specifies sourceCompatibility='1.8' but IntelliJ Platform '2022.3.3' requires sourceCompatibility='17'.",
-                output
+                "- The Java configuration specifies sourceCompatibility='1.8' but IntelliJ Platform '2022.3.3' requires sourceCompatibility='17'.", output
             )
         }
     }
 
     @Test
     fun `report too high Java targetCompatibility`() {
-        buildFile.kotlin(
-            """
-            java {
-                targetCompatibility = JavaVersion.VERSION_19
-            }
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                java {
+                    targetCompatibility = JavaVersion.VERSION_19
+                }
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Java configuration specifies targetCompatibility='19' but IntelliJ Platform '2022.3.3' requires targetCompatibility='17'.",
-                output
+                "- The Java configuration specifies targetCompatibility='19' but IntelliJ Platform '2022.3.3' requires targetCompatibility='17'.", output
             )
         }
     }
 
     @Test
     fun `report too high Kotlin jvmTarget`() {
-        buildFile.kotlin(
-            """
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    jvmTarget = "19"
+        buildFile write //language=kotlin
+                """
+                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                    kotlinOptions {
+                        jvmTarget = "19"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Kotlin configuration specifies jvmTarget='19' but IntelliJ Platform '2022.3.3' requires jvmTarget='17'.",
-                output
+                "- The Kotlin configuration specifies jvmTarget='19' but IntelliJ Platform '2022.3.3' requires jvmTarget='17'.", output
             )
         }
     }
 
     @Test
     fun `do not report too high patch number in Kotlin apiVersion`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>PluginName</name>
-                <description>Lorem ipsum.</description>
-                <vendor>JetBrains</vendor>
-                <idea-version since-build="211" until-build='212.*' />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="211" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    apiVersion = "1.6"
+        buildFile write //language=kotlin
+                """
+                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                    kotlinOptions {
+                        apiVersion = "1.6"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertNotContains(HEADER, output)
@@ -153,58 +141,53 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `report too high Kotlin apiVersion`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>PluginName</name>
-                <description>Lorem ipsum.</description>
-                <vendor>JetBrains</vendor>
-                <idea-version since-build="211" until-build='212.*' />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="211" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    apiVersion = "1.9"
+        buildFile write //language=kotlin
+                """
+                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                    kotlinOptions {
+                        apiVersion = "1.9"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Kotlin configuration specifies apiVersion='1.9' but since-build='223.8836' property requires apiVersion='1.7'.",
-                output
+                "- The Kotlin configuration specifies apiVersion='1.9' but since-build='223.8836' property requires apiVersion='1.7'.", output
             )
         }
     }
 
     @Test
     fun `do not report too low patch number in Kotlin languageVersion`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>PluginName</name>
-                <description>Lorem ipsum.</description>
-                <vendor>JetBrains</vendor>
-                <idea-version since-build="212" until-build='212.*' />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="212" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    languageVersion = "1.7"
+        buildFile write //language=kotlin
+                """
+                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                    kotlinOptions {
+                        languageVersion = "1.7"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertNotContains(HEADER, output)
@@ -213,45 +196,40 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `report too low Kotlin languageVersion`() {
-        buildFile.kotlin(
-            """
-            tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                kotlinOptions {
-                    languageVersion = "1.3"
+        buildFile write //language=kotlin
+                """
+                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+                    kotlinOptions {
+                        languageVersion = "1.3"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Kotlin configuration specifies languageVersion='1.3' but IntelliJ Platform '2022.3.3' requires languageVersion='1.7'.",
-                output
+                "- The Kotlin configuration specifies languageVersion='1.3' but IntelliJ Platform '2022.3.3' requires languageVersion='1.7'.", output
             )
         }
     }
 
     @Test
     fun `report Kotlin stdlib bundling`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>PluginName</name>
-                <description>Lorem ipsum.</description>
-                <vendor>JetBrains</vendor>
-                <idea-version since-build="212" until-build='212.*' />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="212" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
 
         // kotlin.stdlib.default.dependency gets unset
-        gradleProperties.properties(
-            """
-            systemProp.org.gradle.unsafe.kotlin.assignment = true
-            """.trimIndent(),
-            override = true,
-        )
+        gradleProperties overwrite //language=properties
+                """
+                systemProp.org.gradle.unsafe.kotlin.assignment = true
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
@@ -261,13 +239,11 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
             )
         }
 
-        gradleProperties.properties(
-            """
-            kotlin.stdlib.default.dependency = true
-            systemProp.org.gradle.unsafe.kotlin.assignment = true
-            """.trimIndent(),
-            override = true,
-        )
+        gradleProperties overwrite //language=properties
+                """
+                kotlin.stdlib.default.dependency = true
+                systemProp.org.gradle.unsafe.kotlin.assignment = true
+                """.trimIndent()
 
         build(Tasks.External.CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
@@ -277,13 +253,11 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
             )
         }
 
-        gradleProperties.properties(
-            """
-            kotlin.stdlib.default.dependency = false
-            systemProp.org.gradle.unsafe.kotlin.assignment = true
-            """.trimIndent(),
-            override = true,
-        )
+        gradleProperties overwrite //language=properties
+                """
+                kotlin.stdlib.default.dependency = false
+                systemProp.org.gradle.unsafe.kotlin.assignment = true
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertNotContains(HEADER, output)
@@ -292,13 +266,12 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `report kotlinx-coroutines dependency`() {
-        buildFile.kotlin(
-            """
-            dependencies {
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.1")
-            }
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.1")
+                }
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
@@ -315,16 +288,15 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         val message =
             "- The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file"
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>PluginName</name>
-                <description>Lorem ipsum.</description>
-                <vendor>JetBrains</vendor>
-                <idea-version since-build="223.8836" until-build='223.*' />
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="223.8836" until-build='223.*' />
+                </idea-plugin>
+                """.trimIndent()
 
         // default IntelliJ Platform cache, missing .gitignore -> skip
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
@@ -349,7 +321,10 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         gitignore.writeText("")
         dir.resolve(CACHE_DIRECTORY).deleteRecursively()
         val cachePath = dir.resolve(".foo").invariantSeparatorsPathString
-        gradleProperties.properties("org.jetbrains.intellij.platform.intellijPlatformCache=$cachePath")
+        gradleProperties write //language=properties
+                """
+                org.jetbrains.intellij.platform.intellijPlatformCache=$cachePath
+                """.trimIndent()
 
         // custom IntelliJ Platform cache, present .gitignore, entry missing -> skip
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {

@@ -16,11 +16,10 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `report outdated plugin`() {
-        gradleProperties.properties(
-            """
-            org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = true
-            """.trimIndent()
-        )
+        gradleProperties write //language=properties
+                """
+                org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = true
+                """.trimIndent()
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
             val latestVersion = IntelliJPlatformGradlePluginLatestVersionResolver().resolve()
@@ -38,11 +37,10 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `skip version check is disabled with BuildFeature`() {
-        gradleProperties.properties(
-            """
-            org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck=false
-            """.trimIndent()
-        )
+        gradleProperties write //language=properties
+                """
+                org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck=false
+                """.trimIndent()
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
             assertNotContains("${Plugin.NAME} is outdated: 0.0.0.", output)
@@ -53,15 +51,14 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
     fun `skip version check is disabled with existing lock file`() {
         val file = dir.resolve("lockFile").createFile()
 
-        buildFile.kotlin(
-            """
-            tasks {
-                ${Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN} {
-                    selfUpdateLock = file("${file.name}")
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    ${Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN} {
+                        selfUpdateLock = file("${file.name}")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         assertExists(file)
 
@@ -74,15 +71,14 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
     fun `creates coroutines-javaagent file`() {
         val file = dir.resolve("coroutines-javaagent.jar")
 
-        buildFile.kotlin(
-            """
-            tasks {
-                ${Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN} {
-                    coroutinesJavaAgent = file("${file.name}")
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    ${Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN} {
+                        coroutinesJavaAgent = file("${file.name}")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         assertFalse(file.exists())
 

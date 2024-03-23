@@ -12,17 +12,16 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
 
     @Test
     fun `build searchable options produces XML`() {
-        pluginXml.xml(getPluginXmlWithSearchableConfigurable())
+        pluginXml write getPluginXmlWithSearchableConfigurable()
 
-        getTestSearchableConfigurableJava().java(getSearchableConfigurableCode())
+        getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                buildSearchableOptions = true
-            }
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    buildSearchableOptions = true
+                }
+                """.trimIndent()
 
         build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
             assertContains("Searchable options index builder completed", output)
@@ -37,12 +36,11 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     @Ignore // TODO add assertions
     fun `skip build searchable options if disabled via extension`() {
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                buildSearchableOptions = false
-            }
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    buildSearchableOptions = false
+                }
+                """.trimIndent()
     }
 }

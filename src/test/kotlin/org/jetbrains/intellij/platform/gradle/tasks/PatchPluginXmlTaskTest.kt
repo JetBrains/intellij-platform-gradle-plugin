@@ -10,15 +10,19 @@ import kotlin.test.assertEquals
 
 class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
-    private val patchedPluginXml = lazy { buildDirectory.resolve("tmp/${Tasks.PATCH_PLUGIN_XML}/plugin.xml") }
+    private val patchedPluginXml
+        get() = buildDirectory.resolve("tmp/${Tasks.PATCH_PLUGIN_XML}/plugin.xml")
 
     @Test
     fun `patch version and since until builds`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
@@ -33,21 +37,23 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `patch description`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    description = "<p>Plugin pluginDescription</p>"
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        description = "<p>Plugin pluginDescription</p>"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
@@ -63,11 +69,14 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `patch patching preserves UTF-8 characters`() {
-        pluginXml.xml("<idea-plugin someattr=\"\\u2202\" />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin someattr="\u2202"/>
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin someattr="\u2202">
                   <idea-version since-build="223.8836" until-build="223.*" />
@@ -82,21 +91,23 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `patch change notes`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    changeNotes = "change notes"
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        changeNotes = "change notes"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
@@ -112,21 +123,23 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `patch id`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    id = "my.plugin.id"
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        id = "my.plugin.id"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
@@ -142,18 +155,17 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not update id if pluginId is undefined`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-              <id>my.plugin.id</id>
-              <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <id>my.plugin.id</id>
+                  <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
@@ -170,18 +182,17 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `add version tags in the beginning of file`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-              <id>org.jetbrains.erlang</id>
-              <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <id>org.jetbrains.erlang</id>
+                  <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
@@ -198,19 +209,18 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `override version and since until builds`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-              <version>my_version</version>
-              <idea-version since-build='1' until-build='2'>my_version</idea-version>
-              <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <version>my_version</version>
+                  <idea-version since-build='1' until-build='2'>my_version</idea-version>
+                  <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <version>1.0.0</version>
@@ -228,23 +238,21 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not update version tag if project_version is undefined`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-              <version>0.10.0</version>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <version>0.10.0</version>
+                </idea-plugin>
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            version = Project.DEFAULT_VERSION
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                version = Project.DEFAULT_VERSION
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
@@ -259,13 +267,16 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `skip patch task if intellij version did not changed`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML)
         build(Tasks.PATCH_PLUGIN_XML) {
             assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.PATCH_PLUGIN_XML}")?.outcome)
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />
@@ -278,23 +289,25 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `unset the until-build attribute with null-provider passed to extension`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    ideaVersion {
-                        untilBuild = provider { null }
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            untilBuild = provider { null }
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" />
@@ -309,21 +322,23 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `unset the until-build attribute with null-provider passed to task`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            tasks {
-                patchPluginXml {
-                    untilBuild = provider { null }
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    patchPluginXml {
+                        untilBuild = provider { null }
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" />
@@ -338,23 +353,25 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `ignore unseting the until-build with null passed to extension`() {
-        pluginXml.xml("<idea-plugin />")
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    ideaVersion {
-                        untilBuild = null
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            untilBuild = null
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(Tasks.PATCH_PLUGIN_XML) {
             assertFileContent(
-                patchedPluginXml.value,
+                patchedPluginXml,
                 """
                 <idea-plugin>
                   <idea-version since-build="223.8836" until-build="223.*" />

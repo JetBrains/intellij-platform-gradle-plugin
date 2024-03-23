@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.providers
 import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.kotlin
+import org.jetbrains.intellij.platform.gradle.write
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -17,23 +17,22 @@ class JavaRuntimeArchitectureValueSourceTest : IntelliJPluginTestBase() {
         val executablePath = Jvm.current().javaExecutable.toPath().invariantSeparatorsPathString
         val currentArch = System.getProperty("os.arch")
 
-        buildFile.kotlin(
-            """
-            tasks {
-                val runtimeArchitecture = providers.of(org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeArchitectureValueSource::class) {
-                    parameters {
-                        executable = file("$executablePath")
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    val runtimeArchitecture = providers.of(org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeArchitectureValueSource::class) {
+                        parameters {
+                            executable = file("$executablePath")
+                        }
+                    }
+                    
+                    register("$randomTaskName") {
+                        doLast {
+                            println("Runtime Architecture: " + runtimeArchitecture.get())
+                        }
                     }
                 }
-                
-                register("$randomTaskName") {
-                    doLast {
-                        println("Runtime Architecture: " + runtimeArchitecture.get())
-                    }
-                }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         build(randomTaskName) {
             assertLogValue("Runtime Architecture: ") {

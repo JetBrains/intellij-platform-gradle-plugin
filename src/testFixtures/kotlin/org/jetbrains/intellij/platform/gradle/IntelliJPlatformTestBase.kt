@@ -5,13 +5,12 @@ package org.jetbrains.intellij.platform.gradle
 import org.gradle.api.GradleException
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
-import kotlin.io.path.readText
+import kotlin.io.path.deleteRecursively
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -47,7 +46,7 @@ abstract class IntelliJPlatformTestBase {
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
     open fun tearDown() {
-//        dir.deleteRecursively()
+        dir.deleteRecursively()
     }
 
     protected fun build(
@@ -164,13 +163,9 @@ abstract class IntelliJPlatformTestBase {
             }
     }
 
-
-
     protected val BuildResult.safeOutput: String
         get() = output.replace("\r", "")
 
     protected val BuildResult.safeLogs: String
         get() = safeOutput.lineSequence().filterNot { it.startsWith(Plugin.LOG_PREFIX) }.joinToString("\n")
-
-
 }

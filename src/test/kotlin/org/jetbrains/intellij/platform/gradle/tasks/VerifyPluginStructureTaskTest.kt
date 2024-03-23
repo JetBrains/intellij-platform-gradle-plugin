@@ -11,25 +11,23 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not fail on warning by default`() {
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    name = "intellijtest"
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        name = "intellijtest"
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-                <vendor>JetBrains</vendor>
-                <depends>com.intellij.modules.lang</depends>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <vendor>JetBrains</vendor>
+                    <depends>com.intellij.modules.lang</depends>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertContains("Invalid plugin descriptor 'plugin.xml'. The plugin name should not contain the word 'IntelliJ'.", output)
@@ -38,30 +36,28 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `fail on warning if option is disabled`() {
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    name = "intellijtest"
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        name = "intellijtest"
+                    }
                 }
-            }
-            
-            tasks {
-                verifyPluginStructure {
-                    ignoreWarnings = false
+                
+                tasks {
+                    verifyPluginStructure {
+                        ignoreWarnings = false
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin version="2">
-                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-                <vendor>Zolotov</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin version="2">
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <vendor>Zolotov</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertContains("The plugin name should not contain the word 'IntelliJ'.", output)
@@ -70,15 +66,14 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `fail on unacceptable warnings by default`() {
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>PluginName</name>
-                <description>Lorem ipsum.</description>
-                <vendor>JetBrains</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertContains(
@@ -90,25 +85,23 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not fail on unacceptable warnings if option is enabled`() {
-        buildFile.kotlin(
-            """
-            tasks {
-                verifyPluginStructure {
-                    ignoreUnacceptableWarnings = true
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    verifyPluginStructure {
+                        ignoreUnacceptableWarnings = true
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin version="2">
-                <name>PluginName</name>
-                <description>Привет, Мир!</description>
-                <vendor>Zolotov</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin version="2">
+                    <name>PluginName</name>
+                    <description>Привет, Мир!</description>
+                    <vendor>Zolotov</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertContains(
@@ -128,15 +121,14 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not fail on errors if option is enabled`() {
-        buildFile.kotlin(
-            """
-            tasks {
-                verifyPluginStructure {
-                    ignoreFailures = true
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    verifyPluginStructure {
+                        ignoreFailures = true
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         pluginXml.deleteIfExists()
         build(Tasks.VERIFY_PLUGIN_STRUCTURE) {
@@ -146,31 +138,29 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `fail on errors if ignore unacceptable warnings option is enabled`() {
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                pluginConfiguration {
-                    name = "Plugin display name here"
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        name = "Plugin display name here"
+                    }
                 }
-            }
-            
-            tasks {
-                verifyPluginStructure {
-                    ignoreUnacceptableWarnings = true
+                
+                tasks {
+                    verifyPluginStructure {
+                        ignoreUnacceptableWarnings = true
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin version="2">
-                <name>Plugin display name here</name>
-                <description>Привет, Мир!</description>
-                <vendor>Zolotov</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin version="2">
+                    <name>Plugin display name here</name>
+                    <description>Привет, Мир!</description>
+                    <vendor>Zolotov</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertContains("Please ensure that <name> is not equal to the default value 'Plugin display name here'.", output)
@@ -179,25 +169,23 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not fail on unacceptable warnings if ignoreFailures option is enabled`() {
-        buildFile.kotlin(
-            """
-            tasks {
-                verifyPluginStructure {
-                    ignoreFailures = true
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    verifyPluginStructure {
+                        ignoreFailures = true
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin version="2">
-                <name>PluginName</name>
-                <description>Привет, Мир!</description>
-                <vendor>Zolotov</vendor>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin version="2">
+                    <name>PluginName</name>
+                    <description>Привет, Мир!</description>
+                    <vendor>Zolotov</vendor>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertContains(
@@ -209,26 +197,24 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not fail if there are no errors and warnings`() {
-        buildFile.kotlin(
-            """
-            tasks {
-                verifyPluginStructure { 
-                    ignoreWarnings = false 
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    verifyPluginStructure { 
+                        ignoreWarnings = false 
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>Verification test</name>
-                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-                <vendor>JetBrains</vendor>
-                <depends>com.intellij.modules.lang</depends>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>Verification test</name>
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <vendor>JetBrains</vendor>
+                    <depends>com.intellij.modules.lang</depends>
+                </idea-plugin>
+                """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertNotContains("Plugin verification", output)

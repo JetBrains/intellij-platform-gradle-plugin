@@ -5,7 +5,8 @@ package org.jetbrains.intellij.platform.gradle.resolvers.path
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.kotlin
+import org.jetbrains.intellij.platform.gradle.prepend
+import org.jetbrains.intellij.platform.gradle.write
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
 import kotlin.test.Test
@@ -76,28 +77,26 @@ class ProductInfoPathResolverTest : IntelliJPluginTestBase() {
     }
 
     private fun prepareTest() {
-        buildFile.kotlin(
-            """
-            import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
-            import kotlin.io.path.invariantSeparatorsPathString
-            """.trimIndent(),
-            prepend = true,
-        )
-        buildFile.kotlin(
-            """
-            tasks {
-                val productInfoPathResolver = ProductInfoPathResolver(intellijPlatform.platformPath)
-                val pathProvider = provider {
-                    productInfoPathResolver.resolve().invariantSeparatorsPathString
-                }
-            
-                register("$randomTaskName") {
-                    doLast {
-                        println("pathProvider: " + pathProvider.get())
+        buildFile prepend  //language=kotlin
+                """
+                import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
+                import kotlin.io.path.invariantSeparatorsPathString
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    val productInfoPathResolver = ProductInfoPathResolver(intellijPlatform.platformPath)
+                    val pathProvider = provider {
+                        productInfoPathResolver.resolve().invariantSeparatorsPathString
+                    }
+                
+                    register("$randomTaskName") {
+                        doLast {
+                            println("pathProvider: " + pathProvider.get())
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 }

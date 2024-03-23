@@ -2,10 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import org.jetbrains.intellij.platform.gradle.assertContains
-import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.kotlin
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
 import kotlin.io.path.createFile
 import kotlin.io.path.invariantSeparatorsPathString
@@ -43,15 +40,14 @@ class MarketplaceZipSignerPathResolverTest : IntelliJPluginTestBase() {
     fun `resolve latest Marketplace Zip Signer`() {
         val latestVersion = MarketplaceZipSignerLatestVersionResolver().resolve()
 
-        buildFile.kotlin(
-            """
-            dependencies {
-                intellijPlatform {
-                    zipSigner()
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner()
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         prepareTest()
 
@@ -71,15 +67,14 @@ class MarketplaceZipSignerPathResolverTest : IntelliJPluginTestBase() {
     fun `resolve Marketplace Zip Signer with fixed version`() {
         val version = "0.1.24"
 
-        buildFile.kotlin(
-            """
-            dependencies {
-                intellijPlatform {
-                    zipSigner("$version")
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner("$version")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         prepareTest()
 
@@ -96,38 +91,36 @@ class MarketplaceZipSignerPathResolverTest : IntelliJPluginTestBase() {
     }
 
     private fun prepareTest(localPathValue: String = "layout.file(provider { null })") {
-        buildFile.kotlin(
-            """
-            import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-            import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSignerPathResolver
-            import kotlin.io.path.invariantSeparatorsPathString
-            """.trimIndent(),
-            prepend = true,
-        )
-        buildFile.kotlin(
-            """
-            tasks {
-                val marketplaceZipSignerConfiguration = configurations.getByName(Configurations.MARKETPLACE_ZIP_SIGNER)
-                val marketplaceZipSignerPathResolver = MarketplaceZipSignerPathResolver(
-                    marketplaceZipSignerConfiguration,
-                    localPath = $localPathValue,
-                )
-            
-                val marketplaceZipSignerPathProvider = provider {
-                    marketplaceZipSignerConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
-                }
-                val pathProvider = provider {
-                    marketplaceZipSignerPathResolver.resolve().invariantSeparatorsPathString
-                }
-            
-                register("$randomTaskName") {
-                    doLast {
-                        println("marketplaceZipSignerPathProvider: " + marketplaceZipSignerPathProvider.get())
-                        println("pathProvider: " + pathProvider.get())
+        buildFile prepend //language=kotlin
+                """
+                import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+                import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSignerPathResolver
+                import kotlin.io.path.invariantSeparatorsPathString
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    val marketplaceZipSignerConfiguration = configurations.getByName(Configurations.MARKETPLACE_ZIP_SIGNER)
+                    val marketplaceZipSignerPathResolver = MarketplaceZipSignerPathResolver(
+                        marketplaceZipSignerConfiguration,
+                        localPath = $localPathValue,
+                    )
+                
+                    val marketplaceZipSignerPathProvider = provider {
+                        marketplaceZipSignerConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
+                    }
+                    val pathProvider = provider {
+                        marketplaceZipSignerPathResolver.resolve().invariantSeparatorsPathString
+                    }
+                
+                    register("$randomTaskName") {
+                        doLast {
+                            println("marketplaceZipSignerPathProvider: " + marketplaceZipSignerPathProvider.get())
+                            println("pathProvider: " + pathProvider.get())
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 }

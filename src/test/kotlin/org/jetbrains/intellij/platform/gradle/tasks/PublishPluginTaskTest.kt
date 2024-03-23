@@ -15,28 +15,26 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
     override fun setup() {
         super.setup()
 
-        pluginXml.xml(
-            """
-            <idea-plugin>
-                <name>PluginName</name>
-                <version>0.0.1</version>
-                <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
-                <vendor>JetBrains</vendor>
-                <depends>com.intellij.modules.platform</depends>
-            </idea-plugin>
-            """.trimIndent()
-        )
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <version>0.0.1</version>
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <vendor>JetBrains</vendor>
+                    <depends>com.intellij.modules.platform</depends>
+                </idea-plugin>
+                """.trimIndent()
     }
 
     @Test
     fun `fail publishing if ZIP Signer dependency is missing`() {
-        buildFile.kotlin(
-            """
-            intellijPlatform {
-                publishing {}
-            }
-            """.trimIndent()
-        )
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    publishing {}
+                }
+                """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
             assertContains("Cannot resolve 'Marketplace ZIP Signer'", output)
@@ -45,19 +43,18 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `fail publishing if token is missing`() {
-        buildFile.kotlin(
-            """
-            dependencies {
-                intellijPlatform {
-                    zipSigner()
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner()
+                    }
                 }
-            }
-            
-            intellijPlatform {
-                publishing {}
-            }
-            """.trimIndent()
-        )
+                
+                intellijPlatform {
+                    publishing {}
+                }
+                """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
             assertContains("'token' property must be specified for plugin publishing", output)
@@ -66,21 +63,20 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `fail publishing when token is not valid`() {
-        buildFile.kotlin(
-            """
-            dependencies {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner()
+                    }
+                }
+                
                 intellijPlatform {
-                    zipSigner()
+                    publishing {
+                        token = "foo"
+                    }
                 }
-            }
-            
-            intellijPlatform {
-                publishing {
-                    token = "foo"
-                }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
             assertContains("Failed to upload plugin: Upload failed: Authentication Failed: Invalid token: Token is malformed", output)
@@ -89,25 +85,24 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `use signed artifact for publication`() {
-        buildFile.kotlin(
-            """
-            dependencies {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner()
+                    }
+                }
+                
                 intellijPlatform {
-                    zipSigner()
+                    signing {
+                        certificateChainFile = file("${resource("certificates/cert.crt")}")
+                        privateKeyFile = file("${resource("certificates/cert.key")}")
+                    }
+                    publishing {
+                        token = "foo"
+                    }
                 }
-            }
-            
-            intellijPlatform {
-                signing {
-                    certificateChainFile = file("${resource("certificates/cert.crt")}")
-                    privateKeyFile = file("${resource("certificates/cert.key")}")
-                }
-                publishing {
-                    token = "foo"
-                }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
             assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.BUILD_PLUGIN}")?.outcome)
@@ -117,21 +112,20 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `use unsigned artifact for publication if no signing is configured`() {
-        buildFile.kotlin(
-            """
-            dependencies {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner()
+                    }
+                }
+                
                 intellijPlatform {
-                    zipSigner()
+                    publishing {
+                        token = "foo"
+                    }
                 }
-            }
-            
-            intellijPlatform {
-                publishing {
-                    token = "foo"
-                }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
             assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.BUILD_PLUGIN}")?.outcome)

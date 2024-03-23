@@ -2,10 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import org.jetbrains.intellij.platform.gradle.assertContains
-import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.kotlin
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
 import kotlin.io.path.createFile
 import kotlin.io.path.invariantSeparatorsPathString
@@ -43,15 +40,14 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
     fun `resolve latest Plugin Verifier`() {
         val latestVersion = IntelliJPluginVerifierLatestVersionResolver().resolve()
 
-        buildFile.kotlin(
-            """
-            dependencies {
-                intellijPlatform {
-                    pluginVerifier()
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        pluginVerifier()
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         prepareTest()
 
@@ -71,15 +67,14 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
     fun `resolve Plugin Verifier with fixed version`() {
         val version = "1.364"
 
-        buildFile.kotlin(
-            """
-            dependencies {
-                intellijPlatform {
-                    pluginVerifier("$version")
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        pluginVerifier("$version")
+                    }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
 
         prepareTest()
 
@@ -96,38 +91,36 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
     }
 
     private fun prepareTest(localPathValue: String = "layout.file(provider { null })") {
-        buildFile.kotlin(
-            """
-            import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-            import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
-            import kotlin.io.path.invariantSeparatorsPathString
-            """.trimIndent(),
-            prepend = true,
-        )
-        buildFile.kotlin(
-            """
-            tasks {
-                val intellijPluginVerifierConfiguration = configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER)
-                val intelliJPluginVerifierPathResolver = IntelliJPluginVerifierPathResolver(
-                    intellijPluginVerifierConfiguration,
-                    localPath = $localPathValue,
-                )
-            
-                val intellijPluginVerifierPathProvider = provider {
-                    intellijPluginVerifierConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
-                }
-                val pathProvider = provider {
-                    intelliJPluginVerifierPathResolver.resolve().invariantSeparatorsPathString
-                }
-            
-                register("$randomTaskName") {
-                    doLast {
-                        println("intellijPluginVerifierPathProvider: " + intellijPluginVerifierPathProvider.get())
-                        println("pathProvider: " + pathProvider.get())
+        buildFile prepend  //language=kotlin
+                """
+                import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+                import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
+                import kotlin.io.path.invariantSeparatorsPathString
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    val intellijPluginVerifierConfiguration = configurations.getByName(Configurations.INTELLIJ_PLUGIN_VERIFIER)
+                    val intelliJPluginVerifierPathResolver = IntelliJPluginVerifierPathResolver(
+                        intellijPluginVerifierConfiguration,
+                        localPath = $localPathValue,
+                    )
+                
+                    val intellijPluginVerifierPathProvider = provider {
+                        intellijPluginVerifierConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
+                    }
+                    val pathProvider = provider {
+                        intelliJPluginVerifierPathResolver.resolve().invariantSeparatorsPathString
+                    }
+                
+                    register("$randomTaskName") {
+                        doLast {
+                            println("intellijPluginVerifierPathProvider: " + intellijPluginVerifierPathProvider.get())
+                            println("pathProvider: " + pathProvider.get())
+                        }
                     }
                 }
-            }
-            """.trimIndent()
-        )
+                """.trimIndent()
     }
 }
