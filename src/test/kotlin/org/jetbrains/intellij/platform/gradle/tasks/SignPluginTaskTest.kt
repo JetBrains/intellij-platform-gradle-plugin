@@ -176,7 +176,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.SIGN_PLUGIN) {
-            assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.SIGN_PLUGIN}")?.outcome)
+            assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SKIPPED)
         }
     }
 

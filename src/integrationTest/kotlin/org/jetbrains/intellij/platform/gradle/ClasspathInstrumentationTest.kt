@@ -9,9 +9,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "classpath",
 ) {
 
-    private val defaultProjectProperties = mapOf(
-        "intellijPlatform.version" to intellijPlatformVersion,
-        "intellijPlatform.type" to intellijPlatformType,
+    override val defaultProjectProperties = super.defaultProjectProperties + mapOf(
         "markdownPlugin.version" to markdownPluginVersion,
     )
 

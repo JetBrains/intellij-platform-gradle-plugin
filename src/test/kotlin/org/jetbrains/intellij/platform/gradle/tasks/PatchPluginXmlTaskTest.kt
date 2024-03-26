@@ -274,7 +274,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.PATCH_PLUGIN_XML)
         build(Tasks.PATCH_PLUGIN_XML) {
-            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.PATCH_PLUGIN_XML}")?.outcome)
+            assertTaskOutcome(Tasks.PATCH_PLUGIN_XML, TaskOutcome.UP_TO_DATE)
             assertFileContent(
                 patchedPluginXml,
                 """

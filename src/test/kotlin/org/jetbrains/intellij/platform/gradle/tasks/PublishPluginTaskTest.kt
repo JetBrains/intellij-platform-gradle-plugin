@@ -112,8 +112,8 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
-            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.BUILD_PLUGIN}")?.outcome)
-            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.SIGN_PLUGIN}")?.outcome)
+            assertTaskOutcome(Tasks.BUILD_PLUGIN, TaskOutcome.SUCCESS)
+            assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SUCCESS)
         }
     }
 
@@ -135,8 +135,8 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
-            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.BUILD_PLUGIN}")?.outcome)
-            assertEquals(TaskOutcome.SKIPPED, task(":${Tasks.SIGN_PLUGIN}")?.outcome)
+            assertTaskOutcome(Tasks.BUILD_PLUGIN, TaskOutcome.SUCCESS)
+            assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SKIPPED)
         }
     }
 }
