@@ -160,6 +160,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                     val sinceBuildKotlinApiVersion =
                         getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
 
+                    if (sinceBuild.version.contains('*')) {
+                        yield("The since-build='$sinceBuild' should not contain wildcard.")
+                    }
                     if (sinceBuild.major < platformBuild.major) {
                         yield("The since-build='$sinceBuild' is lower than the target IntelliJ Platform major version: '${platformBuild.major}'.")
                     }

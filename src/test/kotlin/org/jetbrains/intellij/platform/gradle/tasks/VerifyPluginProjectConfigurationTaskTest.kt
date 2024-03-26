@@ -332,4 +332,34 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         }
     }
 
+    @Test
+    fun `report invalid sinceBuild if contains wildcard`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            sinceBuild = "211.*"
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="211.*" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
+
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertContains(HEADER, output)
+            assertContains(
+                "- The since-build='211.*' should not contain wildcard.", output
+            )
+        }
+    }
 }
