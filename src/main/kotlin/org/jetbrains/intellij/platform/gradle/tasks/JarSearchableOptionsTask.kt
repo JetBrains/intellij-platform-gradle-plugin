@@ -86,7 +86,11 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
 
                 inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory.apply { asPath.createDirectories() } })
                 archiveBaseName.convention("lib/$SEARCHABLE_OPTIONS_DIRECTORY")
-                destinationDirectory.convention(project.layout.buildDirectory.dir("libsSearchableOptions")) // TODO: check if necessary, if so — use temp
+                destinationDirectory.convention(
+                    project.layout.dir(project.provider {
+                        temporaryDir
+                    })
+                )
                 noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING))
 
                 from(inputDirectory)
