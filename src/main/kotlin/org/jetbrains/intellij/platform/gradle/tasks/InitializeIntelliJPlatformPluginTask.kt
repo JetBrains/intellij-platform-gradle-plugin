@@ -26,10 +26,7 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
-import kotlin.io.path.createDirectories
-import kotlin.io.path.createFile
-import kotlin.io.path.exists
-import kotlin.io.path.outputStream
+import kotlin.io.path.*
 
 /**
  * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up-to-date.
@@ -89,7 +86,15 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
      * Checks if the plugin is up-to-date.
      */
     private fun checkPluginVersion() {
-        if (!selfUpdateCheck.get() || selfUpdateLock.asPath.exists() || offline.get()) {
+        if (!selfUpdateCheck.get() || offline.get()) {
+            return
+        }
+
+        val lastUpdate = runCatching {
+            LocalDate.parse(selfUpdateLock.asPath.readText())
+        }.getOrNull()
+
+        if (lastUpdate == LocalDate.now()) {
             return
         }
 
@@ -101,10 +106,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
             }
 
             with(selfUpdateLock.asPath) {
-                if (!exists()) {
-                    parent.createDirectories()
-                    createFile()
-                }
+                writeText(LocalDate.now().toString())
             }
         } catch (e: Exception) {
             log.error(e.message.orEmpty(), e)
@@ -133,30 +135,31 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     }
 
     companion object : Registrable {
-        override fun register(project: Project) =
-            project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
-                val extension = project.the<IntelliJPlatformExtension>()
+        override fun register(project: Project) = project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
+            val extension = project.the<IntelliJPlatformExtension>()
 
-                offline.convention(project.gradle.startParameter.isOffline)
-                selfUpdateCheck.convention(project.isBuildFeatureEnabled(BuildFeature.SELF_UPDATE_CHECK))
-                selfUpdateLock.convention(
-                    project.layout.file(project.provider {
-                        temporaryDir.resolve(LocalDate.now().toString())
-                    })
-                )
-                coroutinesJavaAgent.convention(
-                    project.layout.file(project.provider {
-                        extension.cachePath.also {
-                            it.createDirectories()
-                        }.resolve("coroutines-javaagent.jar").toFile()
-                    })
-                )
-                pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
+            offline.convention(project.gradle.startParameter.isOffline)
+            selfUpdateCheck.convention(project.isBuildFeatureEnabled(BuildFeature.SELF_UPDATE_CHECK))
+            selfUpdateLock.convention(
+                project.layout.file(project.provider {
+                    extension.cachePath.also {
+                        it.createDirectories()
+                    }.resolve("self-update.lock").toFile()
+                })
+            )
+            coroutinesJavaAgent.convention(
+                project.layout.file(project.provider {
+                    extension.cachePath.also {
+                        it.createDirectories()
+                    }.resolve("coroutines-javaagent.jar").toFile()
+                })
+            )
+            pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
 
-                onlyIf {
-                    !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
-                }
-                mustRunAfter("clean")
+            onlyIf {
+                !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
             }
+            mustRunAfter("clean")
+        }
     }
 }
