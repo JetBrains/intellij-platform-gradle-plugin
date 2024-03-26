@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
@@ -9,18 +10,25 @@ class JarManifestFileIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "jar-manifest-file",
 ) {
 
+    private val defaultProjectProperties = mapOf(
+        "intellijPlatform.version" to intellijPlatformVersion,
+        "intellijPlatform.type" to intellijPlatformType,
+    )
+
     @Test
     fun `test manifest file`() {
-        build(Tasks.External.ASSEMBLE) {
+        build(Tasks.External.ASSEMBLE, projectProperties = defaultProjectProperties) {
             val pluginJar = buildDirectory.resolve("libs/test-1.0.0.jar").also(::assertExists)
 
             pluginJar containsFileInArchive "META-INF/MANIFEST.MF"
             with(pluginJar readEntry "META-INF/MANIFEST.MF") {
-                this containsText "Version: 1.0.0"
-                this containsText "Build-Plugin: IntelliJ Platform Gradle Plugin"
+                this containsText "Created-By: Gradle $gradleVersion"
+                this containsText "Build-Plugin: ${Plugin.NAME}"
                 this containsText "Build-Plugin-Version:"
-                this containsText "Build-OS:"
-                this containsText "Build-SDK: IC-2022.1.4"
+                this containsText "Platform-Type: $intellijPlatformType"
+                this containsText "Platform-Version: $intellijPlatformVersion"
+                this containsText "Kotlin-Stdlib-Bundled: false"
+                this containsText "Kotlin-Version:"
             }
         }
     }
