@@ -2,30 +2,31 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import java.nio.file.Path
 import kotlin.test.Test
 
 class PluginXmlPatchingIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "plugin-xml-patching",
 ) {
 
-    /**
-     * Path to the patched `plugin.xml` file located within the build directory of the integration tests single project,
-     * e.g., `/Users/hsz/Projects/JetBrains/gradle-intellij-plugin/integration-tests/plugin-xml-patching/build/patchedPluginXmlFiles/plugin.xml`.
-     */
-    val patchedPluginXml: Path
-        get() = buildDirectory.resolve("patchedPluginXmlFiles/plugin.xml").also(::assertExists) // TODO: fix location
-
     @Test
     fun `patch plugin_xml`() {
-        build(Tasks.BUILD_PLUGIN) {
-            output containsText ":patchPluginXml"
+        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties) {
+            assertTaskOutcome(Tasks.PATCH_PLUGIN_XML, TaskOutcome.SUCCESS)
 
-            buildDirectory containsFile "patchedPluginXmlFiles/plugin.xml" // TODO: fix location
+            val patchedPluginXml = buildDirectory.resolve("tmp/patchPluginXml/plugin.xml")
+            assertExists(patchedPluginXml)
 
-            patchedPluginXml containsText "<version>1.0.0</version>"
-            patchedPluginXml containsText "<idea-version since-build=\"211\" until-build=\"213.*\" />"
+            patchedPluginXml containsText //language=xml
+                    """
+                    <version>1.0.0</version>
+                    """.trimIndent()
+
+            patchedPluginXml containsText //language=xml
+                    """
+                    <idea-version since-build="231" until-build="233.*" />
+                    """.trimIndent()
         }
     }
 }

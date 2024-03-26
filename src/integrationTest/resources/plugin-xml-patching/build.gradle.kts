@@ -1,3 +1,6 @@
+val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
+val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform")
@@ -5,21 +8,33 @@ plugins {
 
 version = "1.0.0"
 
+kotlin {
+    jvmToolchain(17)
+}
+
 repositories {
     mavenCentral()
+
+    intellijPlatform {
+        defaultRepositories()
+    }
 }
 
-kotlin {
-    jvmToolchain(11)
+dependencies {
+    intellijPlatform {
+        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
+        instrumentationTools()
+    }
 }
 
-intellij {
-    version.set("2022.1.4")
-}
+intellijPlatform {
+    buildSearchableOptions = false
+    instrumentCode = false
 
-tasks {
-    patchPluginXml {
-        sinceBuild.set("211")
-        untilBuild.set("213.*")
+    pluginConfiguration {
+        ideaVersion {
+            sinceBuild = "231"
+            untilBuild = "233.*"
+        }
     }
 }
