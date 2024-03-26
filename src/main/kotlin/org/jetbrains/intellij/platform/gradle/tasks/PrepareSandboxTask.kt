@@ -25,6 +25,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
+import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -201,8 +202,8 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, Tasks.PREPARE_UI_TEST_SANDBOX) {
 
 //            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-                val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
-                val intellijPlatformPluginsConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED]
+                val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH].asLenient
+                val intellijPlatformPluginsConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED].asLenient
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
                 val extension = project.the<IntelliJPlatformExtension>()

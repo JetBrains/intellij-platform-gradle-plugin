@@ -197,7 +197,15 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
             assertValidConfigurationCache = false,
             Tasks.SIGN_PLUGIN,
         ) {
-            assertContains("Could not find org.jetbrains:marketplace-zip-signer:0.0.1.", output)
+            assertContains(
+                """
+                Could not determine the dependencies of task ':signPlugin'.
+                > Failed to query the value of task ':signPlugin' property 'zipSignerExecutable'.
+                   > Cannot resolve the Marketplace ZIP Signer.
+                     Please make sure it is added to the project with `zipSigner()` dependency helper or `intellijPlatform.signing.cliPath` extension property.
+                """.trimIndent(),
+                output,
+            )
         }
     }
 

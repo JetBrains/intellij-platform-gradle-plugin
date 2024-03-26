@@ -38,6 +38,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.io.File
@@ -58,6 +59,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     private val rootProjectDirectory: Path,
 ) : ExtensionAware {
 
+    private val intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
+
     /**
      * Provides read-only access to the IntelliJ Platform project cache location.
      */
@@ -68,13 +71,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * Provides read-only access to the IntelliJ Platform dependency artifact path.
      */
     val platformPath: Path
-        get() = configurations[Configurations.INTELLIJ_PLATFORM].platformPath()
+        get() = intelliJPlatformConfiguration.platformPath()
 
     /**
      * Provides read-only access to the [ProductInfo] object associated with the IntelliJ Platform dependency configured for the current project.
      */
     val productInfo: ProductInfo
-        get() = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
+        get() = intelliJPlatformConfiguration.productInfo()
 
     /**
      * Builds an index of UI components (searchable options) for the plugin.

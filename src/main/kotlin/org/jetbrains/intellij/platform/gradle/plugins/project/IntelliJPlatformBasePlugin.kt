@@ -31,10 +31,7 @@ import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
-import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.create
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 
@@ -93,19 +90,30 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         intellijPlatformLocalConfiguration,
                     )
 
+                    incoming.artifactView {
+                        lenient(true)
+                    }
+
                     incoming.beforeResolve {
-                        if (dependencies.isEmpty()) {
-                            throw GradleException("No IntelliJ Platform dependency found")
+//                        if (dependencies.isEmpty()) {
+//                            throw GradleException("No IntelliJ Platform dependency found.")
+//                        }
+
+                        val identifiers = IntelliJPlatformType.values()
+                            .asSequence()
+                            .flatMap { listOfNotNull(it.dependency?.toString(), it.binary?.toString()) }
+                            .toSet()
+
+                        val matched = dependencies.filter {
+                            identifiers.contains("${it.group}:${it.name}")
                         }
 
-                        val identifiers = IntelliJPlatformType.values().mapNotNull { it.dependency?.toString() }
-                        val matched = dependencies.filter { identifiers.contains(it.toString()) }
                         if (matched.size > 1) {
                             throw GradleException(
                                 matched.joinToString(
-                                    prefix = "Conflicting dependencies detected: \n",
+                                    prefix = "More than one IntelliJ Platform dependency found:\n",
                                     separator = "\n",
-                                )
+                                ) { "${it.group}:${it.name}:${it.version}" }
                             )
                         }
                     }
@@ -304,7 +312,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
                     configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(Extensions.IDEA_VERSION) {
                         val buildVersion = extensionProvider.map {
-                            it.productInfo.buildNumber.toVersion()
+                            it.runCatching { productInfo.buildNumber.toVersion() }.getOrDefault(Version())
                         }
                         sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
                         untilBuild.convention(buildVersion.map { "${it.major}.*" })

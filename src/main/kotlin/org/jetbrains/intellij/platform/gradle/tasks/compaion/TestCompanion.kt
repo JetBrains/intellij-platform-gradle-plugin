@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathReso
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
+import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.absolutePathString
 
@@ -54,11 +55,11 @@ class TestCompanion {
         private val Test.intelliJPlatformConfiguration
             get() = when {
                 this is TestIdeTask -> intelliJPlatformConfiguration
-                else -> project.files(project.configurations[Configurations.INTELLIJ_PLATFORM])
+                else -> project.configurations[Configurations.INTELLIJ_PLATFORM].asLenient
             }
 
         private val Test.jetbrainsRuntimeConfiguration
-            get() = project.configurations[Configurations.JETBRAINS_RUNTIME]
+            get() = project.configurations[Configurations.JETBRAINS_RUNTIME].asLenient
 
         private val Test.pluginXml
             get() = when {
