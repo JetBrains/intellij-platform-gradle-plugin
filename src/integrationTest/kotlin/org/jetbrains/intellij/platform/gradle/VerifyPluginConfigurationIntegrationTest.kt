@@ -25,7 +25,6 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     @Test
     fun `should not report issues on valid configuration`() {
         build(
-            Tasks.External.CLEAN,
             Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties,
@@ -37,7 +36,6 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     @Test
     fun `should report incorrect source compatibility`() {
         build(
-            Tasks.External.CLEAN,
             Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("languageVersion" to "11"),
@@ -50,7 +48,6 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     @Test
     fun `should report incorrect target compatibility`() {
         build(
-            Tasks.External.CLEAN,
             Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
             systemProperties = defaultSystemProperties,
             projectProperties = defaultProjectProperties + mapOf("sinceBuild" to "203"),
