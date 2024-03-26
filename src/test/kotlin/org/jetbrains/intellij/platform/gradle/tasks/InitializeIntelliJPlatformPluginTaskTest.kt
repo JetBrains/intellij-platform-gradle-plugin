@@ -3,9 +3,11 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
+import java.time.LocalDate
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
 import kotlin.io.path.name
@@ -22,6 +24,10 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
+            val lockFile = dir.resolve(CACHE_DIRECTORY).resolve("self-update.lock")
+            assertExists(lockFile)
+            lockFile containsText LocalDate.now().toString()
+
             val latestVersion = IntelliJPlatformGradlePluginLatestVersionResolver().resolve()
 
             assertContains("${Plugin.NAME} is outdated: 0.0.0. Update `${Plugin.ID}` to: $latestVersion", output)
