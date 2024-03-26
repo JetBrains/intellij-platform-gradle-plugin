@@ -15,7 +15,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     private val defaultSystemProperties = mapOf(
         "user.home" to userHome,
     )
-    private val defaultProjectProperties = mapOf(
+    override val defaultProjectProperties = super.defaultProjectProperties + mapOf(
         "intellijVersion" to "2022.3",
         "sinceBuild" to "223",
         "languageVersion" to "17",

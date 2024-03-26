@@ -13,6 +13,11 @@ open class IntelliJPlatformIntegrationTestBase(
     private val resourceName: String? = null,
 ) : IntelliJPlatformTestBase() {
 
+    protected open val defaultProjectProperties: Map<String, Any> = mapOf(
+        "intellijPlatform.version" to intellijPlatformVersion,
+        "intellijPlatform.type" to intellijPlatformType,
+    )
+
     @BeforeTest
     override fun setup() {
         super.setup()
@@ -34,18 +39,6 @@ open class IntelliJPlatformIntegrationTestBase(
             followLinks = true,
             overwrite = true,
         )
-    }
-
-    infix fun String.containsText(string: String) {
-        assert(contains(string)) { "expect '$this' contains '$string'" }
-    }
-
-    infix fun String.notContainsText(string: String) {
-        assert(!contains(string)) { "expect '$this' does not contain '$string'" }
-    }
-
-    infix fun Path.containsText(string: String) {
-        readText().containsText(string)
     }
 
     infix fun String.matchesRegex(regex: String) {

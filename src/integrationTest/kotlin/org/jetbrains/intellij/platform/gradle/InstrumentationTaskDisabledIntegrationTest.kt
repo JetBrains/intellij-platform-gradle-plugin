@@ -15,10 +15,6 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 ) {
 
     private val defaultArgs = listOf("--configuration-cache")
-    private val defaultProjectProperties = mapOf(
-        "intellijPlatform.version" to intellijPlatformVersion,
-        "intellijPlatform.type" to intellijPlatformType,
-    )
 
     @Test
     fun `skip instrumentCode task if disabled`() {

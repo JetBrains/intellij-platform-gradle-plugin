@@ -45,7 +45,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
         build(Tasks.External.PROCESS_RESOURCES)
 
         build(Tasks.External.PROCESS_RESOURCES) {
-            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.External.PROCESS_RESOURCES}")?.outcome)
+            assertTaskOutcome(Tasks.External.PROCESS_RESOURCES, TaskOutcome.UP_TO_DATE)
         }
     }
 
@@ -70,7 +70,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.External.PROCESS_RESOURCES) {
-            assertNotEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.External.PROCESS_RESOURCES}")?.outcome)
+            assertTaskOutcome(Tasks.External.PROCESS_RESOURCES, TaskOutcome.SUCCESS)
 
             assertFileContent(
                 outputPluginXml,

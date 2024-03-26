@@ -14,10 +14,6 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
 ) {
 
     private val defaultArgs = listOf("--configuration-cache", "--info")
-    private val defaultProjectProperties = mapOf(
-        "intellijPlatform.version" to intellijPlatformVersion,
-        "intellijPlatform.type" to intellijPlatformType,
-    )
 
     @BeforeTest
     override fun setup() {

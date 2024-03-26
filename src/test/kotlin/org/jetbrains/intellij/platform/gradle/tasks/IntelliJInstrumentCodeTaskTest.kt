@@ -144,7 +144,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.External.ASSEMBLE)
         build(Tasks.External.ASSEMBLE) {
-            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.External.CLASSES}")?.outcome)
+            assertTaskOutcome(Tasks.External.CLASSES, TaskOutcome.UP_TO_DATE)
         }
     }
 }

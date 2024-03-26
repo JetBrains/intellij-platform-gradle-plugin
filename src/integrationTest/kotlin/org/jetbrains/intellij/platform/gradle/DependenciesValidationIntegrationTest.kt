@@ -200,7 +200,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         }
 
         build(Tasks.SIGN_PLUGIN) {
-            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.SIGN_PLUGIN}")?.outcome)
+            assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SUCCESS)
         }
     }
 

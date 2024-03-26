@@ -11,10 +11,8 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     private val defaultArgs = listOf("--info")
 
-    private val defaultProjectProperties = mapOf(
-        "intellijPlatform.version" to intellijPlatformVersion,
-        "intellijPlatform.type" to intellijPlatformType,
-        "buildSearchableOptions" to false,
+    override val defaultProjectProperties = super.defaultProjectProperties + mapOf(
+        "buildSearchableOptions" to true,
     )
 
     @Test
@@ -23,7 +21,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             Tasks.External.ASSEMBLE,
-            projectProperties = defaultProjectProperties + mapOf(flag to false),
+            projectProperties = defaultProjectProperties + mapOf(flag to false, "buildSearchableOptions" to false),
             args = defaultArgs,
         ) {
             output containsText "Build feature is disabled: $flag"
@@ -36,7 +34,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             Tasks.JAR_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(flag to false, "buildSearchableOptions" to true),
+            projectProperties = defaultProjectProperties + mapOf(flag to false),
             args = defaultArgs,
         ) {
             output containsText "Build feature is disabled: $flag"
@@ -50,7 +48,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             Tasks.JAR_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(flag to true, "buildSearchableOptions" to true),
+            projectProperties = defaultProjectProperties + mapOf(flag to true),
             args = defaultArgs,
         ) {
             output containsText "Build feature is enabled: $flag"
@@ -64,7 +62,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             Tasks.BUILD_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(flag to false, "buildSearchableOptions" to true),
+            projectProperties = defaultProjectProperties + mapOf(flag to false),
             args = defaultArgs,
         ) {
             output containsText "Build feature is disabled: $flag"
@@ -77,7 +75,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             Tasks.BUILD_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(flag to true, "buildSearchableOptions" to true),
+            projectProperties = defaultProjectProperties + mapOf(flag to true),
             args = defaultArgs,
         ) {
             output containsText "Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin."

@@ -10,11 +10,6 @@ class JarManifestFileIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "jar-manifest-file",
 ) {
 
-    private val defaultProjectProperties = mapOf(
-        "intellijPlatform.version" to intellijPlatformVersion,
-        "intellijPlatform.type" to intellijPlatformType,
-    )
-
     @Test
     fun `test manifest file`() {
         build(Tasks.External.ASSEMBLE, projectProperties = defaultProjectProperties) {

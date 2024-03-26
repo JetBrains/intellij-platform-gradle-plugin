@@ -24,7 +24,7 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_SIGNATURE) {
-            assertEquals(TaskOutcome.NO_SOURCE, task(":${Tasks.VERIFY_PLUGIN_SIGNATURE}")?.outcome)
+            assertTaskOutcome(Tasks.VERIFY_PLUGIN_SIGNATURE, TaskOutcome.NO_SOURCE)
         }
     }
 

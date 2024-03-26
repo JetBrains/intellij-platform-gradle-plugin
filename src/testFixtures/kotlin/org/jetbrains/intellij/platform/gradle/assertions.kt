@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.testkit.runner.BuildResult
+import org.gradle.testkit.runner.TaskOutcome
 import org.intellij.lang.annotations.Language
 import java.nio.file.Path
 import kotlin.io.path.exists
@@ -9,6 +11,17 @@ import kotlin.io.path.readText
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+
+infix fun String.containsText(string: String) =
+    assert(contains(string)) { "expected:<$this> but was:<$string>" }
+
+infix fun Path.containsText(string: String) =
+    readText().containsText(string)
+
+infix fun String.notContainsText(string: String) =
+    assert(!contains(string)) { "expected:<$this> but was: <$string>" }
+
+fun BuildResult.assertTaskOutcome(task: String, outcome: TaskOutcome) = assertEquals(outcome, task(":$task")?.outcome)
 
 /**
  * Checks if the given [actual] value contains the [expected] part.

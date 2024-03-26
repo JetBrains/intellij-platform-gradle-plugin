@@ -10,11 +10,6 @@ class ApplyRecommendedRepositoriesIntegrationTest : IntelliJPlatformIntegrationT
     resourceName = "apply-recommended-repositories",
 ) {
 
-    private val defaultProjectProperties = mapOf(
-        "intellijPlatform.version" to intellijPlatformVersion,
-        "intellijPlatform.type" to intellijPlatformType,
-    )
-
     @Test
     fun `attach bundled plugin sources`() {
         build(Tasks.External.CLEAN, projectProperties = defaultProjectProperties) {
