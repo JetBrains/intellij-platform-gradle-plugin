@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
@@ -76,7 +77,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          * @see IntelliJPlatformVersionAware
          */
         if (this is IntelliJPlatformVersionAware) {
-            intelliJPlatformConfiguration.from(configurations[Configurations.INTELLIJ_PLATFORM])
+            intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
         }
 
         /**
@@ -102,7 +103,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          * @see CustomIntelliJPlatformVersionAware
          */
         if (this is CustomIntelliJPlatformVersionAware) {
-            val baseIntellijPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM]
+            val baseIntellijPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
             val dependenciesExtension = this@registerTask.dependencies.the<IntelliJPlatformDependenciesExtension>()
 
             with(configurations) {
@@ -116,7 +117,7 @@ internal inline fun <reified T : Task> Project.registerTask(
                  * Otherwise, refer to the base IntelliJ Platform — useful, i.e., when we want to execute
                  * a regular [RunIdeTask] using defaults.
                  */
-                intelliJPlatformConfiguration.setFrom(provider {
+                intelliJPlatformConfiguration.setFrom(
                     when {
                         localPath.isSpecified() -> {
                             /**
@@ -146,7 +147,7 @@ internal inline fun <reified T : Task> Project.registerTask(
                                 }
 
                                 extendsFrom(intellijPlatformLocalInstanceConfiguration)
-                            }
+                            }.asLenient
                         }
 
                         type.isSpecified() || version.isSpecified() -> {
@@ -191,12 +192,12 @@ internal inline fun <reified T : Task> Project.registerTask(
                                 }
 
                                 extendsFrom(intellijPlatformDependencyConfiguration)
-                            }
+                            }.asLenient
                         }
 
                         else -> baseIntellijPlatformConfiguration
                     }
-                })
+                )
             }
         }
 
@@ -267,7 +268,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          */
         if (this is RuntimeAware) {
             val javaRuntimePathResolver = JavaRuntimePathResolver(
-                jetbrainsRuntime = configurations[Configurations.JETBRAINS_RUNTIME],
+                jetbrainsRuntime = configurations[Configurations.JETBRAINS_RUNTIME].asLenient,
                 intellijPlatform = intelliJPlatformConfiguration,
                 javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
                 javaToolchainService = project.serviceOf<JavaToolchainService>(),
@@ -291,7 +292,7 @@ internal inline fun <reified T : Task> Project.registerTask(
         if (this is PluginVerifierAware) {
             // TODO: test if no PV dependency is added to the project
             val intelliJPluginVerifierPathResolver = IntelliJPluginVerifierPathResolver(
-                intellijPluginVerifier = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER],
+                intellijPluginVerifier = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER].asLenient,
                 localPath = extension.verifyPlugin.cliPath,
             )
 
@@ -306,12 +307,24 @@ internal inline fun <reified T : Task> Project.registerTask(
         if (this is SigningAware) {
             // TODO: test if no ZIP Signer dependency is added to the project
             val marketplaceZipSignerPathResolver = MarketplaceZipSignerPathResolver(
-                marketplaceZipSigner = configurations[Configurations.MARKETPLACE_ZIP_SIGNER],
+                marketplaceZipSigner = configurations[Configurations.MARKETPLACE_ZIP_SIGNER].asLenient,
                 localPath = extension.signing.cliPath,
             )
 
             zipSignerExecutable.convention(layout.file(provider {
-                marketplaceZipSignerPathResolver.resolve().toFile()
+                marketplaceZipSignerPathResolver
+                    .runCatching {
+                        resolve().toFile()
+                    }
+                    .onFailure {
+                        throw GradleException(
+                            """
+                            Cannot resolve the Marketplace ZIP Signer.
+                            Please make sure it is added to the project with `zipSigner()` dependency helper or `intellijPlatform.signing.cliPath` extension property.
+                            """.trimIndent()
+                        )
+                    }
+                    .getOrThrow()
             }))
         }
 
@@ -320,7 +333,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          */
         if (this is JavaCompilerAware) {
             // TODO: test if no Java Compiler dependency is added to the project
-            javaCompilerConfiguration.from(configurations[Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER])
+            javaCompilerConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER].asLenient
         }
 
         /**

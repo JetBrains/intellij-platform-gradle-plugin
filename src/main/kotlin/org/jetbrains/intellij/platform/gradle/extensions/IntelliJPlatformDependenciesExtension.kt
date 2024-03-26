@@ -32,10 +32,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPl
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.platformPath
-import org.jetbrains.intellij.platform.gradle.utils.resolve
-import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
@@ -68,6 +65,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private val layout: ProjectLayout,
     private val rootProjectDirectory: Path,
 ) {
+
+    private val intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
+
+    private val productInfo
+        get() = intelliJPlatformConfiguration.productInfo()
+
+    private val platformPath
+        get() = intelliJPlatformConfiguration.platformPath()
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -802,18 +807,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = configurations[configurationName].dependencies.addLater(
         localPathProvider.map { localPath ->
             val artifactPath = resolveArtifactPath(localPath)
-            val productInfo = artifactPath.productInfo()
+            val localProductInfo = artifactPath.productInfo()
 
-            productInfo.validateSupportedVersion()
+            localProductInfo.validateSupportedVersion()
 
             val hash = artifactPath.hashCode().absoluteValue % 1000
-            val type = productInfo.productCode.toIntelliJPlatformType()
+            val type = localProductInfo.productCode.toIntelliJPlatformType()
             val coordinates = type.dependency ?: type.binary ?: throw GradleException("Specified type '$type' has no dependency available.")
 
             dependencies.create(
                 group = Configurations.Dependencies.LOCAL_IDE_GROUP,
                 name = coordinates.groupId,
-                version = "${productInfo.version}+$hash",
+                version = "${localProductInfo.version}+$hash",
             ).apply {
                 createIvyDependency(
                     localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
@@ -908,8 +913,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      */
     private fun createIntelliJPlatformBundledPluginDependency(bundledPluginId: String): Dependency {
         val id = bundledPluginId.trim()
-        val productInfo = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
-        val bundledPluginsList = configurations[Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST].single().toPath().bundledPlugins()
+        val bundledPluginsList = configurations[Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST].asLenient.single().toPath().bundledPlugins()
         val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Could not find bundled plugin with ID: '$id'") }
         val artifactPath = Path(bundledPlugin.path)
         val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
@@ -992,7 +996,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
         versionProvider.map { version ->
-            val productInfo = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
             val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers).get()
 
             dependencies.create(
@@ -1027,12 +1030,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = configurations[configurationName].dependencies.addLater(
         typeProvider.zip(versionProvider) { type, version ->
             val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers).get()
-            val platformPath = configurations[Configurations.INTELLIJ_PLATFORM].platformPath().toFile()
-            val productInfo = configurations[Configurations.INTELLIJ_PLATFORM].productInfo()
 
             val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
                 parameters {
-                    intellijPlatformPath = layout.dir(providers.provider { platformPath })
+                    intellijPlatformPath = layout.dir(providers.provider { platformPath.toFile() })
                 }
             }
 

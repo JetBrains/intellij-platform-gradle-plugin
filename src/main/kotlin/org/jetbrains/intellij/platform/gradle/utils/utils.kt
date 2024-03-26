@@ -34,6 +34,9 @@ internal fun ConfigurationContainer.create(name: String, description: String, co
         configuration()
     }
 
+internal val Configuration.asLenient
+    get() = incoming.artifactView { lenient(true) }.files
+
 internal val ALL_TASKS
     get() = Constants.Tasks::class.java.declaredFields
         .filter { it.name != "INSTANCE" }

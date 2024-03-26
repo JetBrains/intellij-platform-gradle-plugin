@@ -3,7 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import com.jetbrains.plugin.structure.base.utils.exists
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
@@ -33,7 +33,7 @@ import kotlin.io.path.readLines
 class IntelliJPlatformArgumentProvider(
     @InputFiles
     @PathSensitive(RELATIVE)
-    val intellijPlatformConfiguration: ConfigurableFileCollection,
+    val intellijPlatformConfiguration: FileCollection,
 
     @InputFile
     @PathSensitive(RELATIVE)

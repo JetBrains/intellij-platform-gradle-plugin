@@ -37,7 +37,14 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
-            assertContains("Cannot resolve 'Marketplace ZIP Signer'", output)
+            assertContains(
+                """
+                > Failed to query the value of task ':signPlugin' property 'zipSignerExecutable'.
+                   > Cannot resolve the Marketplace ZIP Signer.
+                     Please make sure it is added to the project with `zipSigner()` dependency helper or `intellijPlatform.signing.cliPath` extension property.
+                """.trimIndent(),
+                output,
+            )
         }
     }
 

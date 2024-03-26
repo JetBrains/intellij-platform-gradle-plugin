@@ -163,6 +163,7 @@ abstract class IntelliJPlatformTestBase {
             }
     }
 
+    // TODO: check if this is still necessary, i.e., on Windows
     protected val BuildResult.safeOutput: String
         get() = output.replace("\r", "")
 
