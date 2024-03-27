@@ -17,6 +17,7 @@ import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
@@ -307,25 +308,30 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
             val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
             val instrumentCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE)
+            val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
 
             project.registerTask<Jar>(Tasks.INSTRUMENTED_JAR, configureWithType = false) {
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-
-                archiveBaseName.convention(jarTaskProvider.flatMap { jarTask ->
-                    jarTask.archiveBaseName.map { "instrumented-$it" }
-                })
+                archiveClassifier.convention("instrumented")
 
                 from(instrumentCodeTaskProvider)
                 with(jarTaskProvider.get())
 
                 dependsOn(instrumentCodeTaskProvider)
-
                 onlyIf { instrumentCodeEnabled.get() }
-
-                project.artifacts.add(Configurations.INSTRUMENTED_JAR, archiveFile) {
-                    builtBy(this@registerTask)
-                }
             }
+
+            val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
+
+            runtimeElementsConfiguration.artifacts.removeIf {
+                it.file == jarTaskProvider.flatMap { task -> task.archiveFile }.asPath.toFile()
+            }
+            project.artifacts.add(runtimeElementsConfiguration.name, instrumentCodeEnabled.flatMap { enabled ->
+                when {
+                    enabled -> instrumentedJarTaskProvider
+                    else -> jarTaskProvider
+                }
+            })
         }
     }
 }

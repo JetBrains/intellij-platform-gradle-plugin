@@ -14,8 +14,6 @@ object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
     const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
-    const val SEARCHABLE_OPTIONS_DIRECTORY = "searchableOptions"
-    const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
     const val VERSION_CURRENT = "current"
     const val VERSION_LATEST = "latest"
 
@@ -77,7 +75,6 @@ object Constants {
         const val INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY = "intellijPluginVerifierIdesDependency"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE = "intellijPluginVerifierIdesLocalInstance"
         const val MARKETPLACE_ZIP_SIGNER = "marketplaceZipSigner"
-        const val INSTRUMENTED_JAR = "instrumentedJar"
         const val JETBRAINS_RUNTIME = "jetbrainsRuntime"
         const val JETBRAINS_RUNTIME_DEPENDENCY = "jetbrainsRuntimeDependency"
         const val JETBRAINS_RUNTIME_LOCAL_INSTANCE = "jetbrainsRuntimeLocalInstance"
@@ -102,6 +99,7 @@ object Constants {
             const val COMPILE_ONLY = JvmConstants.COMPILE_ONLY_CONFIGURATION_NAME
             const val IMPLEMENTATION = JvmConstants.IMPLEMENTATION_CONFIGURATION_NAME
             const val RUNTIME_CLASSPATH = JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
+            const val RUNTIME_ELEMENTS = JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME
             const val TEST_COMPILE_CLASSPATH = JvmConstants.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
             const val TEST_COMPILE_ONLY = JvmConstants.TEST_COMPILE_ONLY_CONFIGURATION_NAME
         }

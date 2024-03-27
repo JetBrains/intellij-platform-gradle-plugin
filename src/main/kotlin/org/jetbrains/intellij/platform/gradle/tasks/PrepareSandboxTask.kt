@@ -41,7 +41,6 @@ import kotlin.io.path.*
  * @see IntelliJPlatformExtension.sandboxContainer
  * @see Constants.Sandbox
  */
-@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
@@ -88,17 +87,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
     abstract val runtimeClasspath: ConfigurableFileCollection
 
     private val usedNames = mutableMapOf<String, Path>()
-
-    //    /**
-//     * Libraries that will be ignored when preparing the sandbox.
-//     * By default, excludes all libraries that are a part of the [SetupDependenciesTask.idea] dependency.
-//     *
-//     * Default value: [org.jetbrains.intellij.dependency.IdeaDependency.jarFiles] of [SetupDependenciesTask.idea]
-//     */
-//    @get:InputFiles
-//    @get:Optional
-//    @get:PathSensitive(PathSensitivity.RELATIVE)
-//    abstract val librariesToIgnore: ConfigurableFileCollection
 
     init {
         group = Plugin.GROUP_NAME
@@ -176,41 +164,16 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
         return name
     }
 
-//    fun configureCompositePlugin(pluginDependency: PluginProjectDependency) {
-//        from(pluginDependency.artifact) {
-//            into(pluginDependency.artifact.name)
-//        }
-//    }
-
-//    fun configureExternalPlugin(pluginDependency: PluginDependency) {
-//        if (pluginDependency.builtin) {
-//            return
-//        }
-//        pluginDependency.artifact.run {
-//            if (isDirectory) {
-//                from(this) {
-//                    into(name)
-//                }
-//            } else {
-//                from(this)
-//            }
-//        }
-//    }
-
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, Tasks.PREPARE_UI_TEST_SANDBOX) {
 
-//            val downloadPluginTaskProvider = project.tasks.named<DownloadRobotServerPluginTask>(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-                val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH].asLenient
+                val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
                 val intellijPlatformPluginsConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED].asLenient
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
                 val extension = project.the<IntelliJPlatformExtension>()
 
-//            val ideaDependencyJarFiles = ideaDependencyProvider.map {
-//                project.files(it.jarFiles)
-//            }
                 val pluginJarProvider = extension.instrumentCode.flatMap {
                     when (it) {
                         true -> instrumentedJarTaskProvider
@@ -218,30 +181,12 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
                     }
                 }.flatMap { it.archiveFile }
 
-//            project.tasks.register<PrepareSandboxTask>() {
-//                PREPARE_UI_TESTING_SANDBOX
-//                from(downloadPluginTaskProvider.flatMap { downloadPluginTask ->
-//                    downloadPluginTask.outputDir
-//                })
-//
-//                dependsOn(IntelliJPluginConstants.DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-//            }
-
                 pluginJar.convention(pluginJarProvider)
                 defaultDestinationDirectory.convention(sandboxPluginsDirectory)
-//                librariesToIgnore.convention(ideaDependencyJarFiles)
                 pluginsClasspath.from(intellijPlatformPluginsConfiguration)
                 runtimeClasspath.from(runtimeConfiguration)
 
                 intoChild(extension.projectName.map { "$it/lib" })
-//                    .from(runtimeClasspath.filter { file ->
-//                        val librariesToIgnore = librariesToIgnore.get().toSet() + Jvm.current().toolsJar
-//                        val pluginDirectories = pluginDependencies.files
-//
-//                        !(librariesToIgnore.contains(file) || pluginDirectories.any { p ->
-//                            file.toPath() == p || file.canonicalPath.startsWith("$p${File.separator}")
-//                        })
-//                    })
                     .from(runtimeClasspath)
                     .from(pluginJar)
                     .eachFile {
@@ -252,26 +197,9 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
                 dependsOn(intellijPlatformPluginsConfiguration)
                 dependsOn(runtimeConfiguration)
-                dependsOn(jarTaskProvider)
-                dependsOn(instrumentedJarTaskProvider)
 
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
-//                inputs.file(jarTaskProvider.map { it.archiveFile })
-//                inputs.file(instrumentedJarTaskProvider.map { it.archiveFile })
                 inputs.files(runtimeConfiguration)
-//                outputs.dir(defaultDestinationDir)
-
-//            project.afterEvaluate `{
-//                extension.plugins.get().filterIsInstance<Project>().forEach { dependency ->
-//                    if (dependency.state.executed) {
-//                        configureProjectPluginTasksDependency(dependency, this@withType)
-//                    } else {
-//                        dependency.afterEvaluate {
-//                            configureProjectPluginTasksDependency(dependency, this@withType)
-//                        }
-//                    }
-//                }
-//            }`
             }
     }
 }

@@ -292,7 +292,7 @@ internal inline fun <reified T : Task> Project.registerTask(
         if (this is PluginVerifierAware) {
             // TODO: test if no PV dependency is added to the project
             val intelliJPluginVerifierPathResolver = IntelliJPluginVerifierPathResolver(
-                intellijPluginVerifier = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER].asLenient,
+                intellijPluginVerifier = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER],
                 localPath = extension.verifyPlugin.cliPath,
             )
 
@@ -425,7 +425,7 @@ internal fun DirectoryProperty.configureSandbox(
 /**
  * An interface to unify how IntelliJ Platform Gradle Plugin tasks are registered.
  * Every task, when registered, can rely on resources resolved with the [project] instance.
- * If the current task depends on another task, make sure it is registered latter.
+ * If the current task depends on another task, make sure it is registered later.
  * The [register] method should most likely be combined with [Project.registerTask].
  */
 internal interface Registrable {

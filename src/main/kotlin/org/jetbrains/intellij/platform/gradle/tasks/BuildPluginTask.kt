@@ -46,14 +46,6 @@ abstract class BuildPluginTask : Zip() {
                     task.destinationDir.resolve(name)
                 })
                 into(archiveBaseName)
-
-                dependsOn(jarSearchableOptionsTaskProvider)
-                dependsOn(prepareSandboxTaskProvider)
-
-//            project.artifacts.add(Dependency.ARCHIVES_CONFIGURATION, this).let { publishArtifact ->
-//                extensions.getByType<DefaultArtifactPublicationSet>().addCandidate(publishArtifact)
-//                project.components.add(IntelliJPlatformPluginLibrary())
-//            }
             }
     }
 }

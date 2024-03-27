@@ -9,7 +9,6 @@ import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
@@ -59,7 +58,8 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
     @TaskAction
     override fun exec() {
         if (showPaidPluginWarning.get()) {
-            log.warn("""
+            log.warn(
+                """
                 Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin.
                 As paid plugins require providing a valid license and presenting a UI dialog, it is impossible to handle such a case, and the task will fail.
                 Please consider disabling the task. 
@@ -85,7 +85,9 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                 val buildSearchableOptionsEnabled = extension.buildSearchableOptions
 
                 outputDirectory.convention(
-                    project.layout.buildDirectory.dir(SEARCHABLE_OPTIONS_DIRECTORY)
+                    project.layout.dir(project.provider {
+                        temporaryDir
+                    })
                 )
                 showPaidPluginWarning.convention(
                     project.isBuildFeatureEnabled(BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING).map {

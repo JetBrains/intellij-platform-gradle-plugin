@@ -214,13 +214,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 }
 
                 create(
-                    name = Configurations.INSTRUMENTED_JAR,
-                    description = "IntelliJ Platform instrumented project submodule"
-                ) {
-                    isCanBeConsumed = true
-                }
-
-                create(
                     name = Configurations.MARKETPLACE_ZIP_SIGNER,
                     description = "Marketplace ZIP Signer",
                 )

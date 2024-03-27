@@ -8,12 +8,12 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_DIRECTORY
-import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_SUFFIX
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
@@ -21,8 +21,9 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
+
+private const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
 
 /**
  * Creates a JAR file with searchable options to be distributed with the plugin.
@@ -83,18 +84,14 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
                 val buildSearchableOptionsEnabled = extension.buildSearchableOptions.zip(buildSearchableOptionsTaskProvider) { enabled, task ->
                     enabled && task.enabled
                 }
+                val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
 
-                inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory.apply { asPath.createDirectories() } })
-                archiveBaseName.convention("lib/$SEARCHABLE_OPTIONS_DIRECTORY")
-                destinationDirectory.convention(
-                    project.layout.dir(project.provider {
-                        temporaryDir
-                    })
-                )
+                inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
+                archiveClassifier.convention("searchableOptions")
+                destinationDirectory.convention(project.layout.buildDirectory.dir("libs"))
                 noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING))
 
                 from(inputDirectory)
-
                 include {
                     it
                         .takeIf { it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) }
@@ -107,7 +104,6 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
                         ?.exists()
                         ?: it.isDirectory
                 }
-
                 eachFile {
                     path = "search/$name"
                 }
@@ -117,8 +113,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
                 }
 
                 outputs.dir(destinationDirectory)
-
-                dependsOn(buildSearchableOptionsTaskProvider)
+                project.artifacts.add(runtimeElementsConfiguration.name, archiveFile)
             }
     }
 }
