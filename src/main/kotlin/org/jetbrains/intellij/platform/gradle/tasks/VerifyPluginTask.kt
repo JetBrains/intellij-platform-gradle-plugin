@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.ByteArrayOutputStream
 import java.util.*
@@ -278,7 +279,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
-                val intellijPluginVerifierIdesConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES]
+                val intellijPluginVerifierIdesConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES].asLenient
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
                 val extension = project.the<IntelliJPlatformExtension>()
 
