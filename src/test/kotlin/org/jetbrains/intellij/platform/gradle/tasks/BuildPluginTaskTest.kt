@@ -71,7 +71,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         "projectName/lib/",
                         "projectName/lib/joda-time-2.8.1.jar",
                         "projectName/lib/projectName-1.0.0.jar",
-                        "projectName/lib/searchableOptions-1.0.0.jar",
+                        "projectName/lib/projectName-1.0.0-searchableOptions.jar",
                     ),
                     collectPaths(zip)
                 )
@@ -130,7 +130,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         "projectName/",
                         "projectName/lib/",
                         "projectName/lib/projectName-1.0.0.jar",
-                        "projectName/lib/searchableOptions-1.0.0.jar",
+                        "projectName/lib/projectName-1.0.0-searchableOptions.jar",
                     ),
                     collectPaths(zip),
                 )
@@ -203,7 +203,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         "projectName/lib/",
                         "projectName/lib/joda-time-2.8.1.jar",
                         "projectName/lib/projectName-1.0.0.jar",
-                        "projectName/lib/searchableOptions-1.0.0.jar",
+                        "projectName/lib/projectName-1.0.0-searchableOptions.jar",
                     ),
                     collectPaths(zip)
                 )
@@ -352,7 +352,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         "projectName/",
                         "projectName/lib/",
                         "projectName/lib/projectName-1.0.0.jar",
-                        "projectName/lib/searchableOptions-1.0.0.jar",
+                        "projectName/lib/projectName-1.0.0-searchableOptions.jar",
                     ),
                     collectPaths(zip)
                 )
@@ -399,7 +399,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         "projectName/",
                         "projectName/lib/",
                         "projectName/lib/projectName-1.0.0.jar",
-                        "projectName/lib/searchableOptions-1.0.0.jar",
+                        "projectName/lib/projectName-1.0.0-searchableOptions.jar",
                     ),
                     collectPaths(zip)
                 )

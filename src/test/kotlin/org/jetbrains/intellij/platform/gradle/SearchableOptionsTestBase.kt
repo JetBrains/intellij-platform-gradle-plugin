@@ -2,10 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import org.intellij.lang.annotations.Language
-import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_DIRECTORY
-import org.jetbrains.intellij.platform.gradle.Constants.SEARCHABLE_OPTIONS_SUFFIX
-
 abstract class SearchableOptionsTestBase : IntelliJPluginTestBase() {
 
     //language=xml
@@ -22,7 +18,7 @@ abstract class SearchableOptionsTestBase : IntelliJPluginTestBase() {
 
     fun getTestSearchableConfigurableJava() = dir.resolve("src/main/java/TestSearchableConfigurable.java")
 
-    @Language("Java")
+    //language=java
     fun getSearchableConfigurableCode() = """
         import com.intellij.openapi.options.ConfigurationException;
         import com.intellij.openapi.options.SearchableConfigurable;
@@ -62,8 +58,4 @@ abstract class SearchableOptionsTestBase : IntelliJPluginTestBase() {
             }
         }
         """.trimIndent()
-
-    fun getSearchableOptionsXml(jar: String) = getSearchableOptions().resolve("$jar.jar/search/$jar.jar$SEARCHABLE_OPTIONS_SUFFIX")
-
-    private fun getSearchableOptions() = buildDirectory.resolve(SEARCHABLE_OPTIONS_DIRECTORY)
 }

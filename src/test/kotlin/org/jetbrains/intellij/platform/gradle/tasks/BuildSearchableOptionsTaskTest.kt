@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.junit.Ignore
@@ -27,14 +28,16 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
             assertContains("Searchable options index builder completed", output)
         }
 
-        getSearchableOptionsXml("projectName-1.0.0").readText().let {
+        val xml = buildDirectory.resolve("tmp/${Tasks.BUILD_SEARCHABLE_OPTIONS}/projectName-1.0.0.jar/search/projectName-1.0.0.jar.searchableOptions.xml")
+        assertExists(xml)
+
+        xml.readText().let {
             assertContains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">", it)
             assertContains("hit=\"Label for Test Searchable Configurable\"", it)
         }
     }
 
     @Test
-    @Ignore // TODO add assertions
     fun `skip build searchable options if disabled via extension`() {
         buildFile write //language=kotlin
                 """
@@ -42,5 +45,10 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                     buildSearchableOptions = false
                 }
                 """.trimIndent()
+
+        build(Tasks.BUILD_PLUGIN) {
+            assertTaskOutcome(Tasks.BUILD_SEARCHABLE_OPTIONS, TaskOutcome.SKIPPED)
+            assertTaskOutcome(Tasks.JAR_SEARCHABLE_OPTIONS, TaskOutcome.SKIPPED)
+        }
     }
 }

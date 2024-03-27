@@ -442,11 +442,6 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     private fun writePluginVerifierDependency(version: String? = null) {
         buildFile write //language=kotlin
                 """
-                repositories {
-                    intellijPlatform {
-                        binaryReleases()
-                    }
-                }
                 dependencies {
                     intellijPlatform {
                         pluginVerifier(${version?.let { "\"$it\"" }.orEmpty()})
