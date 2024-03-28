@@ -27,7 +27,7 @@ dependencies {
         create(providers.gradleProperty("intellijPlatform.type"), providers.gradleProperty("intellijPlatform.version"))
     }
 
-    implementation(project(":searchable-options-submodule"))
+    implementation(project(":submodule"))
 }
 
 intellijPlatform {

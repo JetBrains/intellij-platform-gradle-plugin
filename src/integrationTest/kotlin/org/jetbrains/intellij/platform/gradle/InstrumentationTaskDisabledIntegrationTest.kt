@@ -76,8 +76,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
         ) {
             output notContainsText "> Task :instrumentCode SKIPPED"
 
-            buildDirectory containsFile "libs/test-1.0.0.jar"
-            buildDirectory containsFile "libs/instrumented-test-1.0.0.jar"
+            buildDirectory containsFile "libs/test-1.0.0-instrumented.jar"
 
             buildDirectory.resolve("instrumented/instrumentCode").let {
                 it.resolve("ExampleAction.class").let { file ->
@@ -94,17 +93,17 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
                 }
             }
 
-            buildDirectory.resolve("libs/test-1.0.0.jar").let { jar ->
+            buildDirectory.resolve("libs/test-1.0.0-instrumented.jar").let { jar ->
                 jar containsFileInArchive "META-INF/MANIFEST.MF"
 
                 jar containsFileInArchive "META-INF/plugin.xml"
                 jar readEntry "META-INF/plugin.xml" containsText "<action id=\"ExampleAction\" class=\"ExampleAction\" text=\"Example Action\">"
 
                 jar containsFileInArchive "ExampleAction.class"
-                assertEquals(576, (jar readEntry "ExampleAction.class").length)
+                assertEquals(979, (jar readEntry "ExampleAction.class").length)
 
                 jar containsFileInArchive "Main.class"
-                assertEquals(607, (jar readEntry "Main.class").length)
+                assertEquals(964, (jar readEntry "Main.class").length)
 
                 jar containsFileInArchive "MainKt.class"
                 assertEquals(955, (jar readEntry "MainKt.class").length)
