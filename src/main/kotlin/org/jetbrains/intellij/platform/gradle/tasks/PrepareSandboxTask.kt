@@ -167,7 +167,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, Tasks.PREPARE_UI_TEST_SANDBOX) {
-
                 val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
                 val intellijPlatformPluginsConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED].asLenient
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
@@ -190,6 +189,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
                     .from(runtimeClasspath)
                     .from(pluginJar)
                     .eachFile {
+                        println("name = ${file.toPath()}")
                         name = ensureName(file.toPath())
                     }
 
@@ -197,6 +197,10 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
 
                 dependsOn(intellijPlatformPluginsConfiguration)
                 dependsOn(runtimeConfiguration)
+
+                doLast {
+                    println("runtimeClasspath = \n${runtimeClasspath.joinToString("\n")}")
+                }
 
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
                 inputs.files(runtimeConfiguration)

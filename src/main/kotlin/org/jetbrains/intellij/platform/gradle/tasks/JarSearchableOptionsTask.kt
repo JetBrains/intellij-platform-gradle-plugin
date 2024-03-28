@@ -112,7 +112,6 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
                     buildSearchableOptionsEnabled.get()
                 }
 
-                outputs.dir(destinationDirectory)
                 project.artifacts.add(runtimeElementsConfiguration.name, archiveFile)
             }
     }
