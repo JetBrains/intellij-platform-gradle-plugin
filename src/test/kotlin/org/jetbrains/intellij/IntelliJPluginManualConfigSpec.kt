@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij
 
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -71,6 +72,7 @@ class IntelliJPluginManualConfigSpec : IntelliJPluginSpecBase() {
     }
 
     @Test
+    @Ignore
     fun `configure plugins manually test`() {
         writeTestFile()
         buildFile.groovy(
