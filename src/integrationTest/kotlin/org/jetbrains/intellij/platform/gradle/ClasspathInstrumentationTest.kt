@@ -56,7 +56,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `jacoco should work`() {
-        disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+        disableDebug()
 
         build(Tasks.External.TEST, projectProperties = defaultProjectProperties) {
             buildDirectory.resolve("jacoco/test.exec").let {

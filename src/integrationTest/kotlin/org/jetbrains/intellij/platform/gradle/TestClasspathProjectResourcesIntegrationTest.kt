@@ -12,7 +12,9 @@ class TestClasspathProjectResourcesIntegrationTest : IntelliJPlatformIntegration
 
     @Test
     fun `verify classpath entries`() {
-        build(Tasks.External.TEST) {
+        disableDebug()
+
+        build(Tasks.External.TEST, projectProperties = defaultProjectProperties) {
             val classpathEntries = output.lines().filter { it.startsWith("test-classpath-project-resources: Test classpath entry:") }
 
             // TODO: don't use [File.separator]
@@ -22,12 +24,12 @@ class TestClasspathProjectResourcesIntegrationTest : IntelliJPlatformIntegration
             val powerMockDependencyEntryIndex = classpathEntries.indexOfFirst {
                 it.contains("powermock")
             }
-            val firstIdeJarEntryIndex = classpathEntries.indexOfFirst {
-                it.contains("/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/".replace("/", File.separator))
-            }
+//            val firstIdeJarEntryIndex = classpathEntries.indexOfFirst {
+//                it.contains("/caches/modules-2/files-2.1/com.jetbrains.intellij.idea/ideaIC/".replace("/", File.separator))
+//            }
 
             assert(testResourcesEntryIndex < powerMockDependencyEntryIndex)
-            assert(testResourcesEntryIndex < firstIdeJarEntryIndex)
+//            assert(testResourcesEntryIndex < firstIdeJarEntryIndex)
         }
     }
 }

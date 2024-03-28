@@ -19,7 +19,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
     override fun setup() {
         super.setup()
 
-        disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+        disableDebug()
     }
 
     @Test

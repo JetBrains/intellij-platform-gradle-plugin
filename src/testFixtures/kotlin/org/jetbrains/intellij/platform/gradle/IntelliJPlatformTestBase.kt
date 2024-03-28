@@ -138,11 +138,14 @@ abstract class IntelliJPlatformTestBase {
                 ).toTypedArray(),
                 *gradleArguments.toTypedArray(),
                 *args.toTypedArray(),
-            )//, "-Dorg.gradle.debug=true")
+            )
 
-    @Suppress("SameParameterValue")
-    protected fun disableDebug(reason: String) {
-        println("Debugging is disabled for test with the following reason: $reason")
+    /**
+     * Disables debugging by setting the [debugEnabled] to `false`.
+     * Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation.
+     */
+    protected fun disableDebug() {
+        println("Debugging is disabled for test.")
         debugEnabled = false
     }
 

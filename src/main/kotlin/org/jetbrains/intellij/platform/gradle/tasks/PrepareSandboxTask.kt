@@ -188,19 +188,12 @@ abstract class PrepareSandboxTask : Sync(), SandboxAware {
                 intoChild(extension.projectName.map { "$it/lib" })
                     .from(runtimeClasspath)
                     .from(pluginJar)
-                    .eachFile {
-                        println("name = ${file.toPath()}")
-                        name = ensureName(file.toPath())
-                    }
+                    .eachFile { name = ensureName(file.toPath()) }
 
                 from(pluginsClasspath)
 
                 dependsOn(intellijPlatformPluginsConfiguration)
                 dependsOn(runtimeConfiguration)
-
-                doLast {
-                    println("runtimeClasspath = \n${runtimeClasspath.joinToString("\n")}")
-                }
 
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
                 inputs.files(runtimeConfiguration)
