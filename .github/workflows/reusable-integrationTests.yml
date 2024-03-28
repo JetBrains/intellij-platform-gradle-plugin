@@ -64,7 +64,7 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: integration-tests-${{ matrix.gradleVersion }}-${{ runner.os }}
+          name: integration-tests-${{ matrix.gradleVersion }}-${{ runner.name }}
           path: |
             ${{ github.workspace }}/build/reports/tests
             ${{ github.workspace }}/build/reports/configuration-cache
