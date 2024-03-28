@@ -225,12 +225,6 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 </idea-plugin>
                 """.trimIndent()
 
-        // kotlin.stdlib.default.dependency gets unset
-        gradleProperties overwrite //language=properties
-                """
-                systemProp.org.gradle.unsafe.kotlin.assignment = true
-                """.trimIndent()
-
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
@@ -242,7 +236,6 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         gradleProperties overwrite //language=properties
                 """
                 kotlin.stdlib.default.dependency = true
-                systemProp.org.gradle.unsafe.kotlin.assignment = true
                 """.trimIndent()
 
         build(Tasks.External.CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
@@ -256,7 +249,6 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         gradleProperties overwrite //language=properties
                 """
                 kotlin.stdlib.default.dependency = false
-                systemProp.org.gradle.unsafe.kotlin.assignment = true
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {

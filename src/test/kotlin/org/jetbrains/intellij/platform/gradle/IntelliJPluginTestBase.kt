@@ -95,7 +95,6 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 """
                 kotlin.stdlib.default.dependency = false
                 org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = false
-                systemProp.org.gradle.unsafe.kotlin.assignment = true
                 """.trimIndent()
     }
 
