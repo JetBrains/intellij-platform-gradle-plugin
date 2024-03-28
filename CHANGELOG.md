@@ -6,6 +6,7 @@
 
 - Fix for: `coroutinesJavaAgentPath` specifies file `.../build/tmp/initializeIntelliJPlugin/coroutines-javaagent.jar` which doesn't exist
 - Fixed resolving Android Studio releases URL for Windows [#1551](../../issues/1551)
+- Fixed repository type classification for Rider RC builds [#1579](https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1579)
 
 ## [1.17.2] - 2024-02-20
 

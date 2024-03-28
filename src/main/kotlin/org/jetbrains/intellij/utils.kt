@@ -1,4 +1,4 @@
-// Copyright 2000-2023 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 @file:JvmName("Utils")
 @file:Suppress("BooleanMethodIsAlwaysInverted")
@@ -58,7 +58,7 @@ import java.time.temporal.ChronoField
 import java.util.function.Predicate
 import java.util.jar.Manifest
 
-val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-(EAP\\d*-)?SNAPSHOT".toPattern()
+val MAJOR_VERSION_PATTERN = "(RIDER-|GO-)?\\d{4}\\.\\d-((?:RC|EAP)\\d*-)?SNAPSHOT".toPattern()
 
 internal fun sourcePluginXmlFiles(project: Project) = project
     .extensions.getByName<JavaPluginExtension>("java") // Name hard-coded in JavaBasePlugin.addExtensions and well-known.
