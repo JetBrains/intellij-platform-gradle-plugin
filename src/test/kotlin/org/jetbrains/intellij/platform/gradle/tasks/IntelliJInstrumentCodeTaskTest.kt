@@ -15,7 +15,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
     @BeforeTest
     override fun setup() {
-        disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+        disableDebug()
 
         super.setup()
     }

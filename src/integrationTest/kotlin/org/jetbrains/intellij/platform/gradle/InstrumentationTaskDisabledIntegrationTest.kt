@@ -67,7 +67,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 
     @Test
     fun `produce instrumented artifact when instrumentation is enabled`() {
-        disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+        disableDebug()
 
         build(
             Tasks.BUILD_PLUGIN,
@@ -137,7 +137,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
 
     @Test
     fun `run tests and throw unmet assertion exceptions when instrumentation is enabled`() {
-        disableDebug("Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation")
+        disableDebug()
 
         buildAndFail(
             "test",

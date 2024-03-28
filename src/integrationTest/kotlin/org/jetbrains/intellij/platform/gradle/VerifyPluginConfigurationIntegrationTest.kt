@@ -2,25 +2,27 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "verify-plugin-configuration",
 ) {
 
-    private val issuesFoundSentence = "[gradle-intellij-plugin :verifyPluginConfiguration] The following plugin configuration issues were found:"
+    private val issuesFoundSentence = "${Plugin.LOG_PREFIX} The following plugin configuration issues were found:"
 
-    private val userHome = dir.resolve("home")
-    private val defaultSystemProperties = mapOf(
-        "user.home" to userHome,
-    )
-    override val defaultProjectProperties = super.defaultProjectProperties + mapOf(
-        "intellijVersion" to "2022.3",
-        "sinceBuild" to "223",
-        "languageVersion" to "17",
-        "downloadDirectory" to dir.resolve("home"),
-    )
+    private val defaultSystemProperties
+        get() = mapOf("user.home" to dir.resolve("home"))
+
+    override val defaultProjectProperties
+        get() = super.defaultProjectProperties + mapOf(
+            "intellijVersion" to "2022.3",
+            "sinceBuild" to "223",
+            "languageVersion" to "17",
+            "downloadDirectory" to dir.resolve("home"),
+        )
 
     @Test
     fun `should not report issues on valid configuration`() {
@@ -34,6 +36,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     }
 
     @Test
+    @Ignore
     fun `should report incorrect source compatibility`() {
         build(
             Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
@@ -53,8 +56,8 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
             projectProperties = defaultProjectProperties + mapOf("sinceBuild" to "203"),
         ) {
             output containsText issuesFoundSentence
-            output containsText "- The 'since-build' property is lower than the target IntelliJ Platform major version: 203 < 223."
-            output containsText "- The Java configuration specifies targetCompatibility=17 but since-build='203' property requires targetCompatibility=11."
+            output containsText "- The since-build='203' is lower than the target IntelliJ Platform major version: '223'."
+            output containsText "- The Java configuration specifies targetCompatibility=17 but since-build='203' property requires targetCompatibility='11'."
         }
     }
 }

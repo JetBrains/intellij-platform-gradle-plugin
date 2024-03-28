@@ -24,7 +24,7 @@ dependencies {
 
 kotlin {
     jvmToolchain {
-        languageVersion = languageVersionProperty
+        languageVersion = languageVersionProperty.get()
     }
 }
 

@@ -12,13 +12,7 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `test manifest file`() {
-        build(
-            Tasks.BUILD_PLUGIN,
-            projectProperties = mapOf(
-                "intellijPlatform.version" to intellijPlatformVersion,
-                "intellijPlatform.type" to intellijPlatformType,
-            )
-        ) {
+        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties) {
             val searchableOptionsJar = buildDirectory.resolve("libs/test-1.0.0-searchableOptions.jar")
             assertExists(searchableOptionsJar)
 
