@@ -13,7 +13,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 private val String.fixedLineFeeds
-    get() = replace("\r", "")
+    get() = replace(System.lineSeparator(), "\n")
 
 infix fun String.containsText(string: String) =
     assert(fixedLineFeeds.contains(string)) { "expected:<$this> but was:<$string>" }
