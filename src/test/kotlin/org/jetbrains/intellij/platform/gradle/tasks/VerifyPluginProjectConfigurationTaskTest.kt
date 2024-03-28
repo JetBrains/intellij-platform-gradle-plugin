@@ -225,6 +225,9 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 </idea-plugin>
                 """.trimIndent()
 
+        // kotlin.stdlib.default.dependency gets unset
+        gradleProperties overwrite ""
+
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
