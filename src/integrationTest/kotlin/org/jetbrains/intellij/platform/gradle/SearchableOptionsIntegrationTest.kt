@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "searchable-options",
@@ -12,20 +13,59 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `test manifest file`() {
         build(
-            Tasks.JAR_SEARCHABLE_OPTIONS,
+            Tasks.BUILD_PLUGIN,
             projectProperties = mapOf(
                 "intellijPlatform.version" to intellijPlatformVersion,
                 "intellijPlatform.type" to intellijPlatformType,
             )
         ) {
-//            pluginJar containsFileInArchive "META-INF/MANIFEST.MF"
-//            with(pluginJar readEntry "META-INF/MANIFEST.MF") {
-//                this containsText "Version: 1.0.0"
-//                this containsText "Build-Plugin: IntelliJ Platform Gradle Plugin"
-//                this containsText "Build-Plugin-Version:"
-//                this containsText "Build-OS:"
-//                this containsText "Build-SDK: IC-2022.1.4"
-//            }
+            val searchableOptionsJar = buildDirectory.resolve("libs/test-1.0.0-searchableOptions.jar")
+            assertExists(searchableOptionsJar)
+
+            searchableOptionsJar containsFileInArchive "search/test-1.0.0.jar.searchableOptions.xml"
+            with(searchableOptionsJar readEntry "search/test-1.0.0.jar.searchableOptions.xml") {
+                assertEquals(
+                    """
+                    <options>
+                      <configurable id="test.searchable.configurable" configurable_name="Test Searchable Configurable">
+                        <option name="configurable" hit="Label for Test Searchable Configurable" />
+                        <option name="for" hit="Label for Test Searchable Configurable" />
+                        <option name="label" hit="Label for Test Searchable Configurable" />
+                        <option name="searchable" hit="Label for Test Searchable Configurable" />
+                        <option name="test" hit="Label for Test Searchable Configurable" />
+                        <option name="configurable" hit="Test Searchable Configurable" />
+                        <option name="searchable" hit="Test Searchable Configurable" />
+                        <option name="test" hit="Test Searchable Configurable" />
+                      </configurable>
+                    </options>
+                    """.trimIndent(),
+                    this,
+                )
+            }
+
+            val submoduleSearchableOptionsJar = dir.resolve("submodule/build/libs/submodule-1.0.1-searchableOptions.jar")
+            assertExists(submoduleSearchableOptionsJar)
+
+            submoduleSearchableOptionsJar containsFileInArchive "search/submodule-1.0.1.jar.searchableOptions.xml"
+            with(submoduleSearchableOptionsJar readEntry "search/submodule-1.0.1.jar.searchableOptions.xml") {
+                assertEquals(
+                    """
+                    <options>
+                      <configurable id="submodule.searchable.configurable" configurable_name="Submodule Searchable Configurable">
+                        <option name="configurable" hit="Label for Submodule Searchable Configurable" />
+                        <option name="for" hit="Label for Submodule Searchable Configurable" />
+                        <option name="label" hit="Label for Submodule Searchable Configurable" />
+                        <option name="searchable" hit="Label for Submodule Searchable Configurable" />
+                        <option name="submodule" hit="Label for Submodule Searchable Configurable" />
+                        <option name="configurable" hit="Submodule Searchable Configurable" />
+                        <option name="searchable" hit="Submodule Searchable Configurable" />
+                        <option name="submodule" hit="Submodule Searchable Configurable" />
+                      </configurable>
+                    </options>
+                    """.trimIndent(),
+                    this,
+                )
+            }
         }
     }
 }

@@ -27,8 +27,9 @@ dependencies {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
         instrumentationTools()
         testFramework(TestFrameworkType.Platform.JUnit4)
-        instrumentedModule(":submodule")
     }
+
+    implementation(project(":submodule"))
 }
 
 sourceSets {
