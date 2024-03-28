@@ -123,12 +123,12 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
             args = defaultArgs,
             projectProperties = defaultProjectProperties + mapOf("instrumentCode" to false),
         ) {
-            safeOutput containsText """
+            output containsText """
                 InstrumentationTests > fooTest STANDARD_OUT
                     null
             """.trimIndent()
 
-            safeOutput containsText """
+            output containsText """
                 InstrumentationTests > test STANDARD_OUT
                     null
             """.trimIndent()
@@ -144,12 +144,12 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
             args = defaultArgs,
             projectProperties = defaultProjectProperties + mapOf("instrumentCode" to true),
         ) {
-            safeOutput containsText """
+            output containsText """
                 InstrumentationTests > fooTest FAILED
                     java.lang.IllegalArgumentException at InstrumentationTests.java:12
             """.trimIndent()
 
-            safeOutput containsText """
+            output containsText """
                 InstrumentationTests > test FAILED
                     java.lang.IllegalArgumentException at InstrumentationTests.java:7
             """.trimIndent()

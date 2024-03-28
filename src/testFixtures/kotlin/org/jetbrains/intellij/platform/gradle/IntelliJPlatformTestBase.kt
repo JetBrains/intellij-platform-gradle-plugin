@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle
 import org.gradle.api.GradleException
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
@@ -165,11 +164,4 @@ abstract class IntelliJPlatformTestBase {
                     .also(block)
             }
     }
-
-    // TODO: check if this is still necessary, i.e., on Windows
-    protected val BuildResult.safeOutput: String
-        get() = output.replace("\r", "")
-
-    protected val BuildResult.safeLogs: String
-        get() = safeOutput.lineSequence().filterNot { it.startsWith(Plugin.LOG_PREFIX) }.joinToString("\n")
 }

@@ -12,14 +12,17 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
+private val String.fixedLineFeeds
+    get() = replace("\r", "")
+
 infix fun String.containsText(string: String) =
-    assert(contains(string)) { "expected:<$this> but was:<$string>" }
+    assert(fixedLineFeeds.contains(string)) { "expected:<$this> but was:<$string>" }
 
 infix fun Path.containsText(string: String) =
     readText().containsText(string)
 
 infix fun String.notContainsText(string: String) =
-    assert(!contains(string)) { "expected:<$this> but was: <$string>" }
+    assert(!fixedLineFeeds.contains(string)) { "expected:<$this> but was: <$string>" }
 
 fun BuildResult.assertTaskOutcome(task: String, outcome: TaskOutcome) = assertEquals(outcome, task(":$task")?.outcome)
 
@@ -27,7 +30,7 @@ fun BuildResult.assertTaskOutcome(task: String, outcome: TaskOutcome) = assertEq
  * Checks if the given [actual] value contains the [expected] part.
  */
 fun assertContains(expected: String, actual: String) = assertTrue(
-    actual.contains(expected),
+    actual.fixedLineFeeds.contains(expected),
     """
     expected:<$expected> but was:<$actual>
     """.trimIndent(),
@@ -37,7 +40,7 @@ fun assertContains(expected: String, actual: String) = assertTrue(
  * Checks if the given [actual] value doesn't contain the [expected] part.
  */
 fun assertNotContains(expected: String, actual: String) = assertFalse(
-    actual.contains(expected),
+    actual.fixedLineFeeds.contains(expected),
     """
     expected:<$expected> but was:<$actual>
     """.trimIndent(),

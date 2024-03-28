@@ -16,23 +16,23 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `dependencies should contain IntelliJ Platform and Markdown plugin`() {
         build(Tasks.External.DEPENDENCIES, projectProperties = defaultProjectProperties) {
-            safeLogs containsText """
+            output containsText """
                 compileClasspath - Compile classpath for null/main.
                 +--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
 
-            safeLogs containsText """
+            output containsText """
                 intellijPlatformDependency - IntelliJ Platform dependency archive
                 \--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
             """.trimIndent()
 
-            safeLogs containsText """
+            output containsText """
                 intellijPlatformPlugins - IntelliJ Platform plugins
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
 
-            safeLogs containsText """
+            output containsText """
                 intellijPlatformJavaCompiler - Java Compiler used by Ant tasks
                 \--- com.jetbrains.intellij.java:java-compiler-ant-tasks:223.8836.41
                      +--- com.jetbrains.intellij.java:java-gui-forms-compiler:223.8836.41
