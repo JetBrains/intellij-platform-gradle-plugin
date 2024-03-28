@@ -296,7 +296,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
-            assertContains("Could not find idea:ideaIC:foo.", output)
+            assertContains("No IDE selected for verification with the IntelliJ Plugin Verifier", output)
         }
     }
 
