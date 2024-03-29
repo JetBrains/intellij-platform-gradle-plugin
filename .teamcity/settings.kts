@@ -31,16 +31,16 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 'Debug' option is available in the context menu for the task.
 */
 
-version = "2022.10"
+version = "2024.03"
 
 project {
-    description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/gradle-intellij-plugin"
+    description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/intellij-platform-gradle-plugin"
 
     features {
         githubIssues {
-            id = "PROJECT_EXT_621"
-            displayName = "JetBrains/gradle-intellij-plugin"
-            repositoryURL = "https://github.com/JetBrains/gradle-intellij-plugin"
+            id = "IJPGP"
+            displayName = "JetBrains/intellij-platform-gradle-plugin"
+            repositoryURL = "https://github.com/JetBrains/intellij-platform-gradle-plugin"
         }
     }
 
