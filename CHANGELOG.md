@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.17.3] - 2024-03-29
+
 ### Fixed
 
 - Fix for: `coroutinesJavaAgentPath` specifies file `.../build/tmp/initializeIntelliJPlugin/coroutines-javaagent.jar` which doesn't exist
@@ -972,7 +974,8 @@
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.2...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.3...HEAD
+[1.17.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.2...v1.17.3
 [1.17.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.16.1...v1.17.0
