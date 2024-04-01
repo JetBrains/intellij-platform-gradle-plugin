@@ -33,11 +33,14 @@ abstract class GenerateLexerTask : JavaExec() {
      * The output directory for the generated lexer.
      * The Java file is created directly below the given directory.
      * The value of [packageName] is ignored.
+     * Stale files in the given directory are *not* deleted during task execution,
+     * unless [purgeOldFiles] is explicitly set to `true`.
      */
     @Deprecated(
         message = "Use targetRootOutputDir instead. " +
-                "When using the new property, the Java file is created in a subdirectory of `targetRootOutputDir` matching the package of the file. " +
-                "You can restore the previous behavior by adding `packageName = \"\"`. ",
+                "When using the new property, stale files in `targetRootOutputDir` are deleted by default " +
+                "and the Java file is created in a subdirectory matching the package of the file. " +
+                "You can restore the previous behavior by adding `purgeOldFiles = false` and `packageName = \"\"`. ",
         replaceWith = ReplaceWith("targetRootOutputDir"),
         level = DeprecationLevel.WARNING,
     )
@@ -48,6 +51,8 @@ abstract class GenerateLexerTask : JavaExec() {
     /**
      * The output directory for the generated lexer.
      * The Java file for the lexer is created in a subdirectory matching the [packageName].
+     * Stale files in the given directory are deleted during task execution,
+     * unless [purgeOldFiles] is explicitly set to `false`.
      */
     @get:OutputDirectory
     @get:Optional
@@ -83,6 +88,11 @@ abstract class GenerateLexerTask : JavaExec() {
 
     /**
      * Purge old files from the target directory before generating the lexer.
+     * By default, old files are purged unless you are using the deprecated property [targetOutputDir].
+     * If you want to disable this option because the output directory is shared with another task,
+     * note that you may run into issues with stale files. Also note that
+     * [overlapping task outputs are discouraged by Gradle](https://docs.gradle.org/8.13/userguide/organizing_gradle_projects.html#avoid_overlapping_task_outputs)
+     * and may cause issues when using the build cache.
      */
     @get:Input
     @get:Optional
@@ -114,6 +124,11 @@ abstract class GenerateLexerTask : JavaExec() {
     override fun exec() {
         if (purgeOldFiles.orNull == true) {
             targetOutputDir.asFile.orNull?.deleteRecursively()
+        }
+        if (purgeOldFiles.orNull != false) {
+            // Delete targetRootOutputDir even if the directory is overridden by `targetOutputDir`.
+            // The directory may still contain stale files from a previous execution,
+            // and would still be added to the source set when using `srcDir(task)`.
             targetRootOutputDir.asFile.orNull?.deleteRecursively()
         }
         ByteArrayOutputStream().use { os ->
