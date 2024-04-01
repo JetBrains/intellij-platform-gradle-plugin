@@ -38,6 +38,7 @@ abstract class GenerateLexerTask : JavaExec() {
      */
     @Deprecated(
         message = "Use targetRootOutputDir instead. " +
+                "There is also a new default for the `generateLexer` task which should be sufficient for most use cases." +
                 "When using the new property, stale files in `targetRootOutputDir` are deleted by default " +
                 "and the Java file is created in a subdirectory matching the package of the file. " +
                 "You can restore the previous behavior by adding `purgeOldFiles = false` and `packageName = \"\"`. ",
@@ -162,6 +163,7 @@ abstract class GenerateLexerTask : JavaExec() {
      * Resolves the correct output directory, considering the package of the lexer file.
      */
     private fun getOutputDirectory(): Provider<Directory> {
+        // `targetOutputDir` takes precedence for backwards compatibility
         return if (targetOutputDir.isPresent) {
             targetOutputDir
         } else if (targetRootOutputDir.isPresent) {
@@ -215,6 +217,7 @@ abstract class GenerateLexerTask : JavaExec() {
             project.registerTask<GenerateLexerTask>(Tasks.GENERATE_LEXER) {
                 val intellijPlatformJFlexConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_JFLEX]
 
+                targetRootOutputDir.convention(project.layout.buildDirectory.dir("generated/sources/grammarkit-lexer/java/main"))
                 classpath += intellijPlatformJFlexConfiguration
             }
     }

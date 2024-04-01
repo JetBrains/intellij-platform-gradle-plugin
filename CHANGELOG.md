@@ -4,7 +4,8 @@
 
 ### Added
 
-- Add properties `targetRootOutputDir` and `packageName` for `GenerateLexerTask`. These properties replace `targetOutputDir` and automatically use a proper subdirectory matching the package.
+- Add default value for `targetRootOutputDir` of `GenerateParserTask`.
+- Add properties `targetRootOutputDir` and `packageName` (with defaults) for `GenerateLexerTask`. These properties replace `targetOutputDir` and automatically use a proper subdirectory matching the package.
 
 ### Changed
 

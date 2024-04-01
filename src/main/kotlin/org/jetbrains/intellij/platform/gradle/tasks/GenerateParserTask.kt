@@ -162,6 +162,7 @@ abstract class GenerateParserTask : JavaExec() {
                 val intellijPlatformGrammarKitConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_GRAMMAR_KIT]
                 val intellijPlatformClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH]
 
+                targetRootOutputDir.convention(project.layout.buildDirectory.dir("generated/sources/grammarkit-parser/java/main"))
                 classpath += intellijPlatformGrammarKitConfiguration + intellijPlatformClasspathConfiguration
             }
     }
