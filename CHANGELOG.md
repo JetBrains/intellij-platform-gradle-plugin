@@ -2,6 +2,15 @@
 
 ## [next]
 
+### Added
+
+- Add properties `targetRootOutputDir` and `packageName` for `GenerateLexerTask`. These properties replace `targetOutputDir` and automatically use a proper subdirectory matching the package.
+
+### Changed
+
+- Deprecate property `targetOutputDir` of `GenerateLexerTask`.
+- Deprecate `targetFile(String)` and `targetFile(Provider)` of `GenerateLexerTask`.
+
 ### Fixed
 
 - Hotfix for Grammar-Kit support on Windows
