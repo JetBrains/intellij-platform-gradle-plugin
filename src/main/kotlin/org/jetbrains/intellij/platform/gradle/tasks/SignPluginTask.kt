@@ -18,10 +18,10 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.isSpecified
 import java.util.*
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
+import kotlin.io.path.pathString
 
 /**
  * Signs the ZIP archive with the provided key using [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
@@ -184,10 +184,10 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
         log.debug("Distribution file: $file")
 
         yield("-in")
-        yield(file.absolutePathString())
+        yield(file.pathString)
 
         yield("-out")
-        yield(signedArchiveFile.asPath.absolutePathString())
+        yield(signedArchiveFile.asPath.pathString)
 
         privateKey.orNull?.let {
             yield("-key")
@@ -201,7 +201,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
         }
             ?: privateKeyFile.orNull?.let {
                 yield("-key-file")
-                yield(it.asPath.absolutePathString())
+                yield(it.asPath.pathString)
                 log.debug("Using private key passed as file")
             }
             ?: throw InvalidUserDataException("Private key not found. One of the 'privateKey' or 'privateKeyFile' properties has to be provided.")
@@ -218,7 +218,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
         }
             ?: certificateChainFile.orNull?.let {
                 yield("-cert-file")
-                yield(it.asPath.absolutePathString())
+                yield(it.asPath.pathString)
                 log.debug("Using certificate chain passed as file")
             }
             ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")
@@ -230,7 +230,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
         }
         keyStore.orNull?.let {
             yield("-ks")
-            yield(it.asPath.absolutePathString())
+            yield(it.asPath.pathString)
         }
         keyStorePassword.orNull?.let {
             yield("-ks-pass")

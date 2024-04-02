@@ -7,7 +7,7 @@ import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import java.nio.file.Path
-import kotlin.io.path.absolutePathString
+import kotlin.io.path.pathString
 
 /**
  * Provides command line arguments for running performance tests.
@@ -30,11 +30,11 @@ class PerformanceTestArgumentProvider(
         "-Didea.local.statistics.without.report=true",
         "-Dlinux.native.menu.force.disable=true",
         "-Didea.fatal.error.notification=true",
-        "-Dtestscript.filename=${scriptPath.absolutePathString()}",
+        "-Dtestscript.filename=${scriptPath.pathString}",
         "-DintegrationTests.profiler=$profilerName",
-        "-Dide.performance.screenshot.before.kill=${testArtifactsDirectory.absolutePathString()}",
-        "-Didea.log.path=${testArtifactsDirectory.absolutePathString()}",
-        "-Dsnapshots.path=${testArtifactsDirectory.absolutePathString()}",
-        "-Dmemory.snapshots.path=${testArtifactsDirectory.absolutePathString()}",
+        "-Dide.performance.screenshot.before.kill=${testArtifactsDirectory.pathString}",
+        "-Didea.log.path=${testArtifactsDirectory.pathString}",
+        "-Dsnapshots.path=${testArtifactsDirectory.pathString}",
+        "-Dmemory.snapshots.path=${testArtifactsDirectory.pathString}",
     )
 }

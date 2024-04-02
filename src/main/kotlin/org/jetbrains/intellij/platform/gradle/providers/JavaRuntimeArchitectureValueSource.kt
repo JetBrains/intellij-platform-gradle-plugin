@@ -11,7 +11,7 @@ import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
-import kotlin.io.path.absolutePathString
+import kotlin.io.path.pathString
 
 /**
  * Obtains the architecture of the provided Java Runtime executable by requesting the list of its internal properties.
@@ -33,7 +33,7 @@ abstract class JavaRuntimeArchitectureValueSource : ValueSource<String, JavaRunt
     override fun obtain() = ByteArrayOutputStream().use { os ->
         execOperations.exec {
             commandLine(
-                parameters.executable.asPath.absolutePathString(),
+                parameters.executable.asPath.pathString,
                 "-XshowSettings:properties",
                 "-version",
             )

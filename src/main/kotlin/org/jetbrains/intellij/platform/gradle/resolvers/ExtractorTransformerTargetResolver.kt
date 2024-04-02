@@ -11,7 +11,7 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.io.File.separator
 import java.nio.file.Path
-import kotlin.io.path.absolutePathString
+import kotlin.io.path.pathString
 
 /**
  * Resolves the target directory name for the [ExtractorTransformer] dependency transformer.
@@ -35,7 +35,7 @@ class ExtractorTransformerTargetResolver(
 
     private val coordinates
         get() = runCatching {
-            val (groupId, artifactId, version) = artifactPath.absolutePathString().split(separator).dropLast(2).takeLast(3)
+            val (groupId, artifactId, version) = artifactPath.pathString.split(separator).dropLast(2).takeLast(3)
             Triple(groupId, artifactId, version)
         }.onFailure {
             throw GradleException("Unknown structure of the artifact path: $artifactPath", it)

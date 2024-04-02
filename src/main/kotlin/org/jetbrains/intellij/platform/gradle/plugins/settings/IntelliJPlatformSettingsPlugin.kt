@@ -12,6 +12,7 @@ import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import javax.inject.Inject
+import kotlin.io.path.absolute
 
 @Suppress("unused")
 abstract class IntelliJPlatformSettingsPlugin @Inject constructor(
@@ -31,7 +32,7 @@ abstract class IntelliJPlatformSettingsPlugin @Inject constructor(
                 Extensions.INTELLIJ_PLATFORM,
                 this,
                 providers,
-                settings.rootDir.toPath(),
+                settings.rootDir.toPath().absolute(),
             )
         }
     }

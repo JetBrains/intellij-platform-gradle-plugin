@@ -69,7 +69,7 @@ internal fun ExternalModuleDependency.createIvyDependency(localPlatformArtifacts
 internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
     is String -> localPath
     is File -> localPath.absolutePath
-    is Directory -> localPath.asPath.absolutePathString()
+    is Directory -> localPath.asPath.pathString
     else -> throw IllegalArgumentException("Invalid argument type: '${localPath.javaClass}'. Supported types: String, File, or Directory")
 }
     .let { Path(it) }
@@ -83,7 +83,7 @@ internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
 internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
     gradleProperty(GradleProperties.INTELLIJ_PLATFORM_CACHE).orNull
         .takeUnless { it.isNullOrBlank() }
-        ?.let { Path(it) }
+        ?.let { Path(it).absolute() }
         ?: rootProjectDirectory.resolve(CACHE_DIRECTORY)
 
 /**
@@ -96,6 +96,6 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
 internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
     gradleProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS).orNull
         .takeUnless { it.isNullOrBlank() }
-        ?.let { Path(it) }
+        ?.let { Path(it).absolute() }
         ?: intellijPlatformCachePath(rootProjectDirectory)
             .resolve("localPlatformArtifacts")

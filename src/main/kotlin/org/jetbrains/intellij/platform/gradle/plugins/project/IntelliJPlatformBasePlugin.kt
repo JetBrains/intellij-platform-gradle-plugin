@@ -33,6 +33,7 @@ import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.Path
+import kotlin.io.path.absolute
 import kotlin.io.path.createDirectories
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
@@ -44,7 +45,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         checkGradleVersion()
 
-        val rootProjectDirectory = project.rootProject.rootDir.toPath()
+        val rootProjectDirectory = project.rootProject.rootDir.toPath().absolute()
 
         with(project) {
             with(plugins) {

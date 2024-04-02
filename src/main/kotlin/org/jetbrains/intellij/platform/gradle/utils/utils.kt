@@ -61,7 +61,7 @@ fun FileCollection.platformPath() = runCatching {
 
     when (entries.size) {
         0 -> throw IllegalArgumentException("No IntelliJ Platform dependency found.")
-        1 -> entries.single().toPath()
+        1 -> entries.single().toPath().absolute()
         else -> throw IllegalArgumentException("More than one IntelliJ Platform dependency found.")
     }
 }.onFailure {

@@ -16,8 +16,8 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.util.*
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
+import kotlin.io.path.pathString
 
 /**
  * Validates the signature of the plugin archive file using the [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
@@ -99,11 +99,11 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
         log.debug("Distribution file: $file")
 
         yield("-in")
-        yield(file.absolutePathString())
+        yield(file.pathString)
 
         certificateChain.orNull?.let {
             yield("-cert")
-            yield(createTemporaryCertificateChainFile(it).absolutePathString())
+            yield(createTemporaryCertificateChainFile(it).pathString)
 
             yield(
                 Base64.getDecoder()
@@ -115,7 +115,7 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
         }
             ?: certificateChainFile.orNull?.let {
                 yield("-cert")
-                yield(it.asPath.absolutePathString())
+                yield(it.asPath.pathString)
                 log.debug("Using certificate chain passed as file")
             }
             ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")

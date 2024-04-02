@@ -21,7 +21,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import java.net.URI
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlin.io.path.absolutePathString
+import kotlin.io.path.pathString
 
 /**
  * This is an extension class for managing IntelliJ Platform repositories in a Gradle build script. It's applied to the [RepositoryHandler].
@@ -185,7 +185,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     fun localPlatformArtifacts(action: RepositoryAction = {}) = repositories.ivy {
         // Location of Ivy files generated for the current project.
         val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
-        ivyPattern("${localPlatformArtifactsPath.absolutePathString()}/[organization]-[module]-[revision].[ext]")
+        ivyPattern("${localPlatformArtifactsPath.pathString}/[organization]-[module]-[revision].[ext]")
 
         // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
         artifactPattern("/[artifact]")

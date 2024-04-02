@@ -44,8 +44,8 @@ import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
+import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
 
 /**
@@ -756,7 +756,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
                         downloadDirectory.dir("${type}-${value}").asPath.takeIf { it.exists() }?.let {
                             // IDE is already present in the [downloadDirectory], use as [localIde]
-                            localIde(it.absolutePathString())
+                            localIde(it.pathString)
                             return@mapNotNull null
                         }
 

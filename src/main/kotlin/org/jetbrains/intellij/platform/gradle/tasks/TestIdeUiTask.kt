@@ -12,7 +12,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeE
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.absolutePathString
+import kotlin.io.path.pathString
 
 /**
  * Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing.
@@ -43,7 +43,7 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatf
         super.exec()
     }
 
-    override fun getExecutable() = runtimeDirectory.asPath.resolveJavaRuntimeExecutable().absolutePathString()
+    override fun getExecutable() = runtimeDirectory.asPath.resolveJavaRuntimeExecutable().pathString
 
     companion object : Registrable {
         override fun register(project: Project) =

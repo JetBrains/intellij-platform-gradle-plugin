@@ -26,8 +26,8 @@ import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.ByteArrayOutputStream
 import java.util.*
-import kotlin.io.path.absolutePathString
 import kotlin.io.path.exists
+import kotlin.io.path.pathString
 
 /**
  * Runs the IntelliJ Plugin Verifier CLI tool to check the binary compatibility with specified IDE builds.
@@ -190,7 +190,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             if (isEmpty()) {
                 throw GradleException("No IDE selected for verification with the IntelliJ Plugin Verifier")
             }
-            args(listOf("check-plugin") + getOptions() + file.absolutePathString() + map {
+            args(listOf("check-plugin") + getOptions() + file.pathString + map {
                 when {
                     it.isDirectory -> it.absolutePath
                     else -> it.readText()
@@ -217,8 +217,8 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      */
     private fun getOptions(): List<String> {
         val args = mutableListOf(
-            "-verification-reports-dir", verificationReportsDirectory.asPath.absolutePathString(),
-            "-runtime-dir", runtimeDirectory.asPath.absolutePathString(),
+            "-verification-reports-dir", verificationReportsDirectory.asPath.pathString,
+            "-runtime-dir", runtimeDirectory.asPath.pathString,
         )
 
         externalPrefixes.get().takeIf { it.isNotEmpty() }?.let {
@@ -242,7 +242,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
         if (ignoredProblemsFile.orNull != null) {
             args.add("-ignored-problems")
-            args.add(ignoredProblemsFile.asPath.absolutePathString())
+            args.add(ignoredProblemsFile.asPath.pathString)
         }
 
         freeArgs.orNull?.let {

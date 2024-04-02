@@ -14,7 +14,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeE
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.absolutePathString
+import kotlin.io.path.pathString
 
 /**
  * Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded.
@@ -58,7 +58,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
         workingDir = platformPath.toFile()
 
         if (splitMode.get()) {
-            environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.absolutePathString())
+            environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.pathString)
 
             if (args.isNotEmpty()) {
                 throw RuntimeException("Passing arguments directly is not supported in Split Mode. Use `argumentProviders` instead.")
@@ -68,7 +68,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
         super.exec()
     }
 
-    override fun getExecutable() = runtimeDirectory.asPath.resolveJavaRuntimeExecutable().absolutePathString()
+    override fun getExecutable() = runtimeDirectory.asPath.resolveJavaRuntimeExecutable().pathString
 
     companion object : Registrable {
         // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache

@@ -29,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
+import kotlin.io.path.absolute
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
 
@@ -254,7 +255,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                     project.rootProject.rootDir
                 })
                 intellijPlatformCache.convention(project.layout.dir(project.provider {
-                    project.providers.intellijPlatformCachePath(project.rootProject.rootDir.toPath()).toFile()
+                    project.providers.intellijPlatformCachePath(project.rootProject.rootDir.toPath().absolute()).toFile()
                 }))
                 gitignoreFile.convention(project.layout.file(project.provider {
                     project.rootProject.rootDir.resolve(".gitignore").takeIf { it.exists() }

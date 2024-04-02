@@ -23,7 +23,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.absolutePathString
+import kotlin.io.path.pathString
 
 class TestCompanion {
     companion object : Registrable {
@@ -143,7 +143,7 @@ class TestCompanion {
                 testClassesDirs = instrumentedTestCode + testClassesDirs
 
                 val executablePathProvider = project.provider {
-                    runtimeExecutable.asPath.absolutePathString()
+                    runtimeExecutable.asPath.pathString
                 }
 
                 doFirst {
