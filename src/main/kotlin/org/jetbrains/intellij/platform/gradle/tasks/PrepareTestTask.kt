@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.tasks.CacheableTask
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
+@CacheableTask
 abstract class PrepareTestTask : DefaultTask(), TestableAware
