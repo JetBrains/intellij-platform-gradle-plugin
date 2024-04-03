@@ -90,8 +90,8 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     fun intellijDependencies(action: RepositoryAction = {}) = createRepository(
         name = "IntelliJ Platform Dependencies Repository",
-        url = "https://cache-redirector.jetbrains.com/intellij-dependencies",
-        urlWithCacheRedirector = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies",
+        url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies",
+        urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/intellij-dependencies",
         action = action,
     )
 
