@@ -92,6 +92,7 @@ private val explicitExclusions = setOf(
     Coordinates("org.jetbrains", "jetCheck"),
     Coordinates("org.hamcrest", "hamcrest-core"),
     Coordinates("org.jetbrains.teamcity", "serviceMessages"),
+    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm"),
 )
 
 private val fallbackExclusions = setOf(
