@@ -14,7 +14,7 @@ import kotlin.test.assertEquals
 class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
-    fun `resolve the architecture of the provided JVM`() {
+    fun `resolve the Android Studio link for the specific version and current OS`() {
         buildFile write //language=kotlin
                 """
                 tasks {
