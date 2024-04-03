@@ -15,9 +15,6 @@ class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve the architecture of the provided JVM`() {
-        val executablePath = Jvm.current().javaExecutable.toPath().invariantSeparatorsPathString
-        val currentArch = System.getProperty("os.arch")
-
         buildFile write //language=kotlin
                 """
                 tasks {
@@ -36,15 +33,20 @@ class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        val os = OperatingSystem.current()
-        val link = mapOf(
-            OperatingSystem.
-        )
-
+        val isArm = System.getProperty("os.arch") == "aarch64"
+        val link = with(OperatingSystem.current()) {
+            when {
+                isMacOsX && isArm -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-mac_arm.zip"
+                isMacOsX -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-mac.zip"
+                isLinux -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-linux.tar.gz"
+                isWindows -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-windows-exe.zip"
+                else -> null
+            }
+        }
 
         build(randomTaskName) {
             assertLogValue("Download Link: ") {
-                assertEquals(currentArch, it)
+                assertEquals(link, it)
             }
         }
     }
