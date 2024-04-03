@@ -119,16 +119,20 @@ object Constants {
         const val PREPARE_SANDBOX = "prepareSandbox" // TODO: check
         const val PREPARE_TEST_SANDBOX = "prepareTestingSandbox" // TODO: check
         const val PREPARE_UI_TEST_SANDBOX = "prepareUiTestingSandbox" // TODO: check
+        const val PATCH_PLUGIN_XML = "patchPluginXml"
+        const val PREPARE_SANDBOX = "prepareSandbox"
+        const val PREPARE_TEST_SANDBOX = "prepareTestSandbox"
+        const val PREPARE_UI_TEST_SANDBOX = "prepareUiTestSandbox" // TODO: check
         const val PRINT_BUNDLED_PLUGINS = "printBundledPlugins"
         const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val PUBLISH_PLUGIN = "publishPlugin"
-        const val RUN_IDE = "runIde" // TODO: check
+        const val RUN_IDE = "runIde"
         const val SIGN_PLUGIN = "signPlugin"
         const val TEST_IDE_PERFORMANCE = "testIdePerformance" // TODO: check
         const val TEST_IDE_UI = "testIdeUi" // TODO: check
-        const val VERIFY_PLUGIN = "verifyPlugin" // TODO: check
-        const val VERIFY_PLUGIN_STRUCTURE = "verifyPluginStructure" // TODO: check
-        const val VERIFY_PLUGIN_PROJECT_CONFIGURATION = "verifyPluginProjectConfiguration" // TODO: check
+        const val VERIFY_PLUGIN = "verifyPlugin"
+        const val VERIFY_PLUGIN_STRUCTURE = "verifyPluginStructure"
+        const val VERIFY_PLUGIN_PROJECT_CONFIGURATION = "verifyPluginProjectConfiguration"
         const val VERIFY_PLUGIN_SIGNATURE = "verifyPluginSignature"
 
         object External {

@@ -135,7 +135,7 @@ fun ProductInfo.validateSupportedVersion() {
  * @throws GradleException If the launch information for the current OS and architecture is not found.
  */
 @Throws(GradleException::class)
-internal fun ProductInfo.launchFor(architecture: String, os: OperatingSystem = OperatingSystem.current()): ProductInfo.Launch {
+internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
     val availableArchitectures = launch.mapNotNull { it.arch }.toSet()
     val arch = with(availableArchitectures) {
         when {

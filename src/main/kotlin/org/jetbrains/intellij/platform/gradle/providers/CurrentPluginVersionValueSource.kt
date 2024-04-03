@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle.providers
 
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
-import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.net.URL
 import java.util.jar.Manifest
 
@@ -12,8 +11,6 @@ import java.util.jar.Manifest
  * Obtains the current IntelliJ Platform Gradle Plugin version.
  */
 abstract class CurrentPluginVersionValueSource : ValueSource<String, ValueSourceParameters.None> {
-
-    private val log = Logger(javaClass)
 
     override fun obtain() = javaClass
         .run { getResource("${simpleName.substringBefore('$')}.class") }
