@@ -6,7 +6,8 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.tasks.aware.*
+import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
@@ -32,7 +33,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.*
  * ```
  */
 @UntrackedTask(because = "Should always run")
-abstract class TestIdeTask : Test(), CoroutinesJavaAgentAware, CustomIntelliJPlatformVersionAware, PluginAware, RuntimeAware, SandboxAware {
+abstract class TestIdeTask : Test(), TestableAware, CustomIntelliJPlatformVersionAware {
 
     init {
         group = Plugin.GROUP_NAME

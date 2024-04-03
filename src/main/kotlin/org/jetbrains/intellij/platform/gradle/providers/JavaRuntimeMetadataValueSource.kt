@@ -18,7 +18,7 @@ import kotlin.io.path.pathString
  *
  * It is used to properly pick the [ProductInfo.Launch] when calling the [ProductInfo.launchFor] helper method.
  */
-abstract class JavaRuntimeArchitectureValueSource : ValueSource<String, JavaRuntimeArchitectureValueSource.Parameters> {
+abstract class JavaRuntimeMetadataValueSource : ValueSource<Map<String, String>, JavaRuntimeMetadataValueSource.Parameters> {
 
     @get:Inject
     abstract val execOperations: ExecOperations
@@ -40,8 +40,14 @@ abstract class JavaRuntimeArchitectureValueSource : ValueSource<String, JavaRunt
             errorOutput = os
         }
 
-        os.toString().lines()
-            .find { it.trim().startsWith("os.arch") }
-            ?.substringAfter(" = ")
+        os.toString()
+            .lines()
+            .dropWhile { !it.contains(" = ") }
+            .dropLastWhile { !it.contains(" = ") }
+            .joinToString(System.lineSeparator())
+            .trimIndent()
+            .replace(Regex(Regex.escape(System.lineSeparator()) + "\\s+"), ",")
+            .lines()
+            .associate { it.split(" = ").let { (key, value) -> key to value } }
     }
 }

@@ -10,7 +10,7 @@ import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class JavaRuntimeArchitectureValueSourceTest : IntelliJPluginTestBase() {
+class JavaRuntimeMetadataValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve the architecture of the provided JVM`() {
@@ -20,7 +20,7 @@ class JavaRuntimeArchitectureValueSourceTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 tasks {
-                    val runtimeArchitecture = providers.of(org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeArchitectureValueSource::class) {
+                    val runtimeMetadata = providers.of(org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource::class) {
                         parameters {
                             executable = file("$executablePath")
                         }
@@ -28,14 +28,14 @@ class JavaRuntimeArchitectureValueSourceTest : IntelliJPluginTestBase() {
                     
                     register("$randomTaskName") {
                         doLast {
-                            println("Runtime Architecture: " + runtimeArchitecture.get())
+                            println("Runtime Metadata: " + runtimeMetadata.get()["os.arch"])
                         }
                     }
                 }
                 """.trimIndent()
 
         build(randomTaskName) {
-            assertLogValue("Runtime Architecture: ") {
+            assertLogValue("Runtime Metadata: ") {
                 assertEquals(currentArch, it)
             }
         }

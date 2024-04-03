@@ -25,6 +25,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxProducerAware
 import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
@@ -42,7 +43,7 @@ import kotlin.io.path.*
  * @see Constants.Sandbox
  */
 @CacheableTask
-abstract class PrepareSandboxTask : Sync(), SandboxAware {
+abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
 
     /**
      * Default sandbox destination directory to where the plugin files will be copied into.

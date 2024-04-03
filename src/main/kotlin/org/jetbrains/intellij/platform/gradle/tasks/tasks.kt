@@ -9,10 +9,10 @@ import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.JavaExec
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
-import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
@@ -26,7 +26,8 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeArchitectureValueSource
+import org.jetbrains.intellij.platform.gradle.providers.JavaLauncherValueSource
+import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSignerPathResolver
@@ -217,12 +218,12 @@ internal inline fun <reified T : Task> Project.registerTask(
              */
             sandboxSuffix.convention(
                 when {
-                    this is PrepareSandboxTask -> when (name.substringBefore("_")) {
-                        Tasks.PREPARE_TEST_SANDBOX -> "-test"
-                        Tasks.PREPARE_UI_TEST_SANDBOX -> "-uiTest"
-                        Tasks.PREPARE_SANDBOX -> ""
-                        else -> ""
-                    }
+                    this is SandboxProducerAware -> name
+                        .substringBefore("_")
+                        .removePrefix("prepare")
+                        .removeSuffix("Sandbox")
+                        .replaceFirstChar { it.lowercaseChar() }
+                        .run { "-".takeIf { isNotEmpty() }.orEmpty() + this }
 
                     else -> ""
                 }
@@ -238,14 +239,17 @@ internal inline fun <reified T : Task> Project.registerTask(
              * This also handles [CustomIntelliJPlatformVersionAware] tasks, for which we refer to the `suffix` variable.
              * No suffix is used if a task is a base task provided with the IntelliJ Platform Gradle Plugin as a default.
              */
-            if (this !is PrepareSandboxTask) {
+            if (this !is SandboxProducerAware) {
                 val isBuiltInTask = ALL_TASKS.contains(name)
+                val customIntelliJPlatform = this is CustomIntelliJPlatformVersionAware
+                        && (localPath.isSpecified() || type.isSpecified() || version.isSpecified())
+
                 val prepareSandboxTaskName = when (this) {
-                    is RunIdeTask -> Tasks.PREPARE_SANDBOX
-                    is TestIdeTask -> Tasks.PREPARE_TEST_SANDBOX
-                    is TestIdeUiTask -> Tasks.PREPARE_UI_TEST_SANDBOX
+                    is RunnableIdeAware -> Tasks.PREPARE_SANDBOX
+                    is TestableAware -> Tasks.PREPARE_TEST_SANDBOX
+//                    is TestIdeUiTask -> Tasks.PREPARE_UI_TEST_SANDBOX
                     else -> Tasks.PREPARE_SANDBOX
-                } + "_$suffix".takeUnless { isBuiltInTask }.orEmpty()
+                } + "_$suffix".takeIf { !isBuiltInTask || customIntelliJPlatform }.orEmpty()
 
                 dependsOn(tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName))
             }
@@ -264,7 +268,7 @@ internal inline fun <reified T : Task> Project.registerTask(
 
         /**
          * The [RuntimeAware] adjusts tasks for the running a guest IDE purpose.
-         * This configuration picks relevant Java Runtime using the [JavaRuntimePathResolver] and [RuntimeAware.runtimeArchitecture].
+         * This configuration picks relevant Java Runtime using the [JavaRuntimePathResolver] and [RuntimeAware.runtimeMetadata].
          */
         if (this is RuntimeAware) {
             val javaRuntimePathResolver = JavaRuntimePathResolver(
@@ -274,16 +278,23 @@ internal inline fun <reified T : Task> Project.registerTask(
                 javaToolchainService = project.serviceOf<JavaToolchainService>(),
             )
 
-            runtimeDirectory.convention(layout.dir(provider {
+            runtimeDirectory = layout.dir(provider {
                 javaRuntimePathResolver.resolve().toFile()
-            }))
-            runtimeArchitecture.set(providers.of(JavaRuntimeArchitectureValueSource::class) {
-                parameters {
-                    executable.set(layout.file(
-                        runtimeDirectory.map { it.asPath.resolveJavaRuntimeExecutable().toFile() }
-                    ))
-                }
             })
+            runtimeMetadata = providers.of(JavaRuntimeMetadataValueSource::class) {
+                parameters {
+                    executable = layout.file(
+                        runtimeDirectory.map { it.asPath.resolveJavaRuntimeExecutable().toFile() }
+                    )
+                }
+            }
+            runtimeArchitecture = runtimeMetadata.map { it["os.arch"].orEmpty() }
+            runtimeLauncher = project.providers.of(JavaLauncherValueSource::class) {
+                parameters {
+                    runtimeDirectory = this@withType.runtimeDirectory
+                    runtimeMetadata = this@withType.runtimeMetadata
+                }
+            }
         }
 
         /**
@@ -370,13 +381,14 @@ internal inline fun <reified T : Task> Project.registerTask(
 
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
 
-            if (this is JavaExecSpec) {
-                mainClass.set("com.intellij.idea.Main")
+            if (this is JavaExec) {
+                mainClass = "com.intellij.idea.Main"
+                javaLauncher = runtimeLauncher
 
                 classpath += files(
-                    provider {
+                    runtimeArchitecture.map { architecture ->
                         productInfo
-                            .launchFor(runtimeArchitecture.get())
+                            .launchFor(architecture)
                             .bootClassPathJarNames
                             .map { platformPath.resolve("lib/$it") }
                     }
@@ -418,7 +430,7 @@ internal fun DirectoryProperty.configureSandbox(
     name: String,
 ) {
     convention(sandboxContainer.zip(suffixProvider) { container, suffix ->
-        container.dir(name + suffix).apply { asPath.createDirectories() }
+        container.dir(name + suffix.orEmpty()).apply { asPath.createDirectories() }
     })
 }
 
