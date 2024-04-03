@@ -55,7 +55,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     fun releases(action: RepositoryAction = {}) = createRepository(
         name = "IntelliJ Repository (Releases)",
         url = "https://www.jetbrains.com/intellij-repository/releases",
-        urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/releases",
+        urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository/releases",
         action = action,
     )
 
@@ -67,7 +67,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     fun snapshots(action: RepositoryAction = {}) = createRepository(
         name = "IntelliJ Repository (Snapshots)",
         url = "https://www.jetbrains.com/intellij-repository/snapshots",
-        urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/snapshots",
+        urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository/snapshots",
         action = action,
     )
 
@@ -79,7 +79,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     fun nightly(action: RepositoryAction = {}) = createRepository(
         name = "IntelliJ Repository (Nightly)",
         url = "https://www.jetbrains.com/intellij-repository/nightly",
-        urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/nightly",
+        urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository/nightly",
         action = action,
     )
 
@@ -91,7 +91,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     fun intellijDependencies(action: RepositoryAction = {}) = createRepository(
         name = "IntelliJ Platform Dependencies Repository",
         url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies",
-        urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/intellij-dependencies",
+        urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/intellij-dependencies",
         action = action,
     )
 
@@ -103,7 +103,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     fun marketplace(action: RepositoryAction = {}) = createRepository(
         name = "JetBrains Marketplace Repository",
         url = "https://plugins.jetbrains.com/maven",
-        urlWithCacheRedirector = "https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven",
+        urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/plugins.jetbrains.com/maven",
         action = action,
     )
 
