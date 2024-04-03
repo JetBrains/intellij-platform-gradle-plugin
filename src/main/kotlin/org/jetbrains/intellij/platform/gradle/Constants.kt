@@ -163,7 +163,7 @@ object Constants {
         const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
         const val MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY = "https://plugins.gradle.org/m2"
         const val MAVEN_REPOSITORY = "https://repo1.maven.org/maven2"
-        const val MARKETPLACE = "https://plugins.jetbrains.com"
+        const val JETBRAINS_MARKETPLACE = "https://plugins.jetbrains.com"
         const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"
         const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
     }

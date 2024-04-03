@@ -362,7 +362,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 configureExtension<IntelliJPlatformExtension.Signing>(Extensions.SIGNING)
 
                 configureExtension<IntelliJPlatformExtension.Publishing>(Extensions.PUBLISHING) {
-                    host.convention(Locations.MARKETPLACE)
+                    host.convention(Locations.JETBRAINS_MARKETPLACE)
                     toolboxEnterprise.convention(false)
                     channels.convention(listOf("default"))
                     hidden.convention(false)

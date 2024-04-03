@@ -333,7 +333,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         /**
          * The hostname used for publishing the plugin.
          *
-         * Default value: [Locations.MARKETPLACE]
+         * Default value: [Locations.JETBRAINS_MARKETPLACE]
          *
          * @see PublishPluginTask.host
          */
