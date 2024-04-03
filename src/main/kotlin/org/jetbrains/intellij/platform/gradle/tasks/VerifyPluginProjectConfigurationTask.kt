@@ -216,7 +216,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 }
             }
         }
-            .joinToString(System.lineSeparator()) { "- $it" }
+            .joinToString("\n") { "- $it" }
             .takeIf { it.isNotEmpty() }
             ?.also {
                 log.warn(
@@ -224,7 +224,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                         "The following plugin configuration issues were found:",
                         it,
                         "See: https://jb.gg/intellij-platform-versions"
-                    ).joinToString(System.lineSeparator())
+                    ).joinToString("\n")
                 )
             }
             .also {

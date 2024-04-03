@@ -260,7 +260,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             val errorMessage = output.lines()
                 .dropWhile { it != invalidFilesMessage }
                 .dropLastWhile { !it.startsWith(" ") }
-                .joinToString(System.lineSeparator())
+                .joinToString("\n")
 
             throw GradleException(errorMessage)
         }

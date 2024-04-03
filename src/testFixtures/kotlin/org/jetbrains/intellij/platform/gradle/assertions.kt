@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.kotlin.dsl.support.normaliseLineSeparators
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.intellij.lang.annotations.Language
@@ -12,17 +13,14 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
-private val String.fixedLineFeeds
-    get() = replace(System.lineSeparator(), "\n")
-
 infix fun String.containsText(string: String) =
-    assert(fixedLineFeeds.contains(string)) { "expected:<$this> but was:<$string>" }
+    assert(normaliseLineSeparators().contains(string)) { "expected:<$this> but was:<$string>" }
 
 infix fun Path.containsText(string: String) =
     readText().containsText(string)
 
 infix fun String.notContainsText(string: String) =
-    assert(!fixedLineFeeds.contains(string)) { "expected:<$this> but was: <$string>" }
+    assert(!normaliseLineSeparators().contains(string)) { "expected:<$this> but was: <$string>" }
 
 fun BuildResult.assertTaskOutcome(task: String, outcome: TaskOutcome) = assertEquals(outcome, task(":$task")?.outcome)
 
@@ -30,7 +28,7 @@ fun BuildResult.assertTaskOutcome(task: String, outcome: TaskOutcome) = assertEq
  * Checks if the given [actual] value contains the [expected] part.
  */
 fun assertContains(expected: String, actual: String) = assertTrue(
-    actual.fixedLineFeeds.contains(expected),
+    actual.normaliseLineSeparators().contains(expected),
     """
     expected:<$expected> but was:<$actual>
     """.trimIndent(),
@@ -40,7 +38,7 @@ fun assertContains(expected: String, actual: String) = assertTrue(
  * Checks if the given [actual] value doesn't contain the [expected] part.
  */
 fun assertNotContains(expected: String, actual: String) = assertFalse(
-    actual.fixedLineFeeds.contains(expected),
+    actual.normaliseLineSeparators().contains(expected),
     """
     expected:<$expected> but was:<$actual>
     """.trimIndent(),
@@ -53,4 +51,4 @@ fun assertExists(path: Path) =
     assert(path.exists()) { "expect that '$path' exists" }
 
 fun assertFileContent(path: Path?, @Language("xml") expected: String) =
-    assertEquals(expected.trim(), path?.readText()?.replace("\r", "")?.trim())
+    assertEquals(expected.trim(), path?.readText()?.normaliseLineSeparators()?.trim())

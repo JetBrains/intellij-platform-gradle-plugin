@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.internal.project.ProjectInternal
+import org.gradle.kotlin.dsl.support.normaliseLineSeparators
 import java.io.FileOutputStream
 import java.nio.file.*
 import java.util.zip.ZipFile
@@ -182,7 +183,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
     protected fun Path.toZip() = ZipFile(toFile())
 
     protected fun fileText(zipFile: ZipFile, path: String) = zipFile.getInputStream(zipFile.getEntry(path)).use { inputStream ->
-        inputStream.bufferedReader().use { it.readText() }.replace("\r", "").trim()
+        inputStream.bufferedReader().use { it.readText() }.normaliseLineSeparators().trim()
     }
 
     protected fun collectPaths(zipFile: ZipFile) = zipFile.entries().toList().mapNotNull { it.name }.toSet()

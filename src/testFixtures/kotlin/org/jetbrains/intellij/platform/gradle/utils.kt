@@ -15,6 +15,6 @@ fun Path.ensureExists() = apply {
     }
 }
 
-infix fun Path.write(content: String) = ensureExists().apply { appendText(content + System.lineSeparator()) }
-infix fun Path.overwrite(content: String) = ensureExists().apply { writeText(content + System.lineSeparator()) }
-infix fun Path.prepend(content: String) = ensureExists().apply { writeText(content + System.lineSeparator() + readText() + System.lineSeparator()) }
+infix fun Path.write(content: String) = ensureExists().apply { appendText(content + "\n") }
+infix fun Path.overwrite(content: String) = ensureExists().apply { writeText(content + "\n") }
+infix fun Path.prepend(content: String) = ensureExists().apply { writeText(content + "\n" + readText() + "\n") }
