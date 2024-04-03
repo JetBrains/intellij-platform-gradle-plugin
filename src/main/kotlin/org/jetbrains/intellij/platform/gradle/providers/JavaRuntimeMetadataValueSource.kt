@@ -40,14 +40,16 @@ abstract class JavaRuntimeMetadataValueSource : ValueSource<Map<String, String>,
             errorOutput = os
         }
 
+        val separator = " = "
         os.toString()
             .lines()
-            .dropWhile { !it.contains(" = ") }
-            .dropLastWhile { !it.contains(" = ") }
-            .joinToString(System.lineSeparator())
+            .dropWhile { !it.contains(separator) }
+            .dropLastWhile { !it.contains(separator) }
+            .joinToString("\n")
             .trimIndent()
-            .replace(Regex(Regex.escape(System.lineSeparator()) + "\\s+"), ",")
+            .replace("\n +".toRegex(), ",")
             .lines()
-            .associate { it.split(" = ").let { (key, value) -> key to value } }
+            .filter { it.contains(separator) }
+            .associate { it.split(separator).let { (key, value) -> key to value } }
     }
 }
