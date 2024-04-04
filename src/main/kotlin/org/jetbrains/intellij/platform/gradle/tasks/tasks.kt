@@ -56,13 +56,22 @@ internal inline fun <reified T : Task> Project.registerTask(
 ) {
     // Register new tasks of T type if it does not exist yet
     val log = Logger(javaClass)
+
     names.forEach { name ->
         log.info("Configuring task: $name")
         tasks.maybeCreate<T>(name)
     }
 
+    when (configureWithType) {
+        true -> tasks.withType<T>(configuration)
+        false -> names.forEach { tasks.named<T>(it).configure(configuration) }
+    }
+}
+
+internal fun <T : Task> Project.preconfigureTask(task: T) {
     // Preconfigure all tasks of T type if they inherit from *Aware interfaces
-    tasks.withType<T> {
+
+    with(task) {
         /**
          * The suffix used to build unique names for configurations and tasks for [CustomIntelliJPlatformVersionAware] purposes
          *
@@ -103,7 +112,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          */
         if (this is CustomIntelliJPlatformVersionAware) {
             val baseIntellijPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
-            val dependenciesExtension = this@registerTask.dependencies.the<IntelliJPlatformDependenciesExtension>()
+            val dependenciesExtension = dependencies.the<IntelliJPlatformDependenciesExtension>()
 
             with(configurations) {
                 /**
@@ -287,10 +296,8 @@ internal inline fun <reified T : Task> Project.registerTask(
             }
             runtimeArchitecture = runtimeMetadata.map { it["os.arch"].orEmpty() }
             runtimeLauncher = project.providers.of(JavaLauncherValueSource::class) {
-                parameters {
-                    runtimeDirectory = this@withType.runtimeDirectory
-                    runtimeMetadata = this@withType.runtimeMetadata
-                }
+                parameters.runtimeDirectory = runtimeDirectory
+                parameters.runtimeMetadata = runtimeMetadata
             }
         }
 
@@ -402,11 +409,6 @@ internal inline fun <reified T : Task> Project.registerTask(
                 )
             }
         }
-    }
-
-    when (configureWithType) {
-        true -> tasks.withType<T>(configuration)
-        false -> names.forEach { tasks.named<T>(it).configure(configuration) }
     }
 }
 

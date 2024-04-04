@@ -30,10 +30,8 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformReposit
 import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
-import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
-import org.jetbrains.intellij.platform.gradle.tasks.PrintBundledPluginsTask
-import org.jetbrains.intellij.platform.gradle.tasks.PrintProductsReleasesTask
-import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.*
+import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformAware
 import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.Path
 import kotlin.io.path.absolute
@@ -395,6 +393,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             PrintProductsReleasesTask,
         ).forEach {
             it.register(project)
+        }
+
+        project.tasks.whenTaskAdded {
+            if (this !is IntelliJPlatformAware) {
+                return@whenTaskAdded
+            }
+
+            project.preconfigureTask(this)
         }
     }
 }
