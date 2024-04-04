@@ -111,7 +111,7 @@ abstract class PublishPluginTask : DefaultTask() {
     @TaskAction
     fun publishPlugin() {
         if (token.orNull.isNullOrEmpty()) {
-            throw TaskExecutionException(this, GradleException("'token' property must be specified for plugin publishing"))
+            throw GradleException("'token' property must be specified for plugin publishing")
         }
 
         val path = archiveFile.asPath
@@ -119,7 +119,7 @@ abstract class PublishPluginTask : DefaultTask() {
             is PluginCreationSuccess -> {
                 if (creationResult.unacceptableWarnings.isNotEmpty()) {
                     val problems = creationResult.unacceptableWarnings.joinToString()
-                    throw TaskExecutionException(this, GradleException("Cannot upload plugin: $problems"))
+                    throw GradleException("Cannot upload plugin: $problems")
                 }
                 val pluginId = creationResult.plugin.pluginId
                 channels.get().forEach { channel ->
@@ -144,18 +144,18 @@ abstract class PublishPluginTask : DefaultTask() {
                         )
                         log.info("Uploaded successfully")
                     } catch (exception: Exception) {
-                        throw TaskExecutionException(this, GradleException("Failed to upload plugin: ${exception.message}", exception))
+                        throw GradleException("Failed to upload plugin: ${exception.message}", exception)
                     }
                 }
             }
 
             is PluginCreationFail -> {
                 val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-                throw TaskExecutionException(this, GradleException("Cannot upload plugin: $problems"))
+                throw GradleException("Cannot upload plugin: $problems")
             }
 
             else -> {
-                throw TaskExecutionException(this, GradleException("Cannot upload plugin: $creationResult"))
+                throw GradleException("Cannot upload plugin: $creationResult")
             }
         }
     }

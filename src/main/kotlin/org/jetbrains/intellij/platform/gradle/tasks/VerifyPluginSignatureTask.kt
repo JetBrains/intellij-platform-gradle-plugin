@@ -87,14 +87,13 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
      * @return array with all available CLI options
+     * @throws InvalidUserDataException
      */
     private val arguments = sequence {
-        val file = inputArchiveFile.orNull
-            ?.run {
-                asPath
-                    .takeIf { it.exists() }
-                    ?: throw InvalidUserDataException("Plugin file does not exist: $this")
-            } ?: throw InvalidUserDataException("Input archive file is not provided.")
+        val file = inputArchiveFile.orNull?.let { regularFile ->
+            requireNotNull(regularFile.asPath.takeIf { it.exists() }) { "Plugin file does not exist: $regularFile" }
+        }
+        requireNotNull(file) { "Input archive file is not provided." }
 
         log.debug("Distribution file: $file")
 

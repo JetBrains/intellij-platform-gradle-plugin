@@ -11,7 +11,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
-import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 
@@ -132,9 +131,9 @@ fun ProductInfo.validateSupportedVersion() {
  * @param os The operating system of the target system. By default, it refers to [OperatingSystem.current].
  * @return The launch configuration for the specified architecture.
  * @throws GradleException If the specified architecture is not supported.
- * @throws GradleException If the launch information for the current OS and architecture is not found.
+ * @throws IllegalArgumentException If the launch information for the current OS and architecture is not found.
  */
-@Throws(GradleException::class)
+@Throws(GradleException::class, IllegalArgumentException::class)
 internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
     val availableArchitectures = launch.mapNotNull { it.arch }.toSet()
     val arch = with(availableArchitectures) {
@@ -148,7 +147,7 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
 
     return launch
         .find { ProductInfo.Launch.OS.current == it.os && arch == it.arch }
-        .throwIfNull { GradleException("Could not find launch information for the current OS: $name ($arch)") }
+        .let { requireNotNull(it) { "Could not find launch information for the current OS: $name ($arch)" } }
         .run { copy(additionalJvmArguments = additionalJvmArguments.map { it.trim('"') }) }
 }
 
@@ -157,11 +156,13 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
  *
  * @receiver The [Path] representing the IntelliJ Platform root directory.
  * @return The [ProductInfo] object containing the product information.
+ * @throws IllegalArgumentException
  */
+@Throws(IllegalArgumentException::class)
 fun Path.productInfo() = ProductInfoPathResolver(this)
     .resolve()
     .let { decode<ProductInfo>(it) }
-    .throwIfNull { GradleException("Could not find product info for: $this") }
+    .let { requireNotNull(it) { "Could not find product info for: $this" } }
 
 /**
  * Retrieves the [ProductInfo] for the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.

@@ -728,7 +728,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param versionProvider The provider for the version of the IntelliJ Platform dependency.
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action An optional action to be performed on the created dependency.
+     * @throws GradleException
      */
+    @Throws(GradleException::class)
     private fun addIntelliJPlatformDependency(
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
@@ -736,7 +738,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
         typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
-            type.dependency ?: throw GradleException("Specified type '$type' has no dependency available.")
+            requireNotNull(type.dependency) { "Specified type '$type' has no dependency available." }
 
             when (type) {
                 IntelliJPlatformType.AndroidStudio -> {
@@ -745,7 +747,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                             androidStudio = resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
                             androidStudioVersion = version
                         }
-                    }.orNull ?: throw GradleException("Couldn't resolve Android Studio download URL for version: $version")
+                    }.orNull
+                    requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: $version" }
+
                     val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
 
                     dependencies.create(
@@ -772,7 +776,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param localPathProvider The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action An optional action to be performed on the created dependency.
+     * @throws GradleException
      */
+    @Throws(GradleException::class)
     private fun addIntelliJPlatformLocalDependency(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
@@ -786,7 +792,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
             val hash = artifactPath.hashCode().absoluteValue % 1000
             val type = localProductInfo.productCode.toIntelliJPlatformType()
-            val coordinates = type.dependency ?: type.binary ?: throw GradleException("Specified type '$type' has no dependency available.")
+            val coordinates = type.dependency ?: type.binary
+            requireNotNull(coordinates) { "Specified type '$type' has no dependency available." }
 
             dependencies.create(
                 group = Configurations.Dependencies.LOCAL_IDE_GROUP,
@@ -883,11 +890,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Creates a dependency for an IntelliJ platform bundled plugin.
      *
      * @param bundledPluginId The ID of the bundled plugin.
+     * @throws IllegalArgumentException
      */
+    @Throws(IllegalArgumentException::class)
     private fun createIntelliJPlatformBundledPluginDependency(bundledPluginId: String): Dependency {
         val id = bundledPluginId.trim()
         val bundledPluginsList = configurations[Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST].asLenient.single().toPath().bundledPlugins()
-        val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }.throwIfNull { throw Exception("Could not find bundled plugin with ID: '$id'") }
+        val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }
+        requireNotNull(bundledPlugin) { "Could not find bundled plugin with ID: '$id'" }
+
         val artifactPath = Path(bundledPlugin.path)
         val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
         val hash = artifactPath.hashCode().absoluteValue % 1000

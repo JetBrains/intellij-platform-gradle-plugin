@@ -252,6 +252,10 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         return args
     }
 
+    /**
+     * @throws GradleException
+     */
+    @Throws(GradleException::class)
     private fun verifyOutput(output: String) {
         log.debug("Current failure levels: ${FailureLevel.values().joinToString(", ")}")
 

@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 
 /**
@@ -121,14 +120,22 @@ enum class IntelliJPlatformType(
     companion object {
         private val map = values().associateBy(IntelliJPlatformType::code)
 
-        @Throws(GradleException::class)
-        fun fromCode(code: String) = map[code]
-            ?: throw GradleException("Specified type '$code' is unknown. Supported values: ${values().joinToString()}")
+        /**
+         * @throws IllegalArgumentException
+         */
+        @Throws(IllegalArgumentException::class)
+        fun fromCode(code: String) = requireNotNull(map[code]) {
+            "Specified type '$code' is unknown. Supported values: ${values().joinToString()}"
+        }
     }
 
     override fun toString() = code
 }
 
+/**
+ * @throws IllegalArgumentException
+ */
+@Throws(IllegalArgumentException::class)
 internal fun Any.toIntelliJPlatformType() = when (this) {
     is IntelliJPlatformType -> this
     is String -> IntelliJPlatformType.fromCode(this)

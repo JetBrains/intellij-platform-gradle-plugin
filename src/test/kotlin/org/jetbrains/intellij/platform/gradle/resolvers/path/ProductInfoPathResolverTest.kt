@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
-import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.prepend
@@ -36,7 +35,7 @@ class ProductInfoPathResolverTest : IntelliJPluginTestBase() {
             intellijPlatformDirectory = dir
         )
 
-        val exception = assertFailsWith<GradleException> {
+        val exception = assertFailsWith<IllegalArgumentException> {
             resolver.resolve()
         }
         assertEquals("Cannot resolve 'product-info.json' with: $dir", exception.message)

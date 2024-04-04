@@ -8,12 +8,10 @@ import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.file.Directory
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.BuildException
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.io.File
 import java.nio.file.Path
 import java.time.LocalDateTime
@@ -63,9 +61,8 @@ internal fun ExternalModuleDependency.createIvyDependency(localPlatformArtifacts
  * @param localPath The local path of the artifact. Accepts either [String], [File], or [Directory].
  * @return The resolved artifact path as a Path object.
  * @throws IllegalArgumentException if the [localPath] is not of supported types.
- * @throws BuildException if the resolved path doesn't exist or is not a directory.
  */
-@Throws(IllegalArgumentException::class, BuildException::class)
+@Throws(IllegalArgumentException::class)
 internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
     is String -> localPath
     is File -> localPath.absolutePath
@@ -75,7 +72,7 @@ internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
     .let { Path(it) }
     .let { it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents") }
     .takeIf { it.exists() && it.isDirectory() }
-    .throwIfNull { BuildException("Specified localPath '$localPath' doesn't exist or is not a directory") }
+    .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist or is not a directory" } }
 
 /**
  * Returns the Gradle project cache directory.

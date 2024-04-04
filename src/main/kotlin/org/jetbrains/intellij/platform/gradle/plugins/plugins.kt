@@ -16,6 +16,10 @@ internal inline fun <reified T : Any> Any.configureExtension(name: String, varar
     }
 }
 
+/**
+ * @throws PluginInstantiationException
+ */
+@Throws(PluginInstantiationException::class)
 internal fun checkGradleVersion() {
     if (GradleVersion.current() < Constraints.MINIMAL_GRADLE_VERSION) {
         throw PluginInstantiationException("${Plugin.NAME} requires Gradle ${Constraints.MINIMAL_GRADLE_VERSION} and higher")

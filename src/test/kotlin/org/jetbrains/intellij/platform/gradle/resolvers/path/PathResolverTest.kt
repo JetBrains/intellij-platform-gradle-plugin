@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
-import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import java.nio.file.Path
 import kotlin.test.Test
@@ -45,7 +44,7 @@ class PathResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `fail as cannot be resolved with any prediction`() {
-        val exception = assertFailsWith<GradleException> {
+        val exception = assertFailsWith<IllegalArgumentException> {
             createResolver(
                 "first" to { null },
                 "second" to { null }

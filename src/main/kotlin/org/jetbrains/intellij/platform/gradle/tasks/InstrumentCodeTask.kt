@@ -184,6 +184,10 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
         }
     }
 
+    /**
+     * @throws Exception
+     */
+    @Throws(Exception::class)
     private fun prepareNotNullInstrumenting() = runCatching {
         ant.invokeMethod(
             "typedef",

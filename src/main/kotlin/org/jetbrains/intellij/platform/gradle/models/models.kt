@@ -39,7 +39,7 @@ private inline fun <reified T> obtainStringFormat(): StringFormat {
         ProductInfo::class,
         -> json
 
-        else -> throw GradleException("Unknown type: ${T::class.java.name}")
+        else -> throw IllegalArgumentException("Unknown type: ${T::class.java.name}")
     }
 }
 

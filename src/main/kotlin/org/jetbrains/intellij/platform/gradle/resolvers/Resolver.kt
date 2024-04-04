@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle.resolvers
 
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 
 /**
  * Interface for resolving an instance of [T] object.
@@ -28,10 +27,14 @@ interface Resolver<T> {
     @Throws(GradleException::class)
     fun resolve(): T
 
+    /**
+     * @throws IllegalArgumentException
+     */
+    @Throws(IllegalArgumentException::class)
     fun Sequence<Pair<String, () -> T?>>.resolve() = this
         .also { log.debug("Resolving '$subject'.") }
         .firstNotNullOfOrNull { (label, block) ->
             block()?.also { log.debug("'$label' resolved as: $it") }
         }
-        .throwIfNull { GradleException("Cannot resolve '$subject'" + subjectInput?.let { " with: $it" }.orEmpty()) }
+        .let { requireNotNull(it) { "Cannot resolve '$subject'" + subjectInput?.let { " with: $it" }.orEmpty() } }
 }

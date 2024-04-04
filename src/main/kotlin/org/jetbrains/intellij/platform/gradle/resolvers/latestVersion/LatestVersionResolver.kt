@@ -43,7 +43,6 @@ abstract class LatestVersionResolver(
      *
      * @throws GradleException
      */
-    @Suppress("SameParameterValue")
     @Throws(GradleException::class)
     protected fun fromGitHub(): Version {
         log.debug(message = "Resolving the latest '$subject' version from: $url")

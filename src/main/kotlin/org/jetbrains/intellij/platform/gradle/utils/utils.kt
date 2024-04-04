@@ -16,8 +16,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import java.nio.file.Path
 import kotlin.io.path.absolute
 
-inline fun <T> T?.throwIfNull(block: () -> Exception) = this ?: throw block()
-
 val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()
 
@@ -55,7 +53,9 @@ fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
  *
  * @receiver The [Configuration] to retrieve the product information from.
  * @return The [Path] of the IntelliJ Platform
+ * @throws GradleException
  */
+@Throws(GradleException::class)
 fun FileCollection.platformPath() = runCatching {
     val entries = toList()
 

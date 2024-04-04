@@ -108,6 +108,10 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
 
     override fun configure(closure: Closure<*>) = super.configure(closure)
 
+    /**
+     * @throws GradleException
+     */
+    @Throws(GradleException::class)
     private fun disableIdeUpdate() {
         val updatesConfig = sandboxConfigDirectory
             .asPath
@@ -126,9 +130,8 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
 
         updatesConfig.inputStream().use { inputStream ->
             val document = JDOMUtil.loadDocument(inputStream)
-            val application = document.rootElement
-                .takeIf { it.name == "application" }
-                ?: throw GradleException("Invalid content of '$updatesConfig' – '<application>' root element was expected.")
+            val application = document.rootElement.takeIf { it.name == "application" }
+            requireNotNull(application) { "Invalid content of '$updatesConfig' – '<application>' root element was expected." }
 
             val updatesConfigurable = application
                 .getChildren("component")

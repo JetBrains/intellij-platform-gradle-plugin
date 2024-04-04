@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
@@ -60,7 +61,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
             environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.pathString)
 
             if (args.isNotEmpty()) {
-                throw RuntimeException("Passing arguments directly is not supported in Split Mode. Use `argumentProviders` instead.")
+                throw InvalidUserDataException("Passing arguments directly is not supported in Split Mode. Use `argumentProviders` instead.")
             }
         }
 

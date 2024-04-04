@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
-import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
@@ -61,7 +60,8 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
 
             val type = IntelliJPlatformType.values().find { type ->
                 type.binary?.let { it == coordinates } == true
-            } ?: throw GradleException("Cannot detect platform type for: $coordinates")
+            }
+            requireNotNull(type) { "Cannot detect platform type for: $coordinates" }
 
             val targetDirectory = parameters.downloadDirectory.dir("$type-$version").asPath
             outputs.file("path.txt").writeText(targetDirectory.pathString)

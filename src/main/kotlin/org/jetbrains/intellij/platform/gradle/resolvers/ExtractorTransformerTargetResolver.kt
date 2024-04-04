@@ -33,7 +33,12 @@ class ExtractorTransformerTargetResolver(
 
     override val log = Logger(javaClass)
 
+
     private val coordinates
+        /**
+         * @throws GradleException
+         */
+        @Throws(GradleException::class)
         get() = runCatching {
             val (groupId, artifactId, version) = artifactPath.pathString.split(separator).dropLast(2).takeLast(3)
             Triple(groupId, artifactId, version)
@@ -50,6 +55,10 @@ class ExtractorTransformerTargetResolver(
     private val version
         get() = coordinates.third
 
+    /**
+     * @throws GradleException
+     */
+    @Throws(GradleException::class)
     override fun resolve() = when (obtainArtifactType()) {
         ArtifactType.INTELLIJ_PLATFORM -> {
             val coordinates = Coordinates(groupId, artifactId)

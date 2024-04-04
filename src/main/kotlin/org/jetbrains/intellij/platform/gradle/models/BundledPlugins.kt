@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle.models
 
 import kotlinx.serialization.Serializable
 import org.gradle.api.GradleException
-import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.name
@@ -23,11 +22,19 @@ data class BundledPlugin(
     val dependencies: List<String> = mutableListOf(),
 )
 
+/**
+ * @throws GradleException
+ */
+@Throws(GradleException::class)
 internal fun Path.resolveBundledPluginsPath(name: String = "bundled-plugins.json") =
     listOf(this, resolve(name), resolve("Resources").resolve(name))
         .find { it.name == name && it.exists() }
         ?: throw GradleException("Could not resolve '$name' file in: $this")
 
-@Throws(GradleException::class)
-fun Path.bundledPlugins() = decode<BundledPlugins>(this)
-    .throwIfNull { GradleException("Could not find bundled plugins for: $this") }
+/**
+ * @throws IllegalArgumentException
+ */
+@Throws(IllegalArgumentException::class)
+fun Path.bundledPlugins() = requireNotNull(decode<BundledPlugins>(this)) {
+    "Could not find bundled plugins for: $this"
+}

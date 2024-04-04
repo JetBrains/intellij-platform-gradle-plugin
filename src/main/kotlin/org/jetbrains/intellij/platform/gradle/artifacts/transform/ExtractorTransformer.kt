@@ -51,7 +51,7 @@ abstract class ExtractorTransformer @Inject constructor(
     private val log = Logger(javaClass)
 
     override fun transform(outputs: TransformOutputs) {
-        kotlin.runCatching {
+        runCatching {
             val path = inputArtifact.asPath
             val targetName = ExtractorTransformerTargetResolver(
                 path,

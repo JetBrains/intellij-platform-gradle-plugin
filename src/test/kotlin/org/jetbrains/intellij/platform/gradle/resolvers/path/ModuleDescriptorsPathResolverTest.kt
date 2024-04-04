@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
-import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.*
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
@@ -31,7 +30,7 @@ class ModuleDescriptorsPathResolverTest : IntelliJPluginTestBase() {
             platformPath = dir
         )
 
-        val exception = assertFailsWith<GradleException> {
+        val exception = assertFailsWith<IllegalArgumentException> {
             resolver.resolve()
         }
         assertEquals("Cannot resolve 'Module Descriptors' with: $dir", exception.message)

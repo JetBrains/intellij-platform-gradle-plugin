@@ -771,7 +771,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
             /**
              * Creates and adds a local instance of the IDE as a dependency.
+             *
+             * @throws GradleException
              */
+            @Throws(GradleException::class)
             private fun addLocalIdeDependency(
                 localPlatformArtifactsDirectory: Path,
                 localPath: Provider<*>,
@@ -784,7 +787,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
                     val hash = artifactPath.hashCode().absoluteValue % 1000
                     val type = productInfo.productCode.toIntelliJPlatformType()
-                    type.dependency ?: throw GradleException("Specified type '$type' has no dependency available.")
+                    requireNotNull(type.dependency) { "Specified type '$type' has no dependency available." }
 
                     dependencies.create(
                         group = Configurations.Dependencies.LOCAL_IDE_GROUP,

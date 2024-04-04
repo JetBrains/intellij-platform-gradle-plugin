@@ -26,6 +26,7 @@ interface SplitModeAware : IntelliJPlatformAware, IntelliJPlatformVersionAware {
      * Validates that the resolved IntelliJ Platform supports Split Mode.
      *
      * @see ProductInfo.validateSupportedVersion
+     * @throws IllegalArgumentException
      */
     @Throws(IllegalArgumentException::class)
     fun validateSplitModeSupport() {

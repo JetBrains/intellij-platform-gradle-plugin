@@ -172,14 +172,13 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
      * @return array with all available CLI options
+     * @throws InvalidUserDataException
      */
     private val arguments = sequence {
-        val file = archiveFile.orNull
-            ?.run {
-                asPath
-                    .takeIf { it.exists() }
-                    ?: throw InvalidUserDataException("Plugin file does not exist: $this")
-            } ?: throw InvalidUserDataException("Input archive file is not provided.")
+        val file = archiveFile.orNull?.let { regularFile ->
+            requireNotNull(regularFile.asPath.takeIf { it.exists() }) { "Plugin file does not exist: $regularFile" }
+        }
+        requireNotNull(file) { "Input archive file is not provided." }
 
         log.debug("Distribution file: $file")
 
@@ -191,37 +190,26 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
 
         privateKey.orNull?.let {
             yield("-key")
-            yield(
-                Base64.getDecoder()
-                    .runCatching { decode(it.trim()).let(::String) }
-                    .getOrDefault(it)
-            )
+            yield(Base64.getDecoder().runCatching { decode(it.trim()).let(::String) }.getOrDefault(it))
 
             log.debug("Using private key passed as content")
-        }
-            ?: privateKeyFile.orNull?.let {
-                yield("-key-file")
-                yield(it.asPath.pathString)
-                log.debug("Using private key passed as file")
-            }
-            ?: throw InvalidUserDataException("Private key not found. One of the 'privateKey' or 'privateKeyFile' properties has to be provided.")
+        } ?: privateKeyFile.orNull?.let {
+            yield("-key-file")
+            yield(it.asPath.pathString)
+            log.debug("Using private key passed as file")
+        } ?: throw InvalidUserDataException("Private key not found. One of the 'privateKey' or 'privateKeyFile' properties has to be provided.")
 
         certificateChain.orNull?.let {
             yield("-cert")
-            yield(
-                Base64.getDecoder()
-                    .runCatching { decode(it.trim()).let(::String) }
-                    .getOrDefault(it)
-            )
+            yield(Base64.getDecoder().runCatching { decode(it.trim()).let(::String) }.getOrDefault(it))
 
             log.debug("Using certificate chain passed as content")
+        } ?: certificateChainFile.orNull?.let {
+            yield("-cert-file")
+            yield(it.asPath.pathString)
+            log.debug("Using certificate chain passed as file")
         }
-            ?: certificateChainFile.orNull?.let {
-                yield("-cert-file")
-                yield(it.asPath.pathString)
-                log.debug("Using certificate chain passed as file")
-            }
-            ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")
+        ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")
 
         password.orNull?.let {
             yield("-key-pass")
@@ -251,36 +239,29 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     }
 
     companion object : Registrable {
-        override fun register(project: Project) =
-            project.registerTask<SignPluginTask>(Tasks.SIGN_PLUGIN) {
-                val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
-                val extension = project.the<IntelliJPlatformExtension>()
+        override fun register(project: Project) = project.registerTask<SignPluginTask>(Tasks.SIGN_PLUGIN) {
+            val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
+            val extension = project.the<IntelliJPlatformExtension>()
 
-                archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
-                signedArchiveFile.convention(
-                    project.layout.file(
-                        archiveFile
-                            .map { it.asPath }
-                            .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }
-                    )
-                )
-                extension.signing.let {
-                    keyStore.convention(it.keyStore)
-                    keyStorePassword.convention(it.keyStorePassword)
-                    keyStoreKeyAlias.convention(it.keyStoreKeyAlias)
-                    keyStoreType.convention(it.keyStoreType)
-                    keyStoreProviderName.convention(it.keyStoreProviderName)
-                    privateKey.convention(it.privateKey)
-                    privateKeyFile.convention(it.privateKeyFile)
-                    password.convention(it.password)
-                    certificateChain.convention(it.certificateChain)
-                    certificateChainFile.convention(it.certificateChainFile)
-                }
-
-                onlyIf {
-                    (privateKey.isSpecified() || privateKeyFile.isSpecified())
-                            && (certificateChain.isSpecified() || certificateChainFile.isSpecified())
-                }
+            archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
+            signedArchiveFile.convention(project.layout.file(archiveFile.map { it.asPath }
+                .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }))
+            extension.signing.let {
+                keyStore.convention(it.keyStore)
+                keyStorePassword.convention(it.keyStorePassword)
+                keyStoreKeyAlias.convention(it.keyStoreKeyAlias)
+                keyStoreType.convention(it.keyStoreType)
+                keyStoreProviderName.convention(it.keyStoreProviderName)
+                privateKey.convention(it.privateKey)
+                privateKeyFile.convention(it.privateKeyFile)
+                password.convention(it.password)
+                certificateChain.convention(it.certificateChain)
+                certificateChainFile.convention(it.certificateChainFile)
             }
+
+            onlyIf {
+                (privateKey.isSpecified() || privateKeyFile.isSpecified()) && (certificateChain.isSpecified() || certificateChainFile.isSpecified())
+            }
+        }
     }
 }

@@ -13,7 +13,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_RUNTIME_VENDOR
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.throwIfNull
 import java.nio.file.Path
 
 /**
@@ -101,10 +100,12 @@ class JavaRuntimePathResolver(
      *
      * @see resolve
      * @return Java Runtime executable
+     * @throws IllegalArgumentException
      */
-    fun resolveExecutable() = resolve()
-        .resolveJavaRuntimeExecutable()
-        .throwIfNull { GradleException("No Java Runtime executable found") }
+    @Throws(IllegalArgumentException::class)
+    fun resolveExecutable() = requireNotNull(resolve().resolveJavaRuntimeExecutable()) {
+        "No Java Runtime executable found"
+    }
 
     /**
      * Resolves the Java Runtime directory for the given [Path].

@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.performanceTest.parsers
 
+import org.gradle.api.InvalidUserDataException
 import org.jetbrains.intellij.platform.gradle.models.PerformanceTestScript
 import java.nio.file.Path
 import java.time.Duration
@@ -45,7 +46,7 @@ private fun String.convertToMillis() = when {
     )
 
     else -> takeIf { it.isNotBlank() }?.trim()?.toLong()
-} ?: throw RuntimeException("Value '$this' can't be converted to milliseconds")
+} ?: throw InvalidUserDataException("Value '$this' can't be converted to milliseconds")
 
 private class Keywords {
 

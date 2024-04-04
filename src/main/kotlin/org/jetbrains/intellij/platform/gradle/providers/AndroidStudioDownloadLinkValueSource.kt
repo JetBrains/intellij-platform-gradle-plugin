@@ -41,21 +41,20 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
         val androidStudioReleases = parameters.androidStudio.orNull?.asPath
             ?.also { log.info("Reading Android Studio releases from: $it") }
             ?.let { decode<AndroidStudioReleases>(it) }
-            ?: throw GradleException("Failed to decode Android Studio releases from: ${parameters.androidStudio.orNull}")
+        requireNotNull(androidStudioReleases) { "Failed to decode Android Studio releases from: ${parameters.androidStudio.orNull}" }
 
         val os = with(OperatingSystem.current()) {
             when {
                 isMacOsX -> "mac"
                 isLinux -> "linux"
                 isWindows -> "windows"
-                else -> null
-            } ?: throw GradleException("Failed to obtain platform OS for: $this")
+                else -> throw GradleException("Failed to obtain platform OS for: $this")
+            }
         }
 
         val version = parameters.androidStudioVersion.orNull
-        val item = androidStudioReleases.items
-            .find { it.version == version }
-            ?: throw GradleException("Failed to find Android Studio release for version: $version")
+        val item = androidStudioReleases.items.find { it.version == version }
+        requireNotNull(item) { "Failed to find Android Studio release for version: $version" }
 
         item.downloads
             .asSequence()
