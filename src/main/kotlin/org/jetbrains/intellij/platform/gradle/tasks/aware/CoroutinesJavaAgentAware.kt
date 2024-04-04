@@ -10,7 +10,7 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatform
 /**
  * The interface provides the path to the Java Agent file for the Coroutines library required to enable coroutines debugging.
  */
-interface CoroutinesJavaAgentAware {
+interface CoroutinesJavaAgentAware : IntelliJPlatformAware {
 
     /**
      * The path to the coroutines Java Agent file.

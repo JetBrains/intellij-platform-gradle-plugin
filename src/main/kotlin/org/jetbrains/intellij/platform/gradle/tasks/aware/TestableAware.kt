@@ -2,4 +2,4 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
-interface TestableAware : CoroutinesJavaAgentAware, PluginAware, RuntimeAware, SandboxAware
+interface TestableAware : IntelliJPlatformAware, CoroutinesJavaAgentAware, PluginAware, RuntimeAware, SandboxAware

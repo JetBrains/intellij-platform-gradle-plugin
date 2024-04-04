@@ -24,7 +24,7 @@ import java.nio.file.Path
  *
  * @see IntelliJPlatformDependenciesExtension
  */
-interface IntelliJPlatformVersionAware {
+interface IntelliJPlatformVersionAware : IntelliJPlatformAware {
 
     /**
      * Holds the [Configurations.INTELLIJ_PLATFORM] configuration with the IntelliJ Platform dependency added.

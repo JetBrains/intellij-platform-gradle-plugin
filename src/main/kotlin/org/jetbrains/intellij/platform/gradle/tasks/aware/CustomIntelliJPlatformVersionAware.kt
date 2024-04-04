@@ -5,8 +5,8 @@ package org.jetbrains.intellij.platform.gradle.tasks.aware
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 /**
  * By default, the project with the IntelliJ Platform Gradle Plugin applied required the presence of the IntelliJ Platform, referred to later by various tasks,
@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
  * Configurations, as well as the task preparing sandbox for running and testing the custom IntelliJ Platform (if required), have a random suffix applied
  * to avoid collisions.
  */
-interface CustomIntelliJPlatformVersionAware : IntelliJPlatformVersionAware {
+interface CustomIntelliJPlatformVersionAware : IntelliJPlatformAware, IntelliJPlatformVersionAware {
 
     /**
      * An input property to configure the type of the custom IntelliJ Platform.

@@ -12,7 +12,7 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
 /**
  * The interface provides the possibility to run IDE in Split Mode.
  */
-interface SplitModeAware : IntelliJPlatformVersionAware {
+interface SplitModeAware : IntelliJPlatformAware, IntelliJPlatformVersionAware {
 
     /**
      * Enables Split Mode when running the IDE.

@@ -2,4 +2,4 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
-interface SandboxProducerAware : IntelliJPlatformAware, SandboxAware
+interface IntelliJPlatformAware
