@@ -11,7 +11,7 @@ import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
+ class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve the Android Studio link for the specific version and current OS`() {
@@ -33,11 +33,9 @@ class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        val isArm = System.getProperty("os.arch") == "aarch64"
         val link = with(OperatingSystem.current()) {
             when {
-                isMacOsX && isArm -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-mac_arm.zip"
-                isMacOsX -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-mac.zip"
+                isMacOsX -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-mac_arm.zip"
                 isLinux -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-linux.tar.gz"
                 isWindows -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-windows-exe.zip"
                 else -> null
