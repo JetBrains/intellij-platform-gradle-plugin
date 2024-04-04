@@ -8,7 +8,7 @@ version = "1.0.0"
 plugins {
     id("java")
     id("kotlin")
-    id("org.jetbrains.intellij.platform") // TODO: .submodule
+    id("org.jetbrains.intellij.platform.module")
 }
 
 kotlin {

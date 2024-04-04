@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.of
@@ -60,7 +61,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
      *
      * @see [CoroutinesJavaAgentAware]
      */
-    @get:Internal
+    @get:OutputFile
     abstract val coroutinesJavaAgent: RegularFileProperty
 
     /**
@@ -159,6 +160,11 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
             onlyIf {
                 !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
             }
+
+            project.tasks
+                .matching { it.group == Plugin.GROUP_NAME && it.name != this@registerTask.name }
+                .configureEach { dependsOn(this@registerTask) }
+
             mustRunAfter(Tasks.External.CLEAN)
         }
     }

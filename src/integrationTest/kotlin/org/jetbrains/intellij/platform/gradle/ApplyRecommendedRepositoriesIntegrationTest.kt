@@ -17,7 +17,7 @@ class ApplyRecommendedRepositoriesIntegrationTest : IntelliJPlatformIntegrationT
                 val repositories = it.split(";")
 
                 assertContains(repositories, "https://repo.maven.apache.org/maven2/")
-                assertContains(repositories, "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies")
+                assertContains(repositories, "https://cache-redirector.jetbrains.com/intellij-dependencies")
                 assertContains(repositories, "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/releases")
                 assertContains(repositories, "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/snapshots")
                 assertContains(repositories, "https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven")

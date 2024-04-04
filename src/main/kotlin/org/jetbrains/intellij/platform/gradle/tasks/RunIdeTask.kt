@@ -95,11 +95,11 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
 
 //            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
             }
-    }
-}
 
-internal fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
-    if (!systemProperties.containsKey(name)) {
-        systemProperty(name, defaultValue)
+        private fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
+            if (!systemProperties.containsKey(name)) {
+                systemProperty(name, defaultValue)
+            }
+        }
     }
 }

@@ -39,7 +39,7 @@ abstract class BuildPluginTask : Zip() {
 
                 archiveBaseName.convention(extension.projectName)
 
-                from(jarSearchableOptionsTaskProvider.flatMap { it.archiveFile }) {
+                from(jarSearchableOptionsTaskProvider) {
                     into("lib")
                 }
                 from(prepareSandboxTaskProvider.zip(extension.projectName) { task, name ->

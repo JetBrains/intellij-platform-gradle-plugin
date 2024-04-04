@@ -93,8 +93,6 @@ internal inline fun <reified T : Task> Project.registerTask(
             coroutinesJavaAgentFile.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap {
                 it.coroutinesJavaAgent
             })
-
-            dependsOn(initializeIntelliJPlatformPluginTaskProvider)
         }
 
         /**
@@ -251,7 +249,9 @@ internal inline fun <reified T : Task> Project.registerTask(
                     else -> Tasks.PREPARE_SANDBOX
                 } + "_$suffix".takeIf { !isBuiltInTask || customIntelliJPlatform }.orEmpty()
 
-                dependsOn(tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName))
+                val prepareSandboxTask = tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName)
+                dependsOn(prepareSandboxTask)
+                sandboxSuffix.convention(prepareSandboxTask.sandboxSuffix)
             }
         }
 
@@ -260,10 +260,7 @@ internal inline fun <reified T : Task> Project.registerTask(
          */
         if (this is PluginAware) {
             val patchPluginXmlTaskProvider = tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-
             pluginXml.convention(patchPluginXmlTaskProvider.flatMap { it.outputFile })
-
-            dependsOn(patchPluginXmlTaskProvider)
         }
 
         /**

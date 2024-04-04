@@ -24,7 +24,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        create(providers.gradleProperty("intellijPlatform.type"), providers.gradleProperty("intellijPlatform.version"))
+        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
     }
 
     implementation(project(":submodule"))

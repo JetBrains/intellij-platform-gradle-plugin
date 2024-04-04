@@ -18,7 +18,7 @@ import kotlin.io.path.absolute
 
 inline fun <T> T?.throwIfNull(block: () -> Exception) = this ?: throw block()
 
-internal val FileSystemLocation.asPath
+val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()
 
 internal val <T : FileSystemLocation> Provider<T>.asPath

@@ -193,9 +193,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
 
                 from(pluginsClasspath)
 
-                dependsOn(intellijPlatformPluginsConfiguration)
-                dependsOn(runtimeConfiguration)
-
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
                 inputs.files(runtimeConfiguration)
             }

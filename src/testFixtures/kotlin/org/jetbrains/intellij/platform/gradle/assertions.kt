@@ -2,16 +2,19 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import org.gradle.kotlin.dsl.support.normaliseLineSeparators
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.TaskOutcome
 import org.intellij.lang.annotations.Language
 import java.nio.file.Path
+import java.util.regex.Pattern
 import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+
+private val NON_UNIX_LINE_SEPARATORS = Pattern.compile("\r\n|\r")
+internal fun String.normaliseLineSeparators() = NON_UNIX_LINE_SEPARATORS.matcher(this).replaceAll("\n")
 
 infix fun String.containsText(string: String) =
     assert(normaliseLineSeparators().contains(string)) { "expected:<$this> but was:<$string>" }

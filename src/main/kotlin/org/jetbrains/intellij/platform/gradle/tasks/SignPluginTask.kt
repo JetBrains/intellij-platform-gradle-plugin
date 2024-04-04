@@ -281,8 +281,6 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
                     (privateKey.isSpecified() || privateKeyFile.isSpecified())
                             && (certificateChain.isSpecified() || certificateChainFile.isSpecified())
                 }
-
-                dependsOn(buildPluginTaskProvider)
             }
     }
 }

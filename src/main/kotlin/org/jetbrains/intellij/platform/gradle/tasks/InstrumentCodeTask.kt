@@ -18,6 +18,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
@@ -31,7 +32,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.tasks.aware.JavaCompilerAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.kotlin.gradle.utils.named
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlin.io.path.createDirectories
@@ -42,21 +42,6 @@ import kotlin.io.path.isDirectory
 private const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
 private const val LOADER_REF = "java2.loader"
 
-/**
- * The following attributes help you to tune instrumenting behaviour in `instrumentCode { ... }` block.
- *
- *
- * Would that help in binding instrumented classes with sources?
- *      https://github.com/societe-generale/arch-unit-gradle-plugin/pull/24/files
- *
- * Playing with the default artifact?
- *      https://discuss.gradle.org/t/replace-default-artifact-from-jar-task-need-new-solution-for-gradle-5/30260/18
- *
- *
- * Idea: write instrumented code back to classes/[java|kotlin]/[main|test]/
- * Idea 2: write instrumented code back to instrumented/[java|kotlin]/[main|test]/
- */
-@Deprecated(message = "CHECK")
 @CacheableTask
 abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
@@ -317,7 +302,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                 from(instrumentCodeTaskProvider)
                 with(jarTaskProvider.get())
 
-                dependsOn(instrumentCodeTaskProvider)
+
                 onlyIf { instrumentCodeEnabled.get() }
             }
 

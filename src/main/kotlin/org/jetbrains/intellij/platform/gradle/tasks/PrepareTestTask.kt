@@ -3,8 +3,22 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.Project
 import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.testing.Test
+import org.gradle.kotlin.dsl.named
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
 @CacheableTask
-abstract class PrepareTestTask : DefaultTask(), TestableAware
+abstract class PrepareTestTask : DefaultTask(), TestableAware {
+
+    companion object : Registrable {
+        override fun register(project: Project) =
+            project.registerTask<PrepareTestTask>(Tasks.PREPARE_TEST) {
+                project.tasks.named<Test>(Tasks.External.TEST) {
+                    dependsOn(this@registerTask)
+                }
+            }
+    }
+}

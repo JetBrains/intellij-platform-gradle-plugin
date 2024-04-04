@@ -150,11 +150,14 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {
+            val testResultsFile = buildDirectory.resolve("test-results/test/TEST-InstrumentationTests.xml")
+            assertExists(testResultsFile)
+
             output containsText "InstrumentationTests > fooTest FAILED"
-            output containsText "Argument for @NotNull parameter 's' of TestFoo.testFoo must not be null"
+            testResultsFile containsText "Argument for @NotNull parameter 's' of TestFoo.testFoo must not be null"
 
             output containsText "InstrumentationTests > test FAILED"
-            output containsText "Argument for @NotNull parameter 's' of Foo.foo must not be null"
+            testResultsFile containsText "Argument for @NotNull parameter 's' of Foo.foo must not be null"
         }
     }
 }

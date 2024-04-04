@@ -202,44 +202,28 @@ gradlePlugin {
     website.set(properties("website"))
     vcsUrl.set(properties("vcsUrl"))
 
-    plugins.create("intellijPlatform") {
-        id = "org.jetbrains.intellij.platform"
-        displayName = "IntelliJ Platform Gradle Plugin"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformPlugin"
-        description = project.description
-        tags.set(properties("tags").map { it.split(',') })
-    }
+    mapOf(
+        // main plugins
+        "" to "project.IntelliJPlatformPlugin",
+        "migration" to "project.IntelliJPlatformMigrationPlugin",
+        "module" to "project.IntelliJPlatformModulePlugin",
+        "settings" to "settings.IntelliJPlatformSettingsPlugin",
 
-    plugins.create("intellijPlatformBase") {
-        id = "org.jetbrains.intellij.platform.base"
-        displayName = "IntelliJ Platform Gradle Plugin (base)"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin"
-        description = project.description
-        tags.set(properties("tags").map { it.split(',') })
-    }
-
-    plugins.create("intellijPlatformTasks") {
-        id = "org.jetbrains.intellij.platform.tasks"
-        displayName = "IntelliJ Platform Gradle Plugin (tasks)"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformTasksPlugin"
-        description = project.description
-        tags.set(properties("tags").map { it.split(',') })
-    }
-
-    plugins.create("intellijPlatformSettings") {
-        id = "org.jetbrains.intellij.platform.settings"
-        displayName = "IntelliJ Platform Gradle Plugin (settings)"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.settings.IntelliJPlatformSettingsPlugin"
-        description = project.description
-        tags.set(properties("tags").map { it.split(',') })
-    }
-
-    plugins.create("intellijPlatformMigration") {
-        id = "org.jetbrains.intellij.platform.migration"
-        displayName = "IntelliJ Platform Gradle Plugin (migration helper)"
-        implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformMigrationPlugin"
-        description = project.description
-        tags.set(properties("tags").map { it.split(',') })
+        // partials
+        "base" to "project.partials.IntelliJPlatformBasePlugin",
+        "build" to "project.partial.IntelliJPlatformBuildPlugin",
+        "publish" to "project.partials.IntelliJPlatformPublishPlugin",
+        "run" to "project.partials.IntelliJPlatformRunPlugin",
+        "test" to "project.partials.IntelliJPlatformTestPlugin",
+        "verify" to "project.partials.IntelliJPlatformVerifyPlugin",
+    ).forEach { (pluginId, pluginClass) ->
+        plugins.create("intellijPlatform${pluginId.replaceFirstChar { it.titlecase() }}") {
+            id = "org.jetbrains.intellij.platform" + ".$pluginId".takeIf { pluginId.isNotBlank() }.orEmpty()
+            displayName = "IntelliJ Platform Gradle Plugin" + " ($pluginId)".takeIf { pluginId.isNotBlank() }.orEmpty()
+            implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.$pluginClass"
+            description = project.description
+            tags.set(properties("tags").map { it.split(',') })
+        }
     }
 
     testSourceSets.add(sourceSets["integrationTest"])

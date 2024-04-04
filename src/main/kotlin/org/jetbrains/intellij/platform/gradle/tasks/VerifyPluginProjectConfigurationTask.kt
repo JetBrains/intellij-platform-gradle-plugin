@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
@@ -11,10 +10,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.withGroovyBuilder
-import org.gradle.kotlin.dsl.withType
+import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
@@ -23,13 +19,13 @@ import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCachePath
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
-import kotlin.io.path.absolute
+import kotlin.io.path.exists
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
 
@@ -64,10 +60,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     /**
      * IntelliJ Platform cache directory.
      */
-    @get:InputDirectory
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val intellijPlatformCache: DirectoryProperty
+    @get:Internal
+    abstract val intellijPlatformCache: Property<File>
 
     /**
      * The `.gitignore` file located in the [rootDirectory], tracked for content change.
@@ -203,7 +197,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             }
             run {
                 val gitignore = gitignoreFile.orNull?.asPath ?: return@run
-                val cache = intellijPlatformCache.asPath.takeIf { it.exists() } ?: return@run
+                val cache = intellijPlatformCache.orNull?.toPath()?.takeIf { it.exists() } ?: return@run
                 val root = rootDirectory.get().toPath()
 
                 if (cache != root.resolve(CACHE_DIRECTORY)) {
@@ -247,6 +241,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             project.registerTask<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
                 log.info("Configuring plugin configuration verification task")
 
+                val extension = project.the<IntelliJPlatformExtension>()
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(Tasks.External.COMPILE_JAVA)
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
@@ -254,9 +249,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 rootDirectory.convention(project.provider {
                     project.rootProject.rootDir
                 })
-                intellijPlatformCache.convention(project.layout.dir(project.provider {
-                    project.providers.intellijPlatformCachePath(project.rootProject.rootDir.toPath().absolute()).toFile()
-                }))
+                intellijPlatformCache.convention(project.provider {
+                    extension.cachePath.toFile()
+                })
                 gitignoreFile.convention(project.layout.file(project.provider {
                     project.rootProject.rootDir.resolve(".gitignore").takeIf { it.exists() }
                 }))

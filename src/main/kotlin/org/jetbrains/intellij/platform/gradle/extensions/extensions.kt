@@ -83,8 +83,10 @@ internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
 internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
     gradleProperty(GradleProperties.INTELLIJ_PLATFORM_CACHE).orNull
         .takeUnless { it.isNullOrBlank() }
-        ?.let { Path(it).absolute() }
-        ?: rootProjectDirectory.resolve(CACHE_DIRECTORY)
+        ?.let { Path(it) }
+        .run { this ?: rootProjectDirectory.resolve(CACHE_DIRECTORY) }
+        .createDirectories()
+        .absolute()
 
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
@@ -96,6 +98,7 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
 internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
     gradleProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS).orNull
         .takeUnless { it.isNullOrBlank() }
-        ?.let { Path(it).absolute() }
-        ?: intellijPlatformCachePath(rootProjectDirectory)
-            .resolve("localPlatformArtifacts")
+        ?.let { Path(it) }
+        .run { this ?: intellijPlatformCachePath(rootProjectDirectory).resolve("localPlatformArtifacts") }
+        .createDirectories()
+        .absolute()

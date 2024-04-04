@@ -21,8 +21,6 @@ class ProcessResourcesCompanion {
                     duplicatesStrategy = DuplicatesStrategy.INCLUDE
                     into("META-INF")
                 }
-
-                dependsOn(patchPluginXmlTaskProvider)
             }
     }
 }
