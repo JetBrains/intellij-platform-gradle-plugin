@@ -103,7 +103,7 @@ enum class IntelliJPlatformType(
     RustRover(
         code = "RR",
         dependency = Coordinates("com.jetbrains.intellij.rustrover", "RustRover"),
-        binary = null,
+        binary = Coordinates("rustrover", "RustRover"),
     ),
     WebStorm(
         code = "WS",
@@ -113,7 +113,7 @@ enum class IntelliJPlatformType(
     Writerside(
         code = "WRS",
         dependency = Coordinates("com.jetbrains.intellij.idea", "writerside"),
-        binary = null,
+        binary = Coordinates("writerside", "writerside"),
     ),
     ;
 
