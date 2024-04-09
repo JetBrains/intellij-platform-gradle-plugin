@@ -21,7 +21,7 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
  */
 enum class BuildFeature(private val defaultValue: Boolean) {
     /**
-     * Instruct IDE that sources are needed to be downloaded when working with IntelliJ Platform Gradle Plugin.
+     * Instruct the IDE that sources are needed to be downloaded when working with IntelliJ Platform Gradle Plugin.
      * Value is passed directly to the [Idea Gradle Plugin](https://docs.gradle.org/current/userguide/idea_plugin.html)
      * to the `idea.module.downloadSources` property.
      *
@@ -63,7 +63,7 @@ enum class BuildFeature(private val defaultValue: Boolean) {
     USE_CACHE_REDIRECTOR(true),
 
     /**
-     * Java Compiler dependencies are tied to IntelliJ Platform build numbers and hosted in the IntelliJ Dependencies Repository.
+     * Some dependencies are tied to IntelliJ Platform build numbers and hosted in the IntelliJ Dependencies Repository.
      * Despite this, certain versions (like EAP or nightly builds) might be absent.
      * To solve this, we fetch a list of all versions from the Maven repository and locate the closest match.
      * This method requires an additional remote repository request.

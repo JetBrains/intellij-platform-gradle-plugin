@@ -15,7 +15,6 @@ import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.BuildFeature
-import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
@@ -370,7 +369,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
             configureExtension<IntelliJPlatformExtension.Publishing>(Extensions.PUBLISHING) {
                 host.convention(Locations.JETBRAINS_MARKETPLACE)
-                toolboxEnterprise.convention(false)
+                ideServices.convention(false)
                 channels.convention(listOf("default"))
                 hidden.convention(false)
             }

@@ -18,8 +18,8 @@ import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.utils.IdeServicesPluginRepositoryService
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.ToolboxEnterprisePluginRepositoryService
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
@@ -93,13 +93,13 @@ abstract class PublishPluginTask : DefaultTask() {
     abstract val hidden: Property<Boolean>
 
     /**
-     * Specifies if the Toolbox Enterprise plugin repository service should be used.
+     * Specifies if the IDE Services plugin repository service should be used.
      *
      * Default value: `false`
      */
     @get:Input
     @get:Optional
-    abstract val toolboxEnterprise: Property<Boolean>
+    abstract val ideServices: Property<Boolean>
 
     private val log = Logger(javaClass)
 
@@ -125,12 +125,12 @@ abstract class PublishPluginTask : DefaultTask() {
                 channels.get().forEach { channel ->
                     log.info("Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
                     try {
-                        val repositoryClient = when (toolboxEnterprise.get()) {
+                        val repositoryClient = when (ideServices.get()) {
                             true -> PluginRepositoryFactory.createWithImplementationClass(
                                 host.get(),
                                 token.get(),
                                 "Automation",
-                                ToolboxEnterprisePluginRepositoryService::class.java,
+                                IdeServicesPluginRepositoryService::class.java,
                             )
 
                             false -> PluginRepositoryFactory.create(host.get(), token.get())
@@ -171,7 +171,7 @@ abstract class PublishPluginTask : DefaultTask() {
 
                 token.convention(extension.publishing.token)
                 host.convention(extension.publishing.host)
-                toolboxEnterprise.convention(extension.publishing.toolboxEnterprise)
+                ideServices.convention(extension.publishing.ideServices)
                 channels.convention(extension.publishing.channels)
                 hidden.convention(extension.publishing.hidden)
 

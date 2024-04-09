@@ -378,13 +378,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         val channels: ListProperty<String>
 
         /**
-         * Specifies if the Toolbox Enterprise plugin repository service should be used.
+         * Specifies if the IDE Services plugin repository service should be used.
          *
          * Default value: `false`
          *
-         * @see PublishPluginTask.toolboxEnterprise
+         * @see PublishPluginTask.ideServices
          */
-        val toolboxEnterprise: Property<Boolean>
+        val ideServices: Property<Boolean>
 
         /**
          * Publish the plugin update and mark it as hidden to prevent public release after approval.
