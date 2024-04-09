@@ -65,6 +65,8 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
             }
         }
 
+        systemPropertyDefault("idea.auto.reload.plugins", autoReload.get())
+
         super.exec()
     }
 
@@ -73,7 +75,6 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
         //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/prop  erty.html
         override fun register(project: Project) =
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
-                systemPropertyDefault("idea.auto.reload.plugins", true)
                 systemPropertyDefault("idea.classpath.index.enabled", false)
                 systemPropertyDefault("idea.is.internal", true)
                 systemPropertyDefault("idea.plugin.in.sandbox.mode", true)

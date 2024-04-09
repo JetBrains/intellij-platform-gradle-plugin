@@ -295,10 +295,12 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             project.providers,
             rootProjectDirectory,
         ) {
+            autoReload.convention(true)
             buildSearchableOptions.convention(true)
             instrumentCode.convention(true)
             projectName.convention(project.name)
             sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
+            splitMode.convention(false)
 
             configureExtension<IntelliJPlatformExtension.PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {
                 version.convention(project.provider { project.version.toString() })
