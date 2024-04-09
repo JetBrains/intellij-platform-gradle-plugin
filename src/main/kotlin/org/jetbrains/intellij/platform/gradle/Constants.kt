@@ -174,7 +174,6 @@ object Constants {
         const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY = "kotlin.stdlib.default.dependency"
     }
 
-    const val CLASSPATH_INDEX_CLEANUP_TASK_NAME = "classpathIndexCleanup"
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
 
