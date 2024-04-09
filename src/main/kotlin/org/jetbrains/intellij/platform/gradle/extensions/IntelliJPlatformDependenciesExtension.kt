@@ -800,7 +800,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 name = coordinates.groupId,
                 version = "${localProductInfo.version}+$hash",
             ).apply {
-                createIvyDependency(
+                createIvyDependencyFile(
                     localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
                     publications = listOf(artifactPath.toPublication()),
                 )
@@ -908,7 +908,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             name = id,
             version = "${productInfo.version}+$hash",
         ).apply {
-            createIvyDependency(
+            createIvyDependencyFile(
                 localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
                 publications = jars.map { it.toPublication() },
             )

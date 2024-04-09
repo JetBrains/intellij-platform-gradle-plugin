@@ -24,7 +24,31 @@ import kotlin.io.path.*
  * @param localPlatformArtifactsPath The [Path] to the local IntelliJ Platform artifacts directory.
  * @param publications The list of [IvyModule.Publication] objects to be included in the Ivy file.
  */
-internal fun ExternalModuleDependency.createIvyDependency(localPlatformArtifactsPath: Path, publications: List<IvyModule.Publication>) {
+internal fun ExternalModuleDependency.createIvyDependencyFile(
+    localPlatformArtifactsPath: Path,
+    publications: List<IvyModule.Publication>,
+) =
+    createIvyDependencyFile(
+        group = group.orEmpty(),
+        name = name,
+        version = version.orEmpty(),
+        localPlatformArtifactsPath = localPlatformArtifactsPath,
+        publications = publications
+    )
+
+/**
+ * Creates an Ivy dependency XML file for an external module.
+ *
+ * @param localPlatformArtifactsPath The [Path] to the local IntelliJ Platform artifacts directory.
+ * @param publications The list of [IvyModule.Publication] objects to be included in the Ivy file.
+ */
+internal fun createIvyDependencyFile(
+    group: String,
+    name: String,
+    version: String,
+    localPlatformArtifactsPath: Path,
+    publications: List<IvyModule.Publication>,
+) {
     val ivyFile = localPlatformArtifactsPath
         .resolve("$group-$name-$version.xml")
         .takeUnless { it.exists() }
@@ -88,7 +112,7 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
  *
- * @see [createIvyDependency]
+ * @see [createIvyDependencyFile]
  * @see [IntelliJPlatformRepositoriesExtension.localPlatformArtifacts]
  * @see [GradleProperties.LOCAL_PLATFORM_ARTIFACTS]
  */

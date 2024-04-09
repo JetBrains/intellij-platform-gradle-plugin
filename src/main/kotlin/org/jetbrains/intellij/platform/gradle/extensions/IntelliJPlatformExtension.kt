@@ -794,7 +794,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         name = type.dependency.artifactId,
                         version = "${productInfo.version}+$hash",
                     ).apply {
-                        createIvyDependency(
+                        createIvyDependencyFile(
                             localPlatformArtifactsPath = localPlatformArtifactsDirectory,
                             publications = listOf(artifactPath.toPublication()),
                         )
