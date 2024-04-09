@@ -41,6 +41,7 @@ data class IvyModule(
         val type: String?,
         val ext: String?,
         val conf: String?,
+        val url: String?,
     )
 }
 
@@ -79,4 +80,5 @@ internal fun Path.toPublication() = IvyModule.Publication(
         else -> extension
     },
     conf = "default",
+    url = null,
 )
