@@ -355,7 +355,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [SplitModeAware] allows to run IDE in Split Mode.
          */
         if (this is SplitModeAware) {
-            splitMode.convention(false)
+            splitMode.convention(extension.splitMode)
         }
 
         /**

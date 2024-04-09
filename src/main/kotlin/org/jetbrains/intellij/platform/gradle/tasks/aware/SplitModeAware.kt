@@ -10,7 +10,13 @@ import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 /**
- * The interface provides the possibility to run IDE in Split Mode.
+ * When you develop a plugin, you may want to check how it works in remote development mode, when one machine is running the backend part and another
+ * is running a frontend part (JetBrains Client) which connects to the backend.
+ *
+ * This property allows running the IDE with backend and frontend parts running in separate processes.
+ * The developed plugin is installed in the backend part.
+ *
+ * Split Mode requires the IntelliJ Platform in version `241.14473` or later.
  */
 interface SplitModeAware : IntelliJPlatformAware, IntelliJPlatformVersionAware {
 

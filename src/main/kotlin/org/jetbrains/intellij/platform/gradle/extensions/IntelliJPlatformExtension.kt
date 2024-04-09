@@ -111,6 +111,19 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      */
     abstract val sandboxContainer: DirectoryProperty
 
+    /**
+     * Enables Split Mode when running the IDE.
+     *
+     * When you develop a plugin, you may want to check how it works in remote development mode, when one machine is running the backend part and another
+     * is running a frontend part (JetBrains Client) which connects to the backend.
+     *
+     * This property allows running the IDE with backend and frontend parts running in separate processes.
+     * The developed plugin is installed in the backend part.
+     *
+     * Default value: `false`
+     */
+    abstract val splitMode: Property<Boolean>
+
     val pluginConfiguration
         get() = extensions.getByName<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION)
 
