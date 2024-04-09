@@ -359,6 +359,13 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         }
 
         /**
+         * The [SplitModeAware] allows to auto-reload plugin when run in the IDE.
+         */
+        if (this is AutoReloadAware) {
+            autoReload.convention(extension.autoReload)
+        }
+
+        /**
          * The [RunnableIdeAware] is more complex one than [RuntimeAware] as it preconfigures also the
          * [JavaForkOptions]-based tasks by setting JVM Arguments providers and classpath.
          */

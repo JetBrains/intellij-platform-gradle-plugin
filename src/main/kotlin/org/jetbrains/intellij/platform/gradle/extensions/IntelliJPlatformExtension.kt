@@ -80,6 +80,15 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         get() = intelliJPlatformConfiguration.productInfo()
 
     /**
+     * Enables auto-reload of dynamic plugins.
+     * Dynamic plugin will be reloaded automatically when its content is modified.
+     * This allows a much faster development cycle by avoiding a full restart of the development instance after code changes.
+     *
+     * Default value: `true`
+     */
+    abstract val autoReload: Property<Boolean>
+
+    /**
      * Builds an index of UI components (searchable options) for the plugin.
      * Controls the execution of the [BuildSearchableOptionsTask] task.
      *
