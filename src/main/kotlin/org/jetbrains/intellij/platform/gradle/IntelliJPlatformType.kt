@@ -39,7 +39,7 @@ enum class IntelliJPlatformType(
         dependency = null,
         binary = Coordinates("python", "dataspell"),
     ),
-    Fleet(
+    FleetBackend(
         code = "FLIJ",
         dependency = Coordinates("com.jetbrains.intellij.fleetBackend", "fleetBackend"),
         binary = null,
@@ -64,12 +64,6 @@ enum class IntelliJPlatformType(
         dependency = Coordinates("com.jetbrains.intellij.idea", "ideaIU"),
         binary = Coordinates("idea", "ideaIU"),
     ),
-
-    //    JPS(
-    //        code = "JPS",
-    //        groupId = "",
-    //        artifactId = "",
-    //    ),
     MPS(
         code = "MPS",
         dependency = null,

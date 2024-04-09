@@ -174,6 +174,66 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a dependency on Aqua.
+     *
+     * @param version The version of Aqua.
+     */
+    fun aqua(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Aqua },
+        versionProvider = providers.provider { version },
+    )
+
+    /**
+     * Adds a dependency on Aqua.
+     *
+     * @param version The provider for the version of Aqua.
+     */
+    fun aqua(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.Aqua },
+        versionProvider = version,
+    )
+
+    /**
+     * Adds a dependency on DataGrip.
+     *
+     * @param version The version of DataGrip.
+     */
+    fun datagrip(version: String) = addIntelliJPlatformDependency(
+    typeProvider = providers.provider { IntelliJPlatformType.DataGrip },
+        versionProvider = providers.provider { version },
+    )
+
+    /**
+     * Adds a dependency on DataGrip.
+     *
+     * @param version The provider for the version of DataGrip.
+     */
+    fun datagrip(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.DataGrip },
+        versionProvider = version,
+    )
+
+    /**
+     * Adds a dependency on DataSpell.
+     *
+     * @param version The version of DataSpell.
+     */
+    fun dataspell(version: String) = addIntelliJPlatformDependency(
+    typeProvider = providers.provider { IntelliJPlatformType.DataSpell },
+        versionProvider = providers.provider { version },
+    )
+
+    /**
+     * Adds a dependency on DataSpell.
+     *
+     * @param version The provider for the version of DataSpell.
+     */
+    fun dataspell(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.DataSpell },
+        versionProvider = version,
+    )
+
+    /**
      * Adds a dependency on CLion.
      *
      * @param version The version of CLion.
@@ -199,7 +259,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The version of Fleet Backend.
      */
     fun fleetBackend(version: String) = addIntelliJPlatformDependency(
-        typeProvider = providers.provider { IntelliJPlatformType.Fleet },
+        typeProvider = providers.provider { IntelliJPlatformType.FleetBackend },
         versionProvider = providers.provider { version },
     )
 
@@ -209,7 +269,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider for the version of Fleet Backend.
      */
     fun fleetBackend(version: Provider<String>) = addIntelliJPlatformDependency(
-        typeProvider = providers.provider { IntelliJPlatformType.Fleet },
+        typeProvider = providers.provider { IntelliJPlatformType.FleetBackend },
         versionProvider = version,
     )
 
@@ -294,6 +354,26 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a dependency on MPS.
+     *
+     * @param version The version of MPS.
+     */
+    fun mps(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.MPS },
+        versionProvider = providers.provider { version },
+    )
+
+    /**
+     * Adds a dependency on MPS.
+     *
+     * @param version The provider for the version of MPS.
+     */
+    fun mps(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.MPS },
+        versionProvider = version,
+    )
+
+    /**
      * Adds a dependency on PhpStorm.
      *
      * @param version The version of PhpStorm.
@@ -370,6 +450,26 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      */
     fun rider(version: Provider<String>) = addIntelliJPlatformDependency(
         typeProvider = providers.provider { IntelliJPlatformType.Rider },
+        versionProvider = version,
+    )
+
+    /**
+     * Adds a dependency on RubyMine.
+     *
+     * @param version The version of RubyMine.
+     */
+    fun rubymine(version: String) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.RubyMine },
+        versionProvider = providers.provider { version },
+    )
+
+    /**
+     * Adds a dependency on RubyMine.
+     *
+     * @param version The provider for the version of RubyMine.
+     */
+    fun rubymine(version: Provider<String>) = addIntelliJPlatformDependency(
+        typeProvider = providers.provider { IntelliJPlatformType.RubyMine },
         versionProvider = version,
     )
 
@@ -674,13 +774,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
      *
      * There are multiple Test Framework variants available, which provide additional classes for testing specific modules, like:
-     * JUnit4, JUnit 5, Maven, JavaScript, Go, Jave, ReSharper, etc.
+     * JUnit4, JUnit 5, Maven, JavaScript, Go, Java, ReSharper, etc.
      *
      * The version, if absent, is determined by the IntelliJ Platform build number.
-     * If the exact version is unavailable, the closest one is used, found by scanning all releases.
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
      *
-     * @param type test framework variant type
-     * @param version library version
+     * @param type Test framework variant type.
+     * @param version Test framework library version.
      * @see TestFrameworkType
      */
     fun testFramework(type: TestFrameworkType, version: String = VERSION_CURRENT) =
@@ -690,9 +791,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds a dependency on the `test-framework` library required for testing plugins.
      *
      * There are multiple Test Framework variants available, which provide additional classes for testing specific modules, like:
-     * JUnit4, JUnit 5, Maven, JavaScript, Go, Jave, ReSharper, etc.
+     * JUnit4, JUnit 5, Maven, JavaScript, Go, Java, ReSharper, etc.
      *
-     * If the exact version is unavailable, the closest one is used, found by scanning all releases.
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
      *
      * @param type test framework variant type
      * @param version library version
@@ -704,12 +806,23 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds a Java Compiler dependency for code instrumentation.
      *
      * By default, the version is determined by the IntelliJ Platform build number.
-     * If the exact version is unavailable, the closest one is used, found by scanning all releases.
+     *
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param version Java Compiler version
      */
     fun javaCompiler(version: String = VERSION_CURRENT) = addJavaCompilerDependency(providers.provider { version })
 
     /**
-     * Adds a dependency on Java Compiler used for running the code instrumentation.
+     * Adds a Java Compiler dependency for code instrumentation.
+     *
+     * By default, the version is determined by the IntelliJ Platform build number.
+     *
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param version Java Compiler version
      */
     fun javaCompiler(version: Provider<String>) = addJavaCompilerDependency(version)
 

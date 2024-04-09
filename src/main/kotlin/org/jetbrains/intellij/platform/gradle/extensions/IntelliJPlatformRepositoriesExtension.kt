@@ -21,7 +21,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import java.net.URI
-import java.net.URL
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.pathString

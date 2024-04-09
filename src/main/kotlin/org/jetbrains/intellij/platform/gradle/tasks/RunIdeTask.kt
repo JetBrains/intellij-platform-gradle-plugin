@@ -60,7 +60,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
         if (splitMode.get()) {
             environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.pathString)
 
-            if (args.isNotEmpty()) {
+            if (args.orEmpty().isNotEmpty()) {
                 throw InvalidUserDataException("Passing arguments directly is not supported in Split Mode. Use `argumentProviders` instead.")
             }
         }
