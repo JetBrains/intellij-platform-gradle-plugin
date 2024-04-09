@@ -389,14 +389,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             rootProjectDirectory,
         )
 
-        listOf(
-            InitializeIntelliJPlatformPluginTask,
-            PrintBundledPluginsTask,
-            PrintProductsReleasesTask,
-        ).forEach {
-            it.register(project)
-        }
-
         @Suppress("KotlinConstantConditions")
         project.tasks.whenTaskAdded {
             when (this) {
@@ -416,6 +408,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 is TestableAware,
                 -> project.preconfigureTask(this)
             }
+        }
+
+        listOf(
+            InitializeIntelliJPlatformPluginTask,
+            PrintBundledPluginsTask,
+            PrintProductsReleasesTask,
+        ).forEach {
+            it.register(project)
         }
     }
 }
