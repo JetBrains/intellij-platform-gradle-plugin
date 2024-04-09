@@ -705,7 +705,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param localPath The provider for the type of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
              */
-            fun localIde(localPath: Provider<*>) = addLocalIdeDependency(
+            fun local(localPath: Provider<*>) = addLocalIdeDependency(
                 localPlatformArtifactsDirectory = providers.localPlatformArtifactsPath(rootProjectDirectory),
                 localPath = localPath,
             )
@@ -715,21 +715,21 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param localPath The IntelliJ Platform dependency.
              */
-            fun localIde(localPath: String) = localIde(providers.provider { localPath })
+            fun local(localPath: String) = local(providers.provider { localPath })
 
             /**
              * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param localPath The IntelliJ Platform dependency.
              */
-            fun localIde(localPath: File) = localIde(providers.provider { localPath })
+            fun local(localPath: File) = local(providers.provider { localPath })
 
             /**
              * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param localPath The IntelliJ Platform dependency.
              */
-            fun localIde(localPath: Directory) = localIde(providers.provider { localPath })
+            fun local(localPath: Directory) = local(providers.provider { localPath })
 
             /**
              * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
@@ -767,7 +767,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             /**
              * Processes the list of IDE notations in the [IntelliJPlatformType] to [String] pairs format provided as [notationListProvider] and adds them
              * as dependencies to be resolved by the task running the IntelliJ Plugin Verifier.
-             * If the IDE is already present in the [downloadDirectory], refers to the [localIde] instead.
+             * If the IDE is already present in the [downloadDirectory], refers to the [local] instead.
              *
              * @param notationListProvider The list of IDE notations to be added.
              */
@@ -777,8 +777,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         type.binary ?: return@mapNotNull null
 
                         downloadDirectory.dir("${type}-${value}").asPath.takeIf { it.exists() }?.let {
-                            // IDE is already present in the [downloadDirectory], use as [localIde]
-                            localIde(it.pathString)
+                            // IDE is already present in the [downloadDirectory], use as [local]
+                            local(it.pathString)
                             return@mapNotNull null
                         }
 
