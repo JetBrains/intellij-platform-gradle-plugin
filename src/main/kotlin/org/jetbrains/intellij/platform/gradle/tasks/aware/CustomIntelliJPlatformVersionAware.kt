@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
  * Configurations, as well as the task preparing sandbox for running and testing the custom IntelliJ Platform (if required), have a random suffix applied
  * to avoid collisions.
  */
-interface CustomIntelliJPlatformVersionAware : IntelliJPlatformAware, IntelliJPlatformVersionAware {
+interface CustomIntelliJPlatformVersionAware : IntelliJPlatformVersionAware {
 
     /**
      * An input property to configure the type of the custom IntelliJ Platform.

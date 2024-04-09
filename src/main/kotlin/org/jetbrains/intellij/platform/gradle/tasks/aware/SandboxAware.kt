@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
  * @see IntelliJPlatformExtension.sandboxContainer
  * @see CustomIntelliJPlatformVersionAware
  */
-interface SandboxAware : IntelliJPlatformAware, IntelliJPlatformVersionAware {
+interface SandboxAware : IntelliJPlatformVersionAware {
 
     /**
      * Represents the suffix used i.e., for test-related tasks.

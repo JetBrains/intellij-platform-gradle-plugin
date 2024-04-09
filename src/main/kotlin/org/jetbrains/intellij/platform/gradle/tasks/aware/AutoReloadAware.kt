@@ -16,6 +16,8 @@ interface AutoReloadAware {
      * This allows a much faster development cycle by avoiding a full restart of the development instance after code changes.
      *
      * Default value: `true`
+     *
+     * @see RunnableIdeAware
      */
     @get:Internal
     val autoReload: Property<Boolean>

@@ -31,7 +31,7 @@ import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
-import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.Path
 import kotlin.io.path.absolute
@@ -397,12 +397,25 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             it.register(project)
         }
 
+        @Suppress("KotlinConstantConditions")
         project.tasks.whenTaskAdded {
-            if (this !is IntelliJPlatformAware) {
-                return@whenTaskAdded
+            when (this) {
+                is AutoReloadAware,
+                is CoroutinesJavaAgentAware,
+                is CustomIntelliJPlatformVersionAware,
+                is IntelliJPlatformVersionAware,
+                is JavaCompilerAware,
+                is PluginAware,
+                is PluginVerifierAware,
+                is RunnableIdeAware,
+                is RuntimeAware,
+                is SandboxAware,
+                is SandboxProducerAware,
+                is SigningAware,
+                is SplitModeAware,
+                is TestableAware,
+                -> project.preconfigureTask(this)
             }
-
-            project.preconfigureTask(this)
         }
     }
 }

@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathReso
  *
  * @see JavaRuntimePathResolver
  */
-interface RuntimeAware : IntelliJPlatformAware, IntelliJPlatformVersionAware {
+interface RuntimeAware : IntelliJPlatformVersionAware {
 
     /**
      * Java Runtime parent directory.

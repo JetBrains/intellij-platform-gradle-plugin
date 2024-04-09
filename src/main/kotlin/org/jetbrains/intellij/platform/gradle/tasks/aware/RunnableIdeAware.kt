@@ -7,7 +7,6 @@ import org.gradle.process.JavaForkOptions
 /**
  * The interface which uses a set of various interfaces required for running a guest IDE.
  *
- * @see IntelliJPlatformAware
  * @see CoroutinesJavaAgentAware
  * @see PluginAware
  * @see RuntimeAware
@@ -16,5 +15,4 @@ import org.gradle.process.JavaForkOptions
  * @see AutoReloadAware
  * @see JavaForkOptions
  */
-interface RunnableIdeAware :
-    IntelliJPlatformAware, CoroutinesJavaAgentAware, PluginAware, RuntimeAware, SandboxAware, SplitModeAware, AutoReloadAware, JavaForkOptions
+interface RunnableIdeAware : CoroutinesJavaAgentAware, PluginAware, RuntimeAware, SandboxAware, SplitModeAware, AutoReloadAware, JavaForkOptions

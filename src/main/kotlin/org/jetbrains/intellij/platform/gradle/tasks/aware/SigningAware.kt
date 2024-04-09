@@ -14,7 +14,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
  *
  * @see IntelliJPlatformDependenciesExtension.zipSigner
  */
-interface SigningAware : IntelliJPlatformAware {
+interface SigningAware {
 
     /**
      * Path to the Marketplace ZIP Signer executable.
