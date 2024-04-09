@@ -161,10 +161,6 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                 !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
             }
 
-            project.tasks
-                .matching { it.group == Plugin.GROUP_NAME && it.name != this@registerTask.name }
-                .configureEach { dependsOn(this@registerTask) }
-
             mustRunAfter(Tasks.External.CLEAN)
         }
     }
