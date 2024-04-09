@@ -16,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
  * This property allows running the IDE with backend and frontend parts running in separate processes.
  * The developed plugin is installed in the backend part.
  *
- * Split Mode requires the IntelliJ Platform in version `241.14473` or later.
+ * Split Mode requires the IntelliJ Platform in the version `241.14473` or later.
  */
 interface SplitModeAware : IntelliJPlatformVersionAware {
 

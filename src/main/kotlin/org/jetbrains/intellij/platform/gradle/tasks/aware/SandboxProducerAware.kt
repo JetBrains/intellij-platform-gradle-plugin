@@ -2,4 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
+/**
+ * An interface used to distinguish between the [SandboxAware] consumers and producers.
+ */
 interface SandboxProducerAware : SandboxAware
