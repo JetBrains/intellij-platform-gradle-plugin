@@ -21,12 +21,16 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
  * Prints the list of binary product releases that, by default, match the currently selected IntelliJ Platform along
  * with [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild]
  * and [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild] properties.
+ *
+ * The filer used for retrieving the release list can be customized by using properties provided with [ProductReleasesValueSource.FilterParameters].
  */
 @UntrackedTask(because = "Prints output")
 abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSource.FilterParameters {
 
     /**
      * Property holds the list of product releases to print.
+     *
+     * Can be used to retrieve the result list.
      */
     @get:Input
     abstract val productsReleases: ListProperty<String>

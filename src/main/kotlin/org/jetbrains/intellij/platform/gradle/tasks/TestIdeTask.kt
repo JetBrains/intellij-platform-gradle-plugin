@@ -25,7 +25,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
  * This task class also inherits from [CustomIntelliJPlatformVersionAware],
  * which makes it possible to create `testIde`-like tasks using custom IntelliJ Platform versions:
  *
- * ```
+ * ```kotlin
  * import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
  * import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
  *

@@ -59,6 +59,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
     /**
      * IntelliJ Platform cache directory.
+     *
+     * Default value: [IntelliJPlatformExtension.cachePath]
      */
     @get:Internal
     abstract val intellijPlatformCache: Property<File>

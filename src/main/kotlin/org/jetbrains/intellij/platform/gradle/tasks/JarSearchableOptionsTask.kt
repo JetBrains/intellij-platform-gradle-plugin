@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
@@ -32,9 +31,9 @@ private const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
 abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
 
     /**
-     * The output directory where the JAR file will be created.
+     * The directory from which the prepared searchable options are read.
      *
-     * Default value: [ProjectLayout.getBuildDirectory]/searchableOptions
+     * Default value: [BuildSearchableOptionsTask.outputDirectory]
      */
     @get:InputDirectory
     @get:Optional

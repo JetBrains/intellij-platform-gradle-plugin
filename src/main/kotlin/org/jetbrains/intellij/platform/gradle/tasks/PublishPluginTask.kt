@@ -191,6 +191,5 @@ abstract class PublishPluginTask : DefaultTask() {
                 dependsOn(signPluginTaskProvider)
                 onlyIf { !isOffline }
             }
-
     }
 }

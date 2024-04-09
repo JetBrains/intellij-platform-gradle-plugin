@@ -28,20 +28,31 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.INSTRUMENT_CODE
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.JavaCompilerAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import kotlin.io.path.createDirectories
-import kotlin.io.path.exists
-import kotlin.io.path.extension
-import kotlin.io.path.isDirectory
+import kotlin.io.path.*
 
 private const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
 private const val LOADER_REF = "java2.loader"
 
+/**
+ * Task dedicated to executing the code instrumentation using the Ant tasks provided with the currently used IntelliJ Platform dependency.
+ *
+ * The code instrumentation scans the compiled Java and Kotlin classes for JetBrains Annotations usages to replace them with relevant functionalities
+ * they're responsible for.
+ *
+ * This task is controlled with the [IntelliJPlatformExtension.instrumentCode] extension property, enabled by default.
+ * To properly run the instrumentation, it is required to add [IntelliJPlatformDependenciesExtension.instrumentationTools] dependencies to the project.
+ *
+ * This dependency is available via the [IntelliJPlatformRepositoriesExtension.intellijDependencies] repository, which can be added separately
+ * or using the [IntelliJPlatformRepositoriesExtension.defaultRepositories] helper.
+ */
 @CacheableTask
 abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
@@ -71,9 +82,17 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val formsDirs: ConfigurableFileCollection
 
+    /**
+     * Location of the source code.
+     */
     @get:Internal
     abstract val sourceDirs: ConfigurableFileCollection
 
+    /**
+     * Enables `INFO` logging when running Ant tasks.
+     *
+     * Default value: `false`
+     */
     @get:Internal
     abstract val instrumentationLogs: Property<Boolean>
 
@@ -170,16 +189,16 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                         Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
                     }
 
-//                    val source = classesDirs.firstNotNullOfOrNull { classesDir ->
-//                        classesDir
-//                            .resolve(relativePath.pathString.substringBefore('$').removeSuffix(".class") + ".class")
-//                            .toPath()
-//                            .takeIf { it.exists() }
-//                    }
-//                    source?.apply {
-//                        parent.createDirectories()
-//                        Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
-//                    }
+                    val source = classesDirs.firstNotNullOfOrNull { classesDir ->
+                        classesDir
+                            .resolve(relativePath.pathString.substringBefore('$').removeSuffix(".class") + ".class")
+                            .toPath()
+                            .takeIf { it.exists() }
+                    }
+                    source?.apply {
+                        parent.createDirectories()
+                        Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
+                    }
                 }
         }
     }
@@ -290,8 +309,6 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                     dependsOn(sourceSet.classesTaskName)
                     onlyIf { instrumentCodeEnabled.get() }
                     sourceSet.compiledBy(this)
-
-                    // finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
                 }
             }
 
@@ -305,7 +322,6 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
                 from(instrumentCodeTaskProvider)
                 with(jarTaskProvider.get())
-
 
                 onlyIf { instrumentCodeEnabled.get() }
             }

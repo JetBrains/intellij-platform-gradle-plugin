@@ -23,7 +23,7 @@ import kotlin.io.path.pathString
  * This task class also inherits from [CustomIntelliJPlatformVersionAware],
  * which makes it possible to create `runIde`-like tasks using custom IntelliJ Platform versions:
  *
- * ```
+ * ```kotlin
  * import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
  * import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
  *
@@ -71,8 +71,6 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
     }
 
     companion object : Registrable {
-        // TODO: define `inputs.property` for tasks to consider system properties in terms of the configuration cache
-        //       see: https://docs.gradle.org/current/kotlin-dsl/gradle/org.gradle.api.tasks/-task-inputs/prop  erty.html
         override fun register(project: Project) =
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
                 systemPropertyDefault("idea.classpath.index.enabled", false)
@@ -94,8 +92,6 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
                         systemPropertyDefault("sun.awt.disablegrab", true)
                     }
                 }
-
-//            finalizedBy(IntelliJPluginConstants.CLASSPATH_INDEX_CLEANUP_TASK_NAME)
             }
 
         private fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {

@@ -282,7 +282,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
 /**
  * A shorthand for accessing the [IntelliJPlatformRepositoriesExtension] in the `settings.gradle.kts` file.
  *
- * ```
+ * ```kotlin
  * import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatform
  *
  * dependencyResolutionManagement {

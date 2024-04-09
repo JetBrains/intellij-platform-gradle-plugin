@@ -10,6 +10,9 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
+/**
+ * This is a task used to prepare an immutable `test` task and provide all necessary dependencies and configuration for a proper testing configuration.
+ */
 @CacheableTask
 abstract class PrepareTestTask : DefaultTask(), TestableAware {
 

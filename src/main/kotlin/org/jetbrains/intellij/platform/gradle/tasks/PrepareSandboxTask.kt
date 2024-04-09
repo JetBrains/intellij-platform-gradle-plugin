@@ -36,7 +36,7 @@ import kotlin.io.path.*
  * The sandbox directory is required by tasks that run IDE and tests in isolation from other instances, like when multiple IntelliJ Platforms are used for
  * testing with [RunIdeTask], [TestIdeTask], [TestIdeUiTask], or [TestIdePerformanceTask] tasks.
  *
- * To fully utilize the sandbox capabilities in a task, make it extend the [SandboxAware] interface.
+ * To fully use the sandbox capabilities in a task, make it extend the [SandboxAware] interface.
  *
  * @see SandboxAware
  * @see IntelliJPlatformExtension.sandboxContainer
@@ -87,6 +87,9 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
     @get:Classpath
     abstract val runtimeClasspath: ConfigurableFileCollection
 
+    /**
+     * Holds a list of names used to generate suffixed ones to avoid collisions.
+     */
     private val usedNames = mutableMapOf<String, Path>()
 
     init {
