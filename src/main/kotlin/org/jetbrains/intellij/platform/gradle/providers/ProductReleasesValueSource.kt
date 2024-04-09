@@ -7,6 +7,8 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.*
 import org.gradle.api.resources.ResourceHandler
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -53,21 +55,29 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         /**
          * Build number from which the binary IDE releases will be matched.
          */
+        @get:Input
+        @get:Optional
         val sinceBuild: Property<String>
 
         /**
          * Build number until which the binary IDE releases will be matched.
          */
+        @get:Input
+        @get:Optional
         val untilBuild: Property<String>
 
         /**
          * A list of [IntelliJPlatformType] types to match.
          */
+        @get:Input
+        @get:Optional
         val types: ListProperty<IntelliJPlatformType>
 
         /**
          * A list of [Channel] types of binary releases to search in.
          */
+        @get:Input
+        @get:Optional
         val channels: ListProperty<Channel>
     }
 
