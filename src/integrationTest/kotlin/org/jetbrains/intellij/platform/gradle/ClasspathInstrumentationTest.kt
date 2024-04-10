@@ -77,4 +77,30 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
             }
         }
     }
+
+    @Test
+    fun `attach bundled testFramework_jar`() {
+        disableDebug()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        testFramework(TestFrameworkType.Platform.Bundled)
+                    }
+                }
+                
+                tasks {
+                    test {
+                        doLast {
+                            println(classpath.joinToString("\n"))
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(Tasks.External.TEST, projectProperties = defaultProjectProperties) {
+            output containsText "testFramework.jar"
+        }
+    }
 }

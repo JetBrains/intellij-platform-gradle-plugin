@@ -10,6 +10,7 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.UrlArtifactRepository
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
@@ -65,6 +66,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private val dependencies: DependencyHandler,
     private val providers: ProviderFactory,
     private val resources: ResourceHandler,
+    private val objects: ObjectFactory,
     private val layout: ProjectLayout,
     private val rootProjectDirectory: Path,
 ) {
@@ -202,7 +204,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The version of DataGrip.
      */
     fun datagrip(version: String) = addIntelliJPlatformDependency(
-    typeProvider = providers.provider { IntelliJPlatformType.DataGrip },
+        typeProvider = providers.provider { IntelliJPlatformType.DataGrip },
         versionProvider = providers.provider { version },
     )
 
@@ -222,7 +224,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The version of DataSpell.
      */
     fun dataspell(version: String) = addIntelliJPlatformDependency(
-    typeProvider = providers.provider { IntelliJPlatformType.DataSpell },
+        typeProvider = providers.provider { IntelliJPlatformType.DataSpell },
         versionProvider = providers.provider { version },
     )
 
@@ -1134,7 +1136,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         typeProvider.zip(versionProvider) { type, version ->
             when (type) {
                 TestFrameworkType.Platform.Bundled -> {
-                    dependencies.create(platformPath.resolve(type.coordinates.artifactId).toFile())
+                    dependencies.create(
+                        objects.fileCollection().from(
+                            platformPath.resolve(type.coordinates.artifactId)
+                        )
+                    )
                 }
 
                 else -> {
