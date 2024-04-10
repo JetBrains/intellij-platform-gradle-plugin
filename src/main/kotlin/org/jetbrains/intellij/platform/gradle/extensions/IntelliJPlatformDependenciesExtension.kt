@@ -40,6 +40,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.math.absoluteValue
 
+// TODO synchronize with
+// https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+
 /**
  * Extension class for managing IntelliJ Platform dependencies in a Gradle build script applied to the [DependencyHandler].
  *
