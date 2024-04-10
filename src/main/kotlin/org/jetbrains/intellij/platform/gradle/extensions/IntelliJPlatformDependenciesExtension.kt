@@ -1120,6 +1120,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on the `test-framework` library required for testing plugins.
      *
+     * In rare cases, when the presence of bundled `lib/testFramework.jar` library is necessary,
+     * it is possible to attach it by using the [TestFrameworkType.Platform.Bundled] type.
+     *
      * This dependency belongs to IntelliJ Platform repositories.
      */
     private fun addTestFrameworkDependency(
@@ -1129,33 +1132,41 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
         typeProvider.zip(versionProvider) { type, version ->
-            val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers).get()
-
-            val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
-                parameters {
-                    intellijPlatformPath = layout.dir(providers.provider { platformPath.toFile() })
+            when (type) {
+                TestFrameworkType.Platform.Bundled -> {
+                    dependencies.create(platformPath.resolve(type.coordinates.artifactId).toFile())
                 }
-            }
 
-            dependencies.create(
-                group = type.coordinates.groupId,
-                name = type.coordinates.artifactId,
-                version = when (version) {
-                    VERSION_CURRENT -> when {
-                        resolveClosest -> TestFrameworkClosestVersionResolver(
-                            productInfo,
-                            repositories.urls(),
-                            type.coordinates,
-                        ).resolve().version
+                else -> {
+                    val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers).get()
 
-                        else -> productInfo.buildNumber
+                    val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
+                        parameters {
+                            intellijPlatformPath = layout.dir(providers.provider { platformPath.toFile() })
+                        }
                     }
 
-                    else -> version
-                }
-            ).apply {
-                moduleDescriptors.get().forEach {
-                    exclude(it.groupId, it.artifactId)
+                    dependencies.create(
+                        group = type.coordinates.groupId,
+                        name = type.coordinates.artifactId,
+                        version = when (version) {
+                            VERSION_CURRENT -> when {
+                                resolveClosest -> TestFrameworkClosestVersionResolver(
+                                    productInfo,
+                                    repositories.urls(),
+                                    type.coordinates,
+                                ).resolve().version
+
+                                else -> productInfo.buildNumber
+                            }
+
+                            else -> version
+                        }
+                    ).apply {
+                        moduleDescriptors.get().forEach {
+                            exclude(it.groupId, it.artifactId)
+                        }
+                    }
                 }
             }.apply(action)
         },
@@ -1267,6 +1278,7 @@ interface TestFrameworkType {
     enum class Platform(override val coordinates: Coordinates) : TestFrameworkType {
         JUnit4(Coordinates("com.jetbrains.intellij.platform", "test-framework")),
         JUnit5(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5")),
+        Bundled(Coordinates("bundled", "lib/testFramework.jar")),
     }
 
     enum class Plugin(override val coordinates: Coordinates) : TestFrameworkType {
