@@ -188,17 +188,6 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                         parent.createDirectories()
                         Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
                     }
-
-                    val source = classesDirs.firstNotNullOfOrNull { classesDir ->
-                        classesDir
-                            .resolve(relativePath.pathString.substringBefore('$').removeSuffix(".class") + ".class")
-                            .toPath()
-                            .takeIf { it.exists() }
-                    }
-                    source?.apply {
-                        parent.createDirectories()
-                        Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
-                    }
                 }
         }
     }
