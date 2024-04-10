@@ -4,6 +4,13 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 
+// TODO any changes must be synchronized with
+// IntelliJPlatformDependenciesExtension
+// https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-types.html#IntelliJPlatformType
+// IJ:
+// - org.jetbrains.idea.devkit.projectRoots.IntelliJPlatformProduct
+// - community/plugins/devkit/intellij.devkit/resources/META-INF/plugin.xml
+
 /**
  * Describes all IntelliJ Platform types available to be used for plugin development, dependency resolution, and plugin verification.
  *
