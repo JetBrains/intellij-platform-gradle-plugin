@@ -211,7 +211,7 @@ gradlePlugin {
 
         // partials
         "base" to "project.partials.IntelliJPlatformBasePlugin",
-        "build" to "project.partial.IntelliJPlatformBuildPlugin",
+        "build" to "project.partials.IntelliJPlatformBuildPlugin",
         "publish" to "project.partials.IntelliJPlatformPublishPlugin",
         "run" to "project.partials.IntelliJPlatformRunPlugin",
         "test" to "project.partials.IntelliJPlatformTestPlugin",
