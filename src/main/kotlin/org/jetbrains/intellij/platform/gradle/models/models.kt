@@ -45,7 +45,7 @@ private inline fun <reified T> obtainStringFormat(): StringFormat {
 
 internal inline fun <reified T> decode(url: URL) = decode<T>(url.openStream())
 
-internal inline fun <reified T> decode(path: Path): T? = decode<T>(path.readText())
+internal inline fun <reified T> decode(path: Path): T = decode<T>(path.readText())
 
 internal inline fun <reified T> decode(inputStream: InputStream) = decode<T>(inputStream.bufferedReader().use { it.readText() })
 
@@ -74,7 +74,7 @@ internal inline fun <reified T> decode(input: String, stringFormat: StringFormat
                 """.trimIndent(),
             )
         }
-        .getOrNull()
+        .getOrThrow()
 
 internal fun transformXml(document: Document, path: Path) {
     val xmlOutput = XMLOutputter()

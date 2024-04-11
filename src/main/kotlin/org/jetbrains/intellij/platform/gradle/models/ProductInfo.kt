@@ -162,7 +162,6 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
 fun Path.productInfo() = ProductInfoPathResolver(this)
     .resolve()
     .let { decode<ProductInfo>(it) }
-    .let { requireNotNull(it) { "Could not find product info for: $this" } }
 
 /**
  * Retrieves the [ProductInfo] for the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.
