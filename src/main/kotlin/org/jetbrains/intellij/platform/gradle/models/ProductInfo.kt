@@ -47,6 +47,7 @@ data class ProductInfo(
     val bundledPlugins: List<String> = mutableListOf(),
     val fileExtensions: List<String> = mutableListOf(),
     val modules: List<String> = mutableListOf(),
+    val layout: List<LayoutItem> = mutableListOf()
 ) {
 
     /**
@@ -106,6 +107,18 @@ data class ProductInfo(
         val key: String? = null,
         val value: String? = null,
     )
+
+    @Serializable
+    data class LayoutItem(
+        val name: String? = null,
+        val kind: LayoutItemKind? = null,
+        val classPath: List<String> = mutableListOf(),
+    )
+
+    @Serializable
+    enum class LayoutItemKind {
+        plugin, pluginAlias, productModuleV2, moduleV2
+    }
 }
 
 /**

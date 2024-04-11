@@ -60,15 +60,21 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
     }
 }
 
-internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatformPath: Path): Set<Path> {
-    return productInfo.launch
+internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatformPath: Path) =
+    productInfo.launch
+        .asSequence()
         .filter { it.os == ProductInfo.Launch.OS.current }
         .flatMap { it.bootClassPathJarNames }
-        .asSequence()
-        .map { intellijPlatformPath.resolve("lib/$it") }
+        .map { "lib/$it" }
+        .plus( // TODO: pick only relevant entries. TBD with VK
+            productInfo.layout
+                .asSequence()
+                .filter { it.kind == ProductInfo.LayoutItemKind.productModuleV2 }
+                .flatMap { it.classPath }
+        )
+        .map { intellijPlatformPath.resolve(it) }
         .mapNotNull { it.takeIf { it.exists() } }
         .toSet()
-}
 
 internal fun collectBundledPluginsJars(intellijPlatformPath: Path) =
     intellijPlatformPath
