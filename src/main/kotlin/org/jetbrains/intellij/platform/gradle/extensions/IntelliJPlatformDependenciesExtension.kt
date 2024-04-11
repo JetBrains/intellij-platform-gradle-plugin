@@ -840,6 +840,20 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     }
 
     /**
+     * Adds a dependency on a Jar bundled within the current IntelliJ Platform.
+     *
+     * @param path Path to the bundled Jar file, like `lib/testFramework.jar`
+     */
+    fun bundledLibrary(path: String) = addBundledLibrary(providers.provider { path })
+
+    /**
+     * Adds a dependency on a Jar bundled within the current IntelliJ Platform.
+     *
+     * @param path Path to the bundled Jar file, like `lib/testFramework.jar`
+     */
+    fun bundledLibrary(path: Provider<String>) = addBundledLibrary(path)
+
+    /**
      * A base method for adding a dependency on IntelliJ Platform.
      *
      * @param typeProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
@@ -1126,6 +1140,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * it is possible to attach it by using the [TestFrameworkType.Platform.Bundled] type.
      *
      * This dependency belongs to IntelliJ Platform repositories.
+     *
+     * @param typeProvider The TestFramework type provider.
+     * @param versionProvider The version of the TestFramework.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     private fun addTestFrameworkDependency(
         typeProvider: Provider<TestFrameworkType>,
@@ -1135,13 +1154,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = configurations[configurationName].dependencies.addLater(
         typeProvider.zip(versionProvider) { type, version ->
             when (type) {
-                TestFrameworkType.Platform.Bundled -> {
-                    dependencies.create(
-                        objects.fileCollection().from(
-                            platformPath.resolve(type.coordinates.artifactId)
-                        )
-                    )
-                }
+                TestFrameworkType.Platform.Bundled -> createBundledLibraryDependency(type.coordinates.artifactId)
 
                 else -> {
                     val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers).get()
@@ -1178,6 +1191,29 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         },
     )
 
+    /**
+     * Adds a dependency on a Jar bundled within the current IntelliJ Platform.
+     *
+     * @param pathProvider Path to the bundled Jar file, like `lib/testFramework.jar`
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    private fun addBundledLibrary(
+        pathProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        pathProvider.map { path -> createBundledLibraryDependency(path).apply(action) }
+    )
+
+    /**
+     * Creates a [Dependency] using a Jar file resolved in [platformPath] with [path].
+     */
+    private fun createBundledLibraryDependency(path: String) = dependencies.create(objects.fileCollection().from(platformPath.resolve(path)))
+
+    /**
+     * Retrieves URLs from registered repositories.
+     */
     private fun RepositoryHandler.urls() = mapNotNull { (it as? UrlArtifactRepository)?.url?.toString() }
 }
 

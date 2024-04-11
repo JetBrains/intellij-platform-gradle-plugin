@@ -103,4 +103,29 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
             output containsText "testFramework.jar"
         }
     }
+    @Test
+    fun `attach custom bundled library`() {
+        disableDebug()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        bundledLibrary("lib/testFramework.jar")
+                    }
+                }
+                
+                tasks {
+                    test {
+                        doLast {
+                            println(classpath.joinToString("\n"))
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(Tasks.External.TEST, projectProperties = defaultProjectProperties) {
+            output containsText "testFramework.jar"
+        }
+    }
 }
