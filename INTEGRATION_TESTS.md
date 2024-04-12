@@ -28,7 +28,7 @@ The Integration Tests workflow is stored in the [`integration-tests.yml`](../.gi
 file.
 It defines a couple of triggers:
 
-- `workflow_dispatch` – manual trigger via the [Actions](https://github.com/JetBrains/gradle-intellij-plugin/actions)
+- `workflow_dispatch` – manual trigger via the [Actions](https://github.com/JetBrains/intellij-platform-gradle-plugin/actions)
   tab of the IntelliJ Platform Gradle Plugin GitHub repository.
 - `schedule` (WIP) – CRON job
 - `push` (WIP) – trigger any push to the main branch

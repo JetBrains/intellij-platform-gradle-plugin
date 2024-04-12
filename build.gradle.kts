@@ -270,7 +270,7 @@ publishing {
 //                licenses {
 //                    license {
 //                        name.set("The Apache License, Version 2.0")
-//                        url.set("https://github.com/JetBrains/gradle-intellij-plugin/blob/master/LICENSE")
+//                        url.set("https://github.com/JetBrains/intellij-platform-gradle-plugin/blob/master/LICENSE")
 //                    }
 //                }
 //
@@ -294,5 +294,5 @@ publishing {
 changelog {
     unreleasedTerm.set("next")
     groups.empty()
-    repositoryUrl.set("https://github.com/JetBrains/gradle-intellij-plugin")
+    repositoryUrl.set("https://github.com/JetBrains/intellij-platform-gradle-plugin")
 }

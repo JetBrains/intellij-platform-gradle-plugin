@@ -45,7 +45,7 @@ enum class BuildFeature(private val defaultValue: Boolean) {
     /**
      * Checks whether the currently used Gradle IntelliJ Plugin is outdated and if a new release is available.
      * The plugin performs an update check on every run asking the GitHub Releases page for the redirection URL
-     * to the latest version with `HEAD` HTTP request: `https://github.com/jetbrains/gradle-intellij-plugin/releases/latest`.
+     * to the latest version with `HEAD` HTTP request: `https://github.com/JetBrains/intellij-platform-gradle-plugin/releases/latest`.
      *
      * If the current version is outdated, the plugin will emit a warning with its current and the latest version.
      *

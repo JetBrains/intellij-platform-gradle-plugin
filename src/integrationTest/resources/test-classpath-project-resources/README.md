@@ -17,7 +17,7 @@ When PowerMock is present, it provides its own `mockito-extensions/org.mockito.p
 Mockito, if PowerMock is before project test resource in the classpath.
 Such a situation caused the issue reported in:
 
-- https://github.com/JetBrains/gradle-intellij-plugin/issues/1101
+- https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1101
 
 ## Verification
 
