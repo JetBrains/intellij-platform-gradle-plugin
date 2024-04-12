@@ -8,8 +8,6 @@
 ![IntelliJ Platform Gradle Plugin](.github/readme/intellij-platform-gradle-plugin-dark.svg#gh-dark-mode-only)
 ![IntelliJ Platform Gradle Plugin](.github/readme/intellij-platform-gradle-plugin-light.svg#gh-light-mode-only)
 
-
-# IntelliJ Platform Gradle Plugin
 The IntelliJ Platform Gradle Plugin is a plugin for the Gradle build system to help configure your environment for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs.
 
 ## Documentation
