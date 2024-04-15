@@ -26,7 +26,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.providers.JavaLauncherValueSource
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
@@ -293,10 +292,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 }
             }
             runtimeArchitecture = runtimeMetadata.map { it["os.arch"].orEmpty() }
-            runtimeLauncher = project.providers.of(JavaLauncherValueSource::class) {
-                parameters.runtimeDirectory = runtimeDirectory
-                parameters.runtimeMetadata = runtimeMetadata
-            }
         }
 
         /**
@@ -392,7 +387,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
             if (this is JavaExec) {
                 mainClass = "com.intellij.idea.Main"
-                javaLauncher = runtimeLauncher
+                javaLauncher = runtimeDirectory.zip(runtimeMetadata) { directory, metadata ->
+                    IntelliJPlatformJavaLauncher(directory, metadata)
+                }
 
                 classpath += files(
                     runtimeArchitecture.map { architecture ->

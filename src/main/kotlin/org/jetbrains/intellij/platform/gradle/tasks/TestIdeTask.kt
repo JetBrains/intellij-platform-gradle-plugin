@@ -17,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
@@ -107,7 +108,9 @@ abstract class TestIdeTask : Test(), TestableAware, CustomIntelliJPlatformVersio
 
             classpath = instrumentedCode + instrumentedTestCode + classpath + testCompileClasspathConfiguration
             testClassesDirs = instrumentedTestCode + testClassesDirs
-            javaLauncher = sourceTask.runtimeLauncher
+            javaLauncher = sourceTask.runtimeDirectory.zip(sourceTask.runtimeMetadata) { directory, metadata ->
+                IntelliJPlatformJavaLauncher(directory, metadata)
+            }
         }
 
         override fun register(project: Project) =
