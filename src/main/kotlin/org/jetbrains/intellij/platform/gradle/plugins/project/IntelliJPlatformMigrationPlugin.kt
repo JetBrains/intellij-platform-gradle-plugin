@@ -13,6 +13,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
+import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin.ID
@@ -96,6 +97,8 @@ abstract class IntelliJPlatformMigrationPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         log.info("Configuring plugin: $PLUGIN_MIGRATION_ID")
         log.error(Messages.enabled)
+
+        project.plugins.apply(IntelliJPlatformPlugin::class)
 
         project.configureExtension<IntelliJExtension>(
             "intellij",
