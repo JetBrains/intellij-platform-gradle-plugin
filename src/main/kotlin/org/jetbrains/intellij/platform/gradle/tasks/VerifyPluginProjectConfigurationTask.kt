@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
@@ -43,7 +44,7 @@ import kotlin.io.path.writeText
  */
 // TODO: Use Reporting for handling verification report output? https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
 @CacheableTask
-abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, PluginAware {
+abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, PluginAware, RuntimeAware {
 
     /**
      * Report directory where the verification result will be stored.
@@ -211,21 +212,14 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                     this@sequence.yield("The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file.")
                 }
             }
+            if (runtimeMetadata.get()["java.vendor"] != "JetBrains s.r.o.") {
+                yield("The currently selected Java Runtime is not JetBrains Runtime (JBR). This may lead to unexpected IDE behaviors. Please use IntelliJ Platform binary release with bundled JBR or define it explicitly with project dependencies or JVM Toolchain, see: https://jb.gg/intellij-platform-with-jbr")
+            }
         }
             .joinToString("\n") { "- $it" }
             .takeIf { it.isNotEmpty() }
-            ?.also {
-                log.warn(
-                    listOf(
-                        "The following plugin configuration issues were found:",
-                        it,
-                        "See: https://jb.gg/intellij-platform-versions"
-                    ).joinToString("\n")
-                )
-            }
-            .also {
-                reportDirectory.file("report.txt").asPath.writeText(it.orEmpty())
-            }
+            ?.also { log.warn("The following plugin configuration issues were found:\n$it") }
+            .also { reportDirectory.file("report.txt").asPath.writeText(it.orEmpty()) }
     }
 
     private fun getPlatformJavaVersion(buildNumber: Version) =
