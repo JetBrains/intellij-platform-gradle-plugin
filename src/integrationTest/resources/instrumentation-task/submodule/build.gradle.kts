@@ -1,4 +1,4 @@
-import org.jetbrains.intellij.platform.gradle.extensions.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 
 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")

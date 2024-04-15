@@ -825,10 +825,3 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         }
     }
 }
-
-private fun String.parseIdeNotation() = split('-').let {
-    when {
-        it.size == 2 -> it.first().toIntelliJPlatformType() to it.last()
-        else -> IntelliJPlatformType.IntellijIdeaCommunity to it.first()
-    }
-}

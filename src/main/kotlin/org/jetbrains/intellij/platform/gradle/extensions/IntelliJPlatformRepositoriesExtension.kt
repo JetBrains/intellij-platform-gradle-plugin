@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
@@ -300,5 +299,3 @@ fun RepositoryHandler.intellijPlatform(configure: Action<IntelliJPlatformReposit
  */
 internal typealias MavenRepositoryAction = (MavenArtifactRepository.() -> Unit)
 internal typealias IvyRepositoryAction = (IvyArtifactRepository.() -> Unit)
-
-internal typealias PluginRepositoryType = CustomPluginRepositoryListingType
