@@ -40,14 +40,14 @@ import javax.inject.Inject
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
 abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
-    final override val configurations: ConfigurationContainer,
-    final override val repositories: RepositoryHandler,
-    final override val dependencies: DependencyHandler,
-    final override val providers: ProviderFactory,
-    final override val resources: ResourceHandler,
-    final override val objects: ObjectFactory,
-    final override val layout: ProjectLayout,
-    final override val rootProjectDirectory: Path,
+    override val configurations: ConfigurationContainer,
+    override val repositories: RepositoryHandler,
+    override val dependencies: DependencyHandler,
+    override val providers: ProviderFactory,
+    override val resources: ResourceHandler,
+    override val objects: ObjectFactory,
+    override val layout: ProjectLayout,
+    override val rootProjectDirectory: Path,
 ) : BundledLibraryAware,
     IntelliJPlatformAware,
     IntelliJPlatformDependencyAware,

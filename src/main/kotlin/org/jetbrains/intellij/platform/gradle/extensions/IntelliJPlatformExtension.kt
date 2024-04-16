@@ -54,7 +54,7 @@ import kotlin.math.absoluteValue
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
 abstract class IntelliJPlatformExtension @Inject constructor(
-    private val configurations: ConfigurationContainer,
+    configurations: ConfigurationContainer,
     private val providers: ProviderFactory,
     private val rootProjectDirectory: Path,
 ) : ExtensionAware {

@@ -76,10 +76,15 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
                 description = "IntelliJ Platform dependency archive",
             )
-
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_COLLECTOR,
+                description = "IntelliJ Platform dependencies internal collector",
+            ) {
+                extendsFrom(intellijPlatformDependencyConfiguration)
+            }
             val intellijPlatformLocalConfiguration = create(
-                name = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
-                description = "IntelliJ Platform local instance",
+                name = Configurations.INTELLIJ_PLATFORM_LOCAL,
+                description = "IntelliJ Platform local",
             )
 
             val intellijPlatformConfiguration = create(
@@ -124,19 +129,30 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 }
             }
 
-            val intellijPlatformPluginsConfiguration = create(
-                name = Configurations.INTELLIJ_PLATFORM_PLUGINS,
-                description = "IntelliJ Platform plugins",
+            val intellijPlatformPluginDependenciesConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
+                description = "IntelliJ Platform plugin dependencies",
             )
-            val intellijPlatformPluginsConfigurationExtracted = create(
-                name = Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED,
-                description = "IntelliJ Platform plugins extracted",
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR,
+                description = "IntelliJ Platform plugin dependencies internal collector",
+            ) {
+                extendsFrom(intellijPlatformPluginDependenciesConfiguration)
+            }
+            val intellijPlatformPluginLocalConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+                description = "IntelliJ Platform plugin local",
+            )
+            val intellijPlatformPluginConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGIN,
+                description = "IntelliJ Platform plugins",
             ) {
                 attributes {
                     attribute(Attributes.extracted, true)
                 }
 
-                extendsFrom(intellijPlatformPluginsConfiguration)
+                extendsFrom(intellijPlatformPluginDependenciesConfiguration)
+                extendsFrom(intellijPlatformPluginLocalConfiguration)
             }
 
             val intellijPlatformBundledPluginsConfiguration = create(
@@ -228,7 +244,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Platform extra dependencies",
             ) {
                 extendsFrom(
-                    intellijPlatformPluginsConfigurationExtracted,
+                    intellijPlatformPluginConfiguration,
                     intellijPlatformBundledPluginsConfiguration,
                 )
             }
@@ -271,9 +287,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             applyExtractorTransformer(
                 project.configurations[Configurations.External.COMPILE_CLASSPATH],
                 project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
-                project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY],
+                project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY_COLLECTOR],
+                project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR],
                 project.configurations[Configurations.JETBRAINS_RUNTIME_DEPENDENCY],
-                project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGINS],
             )
             applyCollectorTransformer(
                 project.configurations[Configurations.External.COMPILE_CLASSPATH],

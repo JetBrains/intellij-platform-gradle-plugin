@@ -38,10 +38,10 @@ abstract class ExtractorTransformer @Inject constructor(
         val intellijPlatformDependency: ConfigurableFileCollection
 
         @get:Internal
-        val jetbrainsRuntimeDependency: ConfigurableFileCollection
+        val intellijPlatformPluginDependency: ConfigurableFileCollection
 
         @get:Internal
-        val intellijPlatformPlugins: ConfigurableFileCollection
+        val jetbrainsRuntimeDependency: ConfigurableFileCollection
     }
 
     @get:InputArtifact
@@ -56,8 +56,8 @@ abstract class ExtractorTransformer @Inject constructor(
             val targetName = ExtractorTransformerTargetResolver(
                 path,
                 parameters.intellijPlatformDependency,
+                parameters.intellijPlatformPluginDependency,
                 parameters.jetbrainsRuntimeDependency,
-                parameters.intellijPlatformPlugins,
             ).resolve()
 
             val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
@@ -92,8 +92,8 @@ internal fun DependencyHandler.applyExtractorTransformer(
     compileClasspathConfiguration: Configuration,
     testCompileClasspathConfiguration: Configuration,
     intellijPlatformDependencyConfiguration: Configuration,
+    intellijPlatformPluginDependencyConfiguration: Configuration,
     jetbrainsRuntimeDependencyConfiguration: Configuration,
-    intellijPlatformPluginsConfiguration: Configuration,
 ) {
     artifactTypes.maybeCreate(ZIP_TYPE)
         .attributes
@@ -119,8 +119,8 @@ internal fun DependencyHandler.applyExtractorTransformer(
 
         parameters {
             intellijPlatformDependency.from(intellijPlatformDependencyConfiguration)
+            intellijPlatformPluginDependency.from(intellijPlatformPluginDependencyConfiguration)
             jetbrainsRuntimeDependency.from(jetbrainsRuntimeDependencyConfiguration)
-            intellijPlatformPlugins.from(intellijPlatformPluginsConfiguration)
         }
     }
 }

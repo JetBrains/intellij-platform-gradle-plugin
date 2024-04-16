@@ -91,7 +91,7 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
 @Throws(GradleException::class)
 internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformLocalDependency(
     localPathProvider: Provider<*>,
-    configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL_INSTANCE,
+    configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
     localPathProvider.map { localPath ->

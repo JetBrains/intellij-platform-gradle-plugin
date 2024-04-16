@@ -38,6 +38,14 @@ interface IntelliJPlatformVersionAware {
     val intelliJPlatformConfiguration: ConfigurableFileCollection
 
     /**
+     * Holds the [Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY] configuration with the optional custom IntelliJ Platform plugins dependencies added.
+     * It should not be directly accessed.
+     */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    val intelliJPlatformPluginConfiguration: ConfigurableFileCollection
+
+    /**
      * Provides access to the IntelliJ Platform dependency artifact path.
      */
     @get:Internal

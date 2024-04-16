@@ -16,15 +16,15 @@ import kotlin.io.path.pathString
 /**
  * Resolves the target directory name for the [ExtractorTransformer] dependency transformer.
  * Based on the [artifactPath], it decides about the type of the handled dependency and produces the output directory name.
- * For unknown dependencies, throws an exception.
+ * For unknown dependencies, throw an exception.
  *
  * @param artifactPath The path of the artifact to handle.
  */
 class ExtractorTransformerTargetResolver(
     private val artifactPath: Path,
     private val intellijPlatformDependency: FileCollection,
+    private val intellijPlatformPluginDependency: FileCollection,
     private val jetbrainsRuntimeDependency: FileCollection,
-    private val intellijPlatformPlugins: FileCollection,
 ) : Resolver<String> {
 
     override val subject = "Extractor Transformer Target"
@@ -32,7 +32,6 @@ class ExtractorTransformerTargetResolver(
     override val subjectInput = artifactPath
 
     override val log = Logger(javaClass)
-
 
     private val coordinates
         /**
@@ -67,12 +66,7 @@ class ExtractorTransformerTargetResolver(
                 ?.let { "$it-$version" }
         }
 
-        ArtifactType.JETBRAINS_RUNTIME -> {
-            version
-                .takeIf { groupId == "com.jetbrains" && artifactId == "jbr" }
-        }
-
-        ArtifactType.INTELLIJ_PLATFORM_PLUGINS -> {
+        ArtifactType.INTELLIJ_PLATFORM_PLUGIN -> {
             val channel = when {
                 groupId == JETBRAINS_MARKETPLACE_MAVEN_GROUP -> ""
                 groupId.endsWith(".$JETBRAINS_MARKETPLACE_MAVEN_GROUP") -> groupId.dropLast(JETBRAINS_MARKETPLACE_MAVEN_GROUP.length + 1)
@@ -84,17 +78,22 @@ class ExtractorTransformerTargetResolver(
             }
         }
 
+        ArtifactType.JETBRAINS_RUNTIME -> {
+            version
+                .takeIf { groupId == "com.jetbrains" && artifactId == "jbr" }
+        }
+
         else -> null
     } ?: throw GradleException("Cannot resolve '$subject' for: $artifactPath")
 
     private fun obtainArtifactType() = when (artifactPath.toFile()) {
         in intellijPlatformDependency -> ArtifactType.INTELLIJ_PLATFORM
+        in intellijPlatformPluginDependency -> ArtifactType.INTELLIJ_PLATFORM_PLUGIN
         in jetbrainsRuntimeDependency -> ArtifactType.JETBRAINS_RUNTIME
-        in intellijPlatformPlugins -> ArtifactType.INTELLIJ_PLATFORM_PLUGINS
         else -> null
     }
 
-    private enum class ArtifactType {
-        INTELLIJ_PLATFORM, JETBRAINS_RUNTIME, INTELLIJ_PLATFORM_PLUGINS,
+    enum class ArtifactType {
+        INTELLIJ_PLATFORM, INTELLIJ_PLATFORM_PLUGIN, JETBRAINS_RUNTIME,
     }
 }

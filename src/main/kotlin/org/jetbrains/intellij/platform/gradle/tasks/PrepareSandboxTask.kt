@@ -26,7 +26,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxProducerAware
-import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -70,9 +69,9 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
     abstract val pluginJar: RegularFileProperty
 
     /**
-     * List of dependencies on external plugins resolved from the [Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED] configuration.
+     * List of dependencies on external plugins resolved from the [Configurations.INTELLIJ_PLATFORM_PLUGIN] configuration.
      *
-     * @see Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED
+     * @see Configurations.INTELLIJ_PLATFORM_PLUGIN
      * @see IntelliJPlatformDependenciesExtension.plugin
      * @see IntelliJPlatformDependenciesExtension.bundledPlugin
      */
@@ -175,7 +174,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
         override fun register(project: Project) =
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, Tasks.PREPARE_UI_TEST_SANDBOX) {
                 val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
-                val intellijPlatformPluginsConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGINS_EXTRACTED].asLenient
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
                 val extension = project.the<IntelliJPlatformExtension>()
@@ -189,7 +187,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
 
                 pluginJar.convention(pluginJarProvider)
                 defaultDestinationDirectory.convention(sandboxPluginsDirectory)
-                pluginsClasspath.from(intellijPlatformPluginsConfiguration)
+                pluginsClasspath.from(intelliJPlatformPluginConfiguration)
                 runtimeClasspath.from(runtimeConfiguration)
 
                 intoChild(extension.projectName.map { "$it/lib" })

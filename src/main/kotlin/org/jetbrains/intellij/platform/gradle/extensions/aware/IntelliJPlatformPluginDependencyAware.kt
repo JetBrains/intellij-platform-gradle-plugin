@@ -34,7 +34,7 @@ interface IntelliJPlatformPluginDependencyAware: DependencyAware, IntelliJPlatfo
  */
 internal fun IntelliJPlatformPluginDependencyAware.addIntelliJPlatformPluginDependencies(
     plugins: Provider<List<Triple<String, String, String>>>,
-    configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGINS,
+    configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addAllLater(
     plugins.map {
