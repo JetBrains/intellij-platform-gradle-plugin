@@ -16,7 +16,6 @@ import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.resolvers.ExtractorTransformerTargetResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import javax.inject.Inject
@@ -30,7 +29,7 @@ import kotlin.io.path.nameWithoutExtension
 abstract class ExtractorTransformer @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
-) : TransformAction<ExtractorTransformer.Parameters> {
+) : TransformAction<TransformParameters.None> {
 
     interface Parameters : TransformParameters {
 
@@ -53,15 +52,9 @@ abstract class ExtractorTransformer @Inject constructor(
     override fun transform(outputs: TransformOutputs) {
         runCatching {
             val path = inputArtifact.asPath
-            val targetName = ExtractorTransformerTargetResolver(
-                path,
-                parameters.intellijPlatformDependency,
-                parameters.intellijPlatformPluginDependency,
-                parameters.jetbrainsRuntimeDependency,
-            ).resolve()
-
-            val extension = path.name.removePrefix(path.nameWithoutExtension.removeSuffix(".tar"))
-            val targetDirectory = outputs.dir(targetName)
+            val name = path.nameWithoutExtension.removeSuffix(".tar")
+            val extension = path.name.removePrefix(name)
+            val targetDirectory = outputs.dir(name)
 
             val archiveOperator = when (extension) {
                 ".zip", ".sit" -> archiveOperations::zipTree
@@ -91,9 +84,6 @@ abstract class ExtractorTransformer @Inject constructor(
 internal fun DependencyHandler.applyExtractorTransformer(
     compileClasspathConfiguration: Configuration,
     testCompileClasspathConfiguration: Configuration,
-    intellijPlatformDependencyConfiguration: Configuration,
-    intellijPlatformPluginDependencyConfiguration: Configuration,
-    jetbrainsRuntimeDependencyConfiguration: Configuration,
 ) {
     artifactTypes.maybeCreate(ZIP_TYPE)
         .attributes
@@ -112,16 +102,8 @@ internal fun DependencyHandler.applyExtractorTransformer(
         .attribute(Attributes.extracted, true)
 
     registerTransform(ExtractorTransformer::class) {
-        from
-            .attribute(Attributes.extracted, false)
-        to
-            .attribute(Attributes.extracted, true)
-
-        parameters {
-            intellijPlatformDependency.from(intellijPlatformDependencyConfiguration)
-            intellijPlatformPluginDependency.from(intellijPlatformPluginDependencyConfiguration)
-            jetbrainsRuntimeDependency.from(jetbrainsRuntimeDependencyConfiguration)
-        }
+        from.attribute(Attributes.extracted, false)
+        to.attribute(Attributes.extracted, true)
     }
 }
 

@@ -7,8 +7,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.getByName
-import org.jetbrains.intellij.platform.gradle.Constants.Extensions
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
@@ -22,7 +21,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
  * Configurations, as well as the task preparing sandbox for running and testing the custom IntelliJ Platform (if required), have a random suffix applied
  * to avoid collisions.
  */
-interface CustomIntelliJPlatformVersionAware : IntelliJPlatformVersionAware {
+interface CustomIntelliJPlatformVersionAware : IntelliJPlatformVersionAware, ExtensionAware {
 
     /**
      * An input property to configure the type of the custom IntelliJ Platform.
@@ -59,7 +58,6 @@ interface CustomIntelliJPlatformVersionAware : IntelliJPlatformVersionAware {
      * @param configuration The Action object to configure the [IntelliJPlatformPluginsExtension].
      */
     fun ExtensionAware.plugins(configuration: Action<IntelliJPlatformPluginsExtension>) {
-        val extension = extensions.getByName<IntelliJPlatformPluginsExtension>(Extensions.PLUGINS)
-        configuration.execute(extension)
+        configuration.execute(the<IntelliJPlatformPluginsExtension>())
     }
 }

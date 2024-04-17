@@ -85,7 +85,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             val intellijPlatformLocalConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_LOCAL,
                 description = "IntelliJ Platform local",
-            )
+            ) {
+                attributes {
+                    attribute(Attributes.extracted, true)
+                }
+            }
 
             val intellijPlatformConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM,
@@ -287,9 +291,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             applyExtractorTransformer(
                 project.configurations[Configurations.External.COMPILE_CLASSPATH],
                 project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
-                project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY_COLLECTOR],
-                project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR],
-                project.configurations[Configurations.JETBRAINS_RUNTIME_DEPENDENCY],
             )
             applyCollectorTransformer(
                 project.configurations[Configurations.External.COMPILE_CLASSPATH],

@@ -4,8 +4,10 @@ package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.kotlin.dsl.setProperty
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.extensions.aware.IntelliJPlatformPluginDependencyAware
 import org.jetbrains.intellij.platform.gradle.extensions.aware.addIntelliJPlatformPluginDependencies
@@ -26,7 +28,13 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     override val rootProjectDirectory: Path,
     private val intellijPlatformPluginDependencyConfigurationName: String,
     private val intellijPlatformPluginLocalConfigurationName: String,
+    objects: ObjectFactory,
 ) : IntelliJPlatformPluginDependencyAware {
+
+    /**
+     * Contains a list of plugins to be disabled.
+     */
+    internal val disabled = objects.setProperty(String::class)
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform.
@@ -111,4 +119,39 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
         plugins = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } },
         configurationName = intellijPlatformPluginDependencyConfigurationName,
     )
+
+    /**
+     * Disables plugin with a specific [id].
+     *
+     * @param id The plugin identifier.
+     */
+    fun disablePlugin(id: String) = disabled.add(id)
+
+    /**
+     * Disables plugin with a specific [id].
+     *
+     * @param id The plugin identifier.
+     */
+    fun disablePlugin(id: Provider<String>) = disabled.add(id)
+
+    /**
+     * Disables plugins with a specific [ids].
+     *
+     * @param ids Plugin identifiers.
+     */
+    fun disablePlugins(ids: List<String>) = disabled.addAll(ids)
+
+    /**
+     * Disables plugins with a specific [ids].
+     *
+     * @param ids Plugin identifiers.
+     */
+    fun disablePlugins(ids: Provider<List<String>>) = disabled.addAll(ids)
+
+    /**
+     * Disables plugins with a specific [ids].
+     *
+     * @param ids Plugin identifiers.
+     */
+    fun disablePlugins(vararg ids: String) = disabled.addAll(*ids)
 }

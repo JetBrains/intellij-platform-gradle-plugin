@@ -11,6 +11,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
@@ -23,7 +24,9 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
+import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxProducerAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -53,6 +56,14 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
      */
     @get:Internal
     abstract val defaultDestinationDirectory: DirectoryProperty
+
+    /**
+     * An internal field to hold a list of plugins to be disabled within the current sandbox.
+     *
+     * This property is controlled with [IntelliJPlatformPluginsExtension] method of [CustomIntelliJPlatformVersionAware].
+     */
+    @get:Internal
+    abstract val disabledPlugins: SetProperty<String>
 
     /**
      * The output of [Jar] task.
@@ -100,6 +111,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
     @TaskAction
     override fun copy() {
         disableIdeUpdate()
+        disabledPlugins()
 
         super.copy()
     }
@@ -115,8 +127,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
      */
     @Throws(GradleException::class)
     private fun disableIdeUpdate() {
-        val updatesConfig = sandboxConfigDirectory
-            .asPath
+        val updatesConfig = sandboxConfigDirectory.asPath
             .resolve("options")
             .createDirectories()
             .resolve("updates.xml")
@@ -156,6 +167,12 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
             option.setAttribute("value", "false")
             transformXml(document, updatesConfig)
         }
+    }
+
+    private fun disabledPlugins() {
+        sandboxConfigDirectory.asPath
+            .resolve("disabled_plugins.txt")
+            .writeLines(disabledPlugins.get())
     }
 
     fun ensureName(path: Path): String {

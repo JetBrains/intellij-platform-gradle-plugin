@@ -81,7 +81,11 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          *
          * @see CustomIntelliJPlatformVersionAware
          */
-        val suffix = UUID.randomUUID().toString().substring(0, 8)
+        val suffix = name
+            .substringAfter('_', "")
+            .takeIf { it.length == 8 && it.all(Char::isLetterOrDigit) }
+            ?: UUID.randomUUID().toString().substring(0, 8)
+
         val extension = project.the<IntelliJPlatformExtension>()
 
         /**
@@ -91,8 +95,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * @see IntelliJPlatformVersionAware
          */
         if (this is IntelliJPlatformVersionAware) {
-            intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
-            intelliJPlatformPluginConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN].asLenient
+            val configurationSuffix = "_$suffix".takeIf { name.endsWith("_$suffix") }.orEmpty()
+            intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM + configurationSuffix].asLenient
+            intelliJPlatformPluginConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN + configurationSuffix].asLenient
         }
 
         /**
@@ -116,104 +121,72 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * @see CustomIntelliJPlatformVersionAware
          */
         if (this is CustomIntelliJPlatformVersionAware) {
-            val baseIntellijPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
             val dependenciesExtension = dependencies.the<IntelliJPlatformDependenciesExtension>()
             val rootProjectDirectory = project.rootProject.rootDir.toPath().absolute()
 
             with(configurations) {
+                val baseProductInfo = provider {
+                    configurations[Configurations.INTELLIJ_PLATFORM].asLenient.productInfo()
+                }
+
+                val customIntelliJPlatformLocalConfiguration = create(
+                    name = "${Configurations.INTELLIJ_PLATFORM_LOCAL}_$suffix",
+                    description = "Custom IntelliJ Platform local",
+                ) {
+                    attributes {
+                        attribute(Attributes.extracted, true)
+                    }
+
+                    dependenciesExtension.local(
+                        localPath = localPath,
+                        configurationName = name,
+                    )
+                }
+                val customIntelliJPlatformDependencyConfiguration = create(
+                    name = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix",
+                    description = "Custom IntelliJ Platform dependency archive",
+                ) {
+                    configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY_COLLECTOR].extendsFrom(this)
+
+                    val defaultTypeProvider = baseProductInfo.map {
+                        it.productCode.toIntelliJPlatformType()
+                    }
+                    val defaultVersionProvider = baseProductInfo.map {
+                        IdeVersion.createIdeVersion(it.version).toString()
+                    }
+
+                    dependenciesExtension.create(
+                        type = type.orElse(defaultTypeProvider),
+                        version = version.orElse(defaultVersionProvider),
+                        configurationName = name,
+                    )
+                }
+
                 /**
-                 * Override the default [intelliJPlatformConfiguration] with a custom IntelliJ Platform configuration
-                 * so the current task can refer to it.
-                 * Depending on whether [CustomIntelliJPlatformVersionAware.localPath] or any of
-                 * [CustomIntelliJPlatformVersionAware.type] and
-                 * [CustomIntelliJPlatformVersionAware.version] is set,
-                 * a custom configuration is picked as a replacement.
-                 * Otherwise, refer to the base IntelliJ Platform — useful, i.e., when we want to execute
-                 * a regular [RunIdeTask] using defaults.
+                 * Override the default [Configurations.INTELLIJ_PLATFORM] with a custom IntelliJ Platform configuration so the current task can refer to it.
+                 * Depending on whether [CustomIntelliJPlatformVersionAware.localPath] or any of [CustomIntelliJPlatformVersionAware.type]
+                 * and [CustomIntelliJPlatformVersionAware.version] is set, a custom configuration is picked as a replacement.
+                 * Otherwise, refer to the base IntelliJ Platform — useful, i.e., when we want to execute a regular [RunIdeTask] using defaults.
                  */
-                intelliJPlatformConfiguration.apply {
-                    setFrom(provider {
-                        when {
-                            localPath.isSpecified() -> {
-                                /**
-                                 * A custom IntelliJ Platform Local Instance configuration to which we add a
-                                 * new artifact using [CustomIntelliJPlatformVersionAware.localPath].
-                                 */
-                                val intellijPlatformLocalInstanceConfiguration = create(
-                                    name = "${Configurations.INTELLIJ_PLATFORM_LOCAL}_$suffix",
-                                    description = "Custom IntelliJ Platform local",
-                                ) {
-                                    dependenciesExtension.local(
-                                        localPath = localPath,
-                                        configurationName = name,
-                                    )
-                                }
+                intelliJPlatformConfiguration = create(
+                    name = "${Configurations.INTELLIJ_PLATFORM}_$suffix",
+                    description = "Custom IntelliJ Platform",
+                ) {
+                    attributes {
+                        attribute(Attributes.extracted, true)
+                    }
 
-                                /**
-                                 * A common [Configurations.INTELLIJ_PLATFORM] configuration is created with a proper [suffix] added.
-                                 * This configuration eventually holds the custom [Configurations.INTELLIJ_PLATFORM_LOCAL] dependency.
-                                 */
-                                create(
-                                    name = "${Configurations.INTELLIJ_PLATFORM}_$suffix",
-                                    description = "Custom IntelliJ Platform",
-                                ) {
-                                    attributes {
-                                        attribute(Attributes.extracted, true)
-                                    }
-
-                                    extendsFrom(intellijPlatformLocalInstanceConfiguration)
-                                }.asLenient
-                            }
-
-                            type.isSpecified() || version.isSpecified() -> {
-                                val defaultTypeProvider = provider {
-                                    val productInfo = baseIntellijPlatformConfiguration.productInfo()
-                                    productInfo.productCode.toIntelliJPlatformType()
-                                }
-                                val defaultVersionProvider = provider {
-                                    val productInfo = baseIntellijPlatformConfiguration.productInfo()
-                                    IdeVersion.createIdeVersion(productInfo.version).toString()
-                                }
-
-                                /**
-                                 * A custom IntelliJ Platform Dependency configuration to which we add a new artifact
-                                 * using [CustomIntelliJPlatformVersionAware.type]
-                                 * and [CustomIntelliJPlatformVersionAware.version].
-                                 * As both parameters default to the base IntelliJ Platform values, this configuration
-                                 * always holds some dependency.
-                                 * This configuration is ignored if [CustomIntelliJPlatformVersionAware.localPath] is set.
-                                 *
-                                 * This configuration is also added to the global [Configurations.INTELLIJ_PLATFORM_DEPENDENCY_COLLECTOR] registry
-                                 * so the [ExtractorTransformer] could track and extract custom IntelliJ Platform artifacts.
-                                 */
-                                val intellijPlatformDependencyConfiguration = create(
-                                    name = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix",
-                                    description = "Custom IntelliJ Platform dependency archive",
-                                ) {
-                                    dependenciesExtension.create(
-                                        type = type.orElse(defaultTypeProvider),
-                                        version = version.orElse(defaultVersionProvider),
-                                        configurationName = name,
-                                    )
-                                    configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY_COLLECTOR].extendsFrom(this)
-                                }
-
-                                create(
-                                    name = "${Configurations.INTELLIJ_PLATFORM}_$suffix",
-                                    description = "Custom IntelliJ Platform",
-                                ) {
-                                    attributes {
-                                        attribute(Attributes.extracted, true)
-                                    }
-
-                                    extendsFrom(intellijPlatformDependencyConfiguration)
-                                }.asLenient
-                            }
-
-                            else -> baseIntellijPlatformConfiguration
-                        }
-                    })
-                    finalizeValueOnRead()
+                    defaultDependencies {
+                        addAllLater(provider {
+                            val merged = customIntelliJPlatformLocalConfiguration.dependencies + customIntelliJPlatformDependencyConfiguration.dependencies
+                            listOf(merged.first())
+                        })
+                    }
+                    defaultDependencies {
+                        addAllLater(provider {
+                            customIntelliJPlatformDependencyConfiguration.dependencies
+                        })
+                    }
                 }
 
                 /**
@@ -229,7 +202,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 ) {
                     configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR].extendsFrom(this)
                     extendsFrom(configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY])
-
                 }
 
                 /**
@@ -272,6 +244,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     rootProjectDirectory,
                     intellijPlatformPluginDependencyConfiguration.name,
                     intellijPlatformPluginLocalConfiguration.name,
+                    project.objects,
                 )
             }
         }
@@ -332,16 +305,10 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                  */
                 tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName).let { prepareSandboxTask ->
                     dependsOn(prepareSandboxTask)
-                    sandboxSuffix.convention(prepareSandboxTask.sandboxSuffix)
 
-                    /**
-                     * Pass the [Configurations.INTELLIJ_PLATFORM] and [Configurations.INTELLIJ_PLATFORM_PLUGIN] configurations of the current (probably)
-                     * customized task back to its [PrepareSandboxTask] so it can use properly customized IntelliJ Platform and plugins and put them
-                     * into the right sandbox directory.
-                     * If we're dealing with a built-in task, we use the default configurations anyway.
-                     */
-                    prepareSandboxTask.intelliJPlatformConfiguration = intelliJPlatformConfiguration
-                    prepareSandboxTask.intelliJPlatformPluginConfiguration = intelliJPlatformPluginConfiguration
+                    if (this is CustomIntelliJPlatformVersionAware) {
+                        prepareSandboxTask.disabledPlugins = the<IntelliJPlatformPluginsExtension>().disabled
+                    }
                 }
             }
         }
