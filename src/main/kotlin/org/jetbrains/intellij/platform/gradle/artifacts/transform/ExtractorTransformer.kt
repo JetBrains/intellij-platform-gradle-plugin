@@ -9,10 +9,12 @@ import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
-import org.gradle.api.file.*
+import org.gradle.api.file.ArchiveOperations
+import org.gradle.api.file.FileSystemLocation
+import org.gradle.api.file.FileSystemOperations
+import org.gradle.api.file.RelativePath
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
-import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
@@ -30,18 +32,6 @@ abstract class ExtractorTransformer @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
 ) : TransformAction<TransformParameters.None> {
-
-    interface Parameters : TransformParameters {
-
-        @get:Internal
-        val intellijPlatformDependency: ConfigurableFileCollection
-
-        @get:Internal
-        val intellijPlatformPluginDependency: ConfigurableFileCollection
-
-        @get:Internal
-        val jetbrainsRuntimeDependency: ConfigurableFileCollection
-    }
 
     @get:InputArtifact
     @get:Classpath
