@@ -3,11 +3,14 @@
 package org.jetbrains.intellij.platform.gradle.utils
 
 import org.gradle.api.GradleException
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
+import org.gradle.api.initialization.Settings
+import org.gradle.api.internal.GradleInternal
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.resources.ResourceHandler
@@ -64,3 +67,6 @@ internal fun ResourceHandler.resolve(url: String) = text
     .runCatching { asFile("UTF-8") }
     .onFailure { Logger(javaClass).error("Cannot resolve product releases", it) }
     .getOrNull()
+
+val Project.settings: Settings
+    get() = (gradle as GradleInternal).settings

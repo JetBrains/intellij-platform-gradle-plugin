@@ -375,7 +375,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [SigningAware] resolves and provides the Marketplace ZIP Signer for the further usage.
          */
         if (this is SigningAware) {
-            // TODO: test if no ZIP Signer dependency is added to the project
             val marketplaceZipSignerPathResolver = MarketplaceZipSignerPathResolver(
                 marketplaceZipSigner = configurations[Configurations.MARKETPLACE_ZIP_SIGNER].asLenient,
                 localPath = extension.signing.cliPath,

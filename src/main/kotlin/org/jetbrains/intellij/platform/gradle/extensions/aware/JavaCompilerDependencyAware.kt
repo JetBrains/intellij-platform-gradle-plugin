@@ -17,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompi
 interface JavaCompilerDependencyAware : DependencyAware, IntelliJPlatformAware {
     val providers: ProviderFactory
     val repositories: RepositoryHandler
+    val settingsRepositories: RepositoryHandler
 }
 
 /**
@@ -41,7 +42,7 @@ internal fun JavaCompilerDependencyAware.addJavaCompilerDependency(
                 VERSION_CURRENT -> when {
                     resolveClosest -> JavaCompilerClosestVersionResolver(
                         productInfo,
-                        repositories.urls(),
+                        repositories.urls() + settingsRepositories.urls(),
                     ).resolve().version
 
                     else -> productInfo.buildNumber

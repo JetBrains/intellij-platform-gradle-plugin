@@ -10,8 +10,8 @@ import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
-import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
 import org.jetbrains.intellij.platform.gradle.extensions.urls
 import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
@@ -20,6 +20,7 @@ interface TestFrameworkDependencyAware : DependencyAware, BundledLibraryAware {
     val layout: ProjectLayout
     val providers: ProviderFactory
     val repositories: RepositoryHandler
+    val settingsRepositories: RepositoryHandler
 }
 
 /**
@@ -61,7 +62,7 @@ internal fun TestFrameworkDependencyAware.addTestFrameworkDependency(
                         VERSION_CURRENT -> when {
                             resolveClosest -> TestFrameworkClosestVersionResolver(
                                 productInfo,
-                                repositories.urls(),
+                                repositories.urls() + settingsRepositories.urls(),
                                 type.coordinates,
                             ).resolve().version
 

@@ -42,6 +42,7 @@ import javax.inject.Inject
 abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     override val configurations: ConfigurationContainer,
     override val repositories: RepositoryHandler,
+    override val settingsRepositories: RepositoryHandler,
     override val dependencies: DependencyHandler,
     override val providers: ProviderFactory,
     override val resources: ResourceHandler,
