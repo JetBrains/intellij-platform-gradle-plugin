@@ -350,14 +350,24 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [PluginVerifierAware] resolves and provides the IntelliJ Plugin Verifier for the further usage.
          */
         if (this is PluginVerifierAware) {
-            // TODO: test if no PV dependency is added to the project
             val intelliJPluginVerifierPathResolver = IntelliJPluginVerifierPathResolver(
                 intellijPluginVerifier = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER],
                 localPath = extension.verifyPlugin.cliPath,
             )
 
             pluginVerifierExecutable.convention(layout.file(provider {
-                intelliJPluginVerifierPathResolver.resolve().toFile()
+                intelliJPluginVerifierPathResolver
+                    .runCatching { resolve().toFile() }
+                    .onFailure {
+                        throw GradleException(
+                            """
+                            No IntelliJ Plugin Verifier executable found.
+                            Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.verifyPlugin.cliPath` extension property
+                            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-verifyPlugin
+                            """.trimIndent()
+                        )
+                    }
+                    .getOrThrow()
             }))
         }
 
@@ -379,8 +389,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     .onFailure {
                         throw GradleException(
                             """
-                            Cannot resolve the Marketplace ZIP Signer.
-                            Please make sure it is added to the project with `zipSigner()` dependency helper or `intellijPlatform.signing.cliPath` extension property.
+                            No Marketplace ZIP Signer executable found.
+                            Please ensure the `zipSigner()` entry is present in the project dependencies section or `intellijPlatform.signing.cliPath` extension property
+                            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-signing
                             """.trimIndent()
                         )
                     }
@@ -392,7 +403,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [JavaCompilerAware] resolves and provides the Java Compiler dependency.
          */
         if (this is JavaCompilerAware) {
-            // TODO: test if no Java Compiler dependency is added to the project
             javaCompilerConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER].asLenient
         }
 

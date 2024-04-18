@@ -110,7 +110,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     }
 
     @TaskAction
-    fun instrumentCode(inputChanges: InputChanges) {
+    fun instrumentCode(inputChanges: InputChanges) = runCatching {
         ant.invokeMethod(
             "taskdef",
             mapOf(
@@ -190,7 +190,20 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                     }
                 }
         }
-    }
+    }.onFailure {
+        when {
+            it.cause is NoClassDefFoundError -> throw BuildException(
+                """
+                No Java Compiler transitive dependencies found.
+                Please ensure the `instrumentationTools()` entry is present in the project dependencies section along with the `intellijDependencies()` entry in the repositories section.
+                See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+                """.trimIndent(),
+                it,
+            )
+
+            else -> throw it
+        }
+    }.getOrThrow()
 
     /**
      * @throws Exception

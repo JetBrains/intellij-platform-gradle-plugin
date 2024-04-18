@@ -12,6 +12,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
@@ -186,9 +187,20 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             throw IllegalStateException("Plugin file does not exist: $file")
         }
 
+        log.debug("Distribution file: $file")
+        log.debug("Verifier path: $pluginVerifierExecutable")
+
+        classpath = objectFactory.fileCollection().from(pluginVerifierExecutable)
+
         with(ides.files) {
             if (isEmpty()) {
-                throw GradleException("No IDE selected for verification with the IntelliJ Plugin Verifier")
+                throw GradleException(
+                    """
+                    No IDE resolved for verification with the IntelliJ Plugin Verifier.
+                    Please ensure the `intellijPlatform.verifyPlugin.ides` extension block is configured along with the `defaultRepositories()` (or at least `localPlatformArtifacts()`) entry in the repositories section.
+                    See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-verifyPlugin-ides
+                    """.trimIndent()
+                )
             }
             args(listOf("check-plugin") + getOptions() + file.pathString + map {
                 when {
@@ -197,11 +209,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 }
             })
         }
-
-        log.debug("Distribution file: $file")
-        log.debug("Verifier path: $pluginVerifierExecutable")
-
-        classpath = objectFactory.fileCollection().from(pluginVerifierExecutable)
 
         ByteArrayOutputStream().use { os ->
             standardOutput = TeeOutputStream(System.out, os)
@@ -288,19 +295,19 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 val extension = project.the<IntelliJPlatformExtension>()
 
                 extension.verifyPlugin.let {
-                    freeArgs.convention(it.freeArgs)
-                    failureLevel.convention(it.failureLevel)
-                    verificationReportsDirectory.convention(it.verificationReportsDirectory)
-                    verificationReportsFormats.convention(it.verificationReportsFormats)
-                    externalPrefixes.convention(it.externalPrefixes)
-                    teamCityOutputFormat.convention(it.teamCityOutputFormat)
-                    subsystemsToCheck.convention(it.subsystemsToCheck)
-                    ignoredProblemsFile.convention(it.ignoredProblemsFile)
+                    freeArgs = it.freeArgs
+                    failureLevel = it.failureLevel
+                    verificationReportsDirectory = it.verificationReportsDirectory
+                    verificationReportsFormats = it.verificationReportsFormats
+                    externalPrefixes = it.externalPrefixes
+                    teamCityOutputFormat = it.teamCityOutputFormat
+                    subsystemsToCheck = it.subsystemsToCheck
+                    ignoredProblemsFile = it.ignoredProblemsFile
                 }
 
-                ides.from(intellijPluginVerifierIdesConfiguration)
-                archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
-                offline.convention(project.gradle.startParameter.isOffline)
+                ides = intellijPluginVerifierIdesConfiguration
+                archiveFile = buildPluginTaskProvider.flatMap { it.archiveFile }
+                offline = project.gradle.startParameter.isOffline
             }
     }
 

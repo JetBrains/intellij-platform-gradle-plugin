@@ -23,7 +23,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsListTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
@@ -104,32 +103,20 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     intellijPlatformLocalConfiguration,
                 )
 
-                incoming.artifactView {
-                    lenient(true)
-                }
-
                 incoming.beforeResolve {
-//                        if (dependencies.isEmpty()) {
-//                            throw GradleException("No IntelliJ Platform dependency found.")
-//                        }
+                    val message = when (dependencies.size) {
+                        0 -> "No IntelliJ Platform dependency found."
+                        1 -> null
+                        else -> "More than one IntelliJ Platform dependencies found."
+                    } ?: return@beforeResolve
 
-                    val identifiers = IntelliJPlatformType.values()
-                        .asSequence()
-                        .flatMap { listOfNotNull(it.dependency?.toString(), it.binary?.toString()) }
-                        .toSet()
-
-                    val matched = dependencies.filter {
-                        identifiers.contains("${it.group}:${it.name}")
-                    }
-
-                    if (matched.size > 1) {
-                        throw GradleException(
-                            matched.joinToString(
-                                prefix = "More than one IntelliJ Platform dependency found:\n",
-                                separator = "\n",
-                            ) { "${it.group}:${it.name}:${it.version}" }
-                        )
-                    }
+                    throw GradleException(
+                        """
+                        $message
+                        Please ensure there is a single IntelliJ Platform dependency defined in your project and that the necessary repositories, where it can be located, are added.
+                        See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+                        """.trimIndent()
+                    )
                 }
             }
 
@@ -185,7 +172,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
 
             val jetbrainsRuntimeLocalConfiguration = create(
-                name = Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE, description = "JetBrains Runtime local instance"
+                name = Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE,
+                description = "JetBrains Runtime local instance",
             ) {
                 attributes {
                     attribute(Attributes.extracted, true)
@@ -236,6 +224,18 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                 extendsFrom(intellijPluginVerifierIdesDependencyConfiguration)
                 extendsFrom(intellijPluginVerifierIdesLocalConfiguration)
+
+                incoming.beforeResolve {
+                    if (dependencies.isEmpty()) {
+                        throw GradleException(
+                            """
+                            No IDE provided for running verification with the IntelliJ Plugin Verifier.
+                            Please ensure the `intellijPlatform.verifyPlugin.ides` extension block is configured.
+                            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-verifyPlugin-ides
+                            """.trimIndent()
+                        )
+                    }
+                }
             }
 
             create(
@@ -256,7 +256,19 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             create(
                 name = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
                 description = "Java Compiler used by Ant tasks",
-            )
+            ) {
+                incoming.beforeResolve {
+                    if (dependencies.isEmpty()) {
+                        throw GradleException(
+                            """
+                            No Java Compiler dependency found.
+                            Please ensure the `instrumentationTools()` entry is present in the project dependencies section along with the `defaultRepositories()` (or at least `intellijDependencies()`) entry in the repositories section.
+                            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+                            """.trimIndent()
+                        )
+                    }
+                }
+            }
 
             val intellijPlatformTestDependenciesConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
