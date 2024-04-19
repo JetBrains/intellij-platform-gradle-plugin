@@ -8,6 +8,7 @@ import com.jetbrains.plugin.structure.base.utils.deleteLogged
 import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import groovy.lang.Closure
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
@@ -191,19 +192,21 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                 }
         }
     }.onFailure {
-        when {
-            it.cause is NoClassDefFoundError -> throw BuildException(
-                """
-                No Java Compiler transitive dependencies found.
-                Please ensure the `instrumentationTools()` entry is present in the project dependencies section along with the `intellijDependencies()` entry in the repositories section.
-                See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
-                """.trimIndent(),
-                it,
-            )
-
+        val message = when (it.cause) {
+            is ClassNotFoundException -> "No Java Compiler dependency found."
+            is NoClassDefFoundError -> "No Java Compiler transitive dependencies found."
             else -> throw it
         }
-    }.getOrThrow()
+
+        throw GradleException(
+            """
+            $message
+            Please ensure the `instrumentationTools()` entry is present in the project dependencies section along with the `intellijDependencies()` entry in the repositories section.
+            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+            """.trimIndent(),
+            it,
+        )
+    }
 
     /**
      * @throws Exception

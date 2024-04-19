@@ -256,19 +256,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             create(
                 name = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
                 description = "Java Compiler used by Ant tasks",
-            ) {
-                incoming.beforeResolve {
-                    if (dependencies.isEmpty()) {
-                        throw GradleException(
-                            """
-                            No Java Compiler dependency found.
-                            Please ensure the `instrumentationTools()` entry is present in the project dependencies section along with the `defaultRepositories()` (or at least `intellijDependencies()`) entry in the repositories section.
-                            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
-                            """.trimIndent()
-                        )
-                    }
-                }
-            }
+            )
 
             val intellijPlatformTestDependenciesConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
