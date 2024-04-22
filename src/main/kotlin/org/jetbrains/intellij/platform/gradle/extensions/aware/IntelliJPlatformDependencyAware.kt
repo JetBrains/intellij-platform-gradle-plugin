@@ -48,7 +48,7 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
     typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
-        requireNotNull(type.dependency) { "Specified type '$type' has no dependency available." }
+        requireNotNull(type.maven) { "Specified type '$type' has no dependency available." }
 
         when (type) {
             IntelliJPlatformType.AndroidStudio -> {
@@ -63,8 +63,8 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
                 val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
 
                 dependencies.create(
-                    group = type.dependency.groupId,
-                    name = type.dependency.artifactId,
+                    group = type.maven.groupId,
+                    name = type.maven.artifactId,
                     classifier = classifier,
                     ext = extension,
                     version = version,
@@ -72,8 +72,8 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
             }
 
             else -> dependencies.create(
-                group = type.dependency.groupId,
-                name = type.dependency.artifactId,
+                group = type.maven.groupId,
+                name = type.maven.artifactId,
                 version = version,
             )
         }.apply(action)
@@ -102,7 +102,7 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformLocalDependency(
 
         val hash = artifactPath.hashCode().absoluteValue % 1000
         val type = localProductInfo.productCode.toIntelliJPlatformType()
-        val coordinates = type.dependency ?: type.binary
+        val coordinates = type.maven ?: type.binary
         requireNotNull(coordinates) { "Specified type '$type' has no dependency available." }
 
         dependencies.create(

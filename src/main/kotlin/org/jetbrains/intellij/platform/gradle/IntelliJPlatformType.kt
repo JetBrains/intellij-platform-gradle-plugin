@@ -18,102 +18,102 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
  */
 enum class IntelliJPlatformType(
     val code: String,
-    val dependency: Coordinates?,
+    val maven: Coordinates?,
     val binary: Coordinates?,
 ) {
     AndroidStudio(
         code = "AI",
-        dependency = Coordinates("com.google.android.studio", "android-studio"),
+        maven = Coordinates("com.google.android.studio", "android-studio"),
         binary = Coordinates("com.google.android.studio", "android-studio"),
     ),
     Aqua(
         code = "QA",
-        dependency = null,
+        maven = null,
         binary = Coordinates("aqua", "aqua"),
     ),
     CLion(
         code = "CL",
-        dependency = Coordinates("com.jetbrains.intellij.clion", "clion"),
+        maven = Coordinates("com.jetbrains.intellij.clion", "clion"),
         binary = Coordinates("cpp", "CLion"),
     ),
     DataGrip(
         code = "DB",
-        dependency = null,
+        maven = null,
         binary = Coordinates("datagrip", "datagrip"),
     ),
     DataSpell(
         code = "DS",
-        dependency = null,
+        maven = null,
         binary = Coordinates("python", "dataspell"),
     ),
     FleetBackend(
         code = "FLIJ",
-        dependency = Coordinates("com.jetbrains.intellij.fleetBackend", "fleetBackend"),
+        maven = Coordinates("com.jetbrains.intellij.fleetBackend", "fleetBackend"),
         binary = null,
     ),
     Gateway(
         code = "GW",
-        dependency = Coordinates("com.jetbrains.intellij.gateway", "gateway"),
+        maven = Coordinates("com.jetbrains.intellij.gateway", "gateway"),
         binary = Coordinates("idea/gateway", "JetBrainsGateway"),
     ),
     GoLand(
         code = "GO",
-        dependency = Coordinates("com.jetbrains.intellij.goland", "goland"),
+        maven = Coordinates("com.jetbrains.intellij.goland", "goland"),
         binary = Coordinates("go", "goland"),
     ),
     IntellijIdeaCommunity(
         code = "IC",
-        dependency = Coordinates("com.jetbrains.intellij.idea", "ideaIC"),
+        maven = Coordinates("com.jetbrains.intellij.idea", "ideaIC"),
         binary = Coordinates("idea", "ideaIC"),
     ),
     IntellijIdeaUltimate(
         code = "IU",
-        dependency = Coordinates("com.jetbrains.intellij.idea", "ideaIU"),
+        maven = Coordinates("com.jetbrains.intellij.idea", "ideaIU"),
         binary = Coordinates("idea", "ideaIU"),
     ),
     MPS(
         code = "MPS",
-        dependency = null,
+        maven = null,
         binary = Coordinates("mps", "MPS"),
     ),
     PhpStorm(
         code = "PS",
-        dependency = Coordinates("com.jetbrains.intellij.phpstorm", "phpstorm"),
+        maven = Coordinates("com.jetbrains.intellij.phpstorm", "phpstorm"),
         binary = Coordinates("webide", "PhpStorm"),
     ),
     PyCharmProfessional(
         code = "PY",
-        dependency = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPY"),
+        maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPY"),
         binary = Coordinates("python", "pycharm-professional"),
     ),
     PyCharmCommunity(
         code = "PC",
-        dependency = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPC"),
+        maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPC"),
         binary = Coordinates("python", "pycharm-community"),
     ),
     Rider(
         code = "RD",
-        dependency = Coordinates("com.jetbrains.intellij.rider", "riderRD"),
+        maven = Coordinates("com.jetbrains.intellij.rider", "riderRD"),
         binary = Coordinates("rider", "JetBrains.Rider"),
     ),
     RubyMine(
         code = "RM",
-        dependency = null,
+        maven = null,
         binary = Coordinates("ruby", "RubyMine"),
     ),
     RustRover(
         code = "RR",
-        dependency = Coordinates("com.jetbrains.intellij.rustrover", "RustRover"),
+        maven = Coordinates("com.jetbrains.intellij.rustrover", "RustRover"),
         binary = Coordinates("rustrover", "RustRover"),
     ),
     WebStorm(
         code = "WS",
-        dependency = Coordinates("com.jetbrains.intellij.webstorm", "webstorm"),
+        maven = Coordinates("com.jetbrains.intellij.webstorm", "webstorm"),
         binary = Coordinates("webstorm", "WebStorm"),
     ),
     Writerside(
         code = "WRS",
-        dependency = Coordinates("com.jetbrains.intellij.idea", "writerside"),
+        maven = Coordinates("com.jetbrains.intellij.idea", "writerside"),
         binary = Coordinates("writerside", "writerside"),
     ),
     ;
