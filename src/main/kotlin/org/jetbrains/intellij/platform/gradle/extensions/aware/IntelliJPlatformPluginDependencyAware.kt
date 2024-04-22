@@ -61,6 +61,16 @@ internal fun IntelliJPlatformPluginDependencyAware.addIntelliJPlatformBundledPlu
     }
 )
 
+// TODO: add local plugin
+//internal fun IntelliJPlatformPluginDependencyAware.addIntelliJPlatformLocalPluginDependency(
+//    localPluginProvider: Provider<Any>,
+//    configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+//    action: DependencyAction = {},
+//) = configurations[configurationName].dependencies.addLater(
+//    localPluginProvider.map { localPlugin ->
+//        null
+//    }
+//)
 
 /**
  * Creates a dependency for an IntelliJ platform plugin.

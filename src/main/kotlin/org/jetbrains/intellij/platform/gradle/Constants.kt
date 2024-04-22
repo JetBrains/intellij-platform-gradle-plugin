@@ -90,6 +90,20 @@ object Constants {
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
             val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
             val binaryReleaseExtracted = Attribute.of("intellijPlatformPluginVerifierIdeExtracted", Boolean::class.javaObjectType)
+
+            enum class AttributeType {
+                INTELLIJ_PLATFORM, INTELLIJ_PLATFORM_PLUGIN, JETBRAINS_RUNTIME
+            }
+
+            enum class ArtifactType {
+                DIRECTORY, DMG, TAR_GZ, SIT, ZIP;
+
+                override fun toString() = super.toString().replace('_', '.').lowercase()
+
+                companion object {
+                    val Archives = values().toList() - DIRECTORY
+                }
+            }
         }
 
         object Dependencies {

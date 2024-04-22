@@ -14,8 +14,6 @@ import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
-import org.gradle.api.artifacts.type.ArtifactTypeDefinition
-import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
@@ -96,27 +94,25 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
             }
         }
     }
-}
 
-internal fun DependencyHandler.applyBundledPluginsListTransformer() {
-    // ZIP archives fetched from the IntelliJ Maven repository
-    artifactTypes.maybeCreate(ZIP_TYPE)
-        .attributes
-        .attribute(Attributes.bundledPluginsList, false)
+    companion object {
+        internal fun register(
+            dependencies: DependencyHandler,
+        ) {
+            Attributes.ArtifactType.values().forEach {
+                dependencies.artifactTypes.maybeCreate(it.name).attributes.attribute(Attributes.bundledPluginsList, false)
+            }
 
-    // Local IDEs pointed with intellijPlatformLocal dependencies helper
-    artifactTypes.maybeCreate(ArtifactTypeDefinition.DIRECTORY_TYPE)
-        .attributes
-        .attribute(Attributes.bundledPluginsList, false)
-
-    registerTransform(BundledPluginsListTransformer::class) {
-        from
-            .attribute(Attributes.extracted, true)
-            .attribute(Attributes.collected, false)
-            .attribute(Attributes.bundledPluginsList, false)
-        to
-            .attribute(Attributes.extracted, true)
-            .attribute(Attributes.collected, false)
-            .attribute(Attributes.bundledPluginsList, true)
+            dependencies.registerTransform(BundledPluginsListTransformer::class) {
+                from
+                    .attribute(Attributes.extracted, true)
+                    .attribute(Attributes.collected, false)
+                    .attribute(Attributes.bundledPluginsList, false)
+                to
+                    .attribute(Attributes.extracted, true)
+                    .attribute(Attributes.collected, false)
+                    .attribute(Attributes.bundledPluginsList, true)
+            }
+        }
     }
 }

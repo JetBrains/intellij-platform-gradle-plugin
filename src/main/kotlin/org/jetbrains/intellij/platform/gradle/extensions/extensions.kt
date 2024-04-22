@@ -51,7 +51,7 @@ internal fun ExternalModuleDependency.createIvyDependencyFile(
  * @param publications The list of [IvyModule.Publication] objects to be included in the Ivy file.
  */
 internal fun createIvyDependencyFile(
-    group: String,
+    group: String?,
     name: String,
     version: String,
     localPlatformArtifactsPath: Path,

@@ -23,10 +23,10 @@ import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyBundledPluginsListTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyCollectorTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyExtractorTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.applyPluginVerifierIdeExtractorTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.BundledPluginsListTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.PluginVerifierIdeExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
@@ -288,18 +288,30 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attribute(Attributes.extracted)
             }
 
-            applyExtractorTransformer(
-                project.configurations[Configurations.External.COMPILE_CLASSPATH],
-                project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
+            ExtractorTransformer.register(
+                dependencies = this,
+                coordinates = project.provider {
+                    mapOf(
+                        Attributes.AttributeType.INTELLIJ_PLATFORM to Configurations.INTELLIJ_PLATFORM,
+                        Attributes.AttributeType.INTELLIJ_PLATFORM_PLUGIN to Configurations.INTELLIJ_PLATFORM_PLUGIN,
+                        Attributes.AttributeType.JETBRAINS_RUNTIME to Configurations.JETBRAINS_RUNTIME,
+                    ).mapValues { project.configurations[it.value].allDependencies }
+                },
+                compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
+                testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
             )
-            applyCollectorTransformer(
-                project.configurations[Configurations.External.COMPILE_CLASSPATH],
-                project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
+            CollectorTransformer.register(
+                dependencies = this,
+                compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
+                testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
             )
-            applyBundledPluginsListTransformer()
-            applyPluginVerifierIdeExtractorTransformer(
-                project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY],
-                extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
+            BundledPluginsListTransformer.register(
+                dependencies = this
+            )
+            PluginVerifierIdeExtractorTransformer.register(
+                dependencies = this,
+                intellijPluginVerifierIdesDependencyConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY],
+                downloadDirectoryProvider = extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
             )
 
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {

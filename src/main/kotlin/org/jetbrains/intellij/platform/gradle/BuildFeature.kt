@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.Project
 import org.gradle.api.provider.ProviderFactory
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask

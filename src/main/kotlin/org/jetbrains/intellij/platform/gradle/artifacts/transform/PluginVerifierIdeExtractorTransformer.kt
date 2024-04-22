@@ -8,7 +8,6 @@ import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
-import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
 import org.gradle.api.file.*
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
@@ -91,30 +90,26 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
             log.error("${javaClass.canonicalName} execution failed.", it)
         }
     }
-}
 
-internal fun DependencyHandler.applyPluginVerifierIdeExtractorTransformer(
-    intellijPluginVerifierIdesDependencyConfiguration: Configuration,
-    downloadDirectoryProvider: Provider<Directory>,
-) {
-    artifactTypes.maybeCreate(ZIP_TYPE)
-        .attributes
-        .attribute(Attributes.binaryReleaseExtracted, false)
+    companion object {
+        internal fun register(
+            dependencies: DependencyHandler,
+            intellijPluginVerifierIdesDependencyConfiguration: Configuration,
+            downloadDirectoryProvider: Provider<Directory>,
+        ) {
+            Attributes.ArtifactType.Archives.forEach {
+                dependencies.artifactTypes.maybeCreate(it.name).attributes.attribute(Attributes.binaryReleaseExtracted, false)
+            }
 
-    artifactTypes.maybeCreate("tar.gz")
-        .attributes
-        .attribute(Attributes.binaryReleaseExtracted, false)
+            dependencies.registerTransform(PluginVerifierIdeExtractorTransformer::class) {
+                from.attribute(Attributes.binaryReleaseExtracted, false)
+                to.attribute(Attributes.binaryReleaseExtracted, true)
 
-    registerTransform(PluginVerifierIdeExtractorTransformer::class) {
-        from
-            .attribute(Attributes.binaryReleaseExtracted, false)
-
-        to
-            .attribute(Attributes.binaryReleaseExtracted, true)
-
-        parameters {
-            binaryReleaseDependencies.from(intellijPluginVerifierIdesDependencyConfiguration)
-            downloadDirectory.convention(downloadDirectoryProvider)
+                parameters {
+                    binaryReleaseDependencies.from(intellijPluginVerifierIdesDependencyConfiguration)
+                    downloadDirectory.convention(downloadDirectoryProvider)
+                }
+            }
         }
     }
 }

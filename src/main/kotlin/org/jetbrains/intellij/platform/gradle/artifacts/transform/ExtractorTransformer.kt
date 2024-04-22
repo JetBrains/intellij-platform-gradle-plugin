@@ -3,18 +3,21 @@
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.DependencySet
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
-import org.gradle.api.artifacts.type.ArtifactTypeDefinition.ZIP_TYPE
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.RelativePath
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
+import org.gradle.api.tasks.Internal
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
@@ -31,7 +34,13 @@ import kotlin.io.path.nameWithoutExtension
 abstract class ExtractorTransformer @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val fileSystemOperations: FileSystemOperations,
-) : TransformAction<TransformParameters.None> {
+) : TransformAction<ExtractorTransformer.Parameters> {
+
+    interface Parameters : TransformParameters {
+
+        @get:Internal
+        val coordinates: MapProperty<Attributes.AttributeType, List<String>>
+    }
 
     @get:InputArtifact
     @get:Classpath
@@ -42,13 +51,30 @@ abstract class ExtractorTransformer @Inject constructor(
     override fun transform(outputs: TransformOutputs) {
         runCatching {
             val path = inputArtifact.asPath
+            val pathSegments = path.toList().map { it.name }.windowed(3)
             val name = path.nameWithoutExtension.removeSuffix(".tar")
             val extension = path.name.removePrefix(name)
-            val targetDirectory = outputs.dir(name)
 
-            val archiveOperator = when (extension) {
-                ".zip", ".sit" -> archiveOperations::zipTree
-                ".tar.gz" -> archiveOperations::tarTree
+            val targetDirectory = outputs.dir(name)
+            val attributeType = parameters.coordinates.get().entries
+                .find { (_, value) -> value.any { pathSegments.contains(it.split(':')) } }
+                ?.key ?: return
+
+            targetDirectory.parentFile
+                .resolve(Attributes.AttributeType::class.toString())
+                .apply {
+                    createNewFile()
+                    writeText(attributeType.name)
+                }
+
+            val artifactType = Attributes.ArtifactType.valueOf(extension)
+            val archiveOperator = when (artifactType) {
+                Attributes.ArtifactType.ZIP,
+                Attributes.ArtifactType.SIT,
+                -> archiveOperations::zipTree
+
+                Attributes.ArtifactType.TAR_GZ -> archiveOperations::tarTree
+                Attributes.ArtifactType.DMG -> TODO("Not supported yet")
                 else -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
             }
 
@@ -69,31 +95,35 @@ abstract class ExtractorTransformer @Inject constructor(
             log.error("${javaClass.canonicalName} execution failed.", it)
         }
     }
-}
 
-internal fun DependencyHandler.applyExtractorTransformer(
-    compileClasspathConfiguration: Configuration,
-    testCompileClasspathConfiguration: Configuration,
-) {
-    artifactTypes.maybeCreate(ZIP_TYPE)
-        .attributes
-        .attribute(Attributes.extracted, false)
+    companion object {
+        internal fun register(
+            dependencies: DependencyHandler,
+            coordinates: Provider<Map<Attributes.AttributeType, DependencySet>>,
+            compileClasspathConfiguration: Configuration,
+            testCompileClasspathConfiguration: Configuration,
+        ) {
+            Attributes.ArtifactType.Archives.forEach {
+                dependencies.artifactTypes.maybeCreate(it.name).attributes.attribute(Attributes.extracted, false)
+            }
 
-    artifactTypes.maybeCreate("tar.gz")
-        .attributes
-        .attribute(Attributes.extracted, false)
+            listOf(compileClasspathConfiguration, testCompileClasspathConfiguration).forEach {
+                it.attributes.attribute(Attributes.extracted, true)
+            }
 
-    compileClasspathConfiguration
-        .attributes
-        .attribute(Attributes.extracted, true)
+            dependencies.registerTransform(ExtractorTransformer::class) {
+                from.attribute(Attributes.extracted, false)
+                to.attribute(Attributes.extracted, true)
 
-    testCompileClasspathConfiguration
-        .attributes
-        .attribute(Attributes.extracted, true)
-
-    registerTransform(ExtractorTransformer::class) {
-        from.attribute(Attributes.extracted, false)
-        to.attribute(Attributes.extracted, true)
+                parameters {
+                    this.coordinates = coordinates.map {
+                        it.mapValues { entry ->
+                            entry.value.map { dependency -> dependency.group + ":" + dependency.name + ":" + dependency.version }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 
