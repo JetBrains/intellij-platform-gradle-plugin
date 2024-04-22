@@ -30,7 +30,6 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.PluginVerifier
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
-import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
@@ -63,7 +62,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
          */
         project.pluginManager.withPlugin("idea") {
             project.extensions.configure<IdeaModel>("idea") {
-                module.isDownloadSources = project.isBuildFeatureEnabled(BuildFeature.DOWNLOAD_SOURCES).get()
+                module.isDownloadSources = BuildFeature.DOWNLOAD_SOURCES.isEnabled(project.providers).get()
                 module.excludeDirs.add(rootProjectDirectory.resolve(CACHE_DIRECTORY).toFile())
             }
         }

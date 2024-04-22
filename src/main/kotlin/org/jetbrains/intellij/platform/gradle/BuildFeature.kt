@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import org.gradle.api.Project
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
@@ -86,23 +85,21 @@ enum class BuildFeature(private val defaultValue: Boolean) {
         )
         .replaceFirstChar { c -> c.lowercase() }
         .let { "${Plugin.ID}.buildFeature.$it" }
-}
 
-/**
- * Checks if the specified build feature is enabled for the current project.
- *
- * @param feature The build feature to check.
- * @return A provider containing the boolean value
- */
-fun Project.isBuildFeatureEnabled(feature: BuildFeature) =
-    feature
-        .getValue(providers)
-        .map { value ->
+    /**
+     * Checks if the specified build feature is enabled for the current project.
+     *
+     * @param providers Gradle [ProviderFactory] instance.
+     * @return A provider containing the boolean value
+     */
+    fun isEnabled(providers: ProviderFactory) =
+        getValue(providers).map { value ->
             value.also {
                 val log = Logger(BuildFeature::class.java)
                 when (value) {
-                    true -> log.info("Build feature is enabled: $feature")
-                    false -> log.info("Build feature is disabled: $feature")
+                    true -> log.info("Build feature is enabled: $this")
+                    false -> log.info("Build feature is disabled: $this")
                 }
             }
         }
+}

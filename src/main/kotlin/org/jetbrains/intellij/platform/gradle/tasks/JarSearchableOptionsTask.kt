@@ -15,7 +15,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.isBuildFeatureEnabled
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -88,7 +87,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
                 inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
                 archiveClassifier.convention("searchableOptions")
                 destinationDirectory.convention(project.layout.buildDirectory.dir("libs"))
-                noSearchableOptionsWarning.convention(project.isBuildFeatureEnabled(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING))
+                noSearchableOptionsWarning.convention(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING.isEnabled(project.providers))
 
                 from(inputDirectory)
                 include {
