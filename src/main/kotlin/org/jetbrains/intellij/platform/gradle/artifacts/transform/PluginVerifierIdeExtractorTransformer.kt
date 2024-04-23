@@ -98,7 +98,8 @@ abstract class PluginVerifierIdeExtractorTransformer @Inject constructor(
             downloadDirectoryProvider: Provider<Directory>,
         ) {
             Attributes.ArtifactType.Archives.forEach {
-                dependencies.artifactTypes.maybeCreate(it.name).attributes.attribute(Attributes.binaryReleaseExtracted, false)
+                dependencies.artifactTypes.maybeCreate(it.toString())
+                    .attributes.attribute(Attributes.binaryReleaseExtracted, false)
             }
 
             dependencies.registerTransform(PluginVerifierIdeExtractorTransformer::class) {

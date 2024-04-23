@@ -146,8 +146,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     name = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix",
                     description = "Custom IntelliJ Platform dependency archive",
                 ) {
-                    configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY_COLLECTOR].extendsFrom(this)
-
                     val defaultTypeProvider = baseProductInfo.map {
                         it.productCode.toIntelliJPlatformType()
                     }

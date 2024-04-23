@@ -22,7 +22,6 @@ import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.readText
 
 /**
  * The artifact transformer collecting JAR files located within the IntelliJ Platform or Marketplace Plugin archives.
@@ -38,30 +37,22 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
 
     override fun transform(outputs: TransformOutputs) {
         runCatching {
-            val input = inputArtifact.asPath
-            val type = input.parent
-                .resolve(Attributes.AttributeType::class.toString())
-                .runCatching {
-                    Attributes.AttributeType.valueOf(readText())
-                }
-                .getOrNull()
-                ?: return
+            val path = inputArtifact.asPath
+            val productInfo = runCatching { path.productInfo() }.getOrNull()
 
-            when (type) {
-                Attributes.AttributeType.INTELLIJ_PLATFORM -> {
-                    collectIntelliJPlatformJars(input.productInfo(), input)
-                        .forEach { outputs.file(it) }
-                }
-
-                Attributes.AttributeType.INTELLIJ_PLATFORM_PLUGIN -> {
-                    input.forEachDirectoryEntry { entry ->
+            when (productInfo) {
+                null -> {
+                    path.forEachDirectoryEntry { entry ->
                         entry.resolve("lib")
                             .listDirectoryEntries("*.jar")
                             .forEach { outputs.file(it) }
                     }
                 }
 
-                Attributes.AttributeType.JETBRAINS_RUNTIME -> return
+                else -> {
+                    collectIntelliJPlatformJars(path.productInfo(), path)
+                        .forEach { outputs.file(it) }
+                }
             }
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
@@ -75,7 +66,7 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
             testCompileClasspathConfiguration: Configuration,
         ) {
             Attributes.ArtifactType.values().forEach {
-                dependencies.artifactTypes.maybeCreate(it.name)
+                dependencies.artifactTypes.maybeCreate(it.toString())
                     .attributes.attribute(Attributes.collected, false)
             }
 

@@ -809,11 +809,11 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
                     val hash = artifactPath.hashCode().absoluteValue % 1000
                     val type = productInfo.productCode.toIntelliJPlatformType()
-                    requireNotNull(type.maven) { "Specified type '$type' has no dependency available." }
+                    requireNotNull(type.binary) { "Specified type '$type' has no dependency available." }
 
                     dependencies.create(
                         group = Configurations.Dependencies.LOCAL_IDE_GROUP,
-                        name = type.maven.artifactId,
+                        name = type.binary.artifactId,
                         version = "${productInfo.version}+$hash",
                     ).apply {
                         createIvyDependencyFile(

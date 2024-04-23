@@ -100,7 +100,8 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
             dependencies: DependencyHandler,
         ) {
             Attributes.ArtifactType.values().forEach {
-                dependencies.artifactTypes.maybeCreate(it.name).attributes.attribute(Attributes.bundledPluginsList, false)
+                dependencies.artifactTypes.maybeCreate(it.toString())
+                    .attributes.attribute(Attributes.bundledPluginsList, false)
             }
 
             dependencies.registerTransform(BundledPluginsListTransformer::class) {

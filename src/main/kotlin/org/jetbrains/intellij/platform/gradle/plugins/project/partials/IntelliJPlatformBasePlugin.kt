@@ -74,12 +74,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
                 description = "IntelliJ Platform dependency archive",
             )
-            create(
-                name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_COLLECTOR,
-                description = "IntelliJ Platform dependencies internal collector",
-            ) {
-                extendsFrom(intellijPlatformDependencyConfiguration)
-            }
             val intellijPlatformLocalConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_LOCAL,
                 description = "IntelliJ Platform local",
@@ -289,13 +283,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
             ExtractorTransformer.register(
                 dependencies = this,
-                coordinates = project.provider {
-                    mapOf(
-                        Attributes.AttributeType.INTELLIJ_PLATFORM to Configurations.INTELLIJ_PLATFORM,
-                        Attributes.AttributeType.INTELLIJ_PLATFORM_PLUGIN to Configurations.INTELLIJ_PLATFORM_PLUGIN,
-                        Attributes.AttributeType.JETBRAINS_RUNTIME to Configurations.JETBRAINS_RUNTIME,
-                    ).mapValues { project.configurations[it.value].allDependencies }
-                },
                 compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
                 testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
             )

@@ -121,6 +121,34 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     )
 
     /**
+     * Adds a repository for accessing IntelliJ Platform binary releases.
+     *
+     * @param action The action to be performed on the repository. Defaults to an empty action.
+     */
+    fun binaryReleases(action: IvyRepositoryAction = {}): IvyArtifactRepository {
+        val binaryTypes = IntelliJPlatformType.values()
+            .filter { it != IntelliJPlatformType.AndroidStudio }
+            .mapNotNull { it.binary }
+
+        return createIvyRepository(
+            name = "IntelliJ Platform Binary Releases",
+            url = Locations.DOWNLOAD,
+            patterns = listOf("[organization]/[module]-[revision](-[classifier]).[ext]", "[organization]/[revision]/[module]-[revision](-[classifier]).[ext]"),
+            action = {
+                repositories.exclusiveContent {
+                    forRepositories(this@createIvyRepository)
+                    filter {
+                        binaryTypes.forEach {
+                            includeModule(it.groupId, it.artifactId)
+                        }
+                    }
+                }
+                action()
+            },
+        )
+    }
+
+    /**
      * Adds a repository for accessing Android Studio binary releases.
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
@@ -136,39 +164,14 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
                     IntelliJPlatformType.AndroidStudio.binary?.let {
                         includeModule(it.groupId, it.artifactId)
                     }
+                    IntelliJPlatformType.AndroidStudio.maven?.let {
+                        includeModule(it.groupId, it.artifactId)
+                    }
                 }
             }
             action()
         },
     )
-
-    /**
-     * Adds a repository for accessing IntelliJ Platform binary releases.
-     *
-     * @param action The action to be performed on the repository. Defaults to an empty action.
-     */
-    fun binaryReleases(action: IvyRepositoryAction = {}): IvyArtifactRepository {
-        val binaryTypes = IntelliJPlatformType.values()
-            .filter { it != IntelliJPlatformType.AndroidStudio }
-            .mapNotNull { it.binary }
-
-        return createIvyRepository(
-            name = "IntelliJ Platform Binary Releases",
-            url = Locations.DOWNLOAD,
-            patterns = listOf("[organization]/[module]-[revision].[ext]", "[organization]/[revision]/[module]-[revision].[ext]"),
-            action = {
-                repositories.exclusiveContent {
-                    forRepositories(this@createIvyRepository)
-                    filter {
-                        binaryTypes.forEach {
-                            includeModule(it.groupId, it.artifactId)
-                        }
-                    }
-                }
-                action()
-            },
-        )
-    }
 
     // TODO: check the case when marketplace() is higher on the list — most likely it takes the precedence over ivy and fails on built-in java plugin
     //       see https://stackoverflow.com/questions/23023069/gradle-download-and-unzip-file-from-url/34327202#34327202 and exclusiveContent

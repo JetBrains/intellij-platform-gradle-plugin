@@ -62,7 +62,6 @@ object Constants {
 
     object Configurations {
         const val INTELLIJ_PLATFORM_DEPENDENCY = "intellijPlatformDependency"
-        const val INTELLIJ_PLATFORM_DEPENDENCY_COLLECTOR = "intellijPlatformDependencyCollector"
         const val INTELLIJ_PLATFORM_LOCAL = "intellijPlatformLocal"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
         const val INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY = "intellijPlatformPluginDependency"
@@ -98,10 +97,12 @@ object Constants {
             enum class ArtifactType {
                 DIRECTORY, DMG, TAR_GZ, SIT, ZIP;
 
-                override fun toString() = super.toString().replace('_', '.').lowercase()
+                override fun toString() = name.replace('_', '.').lowercase()
 
                 companion object {
-                    val Archives = values().toList() - DIRECTORY
+                    val Archives = enumValues<ArtifactType>().toList() - DIRECTORY
+
+                    fun from(value: String) = enumValues<ArtifactType>().find { it.toString() == value }
                 }
             }
         }

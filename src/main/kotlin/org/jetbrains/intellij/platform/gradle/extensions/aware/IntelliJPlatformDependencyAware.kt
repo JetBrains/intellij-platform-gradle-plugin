@@ -7,8 +7,11 @@ import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
+import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
@@ -48,8 +51,6 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
     typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
-        requireNotNull(type.maven) { "Specified type '$type' has no dependency available." }
-
         when (type) {
             IntelliJPlatformType.AndroidStudio -> {
                 val downloadLink = providers.of(AndroidStudioDownloadLinkValueSource::class) {
@@ -58,24 +59,56 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
                         androidStudioVersion = version
                     }
                 }.orNull
+
                 requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: $version" }
+                requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
 
                 val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
 
                 dependencies.create(
-                    group = type.maven.groupId,
-                    name = type.maven.artifactId,
+                    group = type.binary.groupId,
+                    name = type.binary.artifactId,
                     classifier = classifier,
                     ext = extension,
                     version = version,
                 )
             }
 
-            else -> dependencies.create(
-                group = type.maven.groupId,
-                name = type.maven.artifactId,
-                version = version,
-            )
+            else -> when (BuildFeature.USE_BINARY_RELEASES.isEnabled(providers).get()) {
+                true -> {
+                    val extension = with(OperatingSystem.current()) {
+                        when {
+                            isWindows -> ArtifactType.ZIP
+                            isLinux -> ArtifactType.TAR_GZ
+                            isMacOsX -> ArtifactType.DMG
+                            else -> throw GradleException("Unsupported operating system: $name")
+                        }.toString()
+                    }
+
+                    val archClassifier = System.getProperty("os.arch")
+                        .takeIf { OperatingSystem.current().isMacOsX && it == "aarch64" }
+
+                    requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
+
+                    dependencies.create(
+                        group = type.binary.groupId,
+                        name = type.binary.artifactId,
+                        version = version,
+                        ext = extension,
+                        classifier = archClassifier,
+                    )
+                }
+
+                false -> {
+                    requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
+
+                    dependencies.create(
+                        group = type.maven.groupId,
+                        name = type.maven.artifactId,
+                        version = version,
+                    )
+                }
+            }
         }.apply(action)
     },
 )

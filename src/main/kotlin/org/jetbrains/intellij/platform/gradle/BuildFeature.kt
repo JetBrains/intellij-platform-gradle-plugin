@@ -55,6 +55,19 @@ enum class BuildFeature(private val defaultValue: Boolean) {
     SELF_UPDATE_CHECK(true),
 
     /**
+     * Use binary IDE releases for development.
+     *
+     * If set to `false`, the IntelliJ Platform Gradle Plugin uses for development IntelliJ Platform artifacts hosted on IntelliJ Maven Repository
+     * (see [Locations.INTELLIJ_REPOSITORY]), which are multi-OS distributions.
+     * Those artifacts are published more often, but do not bundle JetBrains Runtime (JBR) and contain files for all supported operating systems,
+     * which make the archive larger.
+     *
+     * The binary distributions (hosted on [Locations.DOWNLOAD]) are OS-specific releases used eventually by end-users.
+     * Binary distribution is lower in size, contains JetBrains Runtime (JBR), but gets published less often.
+     */
+    USE_BINARY_RELEASES(true),
+
+    /**
      * By default, JetBrains Cache Redirector is used when resolving Maven repositories or any resources used by the IntelliJ Platform Gradle Plugin.
      * Due to limitations, sometimes it is desired to limit the list of remote endpoints accessed by Gradle.
      *
