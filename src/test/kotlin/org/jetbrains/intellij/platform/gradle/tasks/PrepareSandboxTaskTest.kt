@@ -232,6 +232,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertEquals(
             setOf(
                 "config/options/updates.xml",
+                "config/disabled_plugins.txt",
                 "plugins/projectName/lib/joda-time-2.8.1.jar",
                 "plugins/projectName/lib/projectName-1.0.0.jar",
             ),
@@ -279,6 +280,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertEquals(
             setOf(
                 "config/options/updates.xml",
+                "config/disabled_plugins.txt",
                 "plugins/projectName/lib/joda-time-2.8.1.jar",
                 "plugins/projectName/lib/projectName-1.0.0.jar",
             ),
@@ -387,6 +389,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertEquals(
             setOf(
                 "config/options/updates.xml",
+                "config/disabled_plugins.txt",
                 "plugins/projectName/lib/projectName-1.0.0.jar",
                 "plugins/org.jetbrains.postfixCompletion-0.8-beta.jar",
             ),
@@ -422,8 +425,9 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertEquals(
             setOf(
                 "config/options/updates.xml",
-                "plugins/markdown/lib/markdown.jar",
+                "config/disabled_plugins.txt",
                 "plugins/projectName/lib/projectName-1.0.0.jar",
+                "plugins/markdown/lib/markdown.jar",
             ),
             collectPaths(sandbox),
         )
@@ -523,6 +527,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertEquals(
             setOf(
                 "config/options/updates.xml",
+                "config/disabled_plugins.txt",
                 "plugins/projectName/lib/joda-time-2.8.1.jar",
                 "plugins/projectName/lib/projectName-1.0.0.jar",
             ),
@@ -542,6 +547,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertEquals(
             setOf(
                 "config/options/updates.xml",
+                "config/disabled_plugins.txt",
                 "plugins/projectName/lib/projectName-1.0.0.jar",
             ),
             collectPaths(sandbox),
@@ -790,8 +796,9 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
         assertEquals(
             setOf(
-                "plugins/projectName/lib/projectName-1.0.1.jar",
                 "config/options/updates.xml",
+                "config/disabled_plugins.txt",
+                "plugins/projectName/lib/projectName-1.0.1.jar",
             ),
             collectPaths(sandbox),
         )
@@ -819,6 +826,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertEquals(
             setOf(
                 "config/options/updates.xml",
+                "config/disabled_plugins.txt",
                 "plugins/projectName/lib/core_1.jar",
                 "plugins/projectName/lib/core_2.jar",
                 "plugins/projectName/lib/joda-time-2.8.1.jar",
@@ -855,6 +863,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 "plugins-test/projectName/lib/projectName-1.0.0.jar",
                 "plugins-test/some-file",
                 "config-test/options/updates.xml",
+                "config-test/disabled_plugins.txt",
             ),
             collectPaths(sandbox),
         )

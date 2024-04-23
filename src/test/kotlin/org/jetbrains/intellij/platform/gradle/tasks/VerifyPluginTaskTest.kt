@@ -17,7 +17,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
-            assertContains("No IDE selected for verification with the IntelliJ Plugin Verifier", output)
+            assertContains("No IDE provided for running verification with the IntelliJ Plugin Verifier.", output)
         }
     }
 
@@ -44,7 +44,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
             assertValidConfigurationCache = false,
             Tasks.VERIFY_PLUGIN,
         ) {
-            assertContains("Could not find org.jetbrains.intellij.plugins:verifier-cli:1.254", output)
+            assertContains("No IntelliJ Plugin Verifier executable found.", output)
         }
     }
 
@@ -296,7 +296,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
-            assertContains("No IDE selected for verification with the IntelliJ Plugin Verifier", output)
+            assertContains("No IDE resolved for verification with the IntelliJ Plugin Verifier.", output)
         }
     }
 

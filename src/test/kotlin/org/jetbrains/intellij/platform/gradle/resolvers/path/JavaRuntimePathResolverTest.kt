@@ -31,13 +31,12 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             assertLogValue("jetbrainsRuntimePath: ") {
                 assertTrue(it.isEmpty())
             }
-            assertLogValue("intellijPlatformPath: ") {
+            val intellijPlatformPath = assertLogValue("intellijPlatformPath: ") {
                 assertTrue(it.isNotEmpty())
             }
             assertLogValue("resolvedPath: ") {
-                assertEquals(Jvm.current().javaHome.toPath().invariantSeparatorsPathString, it)
+                assertEquals("$intellijPlatformPath/jbr/Contents/Home", it)
             }
-            assertContains("'Current JVM' resolved as:", output)
         }
     }
 

@@ -37,7 +37,7 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
-            assertContains("Cannot resolve the Marketplace ZIP Signer.", output)
+            assertContains("No Marketplace ZIP Signer executable found.", output)
         }
     }
 

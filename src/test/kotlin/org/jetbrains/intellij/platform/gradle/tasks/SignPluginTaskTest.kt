@@ -197,7 +197,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
             assertValidConfigurationCache = false,
             Tasks.SIGN_PLUGIN,
         ) {
-            assertContains("Cannot resolve the Marketplace ZIP Signer.", output)
+            assertContains("No Marketplace ZIP Signer executable found.", output)
         }
     }
 
