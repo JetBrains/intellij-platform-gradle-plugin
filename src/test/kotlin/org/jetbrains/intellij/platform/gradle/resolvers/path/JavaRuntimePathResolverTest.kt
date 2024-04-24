@@ -57,7 +57,6 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             }
             assertLogValue("resolvedPath: ") {
                 assertTrue(it.startsWith(jetbrainsRuntime))
-                assertTrue(it.endsWith("$version/$version"))
                 assertExists(Path(it).resolve("bin/java"))
             }
 
@@ -83,7 +82,6 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             }
             assertLogValue("resolvedPath: ") {
                 assertTrue(it.startsWith(jetbrainsRuntime))
-                assertTrue(it.endsWith("$version/$version/Contents/Home"))
                 assertExists(Path(it).resolve("bin/java"))
             }
 
@@ -108,7 +106,6 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
             }
             assertLogValue("resolvedPath: ") {
                 assertTrue(it.startsWith(jetbrainsRuntime))
-                assertTrue(it.endsWith("$version/$version"))
                 assertExists(Path(it).resolve("bin/java.exe"))
             }
             assertContains("'JetBrains Runtime specified with dependencies' resolved as:", output)

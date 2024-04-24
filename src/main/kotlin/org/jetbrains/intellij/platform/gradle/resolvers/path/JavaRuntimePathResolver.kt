@@ -118,8 +118,9 @@ class JavaRuntimePathResolver(
         val baseDirectory = resolveEntry("jbr*") ?: this
 
         return sequenceOf(
-            { baseDirectory.resolve("Contents/Home") },
             { baseDirectory.resolve("jdk/Contents/Home") },
+            { baseDirectory.resolve("Contents/Home") },
+            { baseDirectory.resolve("Home") },
             { baseDirectory },
         ).firstNotNullOfOrNull {
             it().takeIfExists()
