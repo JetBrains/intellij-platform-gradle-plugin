@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
@@ -79,9 +80,20 @@ abstract class ExtractorTransformer @Inject constructor(
             }
 
             // Resolve the first directory that contains more than a single directory.
-            // This approach helps elliminating `/Application Name.app/Contents/...` macOS directories or nested directory from the `tar.gz` archive.
+            // This approach helps eliminate `/Application Name.app/Contents/...` macOS directories or nested directory from the `tar.gz` archive.
             val root = generateSequence(targetDirectory) { parent ->
-                parent.listFiles()?.singleOrNull()?.takeIf { it.isDirectory }
+                val entry = parent.listFiles()
+                    ?.singleOrNull() // pick an entry if it is a singleton in a directory
+                    ?.takeIf { it.isDirectory } // and this entry is a directory
+                    ?: return@generateSequence null
+
+                fun File.getOrNull(name: String) = listFiles { file -> file.name == name }?.singleOrNull()
+
+                when {
+                    entry.name.endsWith(".app") -> entry.getOrNull("Contents") // eliminate `/Application Name.app/Contents/...`
+                    entry.getOrNull("lib") != null -> null // stop when `lib/` is inside, even if it's a singleton
+                    else -> null
+                }
             }.last()
 
             // Move content from the resolved nested directory.
