@@ -8,7 +8,10 @@ import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
-import org.gradle.api.file.*
+import org.gradle.api.file.ArchiveOperations
+import org.gradle.api.file.FileSystemLocation
+import org.gradle.api.file.FileSystemOperations
+import org.gradle.api.file.FileTree
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
@@ -70,17 +73,29 @@ abstract class ExtractorTransformer @Inject constructor(
             }
 
             fileSystemOperations.copy {
+                includeEmptyDirs = false
                 from(archiveOperator(path))
                 into(targetDirectory)
-                eachFile {
-                    val segments = with(relativePath.segments) {
-                        when {
-                            size > 2 && get(0).endsWith(".app") && get(1) == "Contents" -> drop(2).toTypedArray()
-                            else -> this
-                        }
-                    }
-                    relativePath = RelativePath(true, *segments)
+            }
+
+            // Resolve the first directory that contains more than a single directory.
+            // This approach helps elliminating `/Application Name.app/Contents/...` macOS directories or nested directory from the `tar.gz` archive.
+            val root = generateSequence(targetDirectory) { parent ->
+                parent.listFiles()?.singleOrNull()?.takeIf { it.isDirectory }
+            }.last()
+
+            // Move content from the resolved nested directory.
+            if (root != targetDirectory) {
+                root.listFiles()?.forEach { file ->
+                    val destination = targetDirectory.resolve(file.toRelativeString(root))
+                    destination.parentFile?.mkdirs()
+                    file.renameTo(destination)
                 }
+
+                // Remove empty directory.
+                generateSequence(root) { it.parentFile }
+                    .takeWhile { it != targetDirectory }
+                    .forEach { it.delete() }
             }
 
             when (artifactType) {
@@ -130,7 +145,8 @@ abstract class ExtractorTransformer @Inject constructor(
             .from(tempDirectory)
             .matching {
                 exclude {
-                    Files.isSymbolicLink(it.file.toPath())
+                    // DMG archives contain a symbolic link to Applications directory and some `.background` meta directory we have to exclude.
+                    Files.isSymbolicLink(it.file.toPath()) || it.relativePath.startsWith('.')
                 }
             }
     }
