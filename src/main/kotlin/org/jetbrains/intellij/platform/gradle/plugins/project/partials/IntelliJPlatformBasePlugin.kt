@@ -426,6 +426,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         listOf(
             PrintBundledPluginsTask,
             PrintProductsReleasesTask,
+            SetupDependenciesTask,
         ).forEach {
             it.register(project)
         }
