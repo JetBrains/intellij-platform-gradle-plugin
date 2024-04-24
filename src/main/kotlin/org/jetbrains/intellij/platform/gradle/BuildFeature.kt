@@ -14,7 +14,7 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
  * To enable or disable a particular feature, add a Project property to the `gradle.properties` file with the following pattern:
  *
  * ```
- * org.jetbrains.intellij.buildFeature.<buildFeatureName>=<true|false>
+ * org.jetbrains.intellij.platform.buildFeature.<buildFeatureName>=<true|false>
  * ```
  *
  * Switch to [org.gradle.api.configuration.BuildFeatures] when supporting Gradle 8.5+.
