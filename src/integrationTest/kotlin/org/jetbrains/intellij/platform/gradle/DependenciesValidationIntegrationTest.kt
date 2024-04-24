@@ -6,7 +6,6 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "intellij-platform-dependency-validation",
@@ -234,8 +233,9 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 > Failed to query the value of task ':signPlugin' property 'zipSignerExecutable'.
-                   > Cannot resolve the Marketplace ZIP Signer.
-                     Please make sure it is added to the project with `zipSigner()` dependency helper or `intellijPlatform.signing.cliPath` extension property.
+                   > No Marketplace ZIP Signer executable found.
+                     Please ensure the `zipSigner()` entry is present in the project dependencies section or `intellijPlatform.signing.cliPath` extension property
+                     See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-signing
                 """.trimIndent(),
                 output,
             )

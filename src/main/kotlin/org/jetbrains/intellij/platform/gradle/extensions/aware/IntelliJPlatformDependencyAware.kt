@@ -76,17 +76,15 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
 
             else -> when (BuildFeature.USE_BINARY_RELEASES.isEnabled(providers).get()) {
                 true -> {
-                    val extension = with(OperatingSystem.current()) {
+                    val (extension, classifier) = with(OperatingSystem.current()) {
+                        val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
                         when {
-                            isWindows -> ArtifactType.ZIP
-                            isLinux -> ArtifactType.TAR_GZ
-                            isMacOsX -> ArtifactType.DMG
+                            isWindows -> ArtifactType.ZIP to "win"
+                            isLinux -> ArtifactType.TAR_GZ to arch
+                            isMacOsX -> ArtifactType.DMG to arch
                             else -> throw GradleException("Unsupported operating system: $name")
-                        }.toString()
-                    }
-
-                    val archClassifier = System.getProperty("os.arch")
-                        .takeIf { OperatingSystem.current().isMacOsX && it == "aarch64" }
+                        }
+                    }.let { (type, classifier) -> type.toString() to classifier }
 
                     requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
 
@@ -95,7 +93,7 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
                         name = type.binary.artifactId,
                         version = version,
                         ext = extension,
-                        classifier = archClassifier,
+                        classifier = classifier,
                     )
                 }
 

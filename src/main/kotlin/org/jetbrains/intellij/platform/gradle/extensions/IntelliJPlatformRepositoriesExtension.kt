@@ -133,7 +133,12 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         return createIvyRepository(
             name = "IntelliJ Platform Binary Releases",
             url = Locations.DOWNLOAD,
-            patterns = listOf("[organization]/[module]-[revision](-[classifier]).[ext]", "[organization]/[revision]/[module]-[revision](-[classifier]).[ext]"),
+            patterns = listOf(
+                "[organization]/[module]-[revision](-[classifier]).[ext]",
+                "[organization]/[module]-[revision](.[classifier]).[ext]",
+                "[organization]/[revision]/[module]-[revision](-[classifier]).[ext]",
+                "[organization]/[revision]/[module]-[revision](.[classifier]).[ext]",
+            ),
             action = {
                 repositories.exclusiveContent {
                     forRepositories(this@createIvyRepository)
