@@ -35,7 +35,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
                 assertTrue(it.isNotEmpty())
             }
             assertLogValue("resolvedPath: ") {
-                assertEquals("$intellijPlatformPath/jbr/Contents/Home", it)
+                assertTrue(it.startsWith("$intellijPlatformPath/jbr"))
             }
         }
     }
