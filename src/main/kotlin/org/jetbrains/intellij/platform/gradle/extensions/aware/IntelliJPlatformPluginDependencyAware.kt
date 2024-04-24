@@ -17,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.models.toPublication
 import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import java.nio.file.Path
 import kotlin.io.path.Path
+import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 import kotlin.math.absoluteValue
 
@@ -106,7 +107,12 @@ private fun IntelliJPlatformPluginDependencyAware.createIntelliJPlatformBundledP
     requireNotNull(bundledPlugin) { "Could not find bundled plugin with ID: '$id'" }
 
     val artifactPath = Path(bundledPlugin.path)
-    val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
+    val jars = listOfNotNull(
+        artifactPath.resolve("lib"),
+        artifactPath.resolve("lib/modules").takeIf { it.exists() }
+    ).flatMap {
+        it.listDirectoryEntries("*.jar")
+    }
     val hash = artifactPath.hashCode().absoluteValue % 1000
 
     return dependencies.create(

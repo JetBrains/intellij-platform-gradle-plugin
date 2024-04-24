@@ -43,9 +43,14 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
             when (productInfo) {
                 null -> {
                     path.forEachDirectoryEntry { entry ->
-                        entry.resolve("lib")
-                            .listDirectoryEntries("*.jar")
-                            .forEach { outputs.file(it) }
+                        listOfNotNull(
+                            entry.resolve("lib"),
+                            entry.resolve("lib/modules")
+                        ).flatMap {
+                            it.listDirectoryEntries("*.jar")
+                        }.forEach {
+                            outputs.file(it)
+                        }
                     }
                 }
 
@@ -112,7 +117,7 @@ internal fun collectBundledPluginsJars(intellijPlatformPath: Path) =
         .resolve("plugins")
         .listDirectoryEntries()
         .asSequence()
-        .map { it.resolve("lib") }
+        .flatMap { it.resolve("lib") + it.resolve("lib/modules") }
         .mapNotNull { it.takeIf { it.exists() } }
         .flatMap { it.listDirectoryEntries("*.jar") }
         .toSet()
