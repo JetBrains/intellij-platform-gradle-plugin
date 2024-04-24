@@ -30,10 +30,7 @@ import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.models.toPublication
 import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
-import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
-import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
-import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
@@ -127,11 +124,19 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * is running a frontend part (JetBrains Client) which connects to the backend.
      *
      * This property allows running the IDE with backend and frontend parts running in separate processes.
-     * The developed plugin is installed in the backend part.
+     * The developed plugin is installed in the backend part by default, this can be changed via [targetProductPart].
      *
      * Default value: `false`
      */
     abstract val splitMode: Property<Boolean>
+
+    /**
+     * Taken into account only if [splitMode] is set to `true` and specifies in which part of the IDE the plugin
+     * should be installed when `runIde` task is executed: the backend process, the frontend process, or both.
+     * 
+     * Default value: [RunIdeTask.TargetProductPart.BACKEND] 
+     */
+    abstract val targetProductPart: Property<RunIdeTask.TargetProductPart>
 
     val pluginConfiguration
         get() = extensions.getByName<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION)

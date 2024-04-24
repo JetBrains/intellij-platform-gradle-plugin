@@ -26,9 +26,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxProducerAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -45,7 +43,7 @@ import kotlin.io.path.*
  * @see Constants.Sandbox
  */
 @CacheableTask
-abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
+abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware {
 
     /**
      * Default sandbox destination directory to where the plugin files will be copied into.
@@ -112,7 +110,9 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
     override fun copy() {
         disableIdeUpdate()
         disabledPlugins()
-
+        if (splitMode.get()) {
+            createPropertiesFileForFrontend()
+        }
         super.copy()
     }
 
@@ -175,6 +175,26 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
             .writeLines(disabledPlugins.get())
     }
 
+    /**
+     * Creates a properties file which will be passed to the frontend process when the IDE is started in Split Mode.
+     */
+    private fun createPropertiesFileForFrontend() {
+        val pluginsPath = when (targetProductPart.get()) {
+            RunIdeTask.TargetProductPart.FRONTEND, RunIdeTask.TargetProductPart.BACKEND_AND_FRONTEND ->
+                sandboxPluginsDirectory.asPath
+            RunIdeTask.TargetProductPart.BACKEND ->
+                //specifies an empty directory to ensure that the plugin won't be loaded
+                sandboxPluginsDirectory.asPath.resolve("frontend")
+        }
+        frontendPropertiesFilePath.writeText("""
+            idea.config.path=${sandboxConfigDirectory.asPath.resolve("frontend").pathString}
+            idea.system.path=${sandboxSystemDirectory.asPath.resolve("frontend").pathString}
+            idea.log.path=${sandboxLogDirectory.asPath.resolve("frontend").pathString}
+            idea.plugins.path=${pluginsPath.pathString}
+        """.trimIndent())
+    }
+
+
     fun ensureName(path: Path): String {
         var name = path.name
         var index = 1
@@ -215,6 +235,8 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware {
                 from(pluginsClasspath)
 
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
+                inputs.property("intellijPlatform.splitMode", extension.splitMode)
+                inputs.property("intellijPlatform.targetProductPart", extension.targetProductPart)
                 inputs.files(runtimeConfiguration)
             }
     }

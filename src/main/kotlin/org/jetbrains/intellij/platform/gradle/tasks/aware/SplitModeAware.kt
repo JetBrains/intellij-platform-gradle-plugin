@@ -7,6 +7,7 @@ import org.gradle.api.tasks.Internal
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 /**
@@ -27,6 +28,14 @@ interface SplitModeAware : IntelliJPlatformVersionAware {
      */
     @get:Internal
     val splitMode: Property<Boolean>
+
+    /**
+     * Specifies in which part of the product the developed plugin should be installed.
+     * 
+     * Default value: [RunIdeTask.TargetProductPart.BACKEND]
+     */
+    @get:Internal
+    val targetProductPart: Property<RunIdeTask.TargetProductPart>
 
     /**
      * Validates that the resolved IntelliJ Platform supports Split Mode.

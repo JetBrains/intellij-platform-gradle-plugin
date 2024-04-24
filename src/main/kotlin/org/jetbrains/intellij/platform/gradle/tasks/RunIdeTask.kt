@@ -13,6 +13,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.frontendPropertiesFilePath
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.pathString
 
@@ -59,6 +60,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
 
         if (splitMode.get()) {
             environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.pathString)
+            environment("JETBRAINS_CLIENT_PROPERTIES", frontendPropertiesFilePath.pathString)
 
             if (args.orEmpty().isNotEmpty()) {
                 throw InvalidUserDataException("Passing arguments directly is not supported in Split Mode. Use `argumentProviders` instead.")
@@ -70,6 +72,17 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
         super.exec()
     }
 
+    /**
+     * Describes a part of the product where the developed plugin can be installed when running in [splitMode].
+     */
+    enum class TargetProductPart {
+        BACKEND,
+        FRONTEND,
+        BACKEND_AND_FRONTEND;
+
+        override fun toString() = name.lowercase().replace('_', '-')
+    }
+    
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {

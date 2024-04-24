@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Added
+- `targetProductPart` property is added to allow installing plugin on the frontend part when running in Split Mode [#1563](../../issues/1563)
+
 ### Fixed
 
 - Fix for: `coroutinesJavaAgentPath` specifies file `.../build/tmp/initializeIntelliJPlugin/coroutines-javaagent.jar` which doesn't exist

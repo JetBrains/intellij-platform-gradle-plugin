@@ -3,12 +3,15 @@
 package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File
 import java.nio.file.Path
@@ -23,7 +26,7 @@ import kotlin.io.path.listDirectoryEntries
  * @property sandboxSystemDirectory The output directory where the sandbox system files will be written.
  * @property sandboxLogDirectory The output directory where the sandbox log files will be written.
  */
-class SandboxArgumentProvider(
+open class SandboxArgumentProvider(
     @Optional
     @InputDirectory
     @PathSensitive(RELATIVE)
@@ -54,10 +57,36 @@ class SandboxArgumentProvider(
     override fun asArguments() = listOfNotNull(
         sandboxConfigDirectory.ifExists { "-Didea.config.path=$it" },
         sandboxSystemDirectory.ifExists { "-Didea.system.path=$it" },
-        sandboxLogDirectory.ifExists { "-Didea.log.path=$it" },
+        sandboxLogDirectory.ifExists { "-Didea.log.path=$it" }
+    ) + computePluginPathProperties()
+
+    protected open fun computePluginPathProperties() = listOfNotNull(
         sandboxPluginsDirectory.ifExists { "-Didea.plugins.path=$it" },
         pluginPath?.let { "-Dplugin.path=$it" },
     )
 
-    private fun <T> DirectoryProperty.ifExists(block: (Path) -> T) = orNull?.asPath?.takeIf { it.exists() }?.run(block)
+    protected fun <T> DirectoryProperty.ifExists(block: (Path) -> T) = orNull?.asPath?.takeIf { it.exists() }?.run(block)
+}
+
+class SandboxArgumentProviderSplitModeAware(
+    sandboxConfigDirectory: DirectoryProperty,
+    sandboxPluginsDirectory: DirectoryProperty,
+    sandboxSystemDirectory: DirectoryProperty,
+    sandboxLogDirectory: DirectoryProperty,
+
+    @Input
+    val splitMode: Property<Boolean>,
+
+    @Input
+    val targetProductPart: Property<RunIdeTask.TargetProductPart>,
+) : SandboxArgumentProvider(sandboxConfigDirectory, sandboxPluginsDirectory, sandboxSystemDirectory, sandboxLogDirectory) {
+    override fun computePluginPathProperties(): List<String> {
+        if (splitMode.get() && targetProductPart.get() == RunIdeTask.TargetProductPart.FRONTEND) {
+            return listOfNotNull(
+                //specifies an empty directory to ensure that the plugin won't be loaded by the backend process
+                sandboxPluginsDirectory.ifExists { "-Didea.plugins.path=$it/backend" },
+            ) 
+        }
+        return super.computePluginPathProperties()
+    }
 }

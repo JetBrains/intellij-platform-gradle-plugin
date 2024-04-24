@@ -320,6 +320,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             projectName.convention(project.name)
             sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
             splitMode.convention(false)
+            targetProductPart.convention(RunIdeTask.TargetProductPart.BACKEND)
 
             configureExtension<IntelliJPlatformExtension.PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {
                 version.convention(project.provider { project.version.toString() })

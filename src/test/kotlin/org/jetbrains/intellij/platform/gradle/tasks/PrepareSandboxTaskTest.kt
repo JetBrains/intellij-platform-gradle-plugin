@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import java.nio.file.Path
 import kotlin.io.path.*
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -359,6 +360,59 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             ),
             collectPaths(sandbox),
         )
+    }
+
+    @Test
+    fun `prepare sandbox for splitMode with plugin installed on frontend`() {
+        buildSandboxForSplitMode(RunIdeTask.TargetProductPart.FRONTEND)
+        checkFrontendProperties(sandbox.resolve("plugins"))
+    }
+    
+    @Test
+    fun `prepare sandbox for splitMode with plugin installed on backend`() {
+        buildSandboxForSplitMode(RunIdeTask.TargetProductPart.BACKEND)
+        checkFrontendProperties(sandbox.resolve("plugins").resolve("frontend"))
+    }
+    
+    @Test
+    fun `prepare sandbox for splitMode with plugin installed on backend and frontend`() {
+        buildSandboxForSplitMode(RunIdeTask.TargetProductPart.BACKEND_AND_FRONTEND)
+        checkFrontendProperties(sandbox.resolve("plugins"))
+    }
+
+    private fun checkFrontendProperties(pluginsPath: Path) {
+        assertFileContent(
+            sandbox.resolve("frontend.properties"),
+            """
+                idea.config.path=${sandbox.resolve("config").resolve("frontend").pathString}
+                idea.system.path=${sandbox.resolve("system").resolve("frontend").pathString}
+                idea.log.path=${sandbox.resolve("log").resolve("frontend").pathString}
+                idea.plugins.path=$pluginsPath
+                """.trimIndent()
+        )
+    }
+
+    private fun buildSandboxForSplitMode(targetProductPart: RunIdeTask.TargetProductPart) {
+        writeJavaFile()
+
+        pluginXml write //language=xml
+                """
+                    <idea-plugin />
+                    """.trimIndent()
+
+        buildFile prepend """
+                    import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
+            """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                    intellijPlatform {
+                        splitMode = true
+                        targetProductPart = RunIdeTask.TargetProductPart.${targetProductPart.name}
+                    }
+                    """.trimIndent()
+
+        build(Tasks.PREPARE_SANDBOX)
     }
 
     @Test
