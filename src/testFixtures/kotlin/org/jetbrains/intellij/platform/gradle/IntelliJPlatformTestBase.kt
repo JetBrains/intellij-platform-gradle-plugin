@@ -48,7 +48,7 @@ abstract class IntelliJPlatformTestBase {
         dir.deleteRecursively()
     }
 
-    protected fun build(
+    internal inline fun build(
         vararg tasksList: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
@@ -62,7 +62,7 @@ abstract class IntelliJPlatformTestBase {
         block = block,
     )
 
-    protected fun buildAndFail(
+    internal inline fun buildAndFail(
         vararg tasksList: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
@@ -77,7 +77,7 @@ abstract class IntelliJPlatformTestBase {
         block = block,
     )
 
-    protected fun build(
+    internal inline fun build(
         gradleVersion: String = this.gradleVersion,
         fail: Boolean = false,
         assertValidConfigurationCache: Boolean = true,
@@ -106,7 +106,7 @@ abstract class IntelliJPlatformTestBase {
         }
         .also(block)
 
-    private fun builder(
+    internal fun builder(
         gradleVersion: String,
         vararg tasks: String,
         projectProperties: Map<String, Any> = emptyMap(),
@@ -148,7 +148,7 @@ abstract class IntelliJPlatformTestBase {
         debugEnabled = false
     }
 
-    protected fun BuildResult.assertLogValue(label: String, block: (String) -> Unit): String {
+    protected inline fun BuildResult.assertLogValue(label: String, block: (String) -> Unit): String {
         assertContains(label, output)
         return output
             .lineSequence()
