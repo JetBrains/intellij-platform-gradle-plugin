@@ -18,7 +18,7 @@ repositories {
     mavenCentral()
 
     intellijPlatform {
-        releases()
+        defaultRepositories()
     }
 }
 

@@ -9,26 +9,27 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "classpath",
 ) {
 
-    override val defaultProjectProperties = super.defaultProjectProperties + mapOf(
-        "markdownPlugin.version" to markdownPluginVersion,
-    )
+    override val defaultProjectProperties
+        get() = super.defaultProjectProperties + mapOf(
+            "markdownPlugin.version" to markdownPluginVersion,
+        )
 
     @Test
     fun `dependencies should contain IntelliJ Platform and Markdown plugin`() {
         build(Tasks.External.DEPENDENCIES, projectProperties = defaultProjectProperties) {
             output containsText """
                 compileClasspath - Compile classpath for null/main.
-                +--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
+                +--- idea:ideaIC:$intellijPlatformVersion
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
 
             output containsText """
                 intellijPlatformDependency - IntelliJ Platform dependency archive
-                \--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
+                \--- idea:ideaIC:$intellijPlatformVersion
             """.trimIndent()
 
             output containsText """
-                intellijPlatformPlugins - IntelliJ Platform plugins
+                intellijPlatformPlugin - IntelliJ Platform plugins
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
 
@@ -103,6 +104,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
             output containsText "testFramework.jar"
         }
     }
+
     @Test
     fun `attach custom bundled library`() {
         disableDebug()

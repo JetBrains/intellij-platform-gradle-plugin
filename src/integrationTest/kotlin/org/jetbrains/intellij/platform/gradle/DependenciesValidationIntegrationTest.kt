@@ -45,14 +45,14 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform dependency archive
-                \--- com.jetbrains.intellij.idea:ideaIC:2022.3.3
+                \--- idea:ideaIC:2022.3.3
                 """.trimIndent(),
                 output,
             )
 
             assertContains(
                 """
-                intellijPlatformLocalInstance - IntelliJ Platform local instance
+                intellijPlatformLocal - IntelliJ Platform local
                 No dependencies
                 """.trimIndent(),
                 output,
@@ -61,7 +61,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatform - IntelliJ Platform
-                \--- com.jetbrains.intellij.idea:ideaIC:2022.3.3
+                \--- idea:ideaIC:2022.3.3
                 """.trimIndent(),
                 output,
             )
@@ -87,14 +87,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent()
 
         buildAndFail(Tasks.External.DEPENDENCIES) {
-            assertContains(
-                """
-                > More than one IntelliJ Platform dependency found:
-                  com.jetbrains.intellij.idea:ideaIC:2022.3.3
-                  com.jetbrains.intellij.phpstorm:phpstorm:2022.3.3
-                """.trimIndent(),
-                output,
-            )
+            assertContains("More than one IntelliJ Platform dependencies found.", output)
         }
     }
 
@@ -113,7 +106,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatform - IntelliJ Platform
-                \--- com.jetbrains.intellij.idea:ideaIC:2022.3.3 FAILED
+                \--- idea:ideaIC:2022.3.3 FAILED
                 """.trimIndent(),
                 output,
             )

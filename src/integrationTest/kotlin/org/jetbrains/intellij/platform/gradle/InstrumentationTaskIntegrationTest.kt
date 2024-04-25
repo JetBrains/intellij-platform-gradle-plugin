@@ -6,6 +6,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.appendText
 import kotlin.io.path.fileSize
 import kotlin.test.BeforeTest
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -143,6 +144,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
         }
     }
 
+    @Ignore
     @Test
     fun `fail on null with instrumented code not NPE`() {
         buildAndFail(

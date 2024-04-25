@@ -11,9 +11,10 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     private val defaultArgs = listOf("--info")
 
-    override val defaultProjectProperties = super.defaultProjectProperties + mapOf(
-        "buildSearchableOptions" to true,
-    )
+    override val defaultProjectProperties
+        get() = super.defaultProjectProperties + mapOf(
+            "buildSearchableOptions" to true,
+        )
 
     @Test
     fun `selfUpdateCheck is disabled`() {

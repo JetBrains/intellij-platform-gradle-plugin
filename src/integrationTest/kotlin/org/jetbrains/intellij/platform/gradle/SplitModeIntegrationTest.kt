@@ -10,9 +10,10 @@ class SplitModeIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "split-mode",
 ) {
 
-    private val sufficientVersion = "241.14494.158-EAP-SNAPSHOT"
+    private val sufficientVersion = "2024.1"
 
-    override val defaultProjectProperties = super.defaultProjectProperties + mapOf("splitMode" to true)
+    override val defaultProjectProperties
+        get() = super.defaultProjectProperties + mapOf("splitMode" to true)
 
     @Test
     @Ignore("${Tasks.RUN_IDE} task never finishes")
