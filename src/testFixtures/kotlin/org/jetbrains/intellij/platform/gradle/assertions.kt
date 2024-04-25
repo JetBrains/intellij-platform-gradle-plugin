@@ -17,13 +17,13 @@ private val NON_UNIX_LINE_SEPARATORS = Pattern.compile("\r\n|\r")
 internal fun String.normaliseLineSeparators() = NON_UNIX_LINE_SEPARATORS.matcher(this).replaceAll("\n")
 
 infix fun String.containsText(string: String) =
-    assert(normaliseLineSeparators().contains(string)) { "expected:<$this> but was:<$string>" }
+    assert(normaliseLineSeparators().contains(string)) { "expected:<$string> but was:<$this>" }
 
 infix fun Path.containsText(string: String) =
     readText().containsText(string)
 
 infix fun String.notContainsText(string: String) =
-    assert(!normaliseLineSeparators().contains(string)) { "expected:<$this> but was: <$string>" }
+    assert(!normaliseLineSeparators().contains(string)) { "expected:<$string> but was: <$this>" }
 
 fun BuildResult.assertTaskOutcome(task: String, outcome: TaskOutcome) = assertEquals(outcome, task(":$task")?.outcome)
 
