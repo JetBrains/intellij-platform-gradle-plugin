@@ -6,6 +6,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
+import org.jetbrains.intellij.platform.gradle.tasks.CustomRunIdeTask
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
@@ -23,6 +24,7 @@ abstract class IntelliJPlatformRunPlugin : Plugin<Project> {
 
         listOf(
             RunIdeTask,
+            CustomRunIdeTask,
         ).forEach {
             it.register(project)
         }

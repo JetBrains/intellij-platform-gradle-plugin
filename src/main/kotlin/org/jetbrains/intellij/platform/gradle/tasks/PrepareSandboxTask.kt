@@ -36,7 +36,7 @@ import kotlin.io.path.*
 /**
  * Prepares a sandbox environment with the installed plugin and its dependencies.
  * The sandbox directory is required by tasks that run IDE and tests in isolation from other instances, like when multiple IntelliJ Platforms are used for
- * testing with [RunIdeTask], [TestIdeTask], [TestIdeUiTask], or [TestIdePerformanceTask] tasks.
+ * testing with [RunIdeTask], [CustomTestIdeTask], [TestIdeUiTask], or [TestIdePerformanceTask] tasks.
  *
  * To fully use the sandbox capabilities in a task, make it extend the [SandboxAware] interface.
  *

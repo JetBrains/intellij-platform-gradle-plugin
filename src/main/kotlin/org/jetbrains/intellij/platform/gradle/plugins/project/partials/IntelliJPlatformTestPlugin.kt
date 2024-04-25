@@ -6,10 +6,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
-import org.jetbrains.intellij.platform.gradle.tasks.PrepareTestTask
-import org.jetbrains.intellij.platform.gradle.tasks.TestIdePerformanceTask
-import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
-import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
+import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.TestCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
@@ -28,7 +25,9 @@ abstract class IntelliJPlatformTestPlugin : Plugin<Project> {
         listOf(
             PrepareTestTask,
             TestCompanion,
-            TestIdeTask,
+            CustomTestIdeTask,
+            CustomTestIdePerformanceTask,
+            CustomTestIdeUiTask,
             TestIdePerformanceTask,
             TestIdeUiTask,
         ).forEach {

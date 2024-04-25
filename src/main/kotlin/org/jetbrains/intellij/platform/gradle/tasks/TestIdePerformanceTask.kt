@@ -15,7 +15,7 @@ import org.jetbrains.intellij.platform.gradle.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradle.performanceTest.TestExecutionFailException
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.IdeaLogParser
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.SimpleIJPerformanceParser
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -26,6 +26,9 @@ import kotlin.io.path.nameWithoutExtension
 
 /**
  * Runs performance tests on the IDE with the developed plugin installed.
+ *
+ * This task runs against the IntelliJ Platform and plugins specified in project dependencies.
+ * To register a customized task, use [CustomTestIdePerformanceTask] instead.
  *
  * The [TestIdePerformanceTask] task extends the [RunIdeBase] task, so all configuration attributes of [JavaExec] and [RunIdeTask] tasks can be used in the [TestIdePerformanceTask] as well.
  * See [RunIdeTask] task for more details.
@@ -38,7 +41,7 @@ import kotlin.io.path.nameWithoutExtension
 @Deprecated(message = "CHECK")
 @Incubating
 @UntrackedTask(because = "Should always run")
-abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
+abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, IntelliJPlatformVersionAware {
 
     /**
      * Path to directory with test projects and '.ijperf' files.
@@ -120,8 +123,8 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, CustomInte
     }
 
     companion object : Registrable {
-        override fun register(project: Project) =
-            project.registerTask<TestIdePerformanceTask>(Tasks.TEST_IDE_PERFORMANCE) {
+
+        internal val configuration: TestIdePerformanceTask.() -> Unit = {
 //                artifactsDirectory.convention(extension.type.flatMap { type ->
 //                    extension.version.flatMap { version ->
 //                        project.layout.buildDirectory.dir(
@@ -133,9 +136,9 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, CustomInte
 //                })
 //                profilerName.convention(ProfilerName.ASYNC)
 
-                // Check that the `runIdePerformanceTest` task was launched
-                // Check that `performanceTesting.jar` is absent (that means it's a community version)
-                // Check that user didn't pass a custom version of the performance plugin
+            // Check that the `runIdePerformanceTest` task was launched
+            // Check that `performanceTesting.jar` is absent (that means it's a community version)
+            // Check that user didn't pass a custom version of the performance plugin
 //                if (
 //                    RUN_IDE_PERFORMANCE_TEST_TASK_NAME in project.gradle.startParameter.taskNames
 //                    && extension.plugins.get().none { it is String && it.startsWith(PERFORMANCE_PLUGIN_ID) }
@@ -152,7 +155,10 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, CustomInte
 //                        configurePluginDependency(project, plugin, extension, this, resolver)
 //                    }
 //                }
-            }
+        }
+
+        override fun register(project: Project) =
+            project.registerTask<TestIdePerformanceTask>(Tasks.TEST_IDE_PERFORMANCE, configuration = configuration)
     }
 
 //    private fun resolveLatestPluginUpdate(pluginId: String, buildNumber: String, channel: String = "") =

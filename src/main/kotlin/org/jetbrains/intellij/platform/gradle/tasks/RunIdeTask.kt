@@ -11,7 +11,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.pathString
@@ -20,27 +20,11 @@ import kotlin.io.path.pathString
  * Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded.
  * It directly extends the [JavaExec] Gradle task, which allows for an extensive configuration (system properties, memory management, etc.).
  *
- * This task class also inherits from [CustomIntelliJPlatformVersionAware],
- * which makes it possible to create `runIde`-like tasks using custom IntelliJ Platform versions:
- *
- * ```kotlin
- * import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
- * import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
- *
- * tasks {
- *   val runPhpStorm by registering(RunIdeTask::class) {
- *     type = IntelliJPlatformType.PhpStorm
- *     version = "2023.2.2"
- *   }
- *
- *   val runLocalIde by registering(RunIdeTask::class) {
- *     localPath = file("/Users/hsz/Applications/Android Studio.app")
- *   }
- * }
- * ```
+ * This task runs against the IntelliJ Platform and plugins specified in project dependencies.
+ * To register a customized task, use [CustomRunIdeTask] instead.
  */
 @UntrackedTask(because = "Should always run")
-abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatformVersionAware {
+abstract class RunIdeTask : JavaExec(), RunnableIdeAware, IntelliJPlatformVersionAware {
 
     init {
         group = Plugin.GROUP_NAME
@@ -71,30 +55,34 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
     }
 
     companion object : Registrable {
-        override fun register(project: Project) =
-            project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
-                systemPropertyDefault("idea.classpath.index.enabled", false)
-                systemPropertyDefault("idea.is.internal", true)
-                systemPropertyDefault("idea.plugin.in.sandbox.mode", true)
-                systemPropertyDefault("idea.vendor.name", "JetBrains")
-                systemPropertyDefault("ide.no.platform.update", false)
-                systemPropertyDefault("jdk.module.illegalAccess.silent", true)
 
-                val os = OperatingSystem.current()
+        internal val configuration: RunIdeTask.() -> Unit = {
+            systemPropertyDefault("idea.classpath.index.enabled", false)
+            systemPropertyDefault("idea.is.internal", true)
+            systemPropertyDefault("idea.plugin.in.sandbox.mode", true)
+            systemPropertyDefault("idea.vendor.name", "JetBrains")
+            systemPropertyDefault("ide.no.platform.update", false)
+            systemPropertyDefault("jdk.module.illegalAccess.silent", true)
+
+            with(OperatingSystem.current()) {
                 when {
-                    os.isMacOsX -> {
+                    isMacOsX -> {
                         systemPropertyDefault("idea.smooth.progress", false)
                         systemPropertyDefault("apple.laf.useScreenMenuBar", true)
                         systemPropertyDefault("apple.awt.fileDialogForDirectories", true)
                     }
 
-                    os.isUnix -> {
+                    isUnix -> {
                         systemPropertyDefault("sun.awt.disablegrab", true)
                     }
                 }
             }
+        }
 
-        private fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
+        override fun register(project: Project) =
+            project.registerTask<RunIdeTask>(Tasks.RUN_IDE, configuration = configuration)
+
+        internal fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
             if (!systemProperties.containsKey(name)) {
                 systemProperty(name, defaultValue)
             }

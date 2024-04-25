@@ -3,10 +3,10 @@
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareTestTask
-import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
+import org.jetbrains.intellij.platform.gradle.tasks.CustomTestIdeTask
 
 /**
- * Interface used to describe tasks used for running tests, such as a customizable [TestIdeTask] or [PrepareTestTask]
+ * Interface used to describe tasks used for running tests, such as a customizable [CustomTestIdeTask] or [PrepareTestTask]
  * used for configuring `test` and keeping it immutable.
  */
 interface TestableAware : CoroutinesJavaAgentAware, PluginAware, RuntimeAware, SandboxAware

@@ -43,7 +43,7 @@ import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
  * ```
  */
 @UntrackedTask(because = "Should always run")
-abstract class TestIdeTask : Test(), TestableAware, CustomIntelliJPlatformVersionAware {
+abstract class CustomTestIdeTask : Test(), TestableAware, CustomIntelliJPlatformVersionAware {
 
     init {
         group = Plugin.GROUP_NAME
@@ -60,7 +60,7 @@ abstract class TestIdeTask : Test(), TestableAware, CustomIntelliJPlatformVersio
     companion object : Registrable {
         private val Test.sourceTask: TestableAware
             get() = when {
-                this is TestIdeTask -> this
+                this is CustomTestIdeTask -> this
                 else -> project.tasks.named<PrepareTestTask>(Tasks.PREPARE_TEST).get()
             }
 
@@ -79,7 +79,7 @@ abstract class TestIdeTask : Test(), TestableAware, CustomIntelliJPlatformVersio
         private val Test.testCompileClasspathConfiguration
             get() = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH]
 
-        val configuration: Test.() -> Unit = {
+        internal val configuration: Test.() -> Unit = {
             enableAssertions = true
 
             jvmArgumentProviders.add(
@@ -114,6 +114,6 @@ abstract class TestIdeTask : Test(), TestableAware, CustomIntelliJPlatformVersio
         }
 
         override fun register(project: Project) =
-            project.registerTask<TestIdeTask>(configuration = configuration)
+            project.registerTask<CustomTestIdeTask>(configuration = configuration)
     }
 }
