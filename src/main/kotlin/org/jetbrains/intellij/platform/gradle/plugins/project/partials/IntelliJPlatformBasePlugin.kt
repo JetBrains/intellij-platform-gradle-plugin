@@ -98,7 +98,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                 incoming.beforeResolve {
                     val message = when (dependencies.size) {
-                        0 -> "No IntelliJ Platform dependency found."
+                        0 -> null
                         1 -> null
                         else -> "More than one IntelliJ Platform dependencies found."
                     } ?: return@beforeResolve
@@ -217,18 +217,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                 extendsFrom(intellijPluginVerifierIdesDependencyConfiguration)
                 extendsFrom(intellijPluginVerifierIdesLocalConfiguration)
-
-                incoming.beforeResolve {
-                    if (dependencies.isEmpty()) {
-                        throw GradleException(
-                            """
-                            No IDE provided for running verification with the IntelliJ Plugin Verifier.
-                            Please ensure the `intellijPlatform.verifyPlugin.ides` extension block is configured.
-                            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-verifyPlugin-ides
-                            """.trimIndent()
-                        )
-                    }
-                }
             }
 
             create(

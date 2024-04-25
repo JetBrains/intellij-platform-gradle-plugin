@@ -59,7 +59,21 @@ fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
  * @throws GradleException
  */
 @Throws(GradleException::class)
-fun FileCollection.platformPath() = toList().single().toPath().absolute()
+fun FileCollection.platformPath() = with(toList()) {
+    val message = when (size) {
+        0 -> "No IntelliJ Platform dependency found."
+        1 -> null
+        else -> "More than one IntelliJ Platform dependencies found."
+    } ?: return@with single().toPath().absolute()
+
+    throw GradleException(
+        """
+        $message
+        Please ensure there is a single IntelliJ Platform dependency defined in your project and that the necessary repositories, where it can be located, are added.
+        See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+        """.trimIndent()
+    )
+}
 
 // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
 internal fun ResourceHandler.resolve(url: String) = text

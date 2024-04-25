@@ -92,6 +92,7 @@ abstract class ExtractorTransformer @Inject constructor(
                 when {
                     entry.name.endsWith(".app") -> entry.getOrNull("Contents") // eliminate `/Application Name.app/Contents/...`
                     entry.getOrNull("product-info.json") != null -> entry// set the root to the directory containing `product-info.json`
+                    entry.getOrNull("Resources")?.getOrNull("product-info.json") != null -> entry// set the root to the directory containing `Resources/product-info.json`
                     entry.getOrNull("lib") != null -> null // stop when `lib/` is inside, even if it's a singleton
                     else -> null
                 }

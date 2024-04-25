@@ -135,32 +135,33 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     }
 
     companion object : Registrable {
-        override fun register(project: Project) = project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
-            val extension = project.the<IntelliJPlatformExtension>()
+        override fun register(project: Project) =
+            project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
+                val extension = project.the<IntelliJPlatformExtension>()
 
-            offline.convention(project.gradle.startParameter.isOffline)
-            selfUpdateCheck.convention(BuildFeature.SELF_UPDATE_CHECK.isEnabled(project.providers))
-            selfUpdateLock.convention(
-                project.layout.file(project.provider {
-                    extension.cachePath.also {
-                        it.createDirectories()
-                    }.resolve("self-update.lock").toFile()
-                })
-            )
-            coroutinesJavaAgent.convention(
-                project.layout.file(project.provider {
-                    extension.cachePath.also {
-                        it.createDirectories()
-                    }.resolve("coroutines-javaagent.jar").toFile()
-                })
-            )
-            pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
+                offline.convention(project.gradle.startParameter.isOffline)
+                selfUpdateCheck.convention(BuildFeature.SELF_UPDATE_CHECK.isEnabled(project.providers))
+                selfUpdateLock.convention(
+                    project.layout.file(project.provider {
+                        extension.cachePath.also {
+                            it.createDirectories()
+                        }.resolve("self-update.lock").toFile()
+                    })
+                )
+                coroutinesJavaAgent.convention(
+                    project.layout.file(project.provider {
+                        extension.cachePath.also {
+                            it.createDirectories()
+                        }.resolve("coroutines-javaagent.jar").toFile()
+                    })
+                )
+                pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
 
-            onlyIf {
-                !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
+                onlyIf {
+                    !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
+                }
+
+                mustRunAfter(Tasks.External.CLEAN)
             }
-
-            mustRunAfter(Tasks.External.CLEAN)
-        }
     }
 }

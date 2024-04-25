@@ -31,6 +31,7 @@ abstract class SetupDependenciesTask : DefaultTask() {
     }
 
     companion object : Registrable {
-        override fun register(project: Project) = project.registerTask<SetupDependenciesTask>(Tasks.SETUP_DEPENDENCIES)
+        override fun register(project: Project) =
+            project.registerTask<SetupDependenciesTask>(Tasks.SETUP_DEPENDENCIES)
     }
 }
