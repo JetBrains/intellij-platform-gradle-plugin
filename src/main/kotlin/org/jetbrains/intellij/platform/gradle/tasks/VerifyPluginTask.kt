@@ -188,9 +188,20 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         }
 
         log.debug("Distribution file: $file")
-        log.debug("Verifier path: $pluginVerifierExecutable")
 
-        classpath = objectFactory.fileCollection().from(pluginVerifierExecutable)
+        val executable = pluginVerifierExecutable.orNull
+            ?.asPath
+            ?: throw GradleException(
+                """
+                No IntelliJ Plugin Verifier executable found.
+                Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.verifyPlugin.cliPath` extension property
+                See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-verifyPlugin
+                """.trimIndent()
+            )
+
+        log.debug("Verifier path: $executable")
+
+        classpath = objectFactory.fileCollection().from(executable)
 
         with(ides.files) {
             if (isEmpty()) {

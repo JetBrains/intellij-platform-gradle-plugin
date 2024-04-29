@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
@@ -158,11 +159,18 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
 
     @TaskAction
     override fun exec() {
-        val cliPath = zipSignerExecutable.asPath
+        val executable = zipSignerExecutable.orNull?.asPath
+            ?: throw GradleException(
+                """
+                No Marketplace ZIP Signer executable found.
+                Please ensure the `zipSigner()` entry is present in the project dependencies section or `intellijPlatform.signing.cliPath` extension property
+                See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-signing
+                """.trimIndent()
+            )
 
-        log.debug("Marketplace ZIP Signer CLI path: $cliPath")
+        log.debug("Marketplace ZIP Signer CLI path: $executable")
 
-        classpath = objectFactory.fileCollection().from(cliPath)
+        classpath = objectFactory.fileCollection().from(executable)
         args(arguments.toList())
 
         super.exec()

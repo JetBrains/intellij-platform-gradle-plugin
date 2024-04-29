@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
@@ -356,16 +355,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             pluginVerifierExecutable.convention(layout.file(provider {
                 intelliJPluginVerifierPathResolver
                     .runCatching { resolve().toFile() }
-                    .onFailure {
-                        throw GradleException(
-                            """
-                            No IntelliJ Plugin Verifier executable found.
-                            Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.verifyPlugin.cliPath` extension property
-                            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-verifyPlugin
-                            """.trimIndent()
-                        )
-                    }
-                    .getOrThrow()
+                    .getOrNull()
             }))
         }
 
@@ -380,19 +370,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
             zipSignerExecutable.convention(layout.file(provider {
                 marketplaceZipSignerPathResolver
-                    .runCatching {
-                        resolve().toFile()
-                    }
-                    .onFailure {
-                        throw GradleException(
-                            """
-                            No Marketplace ZIP Signer executable found.
-                            Please ensure the `zipSigner()` entry is present in the project dependencies section or `intellijPlatform.signing.cliPath` extension property
-                            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-signing
-                            """.trimIndent()
-                        )
-                    }
-                    .getOrThrow()
+                    .runCatching { resolve().toFile() }
+                    .getOrNull()
             }))
         }
 
