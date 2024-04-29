@@ -34,6 +34,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -124,7 +125,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * is running a frontend part (JetBrains Client) which connects to the backend.
      *
      * This property allows running the IDE with backend and frontend parts running in separate processes.
-     * The developed plugin is installed in the backend part by default, this can be changed via [targetProductPart].
+     * The developed plugin is installed in the backend part by default, this can be changed via [splitModeTarget].
      *
      * Default value: `false`
      */
@@ -134,9 +135,9 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * Taken into account only if [splitMode] is set to `true` and specifies in which part of the IDE the plugin
      * should be installed when `runIde` task is executed: the backend process, the frontend process, or both.
      * 
-     * Default value: [RunIdeTask.TargetProductPart.BACKEND] 
+     * Default value: [SplitModeAware.SplitModeTarget.BACKEND]
      */
-    abstract val targetProductPart: Property<RunIdeTask.TargetProductPart>
+    abstract val splitModeTarget: Property<SplitModeAware.SplitModeTarget>
 
     val pluginConfiguration
         get() = extensions.getByName<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION)

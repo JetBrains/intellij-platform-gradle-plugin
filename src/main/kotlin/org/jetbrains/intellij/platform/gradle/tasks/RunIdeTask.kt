@@ -72,17 +72,6 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
         super.exec()
     }
 
-    /**
-     * Describes a part of the product where the developed plugin can be installed when running in [splitMode].
-     */
-    enum class TargetProductPart {
-        BACKEND,
-        FRONTEND,
-        BACKEND_AND_FRONTEND;
-
-        override fun toString() = name.lowercase().replace('_', '-')
-    }
-    
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {

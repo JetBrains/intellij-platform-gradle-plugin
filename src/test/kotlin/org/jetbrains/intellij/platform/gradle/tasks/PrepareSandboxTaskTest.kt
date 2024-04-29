@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import java.nio.file.Path
 import kotlin.io.path.*
 import kotlin.test.Ignore
@@ -364,19 +365,19 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `prepare sandbox for splitMode with plugin installed on frontend`() {
-        buildSandboxForSplitMode(RunIdeTask.TargetProductPart.FRONTEND)
+        buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.FRONTEND)
         checkFrontendProperties(sandbox.resolve("plugins"))
     }
     
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend`() {
-        buildSandboxForSplitMode(RunIdeTask.TargetProductPart.BACKEND)
+        buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BACKEND)
         checkFrontendProperties(sandbox.resolve("plugins").resolve("frontend"))
     }
     
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend and frontend`() {
-        buildSandboxForSplitMode(RunIdeTask.TargetProductPart.BACKEND_AND_FRONTEND)
+        buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BACKEND_AND_FRONTEND)
         checkFrontendProperties(sandbox.resolve("plugins"))
     }
 
@@ -392,7 +393,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         )
     }
 
-    private fun buildSandboxForSplitMode(targetProductPart: RunIdeTask.TargetProductPart) {
+    private fun buildSandboxForSplitMode(targetProductPart: SplitModeAware.SplitModeTarget) {
         writeJavaFile()
 
         pluginXml write //language=xml

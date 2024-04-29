@@ -4,14 +4,10 @@ package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.*
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
-import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File
 import java.nio.file.Path
@@ -78,10 +74,10 @@ class SandboxArgumentProviderSplitModeAware(
     val splitMode: Property<Boolean>,
 
     @Input
-    val targetProductPart: Property<RunIdeTask.TargetProductPart>,
+    val targetProductPart: Property<SplitModeAware.SplitModeTarget>,
 ) : SandboxArgumentProvider(sandboxConfigDirectory, sandboxPluginsDirectory, sandboxSystemDirectory, sandboxLogDirectory) {
     override fun computePluginPathProperties(): List<String> {
-        if (splitMode.get() && targetProductPart.get() == RunIdeTask.TargetProductPart.FRONTEND) {
+        if (splitMode.get() && targetProductPart.get() == SplitModeAware.SplitModeTarget.FRONTEND) {
             return listOfNotNull(
                 //specifies an empty directory to ensure that the plugin won't be loaded by the backend process
                 sandboxPluginsDirectory.ifExists { "-Didea.plugins.path=$it/backend" },

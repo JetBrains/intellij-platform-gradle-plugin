@@ -179,10 +179,10 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
      * Creates a properties file which will be passed to the frontend process when the IDE is started in Split Mode.
      */
     private fun createPropertiesFileForFrontend() {
-        val pluginsPath = when (targetProductPart.get()) {
-            RunIdeTask.TargetProductPart.FRONTEND, RunIdeTask.TargetProductPart.BACKEND_AND_FRONTEND ->
+        val pluginsPath = when (splitModeTarget.get()) {
+            SplitModeAware.SplitModeTarget.FRONTEND, SplitModeAware.SplitModeTarget.BACKEND_AND_FRONTEND ->
                 sandboxPluginsDirectory.asPath
-            RunIdeTask.TargetProductPart.BACKEND ->
+            SplitModeAware.SplitModeTarget.BACKEND ->
                 //specifies an empty directory to ensure that the plugin won't be loaded
                 sandboxPluginsDirectory.asPath.resolve("frontend")
         }
@@ -236,7 +236,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
 
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
                 inputs.property("intellijPlatform.splitMode", extension.splitMode)
-                inputs.property("intellijPlatform.targetProductPart", extension.targetProductPart)
+                inputs.property("intellijPlatform.targetProductPart", extension.splitModeTarget)
                 inputs.files(runtimeConfiguration)
             }
     }

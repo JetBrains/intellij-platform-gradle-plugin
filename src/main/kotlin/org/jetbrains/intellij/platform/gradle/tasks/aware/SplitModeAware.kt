@@ -7,7 +7,6 @@ import org.gradle.api.tasks.Internal
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
-import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 /**
@@ -32,10 +31,10 @@ interface SplitModeAware : IntelliJPlatformVersionAware {
     /**
      * Specifies in which part of the product the developed plugin should be installed.
      * 
-     * Default value: [RunIdeTask.TargetProductPart.BACKEND]
+     * Default value: [SplitModeTarget.BACKEND]
      */
     @get:Internal
-    val targetProductPart: Property<RunIdeTask.TargetProductPart>
+    val splitModeTarget: Property<SplitModeTarget>
 
     /**
      * Validates that the resolved IntelliJ Platform supports Split Mode.
@@ -49,5 +48,16 @@ interface SplitModeAware : IntelliJPlatformVersionAware {
         if (splitMode.get() && currentBuildNumber < Constraints.MINIMAL_SPLIT_MODE_BUILD_NUMBER) {
             throw IllegalArgumentException("Split Mode requires the IntelliJ Platform in version '${Constraints.MINIMAL_SPLIT_MODE_BUILD_NUMBER}' or later, but '$currentBuildNumber' was provided.")
         }
+    }
+
+    /**
+     * Describes a part of the product where the developed plugin can be installed when running in [splitMode].
+     */
+    enum class SplitModeTarget {
+        BACKEND,
+        FRONTEND,
+        BACKEND_AND_FRONTEND;
+
+        override fun toString() = name.lowercase().replace('_', '-')
     }
 }

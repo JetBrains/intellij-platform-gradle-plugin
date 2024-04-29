@@ -20,7 +20,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProviderSplitModeAware
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
@@ -409,7 +408,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          */
         if (this is SplitModeAware) {
             splitMode.convention(extension.splitMode)
-            targetProductPart.convention(extension.targetProductPart)
+            splitModeTarget.convention(extension.splitModeTarget)
         }
 
         /**
@@ -442,7 +441,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     sandboxSystemDirectory,
                     sandboxLogDirectory,
                     splitMode,
-                    targetProductPart,
+                    splitModeTarget,
                 )
             )
 
