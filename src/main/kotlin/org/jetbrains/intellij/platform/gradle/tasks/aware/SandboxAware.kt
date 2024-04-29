@@ -3,7 +3,9 @@
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -63,4 +65,11 @@ interface SandboxAware : IntelliJPlatformVersionAware {
      */
     @get:Internal
     val sandboxLogDirectory: DirectoryProperty
+
+    /**
+     * Path to a properties file which will be used to configure the frontend process if the IDE is started in Split Mode.
+     */
+    @get:Internal
+    val frontendPropertiesFile: Provider<RegularFile>
+        get() = sandboxContainerDirectory.file("frontend.properties")
 }

@@ -29,6 +29,14 @@ interface SplitModeAware : IntelliJPlatformVersionAware {
     val splitMode: Property<Boolean>
 
     /**
+     * Specifies in which part of the product the developed plugin should be installed.
+     * 
+     * Default value: [SplitModeTarget.BACKEND]
+     */
+    @get:Internal
+    val splitModeTarget: Property<SplitModeTarget>
+
+    /**
      * Validates that the resolved IntelliJ Platform supports Split Mode.
      *
      * @see ProductInfo.validateSupportedVersion
@@ -40,5 +48,16 @@ interface SplitModeAware : IntelliJPlatformVersionAware {
         if (splitMode.get() && currentBuildNumber < Constraints.MINIMAL_SPLIT_MODE_BUILD_NUMBER) {
             throw IllegalArgumentException("Split Mode requires the IntelliJ Platform in version '${Constraints.MINIMAL_SPLIT_MODE_BUILD_NUMBER}' or later, but '$currentBuildNumber' was provided.")
         }
+    }
+
+    /**
+     * Describes a part of the product where the developed plugin can be installed when running in [splitMode].
+     */
+    enum class SplitModeTarget {
+        BACKEND,
+        FRONTEND,
+        BACKEND_AND_FRONTEND;
+
+        override fun toString() = name.lowercase().replace('_', '-')
     }
 }

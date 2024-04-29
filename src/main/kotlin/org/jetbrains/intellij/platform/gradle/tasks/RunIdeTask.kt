@@ -43,6 +43,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, IntelliJPlatformVersio
 
         if (splitMode.get()) {
             environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.pathString)
+            environment("JETBRAINS_CLIENT_PROPERTIES", frontendPropertiesFile.asPath.pathString)
 
             if (args.orEmpty().isNotEmpty()) {
                 throw InvalidUserDataException("Passing arguments directly is not supported in Split Mode. Use `argumentProviders` instead.")

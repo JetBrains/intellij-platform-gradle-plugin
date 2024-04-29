@@ -387,6 +387,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          */
         if (this is SplitModeAware) {
             splitMode.convention(extension.splitMode)
+            splitModeTarget.convention(extension.splitModeTarget)
         }
 
         /**
@@ -418,6 +419,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     sandboxPluginsDirectory,
                     sandboxSystemDirectory,
                     sandboxLogDirectory,
+                    splitMode,
+                    splitModeTarget,
                 )
             )
 
