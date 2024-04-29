@@ -368,13 +368,13 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.FRONTEND)
         checkFrontendProperties(sandbox.resolve("plugins"))
     }
-    
+
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend`() {
         buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BACKEND)
         checkFrontendProperties(sandbox.resolve("plugins").resolve("frontend"))
     }
-    
+
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend and frontend`() {
         buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BACKEND_AND_FRONTEND)
@@ -385,33 +385,35 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertFileContent(
             sandbox.resolve("frontend.properties"),
             """
-                idea.config.path=${sandbox.resolve("config").resolve("frontend").pathString}
-                idea.system.path=${sandbox.resolve("system").resolve("frontend").pathString}
-                idea.log.path=${sandbox.resolve("log").resolve("frontend").pathString}
-                idea.plugins.path=$pluginsPath
-                """.trimIndent()
+            idea.config.path=${sandbox.resolve("config").resolve("frontend")}
+            idea.system.path=${sandbox.resolve("system").resolve("frontend")}
+            idea.log.path=${sandbox.resolve("log").resolve("frontend")}
+            idea.plugins.path=$pluginsPath
+            """.trimIndent()
         )
     }
 
-    private fun buildSandboxForSplitMode(targetProductPart: SplitModeAware.SplitModeTarget) {
+    private fun buildSandboxForSplitMode(splitModeTarget: SplitModeAware.SplitModeTarget) {
         writeJavaFile()
 
         pluginXml write //language=xml
                 """
-                    <idea-plugin />
-                    """.trimIndent()
+                <idea-plugin />
+                """.trimIndent()
 
-        buildFile prepend """
-                    import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
-            """.trimIndent()
+        buildFile prepend // language=kotlin
+                """
+                import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+                """.trimIndent()
 
         buildFile write //language=kotlin
                 """
-                    intellijPlatform {
-                        splitMode = true
-                        targetProductPart = RunIdeTask.TargetProductPart.${targetProductPart.name}
-                    }
-                    """.trimIndent()
+                intellijPlatform {
+                    sandboxContainer = file("${buildDirectory.resolve(Sandbox.CONTAINER)}")
+                    splitMode = true
+                    splitModeTarget = SplitModeAware.SplitModeTarget.${splitModeTarget.name}
+                }
+                """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX)
     }

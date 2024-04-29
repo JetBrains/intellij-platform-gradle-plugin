@@ -20,7 +20,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProviderSplitModeAware
+import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
@@ -435,7 +435,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 )
             )
             jvmArgumentProviders.add(
-                SandboxArgumentProviderSplitModeAware(
+                SandboxArgumentProvider(
                     sandboxConfigDirectory,
                     sandboxPluginsDirectory,
                     sandboxSystemDirectory,

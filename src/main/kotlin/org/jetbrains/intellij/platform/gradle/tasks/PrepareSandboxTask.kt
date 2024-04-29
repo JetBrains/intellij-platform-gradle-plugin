@@ -110,9 +110,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
     override fun copy() {
         disableIdeUpdate()
         disabledPlugins()
-        if (splitMode.get()) {
-            createPropertiesFileForFrontend()
-        }
+        createSplitModeFrontendPropertiesFile()
         super.copy()
     }
 
@@ -178,22 +176,29 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
     /**
      * Creates a properties file which will be passed to the frontend process when the IDE is started in Split Mode.
      */
-    private fun createPropertiesFileForFrontend() {
+    private fun createSplitModeFrontendPropertiesFile() {
+        if (!splitMode.get()) {
+            return
+        }
+
         val pluginsPath = when (splitModeTarget.get()) {
             SplitModeAware.SplitModeTarget.FRONTEND, SplitModeAware.SplitModeTarget.BACKEND_AND_FRONTEND ->
                 sandboxPluginsDirectory.asPath
+
             SplitModeAware.SplitModeTarget.BACKEND ->
-                //specifies an empty directory to ensure that the plugin won't be loaded
+                // Specifies an empty directory to ensure that the plugin won't be loaded.
                 sandboxPluginsDirectory.asPath.resolve("frontend")
         }
-        frontendPropertiesFilePath.writeText("""
-            idea.config.path=${sandboxConfigDirectory.asPath.resolve("frontend").pathString}
-            idea.system.path=${sandboxSystemDirectory.asPath.resolve("frontend").pathString}
-            idea.log.path=${sandboxLogDirectory.asPath.resolve("frontend").pathString}
-            idea.plugins.path=${pluginsPath.pathString}
-        """.trimIndent())
-    }
 
+        frontendPropertiesFile.asPath.writeText(
+            """
+            idea.config.path=${sandboxConfigDirectory.asPath.resolve("frontend")}
+            idea.system.path=${sandboxSystemDirectory.asPath.resolve("frontend")}
+            idea.log.path=${sandboxLogDirectory.asPath.resolve("frontend")}
+            idea.plugins.path=$pluginsPath
+            """.trimIndent()
+        )
+    }
 
     fun ensureName(path: Path): String {
         var name = path.name

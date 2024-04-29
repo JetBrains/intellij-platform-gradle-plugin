@@ -3,12 +3,12 @@
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.nio.file.Path
 
 /**
  * The interface provides quick access to the sandbox container and specific directories located within it.
@@ -65,10 +65,11 @@ interface SandboxAware : IntelliJPlatformVersionAware {
      */
     @get:Internal
     val sandboxLogDirectory: DirectoryProperty
-}
 
-/**
- * Path to a properties file which will be used to configure the frontend process if the IDE is started in Split Mode. 
- */
-val SandboxAware.frontendPropertiesFilePath: Path
-    get() = sandboxContainerDirectory.asPath.resolve("frontend.properties")
+    /**
+     * Path to a properties file which will be used to configure the frontend process if the IDE is started in Split Mode.
+     */
+    @get:Internal
+    val frontendPropertiesFile: Provider<RegularFile>
+        get() = sandboxContainerDirectory.file("frontend.properties")
+}

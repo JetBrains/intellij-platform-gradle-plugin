@@ -13,7 +13,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.frontendPropertiesFilePath
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.pathString
 
@@ -60,7 +59,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, CustomIntelliJPlatform
 
         if (splitMode.get()) {
             environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.pathString)
-            environment("JETBRAINS_CLIENT_PROPERTIES", frontendPropertiesFilePath.pathString)
+            environment("JETBRAINS_CLIENT_PROPERTIES", frontendPropertiesFile.asPath.pathString)
 
             if (args.orEmpty().isNotEmpty()) {
                 throw InvalidUserDataException("Passing arguments directly is not supported in Split Mode. Use `argumentProviders` instead.")
