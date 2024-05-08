@@ -22,8 +22,6 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.io.File
 import java.nio.file.Path
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import kotlin.io.path.*
 
 /**
@@ -67,13 +65,6 @@ internal fun createIvyDependencyFile(
             organisation = group,
             module = name,
             revision = version,
-            publication = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
-        ),
-        configurations = listOf(
-            IvyModule.Configuration(
-                name = "default",
-                visibility = "public",
-            ),
         ),
         publications = publications,
     )

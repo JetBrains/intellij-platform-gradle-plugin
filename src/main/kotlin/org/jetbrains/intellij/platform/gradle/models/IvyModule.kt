@@ -8,6 +8,8 @@ import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import java.nio.file.Path
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import kotlin.io.path.extension
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.isDirectory
@@ -17,14 +19,14 @@ import kotlin.io.path.isDirectory
 data class IvyModule(
     val version: String = "2.0",
     @XmlElement @XmlSerialName("info") val info: Info?,
-    @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration>,
+    @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration> = listOf(Configuration("default")),
     @XmlElement @XmlChildrenName("artifact") val publications: List<Publication>,
 ) {
 
     @Serializable
     data class Configuration(
         val name: String?,
-        val visibility: String?,
+        val visibility: String = "public",
     )
 
     @Serializable
@@ -32,16 +34,17 @@ data class IvyModule(
         val organisation: String?,
         val module: String?,
         val revision: String?,
-        val publication: String?,
+        val publication: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
     )
 
     @Serializable
     data class Publication(
-        val name: String?,
-        val type: String?,
-        val ext: String?,
-        val conf: String?,
-        val url: String?,
+        val name: String? = null,
+        val type: String? = null,
+        val ext: String? = null,
+        val conf: String? = "default",
+        val url: String? = null,
+        val packaging: String? = null,
     )
 }
 
@@ -75,10 +78,4 @@ internal fun Path.toPublication() = IvyModule.Publication(
         isDirectory() -> "directory"
         else -> extension
     },
-    ext = when {
-        isDirectory() -> null
-        else -> extension
-    },
-    conf = "default",
-    url = null,
 )
