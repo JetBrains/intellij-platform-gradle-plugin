@@ -7,7 +7,7 @@ import org.gradle.api.tasks.Classpath
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 
 /**
- * The interface provides the dependency on Java Compiler used by Ant tasks.
+ * Provides the dependency on Java Compiler used by Ant tasks.
  * This dependency is required, i.e., for [InstrumentCodeTask] to properly configure Ant tasks provided by the IntelliJ Platform.
  */
 interface JavaCompilerAware {

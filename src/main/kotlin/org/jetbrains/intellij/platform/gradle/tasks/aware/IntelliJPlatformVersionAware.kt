@@ -16,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.nio.file.Path
 
 /**
- * This interface provides tasks a possibility for accessing information about the IntelliJ Platform currently used in the project.
+ * Provides tasks a possibility for accessing information about the IntelliJ Platform currently used in the project.
  * The [intelliJPlatformConfiguration] input property receives a dependency added to the [Configurations.INTELLIJ_PLATFORM] configuration,
  * which eventually is resolved and lets to access the IntelliJ Platform details such as [ProductInfo] or the path to the IntelliJ Platform directory.
  *

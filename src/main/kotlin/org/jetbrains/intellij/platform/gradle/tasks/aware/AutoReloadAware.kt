@@ -4,20 +4,22 @@ package org.jetbrains.intellij.platform.gradle.tasks.aware
 
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 
 /**
- * The interface provides the possibility to auto-reload plugin when run in the IDE.
+ * Provides the possibility to auto-reload plugin when run in the IDE.
+ *
+ * @see RunnableIdeAware
  */
 interface AutoReloadAware {
 
     /**
      * Enables auto-reload of dynamic plugins.
      * Dynamic plugin will be reloaded automatically when its content is modified.
+     *
      * This allows a much faster development cycle by avoiding a full restart of the development instance after code changes.
      *
-     * Default value: `true`
-     *
-     * @see RunnableIdeAware
+     * Default value: [IntelliJPlatformExtension.autoReload]
      */
     @get:Internal
     val autoReload: Property<Boolean>

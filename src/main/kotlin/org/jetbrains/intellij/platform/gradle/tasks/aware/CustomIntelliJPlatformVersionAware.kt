@@ -10,16 +10,24 @@ import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
-import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.platform.gradle.tasks.*
 
 /**
  * By default, the project with the IntelliJ Platform Gradle Plugin applied required the presence of the IntelliJ Platform, referred to later by various tasks,
  * configurations, and extensions.
- * The Custom IntelliJ Platform concept allows using another version, i.e., to run a guest IDE or tests against it.
+ *
+ * The custom IntelliJ Platform concept allows using another version, i.e., to run a guest IDE or tests against it.
  * When applying this interface to the task, custom configurations to hold new dependencies defined by [type] and [version]
  * (or [localPath], if referring to the local IntelliJ Platform instance) are created, as well as a dedicated [PrepareSandboxTask] task.
+ *
  * Configurations, as well as the task preparing sandbox for running and testing the custom IntelliJ Platform (if required), have a random suffix applied
  * to avoid collisions.
+ *
+ * @see CustomRunIdeTask
+ * @see CustomTestIdeTask
+ * @see CustomTestIdeUiTask
+ * @see CustomTestIdePerformanceTask
+ * @see PrepareSandboxTask
  */
 interface CustomIntelliJPlatformVersionAware : IntelliJPlatformVersionAware, ExtensionAware {
 
@@ -45,6 +53,7 @@ interface CustomIntelliJPlatformVersionAware : IntelliJPlatformVersionAware, Ext
 
     /**
      * An input property to define the path to the local IntelliJ Platform instance to configure the version of the custom IntelliJ Platform.
+     *
      * The local path precedes the IntelliJ Platform resolution using the [type] and [version] properties.
      */
     @get:InputDirectory

@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks.aware
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
@@ -23,7 +24,7 @@ interface SplitModeAware : IntelliJPlatformVersionAware {
     /**
      * Enables Split Mode when running the IDE.
      *
-     * Default value: `false`
+     * Default value: [IntelliJPlatformExtension.splitMode]
      */
     @get:Internal
     val splitMode: Property<Boolean>
@@ -31,7 +32,7 @@ interface SplitModeAware : IntelliJPlatformVersionAware {
     /**
      * Specifies in which part of the product the developed plugin should be installed.
      * 
-     * Default value: [SplitModeTarget.BACKEND]
+     * Default value: [IntelliJPlatformExtension.splitModeTarget]
      */
     @get:Internal
     val splitModeTarget: Property<SplitModeTarget>

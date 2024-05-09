@@ -28,15 +28,15 @@ import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
  *
  * ```kotlin
  * import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
- * import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
+ * import org.jetbrains.intellij.platform.gradle.tasks.CustomTestIdeTask
  *
  * tasks {
- *   val testPhpStorm by registering(TestIdeTask::class) {
+ *   val testPhpStorm by registering(CustomTestIdeTask::class) {
  *     type = IntelliJPlatformType.PhpStorm
  *     version = "2023.2.2"
  *   }
  *
- *   val testLocalIde by registering(TestIdeTask::class) {
+ *   val testLocalIde by registering(CustomTestIdeTask::class) {
  *     localPath = file("/Users/hsz/Applications/Android Studio.app")
  *   }
  * }
@@ -47,7 +47,7 @@ abstract class CustomTestIdeTask : Test(), TestableAware, CustomIntelliJPlatform
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Runs the IDE instance with the developed plugin installed."
+        description = "Runs tests using a custom IDE instance with the developed plugin installed."
     }
 
     @TaskAction
