@@ -28,20 +28,6 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `fail publishing if ZIP Signer dependency is missing`() {
-        buildFile write //language=kotlin
-                """
-                intellijPlatform {
-                    publishing {}
-                }
-                """.trimIndent()
-
-        buildAndFail(Tasks.PUBLISH_PLUGIN) {
-            assertContains("No Marketplace ZIP Signer executable found.", output)
-        }
-    }
-
-    @Test
     fun `fail publishing if token is missing`() {
         buildFile write //language=kotlin
                 """

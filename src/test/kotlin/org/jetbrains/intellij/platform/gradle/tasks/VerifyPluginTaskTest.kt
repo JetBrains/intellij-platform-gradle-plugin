@@ -17,7 +17,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierDependency()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
-            assertContains("No IDE provided for running verification with the IntelliJ Plugin Verifier.", output)
+            assertContains("No IDE resolved for verification with the IntelliJ Plugin Verifier.", output)
         }
     }
 

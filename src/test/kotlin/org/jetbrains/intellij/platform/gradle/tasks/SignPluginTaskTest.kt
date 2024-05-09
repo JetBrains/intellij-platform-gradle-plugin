@@ -189,6 +189,13 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                         zipSigner("0.0.1")
                     }            
                 }
+                
+                intellijPlatform {
+                    signing {
+                        privateKey = "foo"
+                        certificateChain = "bar"
+                    }
+                }
                 """.trimIndent()
 
         build(
