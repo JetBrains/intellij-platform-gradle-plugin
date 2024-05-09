@@ -35,6 +35,4 @@ internal fun Path.resolveBundledPluginsPath(name: String = "bundled-plugins.json
  * @throws IllegalArgumentException
  */
 @Throws(IllegalArgumentException::class)
-fun Path.bundledPlugins() = requireNotNull(decode<BundledPlugins>(this)) {
-    "Could not find bundled plugins for: $this"
-}
+fun Path.bundledPlugins() = decode<BundledPlugins>(this)

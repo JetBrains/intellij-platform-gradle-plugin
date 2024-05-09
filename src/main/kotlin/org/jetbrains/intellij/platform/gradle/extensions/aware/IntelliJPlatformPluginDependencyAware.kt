@@ -12,15 +12,14 @@ import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MA
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
 import org.jetbrains.intellij.platform.gradle.extensions.createIvyDependencyFile
 import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsPath
-import org.jetbrains.intellij.platform.gradle.models.bundledPlugins
-import org.jetbrains.intellij.platform.gradle.models.toPublication
+import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.io.path.listDirectoryEntries
 import kotlin.math.absoluteValue
 
-interface IntelliJPlatformPluginDependencyAware: DependencyAware, IntelliJPlatformAware {
+interface IntelliJPlatformPluginDependencyAware : DependencyAware, IntelliJPlatformAware {
     val providers: ProviderFactory
     val rootProjectDirectory: Path
 }
@@ -106,17 +105,41 @@ private fun IntelliJPlatformPluginDependencyAware.createIntelliJPlatformBundledP
     requireNotNull(bundledPlugin) { "Could not find bundled plugin with ID: '$id'" }
 
     val artifactPath = Path(bundledPlugin.path)
-    val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
     val hash = artifactPath.hashCode().absoluteValue % 1000
+    val version = "${productInfo.version}+$hash"
 
     return dependencies.create(
         group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
         name = id,
-        version = "${productInfo.version}+$hash",
+        version = version,
     ).apply {
-        createIvyDependencyFile(
-            localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-            publications = jars.map { it.toPublication() },
-        )
+        createBundledPluginIvyDependencyFile(bundledPluginsList, bundledPlugin, version)
     }
+}
+
+private fun IntelliJPlatformPluginDependencyAware.createBundledPluginIvyDependencyFile(
+    bundledPluginsList: BundledPlugins,
+    bundledPlugin: BundledPlugin,
+    version: String,
+) {
+    val artifactPath = Path(bundledPlugin.path)
+    val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
+
+    createIvyDependencyFile(
+        group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
+        name = bundledPlugin.id,
+        version = version,
+        localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+        publications = jars.map { it.toPublication() },
+        dependencies = bundledPlugin.dependencies
+            .mapNotNull { dependencyId -> bundledPluginsList.plugins.find { it.id == dependencyId } }
+            .map {
+                IvyModule.Dependency(
+                    name = it.id,
+                    version = version,
+                ).apply {
+                    createBundledPluginIvyDependencyFile(bundledPluginsList, it, version)
+                }
+            }
+    )
 }

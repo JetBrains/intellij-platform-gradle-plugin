@@ -21,6 +21,7 @@ data class IvyModule(
     @XmlElement @XmlSerialName("info") val info: Info?,
     @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration> = listOf(Configuration("default")),
     @XmlElement @XmlChildrenName("artifact") val publications: List<Publication>,
+    @XmlElement @XmlChildrenName("dependency") val dependencies: List<Dependency> = emptyList(),
 ) {
 
     @Serializable
@@ -45,6 +46,13 @@ data class IvyModule(
         val conf: String? = "default",
         val url: String? = null,
         val packaging: String? = null,
+    )
+
+    @Serializable
+    data class Dependency(
+        @XmlSerialName("org") val organisation: String? = null,
+        @XmlSerialName("name") val name: String,
+        @XmlSerialName("rev") val version: String,
     )
 }
 

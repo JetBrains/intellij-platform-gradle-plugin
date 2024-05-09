@@ -33,13 +33,15 @@ import kotlin.io.path.*
 internal fun ExternalModuleDependency.createIvyDependencyFile(
     localPlatformArtifactsPath: Path,
     publications: List<IvyModule.Publication>,
+    dependencies: List<IvyModule.Dependency> = emptyList(),
 ) =
     createIvyDependencyFile(
         group = group,
         name = name,
         version = version.orEmpty(),
         localPlatformArtifactsPath = localPlatformArtifactsPath,
-        publications = publications
+        publications = publications,
+        dependencies = dependencies,
     )
 
 /**
@@ -54,6 +56,7 @@ internal fun createIvyDependencyFile(
     version: String,
     localPlatformArtifactsPath: Path,
     publications: List<IvyModule.Publication>,
+    dependencies: List<IvyModule.Dependency> = emptyList(),
 ) {
     val ivyFile = localPlatformArtifactsPath
         .resolve("$group-$name-$version.xml")
@@ -67,6 +70,7 @@ internal fun createIvyDependencyFile(
             revision = version,
         ),
         publications = publications,
+        dependencies = dependencies
     )
 
     with(ivyFile) {
