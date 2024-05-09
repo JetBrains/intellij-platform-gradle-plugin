@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.resolvers.closestVersion
 
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.net.URL
@@ -48,10 +49,20 @@ class ClosestVersionResolverTest : IntelliJPluginTestBase() {
         val exception = assertFailsWith<GradleException> {
             createResolver(version, emptyList()).resolve()
         }
-        assertEquals("Cannot resolve the test version closest to: $version", exception.message)
+        assertEquals(
+            """
+            Cannot resolve the test version closest to: $version
+            Please ensure there are necessary repositories present in the project repositories section where the `foo:bar` artifact is published, i.e., by adding the `defaultRepositories()` entry.
+            See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
+            """.trimIndent(),
+            exception.message,
+        )
     }
 
-    private fun createResolver(version: Version, urls: List<URL> = defaultUrls) = object : ClosestVersionResolver(urls) {
+    private fun createResolver(version: Version, urls: List<URL> = defaultUrls) = object : ClosestVersionResolver(
+        coordinates = Coordinates("foo", "bar"),
+        urls = urls,
+    ) {
 
         override val subject = "test"
 
