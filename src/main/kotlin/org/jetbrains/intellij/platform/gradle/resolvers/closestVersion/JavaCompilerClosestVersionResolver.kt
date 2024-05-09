@@ -11,7 +11,8 @@ class JavaCompilerClosestVersionResolver(
     repositoryUrls: List<String>,
     coordinates: Coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
 ) : ClosestVersionResolver(
-    urls = repositoryUrls.map { url -> createMavenMetadataUrl(url, coordinates) }
+    coordinates = coordinates,
+    urls = repositoryUrls.map { url -> createMavenMetadataUrl(url, coordinates) },
 ) {
 
     override val subject = "Java Compiler"

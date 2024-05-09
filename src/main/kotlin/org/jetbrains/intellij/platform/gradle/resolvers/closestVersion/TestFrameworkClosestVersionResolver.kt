@@ -11,6 +11,7 @@ class TestFrameworkClosestVersionResolver(
     repositoryUrls: List<String>,
     coordinates: Coordinates,
 ) : ClosestVersionResolver(
+    coordinates = coordinates,
     urls = repositoryUrls.map { url -> createMavenMetadataUrl(url, coordinates) }
 ) {
 

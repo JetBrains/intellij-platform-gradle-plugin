@@ -48,7 +48,7 @@ class ClosestVersionResolverTest : IntelliJPluginTestBase() {
         val exception = assertFailsWith<GradleException> {
             createResolver(version, emptyList()).resolve()
         }
-        assertEquals("Cannot resolve the test version closest to $version", exception.message)
+        assertEquals("Cannot resolve the test version closest to: $version", exception.message)
     }
 
     private fun createResolver(version: Version, urls: List<URL> = defaultUrls) = object : ClosestVersionResolver(urls) {

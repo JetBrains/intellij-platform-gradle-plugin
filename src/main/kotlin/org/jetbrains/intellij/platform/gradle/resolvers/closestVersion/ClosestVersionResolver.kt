@@ -13,9 +13,10 @@ import java.net.URL
 /**
  * Interface for resolving the closest [Version] of any entity to the provided value.
  *
- * @param urls The URLs list where versions list is available for parsing
+ * @param urls The URLs list where the version list is available for parsing
  */
 abstract class ClosestVersionResolver(
+    protected val coordinates: Coordinates,
     protected val urls: List<URL>,
 ) : Resolver<Version> {
 
@@ -33,10 +34,19 @@ abstract class ClosestVersionResolver(
         .mapNotNull { runCatching { decode<MavenMetadata>(it) }.getOrNull() }
         .flatMap { it.versioning?.versions?.asSequence().orEmpty() }
         .map { it.toVersion() }
+        .ifEmpty {
+            throw GradleException(
+                """
+                Cannot resolve the $subject version closest to: $version
+                Please ensure there are necessary repositories present in the project repositories section where the `$coordinates` artifact is published, i.e., by adding the `defaultRepositories()` entry.
+                See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
+                """.trimIndent()
+            )
+        }
         .filter { it <= version }
         .maxOrNull()
         .also { it?.let { log.debug("Resolved $subject closest version: $it") } }
-        ?: throw GradleException("Cannot resolve the $subject version closest to $version")
+        ?: throw GradleException("Cannot resolve the $subject version closest to: $version")
 }
 
 internal fun createMavenMetadataUrl(repositoryUrl: String, coordinates: Coordinates): URL {
