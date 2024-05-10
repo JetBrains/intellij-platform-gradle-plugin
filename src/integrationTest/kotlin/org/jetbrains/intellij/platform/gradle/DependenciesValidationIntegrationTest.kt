@@ -225,10 +225,9 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         buildAndFail(Tasks.SIGN_PLUGIN) {
             assertContains(
                 """
-                > Failed to query the value of task ':signPlugin' property 'zipSignerExecutable'.
-                   > No Marketplace ZIP Signer executable found.
-                     Please ensure the `zipSigner()` entry is present in the project dependencies section or `intellijPlatform.signing.cliPath` extension property
-                     See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-signing
+               > No Marketplace ZIP Signer executable found.
+                 Please ensure the `zipSigner()` entry is present in the project dependencies section or `intellijPlatform.signing.cliPath` extension property
+                 See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-signing
                 """.trimIndent(),
                 output,
             )

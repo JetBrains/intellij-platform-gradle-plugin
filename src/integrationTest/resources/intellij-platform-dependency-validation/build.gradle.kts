@@ -10,3 +10,8 @@ kotlin {
 repositories {
     mavenCentral()
 }
+
+intellijPlatform {
+    buildSearchableOptions = false
+    instrumentCode = false
+}
