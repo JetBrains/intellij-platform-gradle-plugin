@@ -409,7 +409,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    sandboxContainer = file("${buildDirectory.resolve(Sandbox.CONTAINER)}")
+                    sandboxContainer = file("${buildDirectory.resolve(Sandbox.CONTAINER).invariantSeparatorsPathString}")
                     splitMode = true
                     splitModeTarget = SplitModeAware.SplitModeTarget.${splitModeTarget.name}
                 }
