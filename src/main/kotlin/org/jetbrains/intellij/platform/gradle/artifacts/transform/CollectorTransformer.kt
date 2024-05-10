@@ -2,56 +2,84 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
+import org.gradle.api.tasks.Internal
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.nio.file.Path
+import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
-import kotlin.io.path.forEachDirectoryEntry
 import kotlin.io.path.listDirectoryEntries
 
 /**
  * The artifact transformer collecting JAR files located within the IntelliJ Platform or Marketplace Plugin archives.
  */
 @DisableCachingByDefault(because = "Not worth caching")
-abstract class CollectorTransformer : TransformAction<TransformParameters.None> {
+abstract class CollectorTransformer : TransformAction<CollectorTransformer.Parameters> {
+
+    interface Parameters : TransformParameters {
+
+        @get:Internal
+        val intellijPlatform: ConfigurableFileCollection
+    }
 
     @get:InputArtifact
     @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
+    private val manager = IdePluginManager.createManager(createTempDirectory())
     private val log = Logger(javaClass)
 
     override fun transform(outputs: TransformOutputs) {
         runCatching {
             val path = inputArtifact.asPath
-            val productInfo = runCatching { path.productInfo() }.getOrNull()
+            val productInfo = parameters.intellijPlatform.productInfo()
+            val pluginCreationResult = manager.createPlugin(path, false)
+            val plugin by lazy {
+                require(pluginCreationResult is PluginCreationSuccess)
+                pluginCreationResult.plugin
+            }
 
-            when (productInfo) {
-                null -> {
-                    path.forEachDirectoryEntry { entry ->
-                        entry.resolve("lib")
-                            .listDirectoryEntries("*.jar")
-                            .forEach { outputs.file(it) }
-                    }
+            val isIntelliJPlatform = path == parameters.intellijPlatform.platformPath()
+            val isPlugin = !isIntelliJPlatform && runCatching { plugin }.isSuccess
+            val isBundledPlugin = isPlugin && productInfo.bundledPlugins.contains(plugin.pluginId)
+
+            when {
+                isIntelliJPlatform -> {
+                    collectIntelliJPlatformJars(productInfo, path)
+                        .forEach { outputs.file(it) }
                 }
 
-                else -> {
-                    collectIntelliJPlatformJars(path.productInfo(), path)
-                        .forEach { outputs.file(it) }
+                isBundledPlugin -> {
+                    collectJars(
+                        path.resolve("lib"),
+                        path.resolve("lib/modules"),
+                    ).forEach { outputs.file(it) }
+                }
+
+                isPlugin -> {
+                    collectJars(
+                        path.resolve("lib"),
+                    ).forEach { outputs.file(it) }
                 }
             }
         }.onFailure {
@@ -59,11 +87,16 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
         }
     }
 
+    private fun collectJars(vararg paths: Path) = paths
+        .mapNotNull { it.takeIfExists() }
+        .flatMap { it.listDirectoryEntries("*.jar") }
+
     companion object {
         internal fun register(
             dependencies: DependencyHandler,
             compileClasspathConfiguration: Configuration,
             testCompileClasspathConfiguration: Configuration,
+            intellijPlatformConfiguration: Configuration,
         ) {
             Attributes.ArtifactType.values().forEach {
                 dependencies.artifactTypes.maybeCreate(it.toString())
@@ -85,6 +118,10 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
                 to
                     .attribute(Attributes.extracted, true)
                     .attribute(Attributes.collected, true)
+
+                parameters {
+                    intellijPlatform = intellijPlatformConfiguration
+                }
             }
         }
 
@@ -112,7 +149,7 @@ internal fun collectBundledPluginsJars(intellijPlatformPath: Path) =
         .resolve("plugins")
         .listDirectoryEntries()
         .asSequence()
-        .map { it.resolve("lib") }
+        .flatMap { it.resolve("lib") + it.resolve("lib/modules") }
         .mapNotNull { it.takeIf { it.exists() } }
         .flatMap { it.listDirectoryEntries("*.jar") }
         .toSet()

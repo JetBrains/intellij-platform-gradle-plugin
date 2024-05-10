@@ -278,6 +278,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 dependencies = this,
                 compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
                 testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
+                intellijPlatformConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM],
             )
             BundledPluginsListTransformer.register(
                 dependencies = this

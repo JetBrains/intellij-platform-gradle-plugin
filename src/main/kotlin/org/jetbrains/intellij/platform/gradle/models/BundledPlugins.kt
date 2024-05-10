@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.models
 
 import kotlinx.serialization.Serializable
 import org.gradle.api.GradleException
+import org.gradle.api.file.FileCollection
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.io.path.name
@@ -36,3 +37,5 @@ internal fun Path.resolveBundledPluginsPath(name: String = "bundled-plugins.json
  */
 @Throws(IllegalArgumentException::class)
 fun Path.bundledPlugins() = decode<BundledPlugins>(this)
+
+fun FileCollection.bundledPlugins() = single().toPath().bundledPlugins()

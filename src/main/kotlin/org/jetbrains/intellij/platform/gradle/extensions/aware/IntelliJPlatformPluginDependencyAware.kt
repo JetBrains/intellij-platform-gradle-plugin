@@ -16,7 +16,6 @@ import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlin.io.path.listDirectoryEntries
 import kotlin.math.absoluteValue
 
 interface IntelliJPlatformPluginDependencyAware : DependencyAware, IntelliJPlatformAware {
@@ -123,14 +122,14 @@ private fun IntelliJPlatformPluginDependencyAware.createBundledPluginIvyDependen
     version: String,
 ) {
     val artifactPath = Path(bundledPlugin.path)
-    val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
+//    val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
 
     createIvyDependencyFile(
         group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
         name = bundledPlugin.id,
         version = version,
         localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-        publications = jars.map { it.toPublication() },
+        publications = listOf(artifactPath.toPublication()),
         dependencies = bundledPlugin.dependencies
             .mapNotNull { dependencyId -> bundledPluginsList.plugins.find { it.id == dependencyId } }
             .map {
