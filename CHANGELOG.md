@@ -2,12 +2,9 @@
 
 ## [next]
 
-### Added
-- `targetProductPart` property is added to allow installing plugin on the frontend part when running in Split Mode [#1563](../../issues/1563)
+## [2.0.0-beta2] - 2024-05-13
 
-### Fixed
-
-- Fix for: `coroutinesJavaAgentPath` specifies file `.../build/tmp/initializeIntelliJPlugin/coroutines-javaagent.jar` which doesn't exist
+The **IntelliJ Platform Gradle Plugin `2.0.0-beta2`** is a plugin for the Gradle build system to help configure environments for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs. It is a successor of _Gradle IntelliJ Plugin 1.x_.
 
 ## [1.17.2] - 2024-02-20
 
@@ -26,10 +23,8 @@
 
 ### Added
 
-- Added `org.jetbrains.intellij.buildFeature.useCacheRedirector` build feature
-- Added `IntelliJPlatformCollectorTransformer` and `IntelliJPlatformExtractTransformer` for handling IntelliJ Platform dependency archives
-- Added `jetbrainsAnnotations` dependency helper for adding JetBrains Annotations dependency
-- Added general `intellijPlatform` along with product-specific dependency helpers for adding IntelliJ Platform dependency
+- Publish the plugin update and mark it as hidden to prevent public release after approval, using the `publishPlugin.hidden` property.
+- PatchPluginXmlTask: Wrap the content passed to `<change-notes>` and `<description>` elements with `<![CDATA[ ... ]]>` [#1498](../../issues/1498)
 
 ### Changed
 
@@ -38,11 +33,6 @@
 - New Maven coordinates: `org.jetbrains.intellij.platform:intellij-platform-gradle-plugin`
 - Move classes under the new package: `org.jetbrains.intellij.platform.gradle`
 - Update minimal supported Gradle version to `8.2`
-
-### Added
-
-- Publish the plugin update and mark it as hidden to prevent public release after approval, using the `publishPlugin.hidden` property.
-- PatchPluginXmlTask: Wrap the content passed to `<change-notes>` and `<description>` elements with `<![CDATA[ ... ]]>` [#1498](../../issues/1498)
 
 ### Fixed
 
@@ -993,7 +983,8 @@
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...HEAD
+[2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...v2.0.0-beta2
 [1.17.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.16.1...v1.17.0
