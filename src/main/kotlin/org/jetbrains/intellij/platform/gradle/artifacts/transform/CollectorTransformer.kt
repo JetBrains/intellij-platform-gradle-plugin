@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
@@ -25,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
+import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
@@ -53,15 +55,19 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
         runCatching {
             val path = inputArtifact.asPath
             val productInfo = parameters.intellijPlatform.productInfo()
-            val pluginCreationResult = manager.createPlugin(path, false)
             val plugin by lazy {
+                val pluginPath = generateSequence(path) {
+                    it.takeIf { Files.exists(it.resolve("lib")) } ?: it.listDirectoryEntries().singleOrNull()
+                }.firstOrNull { it.resolve("lib").exists() } ?: throw Exception("")
+
+                val pluginCreationResult = manager.createPlugin(pluginPath, false)
+
                 require(pluginCreationResult is PluginCreationSuccess)
                 pluginCreationResult.plugin
             }
 
             val isIntelliJPlatform = path == parameters.intellijPlatform.platformPath()
             val isPlugin = !isIntelliJPlatform && runCatching { plugin }.isSuccess
-            val isBundledPlugin = isPlugin && productInfo.bundledPlugins.contains(plugin.pluginId)
 
             when {
                 isIntelliJPlatform -> {
@@ -69,26 +75,24 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                         .forEach { outputs.file(it) }
                 }
 
-                isBundledPlugin -> {
-                    collectJars(
-                        path.resolve("lib"),
-                        path.resolve("lib/modules"),
-                    ).forEach { outputs.file(it) }
+                isPlugin -> {
+                    plugin.originalFile?.let { pluginPath ->
+                        collectJars(
+                            pluginPath.resolve("lib"),
+                            pluginPath.resolve("lib/modules"),
+                        ).forEach { outputs.file(it) }
+                    }
                 }
 
-                isPlugin -> {
-                    collectJars(
-                        path.resolve("lib"),
-                    ).forEach { outputs.file(it) }
-                }
+                else -> throw GradleException("Unknown input: $path")
             }
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
         }
     }
 
-    private fun collectJars(vararg paths: Path) = paths
-        .mapNotNull { it.takeIfExists() }
+    private fun collectJars(vararg paths: Path?) = paths
+        .mapNotNull { it?.takeIfExists() }
         .flatMap { it.listDirectoryEntries("*.jar") }
 
     companion object {
