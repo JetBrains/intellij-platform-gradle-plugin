@@ -214,6 +214,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         repositories.exclusiveContent {
             forRepositories(this@apply)
             filter {
+                includeGroup(Configurations.Dependencies.BUNDLED_MODULE_GROUP)
                 includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
                 includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
             }

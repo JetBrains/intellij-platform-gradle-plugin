@@ -109,7 +109,7 @@ object Constants {
 
         object Dependencies {
             const val LOCAL_IDE_GROUP = "localIde"
-            const val BINARY_RELEASE_GROUP = "binaryRelease"
+            const val BUNDLED_MODULE_GROUP = "bundledModule"
             const val BUNDLED_PLUGIN_GROUP = "bundledPlugin"
         }
 

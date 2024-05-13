@@ -63,7 +63,7 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
                             name = pluginName ?: "",
                             version = pluginVersion ?: "",
                             path = pluginDirectory.pathString,
-                            dependencies = dependencies.filterNot { it.isOptional }.map { it.id },
+                            dependencies = dependencies.map { it.id },
                         )
                     }
                 }
@@ -78,7 +78,7 @@ abstract class BundledPluginsListTransformer : TransformAction<TransformParamete
     }
 
     private fun Path.resolvePlugin(): IdePlugin? {
-        val creationResult = manager.createPlugin(this, false, IdePluginManager.PLUGIN_XML)
+        val creationResult = manager.createPlugin(this, false)
 
         return when (creationResult) {
             is PluginCreationSuccess -> creationResult.plugin

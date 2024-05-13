@@ -110,8 +110,8 @@ data class ProductInfo(
 
     @Serializable
     data class LayoutItem(
-        val name: String? = null,
-        val kind: LayoutItemKind? = null,
+        val name: String,
+        val kind: LayoutItemKind,
         val classPath: List<String> = mutableListOf(),
     )
 

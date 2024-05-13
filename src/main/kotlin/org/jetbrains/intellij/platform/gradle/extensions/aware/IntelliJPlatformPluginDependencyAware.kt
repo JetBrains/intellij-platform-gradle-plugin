@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions.aware
 
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
@@ -16,11 +18,18 @@ import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlin.math.absoluteValue
+import kotlin.io.path.exists
 
 interface IntelliJPlatformPluginDependencyAware : DependencyAware, IntelliJPlatformAware {
     val providers: ProviderFactory
     val rootProjectDirectory: Path
+}
+
+internal val IntelliJPlatformPluginDependencyAware.bundledPluginsList
+    get() = configurations[Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST].asLenient.bundledPlugins()
+
+private val pluginManager by lazy {
+    IdePluginManager.createManager()
 }
 
 /**
@@ -98,31 +107,85 @@ private fun IntelliJPlatformPluginDependencyAware.createIntelliJPlatformPluginDe
  */
 @Throws(IllegalArgumentException::class)
 private fun IntelliJPlatformPluginDependencyAware.createIntelliJPlatformBundledPluginDependency(bundledPluginId: String): Dependency {
-    val id = bundledPluginId.trim()
-    val bundledPluginsList = configurations[Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST].asLenient.single().toPath().bundledPlugins()
-    val bundledPlugin = bundledPluginsList.plugins.find { it.id == id }
-    requireNotNull(bundledPlugin) { "Could not find bundled plugin with ID: '$id'" }
-
-    val artifactPath = Path(bundledPlugin.path)
-    val hash = artifactPath.hashCode().absoluteValue % 1000
-    val version = "${productInfo.version}+$hash"
+    val plugin = bundledPluginsList.plugins.find { it.id == bundledPluginId.trim() }
+    requireNotNull(plugin) { "Could not find bundled plugin with ID: '$bundledPluginId'" }
 
     return dependencies.create(
         group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
-        name = id,
-        version = version,
+        name = plugin.id,
+        version = productInfo.version,
     ).apply {
-        createBundledPluginIvyDependencyFile(bundledPluginsList, bundledPlugin, version)
+        createBundledPluginIvyDependencyFile(plugin, version!!)
     }
 }
 
 private fun IntelliJPlatformPluginDependencyAware.createBundledPluginIvyDependencyFile(
-    bundledPluginsList: BundledPlugins,
     bundledPlugin: BundledPlugin,
     version: String,
+    resolved: List<String> = emptyList(),
 ) {
+    val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
+    val group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP
+    val name = bundledPlugin.id
+    val existingIvyFile = localPlatformArtifactsPath.resolve("$group-$name-$version.xml")
+    if (existingIvyFile.exists()) {
+        return
+    }
+
+    if (name in resolved) {
+        return
+    }
+
     val artifactPath = Path(bundledPlugin.path)
-//    val jars = artifactPath.resolve("lib").listDirectoryEntries("*.jar")
+    val plugin by lazy {
+        val pluginCreationResult = pluginManager.createPlugin(artifactPath, false)
+        require(pluginCreationResult is PluginCreationSuccess)
+        pluginCreationResult.plugin
+    }
+
+    val dependencyIds = plugin.dependencies.map { it.id } - plugin.pluginId
+    val bundledModules = productInfo.layout
+        .filter { layout -> layout.name in dependencyIds }
+        .filter { layout -> layout.classPath.isNotEmpty() }
+
+    val ivyDependencies = bundledModules.mapNotNull { layout ->
+        when (layout.kind) {
+            ProductInfo.LayoutItemKind.plugin -> {
+                IvyModule.Dependency(
+                    organization = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
+                    name = layout.name,
+                    version = version,
+                ).also { dependency ->
+                    val dependencyPlugin = bundledPluginsList.plugins.find { it.id == dependency.name } ?: return@also
+                    createBundledPluginIvyDependencyFile(dependencyPlugin, version, resolved + name)
+                }
+            }
+
+            ProductInfo.LayoutItemKind.pluginAlias -> {
+                // TODO: not important?
+                null
+            }
+
+            ProductInfo.LayoutItemKind.moduleV2, ProductInfo.LayoutItemKind.productModuleV2 -> {
+                // TODO: drop if classPath empty?
+                IvyModule.Dependency(
+                    organization = Configurations.Dependencies.BUNDLED_MODULE_GROUP,
+                    name = layout.name,
+                    version = version,
+                ).also { dependency ->
+                    createIvyDependencyFile(
+                        group = dependency.organization,
+                        name = dependency.name,
+                        version = dependency.version,
+                        localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+                        publications = layout.classPath.map { classPath ->
+                            platformPath.resolve(classPath).toPublication()
+                        },
+                    )
+                }
+            }
+        }
+    }
 
     createIvyDependencyFile(
         group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
@@ -130,15 +193,6 @@ private fun IntelliJPlatformPluginDependencyAware.createBundledPluginIvyDependen
         version = version,
         localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
         publications = listOf(artifactPath.toPublication()),
-        dependencies = bundledPlugin.dependencies
-            .mapNotNull { dependencyId -> bundledPluginsList.plugins.find { it.id == dependencyId } }
-            .map {
-                IvyModule.Dependency(
-                    name = it.id,
-                    version = version,
-                ).apply {
-                    createBundledPluginIvyDependencyFile(bundledPluginsList, it, version)
-                }
-            }
+        dependencies = ivyDependencies,
     )
 }

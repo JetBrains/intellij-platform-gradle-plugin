@@ -50,7 +50,7 @@ data class IvyModule(
 
     @Serializable
     data class Dependency(
-        @XmlSerialName("org") val organisation: String? = null,
+        @XmlSerialName("org") val organization: String? = null,
         @XmlSerialName("name") val name: String,
         @XmlSerialName("rev") val version: String,
     )
