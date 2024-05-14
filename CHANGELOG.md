@@ -2,12 +2,29 @@
 
 ## [next]
 
+## [v2.0.0-beta2] - 2024-05-14
+
 ### Added
-- `targetProductPart` property is added to allow installing plugin on the frontend part when running in Split Mode [#1563](../../issues/1563)
+
+- Use IntelliJ Platform distribution from [download.jetbrains.com](http://download.jetbrains.com/) by default. To switch back to IntelliJ Maven Repository artifacts, use `org.jetbrains.intellij.platform.buildFeature.useBinaryReleases=false`
+- Introduced `Custom*` tasks. if you want to extend the `runIde` or `testSomething` tasks, use the `Custom*Task` classes. See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-custom-tasks.html
+- Better handling of missing dependencies/misconfiguration
+- Bring back the `SetupDependenciesTask` to avoid failing build when migrating from `1.x`
+- Better `ClosestVersionResolver` error messages
+- When running IDE in Split Mode, it’s possible to specify `splitModeTarget` (`BACKEND`, `FRONTEND`, `BACKEND_AND_FRONTEND`)
 
 ### Fixed
 
-- Fix for: `coroutinesJavaAgentPath` specifies file `.../build/tmp/initializeIntelliJPlugin/coroutines-javaagent.jar` which doesn't exist
+- Fixed including transitive modules/bundled plugins dependencies of declared plugin dependencies
+- Fixed JetBrains Runtime (JBR) resolving
+- move `TestFrameworkType` from `org.jetbrains.intellij.platform.gradle.extensions` to `org.jetbrains.intellij.platform.gradle`
+
+### Removed
+- Dropped `testIde` task as `test` is now properly configured
+
+## [v2.0.0-beta1] - 2024-04-11
+
+The `2.0.0` release is completely rewritten. Please see [documentation page](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) for more details. 
 
 ## [1.17.2] - 2024-02-20
 
