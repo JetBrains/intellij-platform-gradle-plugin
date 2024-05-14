@@ -20,6 +20,7 @@
 - move `TestFrameworkType` from `org.jetbrains.intellij.platform.gradle.extensions` to `org.jetbrains.intellij.platform.gradle`
 
 ### Removed
+
 - Dropped `testIde` task as `test` is now properly configured
 
 ## [v2.0.0-beta1] - 2024-04-11
@@ -1010,7 +1011,9 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...HEAD
+[2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta1...v2.0.0-beta2
+[2.0.0-beta1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...v2.0.0-beta1
 [1.17.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.16.1...v1.17.0
