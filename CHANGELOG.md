@@ -6,6 +6,7 @@
 
 - `jetbrainsRuntime()` dependency helper for resolving a suitable JBR version for IntelliJ Platform fetched from IntelliJ Maven Repository
 - `jetbrainsRuntimeExplicit(explicitVersion)` dependency helper for specifying an explicit JBR version if necessary
+- `PrepareSandboxTask`: introduce sandboxDirectoriesExistence property to ensure all sandbox directories exist
 
 ### Changed
 
