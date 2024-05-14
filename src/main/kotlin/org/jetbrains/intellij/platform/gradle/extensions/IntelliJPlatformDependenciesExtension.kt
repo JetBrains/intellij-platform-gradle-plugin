@@ -597,7 +597,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param architecture The JetBrains Runtime architecture.
      */
     fun jetbrainsRuntime(version: String, variant: String? = null, architecture: String? = null) = addJetBrainsRuntimeDependency(
-        explicitVersionProvider = providers.provider { from(version, variant, architecture) },
+        explicitVersionProvider = providers.provider { buildJetBrainsRuntimeVersion(version, variant, architecture) },
     )
 
     /**
@@ -608,7 +608,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param architecture The provider of the JetBrains Runtime architecture.
      */
     fun jetbrainsRuntime(version: Provider<String>, variant: Provider<String>, architecture: Provider<String>) = addJetBrainsRuntimeDependency(
-        explicitVersionProvider = providers.provider { from(version.get(), variant.orNull, architecture.orNull) },
+        explicitVersionProvider = providers.provider { buildJetBrainsRuntimeVersion(version.get(), variant.orNull, architecture.orNull) },
     )
 
     /**

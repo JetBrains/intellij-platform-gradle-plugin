@@ -40,7 +40,7 @@ internal fun JetBrainsRuntimeDependencyAware.addObtainedJetBrainsRuntimeDependen
                 }
             } ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
 
-        from(version)
+        buildJetBrainsRuntimeVersion(version)
     },
     configurationName,
     action,
@@ -68,12 +68,14 @@ internal fun JetBrainsRuntimeDependencyAware.addJetBrainsRuntimeDependency(
     },
 )
 
-private fun from(
+internal fun buildJetBrainsRuntimeVersion(
     version: String,
-    variant: String? = null,
+    runtimeVariant: String? = null,
     architecture: String? = null,
     operatingSystem: OperatingSystem = OperatingSystem.current(),
 ): String {
+    val variant = runtimeVariant ?: "jcef"
+
     val (jdk, build) = version.split('b').also {
         assert(it.size == 1) {
             "Incorrect JetBrains Runtime version: $version. Use [sdk]b[build] format, like: 21.0.3b446.1"
@@ -98,5 +100,5 @@ private fun from(
         }
     }
 
-    return "jbr_${variant ?: "jcef"}-$jdk-$os-$arch-b$build"
+    return "jbr_$variant-$jdk-$os-$arch-b$build"
 }
