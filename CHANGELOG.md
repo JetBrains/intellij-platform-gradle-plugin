@@ -2,6 +2,15 @@
 
 ## [next]
 
+### Added
+
+- `jetbrainsRuntime()` dependency helper for resolving a suitable JBR version for IntelliJ Platform fetched from IntelliJ Maven Repository
+- `jetbrainsRuntimeExplicit(explicitVersion)` dependency helper for specifying an explicit JBR version if necessary
+
+### Changed
+
+- Update `PlatformJavaVersions` and `PlatformKotlinVersions`
+
 ## [v2.0.0-beta2] - 2024-05-14
 
 ### Added

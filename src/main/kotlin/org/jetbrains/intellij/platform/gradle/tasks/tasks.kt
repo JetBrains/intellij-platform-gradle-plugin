@@ -324,7 +324,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          */
         if (this is RuntimeAware) {
             val javaRuntimePathResolver = JavaRuntimePathResolver(
-                jetbrainsRuntime = configurations[Configurations.JETBRAINS_RUNTIME].asLenient,
+                jetbrainsRuntime = configurations[Configurations.JETBRAINS_RUNTIME],
                 intellijPlatform = intelliJPlatformConfiguration,
                 javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
                 javaToolchainService = project.serviceOf<JavaToolchainService>(),

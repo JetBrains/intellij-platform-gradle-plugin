@@ -2,13 +2,49 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions.aware
 
+import org.gradle.api.GradleException
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
+import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
+import java.io.FileReader
+import java.util.*
+import kotlin.io.path.exists
 
-interface JetBrainsRuntimeDependencyAware : DependencyAware
+interface JetBrainsRuntimeDependencyAware : IntelliJPlatformAware, DependencyAware {
+    val providers: ProviderFactory
+}
+
+/**
+ * A base method for adding a dependency on JetBrains Runtime.
+ *
+ * @param configurationName The name of the configuration to add the dependency to.
+ * @param action The action to be performed on the dependency. Defaults to an empty action.
+ */
+internal fun JetBrainsRuntimeDependencyAware.addObtainedJetBrainsRuntimeDependency(
+    configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
+    action: DependencyAction = {},
+) = addJetBrainsRuntimeDependency(
+    providers.provider {
+        val version = platformPath.resolve("dependencies.txt")
+            .takeIf { it.exists() }
+            ?.let {
+                FileReader(it.toFile()).use { reader ->
+                    with(Properties()) {
+                        load(reader)
+                        getProperty("runtimeBuild") ?: getProperty("jdkBuild")
+                    }
+                }
+            } ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+
+        from(version)
+    },
+    configurationName,
+    action,
+)
 
 /**
  * A base method for adding a dependency on JetBrains Runtime.
@@ -31,3 +67,24 @@ internal fun JetBrainsRuntimeDependencyAware.addJetBrainsRuntimeDependency(
         ).apply(action)
     },
 )
+
+internal fun from(version: String, variant: String? = null, architecture: String? = null, operatingSystem: OperatingSystem = OperatingSystem.current()): String {
+    val (jdk, build) = version.split('b').also {
+        assert(it.size == 1) {
+            "Incorrect JetBrains Runtime version: $version. Use [sdk]b[build] format, like: 21.0.3b446.1"
+        }
+    }
+
+    val os = with(operatingSystem) {
+        when {
+            isWindows -> "windows"
+            isMacOsX -> "osx"
+            isLinux -> "linux"
+            else -> throw GradleException("Unsupported operating system: $name")
+        }
+    }
+
+    val arch = architecture ?: System.getProperty("os.arch")
+
+    return "jbr_${variant ?: "jcef"}-$jdk-$os-$arch-b$build"
+}
