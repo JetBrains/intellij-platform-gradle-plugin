@@ -86,6 +86,7 @@ object Constants {
 
         object Attributes {
             val bundledPluginsList = Attribute.of("intellijPlatformBundledPluginsList", Boolean::class.javaObjectType)
+            val localPluginsNormalized = Attribute.of("intellijPlatformLocalPluginsNormalized", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
             val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
             val binaryReleaseExtracted = Attribute.of("intellijPlatformPluginVerifierIdeExtracted", Boolean::class.javaObjectType)
@@ -109,6 +110,7 @@ object Constants {
 
         object Dependencies {
             const val LOCAL_IDE_GROUP = "localIde"
+            const val LOCAL_PLUGIN_GROUP = "localPlugin"
             const val BUNDLED_MODULE_GROUP = "bundledModule"
             const val BUNDLED_PLUGIN_GROUP = "bundledPlugin"
         }

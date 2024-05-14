@@ -23,10 +23,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.BundledPluginsListTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.PluginVerifierIdeExtractorTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
@@ -117,22 +114,28 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
                 description = "IntelliJ Platform plugin dependencies",
             )
+            val intellijPlatformPluginLocalConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+                description = "IntelliJ Platform plugin local",
+            ) {
+                attributes {
+                    attribute(Attributes.localPluginsNormalized, false)
+                }
+            }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR,
                 description = "IntelliJ Platform plugin dependencies internal collector",
             ) {
                 extendsFrom(intellijPlatformPluginDependenciesConfiguration)
+                extendsFrom(intellijPlatformPluginLocalConfiguration)
             }
-            val intellijPlatformPluginLocalConfiguration = create(
-                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
-                description = "IntelliJ Platform plugin local",
-            )
             val intellijPlatformPluginConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN,
                 description = "IntelliJ Platform plugins",
             ) {
                 attributes {
                     attribute(Attributes.extracted, true)
+                    attribute(Attributes.localPluginsNormalized, true)
                 }
 
                 extendsFrom(intellijPlatformPluginDependenciesConfiguration)
@@ -281,6 +284,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 intellijPlatformConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM],
             )
             BundledPluginsListTransformer.register(
+                dependencies = this
+            )
+            LocalPluginsNormalizationTransformers.register(
                 dependencies = this
             )
             PluginVerifierIdeExtractorTransformer.register(

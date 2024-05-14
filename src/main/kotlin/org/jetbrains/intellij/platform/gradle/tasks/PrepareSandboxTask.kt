@@ -242,13 +242,12 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
                 inputs.property("intellijPlatform.splitMode", extension.splitMode)
                 inputs.property("intellijPlatform.targetProductPart", extension.splitModeTarget)
-                inputs.files(runtimeConfiguration)
-
                 inputs.property("intellijPlatform.sandboxDirectoriesExistence", project.provider {
                     listOf(sandboxConfigDirectory, sandboxPluginsDirectory, sandboxLogDirectory, sandboxSystemDirectory).all {
                         it.asPath.exists()
                     }
                 })
+                inputs.files(runtimeConfiguration)
             }
     }
 }

@@ -217,6 +217,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
                 includeGroup(Configurations.Dependencies.BUNDLED_MODULE_GROUP)
                 includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
                 includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
+                includeGroup(Configurations.Dependencies.LOCAL_PLUGIN_GROUP)
             }
         }
         action()

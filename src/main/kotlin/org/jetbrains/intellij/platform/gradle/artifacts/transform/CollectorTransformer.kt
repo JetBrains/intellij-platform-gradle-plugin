@@ -26,7 +26,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
-import java.nio.file.Files
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
@@ -57,8 +56,8 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
             val productInfo = parameters.intellijPlatform.productInfo()
             val plugin by lazy {
                 val pluginPath = generateSequence(path) {
-                    it.takeIf { Files.exists(it.resolve("lib")) } ?: it.listDirectoryEntries().singleOrNull()
-                }.firstOrNull { it.resolve("lib").exists() } ?: throw Exception("")
+                    it.takeIf { it.resolve("lib").exists() } ?: it.listDirectoryEntries().singleOrNull()
+                }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: $path")
 
                 val pluginCreationResult = manager.createPlugin(pluginPath, false)
 

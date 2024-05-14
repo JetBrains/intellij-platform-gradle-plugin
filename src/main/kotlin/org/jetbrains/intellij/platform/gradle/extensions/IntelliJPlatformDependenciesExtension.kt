@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
@@ -619,7 +620,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param channel The plugin distribution channel.
      */
     fun plugin(id: String, version: String, channel: String = "") = addIntelliJPlatformPluginDependencies(
-        plugins = providers.provider { listOf(Triple(id, version, channel)) }
+        pluginsProvider = providers.provider { listOf(Triple(id, version, channel)) }
     )
 
     /**
@@ -630,7 +631,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param channel The provider of the plugin distribution channel.
      */
     fun plugin(id: Provider<String>, version: Provider<String>, channel: Provider<String>) = addIntelliJPlatformPluginDependencies(
-        plugins = providers.provider { listOf(Triple(id.get(), version.get(), channel.get())) }
+        pluginsProvider = providers.provider { listOf(Triple(id.get(), version.get(), channel.get())) }
     )
 
     /**
@@ -641,7 +642,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugin(notation: Provider<String>) = addIntelliJPlatformPluginDependencies(
-        plugins = notation.map { listOfNotNull(it.parsePluginNotation()) }
+        pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) }
     )
 
     /**
@@ -652,7 +653,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugin(notation: String) = addIntelliJPlatformPluginDependencies(
-        plugins = providers.provider { listOfNotNull(notation.parsePluginNotation()) }
+        pluginsProvider = providers.provider { listOfNotNull(notation.parsePluginNotation()) }
     )
 
     /**
@@ -663,7 +664,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugins(vararg notations: String) = addIntelliJPlatformPluginDependencies(
-        plugins = providers.provider { notations.mapNotNull { it.parsePluginNotation() } }
+        pluginsProvider = providers.provider { notations.mapNotNull { it.parsePluginNotation() } }
     )
 
     /**
@@ -674,7 +675,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugins(notations: List<String>) = addIntelliJPlatformPluginDependencies(
-        plugins = providers.provider { notations.mapNotNull { it.parsePluginNotation() } }
+        pluginsProvider = providers.provider { notations.mapNotNull { it.parsePluginNotation() } }
     )
 
     /**
@@ -685,7 +686,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
     fun plugins(notations: Provider<List<String>>) = addIntelliJPlatformPluginDependencies(
-        plugins = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } }
+        pluginsProvider = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } }
     )
 
     /**
@@ -694,7 +695,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param id The bundled plugin identifier.
      */
     fun bundledPlugin(id: String) = addIntelliJPlatformBundledPluginDependencies(
-        bundledPlugins = providers.provider { listOf(id) }
+        bundledPluginsProvider = providers.provider { listOf(id) }
     )
 
     /**
@@ -703,7 +704,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param id The provider of the bundled plugin identifier.
      */
     fun bundledPlugin(id: Provider<String>) = addIntelliJPlatformBundledPluginDependencies(
-        bundledPlugins = id.map { listOf(it) }
+        bundledPluginsProvider = id.map { listOf(it) }
     )
 
     /**
@@ -712,7 +713,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param ids The bundled plugin identifiers.
      */
     fun bundledPlugins(vararg ids: String) = addIntelliJPlatformBundledPluginDependencies(
-        bundledPlugins = providers.provider { ids.asList() }
+        bundledPluginsProvider = providers.provider { ids.asList() }
     )
 
     /**
@@ -721,7 +722,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param ids The bundled plugin identifiers.
      */
     fun bundledPlugins(ids: List<String>) = addIntelliJPlatformBundledPluginDependencies(
-        bundledPlugins = providers.provider { ids }
+        bundledPluginsProvider = providers.provider { ids }
     )
 
     /**
@@ -730,7 +731,52 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param ids The bundled plugin identifiers.
      */
     fun bundledPlugins(ids: Provider<List<String>>) = addIntelliJPlatformBundledPluginDependencies(
-        bundledPlugins = ids
+        bundledPluginsProvider = ids
+    )
+
+    /**
+     * Adds dependency on a local IntelliJ Platform plugin.
+     *
+     * @param localPath Path to the local plugin.
+     */
+    fun localPlugin(localPath: File) = addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = providers.provider { localPath }
+    )
+
+    /**
+     * Adds dependency on a local IntelliJ Platform plugin.
+     *
+     * @param localPath Path to the local plugin.
+     */
+    fun localPlugin(localPath: String) = addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = providers.provider { localPath }
+    )
+
+    /**
+     * Adds dependency on a local IntelliJ Platform plugin.
+     *
+     * @param localPath Path to the local plugin.
+     */
+    fun localPlugin(localPath: Directory) = addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = providers.provider { localPath }
+    )
+
+    /**
+     * Adds dependency on a local IntelliJ Platform plugin.
+     *
+     * @param localPath Path to the local plugin.
+     */
+    fun localPlugin(localPath: Provider<*>) = addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = localPath
+    )
+
+    /**
+     * Adds dependency on a local IntelliJ Platform plugin.
+     *
+     * @param dependency Project dependency.
+     */
+    fun localPlugin(dependency: ProjectDependency) = addIntelliJPlatformLocalPluginProjectDependency(
+        dependency = dependency
     )
 
     /**

@@ -4,7 +4,10 @@ package org.jetbrains.intellij.platform.gradle.extensions.aware
 
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.create
@@ -16,9 +19,10 @@ import org.jetbrains.intellij.platform.gradle.extensions.createIvyDependencyFile
 import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.utils.asLenient
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+import java.io.File
 import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.exists
+import kotlin.io.path.*
 
 interface IntelliJPlatformPluginDependencyAware : DependencyAware, IntelliJPlatformAware {
     val providers: ProviderFactory
@@ -35,49 +39,101 @@ private val pluginManager by lazy {
 /**
  * A base method for adding a dependency on a plugin for IntelliJ Platform.
  *
- * @param plugins The provider of the list containing triples with plugin identifier, version, and channel.
+ * @param pluginsProvider The provider of the list containing triples with plugin identifier, version, and channel.
  * @param configurationName The name of the configuration to add the dependency to.
  * @param action The action to be performed on the dependency. Defaults to an empty action.
  */
 internal fun IntelliJPlatformPluginDependencyAware.addIntelliJPlatformPluginDependencies(
-    plugins: Provider<List<Triple<String, String, String>>>,
+    pluginsProvider: Provider<List<Triple<String, String, String>>>,
     configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addAllLater(
-    plugins.map {
-        it.map { (id, version, channel) -> createIntelliJPlatformPluginDependency(id, version, channel).apply(action) }
+    pluginsProvider.map { plugins ->
+        plugins.map { (id, version, channel) -> createIntelliJPlatformPluginDependency(id, version, channel).apply(action) }
     }
 )
 
 /**
  * A base method for adding a dependency on a plugin for IntelliJ Platform.
  *
- * @param bundledPlugins The provider of the list containing triples with plugin identifier, version, and channel.
+ * @param bundledPluginsProvider The provider of the list containing triples with plugin identifier, version, and channel.
  * @param configurationName The name of the configuration to add the dependency to.
  * @param action The action to be performed on the dependency. Defaults to an empty action.
  */
 internal fun IntelliJPlatformPluginDependencyAware.addIntelliJPlatformBundledPluginDependencies(
-    bundledPlugins: Provider<List<String>>,
+    bundledPluginsProvider: Provider<List<String>>,
     configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addAllLater(
-    bundledPlugins.map {
-        it
+    bundledPluginsProvider.map { bundledPlugins ->
+        bundledPlugins
             .filter { id -> id.isNotBlank() }
             .map { id -> createIntelliJPlatformBundledPluginDependency(id).apply(action) }
     }
 )
 
-// TODO: add local plugin
-//internal fun IntelliJPlatformPluginDependencyAware.addIntelliJPlatformLocalPluginDependency(
-//    localPluginProvider: Provider<Any>,
-//    configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
-//    action: DependencyAction = {},
-//) = configurations[configurationName].dependencies.addLater(
-//    localPluginProvider.map { localPlugin ->
-//        null
-//    }
-//)
+/**
+ * A base method for adding a dependency on a local plugin for IntelliJ Platform.
+ *
+ * @param localPathProvider The provider of the path to the local plugin.
+ * @param configurationName The name of the configuration to add the dependency to.
+ * @param action The action to be performed on the dependency. Defaults to an empty action.
+ */
+internal fun IntelliJPlatformPluginDependencyAware.addIntelliJPlatformLocalPluginDependency(
+    localPathProvider: Provider<*>,
+    configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+    action: DependencyAction = {},
+) = configurations[configurationName].dependencies.addLater(
+    localPathProvider.map { localPath ->
+        val artifactPath = when (localPath) {
+            is String -> localPath
+            is File -> localPath.absolutePath
+            is Directory -> localPath.asPath.pathString
+            else -> throw IllegalArgumentException("Invalid argument type: '${localPath.javaClass}'. Supported types: String, File, or Directory.")
+        }
+            .let { Path(it) }
+            .takeIf { it.exists() }
+            .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
+
+        val plugin by lazy {
+            val pluginPath = when {
+                artifactPath.isDirectory() -> generateSequence(artifactPath) {
+                    it.takeIf { it.resolve("lib").exists() } ?: it.listDirectoryEntries().singleOrNull()
+                }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: $artifactPath")
+
+                else -> artifactPath
+            }
+
+            val pluginCreationResult = pluginManager.createPlugin(pluginPath, false)
+            require(pluginCreationResult is PluginCreationSuccess)
+            pluginCreationResult.plugin
+        }
+
+        dependencies.create(
+            group = Configurations.Dependencies.LOCAL_PLUGIN_GROUP,
+            name = plugin.pluginId ?: artifactPath.name,
+            version = plugin.pluginVersion ?: "0.0.0",
+        ).apply {
+            createIvyDependencyFile(
+                localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+                publications = listOf(artifactPath.toPublication()),
+            )
+        }.apply(action)
+    }
+)
+
+/**
+ * A base method for adding a project dependency on a local plugin for IntelliJ Platform.
+ *
+ * @param dependency The plugin project dependency.
+ * @param configurationName The name of the configuration to add the dependency to.
+ * @param action The action to be performed on the dependency. Defaults to an empty action.
+ */
+internal fun IntelliJPlatformPluginDependencyAware.addIntelliJPlatformLocalPluginProjectDependency(
+    dependency: ProjectDependency,
+    configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+    action: DependencyAction = {},
+) = configurations[configurationName].dependencies.add(dependency.apply(action))
 
 /**
  * Creates a dependency for an IntelliJ platform plugin.

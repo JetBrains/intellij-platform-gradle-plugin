@@ -93,12 +93,12 @@ internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
     is String -> localPath
     is File -> localPath.absolutePath
     is Directory -> localPath.asPath.pathString
-    else -> throw IllegalArgumentException("Invalid argument type: '${localPath.javaClass}'. Supported types: String, File, or Directory")
+    else -> throw IllegalArgumentException("Invalid argument type: '${localPath.javaClass}'. Supported types: String, File, or Directory.")
 }
     .let { Path(it) }
     .let { it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents") }
     .takeIf { it.exists() && it.isDirectory() }
-    .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist or is not a directory" } }
+    .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist or is not a directory." } }
 
 /**
  * Returns the Gradle project cache directory.
