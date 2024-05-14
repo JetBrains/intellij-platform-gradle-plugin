@@ -68,7 +68,12 @@ internal fun JetBrainsRuntimeDependencyAware.addJetBrainsRuntimeDependency(
     },
 )
 
-internal fun from(version: String, variant: String? = null, architecture: String? = null, operatingSystem: OperatingSystem = OperatingSystem.current()): String {
+private fun from(
+    version: String,
+    variant: String? = null,
+    architecture: String? = null,
+    operatingSystem: OperatingSystem = OperatingSystem.current(),
+): String {
     val (jdk, build) = version.split('b').also {
         assert(it.size == 1) {
             "Incorrect JetBrains Runtime version: $version. Use [sdk]b[build] format, like: 21.0.3b446.1"
@@ -84,7 +89,14 @@ internal fun from(version: String, variant: String? = null, architecture: String
         }
     }
 
-    val arch = architecture ?: System.getProperty("os.arch")
+    val arch = when (architecture ?: System.getProperty("os.arch")) {
+        "aarch64", "arm64" -> "aarch64"
+        "x86_64", "amd64" -> "x64"
+        else -> when {
+            operatingSystem.isWindows && System.getenv("ProgramFiles(x86)") != null -> "x64"
+            else -> "x86"
+        }
+    }
 
     return "jbr_${variant ?: "jcef"}-$jdk-$os-$arch-b$build"
 }
