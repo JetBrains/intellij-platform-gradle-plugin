@@ -115,14 +115,15 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
     private fun setupJetBrainsRuntimeConfiguration(version: String) {
         buildFile write //language=kotlin
                 """
-                dependencies {
-                    intellijPlatform {
-                        jetbrainsRuntime("$version")
-                    }
-                }
                 repositories {
                     intellijPlatform {
                         jetbrainsRuntime()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        jetbrainsRuntimeExplicit("$version")
                     }
                 }
                 """.trimIndent()
