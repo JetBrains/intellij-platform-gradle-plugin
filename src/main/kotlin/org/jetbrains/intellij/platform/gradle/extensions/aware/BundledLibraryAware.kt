@@ -8,6 +8,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.get
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 
 interface BundledLibraryAware : DependencyAware, IntelliJPlatformAware {
@@ -27,7 +28,16 @@ internal fun BundledLibraryAware.addBundledLibrary(
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
     pathProvider.map { path -> createBundledLibraryDependency(path).apply(action) }
-)
+).also {
+    val log = Logger(javaClass)
+    log.warn(
+        """
+        Do not use `bundledLibrary()` in production, as direct access to the IntelliJ Platform libraries is not recommended.
+        
+        It should only be used as a workaround in case the IntelliJ Platform Gradle Plugin is not aligned with the latest IntelliJ Platform classpath changes.
+        """.trimIndent()
+    )
+}
 
 /**
  * Creates a [Dependency] using a Jar file resolved in [platformPath] with [path].
