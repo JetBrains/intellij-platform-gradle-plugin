@@ -35,6 +35,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathReso
 import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSignerPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.util.*
@@ -284,27 +285,60 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
              * No suffix is used if a task is a base task provided with the IntelliJ Platform Gradle Plugin as a default.
              */
             if (this !is SandboxProducerAware) {
-                val isBuiltInTask = ALL_TASKS.contains(name)
-                val customIntelliJPlatform = this is CustomIntelliJPlatformVersionAware
-                        && (localPath.isSpecified() || type.isSpecified() || version.isSpecified())
+                fun createTask(target: SplitModeTarget): PrepareSandboxTask {
+                    val taskSuffix = "_$suffix".takeIf { name !in ALL_TASKS }.orEmpty()
+                    val taskSubject = when (this) {
+                        is RunnableIdeAware -> ""
+                        is VerifyPluginStructureTask -> ""
+                        is TestableAware -> "Test"
+                        else -> name.replaceFirstChar(Char::uppercase)
+                    }
+                    val splitModeVariant = when (target) {
+                        SplitModeTarget.FRONTEND -> "Frontend"
+                        SplitModeTarget.BACKEND -> ""
+                        SplitModeTarget.BOTH -> ""
+                    }
+                    val taskName = "prepare" + taskSubject + splitModeVariant + "Sandbox" + taskSuffix
 
-                val prepareSandboxTaskName = when (this) {
-                    is RunnableIdeAware -> Tasks.PREPARE_SANDBOX
-                    is TestableAware -> Tasks.PREPARE_TEST_SANDBOX
-//                    is TestIdeUiTask -> Tasks.PREPARE_UI_TEST_SANDBOX
-                    else -> Tasks.PREPARE_SANDBOX
-                } + "_$suffix".takeIf { !isBuiltInTask || customIntelliJPlatform }.orEmpty()
+                    return tasks.maybeCreate<PrepareSandboxTask>(taskName).also { task ->
+                        if (this is CustomIntelliJPlatformVersionAware) {
+                            task.disabledPlugins = the<IntelliJPlatformPluginsExtension>().disabled
+                        }
+
+                        if (this is SplitModeAware) {
+                            task.splitMode = splitMode
+                            task.splitModeTarget = splitModeTarget
+                            task.splitModeCurrentTarget = target
+                        }
+
+                        task.onlyIf {
+                            it as PrepareSandboxTask
+                            val isSplitMode = it.splitMode.get()
+                            val currentTarget = task.splitModeCurrentTarget.get()
+
+                            isSplitMode || currentTarget != SplitModeTarget.FRONTEND
+                        }
+
+                        dependsOn(task)
+                    }
+                }
 
                 /**
                  * Every [SandboxAware] task is supposed to refer to the [PrepareSandboxTask] task.
                  * However, tasks like [RunnableIdeAware] or [TestableAware] should not share the same sandboxes.
-                 * The same applies to the customized tasks – a custom [suffix] is added to the task name.
+                 * The same applies to the customized tasks – a custom suffix is added to the task name.
                  */
-                tasks.maybeCreate<PrepareSandboxTask>(prepareSandboxTaskName).let { prepareSandboxTask ->
-                    dependsOn(prepareSandboxTask)
 
-                    if (this is CustomIntelliJPlatformVersionAware) {
-                        prepareSandboxTask.disabledPlugins = the<IntelliJPlatformPluginsExtension>().disabled
+                when {
+                    this is SplitModeAware -> {
+                        val backendTask = createTask(SplitModeTarget.BACKEND)
+                        val frontendTask = createTask(SplitModeTarget.FRONTEND)
+
+                        backendTask.dependsOn(frontendTask)
+                    }
+
+                    else -> {
+                        createTask(SplitModeTarget.BOTH)
                     }
                 }
             }
@@ -419,8 +453,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     sandboxPluginsDirectory,
                     sandboxSystemDirectory,
                     sandboxLogDirectory,
-                    splitMode,
-                    splitModeTarget,
                 )
             )
 
@@ -445,11 +477,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     runtimeDirectory.map { it.file("lib/tools") }
                 )
 
-                argumentProviders.add(
-                    SplitModeArgumentProvider(
-                        splitMode,
-                    )
-                )
+                if (this is SplitModeAware) {
+                    argumentProviders.add(SplitModeArgumentProvider(splitMode))
+                }
             }
         }
     }

@@ -2,7 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
+import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -19,14 +22,14 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
  *
  * Split Mode requires the IntelliJ Platform in the version `241.14473` or later.
  */
-interface SplitModeAware : IntelliJPlatformVersionAware {
+interface SplitModeAware : IntelliJPlatformVersionAware, SandboxAware {
 
     /**
      * Enables Split Mode when running the IDE.
      *
      * Default value: [IntelliJPlatformExtension.splitMode]
      */
-    @get:Internal
+    @get:Input
     val splitMode: Property<Boolean>
 
     /**
@@ -34,8 +37,15 @@ interface SplitModeAware : IntelliJPlatformVersionAware {
      * 
      * Default value: [IntelliJPlatformExtension.splitModeTarget]
      */
-    @get:Internal
+    @get:Input
     val splitModeTarget: Property<SplitModeTarget>
+
+    /**
+     * Path to a properties file which will be used to configure the frontend process if the IDE is started in Split Mode.
+     */
+    @get:Internal
+    val splitModeFrontendProperties: Provider<RegularFile>
+        get() = sandboxContainerDirectory.file("frontend.properties")
 
     /**
      * Validates that the resolved IntelliJ Platform supports Split Mode.
@@ -57,8 +67,8 @@ interface SplitModeAware : IntelliJPlatformVersionAware {
     enum class SplitModeTarget {
         BACKEND,
         FRONTEND,
-        BACKEND_AND_FRONTEND;
+        BOTH;
 
-        override fun toString() = name.lowercase().replace('_', '-')
+        fun includes(target: SplitModeTarget) = this == target || this == BOTH
     }
 }

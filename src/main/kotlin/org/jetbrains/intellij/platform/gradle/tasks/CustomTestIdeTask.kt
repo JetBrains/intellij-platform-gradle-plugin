@@ -98,8 +98,6 @@ abstract class CustomTestIdeTask : Test(), TestableAware, CustomIntelliJPlatform
                     sourceTask.sandboxPluginsDirectory,
                     sourceTask.sandboxSystemDirectory,
                     sourceTask.sandboxLogDirectory,
-                    project.provider { false },
-                    project.provider { null },
                 )
             )
 

@@ -12,6 +12,7 @@
 ### Changed
 
 - Update `PlatformJavaVersions` and `PlatformKotlinVersions`
+- Introduce a separated Sandbox for the Frontend part when running IDE in Split Mode
 
 ## [v2.0.0-beta2] - 2024-05-14
 

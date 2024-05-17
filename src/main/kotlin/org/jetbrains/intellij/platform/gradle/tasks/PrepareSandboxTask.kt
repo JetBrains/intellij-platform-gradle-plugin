@@ -11,6 +11,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
@@ -27,6 +28,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -96,6 +98,15 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
     abstract val runtimeClasspath: ConfigurableFileCollection
 
     /**
+     * As IntelliJ Platform is capable for running in split mode, each [SplitModeTarget.BACKEND] and [SplitModeTarget.FRONTEND] require separated sandbox.
+     * This property helps distinguish which one is currently handled.
+     *
+     * @see [SplitModeAware]
+     */
+    @get:Internal
+    abstract val splitModeCurrentTarget: Property<SplitModeTarget>
+
+    /**
      * Holds a list of names used to generate suffixed ones to avoid collisions.
      */
     private val usedNames = mutableMapOf<String, Path>()
@@ -111,7 +122,10 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
         disableIdeUpdate()
         disabledPlugins()
         createSplitModeFrontendPropertiesFile()
-        super.copy()
+
+        if (!splitMode.get() || splitModeTarget.get().includes(splitModeCurrentTarget.get())) {
+            super.copy()
+        }
     }
 
     fun intoChild(destinationDir: Any) = mainSpec.addChild().into(destinationDir)
@@ -181,23 +195,16 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
             return
         }
 
-        val pluginsPath = when (splitModeTarget.get()) {
-            SplitModeAware.SplitModeTarget.FRONTEND, SplitModeAware.SplitModeTarget.BACKEND_AND_FRONTEND ->
-                sandboxPluginsDirectory.asPath
-
-            SplitModeAware.SplitModeTarget.BACKEND ->
-                // Specifies an empty directory to ensure that the plugin won't be loaded.
-                sandboxPluginsDirectory.asPath.resolve("frontend")
+        if (splitModeCurrentTarget.get() == SplitModeTarget.FRONTEND) {
+            splitModeFrontendProperties.asPath.writeText(
+                """
+                idea.config.path=${sandboxConfigDirectory.asPath}
+                idea.system.path=${sandboxSystemDirectory.asPath}
+                idea.log.path=${sandboxLogDirectory.asPath}
+                idea.plugins.path=${sandboxPluginsDirectory.asPath}
+                """.trimIndent()
+            )
         }
-
-        frontendPropertiesFile.asPath.writeText(
-            """
-            idea.config.path=${sandboxConfigDirectory.asPath.resolve("frontend")}
-            idea.system.path=${sandboxSystemDirectory.asPath.resolve("frontend")}
-            idea.log.path=${sandboxLogDirectory.asPath.resolve("frontend")}
-            idea.plugins.path=$pluginsPath
-            """.trimIndent()
-        )
     }
 
     fun ensureName(path: Path): String {
@@ -232,16 +239,16 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
                 runtimeClasspath.from(runtimeConfiguration)
 
+                splitModeTarget.convention(extension.splitModeTarget)
+                splitModeCurrentTarget.convention(SplitModeTarget.BACKEND)
+
                 intoChild(extension.projectName.map { "$it/lib" })
                     .from(runtimeClasspath)
                     .from(pluginJar)
                     .eachFile { name = ensureName(file.toPath()) }
-
                 from(pluginsClasspath)
 
                 inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
-                inputs.property("intellijPlatform.splitMode", extension.splitMode)
-                inputs.property("intellijPlatform.targetProductPart", extension.splitModeTarget)
                 inputs.property("intellijPlatform.sandboxDirectoriesExistence", project.provider {
                     listOf(sandboxConfigDirectory, sandboxPluginsDirectory, sandboxLogDirectory, sandboxSystemDirectory).all {
                         it.asPath.exists()

@@ -38,14 +38,6 @@ class SandboxArgumentProvider(
 
     @OutputDirectory
     val sandboxLogDirectory: DirectoryProperty,
-
-    @Optional
-    @Input
-    val splitMode: Provider<Boolean>,
-
-    @Optional
-    @Input
-    val targetProductPart: Provider<SplitModeAware.SplitModeTarget>,
 ) : CommandLineArgumentProvider {
 
     /**
@@ -58,18 +50,10 @@ class SandboxArgumentProvider(
             it.listDirectoryEntries().joinToString("${File.pathSeparator},")
         }
 
-    private fun computePluginPathProperties(): List<String> {
-        if (splitMode.get() && targetProductPart.get() == SplitModeAware.SplitModeTarget.FRONTEND) {
-            return listOfNotNull(
-                // Specifies an empty directory to ensure that the plugin won't be loaded by the backend process.
-                sandboxPluginsDirectory.ifExists { "-Didea.plugins.path=$it/backend" },
-            )
-        }
-        return listOfNotNull(
-            sandboxPluginsDirectory.ifExists { "-Didea.plugins.path=$it" },
-            pluginPath?.let { "-Dplugin.path=$it" },
-        )
-    }
+    private fun computePluginPathProperties() = listOfNotNull(
+        sandboxPluginsDirectory.ifExists { "-Didea.plugins.path=$it" },
+        pluginPath?.let { "-Dplugin.path=$it" },
+    )
 
     override fun asArguments() = listOfNotNull(
         sandboxConfigDirectory.ifExists { "-Didea.config.path=$it" },

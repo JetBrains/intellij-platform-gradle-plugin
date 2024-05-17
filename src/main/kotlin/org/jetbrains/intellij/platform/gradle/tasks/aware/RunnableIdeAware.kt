@@ -11,8 +11,7 @@ import org.gradle.process.JavaForkOptions
  * @see PluginAware
  * @see RuntimeAware
  * @see SandboxAware
- * @see SplitModeAware
  * @see AutoReloadAware
  * @see JavaForkOptions
  */
-interface RunnableIdeAware : AutoReloadAware, CoroutinesJavaAgentAware, PluginAware, RuntimeAware, SandboxAware, SplitModeAware, JavaForkOptions
+interface RunnableIdeAware : AutoReloadAware, CoroutinesJavaAgentAware, PluginAware, RuntimeAware, SandboxAware, JavaForkOptions

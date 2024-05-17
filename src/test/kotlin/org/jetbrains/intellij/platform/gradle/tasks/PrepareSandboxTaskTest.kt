@@ -366,29 +366,29 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `prepare sandbox for splitMode with plugin installed on frontend`() {
         buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.FRONTEND)
-        checkFrontendProperties(sandbox.resolve("plugins"))
+        checkFrontendProperties()
     }
 
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend`() {
         buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BACKEND)
-        checkFrontendProperties(sandbox.resolve("plugins").resolve("frontend"))
+        checkFrontendProperties()
     }
 
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend and frontend`() {
-        buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BACKEND_AND_FRONTEND)
-        checkFrontendProperties(sandbox.resolve("plugins"))
+        buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BOTH)
+        checkFrontendProperties()
     }
 
-    private fun checkFrontendProperties(pluginsPath: Path) {
+    private fun checkFrontendProperties() {
         assertFileContent(
             sandbox.resolve("frontend.properties"),
             """
-            idea.config.path=${sandbox.resolve("config").resolve("frontend")}
-            idea.system.path=${sandbox.resolve("system").resolve("frontend")}
-            idea.log.path=${sandbox.resolve("log").resolve("frontend")}
-            idea.plugins.path=$pluginsPath
+            idea.config.path=${sandbox.resolve("config-frontend")}
+            idea.system.path=${sandbox.resolve("system-frontend")}
+            idea.log.path=${sandbox.resolve("log-frontend")}
+            idea.plugins.path=${sandbox.resolve("plugins-frontend")}
             """.trimIndent()
         )
     }
