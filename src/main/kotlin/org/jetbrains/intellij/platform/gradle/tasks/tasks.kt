@@ -284,7 +284,10 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
              */
             if (this !is SandboxProducerAware) {
                 fun createTask(target: SplitModeTarget): PrepareSandboxTask {
-                    val taskSuffix = "_$suffix".takeIf { name !in ALL_TASKS }.orEmpty()
+                    val taskSuffix = when {
+                        this is CustomIntelliJPlatformVersionAware -> "_$suffix"
+                        else -> ""
+                    }
                     val taskSubject = when (this) {
                         is RunnableIdeAware -> ""
                         is VerifyPluginStructureTask -> ""

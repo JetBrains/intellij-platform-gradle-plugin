@@ -19,6 +19,7 @@
 ### Fixed
 
 - Fixed transitive dependencies of bundled plugin dependencies when IntelliJ Platform doesn't contain `ProductInfo.layout` model yet.
+- Produce customized (suffixed) configuration only for `CustomIntelliJPlatformVersionAware` tasks
 
 ## [v2.0.0-beta2] - 2024-05-14
 
