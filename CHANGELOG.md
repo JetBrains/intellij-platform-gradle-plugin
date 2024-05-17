@@ -15,6 +15,10 @@
 - Update `PlatformJavaVersions` and `PlatformKotlinVersions`
 - Introduce a separated Sandbox for the Frontend part when running IDE in Split Mode
 
+### Fixed
+
+- Fixed transitive dependencies of bundled plugin dependencies when IntelliJ Platform doesn't contain `ProductInfo.layout` model yet.
+
 ## [v2.0.0-beta2] - 2024-05-14
 
 ### Added
@@ -30,7 +34,7 @@
 
 - Fixed including transitive modules/bundled plugins dependencies of declared plugin dependencies
 - Fixed JetBrains Runtime (JBR) resolving
-- move `TestFrameworkType` from `org.jetbrains.intellij.platform.gradle.extensions` to `org.jetbrains.intellij.platform.gradle`
+- Move `TestFrameworkType` from `org.jetbrains.intellij.platform.gradle.extensions` to `org.jetbrains.intellij.platform.gradle`
 
 ### Removed
 

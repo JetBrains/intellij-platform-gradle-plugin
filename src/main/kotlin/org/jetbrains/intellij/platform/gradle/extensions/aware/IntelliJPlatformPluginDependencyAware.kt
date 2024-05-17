@@ -204,6 +204,20 @@ private fun IntelliJPlatformPluginDependencyAware.createBundledPluginIvyDependen
         .filter { layout -> layout.name in dependencyIds }
         .filter { layout -> layout.classPath.isNotEmpty() }
 
+    /**
+     * This is a fallback method for IntelliJ Platform with no [ProductInfo.layout] data present.
+     * To avoid duplications, exclude IDs of possibly resolved `bundledModules` items.
+     *
+     * Eventually, this data should be provided by the IntelliJ Plugin Verifier.
+     */
+    val bundledPlugins = run {
+        val bundledModuleNames = bundledModules.map { it.name }
+
+        bundledPluginsList.plugins.filter {
+            it.id in dependencyIds && it.id !in bundledModuleNames
+        }
+    }
+
     val ivyDependencies = bundledModules.mapNotNull { layout ->
         when (layout.kind) {
             ProductInfo.LayoutItemKind.plugin -> {
@@ -240,6 +254,14 @@ private fun IntelliJPlatformPluginDependencyAware.createBundledPluginIvyDependen
                     )
                 }
             }
+        }
+    } + bundledPlugins.map { dependencyPlugin ->
+        IvyModule.Dependency(
+            organization = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
+            name = dependencyPlugin.id,
+            version = version,
+        ).also {
+            createBundledPluginIvyDependencyFile(dependencyPlugin, version, resolved + name)
         }
     }
 
