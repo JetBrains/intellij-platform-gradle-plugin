@@ -45,7 +45,7 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxAware {
      */
     @get:Internal
     val splitModeFrontendProperties: Provider<RegularFile>
-        get() = sandboxContainerDirectory.file("frontend.properties")
+        get() = sandboxDirectory.file("frontend.properties")
 
     /**
      * Validates that the resolved IntelliJ Platform supports Split Mode.

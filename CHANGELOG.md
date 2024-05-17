@@ -14,6 +14,7 @@
 
 - Update `PlatformJavaVersions` and `PlatformKotlinVersions`
 - Introduce a separated Sandbox for the Frontend part when running IDE in Split Mode
+- Rename `SandboxAware.sandboxContainerDirectory` to `SandboxAware.sandboxDirectory` to avoid confusion with `intellijPlatform.sandboxContainer`
 
 ### Fixed
 

@@ -251,12 +251,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * It lets tasks use the sandbox directories, i.e., to run a guest IDE instance or execute various tests.
          */
         if (this is SandboxAware) {
-            val sandboxDirectoryProvider = extension.sandboxContainer.map { container ->
-                container
-                    .dir("${productInfo.productCode}-${productInfo.version}")
-                    .apply { asPath.createDirectories() }
-            }
-
             /**
              * multiple [PrepareSandboxTask] tasks may be registered for different purposes — running tests or IDE.
              * To keep sandboxes separated, we introduce sandbox suffixes.
@@ -273,11 +267,15 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     else -> ""
                 }
             )
-            sandboxContainerDirectory.convention(sandboxDirectoryProvider)
-            sandboxConfigDirectory.configureSandbox(sandboxContainerDirectory, sandboxSuffix, Sandbox.CONFIG)
-            sandboxPluginsDirectory.configureSandbox(sandboxContainerDirectory, sandboxSuffix, Sandbox.PLUGINS)
-            sandboxSystemDirectory.configureSandbox(sandboxContainerDirectory, sandboxSuffix, Sandbox.SYSTEM)
-            sandboxLogDirectory.configureSandbox(sandboxContainerDirectory, sandboxSuffix, Sandbox.LOG)
+            sandboxDirectory.convention(extension.sandboxContainer.map { container ->
+                container
+                    .dir("${productInfo.productCode}-${productInfo.version}")
+                    .apply { asPath.createDirectories() }
+            })
+            sandboxConfigDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.CONFIG)
+            sandboxPluginsDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.PLUGINS)
+            sandboxSystemDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.SYSTEM)
+            sandboxLogDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.LOG)
 
             /**
              * Some tasks are designed to work with the sandbox, so we explicitly make them depend on the [PrepareSandboxTask] task.

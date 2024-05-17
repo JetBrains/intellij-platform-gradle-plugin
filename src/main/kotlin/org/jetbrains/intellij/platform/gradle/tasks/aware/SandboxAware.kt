@@ -26,14 +26,15 @@ interface SandboxAware : IntelliJPlatformVersionAware {
     val sandboxSuffix: Property<String>
 
     /**
-     * The container for all sandbox-related directories.
+     * The directory containing content read and produced by the running IDE.
+     *
      * The directory name depends on the platform type and version currently used for running a task.
      */
     @get:Internal
-    val sandboxContainerDirectory: DirectoryProperty
+    val sandboxDirectory: DirectoryProperty
 
     /**
-     * A configuration directory located within the [sandboxContainerDirectory].
+     * A configuration directory located within the [sandboxDirectory].
      *
      * @see Constants.Sandbox.CONFIG
      */
@@ -41,7 +42,7 @@ interface SandboxAware : IntelliJPlatformVersionAware {
     val sandboxConfigDirectory: DirectoryProperty
 
     /**
-     * A plugins directory located within the [sandboxContainerDirectory].
+     * A plugins directory located within the [sandboxDirectory].
      *
      * @see Constants.Sandbox.PLUGINS
      */
@@ -49,7 +50,7 @@ interface SandboxAware : IntelliJPlatformVersionAware {
     val sandboxPluginsDirectory: DirectoryProperty
 
     /**
-     * A system directory located within the [sandboxContainerDirectory].
+     * A system directory located within the [sandboxDirectory].
      *
      * @see Constants.Sandbox.SYSTEM
      */
@@ -57,7 +58,7 @@ interface SandboxAware : IntelliJPlatformVersionAware {
     val sandboxSystemDirectory: DirectoryProperty
 
     /**
-     * A log directory located within the [sandboxContainerDirectory].
+     * A log directory located within the [sandboxDirectory].
      *
      * @see Constants.Sandbox.LOG
      */
