@@ -38,7 +38,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
-import java.util.*
 import kotlin.io.path.absolute
 import kotlin.io.path.createDirectories
 
@@ -84,7 +83,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         val suffix = name
             .substringAfter('_', "")
             .takeIf { it.length == 8 && it.all(Char::isLetterOrDigit) }
-            ?: UUID.randomUUID().toString().substring(0, 8)
+            ?: name
 
         val extension = project.the<IntelliJPlatformExtension>()
 
@@ -302,6 +301,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     val taskName = "prepare" + taskSubject + splitModeVariant + "Sandbox" + taskSuffix
 
                     return tasks.maybeCreate<PrepareSandboxTask>(taskName).also { task ->
+                        sandboxSuffix = taskSuffix.replaceFirstChar { '-' }
+
                         if (this is CustomIntelliJPlatformVersionAware) {
                             task.disabledPlugins = the<IntelliJPlatformPluginsExtension>().disabled
                         }
