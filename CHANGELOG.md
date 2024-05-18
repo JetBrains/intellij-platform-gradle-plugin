@@ -2,6 +2,10 @@
 
 ## [next]
 
+## [2.0.0-beta3] - 2024-05-18
+
+The **IntelliJ Platform Gradle Plugin `2.0.0-beta3`** is a plugin for the Gradle build system to help configure environments for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs. It is a successor of _Gradle IntelliJ Plugin 1.x_.
+
 ### Added
 
 - `jetbrainsRuntime()` dependency helper for resolving a suitable JBR version for IntelliJ Platform fetched from IntelliJ Maven Repository
@@ -9,6 +13,12 @@
 - `PrepareSandboxTask`: introduce `sandboxDirectoriesExistence` property to ensure all sandbox directories exist
 - `localPlugin()` dependency helper for adding local plugins as project dependencies and extending customizable tasks
 - Emit warning when using the `bundledLibrary` dependency helper.
+- Use IntelliJ Platform distribution from [download.jetbrains.com](http://download.jetbrains.com/) by default. To switch back to IntelliJ Maven Repository artifacts, use `org.jetbrains.intellij.platform.buildFeature.useBinaryReleases=false`
+- Introduced `Custom*` tasks. if you want to extend the `runIde` or `testSomething` tasks, use the `Custom*Task` classes. See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-custom-tasks.html
+- Better handling of missing dependencies/misconfiguration
+- Bring back the `SetupDependenciesTask` to avoid failing build when migrating from `1.x`
+- Better `ClosestVersionResolver` error messages
+- When running IDE in Split Mode, it’s possible to specify `splitModeTarget` (`BACKEND`, `FRONTEND`, `BACKEND_AND_FRONTEND`)
 
 ### Changed
 
@@ -21,6 +31,13 @@
 
 - Fixed transitive dependencies of bundled plugin dependencies when IntelliJ Platform doesn't contain `ProductInfo.layout` model yet.
 - Produce customized (suffixed) configuration only for `CustomIntelliJPlatformVersionAware` tasks
+- Fixed including transitive modules/bundled plugins dependencies of declared plugin dependencies
+- Fixed JetBrains Runtime (JBR) resolving
+- Move `TestFrameworkType` from `org.jetbrains.intellij.platform.gradle.extensions` to `org.jetbrains.intellij.platform.gradle`
+
+### Removed
+
+- Dropped `testIde` task as `test` is now properly configured
 
 ## [2.0.0-beta2] - 2024-05-14
 
@@ -45,7 +62,7 @@
 
 ## [2.0.0-beta1] - 2024-04-11
 
-The `2.0.0` release is completely rewritten. Please see [documentation page](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) for more details. 
+The `2.0.0` release is completely rewritten. Please see [documentation page](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) for more details.
 
 ## [1.17.2] - 2024-02-20
 
@@ -64,10 +81,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ### Added
 
-- Added `org.jetbrains.intellij.buildFeature.useCacheRedirector` build feature
-- Added `IntelliJPlatformCollectorTransformer` and `IntelliJPlatformExtractTransformer` for handling IntelliJ Platform dependency archives
-- Added `jetbrainsAnnotations` dependency helper for adding JetBrains Annotations dependency
-- Added general `intellijPlatform` along with product-specific dependency helpers for adding IntelliJ Platform dependency
+- Publish the plugin update and mark it as hidden to prevent public release after approval, using the `publishPlugin.hidden` property.
+- PatchPluginXmlTask: Wrap the content passed to `<change-notes>` and `<description>` elements with `<![CDATA[ ... ]]>` [#1498](../../issues/1498)
 
 ### Changed
 
@@ -76,11 +91,6 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - New Maven coordinates: `org.jetbrains.intellij.platform:intellij-platform-gradle-plugin`
 - Move classes under the new package: `org.jetbrains.intellij.platform.gradle`
 - Update minimal supported Gradle version to `8.2`
-
-### Added
-
-- Publish the plugin update and mark it as hidden to prevent public release after approval, using the `publishPlugin.hidden` property.
-- PatchPluginXmlTask: Wrap the content passed to `<change-notes>` and `<description>` elements with `<![CDATA[ ... ]]>` [#1498](../../issues/1498)
 
 ### Fixed
 
@@ -1031,9 +1041,10 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...HEAD
-[2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta1...v2.0.0-beta2
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta3...HEAD
 [2.0.0-beta1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...v2.0.0-beta1
+[2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta1...v2.0.0-beta2
+[2.0.0-beta3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...v2.0.0-beta3
 [1.17.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.0...v1.17.1
 [1.17.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.16.1...v1.17.0
