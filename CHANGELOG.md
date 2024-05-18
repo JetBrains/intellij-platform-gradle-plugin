@@ -22,7 +22,7 @@
 - Fixed transitive dependencies of bundled plugin dependencies when IntelliJ Platform doesn't contain `ProductInfo.layout` model yet.
 - Produce customized (suffixed) configuration only for `CustomIntelliJPlatformVersionAware` tasks
 
-## [v2.0.0-beta2] - 2024-05-14
+## [2.0.0-beta2] - 2024-05-14
 
 ### Added
 
@@ -43,7 +43,7 @@
 
 - Dropped `testIde` task as `test` is now properly configured
 
-## [v2.0.0-beta1] - 2024-04-11
+## [2.0.0-beta1] - 2024-04-11
 
 The `2.0.0` release is completely rewritten. Please see [documentation page](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) for more details. 
 
