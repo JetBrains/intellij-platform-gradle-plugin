@@ -12,5 +12,4 @@ val PlatformKotlinVersions = mapOf(
     Version(232) to Version(1, 8, 20),
     Version(231) to Version(1, 8, 0),
     Version(223) to Version(1, 7, 0)
-
 )

@@ -128,6 +128,12 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     @get:Internal
     abstract val kotlinxCoroutinesLibraryPresent: Property<Boolean>
 
+    /**
+     * Defines if the current module is a main project or imported module, which uses [Plugins.MODULE] plugin.
+     */
+    @get:Internal
+    abstract val hasModulePlugin: Property<Boolean>
+
     private val log = Logger(javaClass)
 
     init {
@@ -140,9 +146,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         val platformBuild = productInfo.buildNumber.toVersion()
         val platformVersion = productInfo.version.toVersion()
         val platformJavaVersion = getPlatformJavaVersion(platformBuild)
-        val sourceCompatibilityJavaVersion = JavaVersion.toVersion(sourceCompatibility.get())
-        val targetCompatibilityJavaVersion = JavaVersion.toVersion(targetCompatibility.get())
-        val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.let { JavaVersion.toVersion(it) }
+        val sourceCompatibilityJavaVersion = sourceCompatibility.get().toJavaVersion()
+        val targetCompatibilityJavaVersion = targetCompatibility.get().toJavaVersion()
+        val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.toJavaVersion()
         val kotlinApiVersion = kotlinApiVersion.orNull?.toVersion()
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.toVersion()
         val kotlinPluginAvailable = kotlinPluginAvailable.get()
@@ -174,8 +180,11 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                         yield("The Kotlin configuration specifies apiVersion='$kotlinApiVersion' but since-build='$sinceBuild' property requires apiVersion='$sinceBuildKotlinApiVersion'.")
                     }
                 }
-                ?: yield("The plugin.xml descriptor file could not be found.")
-
+                ?: run {
+                    if (!hasModulePlugin.get()) {
+                        this@sequence.yield("The plugin.xml descriptor file could not be found.")
+                    }
+                }
 
             if (platformBuild < MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
                 yield("The minimal supported IntelliJ Platform version is `$MINIMAL_INTELLIJ_PLATFORM_VERSION` (branch `$MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER`), current: '$platformVersion' ('$platformBuild')")
@@ -308,23 +317,13 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                     )
                 }
 
+                hasModulePlugin.convention(project.provider {
+                    project.pluginManager.hasPlugin(Plugins.MODULE)
+                })
+
                 project.tasks.withType<JavaCompile> {
                     dependsOn(this@registerTask)
                 }
             }
     }
-
-    // TODO: check it
-//    private fun verifyJavaPluginDependency(project: Project, ideaDependency: IdeaDependency, plugins: List<Any>) {
-//        val hasJavaPluginDependency = plugins.contains("java") || plugins.contains("com.intellij.java")
-//        if (!hasJavaPluginDependency && File(ideaDependency.classes, "plugins/java").exists()) {
-//            sourcePluginXmlFiles(project).forEach { path ->
-//                parsePluginXml(path)?.dependencies?.forEach {
-//                    if (it.dependencyId == "com.intellij.modules.java") {
-//                        throw BuildException("The project depends on 'com.intellij.modules.java' module but doesn't declare a compile dependency on it.\nPlease delete 'depends' tag from '${path}' or add Java plugin to Gradle dependencies (https://plugins.jetbrains.com/docs/intellij/plugin-compatibility.html#java)")
-//                    }
-//                }
-//            }
-//        }
-//    }
 }

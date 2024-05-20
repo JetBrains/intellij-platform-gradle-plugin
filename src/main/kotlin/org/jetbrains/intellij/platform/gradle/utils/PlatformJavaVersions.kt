@@ -13,3 +13,5 @@ val PlatformJavaVersions = mapOf(
     Version(203) to JavaVersion.VERSION_11,
     Version(0) to JavaVersion.VERSION_1_8,
 )
+
+internal fun String.toJavaVersion() = JavaVersion.toVersion(this)
