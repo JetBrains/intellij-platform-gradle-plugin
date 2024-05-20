@@ -59,8 +59,8 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
         item.downloads
             .asSequence()
             .map { it.link }
-            .filter { link -> link.contains("ide-zips") }
             .filter { link -> link.substringAfterLast('/').contains(os) }
+            .filterNot { link -> link.endsWith(".deb") || link.endsWith(".exe") } // Extracting of .deb and .exe archives is not supported.
             .sortedWith(compareByDescending { link ->
                 val arch = when {
                     os == "mac" && System.getProperty("os.arch") == "aarch64" -> "arm"
