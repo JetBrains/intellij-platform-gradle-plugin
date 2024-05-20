@@ -46,8 +46,8 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
 
             else ->
                 dependencies
-                .createIntelliJPlatformDependency(version, type, providers)
-                .apply(action)
+                    .createIntelliJPlatformDependency(version, type, providers)
+                    .apply(action)
         }
     },
 )

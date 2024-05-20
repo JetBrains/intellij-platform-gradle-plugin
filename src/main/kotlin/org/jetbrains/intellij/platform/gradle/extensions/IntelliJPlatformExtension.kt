@@ -53,8 +53,8 @@ import kotlin.math.absoluteValue
 @IntelliJPlatform
 abstract class IntelliJPlatformExtension @Inject constructor(
     configurations: ConfigurationContainer,
-    private val providers: ProviderFactory,
-    private val rootProjectDirectory: Path,
+    providers: ProviderFactory,
+    rootProjectDirectory: Path,
 ) : ExtensionAware {
 
     private val intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
@@ -62,8 +62,9 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     /**
      * Provides read-only access to the IntelliJ Platform project cache location.
      */
-    val cachePath: Path
-        get() = providers.intellijPlatformCachePath(rootProjectDirectory)
+    val cachePath by lazy {
+        providers.intellijPlatformCachePath(rootProjectDirectory)
+    }
 
     /**
      * Provides read-only access to the IntelliJ Platform dependency artifact path.
@@ -134,7 +135,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     /**
      * Taken into account only if [splitMode] is set to `true` and specifies in which part of the IDE the plugin
      * should be installed when `runIde` task is executed: the backend process, the frontend process, or both.
-     * 
+     *
      * Default value: [SplitModeAware.SplitModeTarget.BACKEND]
      */
     abstract val splitModeTarget: Property<SplitModeAware.SplitModeTarget>
