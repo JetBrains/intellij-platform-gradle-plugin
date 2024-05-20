@@ -7,26 +7,13 @@ import org.gradle.api.file.Directory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
-import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
-import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
-import org.jetbrains.intellij.platform.gradle.extensions.createIvyDependencyFile
-import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsPath
-import org.jetbrains.intellij.platform.gradle.extensions.resolveArtifactPath
-import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.models.toPublication
-import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
-import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
+import org.jetbrains.intellij.platform.gradle.extensions.*
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.resolve
 import java.io.File
 import java.nio.file.Path
-import kotlin.math.absoluteValue
 
 interface IntelliJPlatformDependencyAware : DependencyAware {
     val providers: ProviderFactory
@@ -52,62 +39,16 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformDependency(
 ) = configurations[configurationName].dependencies.addLater(
     typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
         when (type) {
-            IntelliJPlatformType.AndroidStudio -> {
-                val downloadLink = providers.of(AndroidStudioDownloadLinkValueSource::class) {
-                    parameters {
-                        androidStudio = resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
-                        androidStudioVersion = version
-                    }
-                }.orNull
+            IntelliJPlatformType.AndroidStudio ->
+                dependencies
+                    .createAndroidStudioDependency(version, providers, resources)
+                    .apply(action)
 
-                requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: $version" }
-                requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
-
-                val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
-
-                dependencies.create(
-                    group = type.binary.groupId,
-                    name = type.binary.artifactId,
-                    classifier = classifier,
-                    ext = extension,
-                    version = version,
-                )
-            }
-
-            else -> when (BuildFeature.USE_BINARY_RELEASES.isEnabled(providers).get()) {
-                true -> {
-                    val (extension, classifier) = with(OperatingSystem.current()) {
-                        val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
-                        when {
-                            isWindows -> ArtifactType.ZIP to "win"
-                            isLinux -> ArtifactType.TAR_GZ to arch
-                            isMacOsX -> ArtifactType.DMG to arch
-                            else -> throw GradleException("Unsupported operating system: $name")
-                        }
-                    }.let { (type, classifier) -> type.toString() to classifier }
-
-                    requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
-
-                    dependencies.create(
-                        group = type.binary.groupId,
-                        name = type.binary.artifactId,
-                        version = version,
-                        ext = extension,
-                        classifier = classifier,
-                    )
-                }
-
-                false -> {
-                    requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
-
-                    dependencies.create(
-                        group = type.maven.groupId,
-                        name = type.maven.artifactId,
-                        version = version,
-                    )
-                }
-            }
-        }.apply(action)
+            else ->
+                dependencies
+                .createIntelliJPlatformDependency(version, type, providers)
+                .apply(action)
+        }
     },
 )
 
@@ -126,25 +67,8 @@ internal fun IntelliJPlatformDependencyAware.addIntelliJPlatformLocalDependency(
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
     localPathProvider.map { localPath ->
-        val artifactPath = resolveArtifactPath(localPath)
-        val localProductInfo = artifactPath.productInfo()
-
-        localProductInfo.validateSupportedVersion()
-
-        val hash = artifactPath.hashCode().absoluteValue % 1000
-        val type = localProductInfo.productCode.toIntelliJPlatformType()
-        val coordinates = type.maven ?: type.binary
-        requireNotNull(coordinates) { "Specified type '$type' has no dependency available." }
-
-        dependencies.create(
-            group = Configurations.Dependencies.LOCAL_IDE_GROUP,
-            name = coordinates.groupId,
-            version = "${localProductInfo.version}+$hash",
-        ).apply {
-            createIvyDependencyFile(
-                localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-                publications = listOf(artifactPath.toPublication()),
-            )
-        }.apply(action)
+        dependencies
+            .createLocalIntelliJPlatformDependency(localPath, providers, rootProjectDirectory)
+            .apply(action)
     },
 )

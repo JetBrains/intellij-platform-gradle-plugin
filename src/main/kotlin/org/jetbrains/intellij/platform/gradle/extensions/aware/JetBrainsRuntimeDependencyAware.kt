@@ -6,10 +6,10 @@ import org.gradle.api.GradleException
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
+import org.jetbrains.intellij.platform.gradle.extensions.createJetBrainsRuntimeDependency
 import java.io.FileReader
 import java.util.*
 import kotlin.io.path.exists
@@ -58,13 +58,10 @@ internal fun JetBrainsRuntimeDependencyAware.addJetBrainsRuntimeDependency(
     configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
-    explicitVersionProvider.map {
-        dependencies.create(
-            group = "com.jetbrains",
-            name = "jbr",
-            version = it,
-            ext = "tar.gz",
-        ).apply(action)
+    explicitVersionProvider.map { version ->
+        dependencies
+            .createJetBrainsRuntimeDependency(version)
+            .apply(action)
     },
 )
 

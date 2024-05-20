@@ -3,12 +3,10 @@
 package org.jetbrains.intellij.platform.gradle.extensions.aware
 
 import org.gradle.api.provider.Provider
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
-import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.extensions.createMarketplaceZipSignerDependency
 
 interface ZipSignerDependencyAware : DependencyAware
 
@@ -25,15 +23,8 @@ internal fun ZipSignerDependencyAware.addZipSignerDependency(
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
     versionProvider.map { version ->
-        dependencies.create(
-            group = "org.jetbrains",
-            name = "marketplace-zip-signer",
-            version = when (version) {
-                VERSION_LATEST -> MarketplaceZipSignerLatestVersionResolver().resolve().version
-                else -> version
-            },
-            classifier = "cli",
-            ext = "jar",
-        ).apply(action)
+        dependencies
+            .createMarketplaceZipSignerDependency(version)
+            .apply(action)
     },
 )

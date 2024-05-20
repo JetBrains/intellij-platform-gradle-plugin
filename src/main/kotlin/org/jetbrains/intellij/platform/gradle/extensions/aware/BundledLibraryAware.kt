@@ -2,14 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions.aware
 
-import org.gradle.api.artifacts.Dependency
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.get
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
+import org.jetbrains.intellij.platform.gradle.extensions.createBundledLibraryDependency
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.platformPath
 
 interface BundledLibraryAware : DependencyAware, IntelliJPlatformAware {
     val objects: ObjectFactory
@@ -27,7 +26,11 @@ internal fun BundledLibraryAware.addBundledLibrary(
     configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
-    pathProvider.map { path -> createBundledLibraryDependency(path).apply(action) }
+    pathProvider.map { path ->
+        dependencies
+            .createBundledLibraryDependency(path, objects, platformPath)
+            .apply(action)
+    }
 ).also {
     val log = Logger(javaClass)
     log.warn(
@@ -38,9 +41,3 @@ internal fun BundledLibraryAware.addBundledLibrary(
         """.trimIndent()
     )
 }
-
-/**
- * Creates a [Dependency] using a Jar file resolved in [platformPath] with [path].
- */
-internal fun BundledLibraryAware.createBundledLibraryDependency(path: String) =
-    dependencies.create(objects.fileCollection().from(platformPath.resolve(path)))

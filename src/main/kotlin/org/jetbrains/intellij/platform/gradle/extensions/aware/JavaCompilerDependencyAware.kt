@@ -5,14 +5,10 @@ package org.jetbrains.intellij.platform.gradle.extensions.aware
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
-import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
-import org.jetbrains.intellij.platform.gradle.extensions.urls
-import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
+import org.jetbrains.intellij.platform.gradle.extensions.createJavaCompilerDependency
 
 interface JavaCompilerDependencyAware : DependencyAware, IntelliJPlatformAware {
     val providers: ProviderFactory
@@ -33,23 +29,8 @@ internal fun JavaCompilerDependencyAware.addJavaCompilerDependency(
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
     versionProvider.map { version ->
-        val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers).get()
-
-        dependencies.create(
-            group = "com.jetbrains.intellij.java",
-            name = "java-compiler-ant-tasks",
-            version = when (version) {
-                VERSION_CURRENT -> when {
-                    resolveClosest -> JavaCompilerClosestVersionResolver(
-                        productInfo,
-                        repositories.urls() + settingsRepositories.urls(),
-                    ).resolve().version
-
-                    else -> productInfo.buildNumber
-                }
-
-                else -> version
-            },
-        ).apply(action)
+        dependencies
+            .createJavaCompilerDependency(version, productInfo, providers, repositories, settingsRepositories)
+            .apply(action)
     }
 )

@@ -3,12 +3,10 @@
 package org.jetbrains.intellij.platform.gradle.extensions.aware
 
 import org.gradle.api.provider.Provider
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
-import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.extensions.createPluginVerifierDependency
 
 interface PluginVerifierDependencyAware : DependencyAware
 
@@ -25,15 +23,8 @@ internal fun PluginVerifierDependencyAware.addPluginVerifierDependency(
     action: DependencyAction = {},
 ) = configurations[configurationName].dependencies.addLater(
     versionProvider.map { version ->
-        dependencies.create(
-            group = "org.jetbrains.intellij.plugins",
-            name = "verifier-cli",
-            version = when (version) {
-                VERSION_LATEST -> IntelliJPluginVerifierLatestVersionResolver().resolve().version
-                else -> version
-            },
-            classifier = "all",
-            ext = "jar",
-        ).apply(action)
+        dependencies
+            .createPluginVerifierDependency(version)
+            .apply(action)
     },
 )

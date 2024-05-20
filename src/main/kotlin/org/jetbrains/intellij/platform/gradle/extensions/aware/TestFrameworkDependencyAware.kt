@@ -6,15 +6,12 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.kotlin.dsl.*
-import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.gradle.kotlin.dsl.get
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.extensions.DependencyAction
-import org.jetbrains.intellij.platform.gradle.extensions.urls
-import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
-import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
+import org.jetbrains.intellij.platform.gradle.extensions.createBundledLibraryDependency
+import org.jetbrains.intellij.platform.gradle.extensions.createTestFrameworkDependency
 
 interface TestFrameworkDependencyAware : DependencyAware, BundledLibraryAware {
     val layout: ProjectLayout
@@ -44,39 +41,15 @@ internal fun TestFrameworkDependencyAware.addTestFrameworkDependency(
 ) = configurations[configurationName].dependencies.addLater(
     typeProvider.zip(versionProvider) { type, version ->
         when (type) {
-            TestFrameworkType.Platform.Bundled -> createBundledLibraryDependency(type.coordinates.artifactId)
+            TestFrameworkType.Platform.Bundled ->
+                dependencies
+                    .createBundledLibraryDependency(type.coordinates.artifactId, objects, platformPath)
+                    .apply(action)
 
-            else -> {
-                val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers).get()
-
-                val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
-                    parameters {
-                        intellijPlatformPath = layout.dir(providers.provider { platformPath.toFile() })
-                    }
-                }
-
-                dependencies.create(
-                    group = type.coordinates.groupId,
-                    name = type.coordinates.artifactId,
-                    version = when (version) {
-                        VERSION_CURRENT -> when {
-                            resolveClosest -> TestFrameworkClosestVersionResolver(
-                                productInfo,
-                                repositories.urls() + settingsRepositories.urls(),
-                                type.coordinates,
-                            ).resolve().version
-
-                            else -> productInfo.buildNumber
-                        }
-
-                        else -> version
-                    }
-                ).apply {
-                    moduleDescriptors.get().forEach {
-                        exclude(it.groupId, it.artifactId)
-                    }
-                }
-            }
-        }.apply(action)
+            else ->
+                dependencies
+                    .createTestFrameworkDependency(type, version, layout, platformPath, productInfo, providers, repositories, settingsRepositories)
+                    .apply(action)
+        }
     },
 )
