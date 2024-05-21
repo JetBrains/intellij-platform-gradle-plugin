@@ -6,6 +6,7 @@
 
 - Support for Android Studio DMG archives
 - Introduce `VerifyPluginProjectConfigurationTask.hasModulePlugin` to exclude modules using `org.jetbrains.intellij.platform.module` subplugin from `plugin.xml` checks.
+- Better error handling in dependency helpers when missing values
 
 ### Fixed
 
