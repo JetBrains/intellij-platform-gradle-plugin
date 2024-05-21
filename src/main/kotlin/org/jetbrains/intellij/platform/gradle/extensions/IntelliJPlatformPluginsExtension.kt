@@ -5,15 +5,15 @@ package org.jetbrains.intellij.platform.gradle.extensions
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.setProperty
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
-import org.jetbrains.intellij.platform.gradle.extensions.helpers.IntelliJPlatformHelper
-import org.jetbrains.intellij.platform.gradle.extensions.helpers.IntelliJPlatformPluginDependencyHelper
-import org.jetbrains.intellij.platform.gradle.extensions.helpers.ProvidersHelper
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
@@ -28,27 +28,27 @@ import javax.inject.Inject
 abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     configurations: ConfigurationContainer,
     dependencies: DependencyHandler,
+    layout: ProjectLayout,
+    objects: ObjectFactory,
     providers: ProviderFactory,
+    repositories: RepositoryHandler,
+    resources: ResourceHandler,
     rootProjectDirectory: Path,
+    settingsRepositories: RepositoryHandler,
     private val intellijPlatformPluginDependencyConfigurationName: String,
     private val intellijPlatformPluginLocalConfigurationName: String,
-    objects: ObjectFactory,
 ) {
 
-    private val providersDelegate = ProvidersHelper(providers)
-
-    private val intelliJPlatformDelegate = IntelliJPlatformHelper(
-        configurations,
-        providers,
-    )
-
-    private val intelliJPlatformPluginDependencyDelegate = IntelliJPlatformPluginDependencyHelper(
+    private val delegate = IntelliJPlatformDependenciesHelper(
         configurations,
         dependencies,
-        intelliJPlatformDelegate.platformPath,
-        intelliJPlatformDelegate.productInfo,
+        layout,
+        objects,
         providers,
-        rootProjectDirectory
+        repositories,
+        resources,
+        rootProjectDirectory,
+        settingsRepositories,
     )
 
     /**
@@ -63,8 +63,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      * @param version The plugin version.
      * @param channel The plugin distribution channel.
      */
-    fun plugin(id: String, version: String, channel: String = "") = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = providersDelegate.of { listOf(Triple(id, version, channel)) },
+    fun plugin(id: String, version: String, channel: String = "") = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { listOf(Triple(id, version, channel)) },
         configurationName = intellijPlatformPluginDependencyConfigurationName,
     )
 
@@ -75,11 +75,10 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      * @param version The provider of the plugin version.
      * @param channel The provider of the plugin distribution channel.
      */
-    fun plugin(id: Provider<String>, version: Provider<String>, channel: Provider<String>) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = providersDelegate.of { listOf(Triple(id.get(), version.get(), channel.get())) },
-            configurationName = intellijPlatformPluginDependencyConfigurationName,
-        )
+    fun plugin(id: Provider<String>, version: Provider<String>, channel: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { listOf(Triple(id.get(), version.get(), channel.get())) },
+        configurationName = intellijPlatformPluginDependencyConfigurationName,
+    )
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -88,7 +87,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugin(notation: Provider<String>) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
+    fun plugin(notation: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
         pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
         configurationName = intellijPlatformPluginDependencyConfigurationName,
     )
@@ -100,8 +99,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugin(notation: String) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = providersDelegate.of { listOfNotNull(notation.parsePluginNotation()) },
+    fun plugin(notation: String) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { listOfNotNull(notation.parsePluginNotation()) },
         configurationName = intellijPlatformPluginDependencyConfigurationName,
     )
 
@@ -112,8 +111,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      *
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugins(vararg notations: String) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = providersDelegate.of { notations.mapNotNull { it.parsePluginNotation() } },
+    fun plugins(vararg notations: String) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { notations.mapNotNull { it.parsePluginNotation() } },
         configurationName = intellijPlatformPluginDependencyConfigurationName,
     )
 
@@ -124,8 +123,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      *
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugins(notations: List<String>) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = providersDelegate.of { notations.mapNotNull { it.parsePluginNotation() } },
+    fun plugins(notations: List<String>) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { notations.mapNotNull { it.parsePluginNotation() } },
         configurationName = intellijPlatformPluginDependencyConfigurationName,
     )
 
@@ -136,19 +135,18 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      *
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugins(notations: Provider<List<String>>) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
+    fun plugins(notations: Provider<List<String>>) = delegate.addIntelliJPlatformPluginDependencies(
         pluginsProvider = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } },
         configurationName = intellijPlatformPluginDependencyConfigurationName,
     )
 
-
     /**
      * Adds dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: File) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginDependency(
-        localPathProvider = providersDelegate.of { localPath },
+    fun localPlugin(localPath: File) = delegate.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = delegate.provider { localPath },
         configurationName = intellijPlatformPluginLocalConfigurationName,
     )
 
@@ -157,8 +155,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: String) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginDependency(
-        localPathProvider = providersDelegate.of { localPath },
+    fun localPlugin(localPath: String) = delegate.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = delegate.provider { localPath },
         configurationName = intellijPlatformPluginLocalConfigurationName,
     )
 
@@ -167,8 +165,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: Directory) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginDependency(
-        localPathProvider = providersDelegate.of { localPath },
+    fun localPlugin(localPath: Directory) = delegate.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = delegate.provider { localPath },
         configurationName = intellijPlatformPluginLocalConfigurationName,
     )
 
@@ -177,7 +175,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: Provider<*>) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginDependency(
+    fun localPlugin(localPath: Provider<*>) = delegate.addIntelliJPlatformLocalPluginDependency(
         localPathProvider = localPath,
         configurationName = intellijPlatformPluginLocalConfigurationName,
     )
@@ -187,7 +185,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      *
      * @param dependency Project dependency.
      */
-    fun localPlugin(dependency: ProjectDependency) = intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginProjectDependency(
+    fun localPlugin(dependency: ProjectDependency) = delegate.addIntelliJPlatformLocalPluginProjectDependency(
         dependency = dependency,
         configurationName = intellijPlatformPluginLocalConfigurationName,
     )

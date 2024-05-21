@@ -1,0 +1,847 @@
+// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+
+package org.jetbrains.intellij.platform.gradle.extensions
+
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import org.gradle.api.GradleException
+import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.file.Directory
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.resources.ResourceHandler
+import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.*
+import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
+import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
+import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.intellij.platform.gradle.models.*
+import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
+import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
+import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.*
+import java.io.File
+import java.io.FileReader
+import java.nio.file.Path
+import java.util.*
+import kotlin.io.path.*
+import kotlin.math.absoluteValue
+
+
+/**
+ * Helper class for managing dependencies on the IntelliJ Platform in Gradle projects.
+ *
+ * @param configurations The Gradle `ConfigurationContainer` used for managing configurations.
+ * @param dependencies The Gradle `DependencyHandler` used for managing dependencies.
+ * @param layout The Gradle `ProjectLayout` used for managing project layout.
+ * @param objects The Gradle `ObjectFactory` used for creating objects.
+ * @param providers The Gradle `ProviderFactory` used for creating providers.
+ * @param repositories The Gradle `RepositoryHandler` used for managing repositories.
+ * @param resources The Gradle `ResourceHandler` used for managing resources.
+ * @param rootProjectDirectory The root directory of the Gradle project.
+ * @param settingsRepositories The Gradle `RepositoryHandler` used for retrieving repositories declared in settings.
+ */
+class IntelliJPlatformDependenciesHelper(
+    private val configurations: ConfigurationContainer,
+    private val dependencies: DependencyHandler,
+    private val layout: ProjectLayout,
+    private val objects: ObjectFactory,
+    private val providers: ProviderFactory,
+    private val repositories: RepositoryHandler,
+    private val resources: ResourceHandler,
+    private val rootProjectDirectory: Path,
+    private val settingsRepositories: RepositoryHandler,
+) {
+
+    private val log = Logger(javaClass)
+
+    /**
+     * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
+     */
+    internal inline fun <reified T : Any> provider(crossinline value: () -> T) = providers.provider {
+        value()
+    }
+
+    //<editor-fold desc="Configuration Accessors">
+
+    /**
+     * Retrieves the [Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST] configuration to access information about plugins
+     * bundled within the IntelliJ Platform added to the project.
+     * Used with [bundledPlugins] accessor.
+     */
+    private val bundledPluginsListConfiguration
+        get() = configurations[Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST].asLenient
+
+    /**
+     * Retrieves the [Configurations.INTELLIJ_PLATFORM] configuration to access information about the main IntelliJ Platform added to the project.
+     * Used with [productInfo] and [platformPath] accessors.
+     */
+    private val intelliJPlatformConfiguration
+        get() = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
+
+    //</editor-fold>
+    //<editor-fold desc="Metadata Accessors">
+
+    internal val bundledPlugins
+        get() = providers.provider { bundledPluginsListConfiguration.bundledPlugins() }
+
+    /**
+     * Provides access to the [ProductInfo] of the current IntelliJ Platform.
+     */
+    internal val productInfo
+        get() = providers.provider { intelliJPlatformConfiguration.productInfo() }
+
+    /**
+     * Provides access to the current IntelliJ Platform path.
+     */
+    internal val platformPath
+        get() = providers.provider { intelliJPlatformConfiguration.platformPath() }
+
+    //</editor-fold>
+    //<editor-fold desc="Helper Methods">
+
+    /**
+     * Adds a dependency on a Jar bundled within the current IntelliJ Platform.
+     *
+     * @param pathProvider Path to the bundled Jar file, like `lib/testFramework.jar`
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addBundledLibrary(
+        pathProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        pathProvider.map { path ->
+            dependencies
+                .createBundledLibrary(path)
+                .apply(action)
+        }
+    ).also {
+        log.warn(
+            """
+            Do not use `bundledLibrary()` in production, as direct access to the IntelliJ Platform libraries is not recommended.
+            
+            It should only be used as a workaround in case the IntelliJ Platform Gradle Plugin is not aligned with the latest IntelliJ Platform classpath changes.
+            """.trimIndent()
+        )
+    }
+
+    /**
+     * A base method for adding a dependency on IntelliJ Platform.
+     *
+     * @param typeProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
+     * @param versionProvider The provider for the version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action An optional action to be performed on the created dependency.
+     * @throws GradleException
+     */
+    @Throws(GradleException::class)
+    internal fun addIntelliJPlatformDependency(
+        typeProvider: Provider<*>,
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        typeProvider.map { it.toIntelliJPlatformType() }.zip(versionProvider) { type, version ->
+            when (type) {
+                IntelliJPlatformType.AndroidStudio ->
+                    dependencies
+                        .createAndroidStudio(version)
+                        .apply(action)
+
+                else ->
+                    dependencies
+                        .createIntelliJPlatform(version, type)
+                        .apply(action)
+            }
+        },
+    )
+
+    /**
+     * A base method for adding a dependency on a local IntelliJ Platform instance.
+     *
+     * @param localPathProvider The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action An optional action to be performed on the created dependency.
+     * @throws GradleException
+     */
+    @Throws(GradleException::class)
+    internal fun addIntelliJPlatformLocalDependency(
+        localPathProvider: Provider<*>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        localPathProvider.map { localPath ->
+            dependencies
+                .createIntelliJPlatformLocal(localPath)
+                .apply(action)
+        },
+    )
+
+    /**
+     * A base method for adding a dependency on a plugin for IntelliJ Platform.
+     *
+     * @param pluginsProvider The provider of the list containing triples with plugin identifier, version, and channel.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addIntelliJPlatformPluginDependencies(
+        pluginsProvider: Provider<List<Triple<String, String, String>>>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addAllLater(
+        pluginsProvider.map { plugins ->
+            plugins.map { (id, version, channel) ->
+                dependencies
+                    .createIntelliJPlatformPlugin(id, version, channel)
+                    .apply(action)
+            }
+        }
+    )
+
+    /**
+     * A base method for adding a dependency on a plugin for IntelliJ Platform.
+     *
+     * @param bundledPluginsProvider The provider of the list containing triples with plugin identifier, version, and channel.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider: Provider<List<String>>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addAllLater(
+        bundledPluginsProvider.map { bundledPlugins ->
+            bundledPlugins
+                .filter { id -> id.isNotBlank() }
+                .map { id ->
+                    dependencies
+                        .createIntelliJPlatformBundledPlugin(id)
+                        .apply(action)
+                }
+        }
+    )
+
+    /**
+     * A base method for adding a dependency on a local plugin for IntelliJ Platform.
+     *
+     * @param localPathProvider The provider of the path to the local plugin.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addIntelliJPlatformLocalPluginDependency(
+        localPathProvider: Provider<*>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        localPathProvider.map { localPath ->
+            dependencies
+                .createIntelliJPlatformLocalPlugin(localPath)
+                .apply(action)
+        }
+    )
+
+    /**
+     * A base method for adding a project dependency on a local plugin for IntelliJ Platform.
+     *
+     * @param dependency The plugin project dependency.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addIntelliJPlatformLocalPluginProjectDependency(
+        dependency: ProjectDependency,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.add(dependency.apply(action))
+
+    /**
+     * Adds a dependency on a Java Compiler used, i.e., for running code instrumentation.
+     *
+     * @param versionProvider The provider of the Java Compiler version.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addJavaCompilerDependency(
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        versionProvider.map { version ->
+            dependencies
+                .createJavaCompiler(version)
+                .apply(action)
+        }
+    )
+
+    /**
+     * A base method for adding a dependency on JetBrains Runtime.
+     *
+     * @param explicitVersionProvider The provider for the explicit version of the JetBrains Runtime.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addJetBrainsRuntimeDependency(
+        explicitVersionProvider: Provider<String>,
+        configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        explicitVersionProvider.map { version ->
+            dependencies
+                .createJetBrainsRuntime(version)
+                .apply(action)
+        },
+    )
+
+    /**
+     * A base method for adding a dependency on JetBrains Runtime.
+     *
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addJetBrainsRuntimeObtainedDependency(
+        configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
+        action: DependencyAction = {},
+    ) = addJetBrainsRuntimeDependency(
+        providers.provider {
+            val version = platformPath.get().resolve("dependencies.txt")
+                .takeIf { it.exists() }
+                ?.let {
+                    FileReader(it.toFile()).use { reader ->
+                        with(Properties()) {
+                            load(reader)
+                            getProperty("runtimeBuild") ?: getProperty("jdkBuild")
+                        }
+                    }
+                } ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+
+            buildJetBrainsRuntimeVersion(version)
+        },
+        configurationName,
+        action,
+    )
+
+    /**
+     * A base method for adding  a dependency on IntelliJ Plugin Verifier.
+     *
+     * @param versionProvider The provider of the IntelliJ Plugin Verifier version.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addPluginVerifierDependency(
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        versionProvider.map { version ->
+            dependencies
+                .createPluginVerifier(version)
+                .apply(action)
+        },
+    )
+
+    /**
+     * Adds a dependency on the `test-framework` library required for testing plugins.
+     *
+     * In rare cases, when the presence of bundled `lib/testFramework.jar` library is necessary,
+     * it is possible to attach it by using the [TestFrameworkType.Platform.Bundled] type.
+     *
+     * This dependency belongs to IntelliJ Platform repositories.
+     *
+     * @param typeProvider The TestFramework type provider.
+     * @param versionProvider The version of the TestFramework.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addTestFrameworkDependency(
+        typeProvider: Provider<TestFrameworkType>,
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        typeProvider.zip(versionProvider) { type, version ->
+            when (type) {
+                TestFrameworkType.Platform.Bundled ->
+                    dependencies
+                        .createBundledLibrary(type.coordinates.artifactId)
+                        .apply(action)
+
+                else ->
+                    dependencies
+                        .createTestFramework(type, version)
+                        .apply(action)
+            }
+        },
+    )
+
+    /**
+     * A base method for adding a dependency on Marketplace ZIP Signer.
+     *
+     * @param versionProvider The provider of the Marketplace ZIP Signer version.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addZipSignerDependency(
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(
+        versionProvider.map { version ->
+            dependencies
+                .createMarketplaceZipSigner(version)
+                .apply(action)
+        },
+    )
+
+
+    //</editor-fold>
+
+    //<editor-fold desc="DependencyHelper Extensions">
+
+    /**
+     * Creates Android Studio dependency.
+     *
+     * @param version Android Studio version
+     */
+    private fun DependencyHandler.createAndroidStudio(version: String): Dependency {
+        val type = IntelliJPlatformType.AndroidStudio
+        val downloadLink = providers.of(AndroidStudioDownloadLinkValueSource::class) {
+            parameters {
+                androidStudio = resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
+                androidStudioVersion = version
+            }
+        }.orNull
+
+        requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: $version" }
+        requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
+
+        val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
+
+        return create(
+            group = type.binary.groupId,
+            name = type.binary.artifactId,
+            classifier = classifier,
+            ext = extension,
+            version = version,
+        )
+    }
+
+    /**
+     * Creates a [Dependency] using a Jar file resolved in [platformPath] with [path].
+     *
+     * @param path relative path to the library, like: `lib/testFramework.jar`
+     */
+    private fun DependencyHandler.createBundledLibrary(path: String) =
+        create(
+            objects
+                .fileCollection()
+                .from(platformPath.map {
+                    it.resolve(path)
+                })
+        )
+
+    /**
+     * Creates IntelliJ Platform dependency based on the provided version and type.
+     *
+     * @param version IntelliJ Platform version
+     * @param type IntelliJ Platform type
+     */
+    private fun DependencyHandler.createIntelliJPlatform(version: String, type: IntelliJPlatformType) =
+        when (BuildFeature.USE_BINARY_RELEASES.isEnabled(providers).get()) {
+            true -> {
+                val (extension, classifier) = with(OperatingSystem.current()) {
+                    val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
+                    when {
+                        isWindows -> ArtifactType.ZIP to "win"
+                        isLinux -> ArtifactType.TAR_GZ to arch
+                        isMacOsX -> ArtifactType.DMG to arch
+                        else -> throw GradleException("Unsupported operating system: $name")
+                    }
+                }.let { (type, classifier) -> type.toString() to classifier }
+
+                requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
+
+                create(
+                    group = type.binary.groupId,
+                    name = type.binary.artifactId,
+                    version = version,
+                    ext = extension,
+                    classifier = classifier,
+                )
+            }
+
+            false -> {
+                requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
+
+                create(
+                    group = type.maven.groupId,
+                    name = type.maven.artifactId,
+                    version = version,
+                )
+            }
+        }
+
+    /**
+     * Creates a dependency on a local IntelliJ Platform instance.
+     *
+     * @param localPath Path to the local IntelliJ Platform
+     */
+    private fun DependencyHandler.createIntelliJPlatformLocal(localPath: Any): Dependency {
+        val artifactPath = resolveArtifactPath(localPath)
+        val localProductInfo = artifactPath.productInfo()
+
+        localProductInfo.validateSupportedVersion()
+
+        // TODO: remove [hash]
+        val hash = artifactPath.hashCode().absoluteValue % 1000
+        val type = localProductInfo.productCode.toIntelliJPlatformType()
+        val coordinates = type.maven ?: type.binary
+        requireNotNull(coordinates) { "Specified type '$type' has no dependency available." }
+
+        return create(
+            group = Configurations.Dependencies.LOCAL_IDE_GROUP,
+            name = coordinates.groupId,
+            version = "${localProductInfo.version}+$hash",
+        ).apply {
+            createIvyDependencyFile(
+                localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+                publications = listOf(artifactPath.toPublication()),
+            )
+        }
+    }
+
+    /**
+     * Creates a dependency for an IntelliJ Platform plugin.
+     *
+     * @param pluginId the ID of the plugin
+     * @param version the version of the plugin
+     * @param channel the channel of the plugin. Can be null or empty for the default channel.
+     */
+    private fun DependencyHandler.createIntelliJPlatformPlugin(pluginId: String, version: String, channel: String?): Dependency {
+        val group = when (channel) {
+            "default", "", null -> JETBRAINS_MARKETPLACE_MAVEN_GROUP
+            else -> "$channel.$JETBRAINS_MARKETPLACE_MAVEN_GROUP"
+        }
+
+        return create(
+            group = group,
+            name = pluginId.trim(),
+            version = version,
+        )
+    }
+
+    /**
+     * Creates a dependency for an IntelliJ platform bundled plugin.
+     *
+     * @param bundledPluginId The ID of the bundled plugin
+     */
+    private fun DependencyHandler.createIntelliJPlatformBundledPlugin(bundledPluginId: String): Dependency {
+        val plugin = bundledPlugins.get().plugins.find { it.id == bundledPluginId }
+        requireNotNull(plugin) { "Could not find bundled plugin with ID: '$bundledPluginId'" }
+
+        return create(
+            group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
+            name = plugin.id,
+            version = productInfo.get().version,
+        ).apply {
+            createBundledPluginIvyDependencyFile(plugin, version!!)
+        }
+    }
+
+    /**
+     * Creates a dependency on a local IntelliJ Platform plugin.
+     *
+     * @param localPath Path to the local plugin
+     */
+    private fun DependencyHandler.createIntelliJPlatformLocalPlugin(localPath: Any): Dependency {
+        val artifactPath = when (localPath) {
+            is String -> localPath
+            is File -> localPath.absolutePath
+            is Directory -> localPath.asPath.pathString
+            else -> throw IllegalArgumentException("Invalid argument type: '${localPath.javaClass}'. Supported types: String, File, or Directory.")
+        }.let { Path(it) }.takeIf { it.exists() }.let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
+
+        val plugin by lazy {
+            val pluginPath = when {
+                artifactPath.isDirectory() -> generateSequence(artifactPath) {
+                    it.takeIf { it.resolve("lib").exists() } ?: it.listDirectoryEntries().singleOrNull()
+                }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: $artifactPath")
+
+                else -> artifactPath
+            }
+
+            val pluginCreationResult = IdePluginManager.createManager().createPlugin(pluginPath, false)
+
+            require(pluginCreationResult is PluginCreationSuccess)
+            pluginCreationResult.plugin
+        }
+
+        return create(
+            group = Configurations.Dependencies.LOCAL_PLUGIN_GROUP,
+            name = plugin.pluginId ?: artifactPath.name,
+            version = plugin.pluginVersion ?: "0.0.0",
+        ).apply {
+            createIvyDependencyFile(
+                localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+                publications = listOf(artifactPath.toPublication()),
+            )
+        }
+    }
+
+    /**
+     * Created Java Compiler dependency.
+     */
+    private fun DependencyHandler.createJavaCompiler(version: String): Dependency {
+        val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers)
+
+        return create(
+            group = "com.jetbrains.intellij.java",
+            name = "java-compiler-ant-tasks",
+            version = when (version) {
+                VERSION_CURRENT -> when {
+                    resolveClosest.get() ->
+                        JavaCompilerClosestVersionResolver(productInfo.get(), repositories.urls() + settingsRepositories.urls())
+                            .resolve()
+                            .version
+
+                    else -> productInfo.get().buildNumber
+                }
+
+                else -> version
+            },
+        )
+    }
+
+    /**
+     * Creates JetBrains Runtime (JBR) dependency.
+     */
+    private fun DependencyHandler.createJetBrainsRuntime(version: String) = create(
+        group = "com.jetbrains",
+        name = "jbr",
+        version = version,
+        ext = "tar.gz",
+    )
+
+    /**
+     * Creates IntelliJ Plugin Verifier CLI tool dependency.
+     */
+    private fun DependencyHandler.createPluginVerifier(version: String) = create(
+        group = "org.jetbrains.intellij.plugins",
+        name = "verifier-cli",
+        version = when (version) {
+            VERSION_LATEST -> IntelliJPluginVerifierLatestVersionResolver().resolve().version
+            else -> version
+        },
+        classifier = "all",
+        ext = "jar",
+    )
+
+    /**
+     * Creates a dependency on the `test-framework` library required for testing plugins.
+     *
+     * If [version] is set to [VERSION_CURRENT], it uses the [ProductInfo.buildNumber].
+     *
+     * If [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] is enabled and [VERSION_CURRENT] is set as a version, it resolves the closest matching library version
+     * using repositories currently added to the project.
+     *
+     * @param type Test Framework type
+     * @param version Test Framework version to resolve
+     */
+    private fun DependencyHandler.createTestFramework(type: TestFrameworkType, version: String): Dependency {
+        val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers)
+
+        val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
+            parameters {
+                intellijPlatformPath = layout.dir(platformPath.map { it.toFile() })
+            }
+        }
+
+        return create(
+            group = type.coordinates.groupId,
+            name = type.coordinates.artifactId,
+            version = when (version) {
+                VERSION_CURRENT -> when {
+                    resolveClosest.get() ->
+                        TestFrameworkClosestVersionResolver(productInfo.get(), repositories.urls() + settingsRepositories.urls(), type.coordinates)
+                            .resolve()
+                            .version
+
+                    else -> productInfo.get().buildNumber
+                }
+
+                else -> version
+            }
+        ).apply {
+            moduleDescriptors.get().forEach {
+                exclude(it.groupId, it.artifactId)
+            }
+        }
+    }
+
+    /**
+     * Adds a dependency on a Marketplace ZIP Signer required for signing plugin with [SignPluginTask].
+     *
+     * If [version] is set to [VERSION_LATEST], it resolves the latest available library version using the [MarketplaceZipSignerLatestVersionResolver].
+     *
+     * @param version Marketplace ZIP Signer version
+     */
+    private fun DependencyHandler.createMarketplaceZipSigner(version: String) = create(
+        group = "org.jetbrains",
+        name = "marketplace-zip-signer",
+        version = when (version) {
+            VERSION_LATEST -> MarketplaceZipSignerLatestVersionResolver().resolve().version
+            else -> version
+        },
+        classifier = "cli",
+        ext = "jar",
+    )
+
+    // TODO: cleanup and migrate to Ivy webserver
+    private fun createBundledPluginIvyDependencyFile(bundledPlugin: BundledPlugin, version: String, resolved: List<String> = emptyList()) {
+        val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
+        val group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP
+        val name = bundledPlugin.id
+        val existingIvyFile = localPlatformArtifactsPath.resolve("$group-$name-$version.xml")
+        if (existingIvyFile.exists()) {
+            return
+        }
+
+        if (name in resolved) {
+            return
+        }
+
+        val artifactPath = Path(bundledPlugin.path)
+        val plugin by lazy {
+            val pluginCreationResult = IdePluginManager.createManager().createPlugin(artifactPath, false)
+            require(pluginCreationResult is PluginCreationSuccess)
+            pluginCreationResult.plugin
+        }
+
+        val dependencyIds = plugin.dependencies.map { it.id } - plugin.pluginId
+        val bundledModules = productInfo.get().layout.filter { layout -> layout.name in dependencyIds }.filter { layout -> layout.classPath.isNotEmpty() }
+
+        /**
+         * This is a fallback method for IntelliJ Platform with no [ProductInfo.layout] data present.
+         * To avoid duplications, exclude IDs of possibly resolved `bundledModules` items.
+         *
+         * Eventually, this data should be provided by the IntelliJ Plugin Verifier.
+         */
+        val fallbackBundledPlugins = run {
+            val bundledModuleNames = bundledModules.map { it.name }
+
+            bundledPlugins.get().plugins.filter {
+                it.id in dependencyIds && it.id !in bundledModuleNames
+            }
+        }
+
+        val ivyDependencies = bundledModules.mapNotNull { layout ->
+            when (layout.kind) {
+                ProductInfo.LayoutItemKind.plugin -> {
+                    IvyModule.Dependency(
+                        organization = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
+                        name = layout.name,
+                        version = version,
+                    ).also { dependency ->
+                        val dependencyPlugin = bundledPlugins.get().plugins.find { it.id == dependency.name } ?: return@also
+                        createBundledPluginIvyDependencyFile(dependencyPlugin, version, resolved + name)
+                    }
+                }
+
+                ProductInfo.LayoutItemKind.pluginAlias -> {
+                    // TODO: not important?
+                    null
+                }
+
+                ProductInfo.LayoutItemKind.moduleV2, ProductInfo.LayoutItemKind.productModuleV2 -> {
+                    // TODO: drop if classPath empty?
+                    IvyModule.Dependency(
+                        organization = Configurations.Dependencies.BUNDLED_MODULE_GROUP,
+                        name = layout.name,
+                        version = version,
+                    ).also { dependency ->
+                        createIvyDependencyFile(
+                            group = dependency.organization,
+                            name = dependency.name,
+                            version = dependency.version,
+                            localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+                            publications = layout.classPath.map { classPath ->
+                                platformPath.get().resolve(classPath).toPublication()
+                            },
+                        )
+                    }
+                }
+            }
+        } + fallbackBundledPlugins.map { dependencyPlugin ->
+            IvyModule.Dependency(
+                organization = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
+                name = dependencyPlugin.id,
+                version = version,
+            ).also {
+                createBundledPluginIvyDependencyFile(dependencyPlugin, version, resolved + name)
+            }
+        }
+
+        createIvyDependencyFile(
+            group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
+            name = bundledPlugin.id,
+            version = version,
+            localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+            publications = listOf(artifactPath.toPublication()),
+            dependencies = ivyDependencies,
+        )
+    }
+
+    internal fun buildJetBrainsRuntimeVersion(
+        version: String,
+        runtimeVariant: String? = null,
+        architecture: String? = null,
+        operatingSystem: OperatingSystem = OperatingSystem.current(),
+    ): String {
+        val variant = runtimeVariant ?: "jcef"
+
+        val (jdk, build) = version.split('b').also {
+            assert(it.size == 1) {
+                "Incorrect JetBrains Runtime version: $version. Use [sdk]b[build] format, like: 21.0.3b446.1"
+            }
+        }
+
+        val os = with(operatingSystem) {
+            when {
+                isWindows -> "windows"
+                isMacOsX -> "osx"
+                isLinux -> "linux"
+                else -> throw GradleException("Unsupported operating system: $name")
+            }
+        }
+
+        val arch = when (architecture ?: System.getProperty("os.arch")) {
+            "aarch64", "arm64" -> "aarch64"
+            "x86_64", "amd64" -> "x64"
+            else -> when {
+                operatingSystem.isWindows && System.getenv("ProgramFiles(x86)") != null -> "x64"
+                else -> "x86"
+            }
+        }
+
+        return "jbr_$variant-$jdk-$os-$arch-b$build"
+    }
+
+    //</editor-fold>
+}

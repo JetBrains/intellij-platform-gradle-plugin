@@ -15,7 +15,6 @@ import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
-import org.jetbrains.intellij.platform.gradle.extensions.helpers.*
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import java.io.File
 import java.nio.file.Path
@@ -42,83 +41,26 @@ import javax.inject.Inject
 @IntelliJPlatform
 abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     configurations: ConfigurationContainer,
-    repositories: RepositoryHandler,
-    settingsRepositories: RepositoryHandler,
     dependencies: DependencyHandler,
-    providers: ProviderFactory,
-    resources: ResourceHandler,
-    objects: ObjectFactory,
     layout: ProjectLayout,
+    objects: ObjectFactory,
+    providers: ProviderFactory,
+    repositories: RepositoryHandler,
+    resources: ResourceHandler,
     rootProjectDirectory: Path,
+    settingsRepositories: RepositoryHandler,
 ) {
 
-    private val providersDelegate = ProvidersHelper(providers)
-
-    private val intelliJPlatformDelegate = IntelliJPlatformHelper(
-        configurations,
-        providers,
-    )
-
-    private val bundledLibraryDelegate = BundledLibraryHelper(
-        configurations,
-        dependencies,
-        objects,
-        intelliJPlatformDelegate.platformPath,
-    )
-
-    private val intelliJPlatformDependencyDelegate = IntelliJPlatformDependencyHelper(
-        configurations,
-        dependencies,
-        providers,
-        resources,
-        rootProjectDirectory,
-    )
-
-    private val intelliJPlatformPluginDependencyDelegate = IntelliJPlatformPluginDependencyHelper(
-        configurations,
-        dependencies,
-        intelliJPlatformDelegate.platformPath,
-        intelliJPlatformDelegate.productInfo,
-        providers,
-        rootProjectDirectory
-    )
-
-    private val javaCompilerDependencyDelegate = JavaCompilerDependencyHelper(
-        configurations,
-        dependencies,
-        intelliJPlatformDelegate.productInfo,
-        providers,
-        repositories,
-        settingsRepositories,
-    )
-
-    private val jetBrainsRuntimeDependencyDelegate = JetBrainsRuntimeDependencyHelper(
-        configurations,
-        dependencies,
-        intelliJPlatformDelegate.platformPath,
-        providers,
-    )
-
-    private val pluginVerifierDependencyDelegate = PluginVerifierDependencyHelper(
-        configurations,
-        dependencies,
-    )
-
-    private val testFrameworkDependencyDelegate = TestFrameworkDependencyHelper(
+    private val delegate = IntelliJPlatformDependenciesHelper(
         configurations,
         dependencies,
         layout,
         objects,
-        intelliJPlatformDelegate.platformPath,
-        intelliJPlatformDelegate.productInfo,
         providers,
         repositories,
+        resources,
+        rootProjectDirectory,
         settingsRepositories,
-    )
-
-    private val zipSignerDependencyDelegate = ZipSignerDependencyHelper(
-        configurations,
-        dependencies,
     )
 
     /**
@@ -127,11 +69,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param type The type of the IntelliJ Platform dependency.
      * @param version The version of the IntelliJ Platform dependency.
      */
-    fun create(type: String, version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { type.toIntelliJPlatformType() },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun create(type: String, version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { type.toIntelliJPlatformType() },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -139,11 +80,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
      * @param version The version of the IntelliJ Platform dependency.
      */
-    fun create(type: Provider<*>, version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = type,
-            versionProvider = providersDelegate.of { version },
-        )
+    fun create(type: Provider<*>, version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = type,
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -151,11 +91,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param type The type of the IntelliJ Platform dependency.
      * @param version The version of the IntelliJ Platform dependency.
      */
-    fun create(type: IntelliJPlatformType, version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { type },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun create(type: IntelliJPlatformType, version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { type },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -163,11 +102,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param type The type of the IntelliJ Platform dependency.
      * @param version The provider for the version of the IntelliJ Platform dependency.
      */
-    fun create(type: String, version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { type.toIntelliJPlatformType() },
-            versionProvider = version,
-        )
+    fun create(type: String, version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { type.toIntelliJPlatformType() },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -175,11 +113,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param type The type of the IntelliJ Platform dependency.
      * @param version The provider for the version of the IntelliJ Platform dependency.
      */
-    fun create(type: IntelliJPlatformType, version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { type },
-            versionProvider = version,
-        )
+    fun create(type: IntelliJPlatformType, version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { type },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -188,12 +125,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider for the version of the IntelliJ Platform dependency.
      * @param configurationName The name of the configuration to add the dependency to.
      */
-    fun create(type: Provider<*>, version: Provider<String>, configurationName: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = type,
-            versionProvider = version,
-            configurationName = configurationName,
-        )
+    fun create(type: Provider<*>, version: Provider<String>, configurationName: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = type,
+        versionProvider = version,
+        configurationName = configurationName,
+    )
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -201,469 +137,426 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
      * @param version The provider for the version of the IntelliJ Platform dependency.
      */
-    fun create(type: Provider<*>, version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = type,
-            versionProvider = version,
-        )
+    fun create(type: Provider<*>, version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = type,
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on Android Studio.
      *
      * @param version The version of Android Studio.
      */
-    fun androidStudio(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.AndroidStudio },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun androidStudio(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.AndroidStudio },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on Android Studio.
      *
      * @param version The provider for the version of Android Studio.
      */
-    fun androidStudio(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.AndroidStudio },
-            versionProvider = version,
-        )
+    fun androidStudio(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.AndroidStudio },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on Aqua.
      *
      * @param version The version of Aqua.
      */
-    fun aqua(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.Aqua },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun aqua(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.Aqua },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on Aqua.
      *
      * @param version The provider for the version of Aqua.
      */
-    fun aqua(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.Aqua },
-            versionProvider = version,
-        )
+    fun aqua(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.Aqua },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on DataGrip.
      *
      * @param version The version of DataGrip.
      */
-    fun datagrip(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.DataGrip },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun datagrip(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.DataGrip },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on DataGrip.
      *
      * @param version The provider for the version of DataGrip.
      */
-    fun datagrip(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.DataGrip },
-            versionProvider = version,
-        )
+    fun datagrip(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.DataGrip },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on DataSpell.
      *
      * @param version The version of DataSpell.
      */
-    fun dataspell(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.DataSpell },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun dataspell(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.DataSpell },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on DataSpell.
      *
      * @param version The provider for the version of DataSpell.
      */
-    fun dataspell(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.DataSpell },
-            versionProvider = version,
-        )
+    fun dataspell(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.DataSpell },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on CLion.
      *
      * @param version The version of CLion.
      */
-    fun clion(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.CLion },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun clion(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.CLion },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on CLion.
      *
      * @param version The provider for the version of CLion.
      */
-    fun clion(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.CLion },
-            versionProvider = version,
-        )
+    fun clion(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.CLion },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on Fleet Backend.
      *
      * @param version The version of Fleet Backend.
      */
-    fun fleetBackend(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.FleetBackend },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun fleetBackend(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.FleetBackend },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on Fleet Backend.
      *
      * @param version The provider for the version of Fleet Backend.
      */
-    fun fleetBackend(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.FleetBackend },
-            versionProvider = version,
-        )
+    fun fleetBackend(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.FleetBackend },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on Gateway.
      *
      * @param version The version of Gateway.
      */
-    fun gateway(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.Gateway },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun gateway(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.Gateway },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on Gateway.
      *
      * @param version The provider for the version of Gateway.
      */
-    fun gateway(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.Gateway },
-            versionProvider = version,
-        )
+    fun gateway(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.Gateway },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on GoLand.
      *
      * @param version The version of GoLand.
      */
-    fun goland(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.GoLand },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun goland(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.GoLand },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on GoLand.
      *
      * @param version The provider for the version of GoLand.
      */
-    fun goland(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.GoLand },
-            versionProvider = version,
-        )
+    fun goland(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.GoLand },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on IntelliJ IDEA Community.
      *
      * @param version The version of IntelliJ IDEA Community.
      */
-    fun intellijIdeaCommunity(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.IntellijIdeaCommunity },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun intellijIdeaCommunity(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.IntellijIdeaCommunity },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on IntelliJ IDEA Community.
      *
      * @param version The provider for the version of IntelliJ IDEA Community.
      */
-    fun intellijIdeaCommunity(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.IntellijIdeaCommunity },
-            versionProvider = version,
-        )
+    fun intellijIdeaCommunity(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.IntellijIdeaCommunity },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on IntelliJ IDEA Ultimate.
      *
      * @param version The version of IntelliJ IDEA Ultimate.
      */
-    fun intellijIdeaUltimate(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.IntellijIdeaUltimate },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun intellijIdeaUltimate(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.IntellijIdeaUltimate },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on IntelliJ IDEA Ultimate.
      *
      * @param version The provider for the version of IntelliJ IDEA Ultimate.
      */
-    fun intellijIdeaUltimate(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.IntellijIdeaUltimate },
-            versionProvider = version,
-        )
+    fun intellijIdeaUltimate(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.IntellijIdeaUltimate },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on MPS.
      *
      * @param version The version of MPS.
      */
-    fun mps(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.MPS },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun mps(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.MPS },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on MPS.
      *
      * @param version The provider for the version of MPS.
      */
-    fun mps(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.MPS },
-            versionProvider = version,
-        )
+    fun mps(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.MPS },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on PhpStorm.
      *
      * @param version The version of PhpStorm.
      */
-    fun phpstorm(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.PhpStorm },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun phpstorm(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.PhpStorm },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on PhpStorm.
      *
      * @param version The provider for the version of PhpStorm.
      */
-    fun phpstorm(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.PhpStorm },
-            versionProvider = version,
-        )
+    fun phpstorm(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.PhpStorm },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on PyCharm Community.
      *
      * @param version The version of PyCharm Community.
      */
-    fun pycharmCommunity(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.PyCharmCommunity },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun pycharmCommunity(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.PyCharmCommunity },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on PyCharm Community.
      *
      * @param version The provider for the version of PyCharm Community.
      */
-    fun pycharmCommunity(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.PyCharmCommunity },
-            versionProvider = version,
-        )
+    fun pycharmCommunity(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.PyCharmCommunity },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on PyCharm Professional.
      *
      * @param version The version of PyCharm Professional.
      */
-    fun pycharmProfessional(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.PyCharmProfessional },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun pycharmProfessional(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.PyCharmProfessional },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on PyCharm Professional.
      *
      * @param version The provider for the version of PyCharm Professional.
      */
-    fun pycharmProfessional(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.PyCharmProfessional },
-            versionProvider = version,
-        )
+    fun pycharmProfessional(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.PyCharmProfessional },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on Rider.
      *
      * @param version The version of Rider.
      */
-    fun rider(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.Rider },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun rider(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.Rider },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on Rider.
      *
      * @param version The provider for the version of Rider.
      */
-    fun rider(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.Rider },
-            versionProvider = version,
-        )
+    fun rider(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.Rider },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on RubyMine.
      *
      * @param version The version of RubyMine.
      */
-    fun rubymine(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.RubyMine },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun rubymine(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.RubyMine },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on RubyMine.
      *
      * @param version The provider for the version of RubyMine.
      */
-    fun rubymine(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.RubyMine },
-            versionProvider = version,
-        )
+    fun rubymine(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.RubyMine },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on Rust Rover.
      *
      * @param version The version of Rust Rover.
      */
-    fun rustRover(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.RustRover },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun rustRover(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.RustRover },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on Rust Rover.
      *
      * @param version The provider for the version of Rust Rover.
      */
-    fun rustRover(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.RustRover },
-            versionProvider = version,
-        )
+    fun rustRover(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.RustRover },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on WebStorm.
      *
      * @param version The version of WebStorm.
      */
-    fun webstorm(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.WebStorm },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun webstorm(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.WebStorm },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on WebStorm.
      *
      * @param version The provider for the version of WebStorm.
      */
-    fun webstorm(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.WebStorm },
-            versionProvider = version,
-        )
+    fun webstorm(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.WebStorm },
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on Writerside.
      *
      * @param version The version of Writerside.
      */
-    fun writerside(version: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.Writerside },
-            versionProvider = providersDelegate.of { version },
-        )
+    fun writerside(version: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.Writerside },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on Writerside.
      *
      * @param version The provider for the version of Writerside.
      */
-    fun writerside(version: Provider<String>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformDependency(
-            typeProvider = providersDelegate.of { IntelliJPlatformType.Writerside },
-            versionProvider = version,
-        )
+    fun writerside(version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+        typeProvider = delegate.provider { IntelliJPlatformType.Writerside },
+        versionProvider = version,
+    )
 
     /**
      * Adds a local dependency on a local IntelliJ Platform instance.
      *
      * @param localPath The local path of the IntelliJ Platform dependency
      */
-    fun local(localPath: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformLocalDependency(
-            localPathProvider = providersDelegate.of { localPath },
-        )
+    fun local(localPath: String) = delegate.addIntelliJPlatformLocalDependency(
+        localPathProvider = delegate.provider { localPath },
+    )
 
     /**
      * Adds a local dependency on a local IntelliJ Platform instance.
      *
      * @param localPath The local path of the IntelliJ Platform dependency
      */
-    fun local(localPath: File) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformLocalDependency(
-            localPathProvider = providersDelegate.of { localPath },
-        )
+    fun local(localPath: File) = delegate.addIntelliJPlatformLocalDependency(
+        localPathProvider = delegate.provider { localPath },
+    )
 
     /**
      * Adds a local dependency on a local IntelliJ Platform instance.
      *
      * @param localPath The local path of the IntelliJ Platform dependency
      */
-    fun local(localPath: Directory) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformLocalDependency(
-            localPathProvider = providersDelegate.of { localPath },
-        )
+    fun local(localPath: Directory) = delegate.addIntelliJPlatformLocalDependency(
+        localPathProvider = delegate.provider { localPath },
+    )
 
     /**
      * Adds a local dependency on a local IntelliJ Platform instance.
      *
      * @param localPath The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
      */
-    fun local(localPath: Provider<*>) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformLocalDependency(
-            localPathProvider = localPath,
-        )
+    fun local(localPath: Provider<*>) = delegate.addIntelliJPlatformLocalDependency(
+        localPathProvider = localPath,
+    )
 
     /**
      * Adds a local dependency on a local IntelliJ Platform instance.
@@ -671,38 +564,34 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param localPath The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
      * @param configurationName The name of the configuration to add the dependency to.
      */
-    fun local(localPath: Provider<*>, configurationName: String) =
-        intelliJPlatformDependencyDelegate.addIntelliJPlatformLocalDependency(
-            localPathProvider = localPath,
-            configurationName = configurationName,
-        )
+    fun local(localPath: Provider<*>, configurationName: String) = delegate.addIntelliJPlatformLocalDependency(
+        localPathProvider = localPath,
+        configurationName = configurationName,
+    )
 
     /**
      * Adds a dependency on JetBrains Runtime.
      * The version is calculated using the current IntelliJ Platform.
      */
-    fun jetbrainsRuntime() =
-        jetBrainsRuntimeDependencyDelegate.addObtainedJetBrainsRuntimeDependency()
+    fun jetbrainsRuntime() = delegate.addJetBrainsRuntimeObtainedDependency()
 
     /**
      * Adds a dependency on JetBrains Runtime.
      *
      * @param explicitVersion The explicit version of the JetBrains Runtime.
      */
-    fun jetbrainsRuntimeExplicit(explicitVersion: String) =
-        jetBrainsRuntimeDependencyDelegate.addJetBrainsRuntimeDependency(
-            explicitVersionProvider = providersDelegate.of { explicitVersion },
-        )
+    fun jetbrainsRuntimeExplicit(explicitVersion: String) = delegate.addJetBrainsRuntimeDependency(
+        explicitVersionProvider = delegate.provider { explicitVersion },
+    )
 
     /**
      * Adds a dependency on JetBrains Runtime.
      *
      * @param explicitVersion The provider for the explicit version of the JetBrains Runtime.
      */
-    fun jetbrainsRuntimeExplicit(explicitVersion: Provider<String>) =
-        jetBrainsRuntimeDependencyDelegate.addJetBrainsRuntimeDependency(
-            explicitVersionProvider = explicitVersion,
-        )
+    fun jetbrainsRuntimeExplicit(explicitVersion: Provider<String>) = delegate.addJetBrainsRuntimeDependency(
+        explicitVersionProvider = explicitVersion,
+    )
 
     /**
      * Adds a local dependency on JetBrains Runtime.
@@ -711,16 +600,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param variant The JetBrains Runtime variant.
      * @param architecture The JetBrains Runtime architecture.
      */
-    fun jetbrainsRuntime(version: String, variant: String? = null, architecture: String? = null) =
-        jetBrainsRuntimeDependencyDelegate.addJetBrainsRuntimeDependency(
-            explicitVersionProvider = providersDelegate.of {
-                jetBrainsRuntimeDependencyDelegate.buildJetBrainsRuntimeVersion(
-                    version,
-                    variant,
-                    architecture,
-                )
-            },
-        )
+    fun jetbrainsRuntime(version: String, variant: String? = null, architecture: String? = null) = delegate.addJetBrainsRuntimeDependency(
+        explicitVersionProvider = delegate.provider {
+            delegate.buildJetBrainsRuntimeVersion(version, variant, architecture)
+        },
+    )
 
     /**
      * Adds a local dependency on JetBrains Runtime.
@@ -729,16 +613,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param variant The provider of the JetBrains Runtime variant.
      * @param architecture The provider of the JetBrains Runtime architecture.
      */
-    fun jetbrainsRuntime(version: Provider<String>, variant: Provider<String>, architecture: Provider<String>) =
-        jetBrainsRuntimeDependencyDelegate.addJetBrainsRuntimeDependency(
-            explicitVersionProvider = providersDelegate.of {
-                jetBrainsRuntimeDependencyDelegate.buildJetBrainsRuntimeVersion(
-                    version.get(),
-                    variant.orNull,
-                    architecture.orNull
-                )
-            },
-        )
+    fun jetbrainsRuntime(version: Provider<String>, variant: Provider<String>, architecture: Provider<String>) = delegate.addJetBrainsRuntimeDependency(
+        explicitVersionProvider = delegate.provider {
+            delegate.buildJetBrainsRuntimeVersion(version.get(), variant.orNull, architecture.orNull)
+        },
+    )
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform.
@@ -747,10 +626,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The plugin version.
      * @param channel The plugin distribution channel.
      */
-    fun plugin(id: String, version: String, channel: String = "") =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = providersDelegate.of { listOf(Triple(id, version, channel)) }
-        )
+    fun plugin(id: String, version: String, channel: String = "") = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { listOf(Triple(id, version, channel)) },
+    )
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform.
@@ -759,10 +637,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider of the plugin version.
      * @param channel The provider of the plugin distribution channel.
      */
-    fun plugin(id: Provider<String>, version: Provider<String>, channel: Provider<String>) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = providersDelegate.of { listOf(Triple(id.get(), version.get(), channel.get())) }
-        )
+    fun plugin(id: Provider<String>, version: Provider<String>, channel: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { listOf(Triple(id.get(), version.get(), channel.get())) },
+    )
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -771,10 +648,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugin(notation: Provider<String>) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) }
-        )
+    fun plugin(notation: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
+    )
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -783,10 +659,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugin(notation: String) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = providersDelegate.of { listOfNotNull(notation.parsePluginNotation()) }
-        )
+    fun plugin(notation: String) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { listOfNotNull(notation.parsePluginNotation()) },
+    )
 
     /**
      * Adds dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -795,10 +670,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugins(vararg notations: String) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = providersDelegate.of { notations.mapNotNull { it.parsePluginNotation() } }
-        )
+    fun plugins(vararg notations: String) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { notations.mapNotNull { it.parsePluginNotation() } },
+    )
 
     /**
      * Adds dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -807,10 +681,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugins(notations: List<String>) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = providersDelegate.of { notations.mapNotNull { it.parsePluginNotation() } }
-        )
+    fun plugins(notations: List<String>) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { notations.mapNotNull { it.parsePluginNotation() } },
+    )
 
     /**
      * Adds dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -819,142 +692,135 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugins(notations: Provider<List<String>>) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } }
-        )
+    fun plugins(notations: Provider<List<String>>) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } },
+    )
 
     /**
      * Adds a dependency on a bundled IntelliJ Platform plugin.
      *
      * @param id The bundled plugin identifier.
      */
-    fun bundledPlugin(id: String) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformBundledPluginDependencies(
-            bundledPluginsProvider = providersDelegate.of { listOf(id) }
-        )
+    fun bundledPlugin(id: String) = delegate.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = delegate.provider { listOf(id) },
+    )
 
     /**
      * Adds a dependency on a bundled IntelliJ Platform plugin.
      *
      * @param id The provider of the bundled plugin identifier.
      */
-    fun bundledPlugin(id: Provider<String>) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformBundledPluginDependencies(
-            bundledPluginsProvider = id.map { listOf(it) }
-        )
+    fun bundledPlugin(id: Provider<String>) = delegate.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = id.map { listOf(it) },
+    )
 
     /**
      * Adds dependencies on bundled IntelliJ Platform plugins.
      *
      * @param ids The bundled plugin identifiers.
      */
-    fun bundledPlugins(vararg ids: String) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformBundledPluginDependencies(
-            bundledPluginsProvider = providersDelegate.of { ids.asList() }
-        )
+    fun bundledPlugins(vararg ids: String) = delegate.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = delegate.provider { ids.asList() },
+    )
 
     /**
      * Adds dependencies on bundled IntelliJ Platform plugins.
      *
      * @param ids The bundled plugin identifiers.
      */
-    fun bundledPlugins(ids: List<String>) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformBundledPluginDependencies(
-            bundledPluginsProvider = providersDelegate.of { ids }
-        )
+    fun bundledPlugins(ids: List<String>) = delegate.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = delegate.provider { ids },
+    )
 
     /**
      * Adds dependencies on bundled IntelliJ Platform plugins.
      *
      * @param ids The bundled plugin identifiers.
      */
-    fun bundledPlugins(ids: Provider<List<String>>) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformBundledPluginDependencies(
-            bundledPluginsProvider = ids
-        )
+    fun bundledPlugins(ids: Provider<List<String>>) = delegate.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = ids,
+    )
 
     /**
      * Adds dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: File) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginDependency(
-            localPathProvider = providersDelegate.of { localPath }
-        )
+    fun localPlugin(localPath: File) = delegate.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = delegate.provider { localPath },
+    )
 
     /**
      * Adds dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: String) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginDependency(
-            localPathProvider = providersDelegate.of { localPath }
-        )
+    fun localPlugin(localPath: String) = delegate.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = delegate.provider { localPath },
+    )
 
     /**
      * Adds dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: Directory) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginDependency(
-            localPathProvider = providersDelegate.of { localPath }
-        )
+    fun localPlugin(localPath: Directory) = delegate.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = delegate.provider { localPath },
+    )
 
     /**
      * Adds dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: Provider<*>) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginDependency(
-            localPathProvider = localPath
-        )
+    fun localPlugin(localPath: Provider<*>) = delegate.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = localPath,
+    )
 
     /**
      * Adds dependency on a local IntelliJ Platform plugin.
      *
      * @param dependency Project dependency.
      */
-    fun localPlugin(dependency: ProjectDependency) =
-        intelliJPlatformPluginDependencyDelegate.addIntelliJPlatformLocalPluginProjectDependency(
-            dependency = dependency
-        )
+    fun localPlugin(dependency: ProjectDependency) = delegate.addIntelliJPlatformLocalPluginProjectDependency(
+        dependency = dependency,
+    )
 
     /**
      * Adds a dependency on IntelliJ Plugin Verifier.
      *
      * @param version The IntelliJ Plugin Verifier version.
      */
-    fun pluginVerifier(version: String = VERSION_LATEST) =
-        pluginVerifierDependencyDelegate.addPluginVerifierDependency(providersDelegate.of { version })
+    fun pluginVerifier(version: String = VERSION_LATEST) = delegate.addPluginVerifierDependency(
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on IntelliJ Plugin Verifier.
      *
      * @param version The provider of the IntelliJ Plugin Verifier version.
      */
-    fun pluginVerifier(version: Provider<String>) =
-        pluginVerifierDependencyDelegate.addPluginVerifierDependency(version)
+    fun pluginVerifier(version: Provider<String>) = delegate.addPluginVerifierDependency(
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on Marketplace ZIP Signer.
      *
      * @param version The Marketplace ZIP Signer version.
      */
-    fun zipSigner(version: String = VERSION_LATEST) =
-        zipSignerDependencyDelegate.addZipSignerDependency(providersDelegate.of { version })
+    fun zipSigner(version: String = VERSION_LATEST) = delegate.addZipSignerDependency(
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on Marketplace ZIP Signer.
      *
      * @param version The provider of the Marketplace ZIP Signer version.
      */
-    fun zipSigner(version: Provider<String>) =
-        zipSignerDependencyDelegate.addZipSignerDependency(version)
+    fun zipSigner(version: Provider<String>) = delegate.addZipSignerDependency(
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
@@ -970,8 +836,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version Test framework library version.
      * @see TestFrameworkType
      */
-    fun testFramework(type: TestFrameworkType, version: String = VERSION_CURRENT) =
-        testFrameworkDependencyDelegate.addTestFrameworkDependency(providersDelegate.of { type }, providersDelegate.of { version })
+    fun testFramework(type: TestFrameworkType, version: String = VERSION_CURRENT) = delegate.addTestFrameworkDependency(
+        typeProvider = delegate.provider { type },
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a dependency on the `test-framework` library required for testing plugins.
@@ -986,8 +854,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version library version
      * @see TestFrameworkType
      */
-    fun testFramework(type: Provider<TestFrameworkType>, version: Provider<String>) =
-        testFrameworkDependencyDelegate.addTestFrameworkDependency(type, version)
+    fun testFramework(type: Provider<TestFrameworkType>, version: Provider<String>) = delegate.addTestFrameworkDependency(
+        typeProvider = type,
+        versionProvider = version,
+    )
 
     /**
      * Adds a Java Compiler dependency for code instrumentation.
@@ -999,8 +869,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version Java Compiler version
      */
-    fun javaCompiler(version: String = VERSION_CURRENT) =
-        javaCompilerDependencyDelegate.addJavaCompilerDependency(providersDelegate.of { version })
+    fun javaCompiler(version: String = VERSION_CURRENT) = delegate.addJavaCompilerDependency(
+        versionProvider = delegate.provider { version },
+    )
 
     /**
      * Adds a Java Compiler dependency for code instrumentation.
@@ -1012,8 +883,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version Java Compiler version
      */
-    fun javaCompiler(version: Provider<String>) =
-        javaCompilerDependencyDelegate.addJavaCompilerDependency(version)
+    fun javaCompiler(version: Provider<String>) = delegate.addJavaCompilerDependency(
+        versionProvider = version,
+    )
 
     /**
      * Applies a set of dependencies required for running the [InstrumentCodeTask] task.
@@ -1028,14 +900,16 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param path Path to the bundled Jar file, like `lib/testFramework.jar`
      */
-    fun bundledLibrary(path: String) =
-        bundledLibraryDelegate.addBundledLibrary(providersDelegate.of { path })
+    fun bundledLibrary(path: String) = delegate.addBundledLibrary(
+        pathProvider = delegate.provider { path },
+    )
 
     /**
      * Adds a dependency on a Jar bundled within the current IntelliJ Platform.
      *
      * @param path Path to the bundled Jar file, like `lib/testFramework.jar`
      */
-    fun bundledLibrary(path: Provider<String>) =
-        bundledLibraryDelegate.addBundledLibrary(path)
+    fun bundledLibrary(path: Provider<String>) = delegate.addBundledLibrary(
+        pathProvider = path,
+    )
 }

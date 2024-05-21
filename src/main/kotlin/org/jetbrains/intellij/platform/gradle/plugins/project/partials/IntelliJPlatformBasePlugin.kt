@@ -389,14 +389,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         project.dependencies.configureExtension<IntelliJPlatformDependenciesExtension>(
             Extensions.INTELLIJ_PLATFORM,
             project.configurations,
-            project.repositories,
-            project.settings.dependencyResolutionManagement.repositories,
             project.dependencies,
-            project.providers,
-            project.resources,
-            project.objects,
             project.layout,
+            project.objects,
+            project.providers,
+            project.repositories,
+            project.resources,
             rootProjectDirectory,
+            project.settings.dependencyResolutionManagement.repositories,
         )
 
         project.repositories.configureExtension<IntelliJPlatformRepositoriesExtension>(

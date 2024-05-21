@@ -237,11 +237,15 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     Extensions.PLUGINS,
                     project.configurations,
                     project.dependencies,
+                    project.layout,
+                    project.objects,
                     project.providers,
+                    project.repositories,
+                    project.resources,
                     rootProjectDirectory,
+                    project.settings.dependencyResolutionManagement.repositories,
                     intellijPlatformPluginDependencyConfiguration.name,
                     intellijPlatformPluginLocalConfiguration.name,
-                    project.objects,
                 )
             }
         }
