@@ -7,6 +7,11 @@
 - Support for Android Studio DMG archives
 - Introduce `VerifyPluginProjectConfigurationTask.hasModulePlugin` to exclude modules using `org.jetbrains.intellij.platform.module` subplugin from `plugin.xml` checks.
 
+### Fixed
+
+- Avoid leaking internal properties from `intellijPlatform` extensions
+- Fixed custom tasks suffixing
+
 ## [2.0.0-beta3] - 2024-05-18
 
 ### Added

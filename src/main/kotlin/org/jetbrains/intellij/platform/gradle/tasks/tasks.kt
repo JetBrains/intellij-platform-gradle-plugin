@@ -80,10 +80,10 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          *
          * @see CustomIntelliJPlatformVersionAware
          */
-        val suffix = name
-            .substringAfter('_', "")
-            .takeIf { it.length == 8 && it.all(Char::isLetterOrDigit) }
-            ?: name
+        val suffix = when {
+            this is CustomIntelliJPlatformVersionAware -> name
+            else -> name.substringAfter('_', "")
+        }.let { "_$it" }.trimEnd('_')
 
         val extension = project.the<IntelliJPlatformExtension>()
 
@@ -94,9 +94,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * @see IntelliJPlatformVersionAware
          */
         if (this is IntelliJPlatformVersionAware) {
-            val configurationSuffix = "_$suffix".takeIf { name.endsWith("_$suffix") }.orEmpty()
-            intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM + configurationSuffix].asLenient
-            intelliJPlatformPluginConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN + configurationSuffix].asLenient
+            intelliJPlatformConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM + suffix).asLenient
+            intelliJPlatformPluginConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_PLUGIN + suffix).asLenient
         }
 
         /**
@@ -129,7 +128,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 }
 
                 val customIntelliJPlatformLocalConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM_LOCAL}_$suffix",
+                    name = Configurations.INTELLIJ_PLATFORM_LOCAL + suffix,
                     description = "Custom IntelliJ Platform local",
                 ) {
                     attributes {
@@ -142,7 +141,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     )
                 }
                 val customIntelliJPlatformDependencyConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_$suffix",
+                    name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY + suffix,
                     description = "Custom IntelliJ Platform dependency archive",
                 ) {
                     val defaultTypeProvider = baseProductInfo.map {
@@ -166,7 +165,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                  * Otherwise, refer to the base IntelliJ Platform — useful, i.e., when we want to execute a regular [RunIdeTask] using defaults.
                  */
                 intelliJPlatformConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM}_$suffix",
+                    name = Configurations.INTELLIJ_PLATFORM + suffix,
                     description = "Custom IntelliJ Platform",
                 ) {
                     attributes {
@@ -194,7 +193,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                  * so the [ExtractorTransformer] could track and extract custom plugin artifacts.
                  */
                 val intellijPlatformPluginDependencyConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY}_$suffix",
+                    name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY + suffix,
                     description = "Custom IntelliJ Platform plugin dependencies",
                 ) {
                     configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR].extendsFrom(this)
@@ -206,7 +205,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                  * to hold additional local plugins to be added to the [CustomIntelliJPlatformVersionAware] task.
                  */
                 val intellijPlatformPluginLocalConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL}_$suffix",
+                    name = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL + suffix,
                     description = "Custom IntelliJ Platform plugin local",
                 ) {
                     extendsFrom(configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL])
@@ -217,7 +216,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                  * This configuration also inherits from the general configurations to align the build setup.
                  */
                 val intellijPlatformPluginConfiguration = create(
-                    name = "${Configurations.INTELLIJ_PLATFORM_PLUGIN}_$suffix",
+                    name = Configurations.INTELLIJ_PLATFORM_PLUGIN + suffix,
                     description = "Custom IntelliJ Platform plugins",
                 ) {
                     attributes {
@@ -258,18 +257,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
              * multiple [PrepareSandboxTask] tasks may be registered for different purposes — running tests or IDE.
              * To keep sandboxes separated, we introduce sandbox suffixes.
              */
-            sandboxSuffix.convention(
-                when {
-                    this is SandboxProducerAware -> name
-                        .substringBefore("_")
-                        .removePrefix("prepare")
-                        .removeSuffix("Sandbox")
-                        .replaceFirstChar { it.lowercaseChar() }
-                        .run { "-".takeIf { isNotEmpty() }.orEmpty() + this }
-
-                    else -> ""
-                }
-            )
+            sandboxSuffix.convention(suffix)
             sandboxDirectory.convention(extension.sandboxContainer.map { container ->
                 container
                     .dir("${productInfo.productCode}-${productInfo.version}")
@@ -287,26 +275,18 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
              */
             if (this !is SandboxProducerAware) {
                 fun createTask(target: SplitModeTarget): PrepareSandboxTask {
-                    val taskSuffix = when {
-                        this is CustomIntelliJPlatformVersionAware -> "_$suffix"
+                    val taskSubject = when {
+                        this is TestableAware -> "Test"
                         else -> ""
-                    }
-                    val taskSubject = when (this) {
-                        is RunnableIdeAware -> ""
-                        is VerifyPluginStructureTask -> ""
-                        is TestableAware -> "Test"
-                        else -> name.replaceFirstChar(Char::uppercase)
                     }
                     val splitModeVariant = when (target) {
                         SplitModeTarget.FRONTEND -> "Frontend"
                         SplitModeTarget.BACKEND -> ""
                         SplitModeTarget.BOTH -> ""
                     }
-                    val taskName = "prepare" + taskSubject + splitModeVariant + "Sandbox" + taskSuffix
+                    val taskName = "prepare" + taskSubject + splitModeVariant + "Sandbox" + suffix
 
                     return tasks.maybeCreate<PrepareSandboxTask>(taskName).also { task ->
-                        sandboxSuffix = taskSuffix.replaceFirstChar { '-' }
-
                         if (this is CustomIntelliJPlatformVersionAware) {
                             task.disabledPlugins = the<IntelliJPlatformPluginsExtension>().disabled
                         }
