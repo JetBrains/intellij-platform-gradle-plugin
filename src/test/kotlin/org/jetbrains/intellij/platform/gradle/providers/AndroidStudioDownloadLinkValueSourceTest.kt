@@ -35,7 +35,7 @@ import kotlin.test.assertEquals
 
         val link = with(OperatingSystem.current()) {
             when {
-                isMacOsX -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-mac_arm.zip"
+                isMacOsX -> "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.9/android-studio-2023.3.1.9-mac_arm.dmg"
                 isLinux -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-linux.tar.gz"
                 isWindows -> "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-windows-exe.zip"
                 else -> null
