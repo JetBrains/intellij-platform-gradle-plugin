@@ -124,7 +124,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
             with(configurations) {
                 val baseProductInfo = provider {
-                    configurations[Configurations.INTELLIJ_PLATFORM].asLenient.productInfo()
+                    configurations[Configurations.INTELLIJ_PLATFORM].asLenient.platformPath().productInfo()
                 }
 
                 val customIntelliJPlatformLocalConfiguration = create(

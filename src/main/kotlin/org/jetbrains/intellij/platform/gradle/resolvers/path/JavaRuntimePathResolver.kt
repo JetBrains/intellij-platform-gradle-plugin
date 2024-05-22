@@ -52,8 +52,8 @@ class JavaRuntimePathResolver(
          * The bundled JetBrains Runtime within the current IntelliJ Platform.
          */
         "JetBrains Runtime bundled within the IntelliJ Platform" to {
-            intellijPlatform.singleOrNull()
-                ?.toPath()
+            intellijPlatform
+                .platformPath()
                 .resolveRuntimeDirectory()
                 .ensureExecutableExists()
         },

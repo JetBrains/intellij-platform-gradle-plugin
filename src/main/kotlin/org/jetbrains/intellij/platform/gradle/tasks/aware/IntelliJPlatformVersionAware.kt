@@ -60,7 +60,7 @@ interface IntelliJPlatformVersionAware {
      */
     @get:Internal
     val productInfo: ProductInfo
-        get() = intelliJPlatformConfiguration.productInfo()
+        get() = platformPath.productInfo()
 
     /**
      * Validates that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.

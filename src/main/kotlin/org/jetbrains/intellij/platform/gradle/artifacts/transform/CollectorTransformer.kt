@@ -53,7 +53,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
     override fun transform(outputs: TransformOutputs) {
         runCatching {
             val path = inputArtifact.asPath
-            val productInfo = parameters.intellijPlatform.productInfo()
+            val productInfo = parameters.intellijPlatform.platformPath().productInfo()
             val plugin by lazy {
                 val pluginPath = generateSequence(path) {
                     it.takeIf { it.resolve("lib").exists() } ?: it.listDirectoryEntries().singleOrNull()

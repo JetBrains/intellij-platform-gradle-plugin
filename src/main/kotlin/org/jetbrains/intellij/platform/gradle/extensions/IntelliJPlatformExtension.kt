@@ -76,7 +76,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * Provides read-only access to the [ProductInfo] object associated with the IntelliJ Platform dependency configured for the current project.
      */
     val productInfo: ProductInfo
-        get() = intelliJPlatformConfiguration.productInfo()
+        get() = platformPath.productInfo()
 
     /**
      * Enables auto-reload of dynamic plugins.

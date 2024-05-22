@@ -103,16 +103,16 @@ class IntelliJPlatformDependenciesHelper(
         get() = provider { bundledPluginsListConfiguration.bundledPlugins() }
 
     /**
-     * Provides access to the [ProductInfo] of the current IntelliJ Platform.
-     */
-    internal val productInfo
-        get() = provider { intelliJPlatformConfiguration.productInfo() }
-
-    /**
      * Provides access to the current IntelliJ Platform path.
      */
     internal val platformPath
         get() = provider { intelliJPlatformConfiguration.platformPath() }
+
+    /**
+     * Provides access to the [ProductInfo] of the current IntelliJ Platform.
+     */
+    internal val productInfo
+        get() = platformPath.map { it.productInfo() }
 
     //</editor-fold>
     //<editor-fold desc="Helper Methods">
