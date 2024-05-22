@@ -13,6 +13,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_RUNTIME_VENDOR
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.nio.file.Path
 
 /**
