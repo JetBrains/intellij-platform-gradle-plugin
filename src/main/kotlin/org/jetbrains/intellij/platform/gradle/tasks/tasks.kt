@@ -39,7 +39,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitMo
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.absolute
-import kotlin.io.path.createDirectories
 
 /**
  * Registers a task of type [T] with the given names
@@ -259,9 +258,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
              */
             sandboxSuffix.convention(suffix)
             sandboxDirectory.convention(extension.sandboxContainer.map { container ->
-                container
-                    .dir("${productInfo.productCode}-${productInfo.version}")
-                    .apply { asPath.createDirectories() }
+                container.dir("${productInfo.productCode}-${productInfo.version}")
             })
             sandboxConfigDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.CONFIG)
             sandboxPluginsDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.PLUGINS)
@@ -290,6 +287,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                         val taskSubjectSuffix = "-$taskSubject".lowercase().trimEnd('-') + suffix
                         task.sandboxSuffix.convention(taskSubjectSuffix)
                         sandboxSuffix.convention(taskSubjectSuffix)
+                        sandboxDirectory.convention(task.sandboxDirectory)
 
                         if (this is CustomIntelliJPlatformVersionAware) {
                             task.disabledPlugins = the<IntelliJPlatformPluginsExtension>().disabled
@@ -319,7 +317,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                  * However, tasks like [RunnableIdeAware] or [TestableAware] should not share the same sandboxes.
                  * The same applies to the customized tasks – a custom suffix is added to the task name.
                  */
-
                 when {
                     this is SplitModeAware -> {
                         val backendTask = createTask(SplitModeTarget.BACKEND)
@@ -493,7 +490,7 @@ internal fun DirectoryProperty.configureSandbox(
     name: String,
 ) {
     convention(sandboxContainer.zip(suffixProvider) { container, suffix ->
-        container.dir(name + suffix.orEmpty()).apply { asPath.createDirectories() }
+        container.dir(name + suffix)
     })
 }
 
