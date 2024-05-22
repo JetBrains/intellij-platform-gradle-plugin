@@ -13,6 +13,7 @@
 - Avoid leaking internal properties from `intellijPlatform` extensions
 - Fixed custom tasks suffixing
 - Fixed: Task `:test` uses this output of task `:prepareSandbox` without declaring an explicit or implicit dependency [#1609](../../issues/1609)
+- ExtractorTransformer: Exclude only `Applications` symlink
 
 ## [2.0.0-beta3] - 2024-05-18
 
