@@ -10,6 +10,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
 /**
  * Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing.
@@ -22,7 +23,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
  */
 @Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run")
-abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, IntelliJPlatformVersionAware {
+abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, IntelliJPlatformVersionAware {
 
     init {
         group = Plugin.GROUP_NAME

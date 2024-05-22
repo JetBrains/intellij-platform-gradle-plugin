@@ -287,14 +287,16 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     val taskName = "prepare" + taskSubject + splitModeVariant + "Sandbox" + suffix
 
                     return tasks.maybeCreate<PrepareSandboxTask>(taskName).also { task ->
-                        task.sandboxSuffix = "-$taskSubject".lowercase().trimEnd('-') + suffix
+                        val taskSubjectSuffix = "-$taskSubject".lowercase().trimEnd('-') + suffix
+                        task.sandboxSuffix.convention(taskSubjectSuffix)
+                        sandboxSuffix.convention(taskSubjectSuffix)
 
                         if (this is CustomIntelliJPlatformVersionAware) {
                             task.disabledPlugins = the<IntelliJPlatformPluginsExtension>().disabled
                         }
 
                         if (this is SplitModeAware) {
-                            task.sandboxSuffix = "-$splitModeVariant".lowercase().trimEnd('-') + suffix
+                            task.sandboxSuffix = "-$taskSubject".lowercase().trimEnd('-') + "-$splitModeVariant".lowercase().trimEnd('-') + suffix
                             task.splitMode = splitMode
                             task.splitModeTarget = splitModeTarget
                             task.splitModeCurrentTarget = target
@@ -307,8 +309,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
                             isSplitMode || currentTarget != SplitModeTarget.FRONTEND
                         }
-
-                        sandboxSuffix.convention(task.sandboxSuffix)
 
                         dependsOn(task)
                     }

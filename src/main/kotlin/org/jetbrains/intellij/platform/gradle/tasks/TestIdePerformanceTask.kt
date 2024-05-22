@@ -17,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.IdeaLogPar
 import org.jetbrains.intellij.platform.gradle.performanceTest.parsers.SimpleIJPerformanceParser
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Files
@@ -41,7 +42,7 @@ import kotlin.io.path.nameWithoutExtension
 @Deprecated(message = "CHECK")
 @Incubating
 @UntrackedTask(because = "Should always run")
-abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, IntelliJPlatformVersionAware {
+abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAware, IntelliJPlatformVersionAware {
 
     /**
      * Path to directory with test projects and '.ijperf' files.
