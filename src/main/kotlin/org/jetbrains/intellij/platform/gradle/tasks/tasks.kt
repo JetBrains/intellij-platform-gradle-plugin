@@ -308,6 +308,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                             isSplitMode || currentTarget != SplitModeTarget.FRONTEND
                         }
 
+                        sandboxSuffix.convention(task.sandboxSuffix)
+
                         dependsOn(task)
                     }
                 }
