@@ -47,7 +47,7 @@ data class ProductInfo(
     val bundledPlugins: List<String> = mutableListOf(),
     val fileExtensions: List<String> = mutableListOf(),
     val modules: List<String> = mutableListOf(),
-    val layout: List<LayoutItem> = mutableListOf()
+    val layout: List<LayoutItem> = mutableListOf(),
 ) {
 
     /**
@@ -172,9 +172,10 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
  * @throws IllegalArgumentException
  */
 @Throws(IllegalArgumentException::class)
-fun Path.productInfo() = ProductInfoPathResolver(this)
-    .resolve()
-    .let { decode<ProductInfo>(it) }
+fun Path.productInfo() =
+    ProductInfoPathResolver(this)
+        .resolve()
+        .let { decode<ProductInfo>(it) }
 
 /**
  * Retrieves the [ProductInfo] for the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.
