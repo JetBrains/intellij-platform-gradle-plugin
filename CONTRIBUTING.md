@@ -21,6 +21,14 @@ To integrate it with another consumer-like project, add the following line in th
 includeBuild("/path/to/gradle-intellij-plugin")
 ```
 
+> [!NOTE]  
+> If you are using the plugin `org.jetbrains.intellij.platform.settings`, you must use the following:
+> ```kotlin
+> pluginManagement {
+>    includeBuild("/path/to/gradle-intellij-plugin")
+> }
+> ```
+
 ## Pull Requests
 To correctly prepare the pull requests, make sure to provide the following information:
 - proper title and description of the GitHub Pull Request – describe what your change introduces, what issue it fixes, etc.
