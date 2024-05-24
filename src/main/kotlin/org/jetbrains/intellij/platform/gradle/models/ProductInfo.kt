@@ -48,7 +48,7 @@ data class ProductInfo(
     val fileExtensions: List<String> = mutableListOf(),
     val modules: List<String> = mutableListOf(),
     val layout: List<LayoutItem> = mutableListOf(),
-) {
+) : java.io.Serializable {
 
     /**
      * Represents a launch configuration for a product.
@@ -72,7 +72,7 @@ data class ProductInfo(
         val startupWmClass: String? = null,
         val bootClassPathJarNames: List<String> = mutableListOf(),
         val additionalJvmArguments: List<String> = mutableListOf(),
-    ) {
+    ) : java.io.Serializable {
 
         /**
          * Represents the different operating systems.

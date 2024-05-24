@@ -446,7 +446,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 is SigningAware,
                 is SplitModeAware,
                 is TestableAware,
-                -> action()
+                    -> action()
             }
         }
 }

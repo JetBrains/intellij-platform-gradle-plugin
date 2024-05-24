@@ -16,7 +16,6 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.Constants
@@ -30,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.kotlin.gradle.utils.named
 import java.nio.file.Path
 import kotlin.io.path.*
 
@@ -222,10 +222,10 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, Tasks.PREPARE_UI_TEST_SANDBOX) {
+                val extension = project.the<IntelliJPlatformExtension>()
                 val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
-                val extension = project.the<IntelliJPlatformExtension>()
 
                 val pluginJarProvider = extension.instrumentCode.flatMap {
                     when (it) {

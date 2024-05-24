@@ -12,23 +12,16 @@ import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.FileType
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.api.tasks.bundling.Jar
-import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.jetbrains.intellij.platform.gradle.BuildException
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.INSTRUMENT_CODE
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
@@ -316,32 +309,6 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                     sourceSet.compiledBy(this)
                 }
             }
-
-            val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
-            val instrumentCodeTaskProvider = project.tasks.named<InstrumentCodeTask>(INSTRUMENT_CODE)
-            val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
-
-            project.registerTask<Jar>(Tasks.INSTRUMENTED_JAR, configureWithType = false) {
-                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-                archiveClassifier.convention("instrumented")
-
-                from(instrumentCodeTaskProvider)
-                with(jarTaskProvider.get())
-
-                onlyIf { instrumentCodeEnabled.get() }
-            }
-
-            val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
-
-            runtimeElementsConfiguration.artifacts.removeIf {
-                it.file == jarTaskProvider.flatMap { task -> task.archiveFile }.asPath.toFile()
-            }
-            project.artifacts.add(runtimeElementsConfiguration.name, instrumentCodeEnabled.flatMap { enabled ->
-                when {
-                    enabled -> instrumentedJarTaskProvider
-                    else -> jarTaskProvider
-                }
-            })
         }
     }
 }

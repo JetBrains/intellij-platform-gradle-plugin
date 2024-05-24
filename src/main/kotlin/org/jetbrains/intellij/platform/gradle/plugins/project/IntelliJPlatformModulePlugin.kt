@@ -25,8 +25,10 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
         listOf(
             // Build Module
+            GenerateManifestTask,
             JarCompanion,
             InstrumentCodeTask,
+            InstrumentedJarTask,
             PrepareSandboxTask,
 
             // Test Module
