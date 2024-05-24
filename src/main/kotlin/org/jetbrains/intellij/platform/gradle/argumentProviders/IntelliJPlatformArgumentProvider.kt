@@ -14,7 +14,6 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
@@ -39,11 +38,6 @@ class IntelliJPlatformArgumentProvider(
     @PathSensitive(RELATIVE)
     @Optional
     val coroutinesJavaAgentFile: Provider<RegularFile>,
-
-    @InputFile
-    @PathSensitive(RELATIVE)
-    @Optional
-    val pluginXml: Provider<RegularFile>,
 
     @Input
     val runtimeArchProvider: Provider<String>,
@@ -99,14 +93,6 @@ class IntelliJPlatformArgumentProvider(
             ?.let { "-javaagent:${coroutinesJavaAgentFile.asPath}" }
 
     /**
-     * Defines the plugin required to be present when IDE is started.
-     */
-    private val requiredPlugins
-        get() = pluginXml.orNull
-            ?.takeIf { it.asPath.exists() }
-            ?.let { "-Didea.required.plugins.id=${it.parse { id }}" }
-
-    /**
      * Retrieves the additional JVM arguments from [ProductInfo.Launch.additionalJvmArguments].
      */
     private val additionalJvmArguments
@@ -148,6 +134,6 @@ class IntelliJPlatformArgumentProvider(
      * @return The list of arguments to be passed to the platform.
      */
     override fun asArguments() = (
-            bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + requiredPlugins + additionalJvmArguments + heapSpace
+            bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + additionalJvmArguments + heapSpace
             ).filterNot { it.isNullOrBlank() }
 }

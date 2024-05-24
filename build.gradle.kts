@@ -208,14 +208,7 @@ gradlePlugin {
         "migration" to "project.IntelliJPlatformMigrationPlugin",
         "module" to "project.IntelliJPlatformModulePlugin",
         "settings" to "settings.IntelliJPlatformSettingsPlugin",
-
-        // partials
-        "base" to "project.partials.IntelliJPlatformBasePlugin",
-        "build" to "project.partials.IntelliJPlatformBuildPlugin",
-        "publish" to "project.partials.IntelliJPlatformPublishPlugin",
-        "run" to "project.partials.IntelliJPlatformRunPlugin",
-        "test" to "project.partials.IntelliJPlatformTestPlugin",
-        "verify" to "project.partials.IntelliJPlatformVerifyPlugin",
+        "base" to "project.IntelliJPlatformBasePlugin",
     ).forEach { (pluginId, pluginClass) ->
         plugins.create("intellijPlatform${pluginId.replaceFirstChar { it.titlecase() }}") {
             id = "org.jetbrains.intellij.platform" + ".$pluginId".takeIf { pluginId.isNotBlank() }.orEmpty()

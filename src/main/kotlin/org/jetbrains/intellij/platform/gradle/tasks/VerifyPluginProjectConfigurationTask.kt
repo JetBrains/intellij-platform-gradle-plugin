@@ -21,7 +21,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.*
@@ -44,13 +43,21 @@ import kotlin.io.path.writeText
  */
 // TODO: Use Reporting for handling verification report output? https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
 @CacheableTask
-abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, PluginAware, RuntimeAware {
+abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, RuntimeAware {
 
     /**
      * Report directory where the verification result will be stored.
      */
     @get:OutputDirectory
     abstract val reportDirectory: DirectoryProperty
+
+    /**
+     * Holds the path to the patched `plugin.xml` file.
+     */
+    @get:InputFile
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Optional
+    abstract val pluginXml: RegularFileProperty
 
     /**
      * Root project path.
@@ -128,12 +135,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     @get:Internal
     abstract val kotlinxCoroutinesLibraryPresent: Property<Boolean>
 
-    /**
-     * Defines if the current module is a main project or imported module, which uses [Plugins.MODULE] plugin.
-     */
-    @get:Internal
-    abstract val hasModulePlugin: Property<Boolean>
-
     private val log = Logger(javaClass)
 
     init {
@@ -180,11 +181,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                         yield("The Kotlin configuration specifies apiVersion='$kotlinApiVersion' but since-build='$sinceBuild' property requires apiVersion='$sinceBuildKotlinApiVersion'.")
                     }
                 }
-                ?: run {
-                    if (!hasModulePlugin.get()) {
-                        this@sequence.yield("The plugin.xml descriptor file could not be found.")
-                    }
-                }
+                ?: yield("The plugin.xml descriptor file could not be found.")
 
             if (platformBuild < MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
                 yield("The minimal supported IntelliJ Platform version is `$MINIMAL_INTELLIJ_PLATFORM_VERSION` (branch `$MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER`), current: '$platformVersion' ('$platformBuild')")
@@ -317,12 +314,12 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                     )
                 }
 
-                hasModulePlugin.convention(project.provider {
-                    project.pluginManager.hasPlugin(Plugins.MODULE)
-                })
-
                 project.tasks.withType<JavaCompile> {
                     dependsOn(this@registerTask)
+                }
+
+                project.tasks.withType<PatchPluginXmlTask> {
+                    pluginXml.convention(outputFile)
                 }
             }
     }

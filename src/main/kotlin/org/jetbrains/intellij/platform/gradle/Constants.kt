@@ -26,13 +26,8 @@ object Constants {
 
     object Plugins {
         const val BASE = "${Plugin.ID}.base"
-        const val BUILD = "${Plugin.ID}.build"
         const val MODULE = "${Plugin.ID}.module"
-        const val PUBLISH = "${Plugin.ID}.publish"
-        const val RUN = "${Plugin.ID}.run"
         const val SETTINGS = "${Plugin.ID}.settings"
-        const val TEST = "${Plugin.ID}.test"
-        const val VERIFY = "${Plugin.ID}.verify"
 
         object External {
             const val JAVA_TEST_FIXTURES = "java-test-fixtures"

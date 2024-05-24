@@ -6,10 +6,9 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
-import org.jetbrains.intellij.platform.gradle.plugins.project.partials.IntelliJPlatformBasePlugin
-import org.jetbrains.intellij.platform.gradle.plugins.project.partials.IntelliJPlatformBuildPlugin
-import org.jetbrains.intellij.platform.gradle.plugins.project.partials.IntelliJPlatformTestPlugin
-import org.jetbrains.intellij.platform.gradle.plugins.project.partials.IntelliJPlatformVerifyPlugin
+import org.jetbrains.intellij.platform.gradle.tasks.*
+import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
+import org.jetbrains.intellij.platform.gradle.tasks.compaion.TestCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 @Suppress("unused")
@@ -22,9 +21,23 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
         with(project.plugins) {
             apply(IntelliJPlatformBasePlugin::class)
-            apply(IntelliJPlatformBuildPlugin::class)
-            apply(IntelliJPlatformTestPlugin::class)
-            apply(IntelliJPlatformVerifyPlugin::class)
+        }
+
+        listOf(
+            // Build Module
+            JarCompanion,
+            InstrumentCodeTask,
+            PrepareSandboxTask,
+
+            // Test Module
+            PrepareTestTask,
+            TestCompanion,
+            CustomTestIdeTask,
+
+            // Verify Module
+            VerifyPluginProjectConfigurationTask,
+        ).forEach {
+            it.register(project)
         }
     }
 }

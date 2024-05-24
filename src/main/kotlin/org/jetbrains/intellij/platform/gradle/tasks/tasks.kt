@@ -19,6 +19,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.PluginArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
@@ -430,7 +431,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 IntelliJPlatformArgumentProvider(
                     intelliJPlatformConfiguration,
                     coroutinesJavaAgentFile,
-                    pluginXml,
                     runtimeArchitecture,
                     options = this,
                 )
@@ -441,6 +441,11 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     sandboxPluginsDirectory,
                     sandboxSystemDirectory,
                     sandboxLogDirectory,
+                )
+            )
+            jvmArgumentProviders.add(
+                PluginArgumentProvider(
+                    pluginXml,
                 )
             )
 

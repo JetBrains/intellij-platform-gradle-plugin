@@ -86,7 +86,6 @@ abstract class CustomTestIdeTask : Test(), TestableAware, CustomIntelliJPlatform
                 IntelliJPlatformArgumentProvider(
                     sourceTask.intelliJPlatformConfiguration,
                     sourceTask.coroutinesJavaAgentFile,
-                    sourceTask.pluginXml,
                     sourceTask.runtimeArchitecture,
                     options = this,
                 )

@@ -6,7 +6,8 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin.ID
-import org.jetbrains.intellij.platform.gradle.plugins.project.partials.*
+import org.jetbrains.intellij.platform.gradle.tasks.*
+import org.jetbrains.intellij.platform.gradle.tasks.compaion.ProcessResourcesCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 @Suppress("unused")
@@ -19,11 +20,37 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
         with(project.plugins) {
             apply(IntelliJPlatformBasePlugin::class)
-            apply(IntelliJPlatformBuildPlugin::class)
-            apply(IntelliJPlatformTestPlugin::class)
-            apply(IntelliJPlatformVerifyPlugin::class)
-            apply(IntelliJPlatformRunPlugin::class)
-            apply(IntelliJPlatformPublishPlugin::class)
+            apply(IntelliJPlatformModulePlugin::class)
+        }
+
+        listOf(
+            // Build
+            PatchPluginXmlTask,
+            ProcessResourcesCompanion,
+            BuildSearchableOptionsTask,
+            JarSearchableOptionsTask,
+            BuildPluginTask,
+
+            // Test
+            CustomTestIdePerformanceTask,
+            CustomTestIdeUiTask,
+            TestIdePerformanceTask,
+            TestIdeUiTask,
+
+            // Run
+            RunIdeTask,
+            CustomRunIdeTask,
+
+            // Verify
+            VerifyPluginTask,
+            VerifyPluginSignatureTask,
+            VerifyPluginStructureTask,
+
+            // Sign
+            SignPluginTask,
+            PublishPluginTask,
+        ).forEach {
+            it.register(project)
         }
     }
 }
