@@ -26,7 +26,7 @@ class JarSearchableOptionsTaskTest : SearchableOptionsTestBase() {
 
         buildDirectory.resolve("libs").let {
             assertExists(it)
-            assertEquals(setOf("projectName-1.0.0-searchableOptions.jar", "projectName-1.0.0.jar"), collectPaths(it))
+            assertEquals(setOf("projectName-1.0.0-searchableOptions.jar", "projectName-1.0.0-base.jar", "projectName-1.0.0.jar"), collectPaths(it))
         }
     }
 }
