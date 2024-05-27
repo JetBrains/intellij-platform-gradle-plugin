@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
@@ -42,6 +43,7 @@ abstract class ComposedJarTask : Jar() {
                 dependsOn(sourceTaskProvider)
                 dependsOn(intellijPlatformPluginModuleConfiguration)
 
+                duplicatesStrategy = DuplicatesStrategy.EXCLUDE
                 JarCompanion.applyPluginManifest(this)
 
                 // Remove the default artifact exported by the current module and replace it with the final one provided by the task.
