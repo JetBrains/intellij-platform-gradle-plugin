@@ -128,6 +128,7 @@ object Constants {
     object Tasks {
         const val BUILD_PLUGIN = "buildPlugin"
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
+        const val COMPOSED_JAR = "composedJar"
         const val GENERATE_MANIFEST = "generateManifest"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
         const val INSTRUMENTED_JAR = "instrumentedJar"

@@ -29,6 +29,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             JarCompanion,
             InstrumentCodeTask,
             InstrumentedJarTask,
+            ComposedJarTask,
             PrepareSandboxTask,
 
             // Test Module
