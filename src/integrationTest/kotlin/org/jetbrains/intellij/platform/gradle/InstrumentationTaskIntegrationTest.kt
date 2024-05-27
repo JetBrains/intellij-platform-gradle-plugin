@@ -66,7 +66,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertEquals(782, it.fileSize())
             }
 
-            buildDirectory.resolve("idea-sandbox/IC-2022.3.3/plugins/test/lib/test-1.0.0-instrumented.jar").let { jar ->
+            buildDirectory.resolve("idea-sandbox/IC-2022.3.3/plugins/test/lib/test-1.0.0.jar").let { jar ->
                 jar containsFileInArchive "Main.class"
                 assertEquals(964, (jar readEntry "Main.class").length)
 
@@ -80,7 +80,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertEquals(989, (jar readEntry "CustomMain.class").length)
             }
 
-            buildDirectory.resolve("idea-sandbox/IC-2022.3.3/plugins/test/lib/submodule-1.0.0-instrumented.jar").let { jar ->
+            buildDirectory.resolve("idea-sandbox/IC-2022.3.3/plugins/test/lib/submodule-1.0.0.jar").let { jar ->
                 jar containsFileInArchive "FormSub.class"
                 assertEquals(1229, (jar readEntry "FormSub.class").length)
 

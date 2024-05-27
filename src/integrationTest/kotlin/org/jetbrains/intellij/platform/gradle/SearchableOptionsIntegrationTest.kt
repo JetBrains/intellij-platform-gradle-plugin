@@ -3,8 +3,10 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.io.path.exists
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "searchable-options",
@@ -38,28 +40,7 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
             }
 
             val submoduleSearchableOptionsJar = dir.resolve("submodule/build/libs/submodule-1.0.1-searchableOptions.jar")
-            assertExists(submoduleSearchableOptionsJar)
-
-            submoduleSearchableOptionsJar containsFileInArchive "search/submodule-1.0.1.jar.searchableOptions.xml"
-            with(submoduleSearchableOptionsJar readEntry "search/submodule-1.0.1.jar.searchableOptions.xml") {
-                assertEquals(
-                    """
-                    <options>
-                      <configurable id="submodule.searchable.configurable" configurable_name="Submodule Searchable Configurable">
-                        <option name="configurable" hit="Label for Submodule Searchable Configurable" />
-                        <option name="for" hit="Label for Submodule Searchable Configurable" />
-                        <option name="label" hit="Label for Submodule Searchable Configurable" />
-                        <option name="searchable" hit="Label for Submodule Searchable Configurable" />
-                        <option name="submodule" hit="Label for Submodule Searchable Configurable" />
-                        <option name="configurable" hit="Submodule Searchable Configurable" />
-                        <option name="searchable" hit="Submodule Searchable Configurable" />
-                        <option name="submodule" hit="Submodule Searchable Configurable" />
-                      </configurable>
-                    </options>
-                    """.trimIndent(),
-                    this,
-                )
-            }
+            assertFalse(submoduleSearchableOptionsJar.exists())
         }
     }
 }

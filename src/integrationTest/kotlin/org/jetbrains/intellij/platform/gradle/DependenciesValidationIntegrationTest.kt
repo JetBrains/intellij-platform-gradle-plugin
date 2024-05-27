@@ -115,9 +115,10 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         buildAndFail(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(
                 """
-                > No IntelliJ Platform dependency found.
-                  Please ensure there is a single IntelliJ Platform dependency defined in your project and that the necessary repositories, where it can be located, are added.
-                  See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+                > Failed to query the value of task ':verifyPluginProjectConfiguration' property 'runtimeDirectory'.
+                   > No IntelliJ Platform dependency found.
+                     Please ensure there is a single IntelliJ Platform dependency defined in your project and that the necessary repositories, where it can be located, are added.
+                     See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
                 """.trimIndent(),
                 output,
             )

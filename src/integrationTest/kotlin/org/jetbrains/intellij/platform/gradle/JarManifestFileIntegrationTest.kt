@@ -13,7 +13,8 @@ class JarManifestFileIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `test manifest file`() {
         build(Tasks.External.ASSEMBLE, projectProperties = defaultProjectProperties) {
-            val pluginJar = buildDirectory.resolve("libs/test-1.0.0.jar").also(::assertExists)
+            val pluginJar = buildDirectory.resolve("libs/test-1.0.0-base.jar")
+            assertExists(pluginJar)
 
             pluginJar containsFileInArchive "META-INF/MANIFEST.MF"
             with(pluginJar readEntry "META-INF/MANIFEST.MF") {
