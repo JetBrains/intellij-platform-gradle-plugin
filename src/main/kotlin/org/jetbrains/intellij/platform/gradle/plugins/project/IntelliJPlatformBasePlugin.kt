@@ -125,7 +125,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             val intellijPlatformPluginModuleConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
                 description = "IntelliJ Platform plugin module",
-            )
+            ) {
+                isTransitive = false
+            }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR,
                 description = "IntelliJ Platform plugin dependencies internal collector",
