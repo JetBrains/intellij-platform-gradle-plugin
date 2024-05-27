@@ -4,12 +4,14 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.file.DuplicatesStrategy
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.INSTRUMENT_CODE
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
 
+@CacheableTask
 abstract class InstrumentedJarTask : Jar() {
 
     companion object : Registrable {

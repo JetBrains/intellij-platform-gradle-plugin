@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.the
@@ -12,6 +13,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
 import org.jetbrains.kotlin.gradle.utils.named
 
+@CacheableTask
 abstract class ComposedJarTask : Jar() {
 
     companion object : Registrable {

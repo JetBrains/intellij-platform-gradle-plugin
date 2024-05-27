@@ -6,6 +6,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -26,6 +27,7 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.writeText
 
+@CacheableTask
 abstract class GenerateManifestTask : DefaultTask() {
 
     @get:Input
