@@ -3,11 +3,12 @@
 package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File
 import java.nio.file.Path
@@ -33,10 +34,10 @@ class SandboxArgumentProvider(
     @PathSensitive(RELATIVE)
     val sandboxPluginsDirectory: DirectoryProperty,
 
-    @OutputDirectory
+    @Internal
     val sandboxSystemDirectory: DirectoryProperty,
 
-    @OutputDirectory
+    @Internal
     val sandboxLogDirectory: DirectoryProperty,
 ) : CommandLineArgumentProvider {
 
