@@ -122,6 +122,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     attribute(Attributes.localPluginsNormalized, false)
                 }
             }
+            val intellijPlatformPluginModuleConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
+                description = "IntelliJ Platform plugin module",
+            )
             create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR,
                 description = "IntelliJ Platform plugin dependencies internal collector",
@@ -233,6 +237,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             ) {
                 extendsFrom(
                     intellijPlatformPluginConfiguration,
+                    intellijPlatformPluginModuleConfiguration,
                     intellijPlatformBundledPluginsConfiguration,
                 )
             }

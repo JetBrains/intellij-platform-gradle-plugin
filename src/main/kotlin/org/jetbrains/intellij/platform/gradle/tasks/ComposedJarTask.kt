@@ -21,9 +21,7 @@ abstract class ComposedJarTask : Jar() {
                 val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
-
-                archiveBaseName.convention(extension.projectName)
-                JarCompanion.applyPluginManifest(this)
+                val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
 
                 val sourceTaskProvider = extension.instrumentCode.flatMap {
                     when (it) {
@@ -33,13 +31,19 @@ abstract class ComposedJarTask : Jar() {
                 }
 
                 from(project.zipTree(sourceTaskProvider.flatMap { it.archiveFile }))
+                from(project.provider {
+                    intellijPlatformPluginModuleConfiguration.map {
+                        project.zipTree(it)
+                    }
+                })
 
                 dependsOn(sourceTaskProvider)
+                dependsOn(intellijPlatformPluginModuleConfiguration)
+
+                JarCompanion.applyPluginManifest(this)
 
                 // Remove the default artifact exported by the current module and replace it with the final one provided by the task.
-                runtimeElementsConfiguration.artifacts.removeIf {
-                    it.classifier == null && it.type == "jar" && it.name == extension.projectName.get()
-                }
+                runtimeElementsConfiguration.artifacts.removeIf { it.classifier == JarCompanion.CLASSIFIER }
                 project.artifacts.add(runtimeElementsConfiguration.name, archiveFile)
             }
     }

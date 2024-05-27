@@ -225,11 +225,12 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
                 val extension = project.the<IntelliJPlatformExtension>()
                 val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
                 val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
+                val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
 
                 pluginJar.convention(composedJarTaskProvider.flatMap { it.archiveFile })
                 defaultDestinationDirectory.convention(sandboxPluginsDirectory)
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
-                runtimeClasspath.from(runtimeConfiguration)
+                runtimeClasspath.from(runtimeConfiguration - intellijPlatformPluginModuleConfiguration)
 
                 splitModeTarget.convention(extension.splitModeTarget)
                 splitModeCurrentTarget.convention(SplitModeTarget.BACKEND)

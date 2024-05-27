@@ -9,6 +9,7 @@
 - Better error handling in dependency helpers when missing values
 - Introduce `GenerateManifestTask` for generating `MANIFEST.MF` file
 - Introduce `ComposedJarTask` to compose and pick the final jar archive
+- Introduce `intellijPlatform.pluginModule(Dependency)` dependency helper to compose a single jar combined of multiple modules
 
 ### Fixed
 

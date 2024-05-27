@@ -62,6 +62,7 @@ object Constants {
         const val INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY = "intellijPlatformPluginDependency"
         const val INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR = "intellijPlatformPluginDependencyCollector"
         const val INTELLIJ_PLATFORM_PLUGIN_LOCAL = "intellijPlatformPluginLocal"
+        const val INTELLIJ_PLATFORM_PLUGIN_MODULE = "intellijPlatformPluginModule"
         const val INTELLIJ_PLATFORM_PLUGIN = "intellijPlatformPlugin"
         const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS = "intellijPlatformBundledPlugins"
         const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST = "intellijPlatformBundledPluginsList"

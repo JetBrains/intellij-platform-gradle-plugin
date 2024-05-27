@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.dsl.RepositoryHandler
@@ -15,6 +16,7 @@ import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
+import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import java.io.File
 import java.nio.file.Path
@@ -785,6 +787,17 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun localPlugin(dependency: ProjectDependency) = delegate.addIntelliJPlatformLocalPluginProjectDependency(
         dependency = dependency,
     )
+
+    /**
+     * Adds dependency on a module to be merged into the main plugin Jar archive by [ComposedJarTask].
+     *
+     * @param dependency Plugin module dependency.
+     */
+    fun pluginModule(dependency: Dependency?) = dependency?.run {
+        delegate.addIntelliJPlatformPluginModuleDependency(
+            dependency = dependency,
+        )
+    }
 
     /**
      * Adds a dependency on IntelliJ Plugin Verifier.

@@ -34,6 +34,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompi
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
@@ -259,6 +260,19 @@ class IntelliJPlatformDependenciesHelper(
     internal fun addIntelliJPlatformLocalPluginProjectDependency(
         dependency: ProjectDependency,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.add(dependency.apply(action))
+
+    /**
+     * A base method for adding a project dependency on a module to be merged into the main plugin Jar archive by [ComposedJarTask].
+     *
+     * @param dependency Plugin module dependency.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addIntelliJPlatformPluginModuleDependency(
+        dependency: Dependency,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.add(dependency.apply(action))
 
