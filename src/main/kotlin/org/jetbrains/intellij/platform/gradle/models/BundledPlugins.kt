@@ -38,4 +38,11 @@ internal fun Path.resolveBundledPluginsPath(name: String = "bundled-plugins.json
 @Throws(IllegalArgumentException::class)
 fun Path.bundledPlugins() = decode<BundledPlugins>(this)
 
-fun FileCollection.bundledPlugins() = single().toPath().bundledPlugins()
+fun FileCollection.bundledPlugins() =
+    singleOrNull()?.toPath()?.bundledPlugins() ?: throw GradleException(
+        """
+        Could not resolve bundled plugin list.
+        Please ensure there is a single IntelliJ Platform dependency defined in your project and that the necessary repositories, where it can be located, are added.
+        See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+        """.trimIndent()
+    )
