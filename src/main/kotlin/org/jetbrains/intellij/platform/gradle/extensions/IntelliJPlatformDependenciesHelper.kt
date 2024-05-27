@@ -547,12 +547,17 @@ class IntelliJPlatformDependenciesHelper(
         val plugin = bundledPlugins.get().plugins.find { it.id == bundledPluginId }
         requireNotNull(plugin) { "Could not find bundled plugin with ID: '$bundledPluginId'" }
 
+        val version = productInfo.get().version
+        val artifactPath = platformPath.get()
+        val hash = artifactPath.hashCode().absoluteValue % 1000
+        val hashedVersion = "$version+$hash"
+
         return create(
             group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
             name = plugin.id,
-            version = productInfo.get().version,
+            version = hashedVersion,
         ).apply {
-            createBundledPluginIvyDependencyFile(plugin, version!!)
+            createBundledPluginIvyDependencyFile(plugin, hashedVersion)
         }
     }
 

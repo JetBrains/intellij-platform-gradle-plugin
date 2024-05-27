@@ -59,8 +59,9 @@ internal fun createIvyDependencyFile(
 ) {
     val ivyFile = localPlatformArtifactsPath
         .resolve("$group-$name-$version.xml")
-        .takeUnless { it.exists() }
-        ?: return
+// TODO: ignore existing Ivy files as path may be invalid over time thanks to Gradle transformers rotation
+//        .takeUnless { it.exists() }
+//        ?: return
 
     val ivyModule = IvyModule(
         info = IvyModule.Info(
@@ -74,6 +75,7 @@ internal fun createIvyDependencyFile(
 
     with(ivyFile) {
         parent.createDirectories()
+        deleteIfExists()
         createFile()
         writeText(XML {
             indentString = "  "
