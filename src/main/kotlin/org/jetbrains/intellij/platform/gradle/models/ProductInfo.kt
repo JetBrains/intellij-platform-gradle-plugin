@@ -106,14 +106,14 @@ data class ProductInfo(
     data class CustomProperty(
         val key: String? = null,
         val value: String? = null,
-    )
+    ): java.io.Serializable
 
     @Serializable
     data class LayoutItem(
         val name: String,
         val kind: LayoutItemKind,
         val classPath: List<String> = mutableListOf(),
-    )
+    ): java.io.Serializable
 
     @Serializable
     enum class LayoutItemKind {
