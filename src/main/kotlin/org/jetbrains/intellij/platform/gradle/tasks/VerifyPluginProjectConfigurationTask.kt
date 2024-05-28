@@ -10,17 +10,17 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.the
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
-import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.KotlinMetadataAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.*
@@ -43,7 +43,7 @@ import kotlin.io.path.writeText
  */
 // TODO: Use Reporting for handling verification report output? https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
 @CacheableTask
-abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, RuntimeAware {
+abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, KotlinMetadataAware, RuntimeAware {
 
     /**
      * Report directory where the verification result will be stored.
@@ -92,48 +92,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
      */
     @get:Internal
     abstract val targetCompatibility: Property<String>
-
-    /**
-     * Indicates that the Kotlin Gradle Plugin is loaded and available.
-     */
-    @get:Internal
-    abstract val kotlinPluginAvailable: Property<Boolean>
-
-    /**
-     * The `apiVersion` property value of `compileKotlin.kotlinOptions` defined in the build script.
-     */
-    @get:Internal
-    abstract val kotlinApiVersion: Property<String?>
-
-    /**
-     * The `languageVersion` property value of `compileKotlin.kotlinOptions` defined in the build script.
-     */
-    @get:Internal
-    abstract val kotlinLanguageVersion: Property<String?>
-
-    /**
-     * The version of Kotlin used in the project.
-     */
-    @get:Internal
-    abstract val kotlinVersion: Property<String?>
-
-    /**
-     * The `jvmTarget` property value of `compileKotlin.kotlinOptions` defined in the build script.
-     */
-    @get:Internal
-    abstract val kotlinJvmTarget: Property<String?>
-
-    /**
-     * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
-     */
-    @get:Internal
-    abstract val kotlinStdlibDefaultDependency: Property<Boolean>
-
-    /**
-     * This variable represents whether the Kotlin Coroutines library is added explicitly to the project dependencies.
-     */
-    @get:Internal
-    abstract val kotlinxCoroutinesLibraryPresent: Property<Boolean>
 
     private val log = Logger(javaClass)
 
@@ -264,55 +222,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 targetCompatibility.convention(compileJavaTaskProvider.map {
                     it.targetCompatibility
                 })
-                kotlinxCoroutinesLibraryPresent.convention(project.provider {
-                    listOf(
-                        Configurations.External.IMPLEMENTATION,
-                        Configurations.External.COMPILE_ONLY,
-                    ).any { configurationName ->
-                        project.configurations[configurationName].dependencies.any {
-                            it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
-                        }
-                    }
-                })
-
-                kotlinPluginAvailable.convention(project.provider {
-                    project.pluginManager.hasPlugin(Plugins.External.KOTLIN)
-                })
-                project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
-                    val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).apply {
-                        configure {
-                            dependsOn(this@registerTask)
-                        }
-                    }.map {
-                        it.withGroovyBuilder { getProperty("kotlinOptions") }
-                            .withGroovyBuilder { getProperty("options") }
-                    }
-
-                    kotlinJvmTarget.convention(kotlinOptionsProvider.flatMap {
-                        it.withGroovyBuilder { getProperty("jvmTarget") as Property<*> }
-                            .map { jvmTarget -> jvmTarget.withGroovyBuilder { getProperty("target") } }
-                            .map { value -> value as String }
-                    })
-                    kotlinApiVersion.convention(kotlinOptionsProvider.flatMap {
-                        it.withGroovyBuilder { getProperty("apiVersion") as Property<*> }
-                            .map { apiVersion -> apiVersion.withGroovyBuilder { getProperty("version") } }
-                            .map { value -> value as String }
-                    })
-                    kotlinLanguageVersion.convention(kotlinOptionsProvider.flatMap {
-                        it.withGroovyBuilder { getProperty("languageVersion") as Property<*> }
-                            .map { languageVersion -> languageVersion.withGroovyBuilder { getProperty("version") } }
-                            .map { value -> value as String }
-                    })
-                    kotlinVersion.convention(project.provider {
-                        project.extensions.getByName("kotlin")
-                            .withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
-                    })
-                    kotlinStdlibDefaultDependency.convention(
-                        project.providers
-                            .gradleProperty(GradleProperties.KOTLIN_STDLIB_DEFAULT_DEPENDENCY)
-                            .map { it.toBoolean() }
-                    )
-                }
 
                 project.tasks.withType<JavaCompile> {
                     dependsOn(this@registerTask)

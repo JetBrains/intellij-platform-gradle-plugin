@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.JavaExec
 import org.gradle.jvm.toolchain.JavaToolchainService
@@ -16,6 +17,8 @@ import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
+import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
+import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
@@ -473,6 +476,59 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 if (this is SplitModeAware) {
                     argumentProviders.add(SplitModeArgumentProvider(splitMode))
                 }
+            }
+        }
+
+        if (this is KotlinMetadataAware) {
+            kotlinxCoroutinesLibraryPresent.convention(project.provider {
+                listOf(
+                    Configurations.External.IMPLEMENTATION,
+                    Configurations.External.COMPILE_ONLY,
+                ).any { configurationName ->
+                    project.configurations[configurationName].dependencies.any {
+                        it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
+                    }
+                }
+            })
+
+            kotlinPluginAvailable.convention(project.provider {
+                project.pluginManager.hasPlugin(Plugins.External.KOTLIN)
+            })
+
+            project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
+                val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).apply {
+                    configure {
+                        this@task.dependsOn(this)
+                    }
+                }.map {
+                    it.withGroovyBuilder { getProperty("kotlinOptions") }
+                        .withGroovyBuilder { getProperty("options") }
+                }
+
+                kotlinJvmTarget.convention(kotlinOptionsProvider.flatMap {
+                    it.withGroovyBuilder { getProperty("jvmTarget") as Property<*> }
+                        .map { jvmTarget -> jvmTarget.withGroovyBuilder { getProperty("target") } }
+                        .map { value -> value as String }
+                })
+                kotlinApiVersion.convention(kotlinOptionsProvider.flatMap {
+                    it.withGroovyBuilder { getProperty("apiVersion") as Property<*> }
+                        .map { apiVersion -> apiVersion.withGroovyBuilder { getProperty("version") } }
+                        .map { value -> value as String }
+                })
+                kotlinLanguageVersion.convention(kotlinOptionsProvider.flatMap {
+                    it.withGroovyBuilder { getProperty("languageVersion") as Property<*> }
+                        .map { languageVersion -> languageVersion.withGroovyBuilder { getProperty("version") } }
+                        .map { value -> value as String }
+                })
+                kotlinVersion.convention(project.provider {
+                    project.extensions.getByName("kotlin")
+                        .withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
+                })
+                kotlinStdlibDefaultDependency.convention(
+                    project.providers
+                        .gradleProperty(GradleProperties.KOTLIN_STDLIB_DEFAULT_DEPENDENCY)
+                        .map { it.toBoolean() }
+                )
             }
         }
     }

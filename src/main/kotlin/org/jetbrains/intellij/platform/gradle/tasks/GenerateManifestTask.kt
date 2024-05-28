@@ -6,7 +6,10 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.OutputFile
+import org.gradle.api.tasks.TaskAction
 import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.assign
@@ -16,12 +19,13 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
+import org.jetbrains.intellij.platform.gradle.tasks.aware.KotlinMetadataAware
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.writeText
 
 @CacheableTask
-abstract class GenerateManifestTask : DefaultTask() {
+abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
 
     /**
      * The IntelliJ Platform Gradle Plugin version.
@@ -34,24 +38,6 @@ abstract class GenerateManifestTask : DefaultTask() {
      */
     @get:Input
     abstract val gradleVersion: Property<String>
-
-    /**
-     * Indicates that the Kotlin Gradle Plugin is loaded and available.
-     */
-    @get:Internal
-    abstract val kotlinPluginAvailable: Property<Boolean>
-
-    /**
-     * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
-     */
-    @get:Input
-    abstract val kotlinStdlibDefaultDependency: Property<Boolean>
-
-    /**
-     * The version of Kotlin used in the project.
-     */
-    @get:Input
-    abstract val kotlinVersion: Property<String?>
 
     /**
      * The [ProductInfo] instance of the current IntelliJ Platform.
@@ -97,12 +83,8 @@ abstract class GenerateManifestTask : DefaultTask() {
                 val extension = project.the<IntelliJPlatformExtension>()
                 val initializeIntelliJPlatformPluginTaskProvider =
                     project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-                val verifyPluginProjectConfigurationTaskProvider =
-                    project.tasks.named<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION)
 
                 productInfo.convention(project.provider { extension.productInfo })
-                kotlinStdlibDefaultDependency.convention(verifyPluginProjectConfigurationTaskProvider.flatMap { it.kotlinStdlibDefaultDependency })
-                kotlinVersion.convention(verifyPluginProjectConfigurationTaskProvider.flatMap { it.kotlinVersion })
                 pluginVersion.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap { it.pluginVersion })
                 gradleVersion.convention(project.provider { project.gradle.gradleVersion })
                 version.convention(extension.pluginConfiguration.version)

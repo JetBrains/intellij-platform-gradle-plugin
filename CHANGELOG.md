@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Introduce `KotlinMetadataAware` interface to provide metadata about the Kotlin setup
+
 ### Fixed
 
 - Regression: Cannot fingerprint input property `productInfo`

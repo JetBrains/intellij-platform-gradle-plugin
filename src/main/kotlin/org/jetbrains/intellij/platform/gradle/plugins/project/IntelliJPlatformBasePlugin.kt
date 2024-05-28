@@ -444,6 +444,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 is CustomIntelliJPlatformVersionAware,
                 is IntelliJPlatformVersionAware,
                 is JavaCompilerAware,
+                is KotlinMetadataAware,
                 is PluginAware,
                 is PluginVerifierAware,
                 is RunnableIdeAware,
