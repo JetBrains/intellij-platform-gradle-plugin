@@ -79,6 +79,7 @@ abstract class GenerateManifestTask : DefaultTask() {
                 kotlinStdlibBundled.convention(
                     project.providers
                         .gradleProperty(GradleProperties.KOTLIN_STDLIB_DEFAULT_DEPENDENCY)
+                        .orElse("true")
                         .map { it.toBoolean() }
                 )
                 kotlinVersion.convention(project.provider {
