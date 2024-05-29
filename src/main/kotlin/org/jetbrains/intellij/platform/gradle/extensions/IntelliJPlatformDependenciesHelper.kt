@@ -73,6 +73,9 @@ class IntelliJPlatformDependenciesHelper(
 
     private val log = Logger(javaClass)
 
+    private val baseType = objects.property<IntelliJPlatformType>()
+    private val baseVersion = objects.property<String>()
+
     /**
      * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
      */
@@ -158,19 +161,29 @@ class IntelliJPlatformDependenciesHelper(
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        fallbackToBase: Boolean = false,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
-        val type = typeProvider.orNull?.toIntelliJPlatformType()
-        requireNotNull(type) { "The `intellijPlatform.create` dependency helper was called with no `type` value provided." }
+    ) {
+        val finalTypeProvider = with(typeProvider.map { it.toIntelliJPlatformType() }) {
+            when (fallbackToBase) {
+                true -> orElse(baseType)
+                false -> also { baseType = this }
+            }
+        }
+        val finalVersionProvider = with(versionProvider) {
+            when (fallbackToBase) {
+                true -> orElse(baseVersion)
+                false -> also { baseVersion = this }
+            }
+        }
 
-        val version = versionProvider.orNull
-        requireNotNull(version) { "The `intellijPlatform.create` dependency helper was called with no `version` value provided." }
-
-        when (type) {
-            IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-            else -> dependencies.createIntelliJPlatform(version, type)
-        }.apply(action)
-    })
+        configurations[configurationName].dependencies.addLater(finalTypeProvider.zip(finalVersionProvider) { type, version ->
+            when (type) {
+                IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
+                else -> dependencies.createIntelliJPlatform(type, version)
+            }.apply(action)
+        })
+    }
 
     /**
      * A base method for adding a dependency on a local IntelliJ Platform instance.
@@ -185,10 +198,7 @@ class IntelliJPlatformDependenciesHelper(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
-        val localPath = localPathProvider.orNull
-        requireNotNull(localPath) { "The `intellijPlatform.local` dependency helper was called with no `localPath` value provided." }
-
+    ) = configurations[configurationName].dependencies.addLater(localPathProvider.map { resolveArtifactPath(it) }.map { localPath ->
         dependencies.createIntelliJPlatformLocal(localPath).apply(action)
     })
 
@@ -455,7 +465,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version IntelliJ Platform version
      * @param type IntelliJ Platform type
      */
-    private fun DependencyHandler.createIntelliJPlatform(version: String, type: IntelliJPlatformType) = when (BuildFeature.USE_BINARY_RELEASES.isEnabled(providers).get()) {
+    private fun DependencyHandler.createIntelliJPlatform(type: IntelliJPlatformType, version: String) = when (BuildFeature.USE_BINARY_RELEASES.isEnabled(providers).get()) {
         true -> {
             val (extension, classifier) = with(OperatingSystem.current()) {
                 val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
@@ -494,8 +504,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param localPath Path to the local IntelliJ Platform
      */
-    private fun DependencyHandler.createIntelliJPlatformLocal(localPath: Any): Dependency {
-        val artifactPath = resolveArtifactPath(localPath)
+    private fun DependencyHandler.createIntelliJPlatformLocal(artifactPath: Path): Dependency {
         val localProductInfo = artifactPath.productInfo()
 
         localProductInfo.validateSupportedVersion()

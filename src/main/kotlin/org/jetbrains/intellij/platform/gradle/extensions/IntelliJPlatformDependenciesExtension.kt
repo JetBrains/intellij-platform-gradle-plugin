@@ -145,6 +145,20 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a dependency on the custom IntelliJ Platform with a fallback to the base IntelliJ Platform.
+     *
+     * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
+     * @param version The provider for the version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to.
+     */
+    internal fun customCreate(type: Provider<*>, version: Provider<String>, configurationName: String) = delegate.addIntelliJPlatformDependency(
+        typeProvider = type,
+        versionProvider = version,
+        configurationName = configurationName,
+        fallbackToBase = true,
+    )
+
+    /**
      * Adds a dependency on Android Studio.
      *
      * @param version The version of Android Studio.

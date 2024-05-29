@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.file.DirectoryProperty
@@ -40,7 +39,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSigne
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.absolute
 
@@ -124,6 +122,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is CustomIntelliJPlatformVersionAware) {
             val dependenciesExtension = dependencies.the<IntelliJPlatformDependenciesExtension>()
             val rootProjectDirectory = project.rootProject.rootDir.toPath().absolute()
+            val baseIntelliJPlatformLocalConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_LOCAL]
 
             with(configurations) {
                 val baseProductInfo = provider {
@@ -147,16 +146,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY + suffix,
                     description = "Custom IntelliJ Platform dependency archive",
                 ) {
-                    val defaultTypeProvider = baseProductInfo.map {
-                        it.productCode.toIntelliJPlatformType()
-                    }
-                    val defaultVersionProvider = baseProductInfo.map {
-                        IdeVersion.createIdeVersion(it.version).toString()
-                    }
-
-                    dependenciesExtension.create(
-                        type = type.orElse(defaultTypeProvider),
-                        version = version.orElse(defaultVersionProvider),
+                    dependenciesExtension.customCreate(
+                        type = type,
+                        version = version,
                         configurationName = name,
                     )
                 }
@@ -177,8 +169,11 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
                     defaultDependencies {
                         addAllLater(provider {
-                            val merged = customIntelliJPlatformLocalConfiguration.dependencies + customIntelliJPlatformDependencyConfiguration.dependencies
-                            listOf(merged.first())
+                            listOf(
+                                customIntelliJPlatformLocalConfiguration,
+                                customIntelliJPlatformDependencyConfiguration,
+                                baseIntelliJPlatformLocalConfiguration,
+                            ).flatMap { it.dependencies }.take(1)
                         })
                     }
                     defaultDependencies {
