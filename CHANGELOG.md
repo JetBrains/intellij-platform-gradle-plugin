@@ -10,6 +10,7 @@
 
 - Regression: Cannot fingerprint input property `productInfo`
 - Regression: `GenerateManifestTask` property `kotlinStdlibBundled` doesn't have a configured value
+- Revise creating custom tasks and IntelliJ Platform main dependency inheritance 
 
 ## [2.0.0-beta4] - 2024-05-27
 
