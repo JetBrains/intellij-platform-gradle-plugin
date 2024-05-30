@@ -30,7 +30,7 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_STRUCTURE) {
-            assertContains("Invalid plugin descriptor 'plugin.xml'. The plugin name should not contain the word 'IntelliJ'.", output)
+            assertContains("Invalid plugin descriptor 'plugin.xml'. The plugin name 'intellijtest' should not include the word 'IntelliJ'.", output)
         }
     }
 
@@ -60,7 +60,7 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN_STRUCTURE) {
-            assertContains("The plugin name should not contain the word 'IntelliJ'.", output)
+            assertContains("Invalid plugin descriptor 'plugin.xml'. The plugin name 'intellijtest' should not include the word 'IntelliJ'.", output)
         }
     }
 
