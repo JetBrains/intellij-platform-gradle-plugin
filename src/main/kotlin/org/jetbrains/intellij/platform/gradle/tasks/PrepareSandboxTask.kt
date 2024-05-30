@@ -119,6 +119,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
 
     @TaskAction
     override fun copy() {
+        createSandboxDirectories()
         disableIdeUpdate()
         disabledPlugins()
         createSplitModeFrontendPropertiesFile()
@@ -133,6 +134,15 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
     override fun getDestinationDir() = defaultDestinationDirectory.asFile.get()
 
     override fun configure(closure: Closure<*>) = super.configure(closure)
+
+    private fun createSandboxDirectories() = listOf(
+        sandboxConfigDirectory,
+        sandboxPluginsDirectory,
+        sandboxLogDirectory,
+        sandboxSystemDirectory,
+    ).forEach {
+        it.asPath.createDirectories()
+    }
 
     /**
      * @throws GradleException
