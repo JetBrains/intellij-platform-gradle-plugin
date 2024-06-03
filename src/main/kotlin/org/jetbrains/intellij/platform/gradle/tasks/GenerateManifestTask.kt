@@ -14,14 +14,13 @@ import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.KotlinMetadataAware
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import kotlin.io.path.writeText
 
 @CacheableTask
@@ -80,14 +79,13 @@ abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<GenerateManifestTask>(Tasks.GENERATE_MANIFEST) {
-                val extension = project.the<IntelliJPlatformExtension>()
                 val initializeIntelliJPlatformPluginTaskProvider =
                     project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
 
-                productInfo.convention(project.provider { extension.productInfo })
+                productInfo.convention(project.extensionProvider.map { it.productInfo })
                 pluginVersion.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap { it.pluginVersion })
                 gradleVersion.convention(project.provider { project.gradle.gradleVersion })
-                version.convention(extension.pluginConfiguration.version)
+                version.convention(project.extensionProvider.flatMap { it.pluginConfiguration.version })
 
                 generatedManifest = temporaryDir.resolve("MANIFEST.MF")
             }

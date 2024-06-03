@@ -6,11 +6,10 @@ import org.gradle.api.Project
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.the
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 /**
  * Builds the plugin and prepares the ZIP archive for testing and deployment.
@@ -35,14 +34,14 @@ abstract class BuildPluginTask : Zip() {
             project.registerTask<BuildPluginTask>(Tasks.BUILD_PLUGIN) {
                 val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-                val extension = project.the<IntelliJPlatformExtension>()
+                val projectNameProvider = project.extensionProvider.flatMap { it.projectName }
 
-                archiveBaseName.convention(extension.projectName)
+                archiveBaseName.convention(projectNameProvider)
 
                 from(jarSearchableOptionsTaskProvider) {
                     into("lib")
                 }
-                from(prepareSandboxTaskProvider.zip(extension.projectName) { task, name ->
+                from(prepareSandboxTaskProvider.zip(projectNameProvider) { task, name ->
                     task.destinationDir.resolve(name)
                 })
                 into(archiveBaseName)

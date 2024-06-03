@@ -14,7 +14,6 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
@@ -22,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.settings
 import java.io.File
 import java.nio.file.Path
@@ -962,7 +962,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 project.resources,
                 project.rootProject.rootDir.toPath().absolute(),
                 project.settings.dependencyResolutionManagement.repositories,
-                project.provider { project.the<IntelliJPlatformExtension>() },
+                project.extensionProvider,
             )
     }
 }

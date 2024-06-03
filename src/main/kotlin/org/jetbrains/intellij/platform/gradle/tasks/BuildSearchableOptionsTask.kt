@@ -6,7 +6,6 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -15,6 +14,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import kotlin.io.path.pathString
 
 /**
@@ -77,8 +77,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-                val extension = project.the<IntelliJPlatformExtension>()
-                val buildSearchableOptionsEnabled = extension.buildSearchableOptions
+                val buildSearchableOptionsEnabled = project.extensionProvider.flatMap { it.buildSearchableOptions }
 
                 outputDirectory.convention(
                     project.layout.dir(project.provider {
@@ -91,7 +90,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                     }
                 )
 
-                inputs.property("intellijPlatform.buildSearchableOptions", extension.buildSearchableOptions)
+                inputs.property("intellijPlatform.buildSearchableOptions", buildSearchableOptionsEnabled)
 
                 onlyIf {
                     buildSearchableOptionsEnabled.get()

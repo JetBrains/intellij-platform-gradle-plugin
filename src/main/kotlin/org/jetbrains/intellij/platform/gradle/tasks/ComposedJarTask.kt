@@ -7,11 +7,10 @@ import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.kotlin.gradle.utils.named
 
 @CacheableTask
@@ -20,16 +19,17 @@ abstract class ComposedJarTask : Jar() {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<ComposedJarTask>(Tasks.COMPOSED_JAR) {
-                val extension = project.the<IntelliJPlatformExtension>()
                 val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
 
-                val sourceTaskProvider = extension.instrumentCode.flatMap {
-                    when (it) {
-                        true -> instrumentedJarTaskProvider
-                        false -> jarTaskProvider
+                val sourceTaskProvider = project.extensionProvider.flatMap {
+                    it.instrumentCode.flatMap { value ->
+                        when (value) {
+                            true -> instrumentedJarTaskProvider
+                            false -> jarTaskProvider
+                        }
                     }
                 }
 

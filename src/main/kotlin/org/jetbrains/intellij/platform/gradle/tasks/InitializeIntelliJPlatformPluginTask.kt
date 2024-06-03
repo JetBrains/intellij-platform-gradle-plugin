@@ -11,11 +11,9 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.of
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
@@ -23,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
@@ -137,22 +136,18 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
-                val extension = project.the<IntelliJPlatformExtension>()
+                val cachePathProvider = project.extensionProvider.map { it.cachePath }
 
                 offline.convention(project.gradle.startParameter.isOffline)
                 selfUpdateCheck.convention(BuildFeature.SELF_UPDATE_CHECK.isEnabled(project.providers))
                 selfUpdateLock.convention(
-                    project.layout.file(project.provider {
-                        extension.cachePath.also {
-                            it.createDirectories()
-                        }.resolve("self-update.lock").toFile()
+                    project.layout.file(cachePathProvider.map {
+                        it.createDirectories().resolve("self-update.lock").toFile()
                     })
                 )
                 coroutinesJavaAgent.convention(
-                    project.layout.file(project.provider {
-                        extension.cachePath.also {
-                            it.createDirectories()
-                        }.resolve("coroutines-javaagent.jar").toFile()
+                    project.layout.file(cachePathProvider.map {
+                        it.createDirectories().resolve("coroutines-javaagent.jar").toFile()
                     })
                 )
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})

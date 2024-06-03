@@ -19,7 +19,6 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByName
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
@@ -318,8 +317,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             companion object : Registrable<IdeaVersion> {
                 override fun register(project: Project, target: Any) =
                     target.configureExtension<IdeaVersion>(Extensions.IDEA_VERSION) {
-                        val extensionProvider = project.provider { project.the<IntelliJPlatformExtension>() }
-                        val buildVersion = extensionProvider.map {
+                        val buildVersion = project.extensionProvider.map {
                             it.runCatching { productInfo.buildNumber.toVersion() }.getOrDefault(Version())
                         }
                         sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
@@ -857,7 +855,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         project.resources,
                         project.rootProjectPath,
                         project.settings.dependencyResolutionManagement.repositories,
-                        project.provider { project.the<IntelliJPlatformExtension>() }
+                        project.extensionProvider,
                     )
             }
         }

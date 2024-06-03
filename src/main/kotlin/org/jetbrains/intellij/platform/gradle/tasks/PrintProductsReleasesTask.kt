@@ -9,13 +9,13 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 /**
  * Prints the list of binary product releases that, by default, match the currently selected IntelliJ Platform along
@@ -48,13 +48,13 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<PrintProductsReleasesTask>(Tasks.PRINT_PRODUCTS_RELEASES) {
-                val extension = project.the<IntelliJPlatformExtension>()
+                val ideaVersionProvider = project.extensionProvider.map { it.pluginConfiguration.ideaVersion }
 
                 productsReleases.convention(
                     ProductReleasesValueSource(
                         project.providers,
                         project.resources,
-                        project.provider { project.the<IntelliJPlatformExtension>() },
+                        project.extensionProvider,
                     ) {
                         sinceBuild = this@registerTask.sinceBuild
                         untilBuild = this@registerTask.untilBuild
@@ -63,11 +63,9 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
                     }
                 )
 
-                val ideaVersionProvider = project.provider { extension.pluginConfiguration.ideaVersion }
-
                 channels.convention(project.provider { ProductRelease.Channel.values().toList() })
-                types.convention(project.provider {
-                    listOf(extension.productInfo.productCode.toIntelliJPlatformType())
+                types.convention(project.extensionProvider.map {
+                    listOf(it.productInfo.productCode.toIntelliJPlatformType())
                 })
                 sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
                 untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })

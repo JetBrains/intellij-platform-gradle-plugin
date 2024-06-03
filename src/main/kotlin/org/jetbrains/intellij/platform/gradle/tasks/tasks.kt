@@ -25,7 +25,6 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentP
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
@@ -81,8 +80,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             this is CustomIntelliJPlatformVersionAware -> name
             else -> name.substringAfter('_', "")
         }.let { "_$it" }.trimEnd('_')
-
-        val extension = project.the<IntelliJPlatformExtension>()
 
         /**
          * Applies the base [Configurations.INTELLIJ_PLATFORM] configuration to [IntelliJPlatformVersionAware] tasks so they can access details of the used IntelliJ
@@ -237,8 +234,10 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
              * To keep sandboxes separated, we introduce sandbox suffixes.
              */
             sandboxSuffix.convention(suffix)
-            sandboxDirectory.convention(extension.sandboxContainer.map { container ->
-                container.dir("${productInfo.productCode}-${productInfo.version}")
+            sandboxDirectory.convention(extensionProvider.flatMap {
+                it.sandboxContainer.map { container ->
+                    container.dir("${productInfo.productCode}-${productInfo.version}")
+                }
             })
             sandboxConfigDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.CONFIG)
             sandboxPluginsDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.PLUGINS)
@@ -351,7 +350,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is PluginVerifierAware) {
             val intelliJPluginVerifierPathResolver = IntelliJPluginVerifierPathResolver(
                 intellijPluginVerifier = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER],
-                localPath = extension.verifyPlugin.cliPath,
+                localPath = extensionProvider.flatMap { it.verifyPlugin.cliPath },
             )
 
             pluginVerifierExecutable.convention(layout.file(provider {
@@ -367,7 +366,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is SigningAware) {
             val marketplaceZipSignerPathResolver = MarketplaceZipSignerPathResolver(
                 marketplaceZipSigner = configurations[Configurations.MARKETPLACE_ZIP_SIGNER].asLenient,
-                localPath = extension.signing.cliPath,
+                localPath = extensionProvider.flatMap { it.signing.cliPath },
             )
 
             zipSignerExecutable.convention(layout.file(provider {
@@ -388,15 +387,15 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [SplitModeAware] allows to run IDE in Split Mode.
          */
         if (this is SplitModeAware) {
-            splitMode.convention(extension.splitMode)
-            splitModeTarget.convention(extension.splitModeTarget)
+            splitMode.convention(extensionProvider.flatMap { it.splitMode })
+            splitModeTarget.convention(extensionProvider.flatMap { it.splitModeTarget })
         }
 
         /**
          * The [SplitModeAware] allows to auto-reload plugin when run in the IDE.
          */
         if (this is AutoReloadAware) {
-            autoReload.convention(extension.autoReload)
+            autoReload.convention(extensionProvider.flatMap { it.autoReload })
         }
 
         /**

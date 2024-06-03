@@ -16,7 +16,6 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.the
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -29,6 +28,7 @@ import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.kotlin.gradle.utils.named
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -232,7 +232,6 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, Tasks.PREPARE_UI_TEST_SANDBOX) {
-                val extension = project.the<IntelliJPlatformExtension>()
                 val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
                 val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
@@ -242,16 +241,16 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
                 runtimeClasspath.from(runtimeConfiguration - intellijPlatformPluginModuleConfiguration)
 
-                splitModeTarget.convention(extension.splitModeTarget)
+                splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })
                 splitModeCurrentTarget.convention(SplitModeTarget.BACKEND)
 
-                intoChild(extension.projectName.map { "$it/lib" })
+                intoChild(project.extensionProvider.flatMap { it.projectName.map { projectName -> "$projectName/lib" } })
                     .from(runtimeClasspath)
                     .from(pluginJar)
                     .eachFile { name = ensureName(file.toPath()) }
                 from(pluginsClasspath)
 
-                inputs.property("intellijPlatform.instrumentCode", extension.instrumentCode)
+                inputs.property("intellijPlatform.instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })
                 inputs.property("intellijPlatform.sandboxDirectoriesExistence", project.provider {
                     listOf(sandboxConfigDirectory, sandboxPluginsDirectory, sandboxLogDirectory, sandboxSystemDirectory).all {
                         it.asPath.exists()

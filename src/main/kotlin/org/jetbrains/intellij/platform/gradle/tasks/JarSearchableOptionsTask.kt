@@ -9,16 +9,15 @@ import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import kotlin.io.path.exists
 
 private const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
@@ -76,12 +75,13 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
-                val extension = project.the<IntelliJPlatformExtension>()
-                val projectName = extension.projectName
+                val projectNameProvider = project.extensionProvider.flatMap { it.projectName }
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
-                val buildSearchableOptionsEnabled = extension.buildSearchableOptions.zip(buildSearchableOptionsTaskProvider) { enabled, task ->
-                    enabled && task.enabled
-                }
+                val buildSearchableOptionsEnabled = project.extensionProvider
+                    .flatMap { it.buildSearchableOptions }
+                    .zip(buildSearchableOptionsTaskProvider) { enabled, task ->
+                        enabled && task.enabled
+                    }
                 val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
 
                 inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
@@ -95,7 +95,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
                         .takeIf { it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) }
                         ?.run {
                             sandboxPluginsDirectory.asPath
-                                .resolve(projectName.get())
+                                .resolve(projectNameProvider.get())
                                 .resolve("lib")
                                 .resolve(name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX))
                         }

@@ -11,7 +11,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.the
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
@@ -201,27 +200,16 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             project.registerTask<VerifyPluginProjectConfigurationTask>(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
                 log.info("Configuring plugin configuration verification task")
 
-                val extension = project.the<IntelliJPlatformExtension>()
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(Tasks.External.COMPILE_JAVA)
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
-
-                rootDirectory.convention(project.provider {
-                    project.rootProject.rootDir
-                })
-                intellijPlatformCache.convention(project.provider {
-                    extension.cachePath.toFile()
-                })
+                rootDirectory.convention(project.provider { project.rootProject.rootDir })
+                intellijPlatformCache.convention(project.extensionProvider.map { it.cachePath.toFile() })
                 gitignoreFile.convention(project.layout.file(project.provider {
                     project.rootProject.rootDir.resolve(".gitignore").takeIf { it.exists() }
                 }))
-
-                sourceCompatibility.convention(compileJavaTaskProvider.map {
-                    it.sourceCompatibility
-                })
-                targetCompatibility.convention(compileJavaTaskProvider.map {
-                    it.targetCompatibility
-                })
+                sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
+                targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
 
                 project.tasks.withType<JavaCompile> {
                     dependsOn(this@registerTask)

@@ -15,7 +15,6 @@ import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -25,6 +24,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.io.ByteArrayOutputStream
 import java.util.*
 import kotlin.io.path.exists
@@ -301,24 +301,22 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
+                val verifyPluginProvider = project.extensionProvider.map { it.verifyPlugin }
                 val intellijPluginVerifierIdesConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES].asLenient
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
-                val extension = project.the<IntelliJPlatformExtension>()
 
-                extension.verifyPlugin.let {
-                    freeArgs = it.freeArgs
-                    failureLevel = it.failureLevel
-                    verificationReportsDirectory = it.verificationReportsDirectory
-                    verificationReportsFormats = it.verificationReportsFormats
-                    externalPrefixes = it.externalPrefixes
-                    teamCityOutputFormat = it.teamCityOutputFormat
-                    subsystemsToCheck = it.subsystemsToCheck
-                    ignoredProblemsFile = it.ignoredProblemsFile
-                }
+                freeArgs.convention(verifyPluginProvider.flatMap { it.freeArgs })
+                failureLevel.convention(verifyPluginProvider.flatMap { it.failureLevel })
+                verificationReportsDirectory.convention(verifyPluginProvider.flatMap { it.verificationReportsDirectory })
+                verificationReportsFormats.convention(verifyPluginProvider.flatMap { it.verificationReportsFormats })
+                externalPrefixes.convention(verifyPluginProvider.flatMap { it.externalPrefixes })
+                teamCityOutputFormat.convention(verifyPluginProvider.flatMap { it.teamCityOutputFormat })
+                subsystemsToCheck.convention(verifyPluginProvider.flatMap { it.subsystemsToCheck })
+                ignoredProblemsFile.convention(verifyPluginProvider.flatMap { it.ignoredProblemsFile })
 
                 ides = intellijPluginVerifierIdesConfiguration
-                archiveFile = buildPluginTaskProvider.flatMap { it.archiveFile }
-                offline = project.gradle.startParameter.isOffline
+                archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
+                offline.convention(project.gradle.startParameter.isOffline)
             }
     }
 

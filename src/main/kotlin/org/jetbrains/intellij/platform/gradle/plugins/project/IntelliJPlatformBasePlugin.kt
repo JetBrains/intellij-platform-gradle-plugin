@@ -11,7 +11,6 @@ import org.gradle.api.tasks.TaskContainer
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.the
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.BuildFeature
@@ -31,6 +30,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.create
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
@@ -58,8 +58,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 module.excludeDirs.add(project.rootProjectPath.resolve(CACHE_DIRECTORY).toFile())
             }
         }
-
-        val extensionProvider = project.provider { project.the<IntelliJPlatformExtension>() }
 
         with(project.configurations) configurations@{
             val intellijPlatformDependencyConfiguration = create(
@@ -294,7 +292,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             PluginVerifierIdeExtractorTransformer.register(
                 dependencies = this,
                 intellijPluginVerifierIdesDependencyConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY],
-                downloadDirectoryProvider = extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
+                downloadDirectoryProvider = project.extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
             )
 
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {

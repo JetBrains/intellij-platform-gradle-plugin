@@ -10,7 +10,6 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.the
 import org.jdom2.CDATA
 import org.jdom2.Document
 import org.jdom2.Element
@@ -21,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import kotlin.io.path.inputStream
 import kotlin.io.path.name
 
@@ -366,7 +366,10 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML) {
-                val extension = project.the<IntelliJPlatformExtension>()
+                val pluginConfigurationProvider = project.extensionProvider.map { it.pluginConfiguration }
+                val productDescriptorProvider = pluginConfigurationProvider.map { it.productDescriptor }
+                val ideaVersionProvider = pluginConfigurationProvider.map { it.ideaVersion }
+                val vendorProvider = pluginConfigurationProvider.map { it.vendor }
 
                 inputFile.convention(project.layout.file(project.provider {
                     val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
@@ -381,31 +384,23 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
                     inputFile.map { temporaryDir.resolve(it.asPath.name) }
                 ))
 
-                extension.pluginConfiguration.let { pluginConfiguration ->
-                    pluginId.convention(pluginConfiguration.id)
-                    pluginName.convention(pluginConfiguration.name)
-                    pluginVersion.convention(pluginConfiguration.version)
-                    pluginDescription.convention(pluginConfiguration.description)
-                    changeNotes.convention(pluginConfiguration.changeNotes)
+                pluginId.convention(pluginConfigurationProvider.flatMap { it.id })
+                pluginName.convention(pluginConfigurationProvider.flatMap { it.name })
+                pluginVersion.convention(pluginConfigurationProvider.flatMap { it.version })
+                pluginDescription.convention(pluginConfigurationProvider.flatMap { it.description })
+                changeNotes.convention(pluginConfigurationProvider.flatMap { it.changeNotes })
 
-                    pluginConfiguration.productDescriptor.let { productDescriptor ->
-                        productDescriptorCode.convention(productDescriptor.code)
-                        productDescriptorReleaseDate.convention(productDescriptor.releaseDate)
-                        productDescriptorReleaseVersion.convention(productDescriptor.releaseVersion)
-                        productDescriptorOptional.convention(productDescriptor.optional)
-                    }
+                productDescriptorCode.convention(productDescriptorProvider.flatMap { it.code })
+                productDescriptorReleaseDate.convention(productDescriptorProvider.flatMap { it.releaseDate })
+                productDescriptorReleaseVersion.convention(productDescriptorProvider.flatMap { it.releaseVersion })
+                productDescriptorOptional.convention(productDescriptorProvider.flatMap { it.optional })
 
-                    pluginConfiguration.ideaVersion.let { ideaVersion ->
-                        sinceBuild.convention(ideaVersion.sinceBuild)
-                        untilBuild.convention(ideaVersion.untilBuild)
-                    }
+                sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
+                untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
 
-                    pluginConfiguration.vendor.let { vendor ->
-                        vendorName.convention(vendor.name)
-                        vendorEmail.convention(vendor.email)
-                        vendorUrl.convention(vendor.url)
-                    }
-                }
+                vendorName.convention(vendorProvider.flatMap { it.name })
+                vendorEmail.convention(vendorProvider.flatMap { it.email })
+                vendorUrl.convention(vendorProvider.flatMap { it.url })
             }
     }
 }

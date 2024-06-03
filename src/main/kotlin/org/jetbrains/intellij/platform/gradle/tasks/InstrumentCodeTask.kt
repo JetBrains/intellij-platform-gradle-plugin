@@ -16,7 +16,6 @@ import org.gradle.api.file.FileType
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.the
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
@@ -28,6 +27,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformReposit
 import org.jetbrains.intellij.platform.gradle.tasks.aware.JavaCompilerAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlin.io.path.*
@@ -275,8 +275,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
     companion object : Registrable {
         override fun register(project: Project) {
-            val extension = project.the<IntelliJPlatformExtension>()
-            val instrumentCodeEnabled = extension.instrumentCode
+            val instrumentCodeEnabled = project.extensionProvider.flatMap { it.instrumentCode }
             val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
 
             sourceSets.forEach { sourceSet ->

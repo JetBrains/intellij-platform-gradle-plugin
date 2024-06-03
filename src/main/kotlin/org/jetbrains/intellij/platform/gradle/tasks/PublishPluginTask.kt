@@ -14,13 +14,13 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.utils.IdeServicesPluginRepositoryService
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 
@@ -163,17 +163,17 @@ abstract class PublishPluginTask : DefaultTask() {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<PublishPluginTask>(Tasks.PUBLISH_PLUGIN) {
-                val extension = project.the<IntelliJPlatformExtension>()
+                val publishingProvider = project.extensionProvider.map { it.publishing }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
                 val signPluginTaskProvider = project.tasks.named<SignPluginTask>(Tasks.SIGN_PLUGIN)
 
                 val isOffline = project.gradle.startParameter.isOffline
 
-                token.convention(extension.publishing.token)
-                host.convention(extension.publishing.host)
-                ideServices.convention(extension.publishing.ideServices)
-                channels.convention(extension.publishing.channels)
-                hidden.convention(extension.publishing.hidden)
+                token.convention(publishingProvider.flatMap { it.token })
+                host.convention(publishingProvider.flatMap { it.host })
+                ideServices.convention(publishingProvider.flatMap { it.ideServices })
+                channels.convention(publishingProvider.flatMap { it.channels })
+                hidden.convention(publishingProvider.flatMap { it.hidden })
 
                 // TODO: can this be done in any other way?
                 archiveFile.convention(

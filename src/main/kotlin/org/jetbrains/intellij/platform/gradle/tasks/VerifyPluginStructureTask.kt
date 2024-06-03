@@ -12,13 +12,13 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 /**
  * Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure.
@@ -105,14 +105,14 @@ abstract class VerifyPluginStructureTask : DefaultTask(), SandboxAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginStructureTask>(Tasks.VERIFY_PLUGIN_STRUCTURE) {
-                val extension = project.the<IntelliJPlatformExtension>()
+                val projectNameProvider = project.extensionProvider.flatMap { it.projectName }
 
                 ignoreFailures.convention(false)
                 ignoreUnacceptableWarnings.convention(false)
                 ignoreWarnings.convention(true)
 
-                pluginDirectory.convention(sandboxPluginsDirectory.flatMap {
-                    it.dir(extension.projectName)
+                pluginDirectory.convention(sandboxPluginsDirectory.zip(projectNameProvider) { pluginsDirectory, projectName ->
+                    pluginsDirectory.dir(projectName)
                 })
             }
     }

@@ -10,13 +10,13 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.isSpecified
 import java.util.*
 import kotlin.io.path.exists
@@ -249,24 +249,25 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<SignPluginTask>(Tasks.SIGN_PLUGIN) {
+                val signingProvider = project.extensionProvider.map { it.signing }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
-                val extension = project.the<IntelliJPlatformExtension>()
 
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
-                signedArchiveFile.convention(project.layout.file(archiveFile.map { it.asPath }
-                    .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() }))
-                extension.signing.let {
-                    keyStore.convention(it.keyStore)
-                    keyStorePassword.convention(it.keyStorePassword)
-                    keyStoreKeyAlias.convention(it.keyStoreKeyAlias)
-                    keyStoreType.convention(it.keyStoreType)
-                    keyStoreProviderName.convention(it.keyStoreProviderName)
-                    privateKey.convention(it.privateKey)
-                    privateKeyFile.convention(it.privateKeyFile)
-                    password.convention(it.password)
-                    certificateChain.convention(it.certificateChain)
-                    certificateChainFile.convention(it.certificateChainFile)
-                }
+                signedArchiveFile.convention(project.layout.file(
+                    archiveFile
+                        .map { it.asPath }
+                        .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() })
+                )
+                keyStore.convention(signingProvider.flatMap { it.keyStore })
+                keyStorePassword.convention(signingProvider.flatMap { it.keyStorePassword })
+                keyStoreKeyAlias.convention(signingProvider.flatMap { it.keyStoreKeyAlias })
+                keyStoreType.convention(signingProvider.flatMap { it.keyStoreType })
+                keyStoreProviderName.convention(signingProvider.flatMap { it.keyStoreProviderName })
+                privateKey.convention(signingProvider.flatMap { it.privateKey })
+                privateKeyFile.convention(signingProvider.flatMap { it.privateKeyFile })
+                password.convention(signingProvider.flatMap { it.password })
+                certificateChain.convention(signingProvider.flatMap { it.certificateChain })
+                certificateChainFile.convention(signingProvider.flatMap { it.certificateChainFile })
 
                 onlyIf {
                     (privateKey.isSpecified() || privateKeyFile.isSpecified()) && (certificateChain.isSpecified() || certificateChainFile.isSpecified())

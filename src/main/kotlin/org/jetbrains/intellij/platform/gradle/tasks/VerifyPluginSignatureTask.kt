@@ -8,13 +8,12 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
-import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.util.*
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
@@ -128,17 +127,20 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginSignatureTask>(Tasks.VERIFY_PLUGIN_SIGNATURE) {
-                val extension = project.the<IntelliJPlatformExtension>()
+                val projectNameProvider = project.extensionProvider.flatMap { it.projectName }
+                val versionProvider = project.extensionProvider.flatMap { it.pluginConfiguration.version }
+                val signingProvider = project.extensionProvider.map { it.signing }
+
                 val inputProvider =
                     project.layout.buildDirectory.flatMap {
-                        extension.projectName.zip(extension.pluginConfiguration.version) { name, version ->
+                        projectNameProvider.zip(versionProvider) { name, version ->
                             it.file("distributions/${name}-${version}-signed.zip")
                         }
                     }
 
                 inputArchiveFile.convention(inputProvider)
-                certificateChain.convention(extension.signing.certificateChain)
-                certificateChainFile.convention(extension.signing.certificateChainFile)
+                certificateChain.convention(signingProvider.flatMap { it.certificateChain })
+                certificateChainFile.convention(signingProvider.flatMap { it.certificateChainFile })
             }
     }
 }
