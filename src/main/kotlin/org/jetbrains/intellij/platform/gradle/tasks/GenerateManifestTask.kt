@@ -70,7 +70,7 @@ abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
             Platform-Version: ${productInfo.map { it.version }.get()}
             Platform-Build: ${productInfo.map { it.buildNumber }.get()}
             Kotlin-Available: ${kotlinPluginAvailable.get()}
-            Kotlin-Stdlib-Bundled: ${kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.get()}
+            Kotlin-Stdlib-Bundled: ${kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull != false}
             Kotlin-Version: ${kotlinVersion.orNull}
             """.trimIndent()
         )
