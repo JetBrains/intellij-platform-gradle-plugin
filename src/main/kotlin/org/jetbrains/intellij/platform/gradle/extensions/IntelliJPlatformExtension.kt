@@ -2,21 +2,21 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
-import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByName
 import org.gradle.kotlin.dsl.the
@@ -28,25 +28,20 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.models.toPublication
-import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
-import kotlin.io.path.exists
-import kotlin.io.path.pathString
-import kotlin.math.absoluteValue
 
 /**
  * The IntelliJ Platform Gradle Plugin extension.
@@ -676,23 +671,30 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          */
         @IntelliJPlatform
         abstract class Ides @Inject constructor(
-            internal val configurations: ConfigurationContainer,
-            internal val dependencies: DependencyHandler,
-            internal val extensionProvider: Provider<IntelliJPlatformExtension>,
-            internal val providers: ProviderFactory,
-            internal val resources: ResourceHandler,
-            internal val rootProjectDirectory: Path,
+            configurations: ConfigurationContainer,
+            dependencies: DependencyHandler,
+            layout: ProjectLayout,
+            objects: ObjectFactory,
+            providers: ProviderFactory,
+            repositories: RepositoryHandler,
+            resources: ResourceHandler,
+            rootProjectDirectory: Path,
+            settingsRepositories: RepositoryHandler,
+            extensionProvider: Provider<IntelliJPlatformExtension>,
         ) {
 
-            /**
-             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @param type The IntelliJ Platform dependency.
-             * @param version The version of the IntelliJ Platform dependency.
-             */
-            fun ide(type: IntelliJPlatformType, version: String) = addIdeDependencies(providers.provider {
-                listOf(type to version)
-            })
+            private val delegate = IntelliJPlatformDependenciesHelper(
+                configurations,
+                dependencies,
+                layout,
+                objects,
+                providers,
+                repositories,
+                resources,
+                rootProjectDirectory,
+                settingsRepositories,
+                extensionProvider,
+            )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -700,9 +702,23 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param type The IntelliJ Platform dependency.
              * @param version The version of the IntelliJ Platform dependency.
              */
-            fun ide(type: String, version: String) = addIdeDependencies(providers.provider {
-                listOf(type.toIntelliJPlatformType() to version)
-            })
+            fun ide(type: IntelliJPlatformType, version: String) = delegate.addIntelliJPlatformDependency(
+                typeProvider = delegate.provider { type },
+                versionProvider = delegate.provider { version },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
+
+            /**
+             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @param type The IntelliJ Platform dependency.
+             * @param version The version of the IntelliJ Platform dependency.
+             */
+            fun ide(type: String, version: String) = delegate.addIntelliJPlatformDependency(
+                typeProvider = delegate.provider { type },
+                versionProvider = delegate.provider { version },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -710,54 +726,60 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
              * @param version The provider for the version of the IntelliJ Platform dependency.
              */
-            fun ide(type: Provider<*>, version: Provider<String>) = addIdeDependencies(type.zip(version) { typeValue, versionValue ->
-                listOf(typeValue.toIntelliJPlatformType() to versionValue)
-            })
+            fun ide(type: Provider<*>, version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+                typeProvider = type,
+                versionProvider = version,
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
-            fun ide(notation: String) = addIdeDependencies(providers.provider {
-                listOf(notation.parseIdeNotation())
-            })
+            fun ide(notation: String) = delegate.addIntelliJPlatformDependencies(
+                notationsProvider = delegate.provider { listOf(notation) },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
-            fun ide(notation: Provider<String>) = addIdeDependencies(notation.map {
-                listOf(it.parseIdeNotation())
-            })
+            fun ide(notation: Provider<String>) = delegate.addIntelliJPlatformDependencies(
+                notationsProvider = notation.map { listOf(it) },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Adds dependencies to binary IDE releases to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param notations The IntelliJ Platform dependencies. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
-            fun ides(notations: List<String>) = addIdeDependencies(providers.provider {
-                notations.map { it.parseIdeNotation() }
-            })
+            fun ides(notations: List<String>) = delegate.addIntelliJPlatformDependencies(
+                notationsProvider = delegate.provider { notations },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Adds dependencies to binary IDE releases to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param notations The IntelliJ Platform dependencies. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
-            fun ides(notations: Provider<List<String>>) = addIdeDependencies(notations.map { notationListValue ->
-                notationListValue.map { it.parseIdeNotation() }
-            })
+            fun ides(notations: Provider<List<String>>) = delegate.addIntelliJPlatformDependencies(
+                notationsProvider = notations,
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param localPath The provider for the type of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
              */
-            fun local(localPath: Provider<*>) = addLocalIdeDependency(
-                localPlatformArtifactsDirectory = providers.localPlatformArtifactsPath(rootProjectDirectory),
-                localPath = localPath,
+            fun local(localPath: Provider<*>) = delegate.addIntelliJPlatformLocalDependency(
+                localPathProvider = localPath,
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
             )
 
             /**
@@ -765,21 +787,30 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param localPath The IntelliJ Platform dependency.
              */
-            fun local(localPath: String) = local(providers.provider { localPath })
+            fun local(localPath: String) = delegate.addIntelliJPlatformLocalDependency(
+                localPathProvider = delegate.provider { localPath },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+            )
 
             /**
              * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param localPath The IntelliJ Platform dependency.
              */
-            fun local(localPath: File) = local(providers.provider { localPath })
+            fun local(localPath: File) = delegate.addIntelliJPlatformLocalDependency(
+                localPathProvider = delegate.provider { localPath },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+            )
 
             /**
              * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
              *
              * @param localPath The IntelliJ Platform dependency.
              */
-            fun local(localPath: Directory) = local(providers.provider { localPath })
+            fun local(localPath: Directory) = delegate.addIntelliJPlatformLocalDependency(
+                localPathProvider = delegate.provider { localPath },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+            )
 
             /**
              * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
@@ -789,9 +820,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see listProductReleases
              * @see ProductReleasesValueSource
              */
-            fun recommended() = addIdeDependencies(listProductReleases().map {
-                it.map { notation -> notation.parseIdeNotation() }
-            })
+            fun recommended() = delegate.addIntelliJPlatformDependencies(
+                notationsProvider = ProductReleasesValueSource(),
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Retrieves matching IDEs using custom filter parameters.
@@ -800,94 +832,33 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see listProductReleases
              * @see ProductReleasesValueSource
              */
-            fun select(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) =
-                addIdeDependencies(listProductReleases(configure).map { notationListValue ->
-                    notationListValue.map { it.parseIdeNotation() }
-                })
+            fun select(configure: FilterParameters.() -> Unit = {}) = delegate.addIntelliJPlatformDependencies(
+                notationsProvider = ProductReleasesValueSource(configure),
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
-             * Prepares a [ProductReleasesValueSource] instance for the further usage, so it's possible to retrieve and filter IDEs based on the currently
-             * used platform or given criteria.
-             *
-             * @param configure The lambda function to configure the parameters for obtaining the product releases. Defaults to an empty action.
-             * @see ProductReleasesValueSource
+             * Extension function for the [IntelliJPlatformExtension.VerifyPlugin.Ides] extension to let filter IDE binary releases just using [FilterParameters].
              */
-            private fun listProductReleases(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) = ProductReleasesValueSource(configure)
+            @Suppress("FunctionName")
+            fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) = delegate.createProductReleasesValueSource(configure)
 
-            /**
-             * Processes the list of IDE notations in the [IntelliJPlatformType] to [String] pairs format provided as [notationListProvider] and adds them
-             * as dependencies to be resolved by the task running the IntelliJ Plugin Verifier.
-             * If the IDE is already present in the [downloadDirectory], refers to the [local] instead.
-             *
-             * @param notationListProvider The list of IDE notations to be added.
-             */
-            private fun addIdeDependencies(notationListProvider: Provider<List<Pair<IntelliJPlatformType, String>>>) =
-                configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY].dependencies.addAllLater(notationListProvider.map { notations ->
-                    notations.mapNotNull { (type, value) ->
-                        type.binary ?: return@mapNotNull null
-
-                        val downloadDirectory = extensionProvider.flatMap { it.verifyPlugin.downloadDirectory }.get()
-                        downloadDirectory.dir("${type}-${value}").asPath.takeIf { it.exists() }?.let {
-                            // IDE is already present in the [downloadDirectory], use as [local]
-                            local(it.pathString)
-                            return@mapNotNull null
-                        }
-
-                        dependencies.create(
-                            group = type.binary.groupId,
-                            name = type.binary.artifactId,
-                            version = value,
-                            ext = "tar.gz",
-                        )
-                    }
-                })
-
-            /**
-             * Creates and adds a local instance of the IDE as a dependency.
-             *
-             * @throws GradleException
-             */
-            @Throws(GradleException::class)
-            private fun addLocalIdeDependency(
-                localPlatformArtifactsDirectory: Path,
-                localPath: Provider<*>,
-            ) = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE].dependencies.addLater(localPath.map {
-                val artifactPath = resolveArtifactPath(it)
-                val productInfo = artifactPath.productInfo()
-
-                productInfo.validateSupportedVersion()
-
-                val hash = artifactPath.hashCode().absoluteValue % 1000
-                val type = productInfo.productCode.toIntelliJPlatformType()
-                requireNotNull(type.binary) { "Specified type '$type' has no dependency available." }
-
-                dependencies.create(
-                    group = Configurations.Dependencies.LOCAL_IDE_GROUP,
-                    name = type.binary.artifactId,
-                    version = "${productInfo.version}+$hash",
-                ).apply {
-                    createIvyDependencyFile(
-                        localPlatformArtifactsPath = localPlatformArtifactsDirectory,
-                        publications = listOf(artifactPath.toPublication()),
-                    )
-                }
-            })
-
+            @Suppress("UnstableApiUsage")
             companion object : Registrable<Ides> {
-                override fun register(project: Project, target: Any): Ides {
-                    val extensionProvider = project.provider { project.the<IntelliJPlatformExtension>() }
-
-                    return target.configureExtension<Ides>(
+                override fun register(project: Project, target: Any) =
+                    target.configureExtension<Ides>(
                         Extensions.IDES,
                         project.configurations,
                         project.dependencies,
-                        extensionProvider,
+                        project.layout,
+                        project.objects,
                         project.providers,
+                        project.repositories,
                         project.resources,
                         project.rootProjectPath,
+                        project.settings.dependencyResolutionManagement.repositories,
+                        project.provider { project.the<IntelliJPlatformExtension>() }
                     )
-                }
-
             }
         }
 

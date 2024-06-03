@@ -190,18 +190,6 @@ fun ProductReleasesValueSource(
     }
 }
 
-/**
- * Extension function for the [IntelliJPlatformExtension.VerifyPlugin.Ides] extension to let filter IDE binary releases just using [FilterParameters].
- */
-@Suppress("FunctionName")
-fun IntelliJPlatformExtension.VerifyPlugin.Ides.ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) =
-    ProductReleasesValueSource(
-        providers,
-        resources,
-        extensionProvider,
-        configure,
-    )
-
 @Serializable
 data class Data(
     @XmlSerialName("item")

@@ -30,6 +30,7 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
@@ -69,6 +70,7 @@ class IntelliJPlatformDependenciesHelper(
     private val resources: ResourceHandler,
     private val rootProjectDirectory: Path,
     private val settingsRepositories: RepositoryHandler,
+    private val extensionProvider: Provider<IntelliJPlatformExtension>,
 ) {
 
     private val log = Logger(javaClass)
@@ -101,6 +103,7 @@ class IntelliJPlatformDependenciesHelper(
         get() = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
 
     //</editor-fold>
+
     //<editor-fold desc="Metadata Accessors">
 
     internal val bundledPlugins
@@ -119,6 +122,7 @@ class IntelliJPlatformDependenciesHelper(
         get() = platformPath.map { it.productInfo() }
 
     //</editor-fold>
+
     //<editor-fold desc="Helper Methods">
 
     /**
@@ -184,6 +188,29 @@ class IntelliJPlatformDependenciesHelper(
             }.apply(action)
         })
     }
+
+    /**
+     * A base method for adding a dependency on IntelliJ Platform.
+     *
+     * @param notationsProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action An optional action to be performed on the created dependency.
+     */
+    @Throws(GradleException::class)
+    internal fun addIntelliJPlatformDependencies(
+        notationsProvider: Provider<List<String>>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addAllLater(notationsProvider.map { notations ->
+        notations.map {
+            val (type, version) = it.parseIdeNotation()
+
+            when (type) {
+                IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
+                else -> dependencies.createIntelliJPlatform(type, version)
+            }.apply(action)
+        }
+    })
 
     /**
      * A base method for adding a dependency on a local IntelliJ Platform instance.
@@ -415,6 +442,14 @@ class IntelliJPlatformDependenciesHelper(
         dependencies.createMarketplaceZipSigner(version).apply(action)
     })
 
+    internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
+        ProductReleasesValueSource(
+            providers,
+            resources,
+            extensionProvider,
+            configure,
+        )
+
 
     //</editor-fold>
 
@@ -465,39 +500,40 @@ class IntelliJPlatformDependenciesHelper(
      * @param version IntelliJ Platform version
      * @param type IntelliJ Platform type
      */
-    private fun DependencyHandler.createIntelliJPlatform(type: IntelliJPlatformType, version: String) = when (BuildFeature.USE_BINARY_RELEASES.isEnabled(providers).get()) {
-        true -> {
-            val (extension, classifier) = with(OperatingSystem.current()) {
-                val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
-                when {
-                    isWindows -> ArtifactType.ZIP to "win"
-                    isLinux -> ArtifactType.TAR_GZ to arch
-                    isMacOsX -> ArtifactType.DMG to arch
-                    else -> throw GradleException("Unsupported operating system: $name")
-                }
-            }.let { (type, classifier) -> type.toString() to classifier }
+    private fun DependencyHandler.createIntelliJPlatform(type: IntelliJPlatformType, version: String) =
+        when (BuildFeature.USE_BINARY_RELEASES.isEnabled(providers).get()) {
+            true -> {
+                val (extension, classifier) = with(OperatingSystem.current()) {
+                    val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
+                    when {
+                        isWindows -> ArtifactType.ZIP to "win"
+                        isLinux -> ArtifactType.TAR_GZ to arch
+                        isMacOsX -> ArtifactType.DMG to arch
+                        else -> throw GradleException("Unsupported operating system: $name")
+                    }
+                }.let { (type, classifier) -> type.toString() to classifier }
 
-            requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
+                requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
 
-            create(
-                group = type.binary.groupId,
-                name = type.binary.artifactId,
-                version = version,
-                ext = extension,
-                classifier = classifier,
-            )
+                create(
+                    group = type.binary.groupId,
+                    name = type.binary.artifactId,
+                    version = version,
+                    ext = extension,
+                    classifier = classifier,
+                )
+            }
+
+            false -> {
+                requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
+
+                create(
+                    group = type.maven.groupId,
+                    name = type.maven.artifactId,
+                    version = version,
+                )
+            }
         }
-
-        false -> {
-            requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
-
-            create(
-                group = type.maven.groupId,
-                name = type.maven.artifactId,
-                version = version,
-            )
-        }
-    }
 
     /**
      * Creates a dependency on a local IntelliJ Platform instance.
@@ -621,7 +657,11 @@ class IntelliJPlatformDependenciesHelper(
             name = "java-compiler-ant-tasks",
             version = when (version) {
                 VERSION_CURRENT -> when {
-                    resolveClosest.get() -> JavaCompilerClosestVersionResolver(productInfo.get(), repositories.urls() + settingsRepositories.urls()).resolve().version
+                    resolveClosest.get() ->
+                        JavaCompilerClosestVersionResolver(
+                            productInfo.get(),
+                            repositories.urls() + settingsRepositories.urls()
+                        ).resolve().version
 
                     else -> productInfo.get().buildNumber
                 }
@@ -678,7 +718,12 @@ class IntelliJPlatformDependenciesHelper(
         return create(
             group = type.coordinates.groupId, name = type.coordinates.artifactId, version = when (version) {
                 VERSION_CURRENT -> when {
-                    resolveClosest.get() -> TestFrameworkClosestVersionResolver(productInfo.get(), repositories.urls() + settingsRepositories.urls(), type.coordinates).resolve().version
+                    resolveClosest.get() ->
+                        TestFrameworkClosestVersionResolver(
+                            productInfo.get(),
+                            repositories.urls() + settingsRepositories.urls(),
+                            type.coordinates
+                        ).resolve().version
 
                     else -> productInfo.get().buildNumber
                 }

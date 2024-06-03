@@ -15,6 +15,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
@@ -41,6 +42,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     resources: ResourceHandler,
     rootProjectDirectory: Path,
     settingsRepositories: RepositoryHandler,
+    extensionProvider: Provider<IntelliJPlatformExtension>,
 ) {
 
     internal val intellijPlatformPluginDependencyConfigurationName = objects.property<String>()
@@ -56,6 +58,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
         resources,
         rootProjectDirectory,
         settingsRepositories,
+        extensionProvider,
     )
 
     /**
@@ -246,6 +249,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
                 project.resources,
                 project.rootProjectPath,
                 project.settings.dependencyResolutionManagement.repositories,
+                project.provider { project.the<IntelliJPlatformExtension>() }
             )
     }
 }

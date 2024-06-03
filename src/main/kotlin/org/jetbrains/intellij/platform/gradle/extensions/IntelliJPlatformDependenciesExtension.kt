@@ -14,6 +14,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
@@ -56,6 +57,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     resources: ResourceHandler,
     rootProjectDirectory: Path,
     settingsRepositories: RepositoryHandler,
+    extensionProvider: Provider<IntelliJPlatformExtension>,
 ) {
 
     private val delegate = IntelliJPlatformDependenciesHelper(
@@ -68,6 +70,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         resources,
         rootProjectDirectory,
         settingsRepositories,
+        extensionProvider,
     )
 
     /**
@@ -959,6 +962,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 project.resources,
                 project.rootProject.rootDir.toPath().absolute(),
                 project.settings.dependencyResolutionManagement.repositories,
+                project.provider { project.the<IntelliJPlatformExtension>() },
             )
     }
 }
