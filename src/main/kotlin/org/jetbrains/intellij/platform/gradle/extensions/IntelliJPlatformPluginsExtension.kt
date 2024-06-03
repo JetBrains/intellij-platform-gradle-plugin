@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
+import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -12,8 +13,13 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
+import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
+import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
+import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
+import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
+import org.jetbrains.intellij.platform.gradle.utils.settings
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
@@ -35,9 +41,10 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     resources: ResourceHandler,
     rootProjectDirectory: Path,
     settingsRepositories: RepositoryHandler,
-    private val intellijPlatformPluginDependencyConfigurationName: String,
-    private val intellijPlatformPluginLocalConfigurationName: String,
 ) {
+
+    internal val intellijPlatformPluginDependencyConfigurationName = objects.property<String>()
+    internal val intellijPlatformPluginLocalConfigurationName = objects.property<String>()
 
     private val delegate = IntelliJPlatformDependenciesHelper(
         configurations,
@@ -54,7 +61,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     /**
      * Contains a list of plugins to be disabled.
      */
-    internal val disabled = objects.setProperty(String::class)
+    internal val disabled = objects.setProperty<String>()
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform.
@@ -65,7 +72,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun plugin(id: String, version: String, channel: String = "") = delegate.addIntelliJPlatformPluginDependencies(
         pluginsProvider = delegate.provider { listOf(Triple(id, version, channel)) },
-        configurationName = intellijPlatformPluginDependencyConfigurationName,
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
     )
 
     /**
@@ -77,7 +84,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun plugin(id: Provider<String>, version: Provider<String>, channel: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
         pluginsProvider = delegate.provider { listOf(Triple(id.get(), version.get(), channel.get())) },
-        configurationName = intellijPlatformPluginDependencyConfigurationName,
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
     )
 
     /**
@@ -89,7 +96,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun plugin(notation: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
         pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
-        configurationName = intellijPlatformPluginDependencyConfigurationName,
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
     )
 
     /**
@@ -101,7 +108,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun plugin(notation: String) = delegate.addIntelliJPlatformPluginDependencies(
         pluginsProvider = delegate.provider { listOfNotNull(notation.parsePluginNotation()) },
-        configurationName = intellijPlatformPluginDependencyConfigurationName,
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
     )
 
     /**
@@ -113,7 +120,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun plugins(vararg notations: String) = delegate.addIntelliJPlatformPluginDependencies(
         pluginsProvider = delegate.provider { notations.mapNotNull { it.parsePluginNotation() } },
-        configurationName = intellijPlatformPluginDependencyConfigurationName,
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
     )
 
     /**
@@ -125,7 +132,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun plugins(notations: List<String>) = delegate.addIntelliJPlatformPluginDependencies(
         pluginsProvider = delegate.provider { notations.mapNotNull { it.parsePluginNotation() } },
-        configurationName = intellijPlatformPluginDependencyConfigurationName,
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
     )
 
     /**
@@ -137,7 +144,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun plugins(notations: Provider<List<String>>) = delegate.addIntelliJPlatformPluginDependencies(
         pluginsProvider = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } },
-        configurationName = intellijPlatformPluginDependencyConfigurationName,
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
     )
 
     /**
@@ -147,7 +154,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun localPlugin(localPath: File) = delegate.addIntelliJPlatformLocalPluginDependency(
         localPathProvider = delegate.provider { localPath },
-        configurationName = intellijPlatformPluginLocalConfigurationName,
+        configurationName = intellijPlatformPluginLocalConfigurationName.get(),
     )
 
     /**
@@ -157,7 +164,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun localPlugin(localPath: String) = delegate.addIntelliJPlatformLocalPluginDependency(
         localPathProvider = delegate.provider { localPath },
-        configurationName = intellijPlatformPluginLocalConfigurationName,
+        configurationName = intellijPlatformPluginLocalConfigurationName.get(),
     )
 
     /**
@@ -167,7 +174,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun localPlugin(localPath: Directory) = delegate.addIntelliJPlatformLocalPluginDependency(
         localPathProvider = delegate.provider { localPath },
-        configurationName = intellijPlatformPluginLocalConfigurationName,
+        configurationName = intellijPlatformPluginLocalConfigurationName.get(),
     )
 
     /**
@@ -177,7 +184,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun localPlugin(localPath: Provider<*>) = delegate.addIntelliJPlatformLocalPluginDependency(
         localPathProvider = localPath,
-        configurationName = intellijPlatformPluginLocalConfigurationName,
+        configurationName = intellijPlatformPluginLocalConfigurationName.get(),
     )
 
     /**
@@ -187,7 +194,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun localPlugin(dependency: ProjectDependency) = delegate.addIntelliJPlatformLocalPluginProjectDependency(
         dependency = dependency,
-        configurationName = intellijPlatformPluginLocalConfigurationName,
+        configurationName = intellijPlatformPluginLocalConfigurationName.get(),
     )
 
     /**
@@ -224,4 +231,21 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      * @param ids Plugin identifiers.
      */
     fun disablePlugins(vararg ids: String) = disabled.addAll(*ids)
+
+    @Suppress("UnstableApiUsage")
+    companion object : Registrable<IntelliJPlatformPluginsExtension> {
+        override fun register(project: Project, target: Any) =
+            target.configureExtension<IntelliJPlatformPluginsExtension>(
+                Extensions.PLUGINS,
+                project.configurations,
+                project.dependencies,
+                project.layout,
+                project.objects,
+                project.providers,
+                project.repositories,
+                project.resources,
+                project.rootProjectPath,
+                project.settings.dependencyResolutionManagement.repositories,
+            )
+    }
 }

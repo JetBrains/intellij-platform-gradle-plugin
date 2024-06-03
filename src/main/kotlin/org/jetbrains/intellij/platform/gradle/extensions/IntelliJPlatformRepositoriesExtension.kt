@@ -8,6 +8,7 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.initialization.Settings
 import org.gradle.api.initialization.resolve.DependencyResolutionManagement
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
@@ -19,9 +20,12 @@ import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
+import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import java.net.URI
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.absolute
 import kotlin.io.path.pathString
 
 /**
@@ -288,6 +292,25 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         patternLayout { patterns.forEach { artifact(it) } }
         metadataSources { artifact() }
         action()
+    }
+
+    companion object : Registrable<IntelliJPlatformRepositoriesExtension> {
+        override fun register(project: Project, target: Any) =
+            target.configureExtension<IntelliJPlatformRepositoriesExtension>(
+                Extensions.INTELLIJ_PLATFORM,
+                project.repositories,
+                project.providers,
+                project.rootProjectPath,
+            )
+
+        @Suppress("UnstableApiUsage")
+        fun register(settings: Settings, target: Any) =
+            target.configureExtension<IntelliJPlatformRepositoriesExtension>(
+                Extensions.INTELLIJ_PLATFORM,
+                settings.dependencyResolutionManagement.repositories,
+                settings.providers,
+                settings.rootDir.toPath().absolute(),
+            )
     }
 }
 

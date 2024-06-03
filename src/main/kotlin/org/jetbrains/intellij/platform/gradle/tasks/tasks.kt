@@ -15,7 +15,6 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
@@ -30,8 +29,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
-import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
@@ -40,7 +37,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeE
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.utils.*
-import kotlin.io.path.absolute
 
 /**
  * Registers a task of type [T] with the given names
@@ -121,14 +117,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          */
         if (this is CustomIntelliJPlatformVersionAware) {
             val dependenciesExtension = dependencies.the<IntelliJPlatformDependenciesExtension>()
-            val rootProjectDirectory = project.rootProject.rootDir.toPath().absolute()
             val baseIntelliJPlatformLocalConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_LOCAL]
 
             with(configurations) {
-                val baseProductInfo = provider {
-                    configurations[Configurations.INTELLIJ_PLATFORM].asLenient.platformPath().productInfo()
-                }
-
                 val customIntelliJPlatformLocalConfiguration = create(
                     name = Configurations.INTELLIJ_PLATFORM_LOCAL + suffix,
                     description = "Custom IntelliJ Platform local",
@@ -230,20 +221,10 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     finalizeValueOnRead()
                 }
 
-                this@task.configureExtension<IntelliJPlatformPluginsExtension>(
-                    Extensions.PLUGINS,
-                    project.configurations,
-                    project.dependencies,
-                    project.layout,
-                    project.objects,
-                    project.providers,
-                    project.repositories,
-                    project.resources,
-                    rootProjectDirectory,
-                    project.settings.dependencyResolutionManagement.repositories,
-                    intellijPlatformPluginDependencyConfiguration.name,
-                    intellijPlatformPluginLocalConfiguration.name,
-                )
+                IntelliJPlatformPluginsExtension.register(project, target = this@task).let {
+                    it.intellijPlatformPluginDependencyConfigurationName = intellijPlatformPluginDependencyConfiguration.name
+                    it.intellijPlatformPluginLocalConfigurationName = intellijPlatformPluginLocalConfiguration.name
+                }
             }
         }
 

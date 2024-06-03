@@ -19,6 +19,7 @@ import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
@@ -29,6 +30,7 @@ import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.models.toPublication
 import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
+import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
@@ -36,12 +38,12 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.asLenient
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.platformPath
+import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
 import kotlin.math.absoluteValue
@@ -279,6 +281,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
              */
             val optional: Property<Boolean>
+
+            companion object : Registrable<ProductDescriptor> {
+                override fun register(project: Project, target: Any) = target.configureExtension<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
+            }
         }
 
         /**
@@ -313,6 +319,18 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version">Plugin Configuration File: `idea-version`</a>
              */
             val untilBuild: Property<String>
+
+            companion object : Registrable<IdeaVersion> {
+                override fun register(project: Project, target: Any) =
+                    target.configureExtension<IdeaVersion>(Extensions.IDEA_VERSION) {
+                        val extensionProvider = project.provider { project.the<IntelliJPlatformExtension>() }
+                        val buildVersion = extensionProvider.map {
+                            it.runCatching { productInfo.buildNumber.toVersion() }.getOrDefault(Version())
+                        }
+                        sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
+                        untilBuild.convention(buildVersion.map { "${it.major}.*" })
+                    }
+            }
         }
 
         /**
@@ -350,6 +368,17 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__vendor">Plugin Configuration File</a>
              */
             val url: Property<String>
+
+            companion object : Registrable<Vendor> {
+                override fun register(project: Project, target: Any) = target.configureExtension<Vendor>(Extensions.VENDOR)
+            }
+        }
+
+        companion object : Registrable<PluginConfiguration> {
+            override fun register(project: Project, target: Any) =
+                target.configureExtension<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {
+                    version.convention(project.provider { project.version.toString() })
+                }
         }
     }
 
@@ -402,6 +431,16 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * @see <a href="https://plugins.jetbrains.com/docs/marketplace/hidden-plugin.html">Hidden release</a>
          */
         val hidden: Property<Boolean>
+
+        companion object : Registrable<Publishing> {
+            override fun register(project: Project, target: Any) =
+                target.configureExtension<Publishing>(Extensions.PUBLISHING) {
+                    host.convention(Locations.JETBRAINS_MARKETPLACE)
+                    ideServices.convention(false)
+                    channels.convention(listOf("default"))
+                    hidden.convention(false)
+                }
+        }
     }
 
     /**
@@ -505,6 +544,11 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * @see SignPluginTask.certificateChainFile
          */
         val certificateChainFile: RegularFileProperty
+
+        companion object : Registrable<Signing> {
+            override fun register(project: Project, target: Any) =
+                target.configureExtension<Signing>(Extensions.SIGNING)
+        }
     }
 
     /**
@@ -634,7 +678,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         abstract class Ides @Inject constructor(
             internal val configurations: ConfigurationContainer,
             internal val dependencies: DependencyHandler,
-            internal val downloadDirectory: DirectoryProperty,
             internal val extensionProvider: Provider<IntelliJPlatformExtension>,
             internal val providers: ProviderFactory,
             internal val resources: ResourceHandler,
@@ -783,6 +826,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     notations.mapNotNull { (type, value) ->
                         type.binary ?: return@mapNotNull null
 
+                        val downloadDirectory = extensionProvider.flatMap { it.verifyPlugin.downloadDirectory }.get()
                         downloadDirectory.dir("${type}-${value}").asPath.takeIf { it.exists() }?.let {
                             // IDE is already present in the [downloadDirectory], use as [local]
                             local(it.pathString)
@@ -807,28 +851,99 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             private fun addLocalIdeDependency(
                 localPlatformArtifactsDirectory: Path,
                 localPath: Provider<*>,
-            ) =
-                configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE].dependencies.addLater(localPath.map {
-                    val artifactPath = resolveArtifactPath(it)
-                    val productInfo = artifactPath.productInfo()
+            ) = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE].dependencies.addLater(localPath.map {
+                val artifactPath = resolveArtifactPath(it)
+                val productInfo = artifactPath.productInfo()
 
-                    productInfo.validateSupportedVersion()
+                productInfo.validateSupportedVersion()
 
-                    val hash = artifactPath.hashCode().absoluteValue % 1000
-                    val type = productInfo.productCode.toIntelliJPlatformType()
-                    requireNotNull(type.binary) { "Specified type '$type' has no dependency available." }
+                val hash = artifactPath.hashCode().absoluteValue % 1000
+                val type = productInfo.productCode.toIntelliJPlatformType()
+                requireNotNull(type.binary) { "Specified type '$type' has no dependency available." }
 
-                    dependencies.create(
-                        group = Configurations.Dependencies.LOCAL_IDE_GROUP,
-                        name = type.binary.artifactId,
-                        version = "${productInfo.version}+$hash",
-                    ).apply {
-                        createIvyDependencyFile(
-                            localPlatformArtifactsPath = localPlatformArtifactsDirectory,
-                            publications = listOf(artifactPath.toPublication()),
-                        )
-                    }
-                })
+                dependencies.create(
+                    group = Configurations.Dependencies.LOCAL_IDE_GROUP,
+                    name = type.binary.artifactId,
+                    version = "${productInfo.version}+$hash",
+                ).apply {
+                    createIvyDependencyFile(
+                        localPlatformArtifactsPath = localPlatformArtifactsDirectory,
+                        publications = listOf(artifactPath.toPublication()),
+                    )
+                }
+            })
+
+            companion object : Registrable<Ides> {
+                override fun register(project: Project, target: Any): Ides {
+                    val extensionProvider = project.provider { project.the<IntelliJPlatformExtension>() }
+
+                    return target.configureExtension<Ides>(
+                        Extensions.IDES,
+                        project.configurations,
+                        project.dependencies,
+                        extensionProvider,
+                        project.providers,
+                        project.resources,
+                        project.rootProjectPath,
+                    )
+                }
+
+            }
         }
+
+        companion object : Registrable<VerifyPlugin> {
+            override fun register(project: Project, target: Any) =
+                target.configureExtension<VerifyPlugin>(Extensions.VERIFY_PLUGIN) {
+                    homeDirectory.convention(
+                        project.providers
+                            .systemProperty("plugin.verifier.home.dir")
+                            .flatMap { project.layout.dir(project.provider { Path(it).toFile() }) }
+                            .orElse(
+                                project.providers.environmentVariable("XDG_CACHE_HOME")
+                                    .map { Path(it, "pluginVerifier").toFile() }
+                                    .let { project.layout.dir(it) }
+                            )
+                            .orElse(
+                                project.providers.systemProperty("user.home")
+                                    .map { Path(it, ".cache/pluginVerifier").toFile() }
+                                    .let { project.layout.dir(it) }
+                            )
+                            .orElse(
+                                project.layout.buildDirectory.dir("tmp/pluginVerifier")
+                            )
+                    )
+                    downloadDirectory.convention(homeDirectory.dir("ides").map {
+                        it.apply { asPath.createDirectories() }
+                    })
+                    failureLevel.convention(listOf(VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS))
+                    verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
+                    verificationReportsFormats.convention(
+                        listOf(
+                            VerifyPluginTask.VerificationReportsFormats.PLAIN,
+                            VerifyPluginTask.VerificationReportsFormats.HTML,
+                        )
+                    )
+                    teamCityOutputFormat.convention(false)
+                    subsystemsToCheck.convention(Subsystems.ALL)
+                }
+        }
+    }
+
+    companion object : Registrable<IntelliJPlatformExtension> {
+        override fun register(project: Project, target: Any) =
+            target.configureExtension<IntelliJPlatformExtension>(
+                Extensions.INTELLIJ_PLATFORM,
+                project.configurations,
+                project.providers,
+                project.rootProjectPath,
+            ) {
+                autoReload.convention(true)
+                buildSearchableOptions.convention(true)
+                instrumentCode.convention(true)
+                projectName.convention(project.name)
+                sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
+                splitMode.convention(false)
+                splitModeTarget.convention(SplitModeAware.SplitModeTarget.BACKEND)
+            }
     }
 }

@@ -6,11 +6,13 @@ package org.jetbrains.intellij.platform.gradle.extensions
 
 import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.serialization.XML
+import org.gradle.api.Project
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.UrlArtifactRepository
 import org.gradle.api.file.Directory
+import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
@@ -152,3 +154,12 @@ internal fun String.parsePluginNotation() = trim()
     .takeIf { it.isNotEmpty() }
     ?.split(":", "@")
     ?.run { Triple(getOrNull(0).orEmpty(), getOrNull(1).orEmpty(), getOrNull(2).orEmpty()) }
+
+/**
+ * An interface to unify how IntelliJ Platform Gradle Plugin extensions are registered.
+ * Because [ExtensionContainer.create] accepts extension arguments provided with no strong typing,
+ */
+internal interface Registrable<T> {
+
+    fun register(project: Project, target: Any): T
+}

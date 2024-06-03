@@ -18,23 +18,20 @@ import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.Constants.Extensions
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
-import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
-import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
-import org.jetbrains.intellij.platform.gradle.utils.*
-import kotlin.io.path.Path
-import kotlin.io.path.absolute
-import kotlin.io.path.createDirectories
+import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.create
+import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
@@ -44,8 +41,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         log.info("Configuring plugin: ${Plugins.BASE}")
 
         checkGradleVersion()
-
-        val rootProjectDirectory = project.rootProject.rootDir.toPath().absolute()
 
         with(project.plugins) {
             apply(JavaPlugin::class)
@@ -60,7 +55,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         project.pluginManager.withPlugin("idea") {
             project.extensions.configure<IdeaModel>("idea") {
                 module.isDownloadSources = BuildFeature.DOWNLOAD_SOURCES.isEnabled(project.providers).get()
-                module.excludeDirs.add(rootProjectDirectory.resolve(CACHE_DIRECTORY).toFile())
+                module.excludeDirs.add(project.rootProjectPath.resolve(CACHE_DIRECTORY).toFile())
             }
         }
 
@@ -310,108 +305,23 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
         }
 
-        project.configureExtension<IntelliJPlatformExtension>(
-            Extensions.INTELLIJ_PLATFORM,
-            project.configurations,
-            project.providers,
-            rootProjectDirectory,
-        ) {
-            autoReload.convention(true)
-            buildSearchableOptions.convention(true)
-            instrumentCode.convention(true)
-            projectName.convention(project.name)
-            sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
-            splitMode.convention(false)
-            splitModeTarget.convention(SplitModeAware.SplitModeTarget.BACKEND)
-
-            configureExtension<IntelliJPlatformExtension.PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {
-                version.convention(project.provider { project.version.toString() })
-
-                configureExtension<IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
-                configureExtension<IntelliJPlatformExtension.PluginConfiguration.IdeaVersion>(Extensions.IDEA_VERSION) {
-                    val buildVersion = extensionProvider.map {
-                        it.runCatching { productInfo.buildNumber.toVersion() }.getOrDefault(Version())
-                    }
-                    sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
-                    untilBuild.convention(buildVersion.map { "${it.major}.*" })
-                }
-                configureExtension<IntelliJPlatformExtension.PluginConfiguration.Vendor>(Extensions.VENDOR)
+        IntelliJPlatformExtension.register(project, target = project).let { intelliJPlatform ->
+            PluginConfiguration.register(project, target = intelliJPlatform).let { pluginConfiguration ->
+                ProductDescriptor.register(project, target = pluginConfiguration)
+                IdeaVersion.register(project, target = pluginConfiguration)
+                Vendor.register(project, target = pluginConfiguration)
             }
 
-            configureExtension<IntelliJPlatformExtension.VerifyPlugin>(Extensions.VERIFY_PLUGIN) {
-                homeDirectory.convention(
-                    project.providers
-                        .systemProperty("plugin.verifier.home.dir")
-                        .flatMap { project.layout.dir(project.provider { Path(it).toFile() }) }
-                        .orElse(
-                            project.providers.environmentVariable("XDG_CACHE_HOME")
-                                .map { Path(it, "pluginVerifier").toFile() }
-                                .let { project.layout.dir(it) }
-                        )
-                        .orElse(
-                            project.providers.systemProperty("user.home")
-                                .map { Path(it, ".cache/pluginVerifier").toFile() }
-                                .let { project.layout.dir(it) }
-                        )
-                        .orElse(
-                            project.layout.buildDirectory.dir("tmp/pluginVerifier")
-                        )
-                )
-                downloadDirectory.convention(homeDirectory.dir("ides").map {
-                    it.apply { asPath.createDirectories() }
-                })
-                failureLevel.convention(listOf(VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS))
-                verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
-                verificationReportsFormats.convention(
-                    listOf(
-                        VerifyPluginTask.VerificationReportsFormats.PLAIN,
-                        VerifyPluginTask.VerificationReportsFormats.HTML,
-                    )
-                )
-                teamCityOutputFormat.convention(false)
-                subsystemsToCheck.convention(VerifyPluginTask.Subsystems.ALL)
-
-                configureExtension<IntelliJPlatformExtension.VerifyPlugin.Ides>(
-                    Extensions.IDES,
-                    project.configurations,
-                    project.dependencies,
-                    downloadDirectory,
-                    extensionProvider,
-                    project.providers,
-                    project.resources,
-                    rootProjectDirectory,
-                )
+            VerifyPlugin.register(project, target = intelliJPlatform).let { verifyPlugin ->
+                VerifyPlugin.Ides.register(project, target = verifyPlugin)
             }
 
-            configureExtension<IntelliJPlatformExtension.Signing>(Extensions.SIGNING)
-
-            configureExtension<IntelliJPlatformExtension.Publishing>(Extensions.PUBLISHING) {
-                host.convention(Locations.JETBRAINS_MARKETPLACE)
-                ideServices.convention(false)
-                channels.convention(listOf("default"))
-                hidden.convention(false)
-            }
+            Signing.register(project, target = intelliJPlatform)
+            Publishing.register(project, target = intelliJPlatform)
         }
 
-        project.dependencies.configureExtension<IntelliJPlatformDependenciesExtension>(
-            Extensions.INTELLIJ_PLATFORM,
-            project.configurations,
-            project.dependencies,
-            project.layout,
-            project.objects,
-            project.providers,
-            project.repositories,
-            project.resources,
-            rootProjectDirectory,
-            project.settings.dependencyResolutionManagement.repositories,
-        )
-
-        project.repositories.configureExtension<IntelliJPlatformRepositoriesExtension>(
-            Extensions.INTELLIJ_PLATFORM,
-            project.repositories,
-            project.providers,
-            rootProjectDirectory,
-        )
+        IntelliJPlatformDependenciesExtension.register(project, target = project.dependencies)
+        IntelliJPlatformRepositoriesExtension.register(project, target = project.repositories)
 
         project.tasks.whenIntelliJPlatformTaskAdded {
             project.preconfigureTask(this)

@@ -4,20 +4,13 @@ package org.jetbrains.intellij.platform.gradle.plugins.settings
 
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
-import org.gradle.api.provider.ProviderFactory
-import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
-import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import javax.inject.Inject
-import kotlin.io.path.absolute
 
-@Suppress("unused")
-abstract class IntelliJPlatformSettingsPlugin @Inject constructor(
-    private val providers: ProviderFactory,
-) : Plugin<Settings> {
+@Suppress("unused", "UnstableApiUsage")
+abstract class IntelliJPlatformSettingsPlugin : Plugin<Settings> {
 
     private val log = Logger(javaClass)
 
@@ -26,14 +19,6 @@ abstract class IntelliJPlatformSettingsPlugin @Inject constructor(
 
         checkGradleVersion()
 
-        @Suppress("UnstableApiUsage")
-        with(settings.dependencyResolutionManagement.repositories) {
-            configureExtension<IntelliJPlatformRepositoriesExtension>(
-                Extensions.INTELLIJ_PLATFORM,
-                this,
-                providers,
-                settings.rootDir.toPath().absolute(),
-            )
-        }
+        IntelliJPlatformRepositoriesExtension.register(settings, target = settings.dependencyResolutionManagement.repositories)
     }
 }

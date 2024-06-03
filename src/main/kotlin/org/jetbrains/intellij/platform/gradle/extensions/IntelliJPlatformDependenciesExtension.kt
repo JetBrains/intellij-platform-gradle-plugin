@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
+import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
@@ -14,13 +15,17 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
+import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
+import org.jetbrains.intellij.platform.gradle.utils.settings
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.absolute
 
 // TODO synchronize with
 // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
@@ -939,4 +944,21 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun bundledLibrary(path: Provider<String>) = delegate.addBundledLibrary(
         pathProvider = path,
     )
+
+    @Suppress("UnstableApiUsage")
+    companion object : Registrable<IntelliJPlatformDependenciesExtension> {
+        override fun register(project: Project, target: Any) =
+            target.configureExtension<IntelliJPlatformDependenciesExtension>(
+                Extensions.INTELLIJ_PLATFORM,
+                project.configurations,
+                project.dependencies,
+                project.layout,
+                project.objects,
+                project.providers,
+                project.repositories,
+                project.resources,
+                project.rootProject.rootDir.toPath().absolute(),
+                project.settings.dependencyResolutionManagement.repositories,
+            )
+    }
 }

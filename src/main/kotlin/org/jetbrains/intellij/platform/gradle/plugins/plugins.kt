@@ -9,12 +9,10 @@ import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 
-internal inline fun <reified T : Any> Any.configureExtension(name: String, vararg constructionArguments: Any, noinline configuration: T.() -> Unit = {}) {
+internal inline fun <reified T : Any> Any.configureExtension(name: String, vararg constructionArguments: Any, noinline configuration: T.() -> Unit = {}) =
     with((this as ExtensionAware).extensions) {
-        val extension = findByName(name) as? T ?: create<T>(name, *constructionArguments)
-        extension.configuration()
+        (findByName(name) as? T ?: create<T>(name, *constructionArguments)).apply(configuration)
     }
-}
 
 /**
  * @throws PluginInstantiationException

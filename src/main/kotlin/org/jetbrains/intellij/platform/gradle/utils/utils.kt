@@ -9,7 +9,6 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
-import org.gradle.api.initialization.Settings
 import org.gradle.api.internal.GradleInternal
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
@@ -82,5 +81,8 @@ internal fun ResourceHandler.resolve(url: String) = text
     .onFailure { Logger(javaClass).error("Cannot resolve product releases", it) }
     .getOrNull()
 
-val Project.settings: Settings
+val Project.settings
     get() = (gradle as GradleInternal).settings
+
+val Project.rootProjectPath
+    get() = rootProject.rootDir.toPath().absolute()
