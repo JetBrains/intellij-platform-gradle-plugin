@@ -85,7 +85,6 @@ object Constants {
             val localPluginsNormalized = Attribute.of("intellijPlatformLocalPluginsNormalized", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
             val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
-            val binaryReleaseExtracted = Attribute.of("intellijPlatformPluginVerifierIdeExtracted", Boolean::class.javaObjectType)
 
             enum class AttributeType {
                 INTELLIJ_PLATFORM, INTELLIJ_PLATFORM_PLUGIN, JETBRAINS_RUNTIME

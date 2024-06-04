@@ -19,7 +19,10 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.*
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.BundledPluginsListTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
@@ -30,7 +33,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.create
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
@@ -197,7 +199,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Plugin Verifier IDE dependencies",
             ) {
                 attributes {
-                    attribute(Attributes.binaryReleaseExtracted, false)
+                    attribute(Attributes.extracted, false)
                 }
             }
             val intellijPluginVerifierIdesLocalConfiguration = create(
@@ -205,7 +207,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Plugin Verifier IDE local",
             ) {
                 attributes {
-                    attribute(Attributes.binaryReleaseExtracted, true)
+                    attribute(Attributes.extracted, true)
                 }
             }
 
@@ -214,7 +216,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Plugin Verifier IDEs",
             ) {
                 attributes {
-                    attribute(Attributes.binaryReleaseExtracted, true)
+                    attribute(Attributes.extracted, true)
                 }
 
                 extendsFrom(intellijPluginVerifierIdesDependencyConfiguration)
@@ -289,11 +291,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             LocalPluginsNormalizationTransformers.register(
                 dependencies = this
             )
-            PluginVerifierIdeExtractorTransformer.register(
-                dependencies = this,
-                intellijPluginVerifierIdesDependencyConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY],
-                downloadDirectoryProvider = project.extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
-            )
+//            PluginVerifierIdeExtractorTransformer.register(
+//                dependencies = this,
+//                intellijPluginVerifierIdesDependencyConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY],
+//                downloadDirectoryProvider = project.extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
+//            )
 
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {
                 project.configurations[Configurations.TEST_FIXTURES_COMPILE_CLASSPATH]

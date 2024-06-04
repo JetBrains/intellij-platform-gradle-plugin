@@ -38,6 +38,7 @@ import kotlin.io.path.pathString
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/verifying-plugin-compatibility.html">Verifying Plugin Compatibility</a>
  *
  * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
+ * TODO: Parallel run? https://docs.gradle.org/current/userguide/worker_api.html#converting_to_worker_api
  */
 @UntrackedTask(because = "Should always run")
 abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware {
