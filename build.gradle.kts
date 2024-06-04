@@ -35,6 +35,8 @@ val additionalPluginClasspath: Configuration by configurations.creating
 
 dependencies {
     implementation(libs.annotations)
+    implementation(libs.undertow)
+
     implementation(libs.intellij.structure.base) {
         exclude("org.jetbrains.kotlin")
     }

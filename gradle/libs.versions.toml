@@ -5,6 +5,7 @@ intellijStructure = "3.271"
 intellijPluginRepositoryRestClient = "2.0.39"
 kotlinxSerializationJson = "1.6.3"
 retrofit = "2.11.0"
+undertow = "2.3.13.Final"
 xmlutil = "0.86.3"
 
 # plugins
@@ -19,6 +20,7 @@ intellij-structure-base = { group = "org.jetbrains.intellij.plugins", name = "st
 intellij-structure-intellij = { group = "org.jetbrains.intellij.plugins", name = "structure-intellij", version.ref = "intellijStructure" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+undertow = { group = "io.undertow", name = "undertow-core", version.ref = "undertow" }
 xmlutil-core = { group = "io.github.pdvrieze.xmlutil", name = "core", version.ref = "xmlutil" }
 xmlutil-serialization = { group = "io.github.pdvrieze.xmlutil", name = "serialization", version.ref = "xmlutil" }
 

@@ -8,25 +8,25 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
+import org.gradle.api.flow.FlowProviders
+import org.gradle.api.flow.FlowScope
 import org.gradle.api.initialization.Settings
 import org.gradle.api.initialization.resolve.DependencyResolutionManagement
+import org.gradle.api.invocation.Gradle
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.internal.os.OperatingSystem
-import org.gradle.kotlin.dsl.maven
-import org.jetbrains.intellij.platform.gradle.BuildFeature
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
-import java.net.URI
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.absolute
-import kotlin.io.path.pathString
 
 /**
  * This is an extension class for managing IntelliJ Platform repositories in a Gradle build script. It's applied to the [RepositoryHandler].
@@ -44,20 +44,34 @@ import kotlin.io.path.pathString
  * @param providers The Gradle [ProviderFactory] to create providers.
  * @param rootProjectDirectory The root project directory location.
  */
-@Suppress("unused", "MemberVisibilityCanBePrivate")
+@Suppress("unused", "MemberVisibilityCanBePrivate", "UnstableApiUsage")
 @IntelliJPlatform
 abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     private val repositories: RepositoryHandler,
-    private val providers: ProviderFactory,
-    private val rootProjectDirectory: Path,
+    providers: ProviderFactory,
+    objects: ObjectFactory,
+    flowScope: FlowScope,
+    flowProviders: FlowProviders,
+    gradle: Gradle,
+    rootProjectDirectory: Path,
 ) {
+
+    private val delegate = IntelliJPlatformRepositoriesHelper(
+        repositories,
+        providers,
+        objects,
+        flowScope,
+        flowProviders,
+        gradle,
+        rootProjectDirectory,
+    )
 
     /**
      * Adds a repository for accessing IntelliJ Platform stable releases.
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun releases(action: MavenRepositoryAction = {}) = createMavenRepository(
+    fun releases(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "IntelliJ Repository (Releases)",
         url = "https://www.jetbrains.com/intellij-repository/releases",
         urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository/releases",
@@ -69,7 +83,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun snapshots(action: MavenRepositoryAction = {}) = createMavenRepository(
+    fun snapshots(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "IntelliJ Repository (Snapshots)",
         url = "https://www.jetbrains.com/intellij-repository/snapshots",
         urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository/snapshots",
@@ -81,7 +95,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun nightly(action: MavenRepositoryAction = {}) = createMavenRepository(
+    fun nightly(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "IntelliJ Repository (Nightly)",
         url = "https://www.jetbrains.com/intellij-repository/nightly",
         urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/www.jetbrains.com/intellij-repository/nightly",
@@ -93,7 +107,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun intellijDependencies(action: MavenRepositoryAction = {}) = createMavenRepository(
+    fun intellijDependencies(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "IntelliJ Platform Dependencies Repository",
         url = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies",
         urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/intellij-dependencies",
@@ -105,10 +119,16 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun marketplace(action: MavenRepositoryAction = {}) = createMavenRepository(
+    fun marketplace(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "JetBrains Marketplace Repository",
         url = "https://plugins.jetbrains.com/maven",
         urlWithCacheRedirector = "${Locations.CACHE_REDIRECTOR}/plugins.jetbrains.com/maven",
+        action = action,
+    )
+
+    fun customPluginRepository(url: String, action: PluginRepositoryAction = {}) = delegate.createCustomPluginRepository(
+        repositoryName = "IntelliJ Platform Custom Plugin Repository ($url)",
+        repositoryUrl = url,
         action = action,
     )
 
@@ -117,7 +137,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun jetbrainsRuntime(action: IvyRepositoryAction = {}) = createIvyRepository(
+    fun jetbrainsRuntime(action: IvyRepositoryAction = {}) = delegate.createIvyRepository(
         name = "JetBrains Runtime",
         url = Locations.JETBRAINS_RUNTIME_REPOSITORY,
         patterns = listOf("[revision].tar.gz"),
@@ -134,7 +154,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
             .filter { it != IntelliJPlatformType.AndroidStudio }
             .mapNotNull { it.binary }
 
-        return createIvyRepository(
+        return delegate.createIvyRepository(
             name = "IntelliJ Platform Binary Releases",
             url = Locations.DOWNLOAD,
             patterns = listOf(
@@ -162,7 +182,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun binaryReleasesAndroidStudio(action: IvyRepositoryAction = {}) = createIvyRepository(
+    fun binaryReleasesAndroidStudio(action: IvyRepositoryAction = {}) = delegate.createIvyRepository(
         name = "Android Studio Binary Releases",
         url = Locations.ANDROID_STUDIO_BINARY_RELEASES,
         patterns = listOf(
@@ -198,37 +218,10 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun localPlatformArtifacts(action: IvyRepositoryAction = {}) = repositories.ivy {
-        name = "Local IntelliJ Platform Artifacts Repository"
-
-        // Location of Ivy files generated for the current project.
-        val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
-        ivyPattern("${localPlatformArtifactsPath.pathString}/[organization]-[module]-[revision].[ext]")
-
-        // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
-        artifactPattern("/[artifact]")
-
-        /**
-         * Because artifact paths always start with `/` (see [toPublication] for details),
-         * on Windows, we have to guess to which drive letter the artifact path belongs to.
-         * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
-         * starting with `c` for the sake of micro-optimization.
-         */
-        if (OperatingSystem.current().isWindows) {
-            (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:/[artifact]") }
-        }
-    }.apply {
-        repositories.exclusiveContent {
-            forRepositories(this@apply)
-            filter {
-                includeGroup(Configurations.Dependencies.BUNDLED_MODULE_GROUP)
-                includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
-                includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
-                includeGroup(Configurations.Dependencies.LOCAL_PLUGIN_GROUP)
-            }
-        }
-        action()
-    }
+    fun localPlatformArtifacts(action: IvyRepositoryAction = {}) = delegate.createLocalIvyRepository(
+        repositoryName = "Local IntelliJ Platform Artifacts Repository",
+        action = action,
+    )
 
     /**
      * Applies a set of recommended repositories required for running the most common tasks provided by the IntelliJ Platform Gradle Plugin:
@@ -247,68 +240,28 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         binaryReleases()
     }
 
-    /**
-     * Creates a Maven repository for accessing dependencies.
-     *
-     * @param name The name of the repository.
-     * @param url The URL of the repository.
-     * @param urlWithCacheRedirector The URL of the repository with cache redirector. Used when [BuildFeature.USE_CACHE_REDIRECTOR] is enabled.
-     * @param action The action to be performed on the repository. Defaults to an empty action.
-     * @see BuildFeature.USE_CACHE_REDIRECTOR
-     */
-    private fun createMavenRepository(
-        name: String,
-        url: String,
-        urlWithCacheRedirector: String = url,
-        action: MavenRepositoryAction = {},
-    ) = BuildFeature.USE_CACHE_REDIRECTOR.getValue(providers).get().let { useCacheRedirector ->
-        repositories.maven(
-            when (useCacheRedirector) {
-                true -> urlWithCacheRedirector
-                false -> url
-            }
-        ) {
-            this.name = name
-            action()
-        }
-    }
-
-    /**
-     * Creates an Ivy repository for accessing dependencies.
-     *
-     * @param name The name of the repository.
-     * @param url The URL of the repository.
-     * @param pattern The pattern used for artifact resolution. Defaults to an empty string.
-     * @param action The action to be performed on the repository. Defaults to an empty action.
-     */
-    private fun createIvyRepository(
-        name: String,
-        url: String,
-        patterns: List<String> = emptyList(),
-        action: IvyRepositoryAction = {},
-    ) = repositories.ivy {
-        this.name = name
-        this.url = URI(url)
-        patternLayout { patterns.forEach { artifact(it) } }
-        metadataSources { artifact() }
-        action()
-    }
-
     companion object : Registrable<IntelliJPlatformRepositoriesExtension> {
         override fun register(project: Project, target: Any) =
             target.configureExtension<IntelliJPlatformRepositoriesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 project.repositories,
                 project.providers,
+                project.objects,
+                project.serviceOf<FlowScope>(),
+                project.serviceOf<FlowProviders>(),
+                project.gradle,
                 project.rootProjectPath,
             )
 
-        @Suppress("UnstableApiUsage")
         fun register(settings: Settings, target: Any) =
             target.configureExtension<IntelliJPlatformRepositoriesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 settings.dependencyResolutionManagement.repositories,
                 settings.providers,
+                settings.serviceOf<ObjectFactory>(),
+                settings.serviceOf<FlowScope>(),
+                settings.serviceOf<FlowProviders>(),
+                settings.gradle,
                 settings.rootDir.toPath().absolute(),
             )
     }
@@ -335,3 +288,4 @@ fun RepositoryHandler.intellijPlatform(configure: Action<IntelliJPlatformReposit
  */
 internal typealias MavenRepositoryAction = (MavenArtifactRepository.() -> Unit)
 internal typealias IvyRepositoryAction = (IvyArtifactRepository.() -> Unit)
+internal typealias PluginRepositoryAction = (PluginArtifactRepository.() -> Unit)

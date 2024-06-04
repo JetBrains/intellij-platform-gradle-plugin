@@ -194,6 +194,10 @@ object Constants {
         const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY = "kotlin.stdlib.default.dependency"
     }
 
+    object Services {
+        const val SHIM_MANAGER = "shimManager"
+    }
+
     const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
     const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
 
