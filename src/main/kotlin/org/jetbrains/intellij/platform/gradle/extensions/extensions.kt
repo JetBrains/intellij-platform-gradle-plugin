@@ -134,7 +134,7 @@ internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Pa
  * Retrieves URLs from registered repositories.
  */
 internal fun RepositoryHandler.urls() = mapNotNull { (it as? UrlArtifactRepository)?.url?.toString() }
-internal fun String.parseIdeNotation() = split('-').let {
+internal fun String.parseIdeNotation() = trim().split('-').let {
     when {
         it.size == 2 -> it.first().toIntelliJPlatformType() to it.last()
         else -> IntelliJPlatformType.IntellijIdeaCommunity to it.first()

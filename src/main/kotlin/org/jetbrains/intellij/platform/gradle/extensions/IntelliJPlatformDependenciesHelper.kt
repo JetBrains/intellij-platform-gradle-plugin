@@ -589,8 +589,9 @@ class IntelliJPlatformDependenciesHelper(
      * @param bundledPluginId The ID of the bundled plugin
      */
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(bundledPluginId: String): Dependency {
-        val plugin = bundledPlugins.get().plugins.find { it.id == bundledPluginId }
-        requireNotNull(plugin) { "Could not find bundled plugin with ID: '$bundledPluginId'" }
+        val id = bundledPluginId.trim()
+        val plugin = bundledPlugins.get().plugins.find { it.id == id }
+        requireNotNull(plugin) { "Could not find bundled plugin with ID: '$id'" }
 
         val version = productInfo.get().version
         val artifactPath = platformPath.get()
