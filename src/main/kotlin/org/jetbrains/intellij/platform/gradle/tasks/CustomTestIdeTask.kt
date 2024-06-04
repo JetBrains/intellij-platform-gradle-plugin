@@ -100,6 +100,7 @@ abstract class CustomTestIdeTask : Test(), TestableAware, CustomIntelliJPlatform
                 )
             )
 
+            systemProperty("idea.classpath.index.enabled", "false")
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
             systemProperty("idea.use.core.classloader.for.plugin.path", "true")
             systemProperty("idea.force.use.core.classloader", "true")
