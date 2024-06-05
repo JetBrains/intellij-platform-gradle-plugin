@@ -20,6 +20,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
@@ -197,18 +198,33 @@ class IntelliJPlatformDependenciesHelper(
      * @param action An optional action to be performed on the created dependency.
      */
     @Throws(GradleException::class)
-    internal fun addIntelliJPlatformDependencies(
+    internal fun addIntelliJPluginVerifierIdes(
         notationsProvider: Provider<List<String>>,
-        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        dependencyConfigurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+        configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(notationsProvider.map { notations ->
-        notations.map {
-            val (type, version) = it.parseIdeNotation()
+    ) = configurations[dependencyConfigurationName].dependencies.addAllLater(notationsProvider.map { notations ->
+        notations.map { notation ->
+            val (type, version) = notation.parseIdeNotation()
 
-            when (type) {
+            val dependency = when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
                 else -> dependencies.createIntelliJPlatform(type, version)
             }.apply(action)
+
+            val dependencyConfiguration = configurations.maybeCreate("${dependencyConfigurationName}_$notation").apply {
+                dependencies.add(dependency)
+            }
+
+            configurations.maybeCreate("${configurationName}_$notation").apply {
+                attributes {
+                    attribute(Attributes.extracted, true)
+                }
+
+                extendsFrom(dependencyConfiguration)
+            }
+
+            dependency
         }
     })
 

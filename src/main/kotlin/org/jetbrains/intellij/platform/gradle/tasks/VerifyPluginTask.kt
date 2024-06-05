@@ -12,8 +12,6 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
-import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
@@ -22,7 +20,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.io.ByteArrayOutputStream
@@ -303,7 +300,11 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
                 val verifyPluginProvider = project.extensionProvider.map { it.verifyPlugin }
-                val intellijPluginVerifierIdesConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES].asLenient
+                val intellijPluginVerifierIdesConfigurations = project.configurations.named { name ->
+                    with(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES) {
+                        name == this || name.startsWith("${this}_")
+                    }
+                }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 
                 freeArgs.convention(verifyPluginProvider.flatMap { it.freeArgs })
@@ -315,7 +316,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 subsystemsToCheck.convention(verifyPluginProvider.flatMap { it.subsystemsToCheck })
                 ignoredProblemsFile.convention(verifyPluginProvider.flatMap { it.ignoredProblemsFile })
 
-                ides = intellijPluginVerifierIdesConfiguration
+                ides.from(intellijPluginVerifierIdesConfigurations)
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 offline.convention(project.gradle.startParameter.isOffline)
             }

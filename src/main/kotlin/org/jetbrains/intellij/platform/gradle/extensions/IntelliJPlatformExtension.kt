@@ -735,9 +735,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
-            fun ide(notation: String) = delegate.addIntelliJPlatformDependencies(
+            fun ide(notation: String) = delegate.addIntelliJPluginVerifierIdes(
                 notationsProvider = delegate.provider { listOf(notation) },
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
             /**
@@ -745,9 +744,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
-            fun ide(notation: Provider<String>) = delegate.addIntelliJPlatformDependencies(
+            fun ide(notation: Provider<String>) = delegate.addIntelliJPluginVerifierIdes(
                 notationsProvider = notation.map { listOf(it) },
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
             /**
@@ -755,9 +753,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param notations The IntelliJ Platform dependencies. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
-            fun ides(notations: List<String>) = delegate.addIntelliJPlatformDependencies(
+            fun ides(notations: List<String>) = delegate.addIntelliJPluginVerifierIdes(
                 notationsProvider = delegate.provider { notations },
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
             /**
@@ -765,9 +762,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param notations The IntelliJ Platform dependencies. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
-            fun ides(notations: Provider<List<String>>) = delegate.addIntelliJPlatformDependencies(
+            fun ides(notations: Provider<List<String>>) = delegate.addIntelliJPluginVerifierIdes(
                 notationsProvider = notations,
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
             /**
@@ -818,9 +814,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see listProductReleases
              * @see ProductReleasesValueSource
              */
-            fun recommended() = delegate.addIntelliJPlatformDependencies(
+            fun recommended() = delegate.addIntelliJPluginVerifierIdes(
                 notationsProvider = ProductReleasesValueSource(),
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
             /**
@@ -830,9 +825,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see listProductReleases
              * @see ProductReleasesValueSource
              */
-            fun select(configure: FilterParameters.() -> Unit = {}) = delegate.addIntelliJPlatformDependencies(
+            fun select(configure: FilterParameters.() -> Unit = {}) = delegate.addIntelliJPluginVerifierIdes(
                 notationsProvider = ProductReleasesValueSource(configure),
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
             /**

@@ -20,6 +20,7 @@
 - Regression: `PrepareSandboxTask` doesn't create `system` and `log` sandbox directories
 - Revise creating custom tasks and IntelliJ Platform main dependency inheritance
 - Redundant whitespace when parsing plugin dependency IDs
+- Plugin Verifier: introduce partial configuration for resolving IntelliJ Platform dependencies with same coordinates but different versions
 
 ## [2.0.0-beta4] - 2024-05-27
 
