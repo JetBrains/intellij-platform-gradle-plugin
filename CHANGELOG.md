@@ -5,13 +5,20 @@
 ### Added
 
 - Introduce `KotlinMetadataAware` interface to provide metadata about the Kotlin setup
+- Custom plugin repositories with authorization headers support
+
+### Changed
+
+- Resolve Plugin Verifier IDEs using regular IntelliJ Platform dependency resolution
 
 ### Fixed
 
+- Add `idea.classpath.index.enabled=false` to tests system properties to avoid creating `classpath.index` file
 - Regression: Cannot fingerprint input property `productInfo`
 - Regression: `GenerateManifestTask` property `kotlinStdlibBundled` doesn't have a configured value
 - Regression: `PrepareSandboxTask` doesn't create `system` and `log` sandbox directories
-- Revise creating custom tasks and IntelliJ Platform main dependency inheritance 
+- Revise creating custom tasks and IntelliJ Platform main dependency inheritance
+- Redundant whitespace when parsing plugin dependency IDs
 
 ## [2.0.0-beta4] - 2024-05-27
 
