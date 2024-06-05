@@ -291,11 +291,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             LocalPluginsNormalizationTransformers.register(
                 dependencies = this
             )
-//            PluginVerifierIdeExtractorTransformer.register(
-//                dependencies = this,
-//                intellijPluginVerifierIdesDependencyConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY],
-//                downloadDirectoryProvider = project.extensionProvider.flatMap { it.verifyPlugin.downloadDirectory },
-//            )
 
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {
                 project.configurations[Configurations.TEST_FIXTURES_COMPILE_CLASSPATH]

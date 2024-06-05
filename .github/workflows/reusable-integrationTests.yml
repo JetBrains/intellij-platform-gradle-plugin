@@ -22,7 +22,6 @@ jobs:
           - windows-latest
           - ubuntu-latest
           - macos-latest
-          - macos-14
 
     steps:
 

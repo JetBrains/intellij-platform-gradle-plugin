@@ -12,8 +12,3 @@ Gradle versions:
 
 When updating _latest GA_ version, adjust `exclude` section 
 and adjust `single-unitTest.yml`.
-
-Operating Systems:
-
-- `macos-latest` = Intel arch
-- `macos-14` = Apple Silicon arch

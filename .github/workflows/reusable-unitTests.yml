@@ -29,7 +29,6 @@ jobs:
           - windows-latest
           - ubuntu-latest
           - macos-latest
-          - macos-14
         exclude:
           - os: ubuntu-latest
             gradleVersion: "8.7"
