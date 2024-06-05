@@ -21,6 +21,8 @@ abstract class ComposedJarTask : Jar() {
             project.registerTask<ComposedJarTask>(Tasks.COMPOSED_JAR) {
                 val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
+                val apiElementsConfiguration = project.configurations[Configurations.External.API_ELEMENTS]
+                val archivesConfiguration = project.configurations[Configurations.External.ARCHIVES]
                 val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
 
@@ -47,8 +49,14 @@ abstract class ComposedJarTask : Jar() {
                 JarCompanion.applyPluginManifest(this)
 
                 // Remove the default artifact exported by the current module and replace it with the final one provided by the task.
-                runtimeElementsConfiguration.artifacts.removeIf { it.classifier == JarCompanion.CLASSIFIER }
-                project.artifacts.add(runtimeElementsConfiguration.name, archiveFile)
+                listOf(
+                    apiElementsConfiguration,
+                    archivesConfiguration,
+                    runtimeElementsConfiguration,
+                ).forEach { configuration ->
+                    configuration.artifacts.removeIf { it.classifier == JarCompanion.CLASSIFIER }
+                    project.artifacts.add(configuration.name, archiveFile)
+                }
             }
     }
 }

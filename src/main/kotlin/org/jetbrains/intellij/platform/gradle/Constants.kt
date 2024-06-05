@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.internal.tasks.JvmConstants
 import org.gradle.api.plugins.HelpTasksPlugin
@@ -111,6 +112,8 @@ object Constants {
         }
 
         object External {
+            const val ARCHIVES = Dependency.ARCHIVES_CONFIGURATION
+            const val API_ELEMENTS = JavaPlugin.API_ELEMENTS_CONFIGURATION_NAME
             const val COMPILE_CLASSPATH = JvmConstants.COMPILE_CLASSPATH_CONFIGURATION_NAME
             const val COMPILE_ONLY = JvmConstants.COMPILE_ONLY_CONFIGURATION_NAME
             const val IMPLEMENTATION = JvmConstants.IMPLEMENTATION_CONFIGURATION_NAME

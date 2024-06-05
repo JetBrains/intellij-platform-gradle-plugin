@@ -14,6 +14,7 @@
 ### Fixed
 
 - Add `idea.classpath.index.enabled=false` to tests system properties to avoid creating `classpath.index` file
+- Replace base archive file of the `Jar` task with `ComposedJarTask` archive file in all configuration artifact sets
 - Regression: Cannot fingerprint input property `productInfo`
 - Regression: `GenerateManifestTask` property `kotlinStdlibBundled` doesn't have a configured value
 - Regression: `PrepareSandboxTask` doesn't create `system` and `log` sandbox directories
