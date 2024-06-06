@@ -20,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.io.ByteArrayOutputStream
@@ -316,7 +317,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 subsystemsToCheck.convention(verifyPluginProvider.flatMap { it.subsystemsToCheck })
                 ignoredProblemsFile.convention(verifyPluginProvider.flatMap { it.ignoredProblemsFile })
 
-                ides.from(intellijPluginVerifierIdesConfigurations)
+                ides.from(project.provider {
+                    intellijPluginVerifierIdesConfigurations.map { it.asLenient }
+                })
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 offline.convention(project.gradle.startParameter.isOffline)
             }
