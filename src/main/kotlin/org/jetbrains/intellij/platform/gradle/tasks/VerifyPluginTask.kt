@@ -301,10 +301,12 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
                 val verifyPluginProvider = project.extensionProvider.map { it.verifyPlugin }
-                val intellijPluginVerifierIdesConfigurations = project.configurations.named { name ->
-                    with(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES) {
-                        name == this || name.startsWith("${this}_")
-                    }
+                val intellijPluginVerifierIdesConfigurations = project.provider { // TODO: use .named when Gradle 8.6+
+                    project.configurations.filter { configuration ->
+                        with(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES) {
+                            configuration.name == this || configuration.name.startsWith("${this}_")
+                        }
+                    }.map { it.asLenient }
                 }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 
@@ -317,9 +319,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 subsystemsToCheck.convention(verifyPluginProvider.flatMap { it.subsystemsToCheck })
                 ignoredProblemsFile.convention(verifyPluginProvider.flatMap { it.ignoredProblemsFile })
 
-                ides.from(project.provider {
-                    intellijPluginVerifierIdesConfigurations.map { it.asLenient }
-                })
+                ides.from(intellijPluginVerifierIdesConfigurations)
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 offline.convention(project.gradle.startParameter.isOffline)
             }
