@@ -207,24 +207,22 @@ class IntelliJPlatformDependenciesHelper(
         notations.map { notation ->
             val (type, version) = notation.parseIdeNotation()
 
-            val dependency = when (type) {
+            when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
                 else -> dependencies.createIntelliJPlatform(type, version)
-            }.apply(action)
-
-            val dependencyConfiguration = configurations.maybeCreate("${dependencyConfigurationName}_$notation").apply {
-                dependencies.add(dependency)
-            }
-
-            configurations.maybeCreate("${configurationName}_$notation").apply {
-                attributes {
-                    attribute(Attributes.extracted, true)
+            }.apply(action).also { dependency ->
+                val dependencyConfiguration = configurations.maybeCreate("${dependencyConfigurationName}_$notation").apply {
+                    dependencies.add(dependency)
                 }
 
-                extendsFrom(dependencyConfiguration)
+                configurations.findByName("${configurationName}_$notation")
+                    ?: configurations.create("${configurationName}_$notation").apply {
+                        attributes {
+                            attribute(Attributes.extracted, true)
+                        }
+                        extendsFrom(dependencyConfiguration)
+                    }
             }
-
-            dependency
         }
     })
 
