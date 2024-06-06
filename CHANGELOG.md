@@ -2,13 +2,39 @@
 
 ## [next]
 
+## [2.0.0-beta6] - 2024-06-06
+
+The **IntelliJ Platform Gradle Plugin `2.0.0-beta6`** is a plugin for the Gradle build system to help configure environments for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs. It is a successor of _Gradle IntelliJ Plugin 1.x_.
+
 ### Added
 
 - Custom plugin repositories with authorization headers support
+- Introduce `KotlinMetadataAware` interface to provide metadata about the Kotlin setup
+- Support for Android Studio DMG archives
+- Introduce `VerifyPluginProjectConfigurationTask.hasModulePlugin` to exclude modules using `org.jetbrains.intellij.platform.module` subplugin from `plugin.xml` checks.
+- Better error handling in dependency helpers when missing values
+- Introduce `GenerateManifestTask` for generating `MANIFEST.MF` file
+- Introduce `ComposedJarTask` to compose and pick the final jar archive
+- Introduce `intellijPlatform.pluginModule(Dependency)` dependency helper to compose a single jar combined of multiple modules
+- `jetbrainsRuntime()` dependency helper for resolving a suitable JBR version for IntelliJ Platform fetched from IntelliJ Maven Repository
+- `jetbrainsRuntimeExplicit(explicitVersion)` dependency helper for specifying an explicit JBR version if necessary
+- `PrepareSandboxTask`: introduce `sandboxDirectoriesExistence` property to ensure all sandbox directories exist
+- `localPlugin()` dependency helper for adding local plugins as project dependencies and extending customizable tasks
+- Emit warning when using the `bundledLibrary` dependency helper.
+- Use IntelliJ Platform distribution from [download.jetbrains.com](http://download.jetbrains.com/) by default. To switch back to IntelliJ Maven Repository artifacts, use `org.jetbrains.intellij.platform.buildFeature.useBinaryReleases=false`
+- Introduced `Custom*` tasks. if you want to extend the `runIde` or `testSomething` tasks, use the `Custom*Task` classes. See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-custom-tasks.html
+- Better handling of missing dependencies/misconfiguration
+- Bring back the `SetupDependenciesTask` to avoid failing build when migrating from `1.x`
+- Better `ClosestVersionResolver` error messages
+- When running IDE in Split Mode, it’s possible to specify `splitModeTarget` (`BACKEND`, `FRONTEND`, `BACKEND_AND_FRONTEND`)
 
 ### Changed
 
 - Resolve Plugin Verifier IDEs using regular IntelliJ Platform dependency resolution
+- Update `PlatformJavaVersions` and `PlatformKotlinVersions`
+- Introduce a separated Sandbox for the Frontend part when running IDE in Split Mode
+- Rename `SandboxAware.sandboxContainerDirectory` to `SandboxAware.sandboxDirectory` to avoid confusion with `intellijPlatform.sandboxContainer`
+- Use custom task name as a suffix for dynamically created configuration and tasks instead of `UUID.randomUUID()`
 
 ### Fixed
 
@@ -16,6 +42,25 @@
 - Replace base archive file of the `Jar` task with `ComposedJarTask` archive file in all configuration artifact sets
 - Redundant whitespace when parsing plugin dependency IDs
 - Plugin Verifier: introduce partial configuration for resolving IntelliJ Platform dependencies with same coordinates but different versions
+- Regression: Cannot fingerprint input property `productInfo`
+- Regression: `GenerateManifestTask` property `kotlinStdlibBundled` doesn't have a configured value
+- Regression: `PrepareSandboxTask` doesn't create `system` and `log` sandbox directories
+- Revise creating custom tasks and IntelliJ Platform main dependency inheritance
+- Avoid leaking internal properties from `intellijPlatform` extensions
+- Fixed custom tasks suffixing
+- Fixed: Task `:test` uses this output of task `:prepareSandbox` without declaring an explicit or implicit dependency [#1609](../../issues/1609)
+- ExtractorTransformer: Exclude only `Applications` symlink
+- SandboxAware: inherit sandbox directory from producer
+- Add IntelliJ Platform path-based hash to Ivy files to better deal with cache (temporary workaround)
+- Fixed transitive dependencies of bundled plugin dependencies when IntelliJ Platform doesn't contain `ProductInfo.layout` model yet.
+- Produce customized (suffixed) configuration only for `CustomIntelliJPlatformVersionAware` tasks
+- Fixed including transitive modules/bundled plugins dependencies of declared plugin dependencies
+- Fixed JetBrains Runtime (JBR) resolving
+- Move `TestFrameworkType` from `org.jetbrains.intellij.platform.gradle.extensions` to `org.jetbrains.intellij.platform.gradle`
+
+### Removed
+
+- Dropped `testIde` task as `test` is now properly configured
 
 ## [2.0.0-beta5] - 2024-05-30
 
@@ -1087,11 +1132,13 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta5...HEAD
-[2.0.0-beta4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta4...v2.0.0-beta5
-[2.0.0-beta3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...v2.0.0-beta3
-[2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta1...v2.0.0-beta2
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta6...HEAD
 [2.0.0-beta1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...v2.0.0-beta1
+[2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta1...v2.0.0-beta2
+[2.0.0-beta3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...v2.0.0-beta3
+[2.0.0-beta4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta3...v2.0.0-beta4
+[2.0.0-beta5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta4...v2.0.0-beta5
+[2.0.0-beta6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta5...v2.0.0-beta6
 [1.17.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...v1.17.3
 [1.17.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.0...v1.17.1
