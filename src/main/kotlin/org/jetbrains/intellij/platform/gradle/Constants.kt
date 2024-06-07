@@ -57,6 +57,7 @@ object Constants {
     }
 
     object Configurations {
+        const val INTELLIJ_PLATFORM_COMPOSED_JAR = "intellijPlatformComposedJar"
         const val INTELLIJ_PLATFORM_DEPENDENCY = "intellijPlatformDependency"
         const val INTELLIJ_PLATFORM_LOCAL = "intellijPlatformLocal"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
@@ -82,6 +83,8 @@ object Constants {
         const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
 
         object Attributes {
+            const val COMPOSED_JAR_NAME = "composed-jar"
+
             val bundledPluginsList = Attribute.of("intellijPlatformBundledPluginsList", Boolean::class.javaObjectType)
             val localPluginsNormalized = Attribute.of("intellijPlatformLocalPluginsNormalized", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
@@ -119,6 +122,7 @@ object Constants {
             const val IMPLEMENTATION = JvmConstants.IMPLEMENTATION_CONFIGURATION_NAME
             const val RUNTIME_CLASSPATH = JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
             const val RUNTIME_ELEMENTS = JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME
+            const val RUNTIME_ONLY = JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME
             const val TEST_COMPILE_CLASSPATH = JvmConstants.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
             const val TEST_COMPILE_ONLY = JvmConstants.TEST_COMPILE_ONLY_CONFIGURATION_NAME
         }

@@ -2,12 +2,12 @@
 
 package org.jetbrains.intellij.platform.gradle.plugins.project
 
-import org.gradle.api.GradleException
-import org.gradle.api.Plugin
-import org.gradle.api.Project
-import org.gradle.api.Task
+import org.gradle.api.*
+import org.gradle.api.attributes.*
+import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.TaskContainer
+import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
@@ -23,6 +23,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.BundledPlugins
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
+import org.jetbrains.intellij.platform.gradle.attributes.ComposedJarRule
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
@@ -62,6 +63,32 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }
 
         with(project.configurations) configurations@{
+            create(Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR) {
+                isCanBeConsumed = true
+                isCanBeResolved = false
+
+                attributes {
+                    attribute(Bundling.BUNDLING_ATTRIBUTE, project.objects.named(Bundling.EXTERNAL))
+                    attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
+                    attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, JavaVersion.current().majorVersion.toInt())
+                    attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
+                    attributes.attribute(Attribute.of("org.gradle.jvm.environment", String::class.java), "standard-jvm")
+                    attributes.attribute(Attribute.of("org.jetbrains.kotlin.platform.type", String::class.java), "jvm")
+                }
+
+                extendsFrom(
+                    this@configurations[Configurations.External.IMPLEMENTATION],
+                    this@configurations[Configurations.External.RUNTIME_ONLY],
+                )
+            }
+
+            named(Configurations.External.RUNTIME_CLASSPATH) {
+                attributes {
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.COMPOSED_JAR_NAME))
+                }
+            }
+
             val intellijPlatformDependencyConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
                 description = "IntelliJ Platform dependency archive",
@@ -122,6 +149,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Platform plugin module",
             ) {
                 isTransitive = false
+
+                attributes {
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.COMPOSED_JAR_NAME))
+                }
             }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR,
@@ -272,6 +303,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attribute(Attributes.bundledPluginsList)
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
+                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE) {
+                    compatibilityRules.add(ComposedJarRule::class)
+                }
             }
 
             ExtractorTransformer.register(

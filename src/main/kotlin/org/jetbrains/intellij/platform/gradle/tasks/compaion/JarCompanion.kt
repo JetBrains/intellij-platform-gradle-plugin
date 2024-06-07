@@ -14,12 +14,10 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 class JarCompanion {
 
     companion object : Registrable {
-        const val CLASSIFIER = "base"
-
         override fun register(project: Project) =
             project.registerTask<Jar>(Tasks.External.JAR, configureWithType = false) {
                 archiveBaseName.convention(project.extensionProvider.flatMap { it.projectName })
-                archiveClassifier.convention(CLASSIFIER)
+                archiveClassifier.convention("base")
                 applyPluginManifest(this)
 
                 exclude("**/classpath.index")

@@ -23,7 +23,7 @@ enum class IntelliJPlatformType(
 ) {
     AndroidStudio(
         code = "AI",
-        maven = Coordinates("com.google.android.studio", "android-studio"),
+        maven = null,
         binary = Coordinates("com.google.android.studio", "android-studio"),
     ),
     Aqua(

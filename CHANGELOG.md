@@ -10,6 +10,7 @@
 ### Changed
 
 - Resolve Plugin Verifier IDEs using regular IntelliJ Platform dependency resolution
+- Publish instrumented and composed artifact with variants instead of replacing the default artifact
 
 ### Fixed
 
