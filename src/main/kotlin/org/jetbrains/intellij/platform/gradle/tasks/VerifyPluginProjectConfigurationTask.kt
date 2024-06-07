@@ -16,6 +16,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
+import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
@@ -92,6 +93,12 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     @get:Internal
     abstract val targetCompatibility: Property<String>
 
+    /**
+     * Defines that the current module has only the [Plugins.MODULE] applied.
+     */
+    @get:Internal
+    abstract val hasModulePlugin: Property<Boolean>
+
     private val log = Logger(javaClass)
 
     init {
@@ -101,6 +108,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
     @TaskAction
     fun verifyPluginConfiguration() {
+        val isModule = hasModulePlugin.get()
         val platformBuild = productInfo.buildNumber.toVersion()
         val platformVersion = productInfo.version.toVersion()
         val platformJavaVersion = getPlatformJavaVersion(platformBuild)
@@ -115,30 +123,47 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         val platformKotlinLanguageVersion = getPlatformKotlinVersion(platformBuild)?.run { "$major.$minor".toVersion() }
 
         sequence {
-            pluginXml.orNull
-                ?.let { file ->
-                    val sinceBuild = file.parse { ideaVersion.sinceBuild.toVersion() }
-                    val sinceBuildJavaVersion = getPlatformJavaVersion(sinceBuild)
-                    val sinceBuildKotlinApiVersion =
-                        getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
+            if (!isModule) {
+                pluginXml.orNull
+                    ?.let { file ->
+                        val sinceBuild = file.parse { ideaVersion.sinceBuild.toVersion() }
+                        val sinceBuildJavaVersion = getPlatformJavaVersion(sinceBuild)
+                        val sinceBuildKotlinApiVersion =
+                            getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
 
-                    if (sinceBuild.version.contains('*')) {
-                        yield("The since-build='$sinceBuild' should not contain wildcard.")
+                        if (sinceBuild.version.contains('*')) {
+                            yield("The since-build='$sinceBuild' should not contain wildcard.")
+                        }
+                        if (sinceBuild.major < platformBuild.major) {
+                            yield("The since-build='$sinceBuild' is lower than the target IntelliJ Platform major version: '${platformBuild.major}'.")
+                        }
+                        if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
+                            yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility='$sinceBuildJavaVersion'.")
+                        }
+                        if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
+                            yield("The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but since-build='$sinceBuild' property requires jvmTarget='$sinceBuildJavaVersion'.")
+                        }
+                        if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
+                            yield("The Kotlin configuration specifies apiVersion='$kotlinApiVersion' but since-build='$sinceBuild' property requires apiVersion='$sinceBuildKotlinApiVersion'.")
+                        }
                     }
-                    if (sinceBuild.major < platformBuild.major) {
-                        yield("The since-build='$sinceBuild' is lower than the target IntelliJ Platform major version: '${platformBuild.major}'.")
+                    ?: yield("The plugin.xml descriptor file could not be found.")
+
+                run {
+                    val gitignore = gitignoreFile.orNull?.asPath ?: return@run
+                    val cache = intellijPlatformCache.orNull?.toPath()?.takeIf { it.exists() } ?: return@run
+                    val root = rootDirectory.get().toPath()
+
+                    if (cache != root.resolve(CACHE_DIRECTORY)) {
+                        return@run
                     }
-                    if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
-                        yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility='$sinceBuildJavaVersion'.")
-                    }
-                    if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
-                        yield("The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but since-build='$sinceBuild' property requires jvmTarget='$sinceBuildJavaVersion'.")
-                    }
-                    if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
-                        yield("The Kotlin configuration specifies apiVersion='$kotlinApiVersion' but since-build='$sinceBuild' property requires apiVersion='$sinceBuildKotlinApiVersion'.")
+
+                    val containsEntry = gitignore.readLines().any { line -> line.contains(CACHE_DIRECTORY) }
+                    if (!containsEntry) {
+                        this@sequence.yield("The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file.")
                     }
                 }
-                ?: yield("The plugin.xml descriptor file could not be found.")
+            }
 
             if (platformBuild < MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
                 yield("The minimal supported IntelliJ Platform version is `$MINIMAL_INTELLIJ_PLATFORM_VERSION` (branch `$MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER`), current: '$platformVersion' ('$platformBuild')")
@@ -160,20 +185,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             }
             if (kotlinxCoroutinesLibraryPresent) {
                 yield("The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines")
-            }
-            run {
-                val gitignore = gitignoreFile.orNull?.asPath ?: return@run
-                val cache = intellijPlatformCache.orNull?.toPath()?.takeIf { it.exists() } ?: return@run
-                val root = rootDirectory.get().toPath()
-
-                if (cache != root.resolve(CACHE_DIRECTORY)) {
-                    return@run
-                }
-
-                val containsEntry = gitignore.readLines().any { line -> line.contains(CACHE_DIRECTORY) }
-                if (!containsEntry) {
-                    this@sequence.yield("The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file.")
-                }
             }
             if (runtimeMetadata.get()["java.vendor"] != "JetBrains s.r.o.") {
                 yield("The currently selected Java Runtime is not JetBrains Runtime (JBR). This may lead to unexpected IDE behaviors. Please use IntelliJ Platform binary release with bundled JBR or define it explicitly with project dependencies or JVM Toolchain, see: https://jb.gg/intellij-platform-with-jbr")
@@ -210,6 +221,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 }))
                 sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
                 targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
+                hasModulePlugin.convention(project.provider {
+                    project.pluginManager.hasPlugin(Plugins.MODULE) && !project.pluginManager.hasPlugin(Plugin.ID)
+                })
 
                 project.tasks.withType<JavaCompile> {
                     dependsOn(this@registerTask)

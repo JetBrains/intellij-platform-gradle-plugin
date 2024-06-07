@@ -5,6 +5,7 @@
 ### Added
 
 - Custom plugin repositories with authorization headers support
+- `VerifyPluginProjectConfigurationTask`: limit specific checks when `.module` plugin is only applied
 
 ### Changed
 
