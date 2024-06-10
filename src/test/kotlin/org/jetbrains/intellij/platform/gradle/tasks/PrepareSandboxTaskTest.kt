@@ -6,7 +6,6 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
-import java.nio.file.Path
 import kotlin.io.path.*
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -924,5 +923,60 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             ),
             collectPaths(sandbox),
         )
+    }
+
+    @Test
+    fun `create sandbox in a custom location`() {
+        val taskName = "customRunIde"
+
+        buildFile write //language=kotlin
+                """
+                val $taskName by tasks.registering(CustomRunIdeTask::class) {
+                    sandboxDirectory = project.layout.buildDirectory.dir("custom-sandbox")
+                    enabled = false
+                }
+                """.trimIndent()
+
+        build(taskName)
+
+        assertExists(buildDirectory.resolve("custom-sandbox/config_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/plugins_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/log_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/system_$taskName"))
+    }
+
+    @Test
+    fun `create test sandbox in a custom location`() {
+        val taskName = "customTest"
+
+        buildFile write //language=kotlin
+                """
+                val $taskName by tasks.registering(CustomTestIdeTask::class) {
+                    sandboxDirectory = project.layout.buildDirectory.dir("custom-sandbox")
+                }
+                """.trimIndent()
+
+        build(taskName)
+
+        assertExists(buildDirectory.resolve("custom-sandbox/config-test_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/plugins-test_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/log-test_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/system-test_$taskName"))
+
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    $taskName {
+                        sandboxSuffix = "-foo"
+                    }
+                }
+                """.trimIndent()
+
+        build(taskName)
+
+        assertExists(buildDirectory.resolve("custom-sandbox/config-foo"))
+        assertExists(buildDirectory.resolve("custom-sandbox/plugins-foo"))
+        assertExists(buildDirectory.resolve("custom-sandbox/log-foo"))
+        assertExists(buildDirectory.resolve("custom-sandbox/system-foo"))
     }
 }

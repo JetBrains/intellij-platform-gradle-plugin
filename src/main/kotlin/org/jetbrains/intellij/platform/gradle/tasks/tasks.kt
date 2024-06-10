@@ -260,13 +260,12 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                         SplitModeTarget.BACKEND -> ""
                         SplitModeTarget.BOTH -> ""
                     }
+                    sandboxSuffix.convention("-$taskSubject".lowercase().trimEnd('-') + suffix)
                     val taskName = "prepare" + taskSubject + splitModeVariant + "Sandbox" + suffix
 
                     return tasks.maybeCreate<PrepareSandboxTask>(taskName).also { task ->
-                        val taskSubjectSuffix = "-$taskSubject".lowercase().trimEnd('-') + suffix
-                        task.sandboxSuffix.convention(taskSubjectSuffix)
-                        sandboxSuffix.convention(taskSubjectSuffix)
-                        sandboxDirectory.convention(task.sandboxDirectory)
+                        task.sandboxSuffix.convention(sandboxSuffix)
+                        task.sandboxDirectory.set(sandboxDirectory)
 
                         if (this is CustomIntelliJPlatformVersionAware) {
                             task.disabledPlugins = the<IntelliJPlatformPluginsExtension>().disabled

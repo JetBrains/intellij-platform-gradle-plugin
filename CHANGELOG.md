@@ -18,6 +18,7 @@
 - Replace base archive file of the `Jar` task with `ComposedJarTask` archive file in all configuration artifact sets
 - Redundant whitespace when parsing plugin dependency IDs
 - Plugin Verifier: introduce partial configuration for resolving IntelliJ Platform dependencies with same coordinates but different versions
+- Customizing the `sandboxDirectory` and `sandboxSuffix` when configuring `SandboxAware` tasks
 
 ## [2.0.0-beta5] - 2024-05-30
 
