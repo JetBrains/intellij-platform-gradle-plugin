@@ -159,8 +159,12 @@ abstract class ExtractorTransformer @Inject constructor(
             .from(tempDirectory)
             .matching {
                 exclude {
-                    // DMG archives contain a symbolic link to Applications directory and some `.background` meta directory we have to exclude.
-                    it.file.run { name == ".background" || (name == "Applications" && Files.isSymbolicLink(toPath())) }
+                    // DMG archives contain a symbolic link to Applications directory and dot-directories located in the root of the archive,
+                    // such as `.background` meta-directory, we have to exclude.
+                    it.file.run {
+                        (name == "Applications" && Files.isSymbolicLink(toPath()))
+                                || it.relativePath.startsWith('.')
+                    }
                 }
             }
     }

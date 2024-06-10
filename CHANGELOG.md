@@ -19,6 +19,7 @@
 - Redundant whitespace when parsing plugin dependency IDs
 - Plugin Verifier: introduce partial configuration for resolving IntelliJ Platform dependencies with same coordinates but different versions
 - Customizing the `sandboxDirectory` and `sandboxSuffix` when configuring `SandboxAware` tasks
+- Fixed content exclusion when extracting DMG archives of IntelliJ Platform on macOS
 
 ## [2.0.0-beta5] - 2024-05-30
 
