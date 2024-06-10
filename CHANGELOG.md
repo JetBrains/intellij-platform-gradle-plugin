@@ -9,6 +9,8 @@
 ### Changed
 
 - Publish instrumented and composed artifact with variants instead of replacing the default artifact
+- Check the latest plugin version against Gradle Plugin Portal
+- Avoid calling `checkPluginVersion` and `createCoroutinesJavaAgentFile` methods when in a `.module`
 
 ### Fixed
 

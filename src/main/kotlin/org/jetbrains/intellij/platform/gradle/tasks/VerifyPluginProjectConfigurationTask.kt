@@ -94,10 +94,10 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     abstract val targetCompatibility: Property<String>
 
     /**
-     * Defines that the current module has only the [Plugins.MODULE] applied.
+     * Defines that the current project has only the [Plugins.MODULE] applied but no [Plugin.ID].
      */
     @get:Internal
-    abstract val hasModulePlugin: Property<Boolean>
+    abstract val module: Property<Boolean>
 
     private val log = Logger(javaClass)
 
@@ -108,7 +108,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
     @TaskAction
     fun verifyPluginConfiguration() {
-        val isModule = hasModulePlugin.get()
+        val isModule = module.get()
         val platformBuild = productInfo.buildNumber.toVersion()
         val platformVersion = productInfo.version.toVersion()
         val platformJavaVersion = getPlatformJavaVersion(platformBuild)
@@ -212,6 +212,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 log.info("Configuring plugin configuration verification task")
 
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(Tasks.External.COMPILE_JAVA)
+                val initializeIntelliJPlatformPluginTaskProvider =
+                    project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
                 rootDirectory.convention(project.provider { project.rootProject.rootDir })
@@ -221,9 +223,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 }))
                 sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
                 targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
-                hasModulePlugin.convention(project.provider {
-                    project.pluginManager.hasPlugin(Plugins.MODULE) && !project.pluginManager.hasPlugin(Plugin.ID)
-                })
+                module.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap { it.module })
 
                 project.tasks.withType<JavaCompile> {
                     dependsOn(this@registerTask)

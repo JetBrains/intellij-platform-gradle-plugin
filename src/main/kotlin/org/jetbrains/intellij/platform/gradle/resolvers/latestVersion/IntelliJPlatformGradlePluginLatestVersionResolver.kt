@@ -7,15 +7,10 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import java.net.URL
 
 class IntelliJPlatformGradlePluginLatestVersionResolver : LatestVersionResolver(
-    url = URL(Locations.GITHUB_REPOSITORY),
+    url = URL("${Locations.MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY}/org/jetbrains/intellij/platform/intellij-platform-gradle-plugin/maven-metadata.xml"),
 ) {
 
     override val subject = Plugin.NAME
 
-    // TODO: use when 2.0 published to GPP
-    //  latestFromMaven(
-    //      "IntelliJ Platform Gradle Plugin",
-    //      "${Locations.MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY}/org/jetbrains/intellij/platform/intellij-platform-gradle-plugin/maven-metadata.xml",
-    //  )
-    override fun resolve() = fromGitHub()
+    override fun resolve() = fromMaven()
 }

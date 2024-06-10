@@ -13,6 +13,7 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.of
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
+import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPlatformGradlePluginLatestVersionResolver
@@ -68,6 +69,12 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     @get:Internal
     abstract val pluginVersion: Property<String>
 
+    /**
+     * Defines that the current project has only the [Plugins.MODULE] applied but no [Plugin.ID].
+     */
+    @get:Internal
+    abstract val module: Property<Boolean>
+
     private val log = Logger(javaClass)
 
     init {
@@ -85,7 +92,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
      * Checks if the plugin is up-to-date.
      */
     private fun checkPluginVersion() {
-        if (!selfUpdateCheck.get() || offline.get()) {
+        if (module.get() || !selfUpdateCheck.get() || offline.get()) {
             return
         }
 
@@ -116,7 +123,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
      * Creates the Java Agent file for the Coroutines library required to enable coroutines debugging.
      */
     private fun createCoroutinesJavaAgentFile() {
-        if (coroutinesJavaAgent.asPath.exists()) {
+        if (module.get() || coroutinesJavaAgent.asPath.exists()) {
             return
         }
 
@@ -151,6 +158,10 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                     })
                 )
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
+                module.convention(project.provider {
+                    project.pluginManager.hasPlugin(Plugins.MODULE) && !project.pluginManager.hasPlugin(Plugin.ID)
+                })
+
 
                 onlyIf {
                     !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()

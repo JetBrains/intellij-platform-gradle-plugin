@@ -11,6 +11,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 data class MavenMetadata(
     @XmlElement val groupId: String,
     @XmlElement val artifactId: String,
+    @XmlElement val version: String?,
     @XmlElement @XmlSerialName("versioning") val versioning: MavenMetadataVersioning?,
 ) {
 
