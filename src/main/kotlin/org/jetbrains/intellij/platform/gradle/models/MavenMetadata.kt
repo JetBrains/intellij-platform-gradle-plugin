@@ -12,6 +12,7 @@ data class MavenMetadata(
     @XmlElement val groupId: String,
     @XmlElement val artifactId: String,
     @XmlElement val version: String?,
+    @XmlElement(false) val modelVersion: String?,
     @XmlElement @XmlSerialName("versioning") val versioning: MavenMetadataVersioning?,
 ) {
 
