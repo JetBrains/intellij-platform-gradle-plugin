@@ -4,13 +4,26 @@
 
 ### Added
 
-- Custom plugin repositories with authorization headers support
 - `VerifyPluginProjectConfigurationTask`: limit specific checks when `.module` plugin is only applied
 
 ### Changed
 
-- Resolve Plugin Verifier IDEs using regular IntelliJ Platform dependency resolution
 - Publish instrumented and composed artifact with variants instead of replacing the default artifact
+
+### Fixed
+
+- Customizing the `sandboxDirectory` and `sandboxSuffix` when configuring `SandboxAware` tasks
+- Fixed content exclusion when extracting DMG archives of IntelliJ Platform on macOS
+
+## [2.0.0-beta6] - 2024-06-06
+
+### Added
+
+- Custom plugin repositories with authorization headers support
+
+### Changed
+
+- Resolve Plugin Verifier IDEs using regular IntelliJ Platform dependency resolution
 
 ### Fixed
 
@@ -18,8 +31,6 @@
 - Replace base archive file of the `Jar` task with `ComposedJarTask` archive file in all configuration artifact sets
 - Redundant whitespace when parsing plugin dependency IDs
 - Plugin Verifier: introduce partial configuration for resolving IntelliJ Platform dependencies with same coordinates but different versions
-- Customizing the `sandboxDirectory` and `sandboxSuffix` when configuring `SandboxAware` tasks
-- Fixed content exclusion when extracting DMG archives of IntelliJ Platform on macOS
 
 ## [2.0.0-beta5] - 2024-05-30
 
@@ -1091,7 +1102,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta5...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta6...HEAD
+[2.0.0-beta5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta5...v2.0.0-beta6
 [2.0.0-beta4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta4...v2.0.0-beta5
 [2.0.0-beta3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...v2.0.0-beta3
 [2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta1...v2.0.0-beta2
