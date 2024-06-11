@@ -14,6 +14,7 @@
 - Rename `TestFrameworkType.Platform.JUnit4` to `TestFrameworkType.Platform`
 - Rename `TestFrameworkType.Platform.JUnit5` to `TestFrameworkType.JUnit5`
 - Rename `TestFrameworkType.Platform.Bundled` to `TestFrameworkType.Bundled`
+- Prevent from updating the `IvyModule.Info.publication` with the current time as it breaks the configuration cache
 
 ### Fixed
 

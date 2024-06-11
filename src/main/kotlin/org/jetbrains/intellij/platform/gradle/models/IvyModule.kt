@@ -35,7 +35,7 @@ data class IvyModule(
         val organisation: String?,
         val module: String?,
         val revision: String?,
-        val publication: String = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")),
+        val publication: String?,
     )
 
     @Serializable
