@@ -17,6 +17,7 @@
 - Customizing the `sandboxDirectory` and `sandboxSuffix` when configuring `SandboxAware` tasks
 - Fixed content exclusion when extracting DMG archives of IntelliJ Platform on macOS
 - Could not find a field for name `metadata/modelVersion` (Attribute) in `MavenMetadata`
+- `PluginArtifactoryShim`: use only host when setting up proxy for custom plugin repositories
 
 ## [2.0.0-beta6] - 2024-06-06
 

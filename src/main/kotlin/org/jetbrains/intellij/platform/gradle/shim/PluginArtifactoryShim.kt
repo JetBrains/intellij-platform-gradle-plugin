@@ -69,7 +69,7 @@ class PluginArtifactoryShim(
             .setRewriteHostHeader(true)
             .build()
 
-        val routingHandler = Handlers.routing() // Pure hacks to convert package.json to ivy descriptors and properly handle npm scope.
+        val routingHandler = Handlers.routing()
             .add(Methods.HEAD, PLUGIN_TEMPLATE, PluginHttpHandler(::handleHeadIvyDescriptor))
             .add(Methods.GET, PLUGIN_TEMPLATE, PluginHttpHandler(::handleGetIvyDescriptor))
             .add(Methods.HEAD, PLUGIN_DOWNLOAD) { exchange ->
@@ -120,15 +120,7 @@ class PluginArtifactoryShim(
         }
     }
 
-    private fun getProxyClient() = runCatching {
-        PluginArtifactRepositoryProxyClient(
-            LoadBalancingProxyClient()
-                .addHost(repository.url, UndertowXnioSsl(Xnio.getInstance(), OptionMap.EMPTY))
-                .setConnectionsPerThread(20)
-        )
-    }.getOrElse { e ->
-        throw RuntimeException(e)
-    }
+    private fun getProxyClient() = PluginArtifactRepositoryProxyClient(repository.url)
 
     private fun handleHeadIvyDescriptor(exchange: HttpServerExchange, pluginId: String, pluginVersion: String) {
         try {
@@ -209,9 +201,14 @@ class PluginArtifactoryShim(
         }
     }
 
-    inner class PluginArtifactRepositoryProxyClient(
-        private val delegate: ProxyClient,
-    ) : ProxyClient {
+    inner class PluginArtifactRepositoryProxyClient(url: URI) : ProxyClient {
+
+        private val host = URI(url.scheme, url.userInfo, url.host, url.port, null, null, null)
+
+        private val delegate =
+            LoadBalancingProxyClient()
+                .addHost(host, UndertowXnioSsl(Xnio.getInstance(), OptionMap.EMPTY))
+                .setConnectionsPerThread(20)
 
         override fun findTarget(exchange: HttpServerExchange?) = delegate.findTarget(exchange)
 
