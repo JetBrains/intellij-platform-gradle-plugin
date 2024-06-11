@@ -11,6 +11,9 @@
 - Publish instrumented and composed artifact with variants instead of replacing the default artifact
 - Check the latest plugin version against Gradle Plugin Portal
 - Avoid calling `checkPluginVersion` and `createCoroutinesJavaAgentFile` methods when in a `.module`
+- Rename `TestFrameworkType.Platform.JUnit4` to `TestFrameworkType.Platform`
+- Rename `TestFrameworkType.Platform.JUnit5` to `TestFrameworkType.JUnit5`
+- Rename `TestFrameworkType.Platform.Bundled` to `TestFrameworkType.Bundled`
 
 ### Fixed
 

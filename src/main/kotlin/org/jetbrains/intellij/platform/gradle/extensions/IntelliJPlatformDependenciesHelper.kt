@@ -433,7 +433,7 @@ class IntelliJPlatformDependenciesHelper(
         requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
 
         when (type) {
-            TestFrameworkType.Platform.Bundled -> dependencies.createBundledLibrary(type.coordinates.artifactId)
+            TestFrameworkType.Bundled -> dependencies.createBundledLibrary(type.coordinates.artifactId)
             else -> dependencies.createTestFramework(type, version)
         }.apply(action)
     })
