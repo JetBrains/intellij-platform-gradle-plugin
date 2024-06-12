@@ -62,7 +62,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                 As paid plugins require providing a valid license and presenting a UI dialog, it is impossible to handle such a case, and the task will fail.
                 Please consider disabling the task. 
                 See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-buildSearchableOptions
-            """.trimIndent()
+                """.trimIndent()
             )
         }
 

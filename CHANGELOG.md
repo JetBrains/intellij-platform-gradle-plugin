@@ -5,6 +5,7 @@
 ### Added
 
 - `VerifyPluginProjectConfigurationTask`: limit specific checks when `.module` plugin is only applied
+- `TestIdeUiTask` (`testIdeUi` task) + `CustomTestIdeUiTask` implementation
 
 ### Changed
 

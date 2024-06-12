@@ -159,7 +159,7 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
         }
 
         override fun register(project: Project) =
-            project.registerTask<TestIdePerformanceTask>(Tasks.TEST_IDE_PERFORMANCE, configuration = configuration)
+            project.registerTask<TestIdePerformanceTask>(Tasks.TEST_IDE_PERFORMANCE, configureWithType = false, configuration = configuration)
     }
 
 //    private fun resolveLatestPluginUpdate(pluginId: String, buildNumber: String, channel: String = "") =

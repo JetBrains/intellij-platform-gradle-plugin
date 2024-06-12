@@ -48,7 +48,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     internal val intellijPlatformPluginDependencyConfigurationName = objects.property<String>()
     internal val intellijPlatformPluginLocalConfigurationName = objects.property<String>()
 
-    private val delegate = IntelliJPlatformDependenciesHelper(
+    internal val delegate = IntelliJPlatformDependenciesHelper(
         configurations,
         dependencies,
         layout,

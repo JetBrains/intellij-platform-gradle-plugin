@@ -82,7 +82,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
         }
 
         override fun register(project: Project) =
-            project.registerTask<RunIdeTask>(Tasks.RUN_IDE, configuration = configuration)
+            project.registerTask<RunIdeTask>(Tasks.RUN_IDE, configureWithType = false, configuration = configuration)
 
         internal fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
             if (!systemProperties.containsKey(name)) {

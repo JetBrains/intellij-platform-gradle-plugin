@@ -36,8 +36,10 @@ import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompi
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.RobotServerPluginLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
@@ -456,6 +458,24 @@ class IntelliJPlatformDependenciesHelper(
         dependencies.createMarketplaceZipSigner(version).apply(action)
     })
 
+    /**
+     * A base method for adding a dependency on Robot Server Plugin.
+     *
+     * @param versionProvider The provider of the Robot Server Plugin version.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addRobotServerPluginDependency(
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.robotServerPlugin` dependency helper was called with no `version` value provided." }
+
+        dependencies.createRobotServerPlugin(version).apply(action)
+    })
+
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
         ProductReleasesValueSource(
             providers,
@@ -768,6 +788,23 @@ class IntelliJPlatformDependenciesHelper(
         },
         classifier = "cli",
         ext = "jar",
+    )
+
+    /**
+     * Adds a dependency on a Robot Server Plugin required for signing plugin with [TestIdeUiTask].
+     *
+     * If [version] is set to [VERSION_LATEST], it resolves the latest available library version using the [RobotServerPluginLatestVersionResolver].
+     *
+     * @param version Robot Server Plugin version
+     */
+    private fun DependencyHandler.createRobotServerPlugin(version: String) = create(
+        group = "com.intellij.remoterobot",
+        name = "robot-server-plugin",
+        version = when (version) {
+            VERSION_LATEST -> RobotServerPluginLatestVersionResolver().resolve().version
+            else -> version
+        },
+        ext = "zip",
     )
 
     // TODO: cleanup and migrate to Ivy webserver

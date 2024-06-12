@@ -4,10 +4,8 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 
 /**
  * Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing.
@@ -16,25 +14,12 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatform
  *
  * @see JavaExec
  */
-@Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run")
-abstract class CustomTestIdeUiTask : TestIdeUiTask(), CustomIntelliJPlatformVersionAware {
+abstract class CustomTestIdeUiTask : TestIdeUiTask() {
 
     init {
         group = Plugin.GROUP_NAME
         description = "Runs the custom IDE instance with the developed plugin and robot-server installed and ready for UI testing."
-    }
-
-    /**
-     * Executes the task, configures and runs the IDE.
-     */
-    @TaskAction
-    override fun exec() {
-        validateIntelliJPlatformVersion()
-
-        workingDir = platformPath.toFile()
-
-        super.exec()
     }
 
     companion object : Registrable {

@@ -8,7 +8,8 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
+import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
@@ -21,9 +22,8 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
  * @see <a href="https://github.com/JetBrains/intellij-ui-test-robot>IntelliJ UI Test Robot</a>
  * @see JavaExec
  */
-@Deprecated(message = "CHECK")
 @UntrackedTask(because = "Should always run")
-abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, IntelliJPlatformVersionAware {
+abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, CustomIntelliJPlatformVersionAware {
 
     init {
         group = Plugin.GROUP_NAME
@@ -44,9 +44,22 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, Inte
 
     companion object : Registrable {
 
-        internal val configuration: TestIdeUiTask.() -> Unit = {}
+        internal val configuration: TestIdeUiTask.() -> Unit = {
+            plugins {
+                delegate.addRobotServerPluginDependency(
+                    versionProvider = delegate.provider { VERSION_LATEST },
+                    configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+                )
+            }
+        }
 
         override fun register(project: Project) =
-            project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configuration = configuration)
+            project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configureWithType = false) {
+                configuration()
+
+                type.finalizeValue()
+                version.finalizeValue()
+                localPath.finalizeValue()
+            }
     }
 }

@@ -251,11 +251,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
                 from(pluginsClasspath)
 
                 inputs.property("intellijPlatform.instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })
-                inputs.property("intellijPlatform.sandboxDirectoriesExistence", project.provider {
-                    listOf(sandboxConfigDirectory, sandboxPluginsDirectory, sandboxLogDirectory, sandboxSystemDirectory).all {
-                        it.asPath.exists()
-                    }
-                })
+                outputs.dirs(sandboxConfigDirectory, sandboxPluginsDirectory, sandboxLogDirectory, sandboxSystemDirectory)
                 inputs.files(runtimeConfiguration)
             }
     }
