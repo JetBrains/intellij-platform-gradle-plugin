@@ -6,6 +6,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.tasks.Input
+import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.shim.PluginArtifactoryShim
 import org.jetbrains.intellij.platform.gradle.shim.PluginArtifactoryShim.ShimServer
@@ -22,9 +23,9 @@ abstract class ShimManagerService : BuildService<ShimManagerService.Parameters> 
 
     private val shims = ConcurrentHashMap<URI, ShimServer>()
 
-    fun start(repository: PluginArtifactRepository) =
+    fun start(repository: PluginArtifactRepository, repositoryType: CustomPluginRepositoryType) =
         shims.computeIfAbsent(repository.url) {
-            PluginArtifactoryShim(repository, parameters.port.get()).start()
+            PluginArtifactoryShim(repository, repositoryType, parameters.port.get()).start()
         }
 
     fun stop(url: URI) = shims[url]?.close()

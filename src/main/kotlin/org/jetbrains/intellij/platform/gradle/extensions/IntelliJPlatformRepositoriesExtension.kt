@@ -19,6 +19,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
@@ -126,11 +127,13 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
-    fun customPluginRepository(url: String, action: PluginRepositoryAction = {}) = delegate.createCustomPluginRepository(
-        repositoryName = "IntelliJ Platform Custom Plugin Repository ($url)",
-        repositoryUrl = url,
-        action = action,
-    )
+    fun customPluginRepository(url: String, type: CustomPluginRepositoryType = CustomPluginRepositoryType.PLUGIN_REPOSITORY, action: PluginRepositoryAction = {}) =
+        delegate.createCustomPluginRepository(
+            repositoryName = "IntelliJ Platform Custom Plugin Repository ($url)",
+            repositoryUrl = url,
+            repositoryType = type,
+            action = action,
+        )
 
     /**
      * Adds a repository for accessing JetBrains Runtime releases.

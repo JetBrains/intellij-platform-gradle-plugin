@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.shim
 
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingParser
-import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingType
 import io.undertow.Handlers
 import io.undertow.Undertow
 import io.undertow.protocols.ssl.UndertowXnioSsl
@@ -23,12 +22,14 @@ import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
 import org.gradle.internal.hash.Hashing
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import org.xnio.OptionMap
 import org.xnio.Xnio
 import java.io.Closeable
 import java.net.BindException
+import java.net.HttpURLConnection
 import java.net.URI
 import java.util.*
 import java.util.concurrent.TimeUnit
@@ -36,31 +37,48 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class PluginArtifactoryShim(
     private val repository: PluginArtifactRepository,
+    private val repositoryType: CustomPluginRepositoryType,
     private val port: Int,
 ) {
 
     private val portIncrement = AtomicInteger(0)
-    internal val repositoryListing by lazy {
+    private val repositoryListing by lazy {
         repository.url.toURL().let { url ->
-            url.openConnection()
-                .apply {
-                    repository.getCredentials(PasswordCredentials::class.java)?.let {
-                        val encoded = Base64.getEncoder().encode("${it.username}:${it.password}".toByteArray())
-                        setRequestProperty("Authorization", "Basic $encoded")
-                    }
-                    repository.getCredentials(HttpHeaderCredentials::class.java)?.let {
-                        setRequestProperty(it.name, it.value)
-                    }
+            url.openConnection().run {
+                repository.getCredentials(PasswordCredentials::class.java)?.let {
+                    val encoded = Base64.getEncoder().encode("${it.username}:${it.password}".toByteArray())
+                    setRequestProperty("Authorization", "Basic $encoded")
                 }
-                .getInputStream()
-                .use { inputStream ->
-                    inputStream.reader().use { reader ->
-                        CustomPluginRepositoryListingParser.parseListOfPlugins(reader.readText(), url, url, CustomPluginRepositoryListingType.PLUGIN_REPOSITORY)
-                        // TODO: handle the other type as well - through the customRepo helper arguments
-                    }
+                repository.getCredentials(HttpHeaderCredentials::class.java)?.let {
+                    setRequestProperty(it.name, it.value)
                 }
+
+                runCatching {
+                    getInputStream().use { inputStream ->
+                        inputStream.reader().use { reader ->
+                            CustomPluginRepositoryListingParser.parseListOfPlugins(reader.readText(), url, url, repositoryType)
+                        }
+                    }
+                }.onFailure {
+                    throw when (this) {
+                        is HttpURLConnection -> {
+                            when {
+                                responseCode == 401 -> UnauthorizedException(it)
+                                else -> it
+                            }
+                        }
+
+                        else -> it
+                    }
+                }.getOrThrow()
+            }
         }
     }
+
+    private fun findPlugin(pluginId: String, pluginVersion: String) =
+        repositoryListing.find {
+            it.pluginId == pluginId && it.version == pluginVersion
+        }
 
     fun start(): ShimServer {
         val proxyHandler = ProxyHandler.builder()
@@ -70,17 +88,14 @@ class PluginArtifactoryShim(
             .build()
 
         val routingHandler = Handlers.routing()
-            .add(Methods.HEAD, PLUGIN_TEMPLATE, PluginHttpHandler(::handleHeadIvyDescriptor))
-            .add(Methods.GET, PLUGIN_TEMPLATE, PluginHttpHandler(::handleGetIvyDescriptor))
+            .add(Methods.HEAD, PLUGIN_DESCRIPTOR, PluginHttpHandler(::handleHeadPluginDescriptor))
+            .add(Methods.GET, PLUGIN_DESCRIPTOR, PluginHttpHandler(::handleGetPluginDescriptor))
             .add(Methods.HEAD, PLUGIN_DOWNLOAD) { exchange ->
                 val parameters = exchange.getAttachment(PathTemplateMatch.ATTACHMENT_KEY).parameters
 
                 val pluginId = parameters[PLUGIN_ID].orEmpty()
                 val pluginVersion = parameters[PLUGIN_VERSION].orEmpty()
-
-                val plugin = repositoryListing.find {
-                    it.pluginId == pluginId && it.version == pluginVersion
-                }
+                val plugin = findPlugin(pluginId, pluginVersion)
 
                 exchange.responseHeaders.put(Headers.CONTENT_TYPE, "application/zip")
                 exchange.statusCode = when (plugin) {
@@ -122,42 +137,39 @@ class PluginArtifactoryShim(
 
     private fun getProxyClient() = PluginArtifactRepositoryProxyClient(repository.url)
 
-    private fun handleHeadIvyDescriptor(exchange: HttpServerExchange, pluginId: String, pluginVersion: String) {
-        try {
-            val ivyDescriptor = getIvyDescriptor(pluginId, pluginVersion)
-            val sha1Etag = Hashing.sha1().hashString(ivyDescriptor).toString()
+    private fun handleHeadPluginDescriptor(exchange: HttpServerExchange, pluginId: String, pluginVersion: String) =
+        handlePluginDescriptor(exchange, pluginId, pluginVersion, false)
 
-            exchange.responseHeaders.put(HttpString.tryFromString("X-Checksum-Sha1"), sha1Etag)
-            exchange.responseHeaders.put(HttpString.tryFromString("ETag"), "{SHA1{$sha1Etag}}")
+    private fun handleGetPluginDescriptor(exchange: HttpServerExchange, pluginId: String, pluginVersion: String) =
+        handlePluginDescriptor(exchange, pluginId, pluginVersion, true)
 
-            exchange.setResponseContentLength(ivyDescriptor.length.toLong())
-            exchange.responseHeaders.put(Headers.CONTENT_TYPE, "text/xml")
-            exchange.setStatusCode(200)
-        } catch (t: RuntimeException) {
-            exchange.setStatusCode(404)
+    private fun handlePluginDescriptor(exchange: HttpServerExchange, pluginId: String, pluginVersion: String, sendContent: Boolean) = runCatching {
+        val ivyDescriptor = getIvyDescriptor(pluginId, pluginVersion)
+        val sha1Etag = Hashing.sha1().hashString(ivyDescriptor).toString()
+
+        exchange.responseHeaders.put(HttpString.tryFromString("X-Checksum-Sha1"), sha1Etag)
+        exchange.responseHeaders.put(HttpString.tryFromString("ETag"), "{SHA1{$sha1Etag}}")
+        exchange.responseHeaders.put(Headers.CONTENT_TYPE, "text/xml")
+        exchange.setResponseContentLength(ivyDescriptor.length.toLong())
+
+        if (sendContent) {
+            exchange.getResponseSender().send(ivyDescriptor)
         }
-    }
-
-    private fun handleGetIvyDescriptor(exchange: HttpServerExchange, pluginId: String, pluginVersion: String) {
-        try {
-            val ivyDescriptor = getIvyDescriptor(pluginId, pluginVersion)
-            val sha1Etag = Hashing.sha1().hashString(ivyDescriptor).toString()
-
-            exchange.responseHeaders.put(HttpString.tryFromString("X-Checksum-Sha1"), sha1Etag)
-            exchange.responseHeaders.put(HttpString.tryFromString("ETag"), "{SHA1{$sha1Etag}}")
-
-            exchange.responseHeaders.put(Headers.CONTENT_TYPE, "text/xml")
-            exchange.setResponseContentLength(ivyDescriptor.length.toLong());
-            exchange.getResponseSender().send(ivyDescriptor);
-        } catch (t: RuntimeException) {
-            exchange.setStatusCode(404)
+    }.onFailure {
+        when (it) {
+            is UnauthorizedException -> {
+                exchange.statusCode = 401
+                exchange.responseSender.send(it.message)
+            }
+            else -> {
+                exchange.statusCode = 404
+            }
         }
     }
 
     private fun getIvyDescriptor(pluginId: String, pluginVersion: String): String {
-        val plugin = repositoryListing.find {
-            it.pluginId == pluginId && it.version == pluginVersion
-        } ?: throw GradleException("No plugin found for $pluginId:$pluginVersion")
+        val plugin = findPlugin(pluginId, pluginVersion)
+            ?: throw GradleException("No plugin found for $pluginId:$pluginVersion")
 
         val ivyModule = IvyModule(
             info = IvyModule.Info(
@@ -178,7 +190,7 @@ class PluginArtifactoryShim(
     companion object {
         private val PLUGIN_ID = "pluginId"
         private val PLUGIN_VERSION = "pluginVersion"
-        private val PLUGIN_TEMPLATE = "/{$PLUGIN_ID}/{$PLUGIN_VERSION}/descriptor.ivy"
+        private val PLUGIN_DESCRIPTOR = "/{$PLUGIN_ID}/{$PLUGIN_VERSION}/descriptor.ivy"
         private val PLUGIN_DOWNLOAD = "/{$PLUGIN_ID}/{$PLUGIN_VERSION}/download"
     }
 
@@ -213,27 +225,37 @@ class PluginArtifactoryShim(
         override fun findTarget(exchange: HttpServerExchange?) = delegate.findTarget(exchange)
 
         override fun getConnection(
-            target: ProxyTarget?,
+            target: ProxyTarget,
             exchange: HttpServerExchange,
-            callback: ProxyCallback<ProxyConnection?>?,
+            callback: ProxyCallback<ProxyConnection>,
             timeout: Long,
-            timeUnit: TimeUnit?,
+            timeUnit: TimeUnit,
         ) {
-            val suffix = "/download"
+            when (val plugin = resolvePlugin(exchange.relativePath)) {
+                null -> {
+                    exchange.statusCode = 404
+                    callback.couldNotResolveBackend(exchange)
+                }
 
-            val (id, version) = exchange.relativePath
-                .trim('/')
-                .takeIf { it.endsWith(suffix) }
-                ?.removeSuffix(suffix)
-                ?.split('/')
-                ?: return
-
-            val plugin = repositoryListing
-                .find { it.pluginId == id && it.version == version }
-                ?: return
-
-            exchange.setRequestURI(plugin.downloadUrl.toString(), true)
-            delegate.getConnection(target, exchange, callback, timeout, timeUnit)
+                else -> {
+                    exchange.statusCode = 200
+                    exchange.setRequestURI(plugin.downloadUrl.toString(), true)
+                    delegate.getConnection(target, exchange, callback, timeout, timeUnit)
+                }
+            }
         }
     }
+
+    private fun resolvePlugin(relativePath: String): CustomPluginRepositoryListingParser.PluginInfo? =
+        relativePath
+            .trim('/')
+            .takeIf { it.endsWith("/download") }
+            ?.removeSuffix("/download")
+            ?.split('/')
+            ?.run {
+                val (id, version) = this
+                findPlugin(id, version)
+            }
+
+    internal class UnauthorizedException(cause: Throwable) : Exception(cause)
 }

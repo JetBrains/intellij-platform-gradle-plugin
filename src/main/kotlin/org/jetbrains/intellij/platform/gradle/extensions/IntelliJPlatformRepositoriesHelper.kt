@@ -17,6 +17,7 @@ import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Services
+import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.DefaultPluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.flow.StopShimServerAction
@@ -92,6 +93,7 @@ class IntelliJPlatformRepositoriesHelper(
     internal fun createCustomPluginRepository(
         repositoryName: String,
         repositoryUrl: String,
+        repositoryType: CustomPluginRepositoryType,
         action: Action<PluginArtifactRepository>,
     ): PluginArtifactRepository {
         val pluginArtifactRepository = objects.newInstance<DefaultPluginArtifactRepository>().apply {
@@ -100,7 +102,7 @@ class IntelliJPlatformRepositoriesHelper(
             action.execute(this)
         }
 
-        val shimServer = shimManager.get().start(pluginArtifactRepository)
+        val shimServer = shimManager.get().start(pluginArtifactRepository, repositoryType)
 
         flowScope.always(StopShimServerAction::class) {
             parameters {
