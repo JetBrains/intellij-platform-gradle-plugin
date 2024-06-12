@@ -8,8 +8,6 @@ import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import java.nio.file.Path
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import kotlin.io.path.extension
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.isDirectory
@@ -18,24 +16,24 @@ import kotlin.io.path.isDirectory
 @XmlSerialName("ivy-module")
 data class IvyModule(
     val version: String = "2.0",
-    @XmlElement @XmlSerialName("info") val info: Info?,
+    @XmlElement @XmlSerialName("info") val info: Info? = null,
     @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration> = listOf(Configuration("default")),
-    @XmlElement @XmlChildrenName("artifact") val publications: List<Publication>,
+    @XmlElement @XmlChildrenName("artifact") val publications: List<Publication> = emptyList(),
     @XmlElement @XmlChildrenName("dependency") val dependencies: List<Dependency> = emptyList(),
 ) {
 
     @Serializable
     data class Configuration(
-        val name: String?,
+        val name: String? = null,
         val visibility: String = "public",
     )
 
     @Serializable
     data class Info(
-        val organisation: String?,
-        val module: String?,
-        val revision: String?,
-        val publication: String?,
+        val organisation: String? = null,
+        val module: String? = null,
+        val revision: String? = null,
+        val publication: String? = null,
     )
 
     @Serializable
