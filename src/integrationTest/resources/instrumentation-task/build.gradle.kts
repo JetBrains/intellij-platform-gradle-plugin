@@ -26,7 +26,7 @@ dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
         instrumentationTools()
-        testFramework(TestFrameworkType.Platform.JUnit4)
+        testFramework(TestFrameworkType.Platform)
     }
 
     implementation(project(":submodule"))

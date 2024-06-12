@@ -29,7 +29,7 @@ dependencies {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
         plugin(markdownPluginNotationProperty)
         instrumentationTools()
-        testFramework(TestFrameworkType.Platform.JUnit4)
+        testFramework(TestFrameworkType.Platform)
     }
 }
 

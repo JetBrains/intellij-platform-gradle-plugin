@@ -96,7 +96,7 @@ private val explicitExclusions = setOf(
 )
 
 private val fallbackExclusions = setOf(
-    // TestFrameworkType.Platform.JUnit4
+    // TestFrameworkType.Platform
     Coordinates("org.jetbrains.kotlin", "kotlin-stdlib"),
     Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm"),
     Coordinates("org.jetbrains.kotlin", "kotlin-stdlib-jdk8"),
