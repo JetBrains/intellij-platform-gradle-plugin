@@ -13,7 +13,11 @@ import kotlin.test.assertEquals
 
 class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
-    private val sandbox get() = buildDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijPlatformType-$intellijPlatformVersion")
+    private val sandbox
+        get() = buildDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijPlatformType-$intellijPlatformVersion")
+
+    private val updatesFile
+        get() = sandbox.resolve("config/options/updates.xml")
 
     @Test
     @Ignore
@@ -638,30 +642,32 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
+        build(Tasks.PREPARE_SANDBOX) {
+            updatesFile overwrite  //language=xml
+                    """
+                    <application>
+                        <component name="SomeOtherComponent">
+                            <option name="SomeOption" value="false" />
+                        </component>
+                    </application>
+                    """.trimIndent()
+        }
+
+        build(Tasks.PREPARE_SANDBOX) {
+            assertFileContent(
+                updatesFile,
                 """
                 <application>
-                    <component name="SomeOtherComponent">
-                        <option name="SomeOption" value="false" />
-                    </component>
+                  <component name="SomeOtherComponent">
+                    <option name="SomeOption" value="false" />
+                  </component>
+                  <component name="UpdatesConfigurable">
+                    <option name="CHECK_NEEDED" value="false" />
+                  </component>
                 </application>
-                """.trimIndent()
-
-        build(Tasks.PREPARE_SANDBOX)
-
-        assertFileContent(
-            updatesFile,
-            """
-            <application>
-              <component name="SomeOtherComponent">
-                <option name="SomeOption" value="false" />
-              </component>
-              <component name="UpdatesConfigurable">
-                <option name="CHECK_NEEDED" value="false" />
-              </component>
-            </application>
-            """.trimIndent(),
-        )
+                """.trimIndent(),
+            )
+        }
     }
 
     @Test
@@ -671,28 +677,30 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
-                """
+        build(Tasks.PREPARE_SANDBOX) {
+            updatesFile overwrite //language=xml
+                    """
                 <application>
                     <component name="UpdatesConfigurable">
                         <option name="SomeOption" value="false" />
                     </component>
                 </application>
                 """.trimIndent()
+        }
 
-        build(Tasks.PREPARE_SANDBOX)
-
-        assertFileContent(
-            updatesFile,
-            """
-            <application>
-              <component name="UpdatesConfigurable">
-                <option name="SomeOption" value="false" />
-                <option name="CHECK_NEEDED" value="false" />
-              </component>
-            </application>
-            """.trimIndent(),
-        )
+        build(Tasks.PREPARE_SANDBOX) {
+            assertFileContent(
+                updatesFile,
+                """
+                <application>
+                  <component name="UpdatesConfigurable">
+                    <option name="SomeOption" value="false" />
+                    <option name="CHECK_NEEDED" value="false" />
+                  </component>
+                </application>
+                """.trimIndent(),
+            )
+        }
     }
 
     @Test
@@ -702,7 +710,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
+        updatesFile write //language=xml
                 """
                 <application>
                     <component name="UpdatesConfigurable">
@@ -732,7 +740,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
+        updatesFile write //language=xml
                 """
                 <application>
                     <component name="UpdatesConfigurable">
@@ -762,7 +770,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml") write ""
+        updatesFile write ""
 
         build(Tasks.PREPARE_SANDBOX)
 
@@ -785,53 +793,55 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
-        val updatesFile = sandbox.resolve("config/options/updates.xml") write //language=xml
+        build(Tasks.PREPARE_SANDBOX) {
+            updatesFile overwrite //language=xml
+                    """
+                    <application>
+                        <component name="UpdatesConfigurable">
+                            <enabledExternalComponentSources>
+                                <item value="Android SDK" />
+                            </enabledExternalComponentSources>
+                            <option name="externalUpdateChannels">
+                                <map>
+                                    <entry key="Android SDK" value="Stable Channel" />
+                                </map>
+                            </option>
+                            <knownExternalComponentSources>
+                                <item value="Android SDK" />
+                            </knownExternalComponentSources>
+                            <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
+                            <option name="LAST_TIME_CHECKED" value="1622537478550" />
+                            <option name="CHECK_NEEDED" value="false" />
+                        </component>
+                    </application>
+                    """.trimIndent()
+        }
+
+        build(Tasks.PREPARE_SANDBOX) {
+            assertFileContent(
+                updatesFile,
                 """
                 <application>
-                    <component name="UpdatesConfigurable">
-                        <enabledExternalComponentSources>
-                            <item value="Android SDK" />
-                        </enabledExternalComponentSources>
-                        <option name="externalUpdateChannels">
-                            <map>
-                                <entry key="Android SDK" value="Stable Channel" />
-                            </map>
-                        </option>
-                        <knownExternalComponentSources>
-                            <item value="Android SDK" />
-                        </knownExternalComponentSources>
-                        <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
-                        <option name="LAST_TIME_CHECKED" value="1622537478550" />
-                        <option name="CHECK_NEEDED" value="false" />
-                    </component>
+                  <component name="UpdatesConfigurable">
+                    <enabledExternalComponentSources>
+                      <item value="Android SDK" />
+                    </enabledExternalComponentSources>
+                    <option name="externalUpdateChannels">
+                      <map>
+                        <entry key="Android SDK" value="Stable Channel" />
+                      </map>
+                    </option>
+                    <knownExternalComponentSources>
+                      <item value="Android SDK" />
+                    </knownExternalComponentSources>
+                    <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
+                    <option name="LAST_TIME_CHECKED" value="1622537478550" />
+                    <option name="CHECK_NEEDED" value="false" />
+                  </component>
                 </application>
-                """.trimIndent()
-
-        build(Tasks.PREPARE_SANDBOX)
-
-        assertFileContent(
-            updatesFile,
-            """
-            <application>
-              <component name="UpdatesConfigurable">
-                <enabledExternalComponentSources>
-                  <item value="Android SDK" />
-                </enabledExternalComponentSources>
-                <option name="externalUpdateChannels">
-                  <map>
-                    <entry key="Android SDK" value="Stable Channel" />
-                  </map>
-                </option>
-                <knownExternalComponentSources>
-                  <item value="Android SDK" />
-                </knownExternalComponentSources>
-                <option name="LAST_BUILD_CHECKED" value="IC-202.8194.7" />
-                <option name="LAST_TIME_CHECKED" value="1622537478550" />
-                <option name="CHECK_NEEDED" value="false" />
-              </component>
-            </application>
-            """.trimIndent(),
-        )
+                """.trimIndent(),
+            )
+        }
     }
 
     @Test
