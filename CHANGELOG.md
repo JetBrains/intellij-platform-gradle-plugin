@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [1.17.4] - 2024-06-14
+
 ### Added
 
 - Message about required migration to IntelliJ Platform Gradle Plugin 2.0 when targeting IntelliJ Platform 2024.2+ (242+).
@@ -978,7 +980,8 @@
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.3...HEAD
+[next]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.4...HEAD
+[1.17.4]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.3...v1.17.4
 [1.17.3]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.2...v1.17.3
 [1.17.2]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/JetBrains/gradle-intellij-plugin/compare/v1.17.0...v1.17.1
