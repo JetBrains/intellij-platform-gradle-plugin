@@ -157,6 +157,23 @@ abstract class VerifyPluginConfigurationTask @Inject constructor(
         val oldPluginVerifierDownloadPath = providers.systemProperty("user.home").map { "$it/.pluginVerifier/ides" }.get().let(Path::of).toAbsolutePath()
 
         sequence {
+            if (platformBuildVersion.major >= 242) {
+                logger.error(
+                    """
+                    
+                    ⚠️⚠️⚠️⚠️⚠️
+                    
+                    Gradle IntelliJ Plugin 1.x does not support building plugins against the IntelliJ Platform 2024.2+ (242+).
+                    
+                    Please upgrade your configuration to use the IntelliJ Platform Gradle Plugin 2.0.0 or higher!
+                    See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
+                    
+                    ⚠️⚠️⚠️⚠️⚠️
+                    
+                    """.trimIndent()
+                )
+            }
+
             pluginXmlFiles.get()
                 .mapNotNull { parsePluginXml(it.toPath(), context) }
                 .forEach { plugin ->

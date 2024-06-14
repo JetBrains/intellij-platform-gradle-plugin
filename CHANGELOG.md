@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Message about required migration to IntelliJ Platform Gradle Plugin 2.0 when targeting IntelliJ Platform 2024.2+ (242+).
+
 ## [1.17.3] - 2024-03-29
 
 ### Fixed
