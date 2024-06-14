@@ -465,9 +465,10 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 }
             })
 
-            kotlinPluginAvailable.convention(project.provider {
+            val kotlinPluginAvailableProvider = project.provider {
                 project.pluginManager.hasPlugin(Plugins.External.KOTLIN)
-            })
+            }
+            kotlinPluginAvailable.convention(kotlinPluginAvailableProvider)
 
             project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
                 val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).apply {

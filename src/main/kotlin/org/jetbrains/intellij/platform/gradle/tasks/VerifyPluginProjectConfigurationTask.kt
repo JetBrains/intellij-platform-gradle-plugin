@@ -215,8 +215,10 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 val initializeIntelliJPlatformPluginTaskProvider =
                     project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
 
+                val rootDirectoryProvider = project.provider { project.rootProject.rootDir }
+
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
-                rootDirectory.convention(project.provider { project.rootProject.rootDir })
+                rootDirectory.convention(rootDirectoryProvider)
                 intellijPlatformCache.convention(project.extensionProvider.map { it.cachePath.toFile() })
                 gitignoreFile.convention(project.layout.file(project.provider {
                     project.rootProject.rootDir.resolve(".gitignore").takeIf { it.exists() }
