@@ -87,7 +87,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
                 """
                 dependencies {
                     intellijPlatform {
-                        testFramework(TestFrameworkType.Platform.Bundled)
+                        testFramework(TestFrameworkType.Bundled)
                     }
                 }
                 
