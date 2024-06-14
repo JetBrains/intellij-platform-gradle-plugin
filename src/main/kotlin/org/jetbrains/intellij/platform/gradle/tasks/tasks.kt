@@ -227,6 +227,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
         /**
          * It lets tasks use the sandbox directories, i.e., to run a guest IDE instance or execute various tests.
+         *
+         * @TODO: Let customize the sandbox location only for the sandbox producer. Consumers have to have values locked.
          */
         if (this is SandboxAware) {
             /**
