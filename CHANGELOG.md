@@ -6,6 +6,8 @@
 
 - `VerifyPluginProjectConfigurationTask`: limit specific checks when `.module` plugin is only applied
 - `TestIdeUiTask` (`testIdeUi` task) + `CustomTestIdeUiTask` implementation
+- Dependencies extension: `platformDependency(groupId, artifactIt)` and `testPlatformDependency(groupId, artifactIt)` for adding dependencies on artifacts published to the IntelliJ Maven Repository
+- `TestFrameworkType.Metrics` for adding metrics and benchmarking tools for Test Framework
 
 ### Changed
 

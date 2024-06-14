@@ -15,6 +15,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
@@ -882,6 +883,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * There are multiple Test Framework variants available, which provide additional classes for testing specific modules, like:
      * JUnit4, JUnit 5, Maven, JavaScript, Go, Java, ReSharper, etc.
      *
+     * The version, if absent, is determined by the IntelliJ Platform build number.
      * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
      * the closest available version is used, found by scanning all releases in the repository.
      *
@@ -892,6 +894,78 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun testFramework(type: Provider<TestFrameworkType>, version: Provider<String>) = delegate.addTestFrameworkDependency(
         typeProvider = type,
         versionProvider = version,
+    )
+
+    /**
+     * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
+     *
+     * The version, if absent, is determined by the IntelliJ Platform build number.
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param groupId IntelliJ Platform dependency groupId
+     * @param artifactId IntelliJ Platform dependency artifactId
+     * @param version IntelliJ Platform dependency version
+     */
+    fun platformDependency(groupId: String, artifactId: String, version: String = VERSION_CURRENT) = delegate.addPlatformDependency(
+        groupIdProvider = delegate.provider { groupId },
+        artifactIdProvider = delegate.provider { artifactId },
+        versionProvider = delegate.provider { version },
+        configurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+    )
+
+    /**
+     * Adds a dependency on the IntelliJ Platform library required for testing plugins.
+     *
+     * The version, if absent, is determined by the IntelliJ Platform build number.
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param groupId IntelliJ Platform dependency groupId
+     * @param artifactId IntelliJ Platform dependency artifactId
+     * @param version IntelliJ Platform dependency version
+     */
+    fun platformDependency(groupId: Provider<String>, artifactId: Provider<String>, version: Provider<String>) = delegate.addPlatformDependency(
+        groupIdProvider = groupId,
+        artifactIdProvider = artifactId,
+        versionProvider = version,
+        configurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+    )
+
+    /**
+     * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
+     *
+     * The version, if absent, is determined by the IntelliJ Platform build number.
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param groupId IntelliJ Platform dependency groupId
+     * @param artifactId IntelliJ Platform dependency artifactId
+     * @param version IntelliJ Platform dependency version
+     */
+    fun testPlatformDependency(groupId: String, artifactId: String, version: String = VERSION_CURRENT) = delegate.addPlatformDependency(
+        groupIdProvider = delegate.provider { groupId },
+        artifactIdProvider = delegate.provider { artifactId },
+        versionProvider = delegate.provider { version },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+    )
+
+    /**
+     * Adds a dependency on the IntelliJ Platform library required for testing plugins.
+     *
+     * The version, if absent, is determined by the IntelliJ Platform build number.
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param groupId IntelliJ Platform dependency groupId
+     * @param artifactId IntelliJ Platform dependency artifactId
+     * @param version IntelliJ Platform dependency version
+     */
+    fun testPlatformDependency(groupId: Provider<String>, artifactId: Provider<String>, version: Provider<String>) = delegate.addPlatformDependency(
+        groupIdProvider = groupId,
+        artifactIdProvider = artifactId,
+        versionProvider = version,
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
     )
 
     /**

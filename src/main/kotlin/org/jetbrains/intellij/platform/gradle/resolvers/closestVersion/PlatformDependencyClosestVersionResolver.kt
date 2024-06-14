@@ -6,7 +6,7 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
-class TestFrameworkClosestVersionResolver(
+class PlatformDependencyClosestVersionResolver(
     private val productInfo: ProductInfo,
     repositoryUrls: List<String>,
     coordinates: Coordinates,
@@ -15,7 +15,7 @@ class TestFrameworkClosestVersionResolver(
     urls = repositoryUrls.map { url -> createMavenMetadataUrl(url, coordinates) }
 ) {
 
-    override val subject = "Test Framework"
+    override val subject = "IntelliJ Platform Dependency ($coordinates)"
 
     override fun resolve() = inMaven(productInfo.buildNumber.toVersion())
 }

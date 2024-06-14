@@ -9,10 +9,15 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
  *
  * @param coordinates Maven coordinates of test framework artifact.
  */
-sealed class TestFrameworkType(val coordinates: Coordinates) {
+sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
     object Platform : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework"))
     object JUnit5 : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5"))
     object Bundled : TestFrameworkType(Coordinates("bundled", "lib/testFramework.jar"))
+    object Metrics : TestFrameworkType(
+        Coordinates("com.jetbrains.intellij.tools", "ide-metrics-benchmark"),
+        Coordinates("com.jetbrains.intellij.tools", "ide-metrics-collector"),
+        Coordinates("com.jetbrains.intellij.tools", "ide-util-common"),
+    )
 
     object Plugin {
         object Go : TestFrameworkType(Coordinates("com.jetbrains.intellij.go", "go-test-framework"))

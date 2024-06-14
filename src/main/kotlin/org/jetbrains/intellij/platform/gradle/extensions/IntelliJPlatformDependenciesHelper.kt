@@ -33,7 +33,7 @@ import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLin
 import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
-import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.TestFrameworkClosestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.PlatformDependencyClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.RobotServerPluginLatestVersionResolver
@@ -413,7 +413,7 @@ class IntelliJPlatformDependenciesHelper(
      * Adds a dependency on the `test-framework` library required for testing plugins.
      *
      * In rare cases, when the presence of bundled `lib/testFramework.jar` library is necessary,
-     * it is possible to attach it by using the [TestFrameworkType.Platform.Bundled] type.
+     * it is possible to attach it by using the [TestFrameworkType.Bundled] type.
      *
      * This dependency belongs to IntelliJ Platform repositories.
      *
@@ -427,7 +427,7 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
         val type = typeProvider.orNull
         requireNotNull(type) { "The `intellijPlatform.testFramework` dependency helper was called with no `type` value provided." }
 
@@ -435,9 +435,46 @@ class IntelliJPlatformDependenciesHelper(
         requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
 
         when (type) {
-            TestFrameworkType.Bundled -> dependencies.createBundledLibrary(type.coordinates.artifactId)
+            TestFrameworkType.Bundled -> type.coordinates.map {
+                dependencies.createBundledLibrary(it.artifactId)
+            }
+
+            TestFrameworkType.Metrics -> type.coordinates.map {
+                dependencies.createPlatformDependency(it.groupId, it.artifactId, version)
+            }
+
             else -> dependencies.createTestFramework(type, version)
-        }.apply(action)
+        }.onEach(action)
+    })
+
+    /**
+     * Adds a dependency on the IntelliJ Platform dependency.
+     *
+     * This dependency belongs to IntelliJ Platform repositories.
+     *
+     * @param groupIdProvider The groupId of the IntelliJ Platform dependency.
+     * @param artifactIdProvider The artifactId of the IntelliJ Platform dependency.
+     * @param versionProvider The version of the IntelliJ Platform dependency.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addPlatformDependency(
+        groupIdProvider: Provider<String>,
+        artifactIdProvider: Provider<String>,
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val groupId = groupIdProvider.orNull
+        requireNotNull(groupId) { "The `intellijPlatform.platformDependency` dependency helper was called with no `groupId` value provided." }
+
+        val artifactId = artifactIdProvider.orNull
+        requireNotNull(artifactId) { "The `intellijPlatform.platformDependency` dependency helper was called with no `artifactId` value provided." }
+
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.platformDependency` dependency helper was called with no `version` value provided." }
+
+        dependencies.createPlatformDependency(groupId, artifactId, version).apply(action)
     })
 
     /**
@@ -733,15 +770,27 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency on the `test-framework` library required for testing plugins.
      *
+     * @param type Test Framework type
+     * @param version Test Framework version to resolve
+     */
+    private fun DependencyHandler.createTestFramework(type: TestFrameworkType, version: String) =
+        type.coordinates.map {
+            createPlatformDependency(it.groupId, it.artifactId, version)
+        }
+
+    /**
+     * Creates a dependency on the `test-framework` library required for testing plugins.
+     *
      * If [version] is set to [VERSION_CURRENT], it uses the [ProductInfo.buildNumber].
      *
      * If [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] is enabled and [VERSION_CURRENT] is set as a version, it resolves the closest matching library version
      * using repositories currently added to the project.
      *
-     * @param type Test Framework type
-     * @param version Test Framework version to resolve
+     * @param groupId Dependency group
+     * @param artifactId Dependency name
+     * @param version Dependency version
      */
-    private fun DependencyHandler.createTestFramework(type: TestFrameworkType, version: String): Dependency {
+    private fun DependencyHandler.createPlatformDependency(groupId: String, artifactId: String, version: String): Dependency {
         val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers)
 
         val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
@@ -751,13 +800,15 @@ class IntelliJPlatformDependenciesHelper(
         }
 
         return create(
-            group = type.coordinates.groupId, name = type.coordinates.artifactId, version = when (version) {
+            group = groupId,
+            name = artifactId,
+            version = when (version) {
                 VERSION_CURRENT -> when {
                     resolveClosest.get() ->
-                        TestFrameworkClosestVersionResolver(
+                        PlatformDependencyClosestVersionResolver(
                             productInfo.get(),
                             repositories.urls() + settingsRepositories.urls(),
-                            type.coordinates
+                            Coordinates(groupId, artifactId)
                         ).resolve().version
 
                     else -> productInfo.get().buildNumber
