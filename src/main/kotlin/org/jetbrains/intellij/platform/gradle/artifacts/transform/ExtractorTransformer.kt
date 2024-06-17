@@ -73,6 +73,7 @@ abstract class ExtractorTransformer @Inject constructor(
                 -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
             }
 
+            log.info("Extracting archive '$path' to directory '$targetDirectory'.")
             fileSystemOperations.copy {
                 includeEmptyDirs = false
                 from(archiveOperator(path))
@@ -81,6 +82,7 @@ abstract class ExtractorTransformer @Inject constructor(
 
             // Resolve the first directory that contains more than a single directory.
             // This approach helps eliminate `/Application Name.app/Contents/...` macOS directories or nested directory from the `tar.gz` archive.
+            log.info("Resolving the content directory in '$targetDirectory'.")
             val root = generateSequence(targetDirectory) { parent ->
                 val entry = parent.listFiles()
                     ?.singleOrNull() // pick an entry if it is a singleton in a directory
@@ -97,9 +99,11 @@ abstract class ExtractorTransformer @Inject constructor(
                     else -> null
                 }
             }.last()
+            log.info("The content directory is '$root'.")
 
             // Move content from the resolved nested directory.
             if (root != targetDirectory) {
+                log.info("Copying the content from '$root' to '$targetDirectory'.")
                 root.listFiles()?.forEach { file ->
                     val destination = targetDirectory.resolve(file.toRelativeString(root))
                     destination.parentFile?.mkdirs()
@@ -114,6 +118,7 @@ abstract class ExtractorTransformer @Inject constructor(
 
             when (artifactType) {
                 Attributes.ArtifactType.DMG -> {
+                    log.info("Unmounting DMG volume '$tempDirectory'.")
                     execOperations.exec {
                         commandLine("hdiutil", "detach", "-force", "-quiet", tempDirectory)
                     }
@@ -121,6 +126,8 @@ abstract class ExtractorTransformer @Inject constructor(
 
                 else -> {}
             }
+
+            log.info("Extracting to '$targetDirectory' completed.")
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
         }
