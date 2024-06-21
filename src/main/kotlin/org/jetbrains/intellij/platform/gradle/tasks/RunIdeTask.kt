@@ -11,8 +11,10 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.pathString
@@ -22,10 +24,10 @@ import kotlin.io.path.pathString
  * It directly extends the [JavaExec] Gradle task, which allows for an extensive configuration (system properties, memory management, etc.).
  *
  * This task runs against the IntelliJ Platform and plugins specified in project dependencies.
- * To register a customized task, use [CustomRunIdeTask] instead.
+ * To register a customized task, use [IntelliJPlatformTestingExtension.runIde] instead.
  */
 @UntrackedTask(because = "Should always run")
-abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, IntelliJPlatformVersionAware {
+abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, SandboxAware, IntelliJPlatformVersionAware {
 
     init {
         group = Plugin.GROUP_NAME
@@ -57,32 +59,29 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
     }
 
     companion object : Registrable {
+        override fun register(project: Project) =
+            project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
+                systemPropertyDefault("idea.classpath.index.enabled", false)
+                systemPropertyDefault("idea.is.internal", true)
+                systemPropertyDefault("idea.plugin.in.sandbox.mode", true)
+                systemPropertyDefault("idea.vendor.name", "JetBrains")
+                systemPropertyDefault("ide.no.platform.update", false)
+                systemPropertyDefault("jdk.module.illegalAccess.silent", true)
 
-        internal val configuration: RunIdeTask.() -> Unit = {
-            systemPropertyDefault("idea.classpath.index.enabled", false)
-            systemPropertyDefault("idea.is.internal", true)
-            systemPropertyDefault("idea.plugin.in.sandbox.mode", true)
-            systemPropertyDefault("idea.vendor.name", "JetBrains")
-            systemPropertyDefault("ide.no.platform.update", false)
-            systemPropertyDefault("jdk.module.illegalAccess.silent", true)
+                with(OperatingSystem.current()) {
+                    when {
+                        isMacOsX -> {
+                            systemPropertyDefault("idea.smooth.progress", false)
+                            systemPropertyDefault("apple.laf.useScreenMenuBar", true)
+                            systemPropertyDefault("apple.awt.fileDialogForDirectories", true)
+                        }
 
-            with(OperatingSystem.current()) {
-                when {
-                    isMacOsX -> {
-                        systemPropertyDefault("idea.smooth.progress", false)
-                        systemPropertyDefault("apple.laf.useScreenMenuBar", true)
-                        systemPropertyDefault("apple.awt.fileDialogForDirectories", true)
-                    }
-
-                    isUnix -> {
-                        systemPropertyDefault("sun.awt.disablegrab", true)
+                        isUnix -> {
+                            systemPropertyDefault("sun.awt.disablegrab", true)
+                        }
                     }
                 }
             }
-        }
-
-        override fun register(project: Project) =
-            project.registerTask<RunIdeTask>(Tasks.RUN_IDE, configureWithType = false, configuration = configuration)
 
         internal fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
             if (!systemProperties.containsKey(name)) {

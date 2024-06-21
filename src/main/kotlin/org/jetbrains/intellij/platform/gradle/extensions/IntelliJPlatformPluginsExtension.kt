@@ -10,12 +10,14 @@ import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
+import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
@@ -43,12 +45,12 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     rootProjectDirectory: Path,
     settingsRepositories: RepositoryHandler,
     extensionProvider: Provider<IntelliJPlatformExtension>,
-) {
+) : ExtensionAware {
 
     internal val intellijPlatformPluginDependencyConfigurationName = objects.property<String>()
     internal val intellijPlatformPluginLocalConfigurationName = objects.property<String>()
 
-    internal val delegate = IntelliJPlatformDependenciesHelper(
+    private val delegate = IntelliJPlatformDependenciesHelper(
         configurations,
         dependencies,
         layout,
@@ -234,6 +236,14 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      * @param ids Plugin identifiers.
      */
     fun disablePlugins(vararg ids: String) = disabled.addAll(*ids)
+
+    fun robotServerPlugin(version: Provider<String>) = delegate.addRobotServerPluginDependency(
+        versionProvider = version,
+    )
+
+    fun robotServerPlugin(version: String = VERSION_LATEST) = delegate.addRobotServerPluginDependency(
+        versionProvider = delegate.provider { version },
+    )
 
     @Suppress("UnstableApiUsage")
     companion object : Registrable<IntelliJPlatformPluginsExtension> {

@@ -14,7 +14,6 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
@@ -23,9 +22,6 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.argumentProviders.PluginArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
@@ -34,7 +30,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathReso
 import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSignerPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.utils.*
 
 /**
@@ -71,15 +66,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
     // Preconfigure all tasks of T type if they inherit from *Aware interfaces
 
     with(task) task@{
-        /**
-         * The suffix used to build unique names for configurations and tasks for [CustomIntelliJPlatformVersionAware] purposes
-         *
-         * @see CustomIntelliJPlatformVersionAware
-         */
-        val suffix = when {
-            this is CustomIntelliJPlatformVersionAware -> name
-            else -> name.substringAfter('_', "")
-        }.let { "_$it" }.trimEnd('_')
+        if (name != Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
+            dependsOn(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
+        }
 
         /**
          * Applies the base [Configurations.INTELLIJ_PLATFORM] configuration to [IntelliJPlatformVersionAware] tasks so they can access details of the used IntelliJ
@@ -88,8 +77,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * @see IntelliJPlatformVersionAware
          */
         if (this is IntelliJPlatformVersionAware) {
-            intelliJPlatformConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM + suffix).asLenient
-            intelliJPlatformPluginConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_PLUGIN + suffix).asLenient
+            intelliJPlatformConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM).asLenient
+            intelliJPlatformPluginConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_PLUGIN).asLenient
         }
 
         /**
@@ -106,209 +95,43 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             })
         }
 
-        /**
-         * The concept of [CustomIntelliJPlatformVersionAware] lets a task accept and use a custom
-         * IntelliJ Platform other than the one used to build the project
-         *
-         * @see CustomIntelliJPlatformVersionAware
-         */
-        if (this is CustomIntelliJPlatformVersionAware) {
-            val dependenciesExtension = dependencies.the<IntelliJPlatformDependenciesExtension>()
-            val baseIntelliJPlatformLocalConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_LOCAL]
-
-            with(configurations) {
-                val customIntelliJPlatformLocalConfiguration = create(
-                    name = Configurations.INTELLIJ_PLATFORM_LOCAL + suffix,
-                    description = "Custom IntelliJ Platform local",
-                ) {
-                    attributes {
-                        attribute(Attributes.extracted, true)
-                    }
-
-                    dependenciesExtension.local(
-                        localPath = localPath,
-                        configurationName = name,
-                    )
-                }
-                val customIntelliJPlatformDependencyConfiguration = create(
-                    name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY + suffix,
-                    description = "Custom IntelliJ Platform dependency archive",
-                ) {
-                    dependenciesExtension.customCreate(
-                        type = type,
-                        version = version,
-                        configurationName = name,
-                    )
-                }
-
-                /**
-                 * Override the default [Configurations.INTELLIJ_PLATFORM] with a custom IntelliJ Platform configuration so the current task can refer to it.
-                 * Depending on whether [CustomIntelliJPlatformVersionAware.localPath] or any of [CustomIntelliJPlatformVersionAware.type]
-                 * and [CustomIntelliJPlatformVersionAware.version] is set, a custom configuration is picked as a replacement.
-                 * Otherwise, refer to the base IntelliJ Platform — useful, i.e., when we want to execute a regular [RunIdeTask] using defaults.
-                 */
-                intelliJPlatformConfiguration = create(
-                    name = Configurations.INTELLIJ_PLATFORM + suffix,
-                    description = "Custom IntelliJ Platform",
-                ) {
-                    attributes {
-                        attribute(Attributes.extracted, true)
-                    }
-
-                    defaultDependencies {
-                        addAllLater(provider {
-                            listOf(
-                                customIntelliJPlatformLocalConfiguration,
-                                customIntelliJPlatformDependencyConfiguration,
-                                baseIntelliJPlatformLocalConfiguration,
-                            ).flatMap { it.dependencies }.take(1)
-                        })
-                    }
-                    defaultDependencies {
-                        addAllLater(provider {
-                            customIntelliJPlatformDependencyConfiguration.dependencies
-                        })
-                    }
-                }
-
-                /**
-                 * Creates a custom [Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY]
-                 * to hold additional plugins to be added to the [CustomIntelliJPlatformVersionAware] task.
-                 *
-                 * This configuration is also added to the global [Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR] registry
-                 * so the [ExtractorTransformer] could track and extract custom plugin artifacts.
-                 */
-                val intellijPlatformPluginDependencyConfiguration = create(
-                    name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY + suffix,
-                    description = "Custom IntelliJ Platform plugin dependencies",
-                ) {
-                    configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR].extendsFrom(this)
-                    extendsFrom(configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY])
-                }
-
-                /**
-                 * Creates a custom [Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL]
-                 * to hold additional local plugins to be added to the [CustomIntelliJPlatformVersionAware] task.
-                 */
-                val intellijPlatformPluginLocalConfiguration = create(
-                    name = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL + suffix,
-                    description = "Custom IntelliJ Platform plugin local",
-                ) {
-                    extendsFrom(configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL])
-                }
-
-                /**
-                 * A custom general [Configurations.INTELLIJ_PLATFORM_PLUGIN] configuration that collects custom plugin local and remote dependencies.
-                 * This configuration also inherits from the general configurations to align the build setup.
-                 */
-                val intellijPlatformPluginConfiguration = create(
-                    name = Configurations.INTELLIJ_PLATFORM_PLUGIN + suffix,
-                    description = "Custom IntelliJ Platform plugins",
-                ) {
-                    attributes {
-                        attribute(Attributes.extracted, true)
-                    }
-
-                    extendsFrom(intellijPlatformPluginDependencyConfiguration)
-                    extendsFrom(intellijPlatformPluginLocalConfiguration)
-                }
-
-                intelliJPlatformPluginConfiguration.apply {
-                    setFrom(intellijPlatformPluginConfiguration)
-                    finalizeValueOnRead()
-                }
-
-                IntelliJPlatformPluginsExtension.register(project, target = this@task).let {
-                    it.intellijPlatformPluginDependencyConfigurationName = intellijPlatformPluginDependencyConfiguration.name
-                    it.intellijPlatformPluginLocalConfigurationName = intellijPlatformPluginLocalConfiguration.name
-                }
-            }
-        }
-
-        /**
-         * It lets tasks use the sandbox directories, i.e., to run a guest IDE instance or execute various tests.
-         *
-         * @TODO: Let customize the sandbox location only for the sandbox producer. Consumers have to have values locked.
-         */
         if (this is SandboxAware) {
-            /**
-             * multiple [PrepareSandboxTask] tasks may be registered for different purposes — running tests or IDE.
-             * To keep sandboxes separated, we introduce sandbox suffixes.
-             */
-            sandboxSuffix.convention(suffix)
-            sandboxDirectory.convention(extensionProvider.flatMap {
-                it.sandboxContainer.map { container ->
-                    container.dir("${productInfo.productCode}-${productInfo.version}")
-                }
-            })
-            sandboxConfigDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.CONFIG)
-            sandboxPluginsDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.PLUGINS)
-            sandboxSystemDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.SYSTEM)
-            sandboxLogDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.LOG)
+            sandboxProducer.convention(Tasks.PREPARE_SANDBOX)
 
-            /**
-             * Some tasks are designed to work with the sandbox, so we explicitly make them depend on the [PrepareSandboxTask] task.
-             * This also handles [CustomIntelliJPlatformVersionAware] tasks, for which we refer to the `suffix` variable.
-             * No suffix is used if a task is a base task provided with the IntelliJ Platform Gradle Plugin as a default.
-             */
-            if (this !is SandboxProducerAware) {
-                fun createTask(target: SplitModeTarget): PrepareSandboxTask {
-                    val taskSubject = when {
-                        this is TestableAware -> "Test"
-                        else -> ""
-                    }
-                    val splitModeVariant = when (target) {
-                        SplitModeTarget.FRONTEND -> "Frontend"
-                        SplitModeTarget.BACKEND -> ""
-                        SplitModeTarget.BOTH -> ""
-                    }
-                    sandboxSuffix.convention("-$taskSubject".lowercase().trimEnd('-') + suffix)
-                    val taskName = "prepare" + taskSubject + splitModeVariant + "Sandbox" + suffix
+            val sandboxProducerTaskProvider = sandboxProducer.flatMap { sandboxProducerTaskName ->
+                project.tasks.named<PrepareSandboxTask>(sandboxProducerTaskName)
+            }
 
-                    return tasks.maybeCreate<PrepareSandboxTask>(taskName).also { task ->
-                        task.sandboxSuffix.convention(sandboxSuffix)
-                        task.sandboxDirectory.set(sandboxDirectory)
+            sandboxDirectory
+                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxDirectory })
+                .finalizeValueOnRead()
 
-                        if (this is CustomIntelliJPlatformVersionAware) {
-                            task.disabledPlugins = the<IntelliJPlatformPluginsExtension>().disabled
-                        }
+            sandboxConfigDirectory
+                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxConfigDirectory })
+                .finalizeValueOnRead()
 
-                        if (this is SplitModeAware) {
-                            task.sandboxSuffix = "-$taskSubject".lowercase().trimEnd('-') + "-$splitModeVariant".lowercase().trimEnd('-') + suffix
-                            task.splitMode = splitMode
-                            task.splitModeTarget = splitModeTarget
-                            task.splitModeCurrentTarget = target
-                        }
+            sandboxPluginsDirectory
+                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxPluginsDirectory })
+                .finalizeValueOnRead()
 
-                        task.onlyIf {
-                            it as PrepareSandboxTask
-                            val isSplitMode = it.splitMode.get()
-                            val currentTarget = task.splitModeCurrentTarget.get()
+            sandboxSystemDirectory
+                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxSystemDirectory })
+                .finalizeValueOnRead()
 
-                            isSplitMode || currentTarget != SplitModeTarget.FRONTEND
-                        }
+            sandboxLogDirectory
+                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxLogDirectory })
+                .finalizeValueOnRead()
 
-                        dependsOn(task)
-                    }
-                }
+            dependsOn(sandboxProducerTaskProvider)
 
-                /**
-                 * Every [SandboxAware] task is supposed to refer to the [PrepareSandboxTask] task.
-                 * However, tasks like [RunnableIdeAware] or [TestableAware] should not share the same sandboxes.
-                 * The same applies to the customized tasks – a custom suffix is added to the task name.
-                 */
-                when {
-                    this is SplitModeAware -> {
-                        val backendTask = createTask(SplitModeTarget.BACKEND)
-                        val frontendTask = createTask(SplitModeTarget.FRONTEND)
+            if (this is SplitModeAware) {
+                splitMode
+                    .convention(sandboxProducerTaskProvider.flatMap { it.splitMode })
+                    .finalizeValueOnRead()
 
-                        backendTask.dependsOn(frontendTask)
-                    }
-
-                    else -> {
-                        createTask(SplitModeTarget.BOTH)
-                    }
-                }
+                splitModeTarget
+                    .convention(sandboxProducerTaskProvider.flatMap { it.splitModeTarget })
+                    .finalizeValueOnRead()
             }
         }
 
@@ -382,14 +205,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          */
         if (this is JavaCompilerAware) {
             javaCompilerConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER].asLenient
-        }
-
-        /**
-         * The [SplitModeAware] allows to run IDE in Split Mode.
-         */
-        if (this is SplitModeAware) {
-            splitMode.convention(extensionProvider.flatMap { it.splitMode })
-            splitModeTarget.convention(extensionProvider.flatMap { it.splitModeTarget })
         }
 
         /**
@@ -473,11 +288,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             kotlinPluginAvailable.convention(kotlinPluginAvailableProvider)
 
             project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
-                val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).apply {
-                    configure {
-                        this@task.dependsOn(this)
-                    }
-                }.map {
+                val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).map {
                     it.withGroovyBuilder { getProperty("kotlinOptions") }
                         .withGroovyBuilder { getProperty("options") }
                 }

@@ -20,13 +20,14 @@ import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.kotlin.gradle.utils.named
@@ -36,7 +37,7 @@ import kotlin.io.path.*
 /**
  * Prepares a sandbox environment with the installed plugin and its dependencies.
  * The sandbox directory is required by tasks that run IDE and tests in isolation from other instances, like when multiple IntelliJ Platforms are used for
- * testing with [RunIdeTask], [CustomTestIdeTask], [TestIdeUiTask], or [TestIdePerformanceTask] tasks.
+ * testing with [RunIdeTask], [TestIdeTask], [TestIdeUiTask], or [TestIdePerformanceTask] tasks.
  *
  * To fully use the sandbox capabilities in a task, make it extend the [SandboxAware] interface.
  *
@@ -45,7 +46,13 @@ import kotlin.io.path.*
  * @see Constants.Sandbox
  */
 @CacheableTask
-abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware {
+abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, SandboxStructure, SplitModeAware {
+
+    /**
+     * Represents the suffix used i.e., for test-related tasks.
+     */
+    @get:Internal
+    abstract val sandboxSuffix: Property<String>
 
     /**
      * Default sandbox destination directory to where the plugin files will be copied into.
@@ -60,7 +67,7 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
     /**
      * An internal field to hold a list of plugins to be disabled within the current sandbox.
      *
-     * This property is controlled with [IntelliJPlatformPluginsExtension] method of [CustomIntelliJPlatformVersionAware].
+     * This property is controlled with [IntelliJPlatformPluginsExtension].
      */
     @get:Internal
     abstract val disabledPlugins: SetProperty<String>
@@ -98,18 +105,11 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
     abstract val runtimeClasspath: ConfigurableFileCollection
 
     /**
-     * As IntelliJ Platform is capable for running in split mode, each [SplitModeTarget.BACKEND] and [SplitModeTarget.FRONTEND] require separated sandbox.
-     * This property helps distinguish which one is currently handled.
-     *
-     * @see [SplitModeAware]
-     */
-    @get:Internal
-    abstract val splitModeCurrentTarget: Property<SplitModeTarget>
-
-    /**
      * Holds a list of names used to generate suffixed ones to avoid collisions.
      */
     private val usedNames = mutableMapOf<String, Path>()
+
+    private val log = Logger(javaClass)
 
     init {
         group = Plugin.GROUP_NAME
@@ -119,14 +119,22 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
 
     @TaskAction
     override fun copy() {
-        createSandboxDirectories()
-        disableIdeUpdate()
-        disabledPlugins()
-        createSplitModeFrontendPropertiesFile()
+        log.info("Preparing sandbox")
+        log.info("sandboxConfigDirectory = ${sandboxConfigDirectory.asPath}")
+        log.info("sandboxPluginsDirectory = ${sandboxPluginsDirectory.asPath}")
+        log.info("sandboxLogDirectory = ${sandboxLogDirectory.asPath}")
+        log.info("sandboxSystemDirectory = ${sandboxSystemDirectory.asPath}")
 
-        if (!splitMode.get() || splitModeTarget.get().includes(splitModeCurrentTarget.get())) {
-            super.copy()
+        disableIdeUpdate(sandboxConfigDirectory)
+        disabledPlugins(sandboxConfigDirectory)
+
+        if (splitMode.get()) {
+            disableIdeUpdate(sandboxConfigFrontendDirectory)
+            disabledPlugins(sandboxConfigFrontendDirectory)
+            createSplitModeFrontendPropertiesFile()
         }
+
+        super.copy()
     }
 
     fun intoChild(destinationDir: Any) = mainSpec.addChild().into(destinationDir)
@@ -135,21 +143,12 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
 
     override fun configure(closure: Closure<*>) = super.configure(closure)
 
-    private fun createSandboxDirectories() = listOf(
-        sandboxConfigDirectory,
-        sandboxPluginsDirectory,
-        sandboxLogDirectory,
-        sandboxSystemDirectory,
-    ).forEach {
-        it.asPath.createDirectories()
-    }
-
     /**
      * @throws GradleException
      */
     @Throws(GradleException::class)
-    private fun disableIdeUpdate() {
-        val updatesConfig = sandboxConfigDirectory.asPath
+    private fun disableIdeUpdate(configDirectory: DirectoryProperty) {
+        val updatesConfig = configDirectory.asPath
             .resolve("options")
             .createDirectories()
             .resolve("updates.xml")
@@ -191,8 +190,8 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
         }
     }
 
-    private fun disabledPlugins() {
-        sandboxConfigDirectory.asPath
+    private fun disabledPlugins(configDirectory: DirectoryProperty) {
+        configDirectory.asPath
             .resolve("disabled_plugins.txt")
             .writeLines(disabledPlugins.get())
     }
@@ -204,17 +203,23 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
         if (!splitMode.get()) {
             return
         }
+        log.info("Preparing sandbox for a Split Mode.")
 
-        if (splitModeCurrentTarget.get() == SplitModeTarget.FRONTEND) {
-            splitModeFrontendProperties.asPath.writeText(
-                """
-                idea.config.path=${sandboxConfigDirectory.asPath}
-                idea.system.path=${sandboxSystemDirectory.asPath}
-                idea.log.path=${sandboxLogDirectory.asPath}
-                idea.plugins.path=${sandboxPluginsDirectory.asPath}
-                """.trimIndent()
-            )
+        val pluginsDirectory = splitModeTarget.flatMap {
+            when (it) {
+                SplitModeAware.SplitModeTarget.BOTH -> sandboxPluginsDirectory
+                else -> sandboxPluginsFrontendDirectory
+            }
         }
+
+        splitModeFrontendProperties.asPath.writeText(
+            """
+            idea.config.path=${sandboxConfigFrontendDirectory.asPath}
+            idea.system.path=${sandboxSystemFrontendDirectory.asPath}
+            idea.log.path=${sandboxLogFrontendDirectory.asPath}
+            idea.plugins.path=${pluginsDirectory.asPath}
+            """.trimIndent()
+        )
     }
 
     fun ensureName(path: Path): String {
@@ -231,18 +236,57 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
 
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, Tasks.PREPARE_UI_TEST_SANDBOX) {
+            project.registerTask<PrepareSandboxTask>(
+                Tasks.PREPARE_SANDBOX,
+                Tasks.PREPARE_TEST_SANDBOX,
+                Tasks.PREPARE_TEST_IDE_UI_SANDBOX,
+                Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX,
+            ) {
                 val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
                 val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
 
+                sandboxSuffix.convention(
+                    name
+                        .substringBefore('_')
+                        .removePrefix("prepare")
+                        .removeSuffix("Sandbox")
+                        .replaceFirstChar { it.lowercase() }
+                        .let { "-$it" }
+                        .trimEnd('-')
+                        .plus('_')
+                        .plus(name.substringAfter('_', missingDelimiterValue = ""))
+                        .trimEnd('_')
+                )
+
+                sandboxDirectory.convention(project.extensionProvider.flatMap {
+                    it.sandboxContainer.map { container ->
+                        container.dir("${productInfo.productCode}-${productInfo.version}")
+                    }
+                })
+
+                sandboxConfigDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.CONFIG)
+                sandboxPluginsDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.PLUGINS)
+                sandboxSystemDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.SYSTEM)
+                sandboxLogDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.LOG)
+
+                sandboxConfigFrontendDirectory.convention(sandboxConfigDirectory.map { it.dir("frontend") })
+                sandboxPluginsFrontendDirectory.convention(sandboxPluginsDirectory.map { it.dir("frontend") })
+                sandboxSystemFrontendDirectory.convention(sandboxSystemDirectory.map { it.dir("frontend") })
+                sandboxLogFrontendDirectory.convention(sandboxLogDirectory.map { it.dir("frontend") })
+
                 pluginJar.convention(composedJarTaskProvider.flatMap { it.archiveFile })
-                defaultDestinationDirectory.convention(sandboxPluginsDirectory)
+                defaultDestinationDirectory.convention(splitModeTarget.flatMap {
+                    when (it) {
+                        SplitModeAware.SplitModeTarget.FRONTEND -> sandboxPluginsFrontendDirectory
+                        else -> sandboxPluginsDirectory
+                    }
+                })
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
                 runtimeClasspath.from(runtimeConfiguration - intellijPlatformPluginModuleConfiguration)
 
+                splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })
-                splitModeCurrentTarget.convention(SplitModeTarget.BACKEND)
 
                 intoChild(project.extensionProvider.flatMap { it.projectName.map { projectName -> "$projectName/lib" } })
                     .from(runtimeClasspath)
@@ -251,8 +295,37 @@ abstract class PrepareSandboxTask : Sync(), SandboxProducerAware, SplitModeAware
                 from(pluginsClasspath)
 
                 inputs.property("intellijPlatform.instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })
-                outputs.dirs(sandboxConfigDirectory, sandboxPluginsDirectory, sandboxLogDirectory, sandboxSystemDirectory)
                 inputs.files(runtimeConfiguration)
+                outputs.dirs(
+                    sandboxConfigDirectory,
+                    sandboxPluginsDirectory,
+                    sandboxLogDirectory,
+                    sandboxSystemDirectory,
+                    splitMode.map { isSplitMode ->
+                        when {
+                            isSplitMode -> sandboxConfigFrontendDirectory
+                            else -> sandboxConfigDirectory
+                        }
+                    },
+                    splitMode.map { isSplitMode ->
+                        when {
+                            isSplitMode -> sandboxPluginsFrontendDirectory
+                            else -> sandboxPluginsDirectory
+                        }
+                    },
+                    splitMode.map { isSplitMode ->
+                        when {
+                            isSplitMode -> sandboxLogFrontendDirectory
+                            else -> sandboxLogDirectory
+                        }
+                    },
+                    splitMode.map { isSplitMode ->
+                        when {
+                            isSplitMode -> sandboxSystemFrontendDirectory
+                            else -> sandboxSystemDirectory
+                        }
+                    },
+                )
             }
     }
 }

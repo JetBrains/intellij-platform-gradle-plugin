@@ -15,35 +15,16 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
  * It directly extends the [Test] Gradle task, which allows for an extensive configuration (system properties, memory management, etc.).
- *
- * This task class also inherits from [CustomIntelliJPlatformVersionAware],
- * which makes it possible to create `testIde`-like tasks using custom IntelliJ Platform versions:
- *
- * ```kotlin
- * import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
- * import org.jetbrains.intellij.platform.gradle.tasks.CustomTestIdeTask
- *
- * tasks {
- *   val testPhpStorm by registering(CustomTestIdeTask::class) {
- *     type = IntelliJPlatformType.PhpStorm
- *     version = "2023.2.2"
- *   }
- *
- *   val testLocalIde by registering(CustomTestIdeTask::class) {
- *     localPath = file("/Users/hsz/Applications/Android Studio.app")
- *   }
- * }
- * ```
  */
 @UntrackedTask(because = "Should always run")
-abstract class CustomTestIdeTask : Test(), TestableAware, CustomIntelliJPlatformVersionAware {
+abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware {
 
     init {
         group = Plugin.GROUP_NAME
@@ -60,7 +41,7 @@ abstract class CustomTestIdeTask : Test(), TestableAware, CustomIntelliJPlatform
     companion object : Registrable {
         private val Test.sourceTask: TestableAware
             get() = when {
-                this is CustomTestIdeTask -> this
+                this is TestIdeTask -> this
                 else -> project.tasks.named<PrepareTestTask>(Tasks.PREPARE_TEST).get()
             }
 
@@ -81,6 +62,8 @@ abstract class CustomTestIdeTask : Test(), TestableAware, CustomIntelliJPlatform
 
         internal val configuration: Test.() -> Unit = {
             enableAssertions = true
+
+            sourceTask.sandboxProducer.convention(Tasks.PREPARE_TEST_SANDBOX)
 
             jvmArgumentProviders.add(
                 IntelliJPlatformArgumentProvider(
@@ -114,6 +97,6 @@ abstract class CustomTestIdeTask : Test(), TestableAware, CustomIntelliJPlatform
         }
 
         override fun register(project: Project) =
-            project.registerTask<CustomTestIdeTask>(configuration = configuration)
+            project.registerTask<TestIdeTask>(configuration = configuration)
     }
 }

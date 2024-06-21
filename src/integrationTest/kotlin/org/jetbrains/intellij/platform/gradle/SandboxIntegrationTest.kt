@@ -58,7 +58,7 @@ class SandboxIntegrationTest : IntelliJPlatformIntegrationTestBase(
     fun `create test sandbox for a custom task in a default location`() {
         build(CUSTOM_TEST_IDE_TASK_NAME, projectProperties = defaultProjectProperties) {
             val sandboxDirectory = buildDirectory.resolve("idea-sandbox").resolve("$intellijPlatformType-$intellijPlatformVersion")
-            val suffix = "-test_$CUSTOM_TEST_IDE_TASK_NAME"
+            val suffix = "_$CUSTOM_TEST_IDE_TASK_NAME"
 
             assertExists(sandboxDirectory)
             assertExists(sandboxDirectory.resolve(Sandbox.CONFIG + suffix))

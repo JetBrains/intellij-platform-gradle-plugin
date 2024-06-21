@@ -2,11 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
@@ -22,7 +24,7 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
  *
  * Split Mode requires the IntelliJ Platform in the version `241.14473` or later.
  */
-interface SplitModeAware : IntelliJPlatformVersionAware, SandboxAware {
+interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
 
     /**
      * Enables Split Mode when running the IDE.
@@ -34,11 +36,43 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxAware {
 
     /**
      * Specifies in which part of the product the developed plugin should be installed.
-     * 
+     *
      * Default value: [IntelliJPlatformExtension.splitModeTarget]
      */
     @get:Input
     val splitModeTarget: Property<SplitModeTarget>
+
+    /**
+     * A frontend configuration directory located within the [sandboxDirectory].
+     *
+     * @see Constants.Sandbox.CONFIG
+     */
+    @get:Internal
+    val sandboxConfigFrontendDirectory: DirectoryProperty
+
+    /**
+     * A frontend plugins directory located within the [sandboxDirectory].
+     *
+     * @see Constants.Sandbox.PLUGINS
+     */
+    @get:Internal
+    val sandboxPluginsFrontendDirectory: DirectoryProperty
+
+    /**
+     * A frontend system directory located within the [sandboxDirectory].
+     *
+     * @see Constants.Sandbox.SYSTEM
+     */
+    @get:Internal
+    val sandboxSystemFrontendDirectory: DirectoryProperty
+
+    /**
+     * A frontend log directory located within the [sandboxDirectory].
+     *
+     * @see Constants.Sandbox.LOG
+     */
+    @get:Internal
+    val sandboxLogFrontendDirectory: DirectoryProperty
 
     /**
      * Path to a properties file which will be used to configure the frontend process if the IDE is started in Split Mode.

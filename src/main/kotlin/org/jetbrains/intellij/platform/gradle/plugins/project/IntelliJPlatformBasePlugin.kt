@@ -2,11 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradle.plugins.project
 
-import org.gradle.api.*
+import org.gradle.api.GradleException
+import org.gradle.api.JavaVersion
+import org.gradle.api.Plugin
+import org.gradle.api.Project
 import org.gradle.api.attributes.*
 import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.tasks.TaskContainer
 import org.gradle.kotlin.dsl.add
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
@@ -18,7 +20,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
-import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.BundledPluginsListTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
@@ -352,35 +353,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         IntelliJPlatformDependenciesExtension.register(project, target = project.dependencies)
         IntelliJPlatformRepositoriesExtension.register(project, target = project.repositories)
 
-        project.tasks.whenIntelliJPlatformTaskAdded {
-            project.preconfigureTask(this)
-        }
-
-        InitializeIntelliJPlatformPluginTask.register(project)
-
-        val initializeIntelliJPlatformPluginTaskProvider =
-            project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-
-        project.tasks.whenIntelliJPlatformTaskAdded {
-            dependsOn(initializeIntelliJPlatformPluginTaskProvider)
-        }
-
-        listOf(
-            PrintBundledPluginsTask,
-            PrintProductsReleasesTask,
-            SetupDependenciesTask,
-        ).forEach {
-            it.register(project)
-        }
-    }
-
-    @Suppress("KotlinConstantConditions")
-    private fun TaskContainer.whenIntelliJPlatformTaskAdded(action: Task.() -> Unit) =
-        whenTaskAdded {
-            when (this) {
+        project.tasks.matching {
+            when (it) {
                 is AutoReloadAware,
                 is CoroutinesJavaAgentAware,
-                is CustomIntelliJPlatformVersionAware,
                 is IntelliJPlatformVersionAware,
                 is JavaCompilerAware,
                 is KotlinMetadataAware,
@@ -389,11 +365,21 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 is RunnableIdeAware,
                 is RuntimeAware,
                 is SandboxAware,
-                is SandboxProducerAware,
                 is SigningAware,
                 is SplitModeAware,
                 is TestableAware,
-                    -> action()
+                    -> true
+                else -> false
             }
+        }.configureEach(project::preconfigureTask)
+
+        listOf(
+            InitializeIntelliJPlatformPluginTask,
+            PrintBundledPluginsTask,
+            PrintProductsReleasesTask,
+            SetupDependenciesTask,
+        ).forEach {
+            it.register(project)
         }
+    }
 }

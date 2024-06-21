@@ -47,6 +47,7 @@ object Constants {
         const val IDES = "ides"
         const val IDEA_VERSION = "ideaVersion"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
+        const val INTELLIJ_PLATFORM_TESTING = "intellijPlatformTesting"
         const val PLUGIN_CONFIGURATION = "pluginConfiguration"
         const val PLUGINS = "plugins"
         const val PRODUCT_DESCRIPTOR = "productDescriptor"
@@ -144,7 +145,8 @@ object Constants {
         const val PREPARE_SANDBOX = "prepareSandbox"
         const val PREPARE_TEST = "prepareTest"
         const val PREPARE_TEST_SANDBOX = "prepareTestSandbox"
-        const val PREPARE_UI_TEST_SANDBOX = "prepareUiTestSandbox" // TODO: check
+        const val PREPARE_TEST_IDE_UI_SANDBOX = "prepareTestIdeUiSandbox" // TODO: check
+        const val PREPARE_TEST_IDE_PERFORMANCE_SANDBOX = "prepareTestIdePerformanceSandbox" // TODO: check
         const val PRINT_BUNDLED_PLUGINS = "printBundledPlugins"
         const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val PUBLISH_PLUGIN = "publishPlugin"

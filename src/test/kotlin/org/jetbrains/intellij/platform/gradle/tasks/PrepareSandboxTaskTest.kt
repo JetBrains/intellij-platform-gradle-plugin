@@ -353,7 +353,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     //            downloadRobotServerPlugin.version = '0.11.1'
                 """.trimIndent()
 
-        build(Tasks.PREPARE_UI_TEST_SANDBOX)
+        build(Tasks.PREPARE_TEST_IDE_UI_SANDBOX)
 
         assertEquals(
             setOf(
@@ -369,29 +369,41 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `prepare sandbox for splitMode with plugin installed on frontend`() {
         buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.FRONTEND)
-        checkFrontendProperties()
+        assertFileContent(
+            sandbox.resolve("frontend.properties"),
+            """
+            idea.config.path=${sandbox.resolve("config/frontend")}
+            idea.system.path=${sandbox.resolve("system/frontend")}
+            idea.log.path=${sandbox.resolve("log/frontend")}
+            idea.plugins.path=${sandbox.resolve("plugins/frontend")}
+            """.trimIndent()
+        )
     }
 
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend`() {
         buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BACKEND)
-        checkFrontendProperties()
+        assertFileContent(
+            sandbox.resolve("frontend.properties"),
+            """
+            idea.config.path=${sandbox.resolve("config/frontend")}
+            idea.system.path=${sandbox.resolve("system/frontend")}
+            idea.log.path=${sandbox.resolve("log/frontend")}
+            idea.plugins.path=${sandbox.resolve("plugins/frontend")}
+            """.trimIndent()
+        )
     }
 
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend and frontend`() {
         buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BOTH)
-        checkFrontendProperties()
-    }
-
-    private fun checkFrontendProperties() {
         assertFileContent(
             sandbox.resolve("frontend.properties"),
             """
-            idea.config.path=${sandbox.resolve("config-frontend")}
-            idea.system.path=${sandbox.resolve("system-frontend")}
-            idea.log.path=${sandbox.resolve("log-frontend")}
-            idea.plugins.path=${sandbox.resolve("plugins-frontend")}
+            idea.config.path=${sandbox.resolve("config/frontend")}
+            idea.system.path=${sandbox.resolve("system/frontend")}
+            idea.log.path=${sandbox.resolve("log/frontend")}
+            idea.plugins.path=${sandbox.resolve("plugins")}
             """.trimIndent()
         )
     }
@@ -941,9 +953,13 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
         buildFile write //language=kotlin
                 """
-                val $taskName by tasks.registering(CustomRunIdeTask::class) {
-                    sandboxDirectory = project.layout.buildDirectory.dir("custom-sandbox")
-                    enabled = false
+                val $taskName by intellijPlatformTesting.runIde.registering {
+                    task {
+                        enabled = false
+                    }
+                    prepareSandboxTask {
+                        sandboxDirectory = project.layout.buildDirectory.dir("custom-sandbox")
+                    }
                 }
                 """.trimIndent()
 
@@ -961,22 +977,36 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
         buildFile write //language=kotlin
                 """
-                val $taskName by tasks.registering(CustomTestIdeTask::class) {
-                    sandboxDirectory = project.layout.buildDirectory.dir("custom-sandbox")
+                val $taskName by intellijPlatformTesting.testIde.registering {
+                    task {
+                        enabled = false
+                    }
+                    prepareSandboxTask {
+                        sandboxDirectory = project.layout.buildDirectory.dir("custom-sandbox")
+                    }
                 }
                 """.trimIndent()
 
         build(taskName)
 
-        assertExists(buildDirectory.resolve("custom-sandbox/config-test_$taskName"))
-        assertExists(buildDirectory.resolve("custom-sandbox/plugins-test_$taskName"))
-        assertExists(buildDirectory.resolve("custom-sandbox/log-test_$taskName"))
-        assertExists(buildDirectory.resolve("custom-sandbox/system-test_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/config_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/plugins_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/log_$taskName"))
+        assertExists(buildDirectory.resolve("custom-sandbox/system_$taskName"))
+    }
+
+    @Test
+    fun `create test sandbox in a custom location with custom suffix`() {
+        val taskName = "customTest"
 
         buildFile write //language=kotlin
                 """
-                tasks {
-                    $taskName {
+                val $taskName by intellijPlatformTesting.testIde.registering {
+                    task {
+                        enabled = false
+                    }
+                    prepareSandboxTask {
+                        sandboxDirectory = project.layout.buildDirectory.dir("custom-sandbox")
                         sandboxSuffix = "-foo"
                     }
                 }

@@ -10,6 +10,7 @@ import org.gradle.api.tasks.*
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.PerformanceTestArgumentProvider
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.models.PerformanceTestResult
 import org.jetbrains.intellij.platform.gradle.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradle.performanceTest.TestExecutionFailException
@@ -29,7 +30,7 @@ import kotlin.io.path.nameWithoutExtension
  * Runs performance tests on the IDE with the developed plugin installed.
  *
  * This task runs against the IntelliJ Platform and plugins specified in project dependencies.
- * To register a customized task, use [CustomTestIdePerformanceTask] instead.
+ * To register a customized task, use [IntelliJPlatformTestingExtension.testIdePerformance] instead.
  *
  * The [TestIdePerformanceTask] task extends the [RunIdeBase] task, so all configuration attributes of [JavaExec] and [RunIdeTask] tasks can be used in the [TestIdePerformanceTask] as well.
  * See [RunIdeTask] task for more details.
@@ -126,6 +127,8 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
     companion object : Registrable {
 
         internal val configuration: TestIdePerformanceTask.() -> Unit = {
+            sandboxProducer.convention(Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX)
+
 //                artifactsDirectory.convention(extension.type.flatMap { type ->
 //                    extension.version.flatMap { version ->
 //                        project.layout.buildDirectory.dir(

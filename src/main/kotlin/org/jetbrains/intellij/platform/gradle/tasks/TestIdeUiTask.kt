@@ -8,8 +8,8 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
-import org.jetbrains.intellij.platform.gradle.tasks.aware.CustomIntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
+import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
@@ -17,13 +17,13 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
  * Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing.
  *
  * This task runs against the IntelliJ Platform and plugins specified in project dependencies.
- * To register a customized task, use [CustomTestIdeTask] instead.
+ * To register a customized task, use [IntelliJPlatformTestingExtension.testIdeUi] instead.
  *
  * @see <a href="https://github.com/JetBrains/intellij-ui-test-robot>IntelliJ UI Test Robot</a>
  * @see JavaExec
  */
 @UntrackedTask(because = "Should always run")
-abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, CustomIntelliJPlatformVersionAware {
+abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, IntelliJPlatformVersionAware {
 
     init {
         group = Plugin.GROUP_NAME
@@ -43,23 +43,7 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, Cust
     }
 
     companion object : Registrable {
-
-        internal val configuration: TestIdeUiTask.() -> Unit = {
-            plugins {
-                delegate.addRobotServerPluginDependency(
-                    versionProvider = delegate.provider { VERSION_LATEST },
-                    configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
-                )
-            }
-        }
-
         override fun register(project: Project) =
-            project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configureWithType = false) {
-                configuration()
-
-                type.finalizeValue()
-                version.finalizeValue()
-                localPath.finalizeValue()
-            }
+            project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configureWithType = false)
     }
 }
