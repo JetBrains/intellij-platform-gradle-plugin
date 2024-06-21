@@ -128,10 +128,20 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         disableIdeUpdate(sandboxConfigDirectory)
         disabledPlugins(sandboxConfigDirectory)
 
+        sandboxConfigDirectory.asPath.createDirectories()
+        sandboxPluginsDirectory.asPath.createDirectories()
+        sandboxLogDirectory.asPath.createDirectories()
+        sandboxSystemDirectory.asPath.createDirectories()
+
         if (splitMode.get()) {
             disableIdeUpdate(sandboxConfigFrontendDirectory)
             disabledPlugins(sandboxConfigFrontendDirectory)
             createSplitModeFrontendPropertiesFile()
+
+            sandboxConfigFrontendDirectory.asPath.createDirectories()
+            sandboxPluginsFrontendDirectory.asPath.createDirectories()
+            sandboxLogFrontendDirectory.asPath.createDirectories()
+            sandboxSystemFrontendDirectory.asPath.createDirectories()
         }
 
         super.copy()
@@ -294,38 +304,39 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                     .eachFile { name = ensureName(file.toPath()) }
                 from(pluginsClasspath)
 
-                inputs.property("intellijPlatform.instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })
+                inputs.property("instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })
+                inputs.property("sandboxDirectory", sandboxDirectory.map { it.asPath.pathString })
+                inputs.property("sandboxSuffix", sandboxSuffix)
                 inputs.files(runtimeConfiguration)
-                outputs.dirs(
-                    sandboxConfigDirectory,
-                    sandboxPluginsDirectory,
-                    sandboxLogDirectory,
-                    sandboxSystemDirectory,
-                    splitMode.map { isSplitMode ->
-                        when {
-                            isSplitMode -> sandboxConfigFrontendDirectory
-                            else -> sandboxConfigDirectory
-                        }
-                    },
-                    splitMode.map { isSplitMode ->
-                        when {
-                            isSplitMode -> sandboxPluginsFrontendDirectory
-                            else -> sandboxPluginsDirectory
-                        }
-                    },
-                    splitMode.map { isSplitMode ->
-                        when {
-                            isSplitMode -> sandboxLogFrontendDirectory
-                            else -> sandboxLogDirectory
-                        }
-                    },
-                    splitMode.map { isSplitMode ->
-                        when {
-                            isSplitMode -> sandboxSystemFrontendDirectory
-                            else -> sandboxSystemDirectory
-                        }
-                    },
-                )
+
+                sandboxConfigDirectory
+                sandboxPluginsDirectory
+                sandboxLogDirectory
+                sandboxSystemDirectory
+                splitMode.map { isSplitMode ->
+                    when {
+                        isSplitMode -> sandboxConfigFrontendDirectory
+                        else -> sandboxConfigDirectory
+                    }
+                }
+                splitMode.map { isSplitMode ->
+                    when {
+                        isSplitMode -> sandboxPluginsFrontendDirectory
+                        else -> sandboxPluginsDirectory
+                    }
+                }
+                splitMode.map { isSplitMode ->
+                    when {
+                        isSplitMode -> sandboxLogFrontendDirectory
+                        else -> sandboxLogDirectory
+                    }
+                }
+                splitMode.map { isSplitMode ->
+                    when {
+                        isSplitMode -> sandboxSystemFrontendDirectory
+                        else -> sandboxSystemDirectory
+                    }
+                }
             }
     }
 }

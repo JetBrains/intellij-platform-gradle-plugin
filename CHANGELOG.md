@@ -11,6 +11,10 @@
 - Custom tasks registering refactoring
 - `testIdeUi` no longer runs IDE with Robot Server Plugin applied
 
+### Fixed
+
+- Fixed `Cannot snapshot ../system/jcef_cache/SingletonSocket: not a regular file` issue when preparing sandbox
+
 ### Removed
 
 - `CustomRunIdeTask`, `CustomTestIdeTask`, `CustomTestIdePerformanceTask`, `CustomTestIdeUiTask` custom task classes
