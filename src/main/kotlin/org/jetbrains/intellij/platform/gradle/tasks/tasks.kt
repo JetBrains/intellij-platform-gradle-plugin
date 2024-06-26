@@ -77,8 +77,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * @see IntelliJPlatformVersionAware
          */
         if (this is IntelliJPlatformVersionAware) {
-            intelliJPlatformConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM).asLenient
-            intelliJPlatformPluginConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_PLUGIN).asLenient
+            intelliJPlatformConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM)
+            intelliJPlatformPluginConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_PLUGIN)
         }
 
         /**
