@@ -35,6 +35,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Path
@@ -678,7 +679,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             resources: ResourceHandler,
             rootProjectDirectory: Path,
             settingsRepositories: RepositoryHandler,
-            extensionProvider: Provider<IntelliJPlatformExtension>,
+            private val extensionProvider: Provider<IntelliJPlatformExtension>,
         ) {
 
             private val delegate = IntelliJPlatformDependenciesHelper(
@@ -691,7 +692,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 resources,
                 rootProjectDirectory,
                 settingsRepositories,
-                extensionProvider,
             )
 
             /**
@@ -815,7 +815,15 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see ProductReleasesValueSource
              */
             fun recommended() = delegate.addIntelliJPluginVerifierIdes(
-                notationsProvider = ProductReleasesValueSource(),
+                notationsProvider = ProductReleasesValueSource {
+                    val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
+
+                    types.convention(extensionProvider.map {
+                        listOf(it.productInfo.productCode.toIntelliJPlatformType())
+                    })
+                    sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
+                    untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
+                },
             )
 
             /**

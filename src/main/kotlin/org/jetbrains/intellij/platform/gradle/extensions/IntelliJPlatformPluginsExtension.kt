@@ -20,7 +20,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import org.jetbrains.intellij.platform.gradle.utils.settings
 import java.io.File
@@ -44,7 +43,6 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     resources: ResourceHandler,
     rootProjectDirectory: Path,
     settingsRepositories: RepositoryHandler,
-    extensionProvider: Provider<IntelliJPlatformExtension>,
 ) : ExtensionAware {
 
     internal val intellijPlatformPluginDependencyConfigurationName = objects.property<String>()
@@ -60,7 +58,6 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
         resources,
         rootProjectDirectory,
         settingsRepositories,
-        extensionProvider,
     )
 
     /**
@@ -259,7 +256,6 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
                 project.resources,
                 project.rootProjectPath,
                 project.settings.dependencyResolutionManagement.repositories,
-                project.extensionProvider,
             )
     }
 }

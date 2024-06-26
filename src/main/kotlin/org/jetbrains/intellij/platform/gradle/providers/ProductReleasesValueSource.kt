@@ -5,13 +5,14 @@ package org.jetbrains.intellij.platform.gradle.providers
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.gradle.api.file.RegularFileProperty
-import org.gradle.api.provider.*
-import org.gradle.api.resources.ResourceHandler
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.provider.ValueSource
+import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradle.models.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
@@ -21,7 +22,10 @@ import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSour
 import org.jetbrains.intellij.platform.gradle.tasks.PrintProductsReleasesTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.*
+import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 /**
  * Provides a complete list of binary IntelliJ Platform product releases matching the given [FilterParameters] criteria.
@@ -165,38 +169,11 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
     }
 }
 
-/**
- * Factory for creating the [ProductReleasesValueSource] instance to simplify providing product releases XML files and default [FilterParameters] filter values.
- */
-@Suppress("FunctionName")
-fun ProductReleasesValueSource(
-    providers: ProviderFactory,
-    resources: ResourceHandler,
-    extensionProvider: Provider<IntelliJPlatformExtension>,
-    configure: FilterParameters.() -> Unit = {},
-) = providers.of(ProductReleasesValueSource::class.java) {
-    val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
-
-    with(parameters) {
-        jetbrainsIdes.set(resources.resolve(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES))
-        androidStudio.set(resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO))
-        channels.convention(providers.provider { ProductRelease.Channel.values().toList() })
-        types.convention(extensionProvider.map {
-            listOf(it.productInfo.productCode.toIntelliJPlatformType())
-        })
-        sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
-        untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
-        configure()
-    }
-}
-
 @Serializable
 data class Data(
     @XmlSerialName("item")
     val items: List<Item>,
 ) {
     @Serializable
-    data class Item(
-        val name: String,
-    )
+    data class Item(val name: String)
 }

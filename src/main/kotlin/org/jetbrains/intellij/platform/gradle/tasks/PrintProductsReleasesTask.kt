@@ -9,6 +9,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.assign
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -16,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.resolve
 
 /**
  * Prints the list of binary product releases that, by default, match the currently selected IntelliJ Platform along
@@ -51,15 +53,14 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
                 val ideaVersionProvider = project.extensionProvider.map { it.pluginConfiguration.ideaVersion }
 
                 productsReleases.convention(
-                    ProductReleasesValueSource(
-                        project.providers,
-                        project.resources,
-                        project.extensionProvider,
-                    ) {
-                        sinceBuild = this@registerTask.sinceBuild
-                        untilBuild = this@registerTask.untilBuild
-                        types = this@registerTask.types
-                        channels = this@registerTask.channels
+                    project.providers.of(ProductReleasesValueSource::class.java) {
+                        parameters.jetbrainsIdes.set(project.resources.resolve(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES))
+                        parameters.androidStudio.set(project.resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO))
+
+                        parameters.sinceBuild = this@registerTask.sinceBuild
+                        parameters.untilBuild = this@registerTask.untilBuild
+                        parameters.types = this@registerTask.types
+                        parameters.channels = this@registerTask.channels
                     }
                 )
 

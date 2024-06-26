@@ -22,7 +22,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.settings
 import java.io.File
 import java.nio.file.Path
@@ -58,7 +57,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     resources: ResourceHandler,
     rootProjectDirectory: Path,
     settingsRepositories: RepositoryHandler,
-    extensionProvider: Provider<IntelliJPlatformExtension>,
 ) {
 
     private val delegate = IntelliJPlatformDependenciesHelper(
@@ -71,7 +69,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         resources,
         rootProjectDirectory,
         settingsRepositories,
-        extensionProvider,
     )
 
     /**
@@ -1036,7 +1033,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 project.resources,
                 project.rootProject.rootDir.toPath().absolute(),
                 project.settings.dependencyResolutionManagement.repositories,
-                project.extensionProvider,
             )
     }
 }

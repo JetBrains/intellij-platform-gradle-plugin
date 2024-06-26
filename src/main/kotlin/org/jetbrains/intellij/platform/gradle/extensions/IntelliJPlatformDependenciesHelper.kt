@@ -73,7 +73,6 @@ class IntelliJPlatformDependenciesHelper(
     private val resources: ResourceHandler,
     private val rootProjectDirectory: Path,
     private val settingsRepositories: RepositoryHandler,
-    private val extensionProvider: Provider<IntelliJPlatformExtension>,
 ) {
 
     private val log = Logger(javaClass)
@@ -514,12 +513,12 @@ class IntelliJPlatformDependenciesHelper(
     })
 
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
-        ProductReleasesValueSource(
-            providers,
-            resources,
-            extensionProvider,
-            configure,
-        )
+        providers.of(ProductReleasesValueSource::class.java) {
+            parameters.jetbrainsIdes.set(resources.resolve(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES))
+            parameters.androidStudio.set(resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO))
+
+            parameters(configure)
+        }
 
 
     //</editor-fold>
