@@ -20,7 +20,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asLenient
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.io.ByteArrayOutputStream
@@ -306,7 +305,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                         with(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES) {
                             configuration.name == this || configuration.name.startsWith("${this}_")
                         }
-                    }.map { it.asLenient }
+                    }
                 }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 
