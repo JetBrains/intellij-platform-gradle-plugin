@@ -26,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
@@ -818,6 +819,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 notationsProvider = ProductReleasesValueSource {
                     val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
 
+                    channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
                     types.convention(extensionProvider.map {
                         listOf(it.productInfo.productCode.toIntelliJPlatformType())
                     })
