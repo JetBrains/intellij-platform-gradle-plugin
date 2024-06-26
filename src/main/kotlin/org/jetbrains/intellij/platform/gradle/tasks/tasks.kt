@@ -98,8 +98,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is SandboxAware) {
             sandboxProducer.convention(Tasks.PREPARE_SANDBOX)
 
-            val sandboxProducerTaskProvider = sandboxProducer.flatMap { sandboxProducerTaskName ->
-                project.tasks.named<PrepareSandboxTask>(sandboxProducerTaskName)
+            val sandboxProducerTaskProvider = project.provider {
+                project.tasks.getByName<PrepareSandboxTask>(sandboxProducer.get())
             }
 
             sandboxDirectory
