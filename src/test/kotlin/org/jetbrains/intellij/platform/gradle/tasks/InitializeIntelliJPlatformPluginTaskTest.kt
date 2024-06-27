@@ -38,6 +38,13 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
     fun `skip version check when offline`() {
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN, "--offline") {
             assertNotContains("${Plugin.NAME} is outdated: 0.0.0.", output)
+
+//            val type = IntelliJPlatformType.fromCode(intellijPlatformType)
+//            val groupId = type.maven?.groupId
+//            val artifactId = type.maven?.artifactId
+//
+//            val dependency = "${groupId}:${artifactId}:$intellijPlatformVersion"
+//            assertContains("No cached version of $dependency available for offline mode.", output)
         }
     }
 

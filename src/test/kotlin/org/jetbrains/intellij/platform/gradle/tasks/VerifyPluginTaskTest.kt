@@ -296,7 +296,8 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
-            assertContains("Could not find idea:ideaIC:foo", output)
+            assertContains("Could not find", output)
+            assertContains("com.jetbrains.intellij.idea:ideaIC:foo", output)
         }
     }
 

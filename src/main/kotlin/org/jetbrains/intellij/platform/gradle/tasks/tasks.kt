@@ -242,7 +242,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 }
             })
 
-            kotlinPluginAvailable.convention(project.pluginManager.hasPlugin(Plugins.External.KOTLIN))
+            kotlinPluginAvailable.convention(project.provider {
+                project.pluginManager.hasPlugin(Plugins.External.KOTLIN)
+            })
             project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
                 val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).map {
                     it.withGroovyBuilder { getProperty("kotlinOptions") }
