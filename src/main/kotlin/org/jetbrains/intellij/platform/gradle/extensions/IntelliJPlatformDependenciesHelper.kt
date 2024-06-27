@@ -21,7 +21,6 @@ import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
@@ -570,40 +569,15 @@ class IntelliJPlatformDependenciesHelper(
      * @param version IntelliJ Platform version
      * @param type IntelliJ Platform type
      */
-    private fun DependencyHandler.createIntelliJPlatform(type: IntelliJPlatformType, version: String) =
-        when (BuildFeature.USE_BINARY_RELEASES.isEnabled(providers).get()) {
-            true -> {
-                val (extension, classifier) = with(OperatingSystem.current()) {
-                    val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
-                    when {
-                        isWindows -> ArtifactType.ZIP to "win"
-                        isLinux -> ArtifactType.TAR_GZ to arch
-                        isMacOsX -> ArtifactType.DMG to arch
-                        else -> throw GradleException("Unsupported operating system: $name")
-                    }
-                }.let { (type, classifier) -> type.toString() to classifier }
+    private fun DependencyHandler.createIntelliJPlatform(type: IntelliJPlatformType, version: String): Dependency {
+        requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
 
-                requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
-
-                create(
-                    group = type.binary.groupId,
-                    name = type.binary.artifactId,
-                    version = version,
-                    ext = extension,
-                    classifier = classifier,
-                )
-            }
-
-            false -> {
-                requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
-
-                create(
-                    group = type.maven.groupId,
-                    name = type.maven.artifactId,
-                    version = version,
-                )
-            }
-        }
+        return create(
+            group = type.maven.groupId,
+            name = type.maven.artifactId,
+            version = version,
+        )
+    }
 
     /**
      * Creates a dependency on a local IntelliJ Platform instance.

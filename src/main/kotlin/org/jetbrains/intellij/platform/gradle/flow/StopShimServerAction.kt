@@ -30,7 +30,6 @@ class StopShimServerAction : FlowAction<StopShimServerAction.Parameters> {
 
     override fun execute(parameters: Parameters) {
         log.info("StopShimServerAction run with buildResult: ${parameters.buildResult.get()}")
-
         parameters.service.get().stop(parameters.url.get())
     }
 }

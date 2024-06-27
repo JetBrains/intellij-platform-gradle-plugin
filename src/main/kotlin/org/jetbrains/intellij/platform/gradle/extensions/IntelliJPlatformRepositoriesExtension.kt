@@ -22,7 +22,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import java.nio.file.Path
@@ -127,7 +126,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
-    fun customPluginRepository(url: String, type: CustomPluginRepositoryType = CustomPluginRepositoryType.PLUGIN_REPOSITORY, action: PluginRepositoryAction = {}) =
+    fun customPluginRepository(url: String, type: CustomPluginRepositoryType = CustomPluginRepositoryType.PLUGIN_REPOSITORY, action: IvyRepositoryAction = {}) =
         delegate.createCustomPluginRepository(
             repositoryName = "IntelliJ Platform Custom Plugin Repository ($url)",
             repositoryUrl = url,
@@ -146,39 +145,6 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         patterns = listOf("[revision].tar.gz"),
         action = action,
     )
-
-    /**
-     * Adds a repository for accessing IntelliJ Platform binary releases.
-     *
-     * @param action The action to be performed on the repository. Defaults to an empty action.
-     */
-    fun binaryReleases(action: IvyRepositoryAction = {}): IvyArtifactRepository {
-        val binaryTypes = IntelliJPlatformType.values()
-            .filter { it != IntelliJPlatformType.AndroidStudio }
-            .mapNotNull { it.binary }
-
-        return delegate.createIvyRepository(
-            name = "IntelliJ Platform Binary Releases",
-            url = Locations.DOWNLOAD,
-            patterns = listOf(
-                "[organization]/[module]-[revision](-[classifier]).[ext]",
-                "[organization]/[module]-[revision](.[classifier]).[ext]",
-                "[organization]/[revision]/[module]-[revision](-[classifier]).[ext]",
-                "[organization]/[revision]/[module]-[revision](.[classifier]).[ext]",
-            ),
-            action = {
-                repositories.exclusiveContent {
-                    forRepositories(this@createIvyRepository)
-                    filter {
-                        binaryTypes.forEach {
-                            includeModule(it.groupId, it.artifactId)
-                        }
-                    }
-                }
-                action()
-            },
-        )
-    }
 
     /**
      * Adds a repository for accessing Android Studio binary releases.
@@ -226,21 +192,28 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
+    fun jetBrainsCdn(action: IvyRepositoryAction = {}) = delegate.createJetBrainsCdnArtifactsRepository(
+        name = "JetBrains CDN artifacts repository",
+        url = Locations.DOWNLOAD,
+        action = action,
+    )
+
     /**
      * Applies a set of recommended repositories required for running the most common tasks provided by the IntelliJ Platform Gradle Plugin:
      * - [localPlatformArtifacts] — required to use plugins bundled with IntelliJ Platform or refer to the local IDE
+     * - [jetBrainsCdn] — required to use IntelliJ Platform distributed via JetBrains CDN
      * - [intellijDependencies] — required for resolving extra IntelliJ Platform dependencies used for running specific tasks
      * - [releases] and [snapshots] — IntelliJ Platform releases channels
      * - [marketplace] — JetBrains Marketplace plugins repository
      * - [binaryReleases] — JetBrains IDEs releases required for running the IntelliJ Plugin Verifier
      */
     fun defaultRepositories() {
+        jetBrainsCdn()
         localPlatformArtifacts()
         intellijDependencies()
         releases()
         snapshots()
         marketplace()
-        binaryReleases()
     }
 
     companion object : Registrable<IntelliJPlatformRepositoriesExtension> {
@@ -291,4 +264,3 @@ fun RepositoryHandler.intellijPlatform(configure: Action<IntelliJPlatformReposit
  */
 internal typealias MavenRepositoryAction = (MavenArtifactRepository.() -> Unit)
 internal typealias IvyRepositoryAction = (IvyArtifactRepository.() -> Unit)
-internal typealias PluginRepositoryAction = (PluginArtifactRepository.() -> Unit)

@@ -4,14 +4,56 @@ package org.jetbrains.intellij.platform.gradle.artifacts.repositories
 
 import org.gradle.api.Action
 import org.gradle.api.artifacts.repositories.ArtifactRepository
+import org.gradle.api.artifacts.repositories.AuthenticationSupported
+import org.gradle.api.artifacts.repositories.PasswordCredentials
 import org.gradle.api.artifacts.repositories.UrlArtifactRepository
 import org.gradle.api.credentials.Credentials
+import org.gradle.api.credentials.HttpHeaderCredentials
+import org.gradle.api.model.ObjectFactory
+import org.gradle.internal.reflect.Instantiator
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.property
+import java.net.URI
+import javax.inject.Inject
 
-interface PluginArtifactRepository : ArtifactRepository, UrlArtifactRepository {
-    fun <T : Credentials?> credentials(credentialsType: Class<T>, action: Action<in T>)
+abstract class PluginArtifactRepository @Inject constructor(
+    objects: ObjectFactory,
+    private val instantiator: Instantiator,
+    private val name: String,
+    private val url: URI,
+    private val allowInsecureProtocol: Boolean = true,
+) : ArtifactRepository, UrlArtifactRepository, AuthenticationSupported {
 
-    fun <T : Credentials?> getCredentials(credentialsType: Class<T>): T?
+    private val credentials = objects.property(Credentials::class)
+
+    override fun getName() = name
+
+    override fun getUrl() = url
+
+    override fun isAllowInsecureProtocol() = allowInsecureProtocol
+
+    override fun <T : Credentials> getCredentials(credentialsType: Class<T>): T =
+        credentials.orNull?.let {
+            when {
+                credentialsType.isAssignableFrom(it.javaClass) -> credentialsType.cast(it)
+                else -> null
+            }
+        } ?: throw MissingCredentialsException()
+
+    override fun <T : Credentials?> credentials(credentialsType: Class<T>, action: Action<in T>) {
+        val credentialsValue = instantiateCredentials(credentialsType)
+        action.execute(credentialsValue)
+        credentials = credentialsValue
+    }
+
+    private fun <T : Credentials?> instantiateCredentials(credentialType: Class<T>) = when {
+        PasswordCredentials::class.java.isAssignableFrom(credentialType) -> credentialType.cast(instantiator.newInstance(PasswordCredentials::class.java))
+        HttpHeaderCredentials::class.java.isAssignableFrom(credentialType) -> credentialType.cast(instantiator.newInstance(HttpHeaderCredentials::class.java))
+        else -> throw IllegalArgumentException("Unrecognized credential type: ${credentialType.getName()}");
+    }
 }
+
+class MissingCredentialsException : Throwable()
 
 inline fun <reified T : Credentials?> PluginArtifactRepository.credentials(action: Action<in T>) {
     credentials(T::class.java, action)

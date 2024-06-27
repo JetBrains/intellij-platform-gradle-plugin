@@ -5,11 +5,14 @@
 ### Added
 
 - `intellijPlatformTesting` top-level extension for registering custom tasks
+- Resolving IntelliJ Platform artifacts from JetBrains CDN using common coordinates
+- `jetBrainsCdn()` repository helper
 
 ### Changed
 
 - Custom tasks registering refactoring
 - `testIdeUi` no longer runs IDE with Robot Server Plugin applied
+- `defaultRepositories()` repository helper executes now `jetBrainsCdn()` instead of `binaryReleases()`
 
 ### Fixed
 
@@ -19,6 +22,7 @@
 
 - `CustomRunIdeTask`, `CustomTestIdeTask`, `CustomTestIdePerformanceTask`, `CustomTestIdeUiTask` custom task classes
 - `CustomIntelliJPlatformVersionAware`, `SandboxProducerAware` task aware class
+- `binaryReleases()` repository helper
 
 ## [2.0.0-beta7] - 2024-06-14
 

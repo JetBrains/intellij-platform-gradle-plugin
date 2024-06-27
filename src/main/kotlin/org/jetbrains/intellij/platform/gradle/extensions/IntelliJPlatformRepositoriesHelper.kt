@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import org.gradle.api.Action
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
@@ -18,10 +17,11 @@ import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
-import org.jetbrains.intellij.platform.gradle.artifacts.repositories.DefaultPluginArtifactRepository
+import org.jetbrains.intellij.platform.gradle.artifacts.repositories.JetBrainsCdnArtifactsRepository
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.flow.StopShimServerAction
 import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.net.URI
 import java.nio.file.Path
 import kotlin.io.path.pathString
@@ -36,6 +36,8 @@ class IntelliJPlatformRepositoriesHelper(
     private val gradle: Gradle,
     private val rootProjectDirectory: Path,
 ) {
+
+    private val log = Logger(javaClass)
 
     private val shimManager = gradle.sharedServices.registerIfAbsent(Services.SHIM_MANAGER, ShimManagerService::class) {
         parameters {
@@ -94,12 +96,11 @@ class IntelliJPlatformRepositoriesHelper(
         repositoryName: String,
         repositoryUrl: String,
         repositoryType: CustomPluginRepositoryType,
-        action: Action<PluginArtifactRepository>,
+        action: IvyRepositoryAction = {},
     ): PluginArtifactRepository {
-        val pluginArtifactRepository = objects.newInstance<DefaultPluginArtifactRepository>().apply {
+        val pluginArtifactRepository = objects.newInstance<PluginArtifactRepository>().apply {
             name = repositoryName
             url = URI(repositoryUrl)
-            action.execute(this)
         }
 
         val shimServer = shimManager.get().start(pluginArtifactRepository, repositoryType)
@@ -125,24 +126,63 @@ class IntelliJPlatformRepositoriesHelper(
                 ignoreGradleMetadataRedirection()
             }
 
-            pluginArtifactRepository.getCredentials(PasswordCredentials::class.java)?.let {
-                credentials(PasswordCredentials::class) {
-                    username = it.username
-                    password = it.password
+            pluginArtifactRepository.runCatching {
+                getCredentials(PasswordCredentials::class.java).let {
+                    credentials(PasswordCredentials::class) {
+                        username = it.username
+                        password = it.password
+                    }
                 }
             }
-            pluginArtifactRepository.getCredentials(HttpHeaderCredentials::class.java)?.let {
-                credentials(HttpHeaderCredentials::class) {
-                    name = it.name
-                    value = it.value
+            pluginArtifactRepository.runCatching {
+                getCredentials(HttpHeaderCredentials::class.java).let {
+                    credentials(HttpHeaderCredentials::class) {
+                        name = it.name
+                        value = it.value
+                    }
+                    authentication {
+                        create<HttpHeaderAuthentication>("header")
+                    }
                 }
-                authentication {
-                    create<HttpHeaderAuthentication>("header")
-                }
+            }
+        }.apply(action)
+
+        return pluginArtifactRepository
+    }
+
+    internal fun createJetBrainsCdnArtifactsRepository(
+        name: String,
+        url: String,
+        action: IvyRepositoryAction,
+    ): JetBrainsCdnArtifactsRepository {
+        log.info("Creating repository: $name")
+
+        val repository = objects.newInstance<JetBrainsCdnArtifactsRepository>(name, URI(url), true)
+        val server = shimManager.get().start(repository)
+
+        flowScope.always(StopShimServerAction::class) {
+            parameters {
+                this.url = repository.url
+                this.buildResult = flowProviders.buildWorkResult.map { !it.failure.isPresent }
             }
         }
 
-        return pluginArtifactRepository
+        repositories.ivy {
+            this.url = server.url
+            this.isAllowInsecureProtocol = true
+
+            patternLayout {
+                artifact("[organization]/[module]/[revision]/download")
+                ivy("[organization]/[module]/[revision]/descriptor.ivy")
+            }
+
+            metadataSources {
+                ivyDescriptor()
+                ignoreGradleMetadataRedirection()
+            }
+        }.apply(action)
+
+        return repository
     }
 
     internal fun createLocalIvyRepository(repositoryName: String, action: IvyRepositoryAction = {}) = repositories.ivy {

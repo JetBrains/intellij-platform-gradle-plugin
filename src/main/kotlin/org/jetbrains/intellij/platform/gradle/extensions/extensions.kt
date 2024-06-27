@@ -119,7 +119,7 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
  * Represents the local platform artifacts directory path which contains Ivy XML files.
  *
  * @see [createIvyDependencyFile]
- * @see [IntelliJPlatformRepositoriesExtension.localPlatformArtifacts]
+ * @see [IntelliJPlatformRepositoriesExtension.jetBrainsCdn]
  * @see [GradleProperties.LOCAL_PLATFORM_ARTIFACTS]
  */
 internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
