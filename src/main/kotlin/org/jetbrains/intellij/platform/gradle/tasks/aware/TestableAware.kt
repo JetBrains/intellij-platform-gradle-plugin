@@ -2,8 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
-import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareTestTask
+import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
 
 /**
  * Interface used to describe tasks used for running tests, such as a customizable [TestIdeTask] or [PrepareTestTask]

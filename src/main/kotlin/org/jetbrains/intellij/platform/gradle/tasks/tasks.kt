@@ -95,11 +95,6 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             })
         }
 
-        if (this is SandboxAware) {
-            val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-            applySandboxFrom(prepareSandboxTaskProvider)
-        }
-
         /**
          * The [PluginAware] resolves and parses the `plugin.xml` file for easy access in other tasks.
          */

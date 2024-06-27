@@ -12,10 +12,10 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
@@ -28,7 +28,7 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
  */
 @CacheableTask
-abstract class VerifyPluginStructureTask : DefaultTask(), SandboxAware {
+abstract class VerifyPluginStructureTask : DefaultTask() {
 
     /**
      * Specifies whether the build should fail when the verifications performed by this task fail.
@@ -106,14 +106,17 @@ abstract class VerifyPluginStructureTask : DefaultTask(), SandboxAware {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginStructureTask>(Tasks.VERIFY_PLUGIN_STRUCTURE) {
                 val projectNameProvider = project.extensionProvider.flatMap { it.projectName }
+                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
 
                 ignoreFailures.convention(false)
                 ignoreUnacceptableWarnings.convention(false)
                 ignoreWarnings.convention(true)
 
-                pluginDirectory.convention(sandboxPluginsDirectory.zip(projectNameProvider) { pluginsDirectory, projectName ->
-                    pluginsDirectory.dir(projectName)
-                })
+                pluginDirectory.convention(
+                    prepareSandboxTaskProvider
+                        .flatMap { it.defaultDestinationDirectory }
+                        .zip(projectNameProvider) { destination, name -> destination.dir(name) }
+                )
             }
     }
 }

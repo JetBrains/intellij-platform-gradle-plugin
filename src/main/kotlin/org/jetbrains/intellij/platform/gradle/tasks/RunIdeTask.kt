@@ -8,13 +8,13 @@ import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.named
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.pathString
@@ -27,7 +27,7 @@ import kotlin.io.path.pathString
  * To register a customized task, use [IntelliJPlatformTestingExtension.runIde] instead.
  */
 @UntrackedTask(because = "Should always run")
-abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, SandboxAware, IntelliJPlatformVersionAware {
+abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, IntelliJPlatformVersionAware {
 
     init {
         group = Plugin.GROUP_NAME
@@ -59,8 +59,13 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Sandbo
     }
 
     companion object : Registrable {
-        override fun register(project: Project) =
-            project.registerTask<RunIdeTask>(Tasks.RUN_IDE) {
+        override fun register(project: Project) {
+            project.registerTask<RunIdeTask>(Tasks.RUN_IDE, configureWithType = false) {
+                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
+                applySandboxFrom(prepareSandboxTaskProvider)
+            }
+
+            project.registerTask<RunIdeTask> {
                 systemPropertyDefault("idea.classpath.index.enabled", false)
                 systemPropertyDefault("idea.is.internal", true)
                 systemPropertyDefault("idea.plugin.in.sandbox.mode", true)
@@ -82,6 +87,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Sandbo
                     }
                 }
             }
+        }
 
         internal fun JavaForkOptions.systemPropertyDefault(name: String, defaultValue: Any) {
             if (!systemProperties.containsKey(name)) {

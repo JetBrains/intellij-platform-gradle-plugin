@@ -14,11 +14,8 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import kotlin.io.path.exists
 
 private const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
 
@@ -26,7 +23,7 @@ private const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
  * Creates a JAR file with searchable options to be distributed with the plugin.
  */
 @CacheableTask
-abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
+abstract class JarSearchableOptionsTask : Jar(), PluginAware {
 
     /**
      * The directory from which the prepared searchable options are read.
@@ -82,6 +79,7 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
                     .zip(buildSearchableOptionsTaskProvider) { enabled, task ->
                         enabled && task.enabled
                     }
+                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
 
                 inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
@@ -94,12 +92,15 @@ abstract class JarSearchableOptionsTask : Jar(), SandboxAware, PluginAware {
                     it
                         .takeIf { it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) }
                         ?.run {
-                            sandboxPluginsDirectory.asPath
-                                .resolve(projectNameProvider.get())
-                                .resolve("lib")
-                                .resolve(name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX))
+                            prepareSandboxTaskProvider.zip(projectNameProvider) { task, name ->
+                                task.destinationDir
+                                    .resolve(name)
+                                    .resolve("lib")
+                                    .resolve(name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX))
+                                    .exists()
+                            }
                         }
-                        ?.exists()
+                        ?.get()
                         ?: it.isDirectory
                 }
                 eachFile {

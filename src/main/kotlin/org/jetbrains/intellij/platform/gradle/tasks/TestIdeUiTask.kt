@@ -23,6 +23,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
  * @see JavaExec
  */
 @UntrackedTask(because = "Should always run")
+@Deprecated("Should not be used for testing with the Robot Server Plugin; a placeholder for the new implementation")
 abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, IntelliJPlatformVersionAware {
 
     init {
@@ -44,6 +45,6 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, Inte
 
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configureWithType = false)
+            project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configureWithType = false) {}
     }
 }
