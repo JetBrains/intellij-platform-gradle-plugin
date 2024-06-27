@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.PerformanceTestArgumentProvider
@@ -127,7 +128,8 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
     companion object : Registrable {
 
         internal val configuration: TestIdePerformanceTask.() -> Unit = {
-            sandboxProducer.convention(Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX)
+            val prepareTestIdePerformanceSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX)
+            applySandboxFrom(prepareTestIdePerformanceSandboxTaskProvider)
 
 //                artifactsDirectory.convention(extension.type.flatMap { type ->
 //                    extension.version.flatMap { version ->

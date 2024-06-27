@@ -96,43 +96,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         }
 
         if (this is SandboxAware) {
-            sandboxProducer.convention(Tasks.PREPARE_SANDBOX)
-
-            val sandboxProducerTaskProvider = project.provider {
-                project.tasks.getByName<PrepareSandboxTask>(sandboxProducer.get())
-            }
-
-            sandboxDirectory
-                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxDirectory })
-                .finalizeValueOnRead()
-
-            sandboxConfigDirectory
-                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxConfigDirectory })
-                .finalizeValueOnRead()
-
-            sandboxPluginsDirectory
-                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxPluginsDirectory })
-                .finalizeValueOnRead()
-
-            sandboxSystemDirectory
-                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxSystemDirectory })
-                .finalizeValueOnRead()
-
-            sandboxLogDirectory
-                .convention(sandboxProducerTaskProvider.flatMap { it.sandboxLogDirectory })
-                .finalizeValueOnRead()
-
-            dependsOn(sandboxProducerTaskProvider)
-
-            if (this is SplitModeAware) {
-                splitMode
-                    .convention(sandboxProducerTaskProvider.flatMap { it.splitMode })
-                    .finalizeValueOnRead()
-
-                splitModeTarget
-                    .convention(sandboxProducerTaskProvider.flatMap { it.splitModeTarget })
-                    .finalizeValueOnRead()
-            }
+            val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
+            applySandboxFrom(prepareSandboxTaskProvider)
         }
 
         /**
@@ -282,11 +247,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 }
             })
 
-            val kotlinPluginAvailableProvider = project.provider {
-                project.pluginManager.hasPlugin(Plugins.External.KOTLIN)
-            }
-            kotlinPluginAvailable.convention(kotlinPluginAvailableProvider)
-
+            kotlinPluginAvailable.convention(project.pluginManager.hasPlugin(Plugins.External.KOTLIN))
             project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
                 val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).map {
                     it.withGroovyBuilder { getProperty("kotlinOptions") }

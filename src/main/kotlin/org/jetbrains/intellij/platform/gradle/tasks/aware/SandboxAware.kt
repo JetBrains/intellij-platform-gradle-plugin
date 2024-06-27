@@ -2,9 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
-import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Internal
+import org.gradle.api.Task
+import org.gradle.api.tasks.TaskProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 
 /**
  * The interface provides quick access to the sandbox container and specific directories located within it.
@@ -15,6 +16,37 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
  */
 interface SandboxAware : SandboxStructure {
 
-    @get:Internal
-    val sandboxProducer: Property<String>
+    fun Task.applySandboxFrom(sandboxProducerTaskProvider: TaskProvider<PrepareSandboxTask>) {
+        sandboxDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxDirectory })
+            .finalizeValueOnRead()
+
+        sandboxConfigDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxConfigDirectory })
+            .finalizeValueOnRead()
+
+        sandboxPluginsDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxPluginsDirectory })
+            .finalizeValueOnRead()
+
+        sandboxSystemDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxSystemDirectory })
+            .finalizeValueOnRead()
+
+        sandboxLogDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxLogDirectory })
+            .finalizeValueOnRead()
+
+        if (this is SplitModeAware) {
+            splitMode
+                .convention(sandboxProducerTaskProvider.flatMap { it.splitMode })
+                .finalizeValueOnRead()
+
+            splitModeTarget
+                .convention(sandboxProducerTaskProvider.flatMap { it.splitModeTarget })
+                .finalizeValueOnRead()
+        }
+
+        dependsOn(sandboxProducerTaskProvider)
+    }
 }

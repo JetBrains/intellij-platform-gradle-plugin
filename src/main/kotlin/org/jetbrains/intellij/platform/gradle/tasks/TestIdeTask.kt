@@ -16,6 +16,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 
@@ -63,7 +64,10 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
         internal val configuration: Test.() -> Unit = {
             enableAssertions = true
 
-            sourceTask.sandboxProducer.convention(Tasks.PREPARE_TEST_SANDBOX)
+            val prepareTestSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_SANDBOX)
+            if (this is SandboxAware) {
+                applySandboxFrom(prepareTestSandboxTaskProvider)
+            }
 
             jvmArgumentProviders.add(
                 IntelliJPlatformArgumentProvider(

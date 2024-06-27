@@ -50,7 +50,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
             }
 
             task {
-                sandboxProducer = prepareSandboxTask.name
+                applySandboxFrom(prepareSandboxTask)
                 intelliJPlatformConfiguration = this@all.intelliJPlatformConfiguration
                 intelliJPlatformPluginConfiguration = this@all.intellijPlatformPluginConfiguration
             }
