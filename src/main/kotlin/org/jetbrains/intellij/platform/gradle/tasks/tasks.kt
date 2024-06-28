@@ -266,10 +266,10 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                         .map { languageVersion -> languageVersion.withGroovyBuilder { getProperty("version") } }
                         .map { value -> value as String }
                 })
-                kotlinVersion.convention(project.provider {
+                kotlinVersion.convention(
                     project.extensions.getByName("kotlin")
                         .withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
-                })
+                )
                 kotlinStdlibDefaultDependency.convention(
                     project.providers
                         .gradleProperty(GradleProperties.KOTLIN_STDLIB_DEFAULT_DEPENDENCY)
