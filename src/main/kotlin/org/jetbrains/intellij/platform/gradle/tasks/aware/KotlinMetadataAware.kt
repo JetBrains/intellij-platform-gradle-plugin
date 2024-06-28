@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
 import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
 
 /**
@@ -14,8 +15,14 @@ interface KotlinMetadataAware {
     /**
      * Indicates that the Kotlin Gradle Plugin is loaded and available.
      */
-    @get:Internal
+    @get:Input
     val kotlinPluginAvailable: Property<Boolean>
+
+    /**
+     * This variable represents whether the Kotlin Coroutines library is added explicitly to the project dependencies.
+     */
+    @get:Input
+    val kotlinxCoroutinesLibraryPresent: Property<Boolean>
 
     /**
      * The `apiVersion` property value of `compileKotlin.kotlinOptions` defined in the build script.
@@ -45,11 +52,5 @@ interface KotlinMetadataAware {
      * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
      */
     @get:Internal
-    val kotlinStdlibDefaultDependency: Property<Boolean>
-
-    /**
-     * This variable represents whether the Kotlin Coroutines library is added explicitly to the project dependencies.
-     */
-    @get:Internal
-    val kotlinxCoroutinesLibraryPresent: Property<Boolean>
+    val kotlinStdlibDefaultDependency: Property<Boolean?>
 }

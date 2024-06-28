@@ -46,7 +46,7 @@ import kotlin.io.path.writeText
 abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, KotlinMetadataAware, RuntimeAware {
 
     /**
-     * Report directory where the verification result will be stored.
+     * Report the directory where the verification result will be stored.
      */
     @get:OutputDirectory
     abstract val reportDirectory: DirectoryProperty

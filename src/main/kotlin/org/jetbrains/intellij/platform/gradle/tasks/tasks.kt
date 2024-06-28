@@ -231,6 +231,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         }
 
         if (this is KotlinMetadataAware) {
+            kotlinPluginAvailable.convention(false)
             kotlinxCoroutinesLibraryPresent.convention(project.provider {
                 listOf(
                     Configurations.External.IMPLEMENTATION,
@@ -242,14 +243,13 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 }
             })
 
-            kotlinPluginAvailable.convention(project.provider {
-                project.pluginManager.hasPlugin(Plugins.External.KOTLIN)
-            })
             project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
                 val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).map {
                     it.withGroovyBuilder { getProperty("kotlinOptions") }
                         .withGroovyBuilder { getProperty("options") }
                 }
+
+                kotlinPluginAvailable.convention(true)
 
                 kotlinJvmTarget.convention(kotlinOptionsProvider.flatMap {
                     it.withGroovyBuilder { getProperty("jvmTarget") as Property<*> }
@@ -276,6 +276,14 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                         .map { it.toBoolean() }
                 )
             }
+
+            inputs.properties(
+                "kotlinJvmTarget" to project.provider { kotlinJvmTarget.orNull.toString() },
+                "kotlinApiVersion" to project.provider { kotlinApiVersion.orNull.toString() },
+                "kotlinLanguageVersion" to project.provider { kotlinLanguageVersion.orNull.toString() },
+                "kotlinVersion" to project.provider { kotlinVersion.orNull.toString() },
+                "kotlinStdlibDefaultDependency" to project.provider { kotlinStdlibDefaultDependency.orNull.toString() },
+            )
         }
     }
 }
