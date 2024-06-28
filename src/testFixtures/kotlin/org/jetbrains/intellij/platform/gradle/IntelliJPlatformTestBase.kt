@@ -45,7 +45,6 @@ abstract class IntelliJPlatformTestBase {
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
     open fun tearDown() {
-        return
         dir.deleteRecursively()
     }
 
