@@ -96,7 +96,7 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
                     when {
                         it.isDirectory -> true
                         !it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) -> false
-                        else -> libContainerProvider.asPath.resolve(name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX)).exists()
+                        else -> libContainerProvider.asPath.resolve(it.name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX)).exists()
                     }
                 }
                 eachFile {

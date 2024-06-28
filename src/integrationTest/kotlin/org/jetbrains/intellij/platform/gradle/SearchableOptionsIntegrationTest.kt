@@ -18,6 +18,7 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
             val searchableOptionsJar = buildDirectory.resolve("libs/test-1.0.0-searchableOptions.jar")
             assertExists(searchableOptionsJar)
 
+            println("searchableOptionsJar = ${searchableOptionsJar}")
             searchableOptionsJar containsFileInArchive "search/test-1.0.0.jar.searchableOptions.xml"
             with(searchableOptionsJar readEntry "search/test-1.0.0.jar.searchableOptions.xml") {
                 assertEquals(

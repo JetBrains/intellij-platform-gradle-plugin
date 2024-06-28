@@ -45,7 +45,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform dependency archive
-                \--- idea:ideaIC:2022.3.3
+                \--- com.jetbrains.intellij.idea:ideaIC:2022.3.3
                 """.trimIndent(),
                 output,
             )
@@ -61,7 +61,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatform - IntelliJ Platform
-                \--- idea:ideaIC:2022.3.3
+                \--- com.jetbrains.intellij.idea:ideaIC:2022.3.3
                 """.trimIndent(),
                 output,
             )
@@ -106,7 +106,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatform - IntelliJ Platform
-                \--- idea:ideaIC:2022.3.3 FAILED
+                \--- com.jetbrains.intellij.idea:ideaIC:2022.3.3 FAILED
                 """.trimIndent(),
                 output,
             )
@@ -116,9 +116,8 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 > Failed to query the value of task ':verifyPluginProjectConfiguration' property 'runtimeDirectory'.
-                   > No IntelliJ Platform dependency found.
-                     Please ensure there is a single IntelliJ Platform dependency defined in your project and that the necessary repositories, where it can be located, are added.
-                     See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
+                   > Could not resolve all files for configuration ':intellijPlatform'.
+                      > Could not find com.jetbrains.intellij.idea:ideaIC:2022.3.3.
                 """.trimIndent(),
                 output,
             )

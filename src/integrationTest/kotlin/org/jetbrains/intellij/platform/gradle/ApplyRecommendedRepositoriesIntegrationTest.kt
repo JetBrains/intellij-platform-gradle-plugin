@@ -21,7 +21,7 @@ class ApplyRecommendedRepositoriesIntegrationTest : IntelliJPlatformIntegrationT
                 assertContains(repositories, "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/releases")
                 assertContains(repositories, "https://cache-redirector.jetbrains.com/www.jetbrains.com/intellij-repository/snapshots")
                 assertContains(repositories, "https://cache-redirector.jetbrains.com/plugins.jetbrains.com/maven")
-                assertContains(repositories, "https://download.jetbrains.com")
+                assertContains(repositories, "http://localhost:7348")
             }
         }
     }
