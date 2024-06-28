@@ -40,9 +40,7 @@ class IntelliJPlatformRepositoriesHelper(
     private val log = Logger(javaClass)
 
     private val shimManager = gradle.sharedServices.registerIfAbsent(Services.SHIM_MANAGER, ShimManagerService::class) {
-        parameters {
-            port = 7348 // TODO: read from Gradle properties
-        }
+        parameters.port = 7348 // TODO: read from Gradle properties
     }
 
     /**
@@ -106,10 +104,8 @@ class IntelliJPlatformRepositoriesHelper(
         val shimServer = shimManager.get().start(pluginArtifactRepository, repositoryType)
 
         flowScope.always(StopShimServerAction::class) {
-            parameters {
-                url = pluginArtifactRepository.url
-                buildResult = flowProviders.buildWorkResult.map { !it.failure.isPresent }
-            }
+            parameters.url = pluginArtifactRepository.url
+            parameters.buildResult = flowProviders.buildWorkResult.map { !it.failure.isPresent }
         }
 
         repositories.ivy {
@@ -161,10 +157,8 @@ class IntelliJPlatformRepositoriesHelper(
         val server = shimManager.get().start(repository)
 
         flowScope.always(StopShimServerAction::class) {
-            parameters {
-                this.url = repository.url
-                this.buildResult = flowProviders.buildWorkResult.map { !it.failure.isPresent }
-            }
+            parameters.url = repository.url
+            parameters.buildResult = flowProviders.buildWorkResult.map { !it.failure.isPresent }
         }
 
         repositories.ivy {
