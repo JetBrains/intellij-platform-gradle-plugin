@@ -86,6 +86,9 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginJar: RegularFileProperty
 
+    @get:OutputDirectory
+    abstract val pluginDirectory: DirectoryProperty
+
     /**
      * List of dependencies on external plugins resolved from the [Configurations.INTELLIJ_PLATFORM_PLUGIN] configuration.
      *
@@ -292,6 +295,11 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                         else -> sandboxPluginsDirectory
                     }
                 })
+                pluginDirectory.convention(
+                    project.extensionProvider.flatMap { extension ->
+                        defaultDestinationDirectory.dir(extension.projectName)
+                    }
+                )
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
                 runtimeClasspath.from(runtimeConfiguration - intellijPlatformPluginModuleConfiguration)
 

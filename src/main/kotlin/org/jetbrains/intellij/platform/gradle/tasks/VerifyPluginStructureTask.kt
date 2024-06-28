@@ -18,7 +18,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 /**
  * Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure.
@@ -105,18 +104,13 @@ abstract class VerifyPluginStructureTask : DefaultTask() {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginStructureTask>(Tasks.VERIFY_PLUGIN_STRUCTURE) {
-                val projectNameProvider = project.extensionProvider.flatMap { it.projectName }
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
 
                 ignoreFailures.convention(false)
                 ignoreUnacceptableWarnings.convention(false)
                 ignoreWarnings.convention(true)
 
-                pluginDirectory.convention(
-                    prepareSandboxTaskProvider
-                        .flatMap { it.defaultDestinationDirectory }
-                        .zip(projectNameProvider) { destination, name -> destination.dir(name) }
-                )
+                pluginDirectory.convention(prepareSandboxTaskProvider.flatMap { it.pluginDirectory })
             }
     }
 }

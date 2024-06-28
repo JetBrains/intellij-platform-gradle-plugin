@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -77,6 +78,9 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
+                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
+                applySandboxFrom(prepareSandboxTaskProvider)
+
                 val buildSearchableOptionsEnabled = project.extensionProvider.flatMap { it.buildSearchableOptions }
 
                 outputDirectory.convention(

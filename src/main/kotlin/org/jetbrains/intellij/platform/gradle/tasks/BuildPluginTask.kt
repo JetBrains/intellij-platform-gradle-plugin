@@ -41,9 +41,7 @@ abstract class BuildPluginTask : Zip() {
                 from(jarSearchableOptionsTaskProvider) {
                     into("lib")
                 }
-                from(prepareSandboxTaskProvider.zip(projectNameProvider) { task, name ->
-                    task.destinationDir.resolve(name)
-                })
+                from(prepareSandboxTaskProvider.map { it.pluginDirectory })
                 into(archiveBaseName)
             }
     }
