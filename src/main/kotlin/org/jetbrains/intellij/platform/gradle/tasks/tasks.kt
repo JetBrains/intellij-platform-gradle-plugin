@@ -232,12 +232,13 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
         if (this is KotlinMetadataAware) {
             kotlinPluginAvailable.convention(false)
+
+            val implementationConfiguration = project.configurations[Configurations.External.IMPLEMENTATION]
+            val compileOnlyConfiguration = project.configurations[Configurations.External.COMPILE_ONLY]
+
             kotlinxCoroutinesLibraryPresent.convention(project.provider {
-                listOf(
-                    Configurations.External.IMPLEMENTATION,
-                    Configurations.External.COMPILE_ONLY,
-                ).any { configurationName ->
-                    project.configurations[configurationName].dependencies.any {
+                listOf(implementationConfiguration, compileOnlyConfiguration).any { configuration ->
+                    configuration.dependencies.any {
                         it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
                     }
                 }
