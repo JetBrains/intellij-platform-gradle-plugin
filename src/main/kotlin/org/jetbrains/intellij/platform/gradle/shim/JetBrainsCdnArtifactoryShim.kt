@@ -115,7 +115,7 @@ class JetBrainsCdnArtifactoryShim @Inject constructor(
                     val connection = it.toURL().openConnection() as HttpURLConnection
 
                     with(connection) {
-                        instanceFollowRedirects = false
+                        instanceFollowRedirects = true
                         runCatching {
                             inputStream.use {
                                 responseCode != HttpURLConnection.HTTP_NOT_FOUND
