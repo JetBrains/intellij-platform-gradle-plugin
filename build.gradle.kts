@@ -42,9 +42,11 @@ dependencies {
     }
     implementation(libs.intellij.structure.intellij) {
         exclude("org.jetbrains.kotlin")
+        exclude("org.jetbrains.kotlinx")
     }
     implementation(libs.intellij.pluginRepositoryRestClient) {
         exclude("org.jetbrains.kotlin")
+        exclude("org.jetbrains.kotlinx")
         exclude("org.slf4j")
     }
 
@@ -154,12 +156,12 @@ fun Test.configureTests() {
 
     systemProperties["test.gradle.home"] = testGradleHome
     systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
-    systemProperties["test.kotlin.version"] = properties("kotlinVersion").get()
     systemProperties["test.gradle.default"] = properties("gradleVersion").get()
     systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
     systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
     systemProperties["test.intellijPlatform.type"] = properties("testIntellijPlatformType").get()
     systemProperties["test.intellijPlatform.version"] = properties("testIntellijPlatformVersion").get()
+    systemProperties["test.kotlin.version"] = properties("testKotlinVersion").get()
     systemProperties["test.ci"] = environment("CI").orElse("false")
     systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
     systemProperties["plugins.repository"] = properties("pluginsRepository").get()
