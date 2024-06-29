@@ -23,6 +23,7 @@
 - `CustomRunIdeTask`, `CustomTestIdeTask`, `CustomTestIdePerformanceTask`, `CustomTestIdeUiTask` custom task classes
 - `CustomIntelliJPlatformVersionAware`, `SandboxProducerAware` task aware class
 - `binaryReleases()` repository helper
+- `org.jetbrains.intellij.platform.buildFeature.useBinaryReleases` flag
 
 ## [2.0.0-beta7] - 2024-06-14
 
