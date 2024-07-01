@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.latestVersion
 
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -10,7 +12,7 @@ import kotlin.test.assertNotNull
 
 class LatestVersionResolverTest : IntelliJPluginTestBase() {
 
-    private val url = resourceUrl("resolvers/latestVersion.xml").run {
+    private val url = resourceUrl("resolvers").run {
         assertNotNull(this)
     }
 
@@ -21,10 +23,9 @@ class LatestVersionResolverTest : IntelliJPluginTestBase() {
         assertEquals("0.1.24".toVersion(), resolvedVersion)
     }
 
-    private fun createResolver() = object : LatestVersionResolver(url) {
-
-        override val subject = "test"
-
-        override fun resolve() = fromMaven()
-    }
+    private fun createResolver() = LatestVersionResolver(
+        subject = "test",
+        coordinates = Coordinates("org.jetbrains", "foo"),
+        urls = listOf(url),
+    )
 }

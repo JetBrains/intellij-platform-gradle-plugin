@@ -3,7 +3,10 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
+import java.net.URL
 import kotlin.io.path.createFile
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
@@ -38,7 +41,11 @@ class MarketplaceZipSignerPathResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve latest Marketplace Zip Signer`() {
-        val latestVersion = MarketplaceZipSignerLatestVersionResolver().resolve()
+        val latestVersion = LatestVersionResolver(
+            subject = "Marketplace ZIP Signer",
+            coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
+            urls = listOf(URL(Locations.MAVEN_REPOSITORY)),
+        ).resolve()
 
         buildFile write //language=kotlin
                 """
@@ -71,7 +78,7 @@ class MarketplaceZipSignerPathResolverTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     intellijPlatform {
-                        zipSigner("$version")
+                        zipSigner(DependencyVersion.Exact("$version"))
                     }
                 }
                 """.trimIndent()

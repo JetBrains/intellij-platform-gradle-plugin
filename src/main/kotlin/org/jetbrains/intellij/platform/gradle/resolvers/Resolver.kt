@@ -15,7 +15,7 @@ interface Resolver<T> {
     val subjectInput: Any?
         get() = null
 
-    val log: Logger
+    private val log: Logger
         get() = Logger(javaClass)
 
     /**

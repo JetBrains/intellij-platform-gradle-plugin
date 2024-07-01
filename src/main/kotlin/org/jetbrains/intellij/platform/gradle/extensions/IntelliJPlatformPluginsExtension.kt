@@ -17,7 +17,7 @@ import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
-import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
+import org.jetbrains.intellij.platform.gradle.DependencyVersion
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
@@ -234,13 +234,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun disablePlugins(vararg ids: String) = disabled.addAll(*ids)
 
-    fun robotServerPlugin(version: Provider<String>) = delegate.addRobotServerPluginDependency(
-        versionProvider = version,
-    )
-
-    fun robotServerPlugin(version: String = VERSION_LATEST) = delegate.addRobotServerPluginDependency(
-        versionProvider = delegate.provider { version },
-    )
+    fun robotServerPlugin(version: DependencyVersion) = delegate.addRobotServerPluginDependency(version)
 
     @Suppress("UnstableApiUsage")
     companion object : Registrable<IntelliJPlatformPluginsExtension> {

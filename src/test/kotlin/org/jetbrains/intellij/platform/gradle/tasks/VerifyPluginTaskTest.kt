@@ -3,8 +3,11 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
+import java.net.URL
 import java.util.*
 import kotlin.io.path.*
 import kotlin.test.*
@@ -55,8 +58,13 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         writePluginVerifierIde()
 
         build(Tasks.VERIFY_PLUGIN) {
-            val version = IntelliJPluginVerifierLatestVersionResolver().resolve()
-            assertContains("Starting the IntelliJ Plugin Verifier $version", output)
+            val latestVersion = LatestVersionResolver(
+                subject = "IntelliJ Plugin Verifier",
+                coordinates = Coordinates("org.jetbrains.intellij.plugins", "verifier-cli"),
+                urls = listOf(URL(Locations.MAVEN_REPOSITORY)),
+            ).resolve()
+
+            assertContains("Starting the IntelliJ Plugin Verifier $latestVersion", output)
         }
     }
 
@@ -445,7 +453,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     intellijPlatform {
-                        pluginVerifier(${version?.let { "\"$it\"" }.orEmpty()})
+                        pluginVerifier(${version?.let { "DependencyVersion.Exact(\"$it\")" }.orEmpty()})
                     }
                 }
                 """.trimIndent()

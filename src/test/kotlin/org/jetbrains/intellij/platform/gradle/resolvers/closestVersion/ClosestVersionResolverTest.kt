@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.resolvers.closestVersion
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.resolvers.version.ClosestVersionResolver
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.net.URL
@@ -12,7 +13,7 @@ import kotlin.test.*
 
 class ClosestVersionResolverTest : IntelliJPluginTestBase() {
 
-    private val defaultUrls = listOf(resourceUrl("resolvers/closestVersion.xml").run {
+    private val defaultUrls = listOf(resourceUrl("resolvers").run {
         assertNotNull(this)
     })
 
@@ -51,21 +52,18 @@ class ClosestVersionResolverTest : IntelliJPluginTestBase() {
         }
         assertEquals(
             """
-            Cannot resolve the test version closest to: $version
-            Please ensure there are necessary repositories present in the project repositories section where the `foo:bar` artifact is published, i.e., by adding the `defaultRepositories()` entry.
+            Cannot resolve the foo:bar version closest to: $version
+            Please ensure there are necessary repositories present in the project repositories section where the `org.jetbrains:foo` artifact is published, i.e., by adding the `defaultRepositories()` entry.
             See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-repositories-extension.html
             """.trimIndent(),
             exception.message,
         )
     }
 
-    private fun createResolver(version: Version, urls: List<URL> = defaultUrls) = object : ClosestVersionResolver(
-        coordinates = Coordinates("foo", "bar"),
+    private fun createResolver(version: Version, urls: List<URL> = defaultUrls) = ClosestVersionResolver(
+        subject = "foo:bar",
+        coordinates = Coordinates("org.jetbrains", "foo"),
+        version = version,
         urls = urls,
-    ) {
-
-        override val subject = "test"
-
-        override fun resolve() = inMaven(version)
-    }
+    )
 }

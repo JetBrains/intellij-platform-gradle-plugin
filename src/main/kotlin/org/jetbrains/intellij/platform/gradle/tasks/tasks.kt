@@ -164,7 +164,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [JavaCompilerAware] resolves and provides the Java Compiler dependency.
          */
         if (this is JavaCompilerAware) {
-            javaCompilerConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER].asLenient
+            javaCompilerConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER]
         }
 
         /**

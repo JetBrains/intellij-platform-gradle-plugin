@@ -18,31 +18,24 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
-import org.jetbrains.intellij.platform.gradle.BuildFeature
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
-import org.jetbrains.intellij.platform.gradle.Constants.VERSION_CURRENT
-import org.jetbrains.intellij.platform.gradle.Constants.VERSION_LATEST
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.JavaCompilerClosestVersionResolver
-import org.jetbrains.intellij.platform.gradle.resolvers.closestVersion.PlatformDependencyClosestVersionResolver
-import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.IntelliJPluginVerifierLatestVersionResolver
-import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
-import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.RobotServerPluginLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.version.ClosestVersionResolver
+import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.io.FileReader
+import java.net.URL
 import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.*
@@ -78,6 +71,8 @@ class IntelliJPlatformDependenciesHelper(
 
     private val baseType = objects.property<IntelliJPlatformType>()
     private val baseVersion = objects.property<String>()
+    private val repositoryUrls
+        get() = (repositories.urls() + settingsRepositories.urls()).map { URL(it) }
 
     /**
      * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
@@ -335,15 +330,18 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addJavaCompilerDependency(
-        versionProvider: Provider<String>,
+        dependencyVersion: DependencyVersion,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
-        val version = versionProvider.orNull
-        requireNotNull(version) { "The `intellijPlatform.javaCompiler` dependency helper was called with no `version` value provided." }
-
-        dependencies.createJavaCompiler(version).apply(action)
-    })
+    ) = configurations[configurationName].dependencies.addLater(
+        provider {
+            dependencies.createDependency(
+                subject = "Java Compiler",
+                coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
+                version = dependencyVersion,
+            ).apply(action)
+        }
+    )
 
     /**
      * A base method for adding a dependency on JetBrains Runtime.
@@ -397,13 +395,10 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addPluginVerifierDependency(
-        versionProvider: Provider<String>,
+        version: DependencyVersion,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(provider {
-        val version = versionProvider.orNull
-        requireNotNull(version) { "The `intellijPlatform.pluginVerifier` dependency helper was called with no `version` value provided." }
-
         dependencies.createPluginVerifier(version).apply(action)
     })
 
@@ -421,27 +416,23 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addTestFrameworkDependency(
-        typeProvider: Provider<TestFrameworkType>,
-        versionProvider: Provider<String>,
+        type: TestFrameworkType,
+        version: DependencyVersion,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(provider {
-        val type = typeProvider.orNull
-        requireNotNull(type) { "The `intellijPlatform.testFramework` dependency helper was called with no `type` value provided." }
-
-        val version = versionProvider.orNull
-        requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
-
         when (type) {
             TestFrameworkType.Bundled -> type.coordinates.map {
                 dependencies.createBundledLibrary(it.artifactId)
             }
 
-            TestFrameworkType.Metrics -> type.coordinates.map {
-                dependencies.createPlatformDependency(it.groupId, it.artifactId, version)
+            else -> type.coordinates.map {
+                dependencies.createPlatformDependency(
+                    subject = "TestFramework",
+                    coordinates = it,
+                    version = version,
+                )
             }
-
-            else -> dependencies.createTestFramework(type, version)
         }.onEach(action)
     })
 
@@ -457,22 +448,12 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addPlatformDependency(
-        groupIdProvider: Provider<String>,
-        artifactIdProvider: Provider<String>,
-        versionProvider: Provider<String>,
+        coordinates: Coordinates,
+        version: DependencyVersion,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(provider {
-        val groupId = groupIdProvider.orNull
-        requireNotNull(groupId) { "The `intellijPlatform.platformDependency` dependency helper was called with no `groupId` value provided." }
-
-        val artifactId = artifactIdProvider.orNull
-        requireNotNull(artifactId) { "The `intellijPlatform.platformDependency` dependency helper was called with no `artifactId` value provided." }
-
-        val version = versionProvider.orNull
-        requireNotNull(version) { "The `intellijPlatform.platformDependency` dependency helper was called with no `version` value provided." }
-
-        dependencies.createPlatformDependency(groupId, artifactId, version).apply(action)
+        dependencies.createPlatformDependency("IntelliJ Platform dependency", coordinates, version).apply(action)
     })
 
     /**
@@ -483,13 +464,10 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addZipSignerDependency(
-        versionProvider: Provider<String>,
+        version: DependencyVersion,
         configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(provider {
-        val version = versionProvider.orNull
-        requireNotNull(version) { "The `intellijPlatform.zipSigner` dependency helper was called with no `version` value provided." }
-
         dependencies.createMarketplaceZipSigner(version).apply(action)
     })
 
@@ -501,13 +479,10 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addRobotServerPluginDependency(
-        versionProvider: Provider<String>,
+        version: DependencyVersion,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(provider {
-        val version = versionProvider.orNull
-        requireNotNull(version) { "The `intellijPlatform.robotServerPlugin` dependency helper was called with no `version` value provided." }
-
         dependencies.createRobotServerPlugin(version).apply(action)
     })
 
@@ -692,31 +667,6 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
-     * Created Java Compiler dependency.
-     */
-    private fun DependencyHandler.createJavaCompiler(version: String): Dependency {
-        val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers)
-
-        return create(
-            group = "com.jetbrains.intellij.java",
-            name = "java-compiler-ant-tasks",
-            version = when (version) {
-                VERSION_CURRENT -> when {
-                    resolveClosest.get() ->
-                        JavaCompilerClosestVersionResolver(
-                            productInfo.get(),
-                            repositories.urls() + settingsRepositories.urls()
-                        ).resolve().version
-
-                    else -> productInfo.get().buildNumber
-                }
-
-                else -> version
-            },
-        )
-    }
-
-    /**
      * Creates JetBrains Runtime (JBR) dependency.
      */
     private fun DependencyHandler.createJetBrainsRuntime(version: String) = create(
@@ -729,106 +679,107 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates IntelliJ Plugin Verifier CLI tool dependency.
      */
-    private fun DependencyHandler.createPluginVerifier(version: String) = create(
-        group = "org.jetbrains.intellij.plugins",
-        name = "verifier-cli",
-        version = when (version) {
-            VERSION_LATEST -> IntelliJPluginVerifierLatestVersionResolver().resolve().version
-            else -> version
-        },
+    private fun DependencyHandler.createPluginVerifier(version: DependencyVersion) = createDependency(
+        subject = "IntelliJ Plugin Verifier",
+        coordinates = Coordinates("org.jetbrains.intellij.plugins", "verifier-cli"),
+        version = version,
         classifier = "all",
-        ext = "jar",
+        extension = "jar",
     )
 
     /**
-     * Creates a dependency on the `test-framework` library required for testing plugins.
+     * Creates a dependency.
      *
-     * @param type Test Framework type
-     * @param version Test Framework version to resolve
-     */
-    private fun DependencyHandler.createTestFramework(type: TestFrameworkType, version: String) =
-        type.coordinates.map {
-            createPlatformDependency(it.groupId, it.artifactId, version)
-        }
-
-    /**
-     * Creates a dependency on the `test-framework` library required for testing plugins.
-     *
-     * If [version] is set to [VERSION_CURRENT], it uses the [ProductInfo.buildNumber].
-     *
-     * If [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] is enabled and [VERSION_CURRENT] is set as a version, it resolves the closest matching library version
-     * using repositories currently added to the project.
-     *
-     * @param groupId Dependency group
-     * @param artifactId Dependency name
+     * @param subject Dependency name
+     * @param coordinates Dependency coordinates
      * @param version Dependency version
      */
-    private fun DependencyHandler.createPlatformDependency(groupId: String, artifactId: String, version: String): Dependency {
-        val resolveClosest = BuildFeature.USE_CLOSEST_VERSION_RESOLVING.getValue(providers)
+    private fun DependencyHandler.createDependency(
+        subject: String,
+        coordinates: Coordinates,
+        version: DependencyVersion,
+        classifier: String? = null,
+        extension: String? = null,
+    ) = create(
+        group = coordinates.groupId,
+        name = coordinates.artifactId,
+        version = version.resolve(subject, coordinates).get().toString(),
+        classifier = classifier,
+        ext = extension,
+    )
 
+    /**
+     * Creates an IntelliJ Platform dependency and excludes transitive dependencies provided by the current IntelliJ Platform.
+     *
+     * @param subject Dependency name
+     * @param coordinates Dependency coordinates
+     * @param version Dependency version
+     */
+    private fun DependencyHandler.createPlatformDependency(
+        subject: String,
+        coordinates: Coordinates,
+        version: DependencyVersion,
+    ) = createDependency(subject, coordinates, version).apply {
         val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
             parameters {
                 intellijPlatformPath = layout.dir(platformPath.map { it.toFile() })
             }
         }
 
-        return create(
-            group = groupId,
-            name = artifactId,
-            version = when (version) {
-                VERSION_CURRENT -> when {
-                    resolveClosest.get() ->
-                        PlatformDependencyClosestVersionResolver(
-                            productInfo.get(),
-                            repositories.urls() + settingsRepositories.urls(),
-                            Coordinates(groupId, artifactId)
-                        ).resolve().version
-
-                    else -> productInfo.get().buildNumber
-                }
-
-                else -> version
-            }
-        ).apply {
-            moduleDescriptors.get().forEach {
-                exclude(it.groupId, it.artifactId)
-            }
+        moduleDescriptors.get().forEach {
+            exclude(it.groupId, it.artifactId)
         }
+    }
+
+    private fun DependencyVersion.resolve(subject: String, coordinates: Coordinates) = when (this) {
+        is DependencyVersion.IntelliJPlatform -> productInfo
+            .map { it.buildNumber.toVersion() }
+
+        is DependencyVersion.Closest -> productInfo
+            .map { it.buildNumber.toVersion() }
+            .map { buildNumber ->
+                ClosestVersionResolver(
+                    subject = subject,
+                    coordinates = coordinates,
+                    version = buildNumber,
+                    urls = repositoryUrls,
+                ).resolve()
+            }
+
+        is DependencyVersion.Latest -> provider {
+            LatestVersionResolver(
+                subject = subject,
+                coordinates = coordinates,
+                urls = repositoryUrls,
+            ).resolve()
+        }
+
+        is DependencyVersion.Exact -> provider { version.toVersion() }
     }
 
     /**
      * Adds a dependency on a Marketplace ZIP Signer required for signing plugin with [SignPluginTask].
      *
-     * If [version] is set to [VERSION_LATEST], it resolves the latest available library version using the [MarketplaceZipSignerLatestVersionResolver].
-     *
      * @param version Marketplace ZIP Signer version
      */
-    private fun DependencyHandler.createMarketplaceZipSigner(version: String) = create(
-        group = "org.jetbrains",
-        name = "marketplace-zip-signer",
-        version = when (version) {
-            VERSION_LATEST -> MarketplaceZipSignerLatestVersionResolver().resolve().version
-            else -> version
-        },
+    private fun DependencyHandler.createMarketplaceZipSigner(version: DependencyVersion) = createDependency(
+        subject = "Marketplace ZIP Signer",
+        coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
+        version = version,
         classifier = "cli",
-        ext = "jar",
+        extension = "jar",
     )
 
     /**
      * Adds a dependency on a Robot Server Plugin required for signing plugin with [TestIdeUiTask].
      *
-     * If [version] is set to [VERSION_LATEST], it resolves the latest available library version using the [RobotServerPluginLatestVersionResolver].
-     *
      * @param version Robot Server Plugin version
      */
-    private fun DependencyHandler.createRobotServerPlugin(version: String) = create(
-        group = "com.intellij.remoterobot",
-        name = "robot-server-plugin",
-        version = when (version) {
-            VERSION_LATEST -> RobotServerPluginLatestVersionResolver().resolve().version
-            else -> version
-        },
-        ext = "zip",
+    private fun DependencyHandler.createRobotServerPlugin(version: DependencyVersion) = createDependency(
+        subject = "Robot Server Plugin",
+        coordinates = Coordinates("com.intellij.remoterobot", "robot-server-plugin"),
+        version = version,
+        extension = "zip",
     )
 
     // TODO: cleanup and migrate to Ivy webserver

@@ -98,7 +98,7 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     intellijPlatform {
-                        zipSigner("0.1.21")
+                        zipSigner(DependencyVersion.Exact("0.1.21"))
                     }            
                 }
                 
