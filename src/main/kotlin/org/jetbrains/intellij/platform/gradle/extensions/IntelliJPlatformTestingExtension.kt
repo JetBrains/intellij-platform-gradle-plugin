@@ -2,10 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import org.gradle.api.Action
-import org.gradle.api.Named
-import org.gradle.api.Project
-import org.gradle.api.Task
+import org.gradle.api.*
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
@@ -22,6 +19,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.utils.create
+import org.jetbrains.intellij.platform.gradle.utils.isModule
 import javax.inject.Inject
 
 @IntelliJPlatform
@@ -32,11 +30,20 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
     val testIdeUi = register<TestIdeUiParameters, _>()
     val testIdePerformance = register<TestIdePerformanceParameters, _>()
 
-    private inline fun <reified C : CommonParameters<T>, T> register() where T : Task, T : IntelliJPlatformVersionAware, T : SandboxAware = project.objects.domainObjectContainer(
+    private inline fun <reified C : CommonParameters<T>, reified T> register() where T : Task, T : IntelliJPlatformVersionAware, T : SandboxAware = project.objects.domainObjectContainer(
         elementType = C::class,
         factory = { project.objects.newInstance<C>(it, project) },
     ).apply {
         all {
+            if (project.pluginManager.isModule) {
+                when(T::class) {
+                    RunIdeTask::class,
+                    TestIdeUiTask::class,
+                    TestIdePerformanceTask::class,
+                        -> throw GradleException("The ${Extensions.INTELLIJ_PLATFORM_TESTING} { ... } extension within a module can register `testIde` tasks only.")
+                }
+            }
+
             plugins {
                 intellijPlatformPluginDependencyConfigurationName = this@all.intellijPlatformPluginDependencyConfiguration.name
                 intellijPlatformPluginLocalConfigurationName = this@all.intellijPlatformPluginLocalConfiguration.name
