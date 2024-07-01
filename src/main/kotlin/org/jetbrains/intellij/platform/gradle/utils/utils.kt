@@ -80,7 +80,7 @@ fun FileCollection.platformPath() = with(toList()) {
 internal fun ResourceHandler.resolve(url: String) = text
     .fromUri(url)
     .runCatching { asFile("UTF-8") }
-    .onFailure { Logger(javaClass).error("Cannot resolve product releases", it) }
+    .onFailure { Logger(javaClass).info("Cannot resolve resource: $url", it) }
     .getOrNull()
 
 val Project.settings

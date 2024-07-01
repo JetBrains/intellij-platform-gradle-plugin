@@ -72,7 +72,9 @@ class IntelliJPlatformDependenciesHelper(
     private val baseType = objects.property<IntelliJPlatformType>()
     private val baseVersion = objects.property<String>()
     private val repositoryUrls
-        get() = (repositories.urls() + settingsRepositories.urls()).map { URL(it) }
+        get() = (repositories.urls() + settingsRepositories.urls())
+            .map { URL(it) }
+            .filterNot { it.protocol == "http" }
 
     /**
      * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
@@ -388,9 +390,9 @@ class IntelliJPlatformDependenciesHelper(
     )
 
     /**
-     * A base method for adding  a dependency on IntelliJ Plugin Verifier.
+     * A base method for adding a dependency on IntelliJ Plugin Verifier.
      *
-     * @param versionProvider The provider of the IntelliJ Plugin Verifier version.
+     * @param version The provider of the IntelliJ Plugin Verifier version.
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
@@ -743,6 +745,7 @@ class IntelliJPlatformDependenciesHelper(
                     coordinates = coordinates,
                     version = buildNumber,
                     urls = repositoryUrls,
+                    resources = resources,
                 ).resolve()
             }
 
@@ -751,6 +754,7 @@ class IntelliJPlatformDependenciesHelper(
                 subject = subject,
                 coordinates = coordinates,
                 urls = repositoryUrls,
+                resources = resources,
             ).resolve()
         }
 

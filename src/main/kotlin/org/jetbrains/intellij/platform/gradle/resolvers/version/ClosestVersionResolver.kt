@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.version
 
 import org.gradle.api.GradleException
+import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
@@ -18,7 +19,8 @@ class ClosestVersionResolver(
     coordinates: Coordinates,
     val version: Version,
     urls: List<URL>,
-) : VersionResolver(subject, coordinates, urls) {
+    resources: ResourceHandler? = null,
+) : VersionResolver(subject, coordinates, urls, resources) {
 
     private val log = Logger(javaClass)
 
