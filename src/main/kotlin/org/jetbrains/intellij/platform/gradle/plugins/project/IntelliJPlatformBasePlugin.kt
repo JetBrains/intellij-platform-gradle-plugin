@@ -56,8 +56,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
          * - set the `idea.module.downloadSources` flag to `true` to tell IDE that sources are required when working with IntelliJ Platform Gradle Plugin
          * - exclude the [CACHE_DIRECTORY] from the IDEA module
          */
-        project.pluginManager.withPlugin("idea") {
-            project.extensions.configure<IdeaModel>("idea") {
+        project.pluginManager.withPlugin(Plugins.External.IDEA) {
+            project.extensions.configure<IdeaModel>(Plugins.External.IDEA) {
                 module.isDownloadSources = BuildFeature.DOWNLOAD_SOURCES.isEnabled(project.providers).get()
                 module.excludeDirs.add(project.rootProjectPath.resolve(CACHE_DIRECTORY).toFile())
             }

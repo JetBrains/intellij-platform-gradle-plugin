@@ -29,6 +29,7 @@ object Constants {
         const val SETTINGS = "${Plugin.ID}.settings"
 
         object External {
+            const val IDEA = "idea"
             const val JAVA_TEST_FIXTURES = "java-test-fixtures"
             const val KOTLIN = "org.jetbrains.kotlin.jvm"
         }
