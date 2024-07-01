@@ -6,6 +6,7 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.TestCompanion
@@ -22,6 +23,8 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
         with(project.plugins) {
             apply(IntelliJPlatformBasePlugin::class)
         }
+
+        IntelliJPlatformTestingExtension.register(project, target = project)
 
         listOf(
             // Build Module

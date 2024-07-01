@@ -6,7 +6,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin.ID
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.ProcessResourcesCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -23,8 +22,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             apply(IntelliJPlatformBasePlugin::class)
             apply(IntelliJPlatformModulePlugin::class)
         }
-
-        IntelliJPlatformTestingExtension.register(project, target = project)
 
         listOf(
             // Build
