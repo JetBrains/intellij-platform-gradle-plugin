@@ -11,6 +11,7 @@ import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask.Companion.systemPropertyDefault
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -93,6 +94,8 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                         it && pluginXml.orNull?.parse { productDescriptor } != null
                     }
                 )
+
+                systemPropertyDefault("idea.l10n.keys", "only")
 
                 inputs.property("intellijPlatform.buildSearchableOptions", buildSearchableOptionsEnabled)
 
