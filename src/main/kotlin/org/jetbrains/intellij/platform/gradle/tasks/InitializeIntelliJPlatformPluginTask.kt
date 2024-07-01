@@ -21,10 +21,7 @@ import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValu
 import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.Version
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.*
 import java.net.URL
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
@@ -166,10 +163,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                     })
                 )
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
-                module.convention(project.provider {
-                    project.pluginManager.hasPlugin(Plugins.MODULE) && !project.pluginManager.hasPlugin(Plugin.ID)
-                })
-
+                module.convention(project.provider { project.pluginManager.isModule })
 
                 onlyIf {
                     !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()

@@ -10,12 +10,15 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.GradleInternal
+import org.gradle.api.plugins.PluginManager
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
+import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import java.nio.file.Path
 import kotlin.io.path.absolute
@@ -91,3 +94,6 @@ val Project.rootProjectPath
 
 val Project.extensionProvider
     get() = provider { the<IntelliJPlatformExtension>() }
+
+internal val PluginManager.isModule
+    get() = hasPlugin(Plugins.MODULE) && !hasPlugin(Plugin.ID)
