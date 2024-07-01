@@ -28,7 +28,7 @@ class JetBrainsCdnArtifactoryShim @Inject constructor(
     private val log = Logger(javaClass)
 
     private val ivyDescriptorHandler = IvyDescriptorHttpHandler { groupId, artifactId, version ->
-        val downloadUrl = resolveDownloadUrl(groupId, artifactId, version) ?: return@IvyDescriptorHttpHandler null
+        val downloadUrl = resolveDownloadUrl(groupId, artifactId, version)?.toString() ?: return@IvyDescriptorHttpHandler null
 
         log.info("Resolved download URL: $downloadUrl")
 
@@ -70,7 +70,7 @@ class JetBrainsCdnArtifactoryShim @Inject constructor(
 
             else -> {
                 exchange.statusCode = StatusCodes.FOUND
-                exchange.responseHeaders.put(Headers.LOCATION, downloadUrl)
+                exchange.responseHeaders.put(Headers.LOCATION, downloadUrl.toString())
             }
         }
     }
@@ -82,7 +82,7 @@ class JetBrainsCdnArtifactoryShim @Inject constructor(
             .add(Methods.HEAD, DOWNLOAD_PATH, downloadHandler)
             .add(Methods.GET, DOWNLOAD_PATH, downloadHandler)
 
-    private fun resolveDownloadUrl(groupId: String, artifactId: String, version: String): String? {
+    private fun resolveDownloadUrl(groupId: String, artifactId: String, version: String): URI? {
         val coordinates = Coordinates(groupId, artifactId)
         val type = IntelliJPlatformType.values().find { it.maven == coordinates || it.binary == coordinates } ?: return null
         if (type.binary == null) {
@@ -125,6 +125,6 @@ class JetBrainsCdnArtifactoryShim @Inject constructor(
                 }
         }
 
-        return downloadUrl.toString()
+        return downloadUrl
     }
 }
