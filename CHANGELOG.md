@@ -7,6 +7,8 @@
 - `intellijPlatformTesting` top-level extension for registering custom tasks
 - Resolving IntelliJ Platform artifacts from JetBrains CDN using common coordinates
 - `jetBrainsCdn()` repository helper
+- `DependencyVersion` for controlling how particular dependencies are resolved (latest/closest/match IntelliJ Platform/exact)
+- Added `-Didea.l10n.keys=only` to the `buildSearchableOptions` task
 
 ### Changed
 
@@ -17,6 +19,7 @@
 ### Fixed
 
 - Fixed `Cannot snapshot ../system/jcef_cache/SingletonSocket: not a regular file` issue when preparing sandbox
+- Optimized resolving the latest/closest dependency version from available Maven repositories
 
 ### Removed
 

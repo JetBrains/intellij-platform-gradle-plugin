@@ -15,8 +15,6 @@ object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
     const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
     const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
-    const val VERSION_CURRENT = "current"
-    const val VERSION_LATEST = "latest"
 
     object Plugin {
         const val ID = "org.jetbrains.intellij.platform"
