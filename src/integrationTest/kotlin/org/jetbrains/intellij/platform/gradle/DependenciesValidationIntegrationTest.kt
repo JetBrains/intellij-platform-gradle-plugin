@@ -3,8 +3,11 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.testkit.runner.TaskOutcome
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.resolvers.latestVersion.MarketplaceZipSignerLatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
+import java.net.URL
 import kotlin.test.Test
 
 class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -137,7 +140,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
-                        zipSigner("0.1.24")
+                        zipSigner(org.jetbrains.intellij.platform.gradle.DependencyVersion.Exact("0.1.24"))
                     }
                 }
                 """.trimIndent()
@@ -180,12 +183,17 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        val version = MarketplaceZipSignerLatestVersionResolver().resolve()
+        val latestVersion = LatestVersionResolver(
+            subject = "Marketplace ZIP Signer",
+            coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
+            urls = listOf(URL(Locations.MAVEN_REPOSITORY)),
+        ).resolve()
+
         build(Tasks.External.DEPENDENCIES) {
             assertContains(
                 """
                 marketplaceZipSigner - Marketplace ZIP Signer
-                \--- org.jetbrains:marketplace-zip-signer:$version
+                \--- org.jetbrains:marketplace-zip-signer:$latestVersion
                 """.trimIndent(),
                 output,
             )
