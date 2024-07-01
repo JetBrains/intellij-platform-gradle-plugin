@@ -101,14 +101,12 @@ class JetBrainsCdnArtifactoryShim @Inject constructor(
 
         val downloadUrl = with(repository.url) {
             listOf(
-                "/${type.binary.groupId}/${type.binary.artifactId}-$version.$extension",
                 "/${type.binary.groupId}/${type.binary.artifactId}-$version-$classifier.$extension",
-                "/${type.binary.groupId}/${type.binary.artifactId}-$version.$extension",
                 "/${type.binary.groupId}/${type.binary.artifactId}-$version.$classifier.$extension",
-                "/${type.binary.groupId}/$version/${type.binary.artifactId}-$version.$extension",
+                "/${type.binary.groupId}/${type.binary.artifactId}-$version.$extension",
                 "/${type.binary.groupId}/$version/${type.binary.artifactId}-$version-$classifier.$extension",
-                "/${type.binary.groupId}/$version/${type.binary.artifactId}-$version.$extension",
                 "/${type.binary.groupId}/$version/${type.binary.artifactId}-$version.$classifier.$extension",
+                "/${type.binary.groupId}/$version/${type.binary.artifactId}-$version.$extension",
             )
                 .map { URI(scheme, userInfo, host, port, it, null, null) }
                 .find {
