@@ -192,7 +192,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
-    fun jetBrainsCdn(action: IvyRepositoryAction = {}) = delegate.createJetBrainsCdnArtifactsRepository(
+    fun jetbrainsCdn(action: IvyRepositoryAction = {}) = delegate.createJetBrainsCdnArtifactsRepository(
         name = "JetBrains CDN artifacts repository",
         url = Locations.DOWNLOAD,
         action = action,
@@ -201,14 +201,14 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     /**
      * Applies a set of recommended repositories required for running the most common tasks provided by the IntelliJ Platform Gradle Plugin:
      * - [localPlatformArtifacts] — required to use plugins bundled with IntelliJ Platform or refer to the local IDE
-     * - [jetBrainsCdn] — required to use IntelliJ Platform distributed via JetBrains CDN
+     * - [jetbrainsCdn] — required to use IntelliJ Platform distributed via JetBrains CDN
      * - [intellijDependencies] — required for resolving extra IntelliJ Platform dependencies used for running specific tasks
      * - [releases] and [snapshots] — IntelliJ Platform releases channels
      * - [marketplace] — JetBrains Marketplace plugins repository
      * - [binaryReleases] — JetBrains IDEs releases required for running the IntelliJ Plugin Verifier
      */
     fun defaultRepositories() {
-        jetBrainsCdn()
+        jetbrainsCdn()
         localPlatformArtifacts()
         intellijDependencies()
         releases()

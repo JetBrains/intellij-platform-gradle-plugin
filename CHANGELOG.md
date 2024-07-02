@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Rename `jetBrainsCdn()` repository helper to `jetbrainsCdn()`
+
 ## [2.0.0-beta8] - 2024-07-01
 
 ### Added
