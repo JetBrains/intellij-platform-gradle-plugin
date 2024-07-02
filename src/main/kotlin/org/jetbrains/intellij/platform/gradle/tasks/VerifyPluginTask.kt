@@ -28,7 +28,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.pathString
 
 /**
- * Runs the IntelliJ Plugin Verifier CLI tool to check the binary compatibility with specified IDE builds.
+ * Runs the IntelliJ Plugin Verifier CLI tool to check compatibility with specified IDE builds.
  *
  * @see IntelliJPlatformExtension.VerifyPlugin
  * @see <a href="https://github.com/JetBrains/intellij-plugin-verifier">IntelliJ Plugin Verifier</a>
