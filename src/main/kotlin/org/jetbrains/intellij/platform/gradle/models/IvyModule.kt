@@ -18,7 +18,7 @@ data class IvyModule(
     val version: String = "2.0",
     @XmlElement @XmlSerialName("info") val info: Info? = null,
     @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration> = listOf(Configuration("default")),
-    @XmlElement @XmlChildrenName("artifact") val publications: List<Publication> = emptyList(),
+    @XmlElement @XmlChildrenName("artifact") val publications: List<Artifact> = emptyList(),
     @XmlElement @XmlChildrenName("dependency") val dependencies: List<Dependency> = emptyList(),
 ) {
 
@@ -37,7 +37,7 @@ data class IvyModule(
     )
 
     @Serializable
-    data class Publication(
+    data class Artifact(
         val name: String? = null,
         val type: String? = null,
         val ext: String? = null,
@@ -51,7 +51,17 @@ data class IvyModule(
         @XmlSerialName("org") val organization: String? = null,
         @XmlSerialName("name") val name: String,
         @XmlSerialName("rev") val version: String,
-    )
+        @XmlElement @XmlSerialName("artifact") val artifacts: List<Artifact> = emptyList(),
+    ) {
+
+        @Serializable
+        data class Artifact(
+            val name: String,
+            val type: String,
+            val classifier: String? = null,
+            @XmlSerialName("ext") val extension: String,
+        )
+    }
 }
 
 /**
@@ -76,9 +86,9 @@ data class IvyModule(
  * As we remove the drive letter, we later have to guess which drive the artifact belongs to by iterating over A:/, B:/, C:/, ...
  * but that's not a huge problem.
  *
- * @see IntelliJPlatformRepositoriesExtension.jetBrainsCdn
+ * @see IntelliJPlatformRepositoriesExtension.jetbrainsCdn
  */
-internal fun Path.toPublication() = IvyModule.Publication(
+internal fun Path.toArtifact() = IvyModule.Artifact(
     name = invariantSeparatorsPathString.replaceFirst(Regex("^[a-zA-Z]:/"), "/"),
     type = when {
         isDirectory() -> "directory"

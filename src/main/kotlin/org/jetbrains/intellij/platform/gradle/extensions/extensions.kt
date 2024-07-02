@@ -33,7 +33,7 @@ import kotlin.io.path.*
  */
 internal fun ExternalModuleDependency.createIvyDependencyFile(
     localPlatformArtifactsPath: Path,
-    publications: List<IvyModule.Publication>,
+    publications: List<IvyModule.Artifact>,
     dependencies: List<IvyModule.Dependency> = emptyList(),
 ) =
     createIvyDependencyFile(
@@ -56,7 +56,7 @@ internal fun createIvyDependencyFile(
     name: String,
     version: String,
     localPlatformArtifactsPath: Path,
-    publications: List<IvyModule.Publication>,
+    publications: List<IvyModule.Artifact>,
     dependencies: List<IvyModule.Dependency> = emptyList(),
 ) {
     val ivyFile = localPlatformArtifactsPath

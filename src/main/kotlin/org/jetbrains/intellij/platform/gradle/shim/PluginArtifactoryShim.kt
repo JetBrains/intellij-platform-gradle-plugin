@@ -74,7 +74,7 @@ class PluginArtifactoryShim(
                 revision = plugin.version,
             ),
             publications = listOf(
-                IvyModule.Publication(type = "zip"),
+                IvyModule.Artifact(type = "zip"),
             ),
         )
     }

@@ -579,7 +579,7 @@ class IntelliJPlatformDependenciesHelper(
         ).apply {
             createIvyDependencyFile(
                 localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-                publications = listOf(artifactPath.toPublication()),
+                publications = listOf(artifactPath.toArtifact()),
             )
         }
     }
@@ -663,7 +663,7 @@ class IntelliJPlatformDependenciesHelper(
         ).apply {
             createIvyDependencyFile(
                 localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-                publications = listOf(artifactPath.toPublication()),
+                publications = listOf(artifactPath.toArtifact()),
             )
         }
     }
@@ -855,7 +855,7 @@ class IntelliJPlatformDependenciesHelper(
                             version = dependency.version,
                             localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
                             publications = layout.classPath.map { classPath ->
-                                platformPath.get().resolve(classPath).toPublication()
+                                platformPath.get().resolve(classPath).toArtifact()
                             },
                         )
                     }
@@ -876,7 +876,7 @@ class IntelliJPlatformDependenciesHelper(
             name = bundledPlugin.id,
             version = version,
             localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-            publications = listOf(artifactPath.toPublication()),
+            publications = listOf(artifactPath.toArtifact()),
             dependencies = ivyDependencies,
         )
     }
