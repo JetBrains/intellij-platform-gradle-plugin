@@ -40,7 +40,7 @@ abstract class ShimManagerService : BuildService<ShimManagerService.Parameters>,
         return shims.computeIfAbsent(repository.url.toString()) {
             val port = parameters.port.get()
             log.info("Creating new shim server for ${repository.url} (port: ${port})")
-            JetBrainsCdnArtifactoryShim(repository, port).start()
+            JetBrainsCdnArtifactoryShim(port).start()
         }
     }
 

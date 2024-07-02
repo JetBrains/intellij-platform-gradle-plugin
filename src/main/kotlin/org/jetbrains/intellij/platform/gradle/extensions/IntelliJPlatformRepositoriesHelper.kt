@@ -15,8 +15,10 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.JetBrainsCdnArtifactsRepository
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.flow.StopShimServerAction
@@ -166,7 +168,6 @@ class IntelliJPlatformRepositoriesHelper(
             this.isAllowInsecureProtocol = true
 
             patternLayout {
-                artifact("[organization]/[module]/[revision]/download")
                 ivy("[organization]/[module]/[revision]/descriptor.ivy")
             }
 
@@ -175,6 +176,32 @@ class IntelliJPlatformRepositoriesHelper(
                 ignoreGradleMetadataRedirection()
             }
         }.apply(action)
+
+        repositories.ivy {
+            this.url = URI(Locations.DOWNLOAD)
+            this.name = "JetBrains CDN"
+
+            patternLayout {
+                listOf(
+                    "[organization]/[module]-[revision](-[classifier]).[ext]",
+                    "[organization]/[module]-[revision](.[classifier]).[ext]",
+                    "[organization]/[revision]/[module]-[revision](-[classifier]).[ext]",
+                    "[organization]/[revision]/[module]-[revision](.[classifier]).[ext]",
+                ).forEach(::artifact)
+            }
+
+            metadataSources { artifact() }
+
+            repositories.exclusiveContent {
+                forRepositories(this@ivy)
+                filter {
+                    IntelliJPlatformType.values()
+                        .filter { it != IntelliJPlatformType.AndroidStudio }
+                        .mapNotNull { it.binary }
+                        .forEach { includeModule(it.groupId, it.artifactId) }
+                }
+            }
+        }
 
         return repository
     }
