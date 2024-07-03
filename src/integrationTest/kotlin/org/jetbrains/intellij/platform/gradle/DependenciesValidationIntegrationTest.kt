@@ -3,11 +3,9 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.testkit.runner.TaskOutcome
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
-import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
-import java.net.URL
+import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
 import kotlin.test.Test
 
 class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -183,12 +181,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        val latestVersion = LatestVersionResolver(
-            subject = "Marketplace ZIP Signer",
-            coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
-            urls = listOf(URL(Locations.MAVEN_REPOSITORY)),
-        ).resolve()
-
+        val latestVersion = Coordinates("org.jetbrains", "marketplace-zip-signer").resolveLatestVersion()
         build(Tasks.External.DEPENDENCIES) {
             assertContains(
                 """

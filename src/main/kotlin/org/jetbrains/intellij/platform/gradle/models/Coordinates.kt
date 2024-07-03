@@ -10,7 +10,7 @@ data class Coordinates(val groupId: String, val artifactId: String) {
     override fun toString() = "$groupId:$artifactId"
 }
 
-internal fun Coordinates.resolveLatestVersion(repositoryUrl: String = Locations.MAVEN_REPOSITORY): String? {
+fun Coordinates.resolveLatestVersion(repositoryUrl: String = Locations.MAVEN_REPOSITORY): String? {
     val host = repositoryUrl.trimEnd('/')
     val path = toString().replace(':', '/').replace('.', '/')
     val url = URL("$host/$path/maven-metadata.xml")
