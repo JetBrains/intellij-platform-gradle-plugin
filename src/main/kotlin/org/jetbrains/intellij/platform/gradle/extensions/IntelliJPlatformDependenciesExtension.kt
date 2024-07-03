@@ -919,7 +919,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version Test framework library version.
      * @see TestFrameworkType
      */
-    fun testFramework(type: TestFrameworkType, version: DependencyVersion = DependencyVersion.IntelliJPlatform) =
+    fun testFramework(type: TestFrameworkType, version: DependencyVersion = DependencyVersion.Closest) =
         delegate.addTestFrameworkDependency(type, version)
 
     /**
@@ -933,7 +933,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param artifactId IntelliJ Platform dependency artifactId
      * @param version IntelliJ Platform dependency version
      */
-    fun platformDependency(coordinates: Coordinates, version: DependencyVersion = DependencyVersion.IntelliJPlatform) =
+    fun platformDependency(coordinates: Coordinates, version: DependencyVersion = DependencyVersion.Closest) =
         delegate.addPlatformDependency(coordinates, version, Configurations.INTELLIJ_PLATFORM_DEPENDENCIES)
 
     /**
@@ -947,7 +947,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param artifactId IntelliJ Platform dependency artifactId
      * @param version IntelliJ Platform dependency version
      */
-    fun testPlatformDependency(coordinates: Coordinates, version: DependencyVersion = DependencyVersion.IntelliJPlatform) =
+    fun testPlatformDependency(coordinates: Coordinates, version: DependencyVersion = DependencyVersion.Closest) =
         delegate.addPlatformDependency(coordinates, version, Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES)
 
     /**

@@ -12,6 +12,10 @@
 - Rename `jetBrainsCdn()` repository helper to `jetbrainsIdeInstallers()`
 - Rename `binaryReleasesAndroidStudio()` repository helper to `androidStudioInstallers()`
 
+### Fixed
+
+- `testFramework()` dependency helper must use `DependencyVersion.Closest` instead fixed `DependencyVersion.IntelliJPlatform`
+
 ### Removed
 
 - Resolving IntelliJ Platform artifacts from JetBrains CDN using common coordinates
