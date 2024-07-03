@@ -181,6 +181,20 @@
 
 The `2.0.0` release is completely rewritten. Please see [documentation page](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) for more details.
 
+## [1.17.4] - 2024-06-14
+
+### Added
+
+- Message about required migration to IntelliJ Platform Gradle Plugin 2.0 when targeting IntelliJ Platform 2024.2+ (242+).
+
+## [1.17.3] - 2024-03-29
+
+### Fixed
+
+- Fix for: `coroutinesJavaAgentPath` specifies file `.../build/tmp/initializeIntelliJPlugin/coroutines-javaagent.jar` which doesn't exist
+- Fixed resolving Android Studio releases URL for Windows [#1551](../../issues/1551)
+- Fixed repository type classification for Rider RC builds [#1579](https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1579)
+
 ## [1.17.2] - 2024-02-20
 
 ### Added
@@ -1159,7 +1173,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Support for attaching IntelliJ sources in IDEA
 
 [next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta8...HEAD
-[2.0.0-beta1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...v2.0.0-beta1
+[2.0.0-beta1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.4...v2.0.0-beta1
 [2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta1...v2.0.0-beta2
 [2.0.0-beta3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...v2.0.0-beta3
 [2.0.0-beta4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta3...v2.0.0-beta4
@@ -1167,6 +1181,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 [2.0.0-beta6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta5...v2.0.0-beta6
 [2.0.0-beta7]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta6...v2.0.0-beta7
 [2.0.0-beta7]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta7...v2.0.0-beta8
+[1.17.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.4...v1.17.4
 [1.17.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...v1.17.3
 [1.17.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.0...v1.17.1
