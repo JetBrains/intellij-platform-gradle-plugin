@@ -19,6 +19,7 @@
 
 - `testFramework()` dependency helper must use `DependencyVersion.Closest` instead fixed `DependencyVersion.IntelliJPlatform`
 - Fixed `Task ... uses output .intellijPlatform/coroutines-javaagent.jar of task ... without declaring dependency`
+- Fixed the wrong Android Studio installer architecture on `x86`
 
 ### Removed
 

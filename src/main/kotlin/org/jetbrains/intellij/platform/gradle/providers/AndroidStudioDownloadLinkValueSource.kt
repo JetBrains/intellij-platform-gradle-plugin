@@ -63,10 +63,10 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
             .filterNot { link -> link.endsWith(".deb") || link.endsWith(".exe") } // Extracting of .deb and .exe archives is not supported.
             .sortedWith(compareByDescending { link ->
                 val arch = when {
-                    os == "mac" && System.getProperty("os.arch") == "aarch64" -> "arm"
+                    os == "mac" && System.getProperty("os.arch") == "aarch64" -> "_arm"
                     else -> ""
                 }
-                link.substringAfterLast('/').contains(arch)
+                link.substringAfterLast('/').contains("$os$arch.")
             })
             .firstOrNull()
             ?: throw GradleException("Failed to obtain download link for version: $version")
