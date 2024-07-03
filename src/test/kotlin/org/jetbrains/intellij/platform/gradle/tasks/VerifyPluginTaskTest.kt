@@ -305,7 +305,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Could not find", output)
-            assertContains("com.jetbrains.intellij.idea:ideaIC:foo", output)
+            assertContains("idea:ideaIC:foo", output)
         }
     }
 
