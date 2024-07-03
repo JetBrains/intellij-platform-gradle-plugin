@@ -19,13 +19,13 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
         build(Tasks.External.DEPENDENCIES, projectProperties = defaultProjectProperties) {
             output containsText """
                 compileClasspath - Compile classpath for null/main.
-                +--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
+                +--- idea:ideaIC:$intellijPlatformVersion
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
 
             output containsText """
                 intellijPlatformDependency - IntelliJ Platform dependency archive
-                \--- com.jetbrains.intellij.idea:ideaIC:$intellijPlatformVersion
+                \--- idea:ideaIC:$intellijPlatformVersion
             """.trimIndent()
 
             output containsText """

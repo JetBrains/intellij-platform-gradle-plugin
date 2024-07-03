@@ -48,7 +48,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform dependency archive
-                \--- com.jetbrains.intellij.idea:ideaIC:2022.3.3
+                \--- idea:ideaIC:2022.3.3
                 """.trimIndent(),
                 output,
             )
@@ -64,7 +64,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatform - IntelliJ Platform
-                \--- com.jetbrains.intellij.idea:ideaIC:2022.3.3
+                \--- idea:ideaIC:2022.3.3
                 """.trimIndent(),
                 output,
             )
@@ -109,7 +109,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatform - IntelliJ Platform
-                \--- com.jetbrains.intellij.idea:ideaIC:2022.3.3 FAILED
+                \--- idea:ideaIC:2022.3.3 FAILED
                 """.trimIndent(),
                 output,
             )
@@ -120,7 +120,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """
                 > Failed to query the value of task ':verifyPluginProjectConfiguration' property 'runtimeDirectory'.
                    > Could not resolve all files for configuration ':intellijPlatform'.
-                      > Could not find com.jetbrains.intellij.idea:ideaIC:2022.3.3.
+                      > Could not find idea:ideaIC:2022.3.3.
                 """.trimIndent(),
                 output,
             )
