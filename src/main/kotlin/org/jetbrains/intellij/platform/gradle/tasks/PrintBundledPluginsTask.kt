@@ -17,8 +17,11 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionAware {
 
     @TaskAction
-    fun printBundledPlugins() = productInfo.bundledPlugins.forEach {
-        println(it)
+    fun printBundledPlugins() {
+        println("Bundled plugins for ${productInfo.name} ${productInfo.version} (${productInfo.buildNumber}):")
+        productInfo.bundledPlugins.forEach {
+            println(it)
+        }
     }
 
     init {
