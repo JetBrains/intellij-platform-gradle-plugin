@@ -8,8 +8,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
-import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
-import java.net.URL
+import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
 import java.time.LocalDate
 import kotlin.io.path.createFile
 import kotlin.io.path.exists
@@ -31,11 +30,7 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
             assertExists(lockFile)
             lockFile containsText LocalDate.now().toString()
 
-            val latestVersion = LatestVersionResolver(
-                subject = "IntelliJ Platform Gradle Plugin",
-                coordinates = Coordinates("org.jetbrains.intellij.platform", "intellij-platform-gradle-plugin"),
-                urls = listOf(URL(Locations.MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY)),
-            ).resolve()
+            val latestVersion = Coordinates("org.jetbrains.intellij.platform", "intellij-platform-gradle-plugin").resolveLatestVersion(Locations.MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY)
 
             assertContains("${Plugin.NAME} is outdated: 0.0.0. Update `${Plugin.ID}` to: $latestVersion", output)
         }

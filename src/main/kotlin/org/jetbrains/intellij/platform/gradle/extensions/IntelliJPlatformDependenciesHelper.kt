@@ -22,14 +22,13 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.resolvers.version.ClosestVersionResolver
-import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
@@ -336,18 +335,15 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addJavaCompilerDependency(
-        dependencyVersion: DependencyVersion,
+        versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        provider {
-            dependencies.createDependency(
-                subject = "Java Compiler",
-                coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
-                version = dependencyVersion,
-            ).apply(action)
-        }
-    )
+    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
+        dependencies.createDependency(
+            coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
+            version = version,
+        ).apply(action)
+    })
 
     /**
      * A base method for adding a dependency on JetBrains Runtime.
@@ -401,10 +397,10 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addPluginVerifierDependency(
-        version: DependencyVersion,
+        versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
+    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
         dependencies.createPluginVerifier(version).apply(action)
     })
 
@@ -423,21 +419,17 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun addTestFrameworkDependency(
         type: TestFrameworkType,
-        version: DependencyVersion,
+        versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(provider {
+    ) = configurations[configurationName].dependencies.addAllLater(versionProvider.map { version ->
         when (type) {
             TestFrameworkType.Bundled -> type.coordinates.map {
                 dependencies.createBundledLibrary(it.artifactId)
             }
 
             else -> type.coordinates.map {
-                dependencies.createPlatformDependency(
-                    subject = "TestFramework",
-                    coordinates = it,
-                    version = version,
-                )
+                dependencies.createPlatformDependency(it, version)
             }
         }.onEach(action)
     })
@@ -455,11 +447,11 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun addPlatformDependency(
         coordinates: Coordinates,
-        version: DependencyVersion,
+        versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
-        dependencies.createPlatformDependency("IntelliJ Platform dependency", coordinates, version).apply(action)
+    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
+        dependencies.createPlatformDependency(coordinates, version).apply(action)
     })
 
     /**
@@ -470,10 +462,10 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addZipSignerDependency(
-        version: DependencyVersion,
+        versionProvider: Provider<String>,
         configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
+    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
         dependencies.createMarketplaceZipSigner(version).apply(action)
     })
 
@@ -485,10 +477,10 @@ class IntelliJPlatformDependenciesHelper(
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addRobotServerPluginDependency(
-        version: DependencyVersion,
+        versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
+    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
         dependencies.createRobotServerPlugin(version).apply(action)
     })
 
@@ -713,8 +705,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates IntelliJ Plugin Verifier CLI tool dependency.
      */
-    private fun DependencyHandler.createPluginVerifier(version: DependencyVersion) = createDependency(
-        subject = "IntelliJ Plugin Verifier",
+    private fun DependencyHandler.createPluginVerifier(version: String) = createDependency(
         coordinates = Coordinates("org.jetbrains.intellij.plugins", "verifier-cli"),
         version = version,
         classifier = "all",
@@ -729,18 +720,41 @@ class IntelliJPlatformDependenciesHelper(
      * @param version Dependency version
      */
     private fun DependencyHandler.createDependency(
-        subject: String,
         coordinates: Coordinates,
-        version: DependencyVersion,
+        version: String,
         classifier: String? = null,
         extension: String? = null,
     ) = create(
         group = coordinates.groupId,
         name = coordinates.artifactId,
-        version = version.resolve(subject, coordinates).get().toString(),
         classifier = classifier,
         ext = extension,
-    )
+    ).apply {
+        val buildNumber by lazy { productInfo.map { it.buildNumber.toVersion() }.get() }
+
+        when (version) {
+            Constraints.PLATFORM_VERSION ->
+                version {
+                    prefer("$buildNumber")
+                }
+
+            Constraints.CLOSEST_VERSION ->
+                version {
+                    strictly("[${buildNumber.major}, $buildNumber[")
+                    prefer("$buildNumber")
+                }
+
+            Constraints.LATEST_VERSION ->
+                version {
+                    prefer("+")
+                }
+
+            else ->
+                version {
+                    prefer(version)
+                }
+        }
+    }
 
     /**
      * Creates an IntelliJ Platform dependency and excludes transitive dependencies provided by the current IntelliJ Platform.
@@ -750,10 +764,9 @@ class IntelliJPlatformDependenciesHelper(
      * @param version Dependency version
      */
     private fun DependencyHandler.createPlatformDependency(
-        subject: String,
         coordinates: Coordinates,
-        version: DependencyVersion,
-    ) = createDependency(subject, coordinates, version).apply {
+        version: String,
+    ) = createDependency(coordinates, version).apply {
         val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
             parameters {
                 intellijPlatformPath = layout.dir(platformPath.map { it.toFile() })
@@ -765,41 +778,12 @@ class IntelliJPlatformDependenciesHelper(
         }
     }
 
-    private fun DependencyVersion.resolve(subject: String, coordinates: Coordinates) = when (this) {
-        is DependencyVersion.IntelliJPlatform -> productInfo
-            .map { it.buildNumber.toVersion() }
-
-        is DependencyVersion.Closest -> productInfo
-            .map { it.buildNumber.toVersion() }
-            .map { buildNumber ->
-                ClosestVersionResolver(
-                    subject = subject,
-                    coordinates = coordinates,
-                    version = buildNumber,
-                    urls = repositoryUrls,
-                    resources = resources,
-                ).resolve()
-            }
-
-        is DependencyVersion.Latest -> provider {
-            LatestVersionResolver(
-                subject = subject,
-                coordinates = coordinates,
-                urls = repositoryUrls,
-                resources = resources,
-            ).resolve()
-        }
-
-        is DependencyVersion.Exact -> provider { version.toVersion() }
-    }
-
     /**
      * Adds a dependency on a Marketplace ZIP Signer required for signing plugin with [SignPluginTask].
      *
      * @param version Marketplace ZIP Signer version
      */
-    private fun DependencyHandler.createMarketplaceZipSigner(version: DependencyVersion) = createDependency(
-        subject = "Marketplace ZIP Signer",
+    private fun DependencyHandler.createMarketplaceZipSigner(version: String) = createDependency(
         coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
         version = version,
         classifier = "cli",
@@ -811,8 +795,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param version Robot Server Plugin version
      */
-    private fun DependencyHandler.createRobotServerPlugin(version: DependencyVersion) = createDependency(
-        subject = "Robot Server Plugin",
+    private fun DependencyHandler.createRobotServerPlugin(version: String) = createDependency(
         coordinates = Coordinates("com.intellij.remoterobot", "robot-server-plugin"),
         version = version,
         extension = "zip",

@@ -12,17 +12,14 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.of
 import org.jetbrains.intellij.platform.gradle.BuildFeature
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource
-import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
+import org.jetbrains.intellij.platform.gradle.providers.LatestPluginVersionValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.*
-import java.net.URL
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
@@ -70,6 +67,12 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     abstract val pluginVersion: Property<String>
 
     /**
+     * Represents the latest version of the plugin.
+     */
+    @get:Internal
+    abstract val latestPluginVersion: Property<String>
+
+    /**
      * Defines that the current project has only the [Plugins.MODULE] applied but no [Plugin.ID].
      */
     @get:Internal
@@ -101,11 +104,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
 
         try {
             val version = Version.parse(pluginVersion.get())
-            val latestVersion = LatestVersionResolver(
-                subject = "IntelliJ Platform Gradle Plugin",
-                coordinates = Coordinates("org.jetbrains.intellij.platform", "intellij-platform-gradle-plugin"),
-                urls = listOf(URL(Locations.MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY)),
-            ).resolve()
+            val latestVersion = Version.parse(latestPluginVersion.get())
 
             if (version < latestVersion) {
                 log.warn("${Plugin.NAME} is outdated: $version. Update `${Plugin.ID}` to: $latestVersion")
@@ -163,11 +162,8 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                     })
                 )
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
+                latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {})
                 module.convention(project.provider { project.pluginManager.isModule })
-
-                onlyIf {
-                    !selfUpdateLock.asPath.exists() || !coroutinesJavaAgent.asPath.exists()
-                }
 
                 mustRunAfter(Tasks.External.CLEAN)
             }

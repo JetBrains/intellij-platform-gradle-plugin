@@ -3,10 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
-import org.jetbrains.intellij.platform.gradle.resolvers.version.LatestVersionResolver
-import java.net.URL
+import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
 import kotlin.io.path.createFile
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
@@ -41,11 +39,7 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve latest Plugin Verifier`() {
-        val latestVersion = LatestVersionResolver(
-            subject = "IntelliJ Plugin Verifier",
-            coordinates = Coordinates("org.jetbrains.intellij.plugins", "verifier-cli"),
-            urls = listOf(URL(Locations.MAVEN_REPOSITORY)),
-        ).resolve()
+        val latestVersion = Coordinates("org.jetbrains.intellij.plugins", "verifier-cli").resolveLatestVersion()
 
         buildFile write //language=kotlin
                 """
@@ -78,7 +72,7 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     intellijPlatform {
-                        pluginVerifier(DependencyVersion.Exact("$version"))
+                        pluginVerifier("$version")
                     }
                 }
                 """.trimIndent()

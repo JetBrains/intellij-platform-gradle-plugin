@@ -16,6 +16,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
@@ -175,13 +176,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider for the version of the IntelliJ Platform dependency.
      * @param configurationName The name of the configuration to add the dependency to.
      */
-    internal fun customCreate(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true, configurationName: String) = delegate.addIntelliJPlatformDependency(
-        typeProvider = type,
-        versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
-        configurationName = configurationName,
-        fallbackToBase = true,
-    )
+    internal fun customCreate(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true, configurationName: String) =
+        delegate.addIntelliJPlatformDependency(
+            typeProvider = type,
+            versionProvider = version,
+            useInstallerProvider = delegate.provider { useInstaller },
+            configurationName = configurationName,
+            fallbackToBase = true,
+        )
 
     /**
      * Adds a dependency on the custom IntelliJ Platform with a fallback to the base IntelliJ Platform.
@@ -190,13 +192,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider for the version of the IntelliJ Platform dependency.
      * @param configurationName The name of the configuration to add the dependency to.
      */
-    internal fun customCreate(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>, configurationName: String) = delegate.addIntelliJPlatformDependency(
-        typeProvider = type,
-        versionProvider = version,
-        useInstallerProvider = useInstaller,
-        configurationName = configurationName,
-        fallbackToBase = true,
-    )
+    internal fun customCreate(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>, configurationName: String) =
+        delegate.addIntelliJPlatformDependency(
+            typeProvider = type,
+            versionProvider = version,
+            useInstallerProvider = useInstaller,
+            configurationName = configurationName,
+            fallbackToBase = true,
+        )
 
     /**
      * Adds a dependency on Android Studio.
@@ -896,14 +899,36 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The IntelliJ Plugin Verifier version.
      */
-    fun pluginVerifier(version: DependencyVersion = DependencyVersion.Latest) = delegate.addPluginVerifierDependency(version)
+    fun pluginVerifier(version: String = Constraints.LATEST_VERSION) = delegate.addPluginVerifierDependency(
+        versionProvider = delegate.provider { version },
+    )
+
+    /**
+     * Adds a dependency on IntelliJ Plugin Verifier.
+     *
+     * @param version The provider of the IntelliJ Plugin Verifier version.
+     */
+    fun pluginVerifier(version: Provider<String>) = delegate.addPluginVerifierDependency(
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on Marketplace ZIP Signer.
      *
      * @param version The Marketplace ZIP Signer version.
      */
-    fun zipSigner(version: DependencyVersion = DependencyVersion.Latest) = delegate.addZipSignerDependency(version)
+    fun zipSigner(version: String = Constraints.LATEST_VERSION) = delegate.addZipSignerDependency(
+        versionProvider = delegate.provider { version },
+    )
+
+    /**
+     * Adds a dependency on Marketplace ZIP Signer.
+     *
+     * @param version The provider of the Marketplace ZIP Signer version.
+     */
+    fun zipSigner(version: Provider<String>) = delegate.addZipSignerDependency(
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
@@ -919,8 +944,29 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version Test framework library version.
      * @see TestFrameworkType
      */
-    fun testFramework(type: TestFrameworkType, version: DependencyVersion = DependencyVersion.Closest) =
-        delegate.addTestFrameworkDependency(type, version)
+    fun testFramework(type: TestFrameworkType, version: String = Constraints.CLOSEST_VERSION) = delegate.addTestFrameworkDependency(
+        type = type,
+        versionProvider = delegate.provider { version },
+    )
+
+    /**
+     * Adds a dependency on the `test-framework` library required for testing plugins.
+     *
+     * There are multiple Test Framework variants available, which provide additional classes for testing specific modules, like:
+     * JUnit4, JUnit 5, Maven, JavaScript, Go, Java, ReSharper, etc.
+     *
+     * The version, if absent, is determined by the IntelliJ Platform build number.
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param type test framework variant type
+     * @param version library version
+     * @see TestFrameworkType
+     */
+    fun testFramework(type: TestFrameworkType, version: Provider<String>) = delegate.addTestFrameworkDependency(
+        type = type,
+        versionProvider = version,
+    )
 
     /**
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
@@ -933,8 +979,28 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param artifactId IntelliJ Platform dependency artifactId
      * @param version IntelliJ Platform dependency version
      */
-    fun platformDependency(coordinates: Coordinates, version: DependencyVersion = DependencyVersion.Closest) =
-        delegate.addPlatformDependency(coordinates, version, Configurations.INTELLIJ_PLATFORM_DEPENDENCIES)
+    fun platformDependency(coordinates: Coordinates, version: String = Constraints.CLOSEST_VERSION) = delegate.addPlatformDependency(
+        coordinates = coordinates,
+        versionProvider = delegate.provider { version },
+        configurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+    )
+
+    /**
+     * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
+     *
+     * The version, if absent, is determined by the IntelliJ Platform build number.
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param coordinates IntelliJ Platform dependency coordinates
+     * @param artifactId IntelliJ Platform dependency artifactId
+     * @param version IntelliJ Platform dependency version
+     */
+    fun platformDependency(coordinates: Coordinates, version: Provider<String>) = delegate.addPlatformDependency(
+        coordinates = coordinates,
+        versionProvider = version,
+        configurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+    )
 
     /**
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
@@ -947,8 +1013,28 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param artifactId IntelliJ Platform dependency artifactId
      * @param version IntelliJ Platform dependency version
      */
-    fun testPlatformDependency(coordinates: Coordinates, version: DependencyVersion = DependencyVersion.Closest) =
-        delegate.addPlatformDependency(coordinates, version, Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES)
+    fun testPlatformDependency(coordinates: Coordinates, version: String = Constraints.CLOSEST_VERSION) = delegate.addPlatformDependency(
+        coordinates = coordinates,
+        versionProvider = delegate.provider { version },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+    )
+
+    /**
+     * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
+     *
+     * The version, if absent, is determined by the IntelliJ Platform build number.
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param groupId IntelliJ Platform dependency groupId
+     * @param artifactId IntelliJ Platform dependency artifactId
+     * @param version IntelliJ Platform dependency version
+     */
+    fun testPlatformDependency(coordinates: Coordinates, version: Provider<String>) = delegate.addPlatformDependency(
+        coordinates = coordinates,
+        versionProvider = version,
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+    )
 
     /**
      * Adds a Java Compiler dependency for code instrumentation.
@@ -960,7 +1046,23 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version Java Compiler version
      */
-    fun javaCompiler(version: DependencyVersion = DependencyVersion.Closest) = delegate.addJavaCompilerDependency(version)
+    fun javaCompiler(version: String = Constraints.CLOSEST_VERSION) = delegate.addJavaCompilerDependency(
+        versionProvider = delegate.provider { version },
+    )
+
+    /**
+     * Adds a Java Compiler dependency for code instrumentation.
+     *
+     * By default, the version is determined by the IntelliJ Platform build number.
+     *
+     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
+     * the closest available version is used, found by scanning all releases in the repository.
+     *
+     * @param version Java Compiler version
+     */
+    fun javaCompiler(version: Provider<String>) = delegate.addJavaCompilerDependency(
+        versionProvider = version,
+    )
 
     /**
      * Applies a set of dependencies required for running the [InstrumentCodeTask] task.

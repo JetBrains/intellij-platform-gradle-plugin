@@ -54,7 +54,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     intellijPlatform {
-                        zipSigner(DependencyVersion.Exact("0.1.21"))
+                        zipSigner("0.1.21")
                     }            
                 }
                 
@@ -146,7 +146,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     intellijPlatform {
-                        zipSigner(DependencyVersion.Exact("0.1.21"))
+                        zipSigner("0.1.21")
                     }            
                 }
                 
@@ -186,7 +186,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     intellijPlatform {
-                        zipSigner(DependencyVersion.Exact("0.0.1"))
+                        zipSigner("0.0.1")
                     }            
                 }
                 

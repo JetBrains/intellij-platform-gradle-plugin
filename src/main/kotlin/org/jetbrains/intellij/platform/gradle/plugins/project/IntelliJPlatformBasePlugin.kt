@@ -369,6 +369,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 is SplitModeAware,
                 is TestableAware,
                     -> true
+
                 else -> false
             }
         }.configureEach(project::preconfigureTask)
