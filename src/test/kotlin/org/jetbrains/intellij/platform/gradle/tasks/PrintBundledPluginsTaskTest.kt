@@ -15,6 +15,7 @@ class PrintBundledPluginsTaskTest : IntelliJPluginTestBase() {
             assertContains(
                 """
                 > Task :${Tasks.PRINT_BUNDLED_PLUGINS}
+                Bundled plugins for IntelliJ IDEA 2022.3.3 (223.8836.41):
                 AntSupport
                 ByteCodeViewer
                 Coverage
