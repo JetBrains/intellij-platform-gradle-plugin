@@ -19,102 +19,102 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
 enum class IntelliJPlatformType(
     val code: String,
     val maven: Coordinates?,
-    val binary: Coordinates?,
+    val cdn: Coordinates?,
 ) {
     AndroidStudio(
         code = "AI",
         maven = null,
-        binary = Coordinates("com.google.android.studio", "android-studio"),
+        cdn = Coordinates("com.google.android.studio", "android-studio"),
     ),
     Aqua(
         code = "QA",
         maven = null,
-        binary = Coordinates("aqua", "aqua"),
+        cdn = Coordinates("aqua", "aqua"),
     ),
     CLion(
         code = "CL",
         maven = Coordinates("com.jetbrains.intellij.clion", "clion"),
-        binary = Coordinates("cpp", "CLion"),
+        cdn = Coordinates("cpp", "CLion"),
     ),
     DataGrip(
         code = "DB",
         maven = null,
-        binary = Coordinates("datagrip", "datagrip"),
+        cdn = Coordinates("datagrip", "datagrip"),
     ),
     DataSpell(
         code = "DS",
         maven = null,
-        binary = Coordinates("python", "dataspell"),
+        cdn = Coordinates("python", "dataspell"),
     ),
     FleetBackend(
         code = "FLIJ",
         maven = Coordinates("com.jetbrains.intellij.fleetBackend", "fleetBackend"),
-        binary = null,
+        cdn = null,
     ),
     Gateway(
         code = "GW",
         maven = Coordinates("com.jetbrains.intellij.gateway", "gateway"),
-        binary = Coordinates("idea/gateway", "JetBrainsGateway"),
+        cdn = Coordinates("idea/gateway", "JetBrainsGateway"),
     ),
     GoLand(
         code = "GO",
         maven = Coordinates("com.jetbrains.intellij.goland", "goland"),
-        binary = Coordinates("go", "goland"),
+        cdn = Coordinates("go", "goland"),
     ),
     IntellijIdeaCommunity(
         code = "IC",
         maven = Coordinates("com.jetbrains.intellij.idea", "ideaIC"),
-        binary = Coordinates("idea", "ideaIC"),
+        cdn = Coordinates("idea", "ideaIC"),
     ),
     IntellijIdeaUltimate(
         code = "IU",
         maven = Coordinates("com.jetbrains.intellij.idea", "ideaIU"),
-        binary = Coordinates("idea", "ideaIU"),
+        cdn = Coordinates("idea", "ideaIU"),
     ),
     MPS(
         code = "MPS",
         maven = null,
-        binary = Coordinates("mps", "MPS"),
+        cdn = Coordinates("mps", "MPS"),
     ),
     PhpStorm(
         code = "PS",
         maven = Coordinates("com.jetbrains.intellij.phpstorm", "phpstorm"),
-        binary = Coordinates("webide", "PhpStorm"),
+        cdn = Coordinates("webide", "PhpStorm"),
     ),
     PyCharmProfessional(
         code = "PY",
         maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPY"),
-        binary = Coordinates("python", "pycharm-professional"),
+        cdn = Coordinates("python", "pycharm-professional"),
     ),
     PyCharmCommunity(
         code = "PC",
         maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPC"),
-        binary = Coordinates("python", "pycharm-community"),
+        cdn = Coordinates("python", "pycharm-community"),
     ),
     Rider(
         code = "RD",
         maven = Coordinates("com.jetbrains.intellij.rider", "riderRD"),
-        binary = Coordinates("rider", "JetBrains.Rider"),
+        cdn = Coordinates("rider", "JetBrains.Rider"),
     ),
     RubyMine(
         code = "RM",
         maven = null,
-        binary = Coordinates("ruby", "RubyMine"),
+        cdn = Coordinates("ruby", "RubyMine"),
     ),
     RustRover(
         code = "RR",
         maven = Coordinates("com.jetbrains.intellij.rustrover", "RustRover"),
-        binary = Coordinates("rustrover", "RustRover"),
+        cdn = Coordinates("rustrover", "RustRover"),
     ),
     WebStorm(
         code = "WS",
         maven = Coordinates("com.jetbrains.intellij.webstorm", "webstorm"),
-        binary = Coordinates("webstorm", "WebStorm"),
+        cdn = Coordinates("webstorm", "WebStorm"),
     ),
     Writerside(
         code = "WRS",
         maven = Coordinates("com.jetbrains.intellij.idea", "writerside"),
-        binary = Coordinates("writerside", "writerside"),
+        cdn = Coordinates("writerside", "writerside"),
     ),
     ;
 

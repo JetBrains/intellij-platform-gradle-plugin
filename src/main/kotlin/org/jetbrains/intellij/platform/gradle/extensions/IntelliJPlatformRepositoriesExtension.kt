@@ -162,7 +162,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
             repositories.exclusiveContent {
                 forRepositories(this@createIvyRepository)
                 filter {
-                    IntelliJPlatformType.AndroidStudio.binary?.let {
+                    IntelliJPlatformType.AndroidStudio.cdn?.let {
                         includeModule(it.groupId, it.artifactId)
                     }
                     IntelliJPlatformType.AndroidStudio.maven?.let {

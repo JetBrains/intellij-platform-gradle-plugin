@@ -516,13 +516,13 @@ class IntelliJPlatformDependenciesHelper(
         }.orNull
 
         requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: $version" }
-        requireNotNull(type.binary) { "Specified type '$type' has no artifact coordinates available." }
+        requireNotNull(type.cdn) { "Specified type '$type' has no artifact coordinates available." }
 
         val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
 
         return create(
-            group = type.binary.groupId,
-            name = type.binary.artifactId,
+            group = type.cdn.groupId,
+            name = type.cdn.artifactId,
             classifier = classifier,
             ext = extension,
             version = version,
@@ -569,7 +569,7 @@ class IntelliJPlatformDependenciesHelper(
         // TODO: remove [hash]
         val hash = artifactPath.hashCode().absoluteValue % 1000
         val type = localProductInfo.productCode.toIntelliJPlatformType()
-        val coordinates = type.maven ?: type.binary
+        val coordinates = type.maven ?: type.cdn
         requireNotNull(coordinates) { "Specified type '$type' has no dependency available." }
 
         return create(

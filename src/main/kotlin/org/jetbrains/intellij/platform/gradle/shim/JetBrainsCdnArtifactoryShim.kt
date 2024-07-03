@@ -22,10 +22,10 @@ class JetBrainsCdnArtifactoryShim @Inject constructor(port: Int) : Shim(port) {
 
         val coordinates = Coordinates(groupId, artifactId)
         val type = IntelliJPlatformType.values().find { it.maven == coordinates }
-        if (type?.binary == null || type.maven == null) {
+        if (type?.cdn == null || type.maven == null) {
             return@IvyDescriptorHttpHandler null
         }
-        log.info("Transforming ${type.maven} to ${type.binary}")
+        log.info("Transforming ${type.maven} to ${type.cdn}")
 
         val (extension, classifier) = with(OperatingSystem.current()) {
             val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
@@ -46,12 +46,12 @@ class JetBrainsCdnArtifactoryShim @Inject constructor(port: Int) : Shim(port) {
             ),
             dependencies = listOf(
                 IvyModule.Dependency(
-                    organization = type.binary.groupId,
-                    name = type.binary.artifactId,
+                    organization = type.cdn.groupId,
+                    name = type.cdn.artifactId,
                     version = version,
                     artifacts = listOf(
                         IvyModule.Dependency.Artifact(
-                            name = type.binary.artifactId,
+                            name = type.cdn.artifactId,
                             type = extension,
                             extension = extension,
                             classifier = classifier,

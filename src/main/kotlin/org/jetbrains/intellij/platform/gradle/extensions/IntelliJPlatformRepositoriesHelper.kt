@@ -197,7 +197,7 @@ class IntelliJPlatformRepositoriesHelper(
                 filter {
                     IntelliJPlatformType.values()
                         .filter { it != IntelliJPlatformType.AndroidStudio }
-                        .mapNotNull { it.binary }
+                        .mapNotNull { it.cdn }
                         .forEach { includeModule(it.groupId, it.artifactId) }
                 }
             }
