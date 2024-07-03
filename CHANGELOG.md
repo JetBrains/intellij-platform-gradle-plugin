@@ -17,6 +17,7 @@
 ### Fixed
 
 - `testFramework()` dependency helper must use `DependencyVersion.Closest` instead fixed `DependencyVersion.IntelliJPlatform`
+- Fixed `Task ... uses output .intellijPlatform/coroutines-javaagent.jar of task ... without declaring dependency`
 
 ### Removed
 

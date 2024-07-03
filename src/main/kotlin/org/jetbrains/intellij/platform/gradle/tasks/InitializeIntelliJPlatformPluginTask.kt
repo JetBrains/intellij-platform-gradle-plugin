@@ -122,7 +122,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
      * Creates the Java Agent file for the Coroutines library required to enable coroutines debugging.
      */
     private fun createCoroutinesJavaAgentFile() {
-        if (module.get() || coroutinesJavaAgent.asPath.exists()) {
+        if (coroutinesJavaAgent.asPath.exists()) {
             return
         }
 
@@ -156,11 +156,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                         it.createDirectories().resolve("self-update.lock").toFile()
                     })
                 )
-                coroutinesJavaAgent.convention(
-                    project.layout.file(cachePathProvider.map {
-                        it.createDirectories().resolve("coroutines-javaagent.jar").toFile()
-                    })
-                )
+                coroutinesJavaAgent.convention(project.layout.buildDirectory.file("coroutines-javaagent.jar"))
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
                 latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {})
                 module.convention(project.provider { project.pluginManager.isModule })
