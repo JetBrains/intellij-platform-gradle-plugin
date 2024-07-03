@@ -103,11 +103,6 @@ abstract class PublishPluginTask : DefaultTask() {
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Publishes plugin to the remote Marketplace repository."
-    }
-
     @TaskAction
     fun publishPlugin() {
         if (token.orNull.isNullOrEmpty()) {
@@ -158,6 +153,11 @@ abstract class PublishPluginTask : DefaultTask() {
                 throw GradleException("Cannot upload plugin: $creationResult")
             }
         }
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Publishes plugin to the remote Marketplace repository."
     }
 
     companion object : Registrable {

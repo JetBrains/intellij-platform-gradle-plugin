@@ -47,11 +47,6 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Builds an index of UI components (searchable options) for the plugin."
-    }
-
     /**
      * Executes the task, configures and runs the IDE.
      */
@@ -74,6 +69,11 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
         args = args + listOf("traverseUI", outputDirectory.asPath.pathString, "true")
 
         super.exec()
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Builds an index of UI components (searchable options) for the plugin."
     }
 
     companion object : Registrable {

@@ -27,16 +27,16 @@ import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 @UntrackedTask(because = "Should always run")
 abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware {
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Runs tests using a custom IDE instance with the developed plugin installed."
-    }
-
     @TaskAction
     override fun executeTests() {
         validateIntelliJPlatformVersion()
 
         super.executeTests()
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Runs tests using a custom IDE instance with the developed plugin installed."
     }
 
     companion object : Registrable {

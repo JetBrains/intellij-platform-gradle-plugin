@@ -77,11 +77,6 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Initializes the IntelliJ Platform Gradle Plugin"
-    }
-
     @TaskAction
     fun initialize() {
         checkPluginVersion()
@@ -143,6 +138,11 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
         )
 
         JarOutputStream(coroutinesJavaAgent.asPath.outputStream(), manifest).close()
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Initializes the IntelliJ Platform Gradle Plugin"
     }
 
     companion object : Registrable {

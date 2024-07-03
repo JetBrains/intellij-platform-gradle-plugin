@@ -6,6 +6,7 @@ import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
@@ -28,6 +29,11 @@ abstract class SetupDependenciesTask : DefaultTask() {
             See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html#setupdependencies
             """.trimIndent()
         )
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "The setupDependencies task is scheduled for removal"
     }
 
     companion object : Registrable {

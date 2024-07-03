@@ -168,13 +168,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Runs the IntelliJ Plugin Verifier tool to check compatibility with specified IDE builds."
-
-        mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
-    }
-
     /**
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
      */
@@ -294,6 +287,13 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 )
             }
         }
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Runs the IntelliJ Plugin Verifier tool to check compatibility with specified IDE builds."
+
+        mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
     }
 
     companion object : Registrable {

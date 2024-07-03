@@ -46,13 +46,6 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Creates a JAR file with searchable options to be distributed with the plugin."
-
-        includeEmptyDirs = false
-    }
-
     @TaskAction
     override fun copy() {
         super.copy()
@@ -69,6 +62,13 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
                 )
             }
         }
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Creates a JAR file with searchable options to be distributed with the plugin."
+
+        includeEmptyDirs = false
     }
 
     companion object : Registrable {

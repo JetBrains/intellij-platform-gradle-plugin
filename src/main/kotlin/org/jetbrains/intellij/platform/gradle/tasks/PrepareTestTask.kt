@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.named
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
@@ -16,6 +17,11 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
  */
 @CacheableTask
 abstract class PrepareTestTask : DefaultTask(), TestableAware, SandboxAware {
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Configures the 'test' task to run tests from the current project."
+    }
 
     companion object : Registrable {
         override fun register(project: Project) =

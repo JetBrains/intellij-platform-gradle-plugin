@@ -62,14 +62,6 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Verifies signed ZIP archive with the provided key using marketplace-zip-signer library."
-
-        mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
-        args = listOf("verify")
-    }
-
     @TaskAction
     override fun exec() {
         val cliPath = zipSignerExecutable.asPath
@@ -123,6 +115,14 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
         temporaryDir.resolve("certificate-chain.pem")
             .also { it.writeText(content) }
             .toPath()
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Verifies signed ZIP archive with the provided key using marketplace-zip-signer library."
+
+        mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
+        args = listOf("verify")
+    }
 
     companion object : Registrable {
         override fun register(project: Project) =

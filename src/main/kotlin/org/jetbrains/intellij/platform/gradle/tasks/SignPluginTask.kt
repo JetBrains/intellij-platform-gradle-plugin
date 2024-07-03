@@ -149,14 +149,6 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
-
-        mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
-        args = listOf("sign")
-    }
-
     @TaskAction
     override fun exec() {
         val executable = zipSignerExecutable.orNull?.asPath
@@ -244,6 +236,14 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
             yield("-ks-provider-name")
             yield(it)
         }
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
+
+        mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
+        args = listOf("sign")
     }
 
     companion object : Registrable {

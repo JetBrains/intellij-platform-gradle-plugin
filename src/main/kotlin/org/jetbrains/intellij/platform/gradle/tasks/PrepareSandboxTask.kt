@@ -114,12 +114,6 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Prepares sandbox directory with installed plugin and its dependencies."
-        duplicatesStrategy = DuplicatesStrategy.FAIL
-    }
-
     @TaskAction
     override fun copy() {
         log.info("Preparing sandbox")
@@ -245,6 +239,12 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         }
 
         return name
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Prepares sandbox directory with installed plugin and its dependencies."
+        duplicatesStrategy = DuplicatesStrategy.FAIL
     }
 
     companion object : Registrable {

@@ -75,11 +75,6 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Runs performance tests on the IDE with the developed plugin installed."
-    }
-
     @TaskAction
     override fun exec() {
         val dir = artifactsDirectory.asPath
@@ -123,6 +118,11 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
             }
             throw TestExecutionFailException("${testExecutionResults.size} test(s) failed")
         }
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Runs performance tests on the IDE with the developed plugin installed."
     }
 
     companion object : Registrable {

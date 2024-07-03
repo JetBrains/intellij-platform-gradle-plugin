@@ -26,11 +26,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 @Deprecated("Should not be used for testing with the Robot Server Plugin; a placeholder for the new implementation")
 abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, IntelliJPlatformVersionAware {
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing."
-    }
-
     /**
      * Executes the task, configures and runs the IDE.
      */
@@ -41,6 +36,11 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, Inte
         workingDir = platformPath.toFile()
 
         super.exec()
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing."
     }
 
     companion object : Registrable {

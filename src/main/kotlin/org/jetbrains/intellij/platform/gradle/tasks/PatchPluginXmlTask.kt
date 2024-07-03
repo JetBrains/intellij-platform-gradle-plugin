@@ -267,11 +267,6 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Patches `plugin.xml` file with values provided to the task."
-    }
-
     @TaskAction
     fun patchPluginXml() {
         inputFile.asPath.inputStream().use { inputStream ->
@@ -361,6 +356,11 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
                 element.removeAttribute(attributeName)
             }
         }
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Patches `plugin.xml` file with values provided to the task."
     }
 
     companion object : Registrable {

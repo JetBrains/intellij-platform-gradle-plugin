@@ -98,11 +98,6 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Code instrumentation task."
-    }
-
     @TaskAction
     fun instrumentCode(inputChanges: InputChanges) = runCatching {
         ant.invokeMethod(
@@ -271,6 +266,11 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                 System.clearProperty("java.awt.headless")
             }
         }
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Code instrumentation task."
     }
 
     companion object : Registrable {

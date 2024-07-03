@@ -16,14 +16,14 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 @UntrackedTask(because = "Prints output")
 abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionAware {
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Prints bundled plugins within the currently targeted IntelliJ-based IDE release."
-    }
-
     @TaskAction
     fun printBundledPlugins() = productInfo.bundledPlugins.forEach {
         println(it)
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Prints bundled plugins within the currently targeted IntelliJ-based IDE release."
     }
 
     companion object : Registrable {

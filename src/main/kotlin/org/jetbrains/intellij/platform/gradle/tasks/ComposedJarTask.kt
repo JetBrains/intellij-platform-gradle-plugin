@@ -9,12 +9,18 @@ import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 @CacheableTask
 abstract class ComposedJarTask : Jar() {
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Prepares a Jar archive with all the modules of the plugin."
+    }
 
     companion object : Registrable {
         override fun register(project: Project) =

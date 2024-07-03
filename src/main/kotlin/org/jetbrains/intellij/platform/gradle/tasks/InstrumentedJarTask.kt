@@ -8,11 +8,17 @@ import org.gradle.api.tasks.CacheableTask
 import org.gradle.api.tasks.bundling.Jar
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.INSTRUMENT_CODE
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
 
 @CacheableTask
 abstract class InstrumentedJarTask : Jar() {
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Creates a JAR file with instrumented classes."
+    }
 
     companion object : Registrable {
         private const val CLASSIFIER = "instrumented"

@@ -37,14 +37,14 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
     @get:Input
     abstract val productsReleases: ListProperty<String>
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Prints all available IntelliJ-based IDE releases with their updates."
-    }
-
     @TaskAction
     fun printProductsReleases() = productsReleases.get().forEach {
         println(it)
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Prints all available IntelliJ-based IDE releases with their updates."
     }
 
     companion object : Registrable {

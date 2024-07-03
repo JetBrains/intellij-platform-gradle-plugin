@@ -64,11 +64,6 @@ abstract class VerifyPluginStructureTask : DefaultTask() {
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure."
-    }
-
     @TaskAction
     fun verifyPlugin() {
         val creationResult = IdePluginManager.createManager().createPlugin(pluginDirectory.asPath)
@@ -99,6 +94,11 @@ abstract class VerifyPluginStructureTask : DefaultTask() {
         if (failBuild && !ignoreFailures.get()) {
             throw GradleException("Plugin verification failed.")
         }
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure."
     }
 
     companion object : Registrable {

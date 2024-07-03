@@ -101,11 +101,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
     private val log = Logger(javaClass)
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Validates the plugin project configuration"
-    }
-
     @TaskAction
     fun verifyPluginConfiguration() {
         val isModule = module.get()
@@ -205,6 +200,11 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     private operator fun JavaVersion?.compareTo(other: JavaVersion?) = other?.let { this?.compareTo(it) } ?: 0
 
     private operator fun Version?.compareTo(other: Version?) = other?.let { this?.compareTo(it) } ?: 0
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Validates the plugin project configuration"
+    }
 
     companion object : Registrable {
         override fun register(project: Project) =

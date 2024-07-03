@@ -29,11 +29,6 @@ import kotlin.io.path.pathString
 @UntrackedTask(because = "Should always run")
 abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, IntelliJPlatformVersionAware {
 
-    init {
-        group = Plugin.GROUP_NAME
-        description = "Runs the IDE instance with the developed plugin installed."
-    }
-
     /**
      * Executes the task, configures and runs the IDE.
      */
@@ -56,6 +51,11 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
         systemPropertyDefault("idea.auto.reload.plugins", autoReload.get())
 
         super.exec()
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Runs the IDE instance with the developed plugin installed."
     }
 
     companion object : Registrable {
