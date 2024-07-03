@@ -10,6 +10,7 @@ import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -50,6 +51,8 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
             }
 
             prepareSandboxTask {
+                group = Plugin.GROUP_NAME
+
                 sandboxDirectory = this@all.sandboxDirectory.orElse(basePrepareSandboxTask.flatMap { it.sandboxDirectory })
                 splitMode = this@all.splitMode.orElse(basePrepareSandboxTask.flatMap { it.splitMode })
                 splitModeTarget = this@all.splitModeTarget.orElse(basePrepareSandboxTask.flatMap { it.splitModeTarget })
@@ -57,6 +60,8 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
             }
 
             task {
+                group = Plugin.GROUP_NAME
+
                 applySandboxFrom(prepareSandboxTask)
                 intelliJPlatformConfiguration = this@all.intelliJPlatformConfiguration
                 intelliJPlatformPluginConfiguration = this@all.intellijPlatformPluginConfiguration
