@@ -7,9 +7,7 @@ import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.tasks.Input
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
-import org.jetbrains.intellij.platform.gradle.artifacts.repositories.JetBrainsCdnArtifactsRepository
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
-import org.jetbrains.intellij.platform.gradle.shim.JetBrainsCdnArtifactoryShim
 import org.jetbrains.intellij.platform.gradle.shim.PluginArtifactoryShim
 import org.jetbrains.intellij.platform.gradle.shim.Shim
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -33,14 +31,6 @@ abstract class ShimManagerService : BuildService<ShimManagerService.Parameters>,
             val port = parameters.port.get()
             log.info("Creating new shim server for ${repository.url} (port: ${port})")
             PluginArtifactoryShim(repository, repositoryType, port).start()
-        }
-    }
-
-    fun start(repository: JetBrainsCdnArtifactsRepository): Shim.Server {
-        return shims.computeIfAbsent(repository.url.toString()) {
-            val port = parameters.port.get()
-            log.info("Creating new shim server for ${repository.url} (port: ${port})")
-            JetBrainsCdnArtifactoryShim(port).start()
         }
     }
 

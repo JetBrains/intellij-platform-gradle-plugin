@@ -21,6 +21,7 @@ import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.models.*
@@ -40,7 +41,6 @@ import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.*
 import kotlin.math.absoluteValue
-
 
 /**
  * Helper class for managing dependencies on the IntelliJ Platform in Gradle projects.
@@ -162,6 +162,7 @@ class IntelliJPlatformDependenciesHelper(
     internal fun addIntelliJPlatformDependency(
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
+        useInstallerProvider: Provider<Boolean>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         fallbackToBase: Boolean = false,
         action: DependencyAction = {},
@@ -182,7 +183,10 @@ class IntelliJPlatformDependenciesHelper(
         configurations[configurationName].dependencies.addLater(finalTypeProvider.zip(finalVersionProvider) { type, version ->
             when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-                else -> dependencies.createIntelliJPlatform(type, version)
+                else -> when (useInstallerProvider.get()) {
+                    true -> dependencies.createIntelliJPlatformInstaller(type, version)
+                    false -> dependencies.createIntelliJPlatform(type, version)
+                }
             }.apply(action)
         })
     }
@@ -206,7 +210,7 @@ class IntelliJPlatformDependenciesHelper(
 
             when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-                else -> dependencies.createIntelliJPlatform(type, version)
+                else -> dependencies.createIntelliJPlatformInstaller(type, version)
             }.apply(action).also { dependency ->
                 val dependencyConfiguration = configurations.maybeCreate("${dependencyConfigurationName}_$notation").apply {
                     dependencies.add(dependency)
@@ -516,13 +520,13 @@ class IntelliJPlatformDependenciesHelper(
         }.orNull
 
         requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: $version" }
-        requireNotNull(type.cdn) { "Specified type '$type' has no artifact coordinates available." }
+        requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
 
         val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
 
         return create(
-            group = type.cdn.groupId,
-            name = type.cdn.artifactId,
+            group = type.installer.groupId,
+            name = type.installer.artifactId,
             classifier = classifier,
             ext = extension,
             version = version,
@@ -557,6 +561,34 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
+     * Creates IntelliJ Platform dependency based on the provided version and type.
+     *
+     * @param version IntelliJ Platform version
+     * @param type IntelliJ Platform type
+     */
+    private fun DependencyHandler.createIntelliJPlatformInstaller(type: IntelliJPlatformType, version: String): Dependency {
+        requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
+
+        val (extension, classifier) = with(OperatingSystem.current()) {
+            val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
+            when {
+                isWindows -> ArtifactType.ZIP to "win"
+                isLinux -> ArtifactType.TAR_GZ to arch
+                isMacOsX -> ArtifactType.DMG to arch
+                else -> throw GradleException("Unsupported operating system: $name")
+            }
+        }.let { (type, classifier) -> type.toString() to classifier }
+
+        return create(
+            group = type.installer.groupId,
+            name = type.installer.artifactId,
+            version = version,
+            ext = extension,
+            classifier = classifier,
+        )
+    }
+
+    /**
      * Creates a dependency on a local IntelliJ Platform instance.
      *
      * @param localPath Path to the local IntelliJ Platform
@@ -569,7 +601,7 @@ class IntelliJPlatformDependenciesHelper(
         // TODO: remove [hash]
         val hash = artifactPath.hashCode().absoluteValue % 1000
         val type = localProductInfo.productCode.toIntelliJPlatformType()
-        val coordinates = type.maven ?: type.cdn
+        val coordinates = type.maven ?: type.installer
         requireNotNull(coordinates) { "Specified type '$type' has no dependency available." }
 
         return create(

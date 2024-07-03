@@ -15,15 +15,11 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.artifacts.repositories.JetBrainsCdnArtifactsRepository
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.flow.StopShimServerAction
 import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
-import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.net.URI
 import java.nio.file.Path
 import kotlin.io.path.pathString
@@ -38,8 +34,6 @@ class IntelliJPlatformRepositoriesHelper(
     private val gradle: Gradle,
     private val rootProjectDirectory: Path,
 ) {
-
-    private val log = Logger(javaClass)
 
     private val shimManager = gradle.sharedServices.registerIfAbsent(Services.SHIM_MANAGER, ShimManagerService::class) {
         parameters.port = 7348 // TODO: read from Gradle properties
@@ -146,64 +140,6 @@ class IntelliJPlatformRepositoriesHelper(
         }.apply(action)
 
         return pluginArtifactRepository
-    }
-
-    internal fun createJetBrainsCdnArtifactsRepository(
-        name: String,
-        url: String,
-        action: IvyRepositoryAction,
-    ): JetBrainsCdnArtifactsRepository {
-        log.info("Creating repository: $name")
-
-        val repository = objects.newInstance<JetBrainsCdnArtifactsRepository>(name, URI(url), true)
-        val server = shimManager.get().start(repository)
-
-        flowScope.always(StopShimServerAction::class) {
-            parameters.url = repository.url
-            parameters.buildResult = flowProviders.buildWorkResult.map { !it.failure.isPresent }
-        }
-
-        repositories.ivy {
-            this.url = server.url
-            this.isAllowInsecureProtocol = true
-
-            patternLayout {
-                ivy("[organization]/[module]/[revision]/descriptor.ivy")
-            }
-
-            metadataSources {
-                ivyDescriptor()
-                ignoreGradleMetadataRedirection()
-            }
-        }.apply(action)
-
-        repositories.ivy {
-            this.url = URI(Locations.DOWNLOAD)
-            this.name = "JetBrains CDN"
-
-            patternLayout {
-                listOf(
-                    "[organization]/[module]-[revision](-[classifier]).[ext]",
-                    "[organization]/[module]-[revision](.[classifier]).[ext]",
-                    "[organization]/[revision]/[module]-[revision](-[classifier]).[ext]",
-                    "[organization]/[revision]/[module]-[revision](.[classifier]).[ext]",
-                ).forEach(::artifact)
-            }
-
-            metadataSources { artifact() }
-
-            repositories.exclusiveContent {
-                forRepositories(this@ivy)
-                filter {
-                    IntelliJPlatformType.values()
-                        .filter { it != IntelliJPlatformType.AndroidStudio }
-                        .mapNotNull { it.cdn }
-                        .forEach { includeModule(it.groupId, it.artifactId) }
-                }
-            }
-        }
-
-        return repository
     }
 
     internal fun createLocalIvyRepository(repositoryName: String, action: IvyRepositoryAction = {}) = repositories.ivy {

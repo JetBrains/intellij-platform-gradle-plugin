@@ -2,9 +2,19 @@
 
 ## [next]
 
+### Added
+
+- Added `useInstaller: Boolean` property to `create(type, version)` (and product-specific) dependency helpers to distinguish the type of artifacts; `true` by default
+- Added `useInstaller: Boolean` property to configuration when creating custom tasks with `intelliJPlatformTesting`; `true` by default
+
 ### Changed
 
-- Rename `jetBrainsCdn()` repository helper to `jetbrainsCdn()`
+- Rename `jetBrainsCdn()` repository helper to `jetbrainsIdeInstallers()`
+- Rename `binaryReleasesAndroidStudio()` repository helper to `androidStudioInstallers()`
+
+### Removed
+
+- Resolving IntelliJ Platform artifacts from JetBrains CDN using common coordinates
 
 ## [2.0.0-beta8] - 2024-07-01
 

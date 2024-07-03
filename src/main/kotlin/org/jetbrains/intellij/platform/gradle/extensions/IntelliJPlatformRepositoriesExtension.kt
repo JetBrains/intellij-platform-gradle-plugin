@@ -147,13 +147,43 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     )
 
     /**
+     * Adds a repository for accessing IntelliJ Platform binary releases.
+     *
+     * @param action The action to be performed on the repository. Defaults to an empty action.
+     */
+    fun jetbrainsIdeInstallers(action: IvyRepositoryAction = {}): IvyArtifactRepository = delegate.createIvyRepository(
+        name = "JetBrains IDE Installers",
+        url = Locations.JETBRAINS_IDES_INSTALLERS,
+        patterns = listOf(
+            "[organization]/[module]-[revision](-[classifier]).[ext]",
+            "[organization]/[module]-[revision](.[classifier]).[ext]",
+            "[organization]/[revision]/[module]-[revision](-[classifier]).[ext]",
+            "[organization]/[revision]/[module]-[revision](.[classifier]).[ext]",
+        ),
+        action = {
+            repositories.exclusiveContent {
+                forRepositories(this@createIvyRepository)
+                filter {
+                    IntelliJPlatformType.values()
+                        .filter { it != IntelliJPlatformType.AndroidStudio }
+                        .mapNotNull { it.installer }
+                        .forEach {
+                            includeModule(it.groupId, it.artifactId)
+                        }
+                }
+            }
+            action()
+        },
+    )
+
+    /**
      * Adds a repository for accessing Android Studio binary releases.
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
-    fun binaryReleasesAndroidStudio(action: IvyRepositoryAction = {}) = delegate.createIvyRepository(
-        name = "Android Studio Binary Releases",
-        url = Locations.ANDROID_STUDIO_BINARY_RELEASES,
+    fun androidStudioInstallers(action: IvyRepositoryAction = {}) = delegate.createIvyRepository(
+        name = "Android Studio Installers",
+        url = Locations.ANDROID_STUDIO_INSTALLERS,
         patterns = listOf(
             "/ide-zips/[revision]/[artifact]-[revision]-[classifier].[ext]",
             "/install/[revision]/[artifact]-[revision]-[classifier].[ext]",
@@ -162,12 +192,10 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
             repositories.exclusiveContent {
                 forRepositories(this@createIvyRepository)
                 filter {
-                    IntelliJPlatformType.AndroidStudio.cdn?.let {
-                        includeModule(it.groupId, it.artifactId)
-                    }
-                    IntelliJPlatformType.AndroidStudio.maven?.let {
-                        includeModule(it.groupId, it.artifactId)
-                    }
+                    val coordinates = IntelliJPlatformType.AndroidStudio.installer
+                    requireNotNull(coordinates)
+
+                    includeModule(coordinates.groupId, coordinates.artifactId)
                 }
             }
             action()
@@ -192,23 +220,17 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
-    fun jetbrainsCdn(action: IvyRepositoryAction = {}) = delegate.createJetBrainsCdnArtifactsRepository(
-        name = "JetBrains CDN artifacts repository",
-        url = Locations.DOWNLOAD,
-        action = action,
-    )
-
     /**
      * Applies a set of recommended repositories required for running the most common tasks provided by the IntelliJ Platform Gradle Plugin:
      * - [localPlatformArtifacts] — required to use plugins bundled with IntelliJ Platform or refer to the local IDE
-     * - [jetbrainsCdn] — required to use IntelliJ Platform distributed via JetBrains CDN
      * - [intellijDependencies] — required for resolving extra IntelliJ Platform dependencies used for running specific tasks
      * - [releases] and [snapshots] — IntelliJ Platform releases channels
      * - [marketplace] — JetBrains Marketplace plugins repository
      * - [binaryReleases] — JetBrains IDEs releases required for running the IntelliJ Plugin Verifier
      */
     fun defaultRepositories() {
-        jetbrainsCdn()
+        jetbrainsIdeInstallers()
+        androidStudioInstallers()
         localPlatformArtifacts()
         intellijDependencies()
         releases()

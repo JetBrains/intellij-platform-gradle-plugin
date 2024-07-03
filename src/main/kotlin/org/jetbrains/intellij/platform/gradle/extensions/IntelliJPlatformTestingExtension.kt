@@ -73,6 +73,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
         abstract val type: Property<IntelliJPlatformType>
         abstract val version: Property<String>
         abstract val localPath: DirectoryProperty
+        abstract val useInstaller: Property<Boolean>
 
         abstract val sandboxDirectory: DirectoryProperty
 
@@ -113,6 +114,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
                 type = type,
                 version = version,
                 configurationName = this@create.name,
+                useInstaller = useInstaller.orElse(true),
             )
         }
 

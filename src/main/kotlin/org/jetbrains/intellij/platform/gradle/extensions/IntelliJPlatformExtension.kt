@@ -704,6 +704,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             fun ide(type: IntelliJPlatformType, version: String) = delegate.addIntelliJPlatformDependency(
                 typeProvider = delegate.provider { type },
                 versionProvider = delegate.provider { version },
+                useInstallerProvider = delegate.provider { true },
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
@@ -716,6 +717,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             fun ide(type: String, version: String) = delegate.addIntelliJPlatformDependency(
                 typeProvider = delegate.provider { type },
                 versionProvider = delegate.provider { version },
+                useInstallerProvider = delegate.provider { true },
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
@@ -728,6 +730,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             fun ide(type: Provider<*>, version: Provider<String>) = delegate.addIntelliJPlatformDependency(
                 typeProvider = type,
                 versionProvider = version,
+                useInstallerProvider = delegate.provider { true },
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 

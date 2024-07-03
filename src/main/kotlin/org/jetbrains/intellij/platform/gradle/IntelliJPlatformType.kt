@@ -19,102 +19,102 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
 enum class IntelliJPlatformType(
     val code: String,
     val maven: Coordinates?,
-    val cdn: Coordinates?,
+    val installer: Coordinates?,
 ) {
     AndroidStudio(
         code = "AI",
         maven = null,
-        cdn = Coordinates("com.google.android.studio", "android-studio"),
+        installer = Coordinates("com.google.android.studio", "android-studio"),
     ),
     Aqua(
         code = "QA",
         maven = null,
-        cdn = Coordinates("aqua", "aqua"),
+        installer = Coordinates("aqua", "aqua"),
     ),
     CLion(
         code = "CL",
         maven = Coordinates("com.jetbrains.intellij.clion", "clion"),
-        cdn = Coordinates("cpp", "CLion"),
+        installer = Coordinates("cpp", "CLion"),
     ),
     DataGrip(
         code = "DB",
         maven = null,
-        cdn = Coordinates("datagrip", "datagrip"),
+        installer = Coordinates("datagrip", "datagrip"),
     ),
     DataSpell(
         code = "DS",
         maven = null,
-        cdn = Coordinates("python", "dataspell"),
+        installer = Coordinates("python", "dataspell"),
     ),
     FleetBackend(
         code = "FLIJ",
         maven = Coordinates("com.jetbrains.intellij.fleetBackend", "fleetBackend"),
-        cdn = null,
+        installer = null,
     ),
     Gateway(
         code = "GW",
         maven = Coordinates("com.jetbrains.intellij.gateway", "gateway"),
-        cdn = Coordinates("idea/gateway", "JetBrainsGateway"),
+        installer = Coordinates("idea/gateway", "JetBrainsGateway"),
     ),
     GoLand(
         code = "GO",
         maven = Coordinates("com.jetbrains.intellij.goland", "goland"),
-        cdn = Coordinates("go", "goland"),
+        installer = Coordinates("go", "goland"),
     ),
     IntellijIdeaCommunity(
         code = "IC",
         maven = Coordinates("com.jetbrains.intellij.idea", "ideaIC"),
-        cdn = Coordinates("idea", "ideaIC"),
+        installer = Coordinates("idea", "ideaIC"),
     ),
     IntellijIdeaUltimate(
         code = "IU",
         maven = Coordinates("com.jetbrains.intellij.idea", "ideaIU"),
-        cdn = Coordinates("idea", "ideaIU"),
+        installer = Coordinates("idea", "ideaIU"),
     ),
     MPS(
         code = "MPS",
         maven = null,
-        cdn = Coordinates("mps", "MPS"),
+        installer = Coordinates("mps", "MPS"),
     ),
     PhpStorm(
         code = "PS",
         maven = Coordinates("com.jetbrains.intellij.phpstorm", "phpstorm"),
-        cdn = Coordinates("webide", "PhpStorm"),
+        installer = Coordinates("webide", "PhpStorm"),
     ),
     PyCharmProfessional(
         code = "PY",
         maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPY"),
-        cdn = Coordinates("python", "pycharm-professional"),
+        installer = Coordinates("python", "pycharm-professional"),
     ),
     PyCharmCommunity(
         code = "PC",
         maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPC"),
-        cdn = Coordinates("python", "pycharm-community"),
+        installer = Coordinates("python", "pycharm-community"),
     ),
     Rider(
         code = "RD",
         maven = Coordinates("com.jetbrains.intellij.rider", "riderRD"),
-        cdn = Coordinates("rider", "JetBrains.Rider"),
+        installer = Coordinates("rider", "JetBrains.Rider"),
     ),
     RubyMine(
         code = "RM",
         maven = null,
-        cdn = Coordinates("ruby", "RubyMine"),
+        installer = Coordinates("ruby", "RubyMine"),
     ),
     RustRover(
         code = "RR",
         maven = Coordinates("com.jetbrains.intellij.rustrover", "RustRover"),
-        cdn = Coordinates("rustrover", "RustRover"),
+        installer = Coordinates("rustrover", "RustRover"),
     ),
     WebStorm(
         code = "WS",
         maven = Coordinates("com.jetbrains.intellij.webstorm", "webstorm"),
-        cdn = Coordinates("webstorm", "WebStorm"),
+        installer = Coordinates("webstorm", "WebStorm"),
     ),
     Writerside(
         code = "WRS",
         maven = Coordinates("com.jetbrains.intellij.idea", "writerside"),
-        cdn = Coordinates("writerside", "writerside"),
+        installer = Coordinates("writerside", "writerside"),
     ),
     ;
 
