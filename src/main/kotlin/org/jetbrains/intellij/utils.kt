@@ -104,7 +104,7 @@ internal fun String.resolveIdeHomeVariable(ideDir: Path) =
             .let { entry ->
                 val (_, value) = entry.split("=")
                 when {
-                    Path.of(value).exists() -> entry
+                    runCatching { Path.of(value).exists() }.getOrElse { false } -> entry
                     else -> entry.replace("/Contents", "")
                 }
             }
@@ -190,7 +190,7 @@ fun releaseType(version: String) = when {
             version.endsWith(RELEASE_SUFFIX_EAP_CANDIDATE) ||
             version.endsWith(RELEASE_SUFFIX_CUSTOM_SNAPSHOT) ||
             version.matches(MAJOR_VERSION_PATTERN.toRegex())
-    -> RELEASE_TYPE_SNAPSHOTS
+        -> RELEASE_TYPE_SNAPSHOTS
 
     version.endsWith(RELEASE_SUFFIX_SNAPSHOT) -> RELEASE_TYPE_NIGHTLY
     else -> RELEASE_TYPE_RELEASES
@@ -314,7 +314,7 @@ internal fun getCurrentPluginVersion() = IntelliJPlugin::class.java
     }.getOrNull()
 
 internal val <T> Property<T>.isSpecified: Boolean
-    get() = isPresent && when(val value = orNull) {
+    get() = isPresent && when (val value = orNull) {
         null -> false
         is String -> value.isNotEmpty()
         is RegularFile -> value.asFile.exists()

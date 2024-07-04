@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Fixed `InvalidPathException: Illegal char <:>` exception on Windows when resolving IntelliJ Platform system properties
+
 ## [1.17.4] - 2024-06-14
 
 ### Added
