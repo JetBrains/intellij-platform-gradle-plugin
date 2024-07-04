@@ -6,7 +6,6 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
@@ -20,7 +19,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
-import org.jetbrains.intellij.platform.gradle.utils.settings
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
@@ -38,10 +36,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     layout: ProjectLayout,
     objects: ObjectFactory,
     providers: ProviderFactory,
-    repositories: RepositoryHandler,
     resources: ResourceHandler,
     rootProjectDirectory: Path,
-    settingsRepositories: RepositoryHandler,
 ) : ExtensionAware {
 
     internal val intellijPlatformPluginDependencyConfigurationName = objects.property<String>()
@@ -53,10 +49,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
         layout,
         objects,
         providers,
-        repositories,
         resources,
         rootProjectDirectory,
-        settingsRepositories,
     )
 
     /**
@@ -241,7 +235,6 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
         versionProvider = version
     )
 
-    @Suppress("UnstableApiUsage")
     companion object : Registrable<IntelliJPlatformPluginsExtension> {
         override fun register(project: Project, target: Any) =
             target.configureExtension<IntelliJPlatformPluginsExtension>(
@@ -251,10 +244,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
                 project.layout,
                 project.objects,
                 project.providers,
-                project.repositories,
                 project.resources,
                 project.rootProjectPath,
-                project.settings.dependencyResolutionManagement.repositories,
             )
     }
 }

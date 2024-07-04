@@ -6,6 +6,7 @@
 
 - Added `useInstaller: Boolean` property to `create(type, version)` (and product-specific) dependency helpers to distinguish the type of artifacts; `true` by default
 - Added `useInstaller: Boolean` property to configuration when creating custom tasks with `intelliJPlatformTesting`; `true` by default
+- Introduce `create(notation: String, useInstaller: Boolean)` dependency helper
 
 ### Changed
 

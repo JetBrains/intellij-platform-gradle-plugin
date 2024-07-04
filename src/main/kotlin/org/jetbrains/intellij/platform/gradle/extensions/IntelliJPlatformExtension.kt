@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.extensions
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
@@ -676,10 +675,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             layout: ProjectLayout,
             objects: ObjectFactory,
             providers: ProviderFactory,
-            repositories: RepositoryHandler,
             resources: ResourceHandler,
             rootProjectDirectory: Path,
-            settingsRepositories: RepositoryHandler,
             private val extensionProvider: Provider<IntelliJPlatformExtension>,
         ) {
 
@@ -689,10 +686,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 layout,
                 objects,
                 providers,
-                repositories,
                 resources,
                 rootProjectDirectory,
-                settingsRepositories,
             )
 
             /**
@@ -848,7 +843,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             @Suppress("FunctionName")
             fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) = delegate.createProductReleasesValueSource(configure)
 
-            @Suppress("UnstableApiUsage")
             companion object : Registrable<Ides> {
                 override fun register(project: Project, target: Any) =
                     target.configureExtension<Ides>(
@@ -858,10 +852,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         project.layout,
                         project.objects,
                         project.providers,
-                        project.repositories,
                         project.resources,
                         project.rootProjectPath,
-                        project.settings.dependencyResolutionManagement.repositories,
                         project.extensionProvider,
                     )
             }

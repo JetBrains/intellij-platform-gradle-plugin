@@ -7,7 +7,6 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
@@ -22,7 +21,6 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
-import org.jetbrains.intellij.platform.gradle.utils.settings
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
@@ -39,7 +37,6 @@ import kotlin.io.path.absolute
  * and Marketplace ZIP Signer.
  *
  * @param configurations The Gradle [ConfigurationContainer] to manage configurations.
- * @param repositories The Gradle [RepositoryHandler] to manage repositories.
  * @param dependencies The Gradle [DependencyHandler] to manage dependencies.
  * @param providers The Gradle [ProviderFactory] to create providers.
  * @param layout The Gradle [ProjectLayout] to manage layout providers.
@@ -53,10 +50,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     layout: ProjectLayout,
     objects: ObjectFactory,
     providers: ProviderFactory,
-    repositories: RepositoryHandler,
     resources: ResourceHandler,
     rootProjectDirectory: Path,
-    settingsRepositories: RepositoryHandler,
 ) {
 
     private val delegate = IntelliJPlatformDependenciesHelper(
@@ -65,10 +60,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         layout,
         objects,
         providers,
-        repositories,
         resources,
         rootProjectDirectory,
-        settingsRepositories,
     )
 
     /**
@@ -1120,7 +1113,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         pathProvider = path,
     )
 
-    @Suppress("UnstableApiUsage")
     companion object : Registrable<IntelliJPlatformDependenciesExtension> {
         override fun register(project: Project, target: Any) =
             target.configureExtension<IntelliJPlatformDependenciesExtension>(
@@ -1130,10 +1122,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 project.layout,
                 project.objects,
                 project.providers,
-                project.repositories,
                 project.resources,
                 project.rootProject.rootDir.toPath().absolute(),
-                project.settings.dependencyResolutionManagement.repositories,
             )
     }
 }

@@ -9,7 +9,6 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
@@ -35,7 +34,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.io.FileReader
-import java.net.URL
 import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.*
@@ -49,10 +47,8 @@ import kotlin.math.absoluteValue
  * @param layout The Gradle `ProjectLayout` used for managing project layout.
  * @param objects The Gradle `ObjectFactory` used for creating objects.
  * @param providers The Gradle `ProviderFactory` used for creating providers.
- * @param repositories The Gradle `RepositoryHandler` used for managing repositories.
  * @param resources The Gradle `ResourceHandler` used for managing resources.
  * @param rootProjectDirectory The root directory of the Gradle project.
- * @param settingsRepositories The Gradle `RepositoryHandler` used for retrieving repositories declared in settings.
  */
 class IntelliJPlatformDependenciesHelper(
     private val configurations: ConfigurationContainer,
@@ -60,20 +56,14 @@ class IntelliJPlatformDependenciesHelper(
     private val layout: ProjectLayout,
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,
-    private val repositories: RepositoryHandler,
     private val resources: ResourceHandler,
     private val rootProjectDirectory: Path,
-    private val settingsRepositories: RepositoryHandler,
 ) {
 
     private val log = Logger(javaClass)
 
     private val baseType = objects.property<IntelliJPlatformType>()
     private val baseVersion = objects.property<String>()
-    private val repositoryUrls
-        get() = (repositories.urls() + settingsRepositories.urls())
-            .map { URL(it) }
-            .filterNot { it.protocol == "http" }
 
     /**
      * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
