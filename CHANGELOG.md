@@ -14,6 +14,7 @@
 - Rewrite the latest/closest version resolution mechanism for performance reasons
 - Rewrite the latest Gradle plugin check for performance reasons
 - Enhance `PrintBundledPluginsTask` output
+- IntelliJPlatformTestingExtension: make the produced object `Buildable` so it can be used for `dependsOn()` purposes
 
 ### Fixed
 
