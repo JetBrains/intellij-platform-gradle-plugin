@@ -170,6 +170,36 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
+     */
+    fun create(notation: String, useInstaller: Boolean = true) {
+        val (type, version) = notation.parseIdeNotation()
+
+        delegate.addIntelliJPlatformDependency(
+            typeProvider = delegate.provider { type },
+            versionProvider = delegate.provider { version },
+            useInstallerProvider = delegate.provider { useInstaller },
+        )
+    }
+
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
+     */
+    fun create(notation: Provider<String>, useInstaller: Boolean = true) {
+        val parsedNotationProvider = notation.map { it.parseIdeNotation() }
+
+        delegate.addIntelliJPlatformDependency(
+            typeProvider = parsedNotationProvider.map { it.first },
+            versionProvider = parsedNotationProvider.map { it.second },
+            useInstallerProvider = delegate.provider { useInstaller },
+        )
+    }
+
+    /**
      * Adds a dependency on the custom IntelliJ Platform with a fallback to the base IntelliJ Platform.
      *
      * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
