@@ -138,7 +138,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
-                        zipSigner(org.jetbrains.intellij.platform.gradle.DependencyVersion.Exact("0.1.24"))
+                        zipSigner("0.1.24")
                     }
                 }
                 """.trimIndent()
@@ -147,7 +147,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 marketplaceZipSigner - Marketplace ZIP Signer
-                \--- org.jetbrains:marketplace-zip-signer:0.1.24
+                \--- org.jetbrains:marketplace-zip-signer:{prefer 0.1.24} -> 0.1.24
                 """.trimIndent(),
                 output,
             )
@@ -186,7 +186,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 marketplaceZipSigner - Marketplace ZIP Signer
-                \--- org.jetbrains:marketplace-zip-signer:$latestVersion
+                \--- org.jetbrains:marketplace-zip-signer:{prefer +} -> $latestVersion
                 """.trimIndent(),
                 output,
             )

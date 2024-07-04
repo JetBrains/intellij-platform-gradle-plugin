@@ -35,7 +35,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
             output containsText """
                 intellijPlatformJavaCompiler - Java Compiler used by Ant tasks
-                \--- com.jetbrains.intellij.java:java-compiler-ant-tasks:223.8836.41
+                \--- com.jetbrains.intellij.java:java-compiler-ant-tasks:{strictly [223, 223.8836.41]; prefer 223.8836.41} -> 223.8836.41
                      +--- com.jetbrains.intellij.java:java-gui-forms-compiler:223.8836.41
                      |    +--- com.jetbrains.intellij.platform:util-jdom:223.8836.41
                      |    |    +--- jaxen:jaxen:1.2.0

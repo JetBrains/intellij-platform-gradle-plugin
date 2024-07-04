@@ -730,7 +730,7 @@ class IntelliJPlatformDependenciesHelper(
 
             Constraints.CLOSEST_VERSION ->
                 version {
-                    strictly("[${buildNumber.major}, $buildNumber[")
+                    strictly("[${buildNumber.major}, $buildNumber]")
                     prefer("$buildNumber")
                 }
 
