@@ -26,8 +26,11 @@ import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MA
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
+import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
+import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
+import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
@@ -380,6 +383,25 @@ class IntelliJPlatformDependenciesHelper(
     )
 
     /**
+     * A base method for adding a dependency on JetBrains Runtime.
+     *
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addJetBrainsRuntimeLocalDependency(
+        localPathProvider: Provider<*>,
+        configurationName: String = Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(localPathProvider.map { localPath ->
+        val artifactPath = resolvePath(localPath)
+            .takeIf { it.exists() }
+            ?.resolveJavaRuntimeDirectory()
+            .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
+
+        dependencies.createJetBrainsRuntimeLocal(artifactPath).apply(action)
+    })
+
+    /**
      * A base method for adding a dependency on IntelliJ Plugin Verifier.
      *
      * @param version The provider of the IntelliJ Plugin Verifier version.
@@ -648,12 +670,9 @@ class IntelliJPlatformDependenciesHelper(
      * @param localPath Path to the local plugin
      */
     private fun DependencyHandler.createIntelliJPlatformLocalPlugin(localPath: Any): Dependency {
-        val artifactPath = when (localPath) {
-            is String -> localPath
-            is File -> localPath.absolutePath
-            is Directory -> localPath.asPath.pathString
-            else -> throw IllegalArgumentException("Invalid argument type: '${localPath.javaClass}'. Supported types: String, File, or Directory.")
-        }.let { Path(it) }.takeIf { it.exists() }.let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
+        val artifactPath = resolvePath(localPath)
+            .takeIf { it.exists() }
+            .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
 
         val plugin by lazy {
             val pluginPath = when {
@@ -674,6 +693,42 @@ class IntelliJPlatformDependenciesHelper(
             group = Configurations.Dependencies.LOCAL_PLUGIN_GROUP,
             name = plugin.pluginId ?: artifactPath.name,
             version = plugin.pluginVersion ?: "0.0.0",
+        ).apply {
+            createIvyDependencyFile(
+                localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
+                publications = listOf(artifactPath.toArtifact()),
+            )
+        }
+    }
+
+    /**
+     * Creates a dependency on a local JetBrains Runtime instance.
+     *
+     * @param artifactPath Path to the local JetBrains Runtime
+     */
+    private fun DependencyHandler.createJetBrainsRuntimeLocal(artifactPath: Path): Dependency {
+        val hash = artifactPath.hashCode().absoluteValue % 1000
+        val runtimeMetadata = providers.of(JavaRuntimeMetadataValueSource::class) {
+            parameters {
+                executable = layout.file(provider {
+                    artifactPath.resolveJavaRuntimeExecutable().toFile()
+                })
+            }
+        }.get()
+
+        val javaVendorVersion = runtimeMetadata["java.vendor.version"]
+        requireNotNull(javaVendorVersion)
+
+        val javaVersion = runtimeMetadata["java.version"]
+        requireNotNull(javaVersion)
+
+        val name = javaVendorVersion.substringBefore(javaVersion.orEmpty()).trim('-')
+        val version = javaVendorVersion.removePrefix(name).trim('-').let { "$it+$hash" }
+
+        return create(
+            group = Configurations.Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
+            name = name,
+            version = version,
         ).apply {
             createIvyDependencyFile(
                 localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),

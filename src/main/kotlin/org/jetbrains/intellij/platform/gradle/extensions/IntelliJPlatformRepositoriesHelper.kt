@@ -169,6 +169,7 @@ class IntelliJPlatformRepositoriesHelper(
                 includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
                 includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
                 includeGroup(Configurations.Dependencies.LOCAL_PLUGIN_GROUP)
+                includeGroup(Configurations.Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP)
             }
         }
         action()

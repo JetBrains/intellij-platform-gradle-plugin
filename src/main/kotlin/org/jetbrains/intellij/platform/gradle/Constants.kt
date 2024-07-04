@@ -113,6 +113,7 @@ object Constants {
         object Dependencies {
             const val LOCAL_IDE_GROUP = "localIde"
             const val LOCAL_PLUGIN_GROUP = "localPlugin"
+            const val LOCAL_JETBRAINS_RUNTIME_GROUP = "localJetBrainsRuntime"
             const val BUNDLED_MODULE_GROUP = "bundledModule"
             const val BUNDLED_PLUGIN_GROUP = "bundledPlugin"
         }

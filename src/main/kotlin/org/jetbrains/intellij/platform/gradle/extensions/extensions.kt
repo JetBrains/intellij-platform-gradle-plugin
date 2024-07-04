@@ -85,6 +85,14 @@ internal fun createIvyDependencyFile(
     }
 }
 
+@Throws(IllegalArgumentException::class)
+internal fun resolvePath(localPath: Any) = when (localPath) {
+    is String -> localPath
+    is File -> localPath.absolutePath
+    is Directory -> localPath.asPath.pathString
+    else -> throw IllegalArgumentException("Invalid argument type: '${localPath.javaClass}'. Supported types: String, File, or Directory.")
+}.let { Path(it) }
+
 /**
  * Resolves the artifact path for the given [localPath] as it may accept different data types.
  *
@@ -93,13 +101,7 @@ internal fun createIvyDependencyFile(
  * @throws IllegalArgumentException if the [localPath] is not of supported types.
  */
 @Throws(IllegalArgumentException::class)
-internal fun resolveArtifactPath(localPath: Any) = when (localPath) {
-    is String -> localPath
-    is File -> localPath.absolutePath
-    is Directory -> localPath.asPath.pathString
-    else -> throw IllegalArgumentException("Invalid argument type: '${localPath.javaClass}'. Supported types: String, File, or Directory.")
-}
-    .let { Path(it) }
+internal fun resolveArtifactPath(localPath: Any) = resolvePath(localPath)
     .let { it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents") }
     .takeIf { it.exists() && it.isDirectory() }
     .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist or is not a directory." } }

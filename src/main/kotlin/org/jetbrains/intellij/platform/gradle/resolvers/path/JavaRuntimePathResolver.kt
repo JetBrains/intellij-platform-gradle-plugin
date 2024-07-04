@@ -117,15 +117,7 @@ class JavaRuntimePathResolver(
         this ?: return null
 
         val baseDirectory = resolveEntry("jbr*") ?: this
-
-        return sequenceOf(
-            { baseDirectory.resolve("jdk/Contents/Home") },
-            { baseDirectory.resolve("Contents/Home") },
-            { baseDirectory.resolve("Home") },
-            { baseDirectory },
-        ).firstNotNullOfOrNull {
-            it().takeIfExists()
-        }
+        return baseDirectory.resolveJavaRuntimeDirectory()
     }
 
     /**
@@ -137,6 +129,16 @@ class JavaRuntimePathResolver(
         this?.resolveJavaRuntimeExecutable().let { this }
     }.getOrNull()
 }
+
+internal fun Path.resolveJavaRuntimeDirectory(): Path? =
+    sequenceOf(
+        { resolve("jdk/Contents/Home") },
+        { resolve("Contents/Home") },
+        { resolve("Home") },
+        { this },
+    ).firstNotNullOfOrNull {
+        it().takeIfExists()
+    }
 
 /**
  * Resolves the path to the Java Runtime executable within the parent directory.

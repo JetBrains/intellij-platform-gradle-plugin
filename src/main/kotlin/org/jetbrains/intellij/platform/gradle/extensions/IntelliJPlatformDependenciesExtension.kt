@@ -740,6 +740,42 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a dependency on JetBrains Runtime local instance.
+     *
+     * @param localPath Path to the local JetBrains Runtime.
+     */
+    fun jetbrainsRuntimeLocal(localPath: String) = delegate.addJetBrainsRuntimeLocalDependency(
+        localPathProvider = delegate.provider { localPath },
+    )
+
+    /**
+     * Adds a dependency on JetBrains Runtime local instance.
+     *
+     * @param localPath Path to the local JetBrains Runtime.
+     */
+    fun jetbrainsRuntimeLocal(localPath: Directory) = delegate.addJetBrainsRuntimeLocalDependency(
+        localPathProvider = delegate.provider { localPath },
+    )
+
+    /**
+     * Adds a dependency on JetBrains Runtime local instance.
+     *
+     * @param localPath Path to the local JetBrains Runtime.
+     */
+    fun jetbrainsRuntimeLocal(localPath: Path) = delegate.addJetBrainsRuntimeLocalDependency(
+        localPathProvider = delegate.provider { localPath },
+    )
+
+    /**
+     * Adds a dependency on JetBrains Runtime local instance.
+     *
+     * @param localPath Path to the local JetBrains Runtime.
+     */
+    fun jetbrainsRuntimeLocal(localPath: Provider<*>) = delegate.addJetBrainsRuntimeLocalDependency(
+        localPathProvider = localPath,
+    )
+
+    /**
      * Adds a dependency on a plugin for IntelliJ Platform.
      *
      * @param id The plugin identifier.
