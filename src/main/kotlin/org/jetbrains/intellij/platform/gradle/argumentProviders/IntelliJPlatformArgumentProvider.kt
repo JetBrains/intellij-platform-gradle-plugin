@@ -122,7 +122,7 @@ class IntelliJPlatformArgumentProvider(
                 .let { entry ->
                     val (_, value) = entry.split("=")
                     when {
-                        Path(value).exists() -> entry
+                        runCatching { Path(value).exists() }.getOrElse { false } -> entry
                         else -> entry.replace("/Contents", "")
                     }
                 }
