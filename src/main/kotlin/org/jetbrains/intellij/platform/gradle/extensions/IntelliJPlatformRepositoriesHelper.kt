@@ -92,15 +92,11 @@ class IntelliJPlatformRepositoriesHelper(
         repositoryType: CustomPluginRepositoryType,
         action: IvyRepositoryAction = {},
     ): PluginArtifactRepository {
-        val pluginArtifactRepository = objects.newInstance<PluginArtifactRepository>().apply {
-            name = repositoryName
-            url = URI(repositoryUrl)
-        }
-
-        val shimServer = shimManager.get().start(pluginArtifactRepository, repositoryType)
+        val repository = objects.newInstance<PluginArtifactRepository>(repositoryName, URI(repositoryUrl), repositoryType)
+        val shimServer = shimManager.get().start(repository)
 
         flowScope.always(StopShimServerAction::class) {
-            parameters.url = pluginArtifactRepository.url
+            parameters.url = repository.url
             parameters.buildResult = flowProviders.buildWorkResult.map { !it.failure.isPresent }
         }
 
@@ -118,7 +114,7 @@ class IntelliJPlatformRepositoriesHelper(
                 ignoreGradleMetadataRedirection()
             }
 
-            pluginArtifactRepository.runCatching {
+            repository.runCatching {
                 getCredentials(PasswordCredentials::class.java).let {
                     credentials(PasswordCredentials::class) {
                         username = it.username
@@ -126,7 +122,7 @@ class IntelliJPlatformRepositoriesHelper(
                     }
                 }
             }
-            pluginArtifactRepository.runCatching {
+            repository.runCatching {
                 getCredentials(HttpHeaderCredentials::class.java).let {
                     credentials(HttpHeaderCredentials::class) {
                         name = it.name
@@ -139,7 +135,7 @@ class IntelliJPlatformRepositoriesHelper(
             }
         }.apply(action)
 
-        return pluginArtifactRepository
+        return repository
     }
 
     internal fun createLocalIvyRepository(repositoryName: String, action: IvyRepositoryAction = {}) = repositories.ivy {

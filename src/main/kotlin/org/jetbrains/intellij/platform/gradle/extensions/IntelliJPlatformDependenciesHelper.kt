@@ -271,9 +271,11 @@ class IntelliJPlatformDependenciesHelper(
         val bundledPlugins = bundledPluginsProvider.orNull
         requireNotNull(bundledPlugins) { "The `intellijPlatform.bundledPlugins` dependency helper was called with no `bundledPlugins` value provided." }
 
-        bundledPlugins.filter { id -> id.isNotBlank() }.map { id ->
-            dependencies.createIntelliJPlatformBundledPlugin(id).apply(action)
-        }
+        bundledPlugins
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .map { dependencies.createIntelliJPlatformBundledPlugin(it) }
+            .onEach(action)
     })
 
     /**
@@ -860,7 +862,6 @@ class IntelliJPlatformDependenciesHelper(
         extension = "zip",
     )
 
-    // TODO: cleanup and migrate to Ivy webserver
     private fun createBundledPluginIvyDependencyFile(bundledPlugin: BundledPlugin, version: String, resolved: List<String> = emptyList()) {
         val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
         val group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP

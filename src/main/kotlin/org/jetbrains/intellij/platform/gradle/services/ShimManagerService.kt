@@ -2,11 +2,12 @@
 
 package org.jetbrains.intellij.platform.gradle.services
 
+import org.gradle.api.GradleException
 import org.gradle.api.provider.Property
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.tasks.Input
-import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
+import org.jetbrains.intellij.platform.gradle.artifacts.repositories.BaseArtifactRepository
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.shim.PluginArtifactoryShim
 import org.jetbrains.intellij.platform.gradle.shim.Shim
@@ -26,11 +27,15 @@ abstract class ShimManagerService : BuildService<ShimManagerService.Parameters>,
 
     private val shims = ConcurrentHashMap<String, Shim.Server>()
 
-    fun start(repository: PluginArtifactRepository, repositoryType: CustomPluginRepositoryType): Shim.Server {
+    fun start(repository: BaseArtifactRepository): Shim.Server {
         return shims.computeIfAbsent(repository.url.toString()) {
             val port = parameters.port.get()
             log.info("Creating new shim server for ${repository.url} (port: ${port})")
-            PluginArtifactoryShim(repository, repositoryType, port).start()
+
+            when (repository) {
+                is PluginArtifactRepository -> PluginArtifactoryShim(repository, port)
+                else -> throw GradleException("Unsupported repository type: ${repository.javaClass.simpleName}")
+            }.start()
         }
     }
 

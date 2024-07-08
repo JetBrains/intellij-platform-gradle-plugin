@@ -12,34 +12,29 @@ import io.undertow.util.StatusCodes
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
 import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
-import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import java.net.HttpURLConnection
 import java.net.URI
 import java.util.*
 
-class PluginArtifactoryShim(
-    private val repository: PluginArtifactRepository,
-    private val repositoryType: CustomPluginRepositoryType,
-    port: Int,
-) : Shim(port) {
+class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : Shim(repository, port) {
 
     private val repositoryListing by lazy {
         repository.url.toURL().let { url ->
             url.openConnection().run {
-                repository.getCredentials(PasswordCredentials::class.java)?.let {
+                repository.getCredentials(PasswordCredentials::class.java).let {
                     val encoded = Base64.getEncoder().encode("${it.username}:${it.password}".toByteArray())
                     setRequestProperty("Authorization", "Basic $encoded")
                 }
-                repository.getCredentials(HttpHeaderCredentials::class.java)?.let {
+                repository.getCredentials(HttpHeaderCredentials::class.java).let {
                     setRequestProperty(it.name, it.value)
                 }
 
                 runCatching {
                     getInputStream().use { inputStream ->
                         inputStream.reader().use { reader ->
-                            CustomPluginRepositoryListingParser.parseListOfPlugins(reader.readText(), url, url, repositoryType)
+                            CustomPluginRepositoryListingParser.parseListOfPlugins(reader.readText(), url, url, repository.type)
                         }
                     }
                 }.onFailure {

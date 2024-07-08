@@ -3,34 +3,28 @@
 package org.jetbrains.intellij.platform.gradle.artifacts.repositories
 
 import org.gradle.api.Action
-import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.AuthenticationSupported
 import org.gradle.api.artifacts.repositories.PasswordCredentials
-import org.gradle.api.artifacts.repositories.UrlArtifactRepository
 import org.gradle.api.credentials.Credentials
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.model.ObjectFactory
 import org.gradle.internal.reflect.Instantiator
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.property
+import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import java.net.URI
 import javax.inject.Inject
 
 abstract class PluginArtifactRepository @Inject constructor(
     objects: ObjectFactory,
     private val instantiator: Instantiator,
-    private val name: String,
-    private val url: URI,
-    private val allowInsecureProtocol: Boolean = true,
-) : ArtifactRepository, UrlArtifactRepository, AuthenticationSupported {
+    name: String,
+    url: URI,
+    val type: CustomPluginRepositoryType,
+    allowInsecureProtocol: Boolean = true,
+) : BaseArtifactRepository(name, url, allowInsecureProtocol), AuthenticationSupported {
 
     private val credentials = objects.property(Credentials::class)
-
-    override fun getName() = name
-
-    override fun getUrl() = url
-
-    override fun isAllowInsecureProtocol() = allowInsecureProtocol
 
     override fun <T : Credentials> getCredentials(credentialsType: Class<T>): T =
         credentials.orNull?.let {

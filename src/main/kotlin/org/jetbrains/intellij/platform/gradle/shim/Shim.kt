@@ -13,6 +13,7 @@ import io.undertow.util.*
 import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.internal.hash.Hashing
+import org.jetbrains.intellij.platform.gradle.artifacts.repositories.BaseArtifactRepository
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.xnio.OptionMap
@@ -30,6 +31,7 @@ internal const val DESCRIPTOR_PATH = "/{$GROUP_ID}/{$ARTIFACT_ID}/{$VERSION}/des
 internal const val DOWNLOAD_PATH = "/{$GROUP_ID}/{$ARTIFACT_ID}/{$VERSION}/download"
 
 abstract class Shim(
+    private val repository: BaseArtifactRepository,
     private val port: Int,
 ) {
     private val portIncrement = AtomicInteger(0)
