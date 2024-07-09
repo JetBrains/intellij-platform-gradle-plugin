@@ -648,7 +648,10 @@ class IntelliJPlatformDependenciesHelper(
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(bundledPluginId: String): Dependency {
         val id = bundledPluginId.trim()
         val plugin = bundledPlugins.get().plugins.find { it.id == id }
-        requireNotNull(plugin) { "Could not find bundled plugin with ID: '$id'. See https://jb.gg/ij-plugin-dependencies." }
+        requireNotNull(plugin) {
+            val javaPlugin = if (id == "java") "Use 'com.intellij.java' instead of 'java'." else ""
+            "Could not find bundled plugin with ID: '$id'. $javaPlugin See https://jb.gg/ij-plugin-dependencies."
+        }
 
         val version = productInfo.get().version
         val artifactPath = platformPath.get()
