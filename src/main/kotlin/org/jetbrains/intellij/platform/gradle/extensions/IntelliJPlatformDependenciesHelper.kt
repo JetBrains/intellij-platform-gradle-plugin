@@ -705,8 +705,15 @@ class IntelliJPlatformDependenciesHelper(
         )
     }
 
-    private fun IdePlugin.collectDependencies(): List<IvyModule.Dependency> {
-        val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name }).toSet()
+    /**
+     * Collects all dependencies on plugins or modules of the current [IdePlugin].
+     * The [path] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
+     *
+     * @param path IDs of already traversed plugins or modules
+     */
+    private fun IdePlugin.collectDependencies(path: List<String> = emptyList()): List<IvyModule.Dependency> {
+        val id = requireNotNull(pluginId)
+        val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name } - id).toSet()
         val buildNumber by lazy { productInfo.get().buildNumber }
         val platformPath by lazy { platformPath.get() }
 
@@ -721,7 +728,10 @@ class IntelliJPlatformDependenciesHelper(
                 IvyModule(
                     info = IvyModule.Info(group, name, version),
                     publications = listOf(artifactPath.toIvyArtifact()),
-                    dependencies = it.collectDependencies(),
+                    dependencies = when {
+                        id in path -> emptyList()
+                        else -> it.collectDependencies(path + id)
+                    },
                 ).write()
 
                 IvyModule.Dependency(group, name, version)
