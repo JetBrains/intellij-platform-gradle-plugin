@@ -523,7 +523,7 @@ class IntelliJPlatformDependenciesHelper(
             }
         }.orNull
 
-        requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: $version" }
+        requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: '$version'" }
         requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
 
         val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
@@ -648,7 +648,7 @@ class IntelliJPlatformDependenciesHelper(
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(bundledPluginId: String): Dependency {
         val id = bundledPluginId.trim()
         val plugin = bundledPlugins.get().plugins.find { it.id == id }
-        requireNotNull(plugin) { "Could not find bundled plugin with ID: '$id'" }
+        requireNotNull(plugin) { "Could not find bundled plugin with ID: '$id'. See https://jb.gg/ij-plugin-dependencies." }
 
         val version = productInfo.get().version
         val artifactPath = platformPath.get()
@@ -678,7 +678,7 @@ class IntelliJPlatformDependenciesHelper(
             val pluginPath = when {
                 artifactPath.isDirectory() -> generateSequence(artifactPath) {
                     it.takeIf { it.resolve("lib").exists() } ?: it.listDirectoryEntries().singleOrNull()
-                }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: $artifactPath")
+                }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: '$artifactPath'")
 
                 else -> artifactPath
             }

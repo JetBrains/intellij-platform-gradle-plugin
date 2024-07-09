@@ -33,7 +33,7 @@ class ModuleDescriptorsPathResolverTest : IntelliJPluginTestBase() {
         val exception = assertFailsWith<IllegalArgumentException> {
             resolver.resolve()
         }
-        assertEquals("Cannot resolve 'Module Descriptors' with: $dir", exception.message)
+        assertEquals("Cannot resolve 'Module Descriptors' with: '$dir'", exception.message)
     }
 
     @Test

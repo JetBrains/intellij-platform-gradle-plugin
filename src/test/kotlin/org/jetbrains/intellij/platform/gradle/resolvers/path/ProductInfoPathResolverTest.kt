@@ -38,7 +38,7 @@ class ProductInfoPathResolverTest : IntelliJPluginTestBase() {
         val exception = assertFailsWith<IllegalArgumentException> {
             resolver.resolve()
         }
-        assertEquals("Cannot resolve 'product-info.json' with: $dir", exception.message)
+        assertEquals("Cannot resolve 'product-info.json' with: '$dir'", exception.message)
     }
 
     @Test

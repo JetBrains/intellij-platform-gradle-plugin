@@ -47,7 +47,7 @@ abstract class LocalPluginsNormalizationTransformers @Inject constructor(
                         """
                         The local plugin path is set to the directory that directly contains the plugin content.
                         This layout prevents the plugin from loading it inside the IDE.
-                        To resolve this, the plugin content has been moved to a nested directory: $targetDirectory
+                        To resolve this, the plugin content has been moved to a nested directory: '$targetDirectory'
                         """.trimIndent()
                     )
 

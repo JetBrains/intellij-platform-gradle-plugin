@@ -57,7 +57,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
             val plugin by lazy {
                 val pluginPath = generateSequence(path) {
                     it.takeIf { it.resolve("lib").exists() } ?: it.listDirectoryEntries().singleOrNull()
-                }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: $path")
+                }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: '$path'")
 
                 val pluginCreationResult = manager.createPlugin(pluginPath, false)
 
