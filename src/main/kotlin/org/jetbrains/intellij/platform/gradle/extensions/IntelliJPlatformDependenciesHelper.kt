@@ -649,8 +649,19 @@ class IntelliJPlatformDependenciesHelper(
         val id = bundledPluginId.trim()
         val plugin = bundledPlugins.get().plugins.find { it.id == id }
         requireNotNull(plugin) {
-            val javaPlugin = if (id == "java") "Use 'com.intellij.java' instead of 'java'." else ""
-            "Could not find bundled plugin with ID: '$id'. $javaPlugin See https://jb.gg/ij-plugin-dependencies."
+            val unresolvedPluginId = when (id) {
+                "copyright" -> "Use correct plugin ID 'com.intellij.copyright' instead of 'copyright'."
+                "css", "css-impl" -> "Use correct plugin ID 'com.intellij.css' instead of 'css'/'css-impl'."
+                "DatabaseTools" -> "Use correct plugin ID 'com.intellij.database' instead of 'DatabaseTools'."
+                "gradle" -> "Use correct plugin ID 'com.intellij.gradle' instead of 'gradle'."
+                "java" -> "Use correct plugin ID 'com.intellij.java' instead of 'java'."
+                "Kotlin" -> "Use correct plugin ID 'org.jetbrains.kotlin' instead of 'Kotlin'."
+                "markdown" -> "Use correct plugin ID 'org.intellij.plugins.markdown' instead of 'markdown'."
+                "maven" -> "Use correct plugin ID 'org.jetbrains.idea.maven' instead of 'maven'."
+                "yaml" -> "Use correct plugin ID 'org.jetbrains.plugins.yaml' instead of 'yaml'."
+                else -> "Could not find bundled plugin with ID: '$id'."
+            }
+            "$unresolvedPluginId See https://jb.gg/ij-plugin-dependencies."
         }
 
         val version = productInfo.get().version

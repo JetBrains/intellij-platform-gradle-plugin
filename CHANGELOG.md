@@ -17,6 +17,7 @@
 - Rewrite the latest Gradle plugin check for performance reasons
 - Enhance `PrintBundledPluginsTask` output
 - IntelliJPlatformTestingExtension: make the produced object `Buildable` so it can be used for `dependsOn()` purposes
+- `bundledPlugin()`: provide a helpful message when specifying a well-known plugin path (valid in 1.x) instead of real plugin ID (`java` vs `com.intellij.java`) 
 
 ### Fixed
 
