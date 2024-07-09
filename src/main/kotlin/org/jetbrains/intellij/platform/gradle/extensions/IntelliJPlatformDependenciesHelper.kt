@@ -64,6 +64,7 @@ class IntelliJPlatformDependenciesHelper(
 ) {
 
     private val log = Logger(javaClass)
+    private val pluginManager = IdePluginManager.createManager()
 
     private val baseType = objects.property<IntelliJPlatformType>()
     private val baseVersion = objects.property<String>()
@@ -78,14 +79,6 @@ class IntelliJPlatformDependenciesHelper(
     //<editor-fold desc="Configuration Accessors">
 
     /**
-     * Retrieves the [Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST] configuration to access information about plugins
-     * bundled within the IntelliJ Platform added to the project.
-     * Used with [bundledPlugins] accessor.
-     */
-    private val bundledPluginsListConfiguration
-        get() = configurations[Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST].asLenient
-
-    /**
      * Retrieves the [Configurations.INTELLIJ_PLATFORM] configuration to access information about the main IntelliJ Platform added to the project.
      * Used with [productInfo] and [platformPath] accessors.
      */
@@ -95,9 +88,6 @@ class IntelliJPlatformDependenciesHelper(
     //</editor-fold>
 
     //<editor-fold desc="Metadata Accessors">
-
-    internal val bundledPlugins
-        get() = provider { bundledPluginsListConfiguration.bundledPlugins() }
 
     /**
      * Provides access to the current IntelliJ Platform path.
@@ -110,6 +100,30 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal val productInfo
         get() = platformPath.map { it.productInfo() }
+
+    private val bundledPlugins by lazy {
+        platformPath.get()
+            .resolve("plugins")
+            .listDirectoryEntries()
+            .filter { it.isDirectory() }
+            .map { pluginManager.createPlugin(it, false) }
+            .mapNotNull { result ->
+                when (result) {
+                    is PluginCreationSuccess -> result.plugin
+                    is PluginCreationFail -> {
+                        val problems = result.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
+                        log.warn("Cannot create plugin from file '$this': $problems")
+                        null
+                    }
+
+                    else -> {
+                        log.warn("Cannot create plugin from file '$this'. $result")
+                        null
+                    }
+                }
+            }
+            .associateBy { requireNotNull(it.pluginId) }
+    }
 
     //</editor-fold>
 
@@ -601,25 +615,25 @@ class IntelliJPlatformDependenciesHelper(
      */
     private fun DependencyHandler.createIntelliJPlatformLocal(artifactPath: Path): Dependency {
         val localProductInfo = artifactPath.productInfo()
-
         localProductInfo.validateSupportedVersion()
 
-        // TODO: remove [hash]
-        val hash = artifactPath.hashCode().absoluteValue % 1000
         val type = localProductInfo.productCode.toIntelliJPlatformType()
-        val coordinates = type.maven ?: type.installer
-        requireNotNull(coordinates) { "Specified type '$type' has no dependency available." }
+        val version = "${localProductInfo.version}+${artifactPath.hash}"
+
+        IvyModule(
+            info = IvyModule.Info(
+                organisation = Dependencies.LOCAL_IDE_GROUP,
+                module = type.code,
+                revision = version,
+            ),
+            publications = listOf(artifactPath.toIvyArtifact()),
+        ).write()
 
         return create(
-            group = Configurations.Dependencies.LOCAL_IDE_GROUP,
-            name = coordinates.groupId,
-            version = "${localProductInfo.version}+$hash",
-        ).apply {
-            createIvyDependencyFile(
-                localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-                publications = listOf(artifactPath.toArtifact()),
-            )
-        }
+            group = Dependencies.LOCAL_IDE_GROUP,
+            name = type.code,
+            version = localProductInfo.version,
+        )
     }
 
     /**
@@ -647,9 +661,8 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param bundledPluginId The ID of the bundled plugin
      */
-    private fun DependencyHandler.createIntelliJPlatformBundledPlugin(bundledPluginId: String): Dependency {
-        val id = bundledPluginId.trim()
-        val plugin = bundledPlugins.get().plugins.find { it.id == id }
+    private fun DependencyHandler.createIntelliJPlatformBundledPlugin(id: String): Dependency {
+        val plugin = bundledPlugins[id]
         requireNotNull(plugin) {
             val unresolvedPluginId = when (id) {
                 "copyright" -> "Use correct plugin ID 'com.intellij.copyright' instead of 'copyright'."
@@ -666,18 +679,71 @@ class IntelliJPlatformDependenciesHelper(
             "$unresolvedPluginId See https://jb.gg/ij-plugin-dependencies."
         }
 
-        val version = productInfo.get().version
-        val artifactPath = platformPath.get()
-        val hash = artifactPath.hashCode().absoluteValue % 1000
-        val hashedVersion = "$version+$hash"
+        val artifactPath = requireNotNull(plugin.originalFile)
+        val version = "${plugin.pluginVersion}+${artifactPath.hash}"
+
+        IvyModule(
+            info = IvyModule.Info(
+                organisation = Dependencies.BUNDLED_PLUGIN_GROUP,
+                module = id,
+                revision = version,
+            ),
+            publications = listOf(artifactPath.toIvyArtifact()),
+            dependencies = plugin.collectDependencies(),
+        ).write()
 
         return create(
-            group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
-            name = plugin.id,
-            version = hashedVersion,
-        ).apply {
-            createBundledPluginIvyDependencyFile(plugin, hashedVersion)
-        }
+            group = Dependencies.BUNDLED_PLUGIN_GROUP,
+            name = id,
+            version = version,
+        )
+    }
+
+    private fun IdePlugin.collectDependencies(): List<IvyModule.Dependency> {
+        val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name }).toSet()
+        val buildNumber by lazy { productInfo.get().buildNumber }
+        val platformPath by lazy { platformPath.get() }
+
+        val plugins = dependencyIds
+            .mapNotNull { bundledPlugins[it] }
+            .map {
+                val artifactPath = requireNotNull(it.originalFile)
+                val group = Dependencies.BUNDLED_PLUGIN_GROUP
+                val name = requireNotNull(it.pluginId)
+                val version = "${it.pluginVersion}+${artifactPath.hash}"
+
+                IvyModule(
+                    info = IvyModule.Info(group, name, version),
+                    publications = listOf(artifactPath.toIvyArtifact()),
+                    dependencies = it.collectDependencies(),
+                ).write()
+
+                IvyModule.Dependency(group, name, version)
+            }
+
+        val layoutItems = productInfo.get().layout
+            .filter { layout -> layout.name in dependencyIds }
+            .filter { layout -> layout.classPath.isNotEmpty() }
+
+        val modules = dependencyIds
+            .filterNot { bundledPlugins.containsKey(it) }
+            .mapNotNull { layoutItems.find { layout -> layout.name == it } }
+            .filterNot { it.classPath.isEmpty() }
+            .map {
+                val artifactPaths = it.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
+                val group = Dependencies.BUNDLED_MODULE_GROUP
+                val name = it.name
+                val version = "$buildNumber+${platformPath.hash}"
+
+                IvyModule(
+                    info = IvyModule.Info(group, name, version),
+                    publications = artifactPaths,
+                ).write()
+
+                IvyModule.Dependency(group, name, version)
+            }
+
+        return plugins + modules
     }
 
     /**
@@ -705,16 +771,23 @@ class IntelliJPlatformDependenciesHelper(
             pluginCreationResult.plugin
         }
 
+        val version = (plugin.pluginVersion ?: "0.0.0") + "+" + artifactPath.hash
+        val name = plugin.pluginId ?: artifactPath.name
+
+        IvyModule(
+            info = IvyModule.Info(
+                organisation = Dependencies.LOCAL_PLUGIN_GROUP,
+                module = name,
+                revision = version,
+            ),
+            publications = listOf(artifactPath.toIvyArtifact()),
+        ).write()
+
         return create(
-            group = Configurations.Dependencies.LOCAL_PLUGIN_GROUP,
-            name = plugin.pluginId ?: artifactPath.name,
-            version = plugin.pluginVersion ?: "0.0.0",
-        ).apply {
-            createIvyDependencyFile(
-                localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-                publications = listOf(artifactPath.toArtifact()),
-            )
-        }
+            group = Dependencies.LOCAL_PLUGIN_GROUP,
+            name = name,
+            version = version,
+        )
     }
 
     /**
@@ -723,7 +796,6 @@ class IntelliJPlatformDependenciesHelper(
      * @param artifactPath Path to the local JetBrains Runtime
      */
     private fun DependencyHandler.createJetBrainsRuntimeLocal(artifactPath: Path): Dependency {
-        val hash = artifactPath.hashCode().absoluteValue % 1000
         val runtimeMetadata = providers.of(JavaRuntimeMetadataValueSource::class) {
             parameters {
                 executable = layout.file(provider {
@@ -738,19 +810,23 @@ class IntelliJPlatformDependenciesHelper(
         val javaVersion = runtimeMetadata["java.version"]
         requireNotNull(javaVersion)
 
-        val name = javaVendorVersion.substringBefore(javaVersion.orEmpty()).trim('-')
-        val version = javaVendorVersion.removePrefix(name).trim('-').let { "$it+$hash" }
+        val name = javaVendorVersion.substringBefore(javaVersion).trim('-')
+        val version = javaVendorVersion.removePrefix(name).trim('-') + "+" + artifactPath.hash
+
+        IvyModule(
+            info = IvyModule.Info(
+                organisation = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
+                module = name,
+                revision = version,
+            ),
+            publications = listOf(artifactPath.toIvyArtifact()),
+        ).write()
 
         return create(
-            group = Configurations.Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
+            group = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
             name = name,
             version = version,
-        ).apply {
-            createIvyDependencyFile(
-                localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-                publications = listOf(artifactPath.toArtifact()),
-            )
-        }
+        )
     }
 
     /**
@@ -818,6 +894,29 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
+     * Creates an Ivy dependency XML file for an external module.
+     */
+    private fun IvyModule.write() = apply {
+        val fileName = with(requireNotNull(info)) {
+            "$organisation-$module-$revision.xml"
+        }
+        val ivyFile = providers
+            .localPlatformArtifactsPath(rootProjectDirectory)
+            .resolve(fileName)
+
+        if (ivyFile.exists()) {
+            return@apply
+        }
+
+        ivyFile
+            .apply { parent.createDirectories() }
+            .createFile()
+            .writeText(XML {
+                indentString = "  "
+            }.encodeToString(this))
+    }
+
+    /**
      * Creates an IntelliJ Platform dependency and excludes transitive dependencies provided by the current IntelliJ Platform.
      *
      * @param subject Dependency name
@@ -862,99 +961,8 @@ class IntelliJPlatformDependenciesHelper(
         extension = "zip",
     )
 
-    private fun createBundledPluginIvyDependencyFile(bundledPlugin: BundledPlugin, version: String, resolved: List<String> = emptyList()) {
-        val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
-        val group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP
-        val name = bundledPlugin.id
-        val existingIvyFile = localPlatformArtifactsPath.resolve("$group-$name-$version.xml")
-        if (existingIvyFile.exists()) {
-            return
-        }
-
-        if (name in resolved) {
-            return
-        }
-
-        val artifactPath = Path(bundledPlugin.path)
-        val plugin by lazy {
-            val pluginCreationResult = IdePluginManager.createManager().createPlugin(artifactPath, false)
-            require(pluginCreationResult is PluginCreationSuccess)
-            pluginCreationResult.plugin
-        }
-
-        val dependencyIds = plugin.dependencies.map { it.id } - plugin.pluginId
-        val bundledModules = productInfo.get().layout.filter { layout -> layout.name in dependencyIds }.filter { layout -> layout.classPath.isNotEmpty() }
-
-        /**
-         * This is a fallback method for IntelliJ Platform with no [ProductInfo.layout] data present.
-         * To avoid duplications, exclude IDs of possibly resolved `bundledModules` items.
-         *
-         * Eventually, this data should be provided by the IntelliJ Plugin Verifier.
-         */
-        val fallbackBundledPlugins = run {
-            val bundledModuleNames = bundledModules.map { it.name }
-
-            bundledPlugins.get().plugins.filter {
-                it.id in dependencyIds && it.id !in bundledModuleNames
-            }
-        }
-
-        val ivyDependencies = bundledModules.mapNotNull { layout ->
-            when (layout.kind) {
-                ProductInfo.LayoutItemKind.plugin -> {
-                    IvyModule.Dependency(
-                        organization = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
-                        name = layout.name,
-                        version = version,
-                    ).also { dependency ->
-                        val dependencyPlugin = bundledPlugins.get().plugins.find { it.id == dependency.name } ?: return@also
-                        createBundledPluginIvyDependencyFile(dependencyPlugin, version, resolved + name)
-                    }
-                }
-
-                ProductInfo.LayoutItemKind.pluginAlias -> {
-                    // TODO: not important?
-                    null
-                }
-
-                ProductInfo.LayoutItemKind.moduleV2, ProductInfo.LayoutItemKind.productModuleV2 -> {
-                    // TODO: drop if classPath empty?
-                    IvyModule.Dependency(
-                        organization = Configurations.Dependencies.BUNDLED_MODULE_GROUP,
-                        name = layout.name,
-                        version = version,
-                    ).also { dependency ->
-                        createIvyDependencyFile(
-                            group = dependency.organization,
-                            name = dependency.name,
-                            version = dependency.version,
-                            localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-                            publications = layout.classPath.map { classPath ->
-                                platformPath.get().resolve(classPath).toArtifact()
-                            },
-                        )
-                    }
-                }
-            }
-        } + fallbackBundledPlugins.map { dependencyPlugin ->
-            IvyModule.Dependency(
-                organization = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
-                name = dependencyPlugin.id,
-                version = version,
-            ).also {
-                createBundledPluginIvyDependencyFile(dependencyPlugin, version, resolved + name)
-            }
-        }
-
-        createIvyDependencyFile(
-            group = Configurations.Dependencies.BUNDLED_PLUGIN_GROUP,
-            name = bundledPlugin.id,
-            version = version,
-            localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory),
-            publications = listOf(artifactPath.toArtifact()),
-            dependencies = ivyDependencies,
-        )
-    }
+    private val Path.hash
+        get() = (hashCode().absoluteValue % 1000).toString()
 
     internal fun buildJetBrainsRuntimeVersion(
         version: String,

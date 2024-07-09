@@ -88,7 +88,7 @@ data class IvyModule(
  *
  * @see IntelliJPlatformRepositoriesExtension.jetbrainsCdn
  */
-internal fun Path.toArtifact() = IvyModule.Artifact(
+internal fun Path.toIvyArtifact() = IvyModule.Artifact(
     name = invariantSeparatorsPathString.replaceFirst(Regex("^[a-zA-Z]:/"), "/"),
     type = when {
         isDirectory() -> "directory"

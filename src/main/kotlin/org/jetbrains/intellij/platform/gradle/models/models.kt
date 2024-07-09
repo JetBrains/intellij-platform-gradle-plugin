@@ -35,7 +35,6 @@ private inline fun <reified T> obtainStringFormat(): StringFormat {
         ModuleDescriptor::class,
         -> xml
 
-        BundledPlugins::class,
         ProductInfo::class,
         -> json
 

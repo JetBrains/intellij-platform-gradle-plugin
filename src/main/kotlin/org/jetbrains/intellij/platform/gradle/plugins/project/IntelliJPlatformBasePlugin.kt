@@ -20,7 +20,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.BundledPluginsListTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
@@ -180,17 +179,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Platform bundled plugins",
             )
 
-            create(
-                name = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS_LIST,
-                description = "IntelliJ Platform bundled plugins list",
-            ) {
-                attributes {
-                    attribute(Attributes.bundledPluginsList, true)
-                }
-
-                extendsFrom(intellijPlatformConfiguration)
-            }
-
             val jetbrainsRuntimeDependencyConfiguration = create(
                 name = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
                 description = "JetBrains Runtime dependency archive",
@@ -301,7 +289,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         with(project.dependencies) {
             attributesSchema {
-                attribute(Attributes.bundledPluginsList)
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
                 attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE) {
@@ -319,9 +306,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
                 testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
                 intellijPlatformConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM],
-            )
-            BundledPluginsListTransformer.register(
-                dependencies = this
             )
             LocalPluginsNormalizationTransformers.register(
                 dependencies = this

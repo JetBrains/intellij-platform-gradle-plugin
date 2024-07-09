@@ -17,6 +17,8 @@
 - Rewrite the latest Gradle plugin check for performance reasons
 - Enhance `PrintBundledPluginsTask` output
 - IntelliJPlatformTestingExtension: make the produced object `Buildable` so it can be used for `dependsOn()` purposes
+- Rewrite the local Ivy dependencies management
+- Review the bundled plugins resolution
 - `bundledPlugin()`: provide a helpful message when specifying a well-known plugin path (valid in 1.x) instead of real plugin ID (`java` vs `com.intellij.java`) 
 
 ### Fixed
@@ -29,6 +31,7 @@
 ### Removed
 
 - Resolving IntelliJ Platform artifacts from JetBrains CDN using common coordinates
+- Remove `BundledPluginsListTransformer` and in-advance bundled plugins resolving with JSON serialization
 
 ## [2.0.0-beta8] - 2024-07-01
 
