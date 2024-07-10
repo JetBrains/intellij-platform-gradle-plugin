@@ -29,6 +29,7 @@
 - Fixed `Task ... uses output .intellijPlatform/coroutines-javaagent.jar of task ... without declaring dependency`
 - Fixed the wrong Android Studio installer architecture on `x86`
 - Fixed `InvalidPathException: Illegal char <:>` exception on Windows when resolving IntelliJ Platform system properties
+- Fixed missing custom plugins in the sandbox when running a custom task
 
 ### Removed
 

@@ -136,6 +136,9 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
                 val prepareSandboxTask = project.tasks.register<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX.withSuffix) {
                     group = Plugin.GROUP_NAME
 
+                    intelliJPlatformConfiguration = customIntelliJPlatformConfiguration
+                    intelliJPlatformPluginConfiguration = customIntellijPlatformPluginConfiguration
+
                     sandboxDirectory = this@all.sandboxDirectory.orElse(basePrepareSandboxTask.flatMap { it.sandboxDirectory })
                     splitMode = this@all.splitMode.orElse(basePrepareSandboxTask.flatMap { it.splitMode })
                     splitModeTarget = this@all.splitModeTarget.orElse(basePrepareSandboxTask.flatMap { it.splitModeTarget })
@@ -145,9 +148,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
                 project.tasks.register<T>(name) {
                     group = Plugin.GROUP_NAME
 
-                    applySandboxFrom(prepareSandboxTask)
                     intelliJPlatformConfiguration = customIntelliJPlatformConfiguration
                     intelliJPlatformPluginConfiguration = customIntellijPlatformPluginConfiguration
+
+                    applySandboxFrom(prepareSandboxTask)
                 }
             }
         }
