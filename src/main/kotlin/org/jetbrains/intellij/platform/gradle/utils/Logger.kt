@@ -8,7 +8,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 class Logger(cls: Class<*>) {
 
     private val logger = Logging.getLogger(cls)
-    private val prefix = Plugin.LOG_PREFIX
+    private val prefix = "[${Plugin.ID}]"
 
     fun debug(message: String, e: Throwable? = null) = logger.debug("$prefix $message", e)
     fun error(message: String, e: Throwable? = null) = logger.error("$prefix $message", e)

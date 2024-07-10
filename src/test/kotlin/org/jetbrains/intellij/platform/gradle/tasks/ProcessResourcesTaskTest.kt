@@ -10,6 +10,8 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotEquals
 
+private const val PROCESS_RESOURCES = "processResources"
+
 class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
 
     private val outputPluginXml
@@ -22,7 +24,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
-        build(Tasks.External.PROCESS_RESOURCES)
+        build(PROCESS_RESOURCES)
 
         assertFileContent(
             outputPluginXml,
@@ -42,10 +44,10 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
-        build(Tasks.External.PROCESS_RESOURCES)
+        build(PROCESS_RESOURCES)
 
-        build(Tasks.External.PROCESS_RESOURCES) {
-            assertTaskOutcome(Tasks.External.PROCESS_RESOURCES, TaskOutcome.UP_TO_DATE)
+        build(PROCESS_RESOURCES) {
+            assertTaskOutcome(PROCESS_RESOURCES, TaskOutcome.UP_TO_DATE)
         }
     }
 
@@ -56,7 +58,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
-        build(Tasks.External.PROCESS_RESOURCES)
+        build(PROCESS_RESOURCES)
 
         buildFile write //language=kotlin
                 """
@@ -69,8 +71,8 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build(Tasks.External.PROCESS_RESOURCES) {
-            assertTaskOutcome(Tasks.External.PROCESS_RESOURCES, TaskOutcome.SUCCESS)
+        build(PROCESS_RESOURCES) {
+            assertTaskOutcome(PROCESS_RESOURCES, TaskOutcome.SUCCESS)
 
             assertFileContent(
                 outputPluginXml,

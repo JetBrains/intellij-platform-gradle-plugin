@@ -10,11 +10,12 @@ import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.jvm.toolchain.JavaToolchainSpec
 import org.gradle.jvm.toolchain.internal.DefaultJvmVendorSpec
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_RUNTIME_VENDOR
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.nio.file.Path
+
+private const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
 
 /**
  * Resolves Java Runtime.

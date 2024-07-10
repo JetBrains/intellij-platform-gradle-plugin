@@ -279,7 +279,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 intellijPlatformTestDependenciesConfiguration,
             )
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {
-                this@configurations[Configurations.TEST_FIXTURES_COMPILE_ONLY].extendsFrom(
+                this@configurations[Configurations.External.TEST_FIXTURES_COMPILE_ONLY].extendsFrom(
                     intellijPlatformConfiguration,
                     intellijPlatformDependenciesConfiguration,
                     intellijPlatformTestDependenciesConfiguration,
@@ -312,7 +312,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             )
 
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {
-                project.configurations[Configurations.TEST_FIXTURES_COMPILE_CLASSPATH]
+                project.configurations[Configurations.External.TEST_FIXTURES_COMPILE_CLASSPATH]
                     .attributes
                     .attribute(Attributes.extracted, true)
                     .attribute(Attributes.collected, true)

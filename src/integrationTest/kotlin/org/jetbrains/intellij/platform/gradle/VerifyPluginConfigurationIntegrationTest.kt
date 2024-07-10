@@ -11,7 +11,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     resourceName = "verify-plugin-configuration",
 ) {
 
-    private val issuesFoundSentence = "${Plugin.LOG_PREFIX} The following plugin configuration issues were found:"
+    private val issuesFoundSentence = "[${Plugin.ID}] The following plugin configuration issues were found:"
 
     private val defaultSystemProperties
         get() = mapOf("user.home" to dir.resolve("home"))

@@ -3,8 +3,9 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
+
+private const val ASSEMBLE = "assemble"
 
 class JarManifestFileIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "jar-manifest-file",
@@ -12,7 +13,7 @@ class JarManifestFileIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `test manifest file`() {
-        build(Tasks.External.ASSEMBLE, projectProperties = defaultProjectProperties) {
+        build(ASSEMBLE, projectProperties = defaultProjectProperties) {
             val pluginJar = buildDirectory.resolve("libs/test-1.0.0-base.jar")
             assertExists(pluginJar)
 

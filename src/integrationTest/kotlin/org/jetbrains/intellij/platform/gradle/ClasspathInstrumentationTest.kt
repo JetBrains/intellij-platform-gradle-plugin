@@ -5,6 +5,8 @@ package org.jetbrains.intellij.platform.gradle
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
+private const val DEPENDENCIES = "dependencies"
+
 class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "classpath",
 ) {
@@ -16,7 +18,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `dependencies should contain IntelliJ Platform and Markdown plugin`() {
-        build(Tasks.External.DEPENDENCIES, projectProperties = defaultProjectProperties) {
+        build(DEPENDENCIES, projectProperties = defaultProjectProperties) {
             output containsText """
                 compileClasspath - Compile classpath for null/main.
                 +--- idea:ideaIC:$intellijPlatformVersion

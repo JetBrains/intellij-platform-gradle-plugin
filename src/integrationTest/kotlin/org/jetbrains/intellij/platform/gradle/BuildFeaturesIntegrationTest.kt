@@ -5,6 +5,8 @@ package org.jetbrains.intellij.platform.gradle
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
+private const val ASSEMBLE = "assemble"
+
 class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "build-features",
 ) {
@@ -21,7 +23,7 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
         val flag = BuildFeature.SELF_UPDATE_CHECK.toString()
 
         build(
-            Tasks.External.ASSEMBLE,
+            ASSEMBLE,
             projectProperties = defaultProjectProperties + mapOf(flag to false, "buildSearchableOptions" to false),
             args = defaultArgs,
         ) {

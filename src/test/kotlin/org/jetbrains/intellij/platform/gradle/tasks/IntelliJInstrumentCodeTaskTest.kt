@@ -7,7 +7,9 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
+
+private const val ASSEMBLE = "assemble"
+private const val CLASSES = "classes"
 
 class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
@@ -37,7 +39,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         writeJavaFile()
 
-        build(Tasks.External.ASSEMBLE, args = defaultArgs) {
+        build(ASSEMBLE, args = defaultArgs) {
             assertContains("Added @NotNull assertions to 1 files", output)
         }
     }
@@ -75,14 +77,14 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         writeJavaFile()
 
-        build(Tasks.External.ASSEMBLE, args = defaultArgs) {
+        build(ASSEMBLE, args = defaultArgs) {
             assertNotContains("Added @NotNull", output)
         }
     }
 
     @Test
     fun `do not instrument code on empty source sets`() {
-        build(Tasks.External.ASSEMBLE, args = defaultArgs) {
+        build(ASSEMBLE, args = defaultArgs) {
             assertNotContains("Compiling forms and instrumenting code", output)
         }
     }
@@ -120,7 +122,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
                 </form>
                 """.trimIndent()
 
-        build(Tasks.External.ASSEMBLE, args = defaultArgs) {
+        build(ASSEMBLE, args = defaultArgs) {
             assertContains("Compiling forms and instrumenting code", output)
         }
     }
@@ -142,9 +144,9 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build(Tasks.External.ASSEMBLE)
-        build(Tasks.External.ASSEMBLE) {
-            assertTaskOutcome(Tasks.External.CLASSES, TaskOutcome.UP_TO_DATE)
+        build(ASSEMBLE)
+        build(ASSEMBLE) {
+            assertTaskOutcome(CLASSES, TaskOutcome.UP_TO_DATE)
         }
     }
 }

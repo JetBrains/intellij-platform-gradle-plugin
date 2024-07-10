@@ -25,6 +25,8 @@ import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
 import kotlin.io.path.*
 
+private const val CLEAN = "clean"
+
 /**
  * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up-to-date.
  */
@@ -161,7 +163,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                 latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {})
                 module.convention(project.provider { project.pluginManager.isModule })
 
-                mustRunAfter(Tasks.External.CLEAN)
+                mustRunAfter(CLEAN)
             }
     }
 }

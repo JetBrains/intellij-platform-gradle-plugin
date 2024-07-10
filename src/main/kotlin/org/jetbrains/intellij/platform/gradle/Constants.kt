@@ -2,25 +2,19 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import org.gradle.api.artifacts.Dependency
 import org.gradle.api.attributes.Attribute
 import org.gradle.api.internal.tasks.JvmConstants
-import org.gradle.api.plugins.HelpTasksPlugin
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
-    const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
-    const val JETBRAINS_MARKETPLACE_MAVEN_GROUP = "com.jetbrains.plugins"
 
     object Plugin {
         const val ID = "org.jetbrains.intellij.platform"
         const val NAME = "IntelliJ Platform Gradle Plugin"
         const val GROUP_NAME = "intellij platform"
-        const val LOG_PREFIX = "[$ID]"
     }
 
     object Plugins {
@@ -81,8 +75,6 @@ object Constants {
         const val JETBRAINS_RUNTIME = "jetbrainsRuntime"
         const val JETBRAINS_RUNTIME_DEPENDENCY = "jetbrainsRuntimeDependency"
         const val JETBRAINS_RUNTIME_LOCAL_INSTANCE = "jetbrainsRuntimeLocalInstance"
-        const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
-        const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
 
         object Attributes {
             const val COMPOSED_JAR_NAME = "composed-jar"
@@ -90,10 +82,6 @@ object Constants {
             val localPluginsNormalized = Attribute.of("intellijPlatformLocalPluginsNormalized", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
             val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
-
-            enum class AttributeType {
-                INTELLIJ_PLATFORM, INTELLIJ_PLATFORM_PLUGIN, JETBRAINS_RUNTIME
-            }
 
             enum class ArtifactType {
                 DIRECTORY, DMG, TAR_GZ, SIT, ZIP;
@@ -114,11 +102,10 @@ object Constants {
             const val LOCAL_JETBRAINS_RUNTIME_GROUP = "localJetBrainsRuntime"
             const val BUNDLED_MODULE_GROUP = "bundledModule"
             const val BUNDLED_PLUGIN_GROUP = "bundledPlugin"
+            const val MARKETPLACE_GROUP = "com.jetbrains.plugins"
         }
 
         object External {
-            const val ARCHIVES = Dependency.ARCHIVES_CONFIGURATION
-            const val API_ELEMENTS = JavaPlugin.API_ELEMENTS_CONFIGURATION_NAME
             const val COMPILE_CLASSPATH = JvmConstants.COMPILE_CLASSPATH_CONFIGURATION_NAME
             const val COMPILE_ONLY = JvmConstants.COMPILE_ONLY_CONFIGURATION_NAME
             const val IMPLEMENTATION = JvmConstants.IMPLEMENTATION_CONFIGURATION_NAME
@@ -127,12 +114,10 @@ object Constants {
             const val RUNTIME_ONLY = JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME
             const val TEST_COMPILE_CLASSPATH = JvmConstants.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
             const val TEST_COMPILE_ONLY = JvmConstants.TEST_COMPILE_ONLY_CONFIGURATION_NAME
+            const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
+            const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
         }
     }
-
-    // TODO: fix that
-    const val INSTRUMENT_CODE = "instrumentCode"
-    const val INSTRUMENT_TEST_CODE = "instrumentTestCode"
 
     object Tasks {
         const val BUILD_PLUGIN = "buildPlugin"
@@ -140,6 +125,8 @@ object Constants {
         const val COMPOSED_JAR = "composedJar"
         const val GENERATE_MANIFEST = "generateManifest"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
+        const val INSTRUMENT_CODE = "instrumentCode"
+        const val INSTRUMENT_TEST_CODE = "instrumentTestCode"
         const val INSTRUMENTED_JAR = "instrumentedJar"
         const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
         const val PATCH_PLUGIN_XML = "patchPluginXml"
@@ -162,14 +149,9 @@ object Constants {
         const val VERIFY_PLUGIN_SIGNATURE = "verifyPluginSignature"
 
         object External {
-            const val ASSEMBLE = LifecycleBasePlugin.ASSEMBLE_TASK_NAME
-            const val CLASSES = JavaPlugin.CLASSES_TASK_NAME
-            const val CLEAN = LifecycleBasePlugin.CLEAN_TASK_NAME
             const val COMPILE_JAVA = JavaPlugin.COMPILE_JAVA_TASK_NAME
             const val COMPILE_KOTLIN = "compileKotlin"
-            const val DEPENDENCIES = HelpTasksPlugin.DEPENDENCIES_TASK
             const val JAR = JavaPlugin.JAR_TASK_NAME
-            const val PROCESS_RESOURCES = JavaPlugin.PROCESS_RESOURCES_TASK_NAME
             const val TEST = JavaPlugin.TEST_TASK_NAME
         }
     }
@@ -183,16 +165,27 @@ object Constants {
     }
 
     object Locations {
-        const val ANDROID_STUDIO_INSTALLERS = "https://redirector.gvt1.com/edgedl/android/studio"
-        const val JETBRAINS_IDES_INSTALLERS = "https://download.jetbrains.com"
         const val CACHE_REDIRECTOR = "https://cache-redirector.jetbrains.com"
+        const val CACHE_REDIRECTOR_INTELLIJ_DEPENDENCIES_REPOSITORY = "$CACHE_REDIRECTOR/intellij-dependencies"
+        const val CACHE_REDIRECTOR_INTELLIJ_REPOSITORY_NIGHTLY = "$CACHE_REDIRECTOR/www.jetbrains.com/intellij-repository/nightly"
+        const val CACHE_REDIRECTOR_INTELLIJ_REPOSITORY_RELEASES = "$CACHE_REDIRECTOR/www.jetbrains.com/intellij-repository/releases"
+        const val CACHE_REDIRECTOR_INTELLIJ_REPOSITORY_SNAPSHOTS = "$CACHE_REDIRECTOR/www.jetbrains.com/intellij-repository/snapshots"
+        const val CACHE_REDIRECTOR_JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
+        const val CACHE_REDIRECTOR_MARKETPLACE_REPOSITORY = "$CACHE_REDIRECTOR/plugins.jetbrains.com/maven"
+
+        const val INTELLIJ_DEPENDENCIES_REPOSITORY = "https://packages.jetbrains.team/maven/p/ij/intellij-dependencies"
+        const val INTELLIJ_REPOSITORY_NIGHTLY = "https://www.jetbrains.com/intellij-repository/nightly"
+        const val INTELLIJ_REPOSITORY_RELEASES = "https://www.jetbrains.com/intellij-repository/releases"
+        const val INTELLIJ_REPOSITORY_SNAPSHOTS = "https://www.jetbrains.com/intellij-repository/snapshots"
+        const val MARKETPLACE_REPOSITORY = "https://plugins.jetbrains.com/maven"
+
         const val GITHUB_REPOSITORY = "https://github.com/jetbrains/intellij-platform-gradle-plugin"
-        const val INTELLIJ_REPOSITORY = "$CACHE_REDIRECTOR/intellij-repository"
-        const val INTELLIJ_DEPENDENCIES_REPOSITORY = "$CACHE_REDIRECTOR/intellij-dependencies"
-        const val JETBRAINS_RUNTIME_REPOSITORY = "$CACHE_REDIRECTOR/intellij-jbr"
         const val MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY = "https://plugins.gradle.org/m2"
         const val MAVEN_REPOSITORY = "https://repo1.maven.org/maven2"
         const val JETBRAINS_MARKETPLACE = "https://plugins.jetbrains.com"
+
+        const val ANDROID_STUDIO_INSTALLERS = "https://redirector.gvt1.com/edgedl/android/studio"
+        const val JETBRAINS_IDES_INSTALLERS = "https://download.jetbrains.com"
         const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"
         const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
     }
@@ -206,14 +199,4 @@ object Constants {
     object Services {
         const val SHIM_MANAGER = "shimManager"
     }
-
-    const val DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME = "downloadRobotServerPlugin"
-    const val INSTRUMENT_TEST_CODE_TASK_NAME = "instrumentTestCode"
-
-    const val RUN_IDE_FOR_UI_TESTS_TASK_NAME = "runIdeForUiTests"
-    const val RUN_IDE_PERFORMANCE_TEST_TASK_NAME = "runIdePerformanceTest"
-
-    const val DEFAULT_INTELLIJ_PLUGINS_REPOSITORY = "${Locations.CACHE_REDIRECTOR}/plugins.jetbrains.com/maven"
-
-    const val PERFORMANCE_PLUGIN_ID = "com.jetbrains.performancePlugin"
 }

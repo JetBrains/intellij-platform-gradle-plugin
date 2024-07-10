@@ -11,10 +11,12 @@ import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.platform.gradle.tasks.Registrable
 import org.jetbrains.intellij.platform.gradle.tasks.registerTask
 
+private const val PROCESS_RESOURCES = "processResources"
+
 class ProcessResourcesCompanion {
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<ProcessResources>(Tasks.External.PROCESS_RESOURCES) {
+            project.registerTask<ProcessResources>(PROCESS_RESOURCES) {
                 val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
 
                 from(patchPluginXmlTaskProvider) {

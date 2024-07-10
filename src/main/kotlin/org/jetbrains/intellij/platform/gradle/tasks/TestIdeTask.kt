@@ -9,7 +9,6 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -46,13 +45,13 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             }
 
         private val Test.instrumentedCode
-            get() = project.tasks.named<InstrumentCodeTask>(Constants.INSTRUMENT_CODE)
+            get() = project.tasks.named<InstrumentCodeTask>(Tasks.INSTRUMENT_CODE)
                 .also { dependsOn(it) }
                 .flatMap { it.outputDirectory }
                 .let { project.files(it) }
 
         private val Test.instrumentedTestCode
-            get() = project.tasks.named<InstrumentCodeTask>(Constants.INSTRUMENT_TEST_CODE)
+            get() = project.tasks.named<InstrumentCodeTask>(Tasks.INSTRUMENT_TEST_CODE)
                 .also { dependsOn(it) }
                 .flatMap { it.outputDirectory }
                 .let { project.files(it) }

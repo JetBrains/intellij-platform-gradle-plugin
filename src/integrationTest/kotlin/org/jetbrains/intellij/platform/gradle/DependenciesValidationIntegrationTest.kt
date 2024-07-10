@@ -8,13 +8,15 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
 import kotlin.test.Test
 
+private const val DEPENDENCIES = "dependencies"
+
 class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "intellij-platform-dependency-validation",
 ) {
 
     @Test
     fun `allow for no IntelliJ Platform dependency if not running tasks`() {
-        build(Tasks.External.DEPENDENCIES) {
+        build(DEPENDENCIES) {
             assertContains(
                 """
                 intellijPlatform - IntelliJ Platform
@@ -42,7 +44,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        build(Tasks.External.DEPENDENCIES) {
+        build(DEPENDENCIES) {
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform dependency archive
@@ -87,7 +89,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        buildAndFail(Tasks.External.DEPENDENCIES) {
+        buildAndFail(DEPENDENCIES) {
             assertContains("More than one IntelliJ Platform dependencies found.", output)
         }
     }
@@ -103,7 +105,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        build(Tasks.External.DEPENDENCIES) {
+        build(DEPENDENCIES) {
             assertContains(
                 """
                 intellijPlatform - IntelliJ Platform
@@ -143,7 +145,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        build(Tasks.External.DEPENDENCIES) {
+        build(DEPENDENCIES) {
             assertContains(
                 """
                 marketplaceZipSigner - Marketplace ZIP Signer
@@ -182,7 +184,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent()
 
         val latestVersion = Coordinates("org.jetbrains", "marketplace-zip-signer").resolveLatestVersion()
-        build(Tasks.External.DEPENDENCIES) {
+        build(DEPENDENCIES) {
             assertContains(
                 """
                 marketplaceZipSigner - Marketplace ZIP Signer

@@ -8,6 +8,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.*
 import kotlin.test.Test
 
+private const val CLEAN = "clean"
 private const val HEADER = "The following plugin configuration issues were found"
 
 class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
@@ -241,7 +242,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 kotlin.stdlib.default.dependency = true
                 """.trimIndent()
 
-        build(Tasks.External.CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+        build(CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
                 "- The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib",

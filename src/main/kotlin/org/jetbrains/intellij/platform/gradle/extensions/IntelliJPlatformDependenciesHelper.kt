@@ -28,7 +28,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
-import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
@@ -651,8 +650,8 @@ class IntelliJPlatformDependenciesHelper(
      */
     private fun DependencyHandler.createIntelliJPlatformPlugin(pluginId: String, version: String, channel: String?): Dependency {
         val group = when (channel) {
-            "default", "", null -> JETBRAINS_MARKETPLACE_MAVEN_GROUP
-            else -> "$channel.$JETBRAINS_MARKETPLACE_MAVEN_GROUP"
+            "default", "", null -> Dependencies.MARKETPLACE_GROUP
+            else -> "$channel.${Dependencies.MARKETPLACE_GROUP}"
         }
 
         return create(

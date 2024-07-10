@@ -11,7 +11,7 @@ import io.undertow.util.PathTemplateMatch
 import io.undertow.util.StatusCodes
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
-import org.jetbrains.intellij.platform.gradle.Constants.JETBRAINS_MARKETPLACE_MAVEN_GROUP
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import java.net.HttpURLConnection
@@ -64,7 +64,7 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
 
         IvyModule(
             info = IvyModule.Info(
-                organisation = JETBRAINS_MARKETPLACE_MAVEN_GROUP,
+                organisation = Dependencies.MARKETPLACE_GROUP,
                 module = plugin.pluginId,
                 revision = plugin.version,
             ),
