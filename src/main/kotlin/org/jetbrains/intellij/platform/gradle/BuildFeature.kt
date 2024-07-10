@@ -59,17 +59,7 @@ enum class BuildFeature(private val defaultValue: Boolean) {
      *
      * It is possible to refer to the direct location (whenever it is possible) by switching off JetBrains Cache Redirector globally.
      */
-    USE_CACHE_REDIRECTOR(true),
-
-    /**
-     * Some dependencies are tied to IntelliJ Platform build numbers and hosted in the IntelliJ Dependencies Repository.
-     * Despite this, certain versions (like EAP or nightly builds) might be absent.
-     * To solve this, we fetch a list of all versions from the Maven repository and locate the closest match.
-     * This method requires an additional remote repository request.
-     * If undesired, this feature can be disabled to strictly match dependencies to your build version.
-     */
-    USE_CLOSEST_VERSION_RESOLVING(true),
-    ;
+    USE_CACHE_REDIRECTOR(true);
 
     fun getValue(providers: ProviderFactory) = providers.gradleProperty(toString())
         .map { it.toBoolean() }

@@ -32,6 +32,7 @@
 
 - Resolving IntelliJ Platform artifacts from JetBrains CDN using common coordinates
 - Remove `BundledPluginsListTransformer` and in-advance bundled plugins resolving with JSON serialization
+- Remove `BuildFeature.USE_CLOSEST_VERSION_RESOLVING`
 
 ## [2.0.0-beta8] - 2024-07-01
 

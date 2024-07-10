@@ -996,8 +996,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * JUnit4, JUnit 5, Maven, JavaScript, Go, Java, ReSharper, etc.
      *
      * The version, if absent, is determined by the IntelliJ Platform build number.
-     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
-     * the closest available version is used, found by scanning all releases in the repository.
      *
      * @param type Test framework variant type.
      * @param version Test framework library version.
@@ -1015,8 +1013,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * JUnit4, JUnit 5, Maven, JavaScript, Go, Java, ReSharper, etc.
      *
      * The version, if absent, is determined by the IntelliJ Platform build number.
-     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
-     * the closest available version is used, found by scanning all releases in the repository.
      *
      * @param type test framework variant type
      * @param version library version
@@ -1031,8 +1027,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
      *
      * The version, if absent, is determined by the IntelliJ Platform build number.
-     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
-     * the closest available version is used, found by scanning all releases in the repository.
      *
      * @param coordinates IntelliJ Platform dependency coordinates
      * @param artifactId IntelliJ Platform dependency artifactId
@@ -1048,8 +1042,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
      *
      * The version, if absent, is determined by the IntelliJ Platform build number.
-     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
-     * the closest available version is used, found by scanning all releases in the repository.
      *
      * @param coordinates IntelliJ Platform dependency coordinates
      * @param artifactId IntelliJ Platform dependency artifactId
@@ -1065,8 +1057,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
      *
      * The version, if absent, is determined by the IntelliJ Platform build number.
-     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
-     * the closest available version is used, found by scanning all releases in the repository.
      *
      * @param groupId IntelliJ Platform dependency groupId
      * @param artifactId IntelliJ Platform dependency artifactId
@@ -1082,8 +1072,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
      *
      * The version, if absent, is determined by the IntelliJ Platform build number.
-     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
-     * the closest available version is used, found by scanning all releases in the repository.
      *
      * @param groupId IntelliJ Platform dependency groupId
      * @param artifactId IntelliJ Platform dependency artifactId
@@ -1100,8 +1088,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * By default, the version is determined by the IntelliJ Platform build number.
      *
-     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
-     * the closest available version is used, found by scanning all releases in the repository.
      *
      * @param version Java Compiler version
      */
@@ -1114,8 +1100,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * By default, the version is determined by the IntelliJ Platform build number.
      *
-     * If the exact version is unavailable, and the [BuildFeature.USE_CLOSEST_VERSION_RESOLVING] flag is set to `true`,
-     * the closest available version is used, found by scanning all releases in the repository.
      *
      * @param version Java Compiler version
      */
