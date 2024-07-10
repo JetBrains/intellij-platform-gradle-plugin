@@ -525,7 +525,6 @@ class IntelliJPlatformDependenciesHelper(
             parameters(configure)
         }
 
-
     //</editor-fold>
 
     //<editor-fold desc="DependencyHelper Extensions">
