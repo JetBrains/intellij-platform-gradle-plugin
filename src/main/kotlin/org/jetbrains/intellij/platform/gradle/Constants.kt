@@ -189,14 +189,4 @@ object Constants {
         const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"
         const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
     }
-
-    object GradleProperties {
-        const val INTELLIJ_PLATFORM_CACHE = "${Plugin.ID}.intellijPlatformCache"
-        const val LOCAL_PLATFORM_ARTIFACTS = "${Plugin.ID}.localPlatformArtifacts"
-        const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY = "kotlin.stdlib.default.dependency"
-    }
-
-    object Services {
-        const val SHIM_MANAGER = "shimManager"
-    }
 }

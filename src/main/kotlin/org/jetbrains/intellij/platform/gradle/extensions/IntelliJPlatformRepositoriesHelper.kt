@@ -13,16 +13,18 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.authentication.http.HttpHeaderAuthentication
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
-import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.flow.StopShimServerAction
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
 import java.net.URI
 import java.nio.file.Path
 import kotlin.io.path.pathString
+
+private const val SHIM_MANAGER = "shimManager"
 
 @Suppress("UnstableApiUsage")
 class IntelliJPlatformRepositoriesHelper(
@@ -35,8 +37,8 @@ class IntelliJPlatformRepositoriesHelper(
     private val rootProjectDirectory: Path,
 ) {
 
-    private val shimManager = gradle.sharedServices.registerIfAbsent(Services.SHIM_MANAGER, ShimManagerService::class) {
-        parameters.port = 7348 // TODO: read from Gradle properties
+    private val shimManager = gradle.sharedServices.registerIfAbsent(SHIM_MANAGER, ShimManagerService::class) {
+        parameters.port = providers[GradleProperties.ShimServerPort]
     }
 
     /**
@@ -44,26 +46,28 @@ class IntelliJPlatformRepositoriesHelper(
      *
      * @param name The name of the repository.
      * @param url The URL of the repository.
-     * @param urlWithCacheRedirector The URL of the repository with cache redirector. Used when [BuildFeature.USE_CACHE_REDIRECTOR] is enabled.
+     * @param urlWithCacheRedirector The URL of the repository with the cache redirector. Used when [GradleProperties.UseCacheRedirector] is enabled.
      * @param action The action to be performed on the repository. Defaults to an empty action.
-     * @see BuildFeature.USE_CACHE_REDIRECTOR
+     * @see GradleProperties.UseCacheRedirector
      */
     internal fun createMavenRepository(
         name: String,
         url: String,
         urlWithCacheRedirector: String = url,
         action: MavenRepositoryAction = {},
-    ) = BuildFeature.USE_CACHE_REDIRECTOR.getValue(providers).get().let { useCacheRedirector ->
-        repositories.maven(
-            when (useCacheRedirector) {
-                true -> urlWithCacheRedirector
-                false -> url
+    ) = providers[GradleProperties.UseCacheRedirector]
+        .map { useCacheRedirector ->
+            repositories.maven(
+                when (useCacheRedirector) {
+                    true -> urlWithCacheRedirector
+                    false -> url
+                }
+            ) {
+                this.name = name
+                action()
             }
-        ) {
-            this.name = name
-            action()
         }
-    }
+        .get()
 
     /**
      * Creates an Ivy repository for accessing dependencies.

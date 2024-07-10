@@ -9,10 +9,11 @@ import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -39,7 +40,7 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
 
     /**
      * Emit a warning if no searchable options are found.
-     * Can be disabled with [BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING].
+     * Can be disabled with [GradleProperties.NoSearchableOptionsWarning].
      */
     @get:Internal
     abstract val noSearchableOptionsWarning: Property<Boolean>
@@ -89,7 +90,7 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
                 inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
                 archiveClassifier.convention("searchableOptions")
                 destinationDirectory.convention(project.layout.buildDirectory.dir("libs"))
-                noSearchableOptionsWarning.convention(BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING.isEnabled(project.providers))
+                noSearchableOptionsWarning.convention(project.providers[GradleProperties.NoSearchableOptionsWarning])
 
                 from(inputDirectory)
                 include {

@@ -22,7 +22,7 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
     fun `report outdated plugin`() {
         gradleProperties write //language=properties
                 """
-                org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = true
+                org.jetbrains.intellij.platform.selfUpdateCheck = true
                 """.trimIndent()
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
@@ -30,7 +30,10 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
             assertExists(lockFile)
             lockFile containsText LocalDate.now().toString()
 
-            val latestVersion = Coordinates("org.jetbrains.intellij.platform", "intellij-platform-gradle-plugin").resolveLatestVersion(Locations.MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY)
+            val latestVersion = Coordinates(
+                "org.jetbrains.intellij.platform",
+                "intellij-platform-gradle-plugin"
+            ).resolveLatestVersion(Locations.MAVEN_GRADLE_PLUGIN_PORTAL_REPOSITORY)
 
             assertContains("${Plugin.NAME} is outdated: 0.0.0. Update `${Plugin.ID}` to: $latestVersion", output)
         }
@@ -54,7 +57,7 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
     fun `skip version check is disabled with BuildFeature`() {
         gradleProperties write //language=properties
                 """
-                org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck=false
+                org.jetbrains.intellij.platform.selfUpdateCheck = false
                 """.trimIndent()
 
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
@@ -64,7 +67,10 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `skip version check is disabled with existing lock file`() {
-        val file = dir.resolve("lockFile").createFile()
+        val file = dir
+            .resolve("lockFile")
+            .createFile()
+            .write(LocalDate.now().toString())
 
         buildFile write //language=kotlin
                 """

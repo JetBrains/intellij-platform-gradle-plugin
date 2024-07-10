@@ -20,7 +20,7 @@ import kotlin.test.assertEquals
                 tasks {
                     val androidStudioDownloadLink = providers.of(org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource::class) {
                         parameters {
-                            androidStudio = file("${resource("products-releases/android-studio-releases-list.xml")}")
+                            androidStudioUrl = "${resourceUrl("products-releases/android-studio-releases-list.xml")}"
                             androidStudioVersion = "2023.3.1.9"
                         }
                     }

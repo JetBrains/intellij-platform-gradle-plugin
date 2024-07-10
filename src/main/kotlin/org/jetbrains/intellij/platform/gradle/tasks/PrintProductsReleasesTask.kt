@@ -9,15 +9,15 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.assign
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import org.jetbrains.intellij.platform.gradle.utils.resolve
 
 /**
  * Prints the list of binary product releases that, by default, match the currently selected IntelliJ Platform along
@@ -54,8 +54,8 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
 
                 productsReleases.convention(
                     project.providers.of(ProductReleasesValueSource::class.java) {
-                        parameters.jetbrainsIdes.set(project.resources.resolve(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES))
-                        parameters.androidStudio.set(project.resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO))
+                        parameters.jetbrainsIdesUrl = project.providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
+                        parameters.androidStudioUrl = project.providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
 
                         parameters.sinceBuild = this@registerTask.sinceBuild
                         parameters.untilBuild = this@registerTask.untilBuild

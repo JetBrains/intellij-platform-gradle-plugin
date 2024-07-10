@@ -28,7 +28,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
@@ -519,8 +518,8 @@ class IntelliJPlatformDependenciesHelper(
 
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
         providers.of(ProductReleasesValueSource::class.java) {
-            parameters.jetbrainsIdes.set(resources.resolve(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES))
-            parameters.androidStudio.set(resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO))
+            parameters.jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
+            parameters.androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
 
             parameters(configure)
         }
@@ -538,7 +537,7 @@ class IntelliJPlatformDependenciesHelper(
         val type = IntelliJPlatformType.AndroidStudio
         val downloadLink = providers.of(AndroidStudioDownloadLinkValueSource::class) {
             parameters {
-                androidStudio = resources.resolve(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
+                androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
                 androidStudioVersion = version
             }
         }.orNull

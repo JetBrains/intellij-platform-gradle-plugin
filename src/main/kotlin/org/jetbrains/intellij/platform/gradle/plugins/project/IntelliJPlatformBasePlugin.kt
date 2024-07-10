@@ -15,11 +15,11 @@ import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
-import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
@@ -29,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
@@ -57,7 +58,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
          */
         project.pluginManager.withPlugin(Plugins.External.IDEA) {
             project.extensions.configure<IdeaModel>(Plugins.External.IDEA) {
-                module.isDownloadSources = BuildFeature.DOWNLOAD_SOURCES.isEnabled(project.providers).get()
+                module.isDownloadSources = project.providers[GradleProperties.DownloadSources].get()
                 module.excludeDirs.add(project.rootProjectPath.resolve(CACHE_DIRECTORY).toFile())
             }
         }

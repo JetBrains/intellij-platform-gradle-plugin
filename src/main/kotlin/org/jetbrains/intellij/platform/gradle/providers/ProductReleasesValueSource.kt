@@ -4,14 +4,13 @@ package org.jetbrains.intellij.platform.gradle.providers
 
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradle.models.JetBrainsIdesReleases
@@ -24,8 +23,8 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import java.net.URL
 
 /**
  * Provides a complete list of binary IntelliJ Platform product releases matching the given [FilterParameters] criteria.
@@ -34,25 +33,25 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
  *
  * @see PrintProductsReleasesTask
  * @see VerifyPluginTask
- * @see Locations.PRODUCTS_RELEASES_JETBRAINS_IDES
- * @see Locations.PRODUCTS_RELEASES_ANDROID_STUDIO
+ * @see GradleProperties.ProductsReleasesJetBrainsIdesUrl
+ * @see GradleProperties.ProductsReleasesAndroidStudioUrl
  */
 abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductReleasesValueSource.Parameters> {
 
     interface Parameters : FilterParameters {
         /**
-         * A file containing the XML with all available JetBrains IDEs releases.
+         * The URL to the resource containing the XML with all available JetBrains IDEs releases.
          *
-         * @see Locations.PRODUCTS_RELEASES_JETBRAINS_IDES
+         * @see GradleProperties.ProductsReleasesJetBrainsIdesUrl
          */
-        val jetbrainsIdes: RegularFileProperty
+        val jetbrainsIdesUrl: Property<String>
 
         /**
-         * A file containing the XML with all available Android Studio releases.
+         * The URL to the resource containing the XML with all available Android Studio releases.
          *
-         * @see Locations.PRODUCTS_RELEASES_ANDROID_STUDIO
+         * @see GradleProperties.ProductsReleasesAndroidStudioUrl
          */
-        val androidStudio: RegularFileProperty
+        val androidStudioUrl: Property<String>
     }
 
     interface FilterParameters : ValueSourceParameters {
@@ -88,8 +87,9 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
     private val log = Logger(javaClass)
 
     override fun obtain(): List<String>? = with(parameters) {
-        val jetbrainsIdesReleases = jetbrainsIdes.orNull?.asPath
+        val jetbrainsIdesReleases = jetbrainsIdesUrl.orNull
             ?.also { log.info("Reading JetBrains IDEs releases from: $it") }
+            ?.let { URL(it).readText() }
             ?.let { decode<JetBrainsIdesReleases>(it) }
             ?.let {
                 sequence {
@@ -125,8 +125,9 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .orEmpty()
             .toList()
 
-        val androidStudioReleases = androidStudio.orNull?.asPath
+        val androidStudioReleases = androidStudioUrl.orNull
             ?.also { log.info("Reading Android Studio releases from: $it") }
+            ?.let { URL(it).readText() }
             ?.let { decode<AndroidStudioReleases>(it) }
             ?.items
             ?.mapNotNull { item ->

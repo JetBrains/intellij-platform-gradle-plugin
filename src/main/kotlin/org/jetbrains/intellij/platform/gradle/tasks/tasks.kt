@@ -14,7 +14,6 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -273,7 +272,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 )
                 kotlinStdlibDefaultDependency.convention(
                     project.providers
-                        .gradleProperty(GradleProperties.KOTLIN_STDLIB_DEFAULT_DEPENDENCY)
+                        .gradleProperty("kotlin.stdlib.default.dependency")
                         .map { it.toBoolean() }
                 )
             }

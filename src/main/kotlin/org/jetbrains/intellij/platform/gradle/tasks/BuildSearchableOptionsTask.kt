@@ -7,10 +7,11 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask.Companion.systemPropertyDefault
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
@@ -27,7 +28,7 @@ import kotlin.io.path.pathString
  *
  * In the case of running the task for the plugin which has the [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor] configures,
  * a warning will be logged regarding potential issues with running headless IDE for paid plugins.
- * It is possible to mute this warning with [BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING] build feature flag.
+ * It is possible to mute this warning with [GradleProperties.PaidPluginSearchableOptionsWarning] build feature flag.
  */
 @CacheableTask
 abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
@@ -40,7 +41,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
 
     /**
      * Emit warning if the task is executed by a paid plugin.
-     * Can be disabled with [BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING].
+     * Can be disabled with [GradleProperties.PaidPluginSearchableOptionsWarning].
      */
     @get:Internal
     abstract val showPaidPluginWarning: Property<Boolean>
@@ -90,7 +91,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                     })
                 )
                 showPaidPluginWarning.convention(
-                    BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING.isEnabled(project.providers).map {
+                    project.providers[GradleProperties.PaidPluginSearchableOptionsWarning].map {
                         it && pluginXml.orNull?.parse { productDescriptor } != null
                     }
                 )

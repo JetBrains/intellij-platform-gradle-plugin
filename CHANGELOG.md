@@ -8,6 +8,7 @@
 - Added `useInstaller: Boolean` property to configuration when creating custom tasks with `intelliJPlatformTesting`; `true` by default
 - Introduce `create(notation: String, useInstaller: Boolean)` dependency helper for adding a dependency on the IntelliJ Platform using notation string, like `IU-2024.2`
 - Introduce `jetbrainsRuntimeLocal(localPath: String)` dependency helper for adding a dependency on the local JetBrains Runtime instance
+- Introduce `GradleProperties` helper class for handling `org.jetbrains.intellij.platform.<propertyName>` Gradle properties, accepting multiple input types
 
 ### Changed
 
@@ -20,6 +21,7 @@
 - Rewrite the local Ivy dependencies management
 - Review the bundled plugins resolution
 - `bundledPlugin()`: provide a helpful message when specifying a well-known plugin path (valid in 1.x) instead of real plugin ID (`java` vs `com.intellij.java`) 
+- Renamed `org.jetbrains.intellij.platform.buildFeature.<propertyName>` Gradle properties to `org.jetbrains.intellij.platform.<propertyName>`
 
 ### Fixed
 
@@ -33,6 +35,7 @@
 - Resolving IntelliJ Platform artifacts from JetBrains CDN using common coordinates
 - Remove `BundledPluginsListTransformer` and in-advance bundled plugins resolving with JSON serialization
 - Remove `BuildFeature.USE_CLOSEST_VERSION_RESOLVING`
+- Remove `BuildFeature` mechanism in favor of `GradleProperties`
 
 ## [2.0.0-beta8] - 2024-07-01
 

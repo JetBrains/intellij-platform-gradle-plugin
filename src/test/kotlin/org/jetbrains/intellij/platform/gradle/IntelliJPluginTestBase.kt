@@ -95,7 +95,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         gradleProperties write //language=properties
                 """
                 kotlin.stdlib.default.dependency = false
-                org.jetbrains.intellij.platform.buildFeature.selfUpdateCheck = false
+                org.jetbrains.intellij.platform.selfUpdateCheck = false
                 """.trimIndent()
     }
 

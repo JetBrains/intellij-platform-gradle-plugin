@@ -11,8 +11,9 @@ import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
-import org.jetbrains.intellij.platform.gradle.Constants.GradleProperties
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File
@@ -44,7 +45,7 @@ internal fun resolveArtifactPath(localPath: Any) = resolvePath(localPath)
  * Returns the Gradle project cache directory.
  */
 internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
-    gradleProperty(GradleProperties.INTELLIJ_PLATFORM_CACHE).orNull
+    get(GradleProperties.IntellijPlatformCache).orNull
         .takeUnless { it.isNullOrBlank() }
         ?.let { Path(it) }
         .run { this ?: rootProjectDirectory.resolve(CACHE_DIRECTORY) }
@@ -56,10 +57,10 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
  *
  * @see [createIvyDependencyFile]
  * @see [IntelliJPlatformRepositoriesExtension.jetbrainsCdn]
- * @see [GradleProperties.LOCAL_PLATFORM_ARTIFACTS]
+ * @see [GradleProperties.LocalPlatformArtifacts]
  */
 internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
-    gradleProperty(GradleProperties.LOCAL_PLATFORM_ARTIFACTS).orNull
+    get(GradleProperties.LocalPlatformArtifacts).orNull
         .takeUnless { it.isNullOrBlank() }
         ?.let { Path(it) }
         .run { this ?: intellijPlatformCachePath(rootProjectDirectory).resolve("localPlatformArtifacts") }

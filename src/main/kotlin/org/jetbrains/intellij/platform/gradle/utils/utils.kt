@@ -13,7 +13,6 @@ import org.gradle.api.internal.GradleInternal
 import org.gradle.api.plugins.PluginManager
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -78,13 +77,6 @@ fun FileCollection.platformPath() = with(toList()) {
         """.trimIndent()
     )
 }
-
-// TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
-internal fun ResourceHandler.resolve(url: String) = text
-    .fromUri(url)
-    .runCatching { asFile("UTF-8") }
-    .onFailure { Logger(javaClass).info("Cannot resolve resource: '$url'", it) }
-    .getOrNull()
 
 val Project.settings
     get() = (gradle as GradleInternal).settings

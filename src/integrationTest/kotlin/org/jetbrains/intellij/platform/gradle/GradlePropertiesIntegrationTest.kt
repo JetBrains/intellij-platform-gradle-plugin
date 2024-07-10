@@ -7,8 +7,8 @@ import kotlin.test.Test
 
 private const val ASSEMBLE = "assemble"
 
-class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
-    resourceName = "build-features",
+class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
+    resourceName = "gradle-properties",
 ) {
 
     private val defaultArgs = listOf("--info")
@@ -20,65 +20,68 @@ class BuildFeaturesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `selfUpdateCheck is disabled`() {
-        val flag = BuildFeature.SELF_UPDATE_CHECK.toString()
+        val property = GradleProperties.SelfUpdateCheck.toString()
 
         build(
             ASSEMBLE,
-            projectProperties = defaultProjectProperties + mapOf(flag to false, "buildSearchableOptions" to false),
+            projectProperties = defaultProjectProperties + mapOf(
+                property to false,
+                "buildSearchableOptions" to false,
+            ),
             args = defaultArgs,
         ) {
-            output containsText "Build feature is disabled: $flag"
+            output containsText "Read Gradle property: $property=false"
         }
     }
 
     @Test
     fun `noSearchableOptionsWarning is disabled`() {
-        val flag = BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING.toString()
+        val property = GradleProperties.NoSearchableOptionsWarning.toString()
 
         build(
             Tasks.JAR_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(flag to false),
+            projectProperties = defaultProjectProperties + mapOf(property to false),
             args = defaultArgs,
         ) {
-            output containsText "Build feature is disabled: $flag"
+            output containsText "Read Gradle property: $property=false"
             output notContainsText "No searchable options found."
         }
     }
 
     @Test
     fun `noSearchableOptionsWarning is enabled`() {
-        val flag = BuildFeature.NO_SEARCHABLE_OPTIONS_WARNING.toString()
+        val property = GradleProperties.NoSearchableOptionsWarning.toString()
 
         build(
             Tasks.JAR_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(flag to true),
+            projectProperties = defaultProjectProperties + mapOf(property to true),
             args = defaultArgs,
         ) {
-            output containsText "Build feature is enabled: $flag"
+            output containsText "Read Gradle property: $property=true"
             output containsText "No searchable options found."
         }
     }
 
     @Test
     fun `paidPluginSearchableOptionsWarning is disabled`() {
-        val flag = BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING.toString()
+        val property = GradleProperties.PaidPluginSearchableOptionsWarning.toString()
 
         build(
             Tasks.BUILD_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(flag to false),
+            projectProperties = defaultProjectProperties + mapOf(property to false),
             args = defaultArgs,
         ) {
-            output containsText "Build feature is disabled: $flag"
+            output containsText "Read Gradle property: $property=false"
         }
     }
 
     @Test
     fun `paidPluginSearchableOptionsWarning is enabled`() {
-        val flag = BuildFeature.PAID_PLUGIN_SEARCHABLE_OPTIONS_WARNING.toString()
+        val property = GradleProperties.PaidPluginSearchableOptionsWarning.toString()
 
         build(
             Tasks.BUILD_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(flag to true),
+            projectProperties = defaultProjectProperties + mapOf(property to true),
             args = defaultArgs,
         ) {
             output containsText "Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin."

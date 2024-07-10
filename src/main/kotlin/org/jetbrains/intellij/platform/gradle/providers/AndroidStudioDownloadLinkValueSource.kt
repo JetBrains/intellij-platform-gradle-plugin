@@ -3,20 +3,19 @@
 package org.jetbrains.intellij.platform.gradle.providers
 
 import org.gradle.api.GradleException
-import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.models.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradle.models.decode
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource.Parameters
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
+import java.net.URL
 
 /**
- * Fetches the Android Studio releases list from [Locations.PRODUCTS_RELEASES_ANDROID_STUDIO] and finds the release matching the [Parameters.androidStudioVersion].
+ * Fetches the Android Studio releases list from [GradleProperties.ProductsReleasesAndroidStudioUrl] and finds the release matching the [Parameters.androidStudioVersion].
  * From the resolved [AndroidStudioReleases.Item], filters out the [AndroidStudioReleases.Item.Download.link] matching current OS and architecture.
  */
 abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parameters> {
@@ -25,9 +24,9 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
         /**
          * A file containing the XML with all available Android Studio releases.
          *
-         * @see Locations.PRODUCTS_RELEASES_ANDROID_STUDIO
+         * @see GradleProperties.ProductsReleasesAndroidStudioUrl
          */
-        val androidStudio: RegularFileProperty
+        val androidStudioUrl: Property<String>
 
         /**
          * The requested Android Studio IDE version.
@@ -38,10 +37,11 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
     private val log = Logger(javaClass)
 
     override fun obtain() = runCatching {
-        val androidStudioReleases = parameters.androidStudio.orNull?.asPath
+        val androidStudioReleases = parameters.androidStudioUrl.orNull
             ?.also { log.info("Reading Android Studio releases from: $it") }
+            ?.let { URL(it).readText() }
             ?.let { decode<AndroidStudioReleases>(it) }
-        requireNotNull(androidStudioReleases) { "Failed to decode Android Studio releases from: ${parameters.androidStudio.orNull}" }
+        requireNotNull(androidStudioReleases) { "Failed to decode Android Studio releases from: ${parameters.androidStudioUrl.orNull}" }
 
         val os = with(OperatingSystem.current()) {
             when {

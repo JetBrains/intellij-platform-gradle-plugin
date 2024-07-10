@@ -11,10 +11,11 @@ import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.of
-import org.jetbrains.intellij.platform.gradle.BuildFeature
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource
 import org.jetbrains.intellij.platform.gradle.providers.LatestPluginVersionValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
@@ -42,7 +43,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     /**
      * Represents the property for checking if self-update is enabled.
      *
-     * Default value: [BuildFeature.SELF_UPDATE_CHECK]
+     * Default value: [GradleProperties.SelfUpdateCheck]
      */
     @get:Internal
     abstract val selfUpdateCheck: Property<Boolean>
@@ -97,7 +98,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
         }
 
         val lastUpdate = runCatching {
-            LocalDate.parse(selfUpdateLock.asPath.readText())
+            LocalDate.parse(selfUpdateLock.asPath.readText().trim())
         }.getOrNull()
 
         if (lastUpdate == LocalDate.now()) {
@@ -152,7 +153,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                 val cachePathProvider = project.extensionProvider.map { it.cachePath }
 
                 offline.convention(project.gradle.startParameter.isOffline)
-                selfUpdateCheck.convention(BuildFeature.SELF_UPDATE_CHECK.isEnabled(project.providers))
+                selfUpdateCheck.convention(project.providers[GradleProperties.SelfUpdateCheck])
                 selfUpdateLock.convention(
                     project.layout.file(cachePathProvider.map {
                         it.createDirectories().resolve("self-update.lock").toFile()
