@@ -15,12 +15,14 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import kotlin.io.path.exists
 
-private const val SEARCHABLE_OPTIONS_SUFFIX = ".searchableOptions.xml"
+private const val SEARCHABLE_OPTIONS_SUFFIX_XML = ".searchableOptions.xml"
+private const val SEARCHABLE_OPTIONS_SUFFIX_JSON = "-searchableOptions.json"
 
 /**
  * Creates a JAR file with searchable options to be distributed with the plugin.
@@ -53,7 +55,7 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
 
         if (noSearchableOptionsWarning.get()) {
             val noSearchableOptions = source.none {
-                it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX)
+                it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_XML) || it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_JSON)
             }
             if (noSearchableOptions) {
                 log.warn(
@@ -96,12 +98,17 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
                 include {
                     when {
                         it.isDirectory -> true
-                        !it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX) -> false
-                        else -> libContainerProvider.asPath.resolve(it.name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX)).exists()
+                        it.name.endsWith(pluginXml.parse { id + SEARCHABLE_OPTIONS_SUFFIX_JSON }.get()) -> true
+                        it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_JSON) -> false
+                        !it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_XML) -> false
+                        else -> libContainerProvider.asPath.resolve(it.name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX_XML)).exists()
                     }
                 }
                 eachFile {
-                    path = "search/$name"
+                    path = when {
+                        name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_JSON) -> name
+                        else -> "search/$name"
+                    }
                 }
 
                 onlyIf {

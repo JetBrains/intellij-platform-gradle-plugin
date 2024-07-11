@@ -13,12 +13,11 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
 ) {
 
     @Test
-    fun `test manifest file`() {
+    fun `test searchable options`() {
         build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties) {
             val searchableOptionsJar = buildDirectory.resolve("libs/test-1.0.0-searchableOptions.jar")
             assertExists(searchableOptionsJar)
 
-            println("searchableOptionsJar = ${searchableOptionsJar}")
             searchableOptionsJar containsFileInArchive "search/test-1.0.0.jar.searchableOptions.xml"
             with(searchableOptionsJar readEntry "search/test-1.0.0.jar.searchableOptions.xml") {
                 assertEquals(
@@ -35,6 +34,28 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
                         <option name="test" hit="Test Searchable Configurable" />
                       </configurable>
                     </options>
+                    """.trimIndent(),
+                    this,
+                )
+            }
+
+            val submoduleSearchableOptionsJar = dir.resolve("submodule/build/libs/submodule-1.0.1-searchableOptions.jar")
+            assertFalse(submoduleSearchableOptionsJar.exists())
+        }
+    }
+
+    @Test
+    fun `test searchable options in 242+`() {
+        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties + mapOf("intellijPlatform.version" to "242.19533.56")) {
+            val searchableOptionsJar = buildDirectory.resolve("libs/test-1.0.0-searchableOptions.jar")
+            assertExists(searchableOptionsJar)
+
+            searchableOptionsJar containsFileInArchive "p-org.jetbrains.plugins.integration-tests.searchable-options-searchableOptions.json"
+            with(searchableOptionsJar readEntry "p-org.jetbrains.plugins.integration-tests.searchable-options-searchableOptions.json") {
+                assertEquals(
+                    """
+                    {"id":"test.searchable.configurable","name":"Test Searchable Configurable","entries":[{"hit":"Label for Test Searchable Configurable","words":["configurable","for","label","searchable","test"]},{"hit":"Test Searchable Configurable","words":["configurable","searchable","test"]}]}
+                    
                     """.trimIndent(),
                     this,
                 )
