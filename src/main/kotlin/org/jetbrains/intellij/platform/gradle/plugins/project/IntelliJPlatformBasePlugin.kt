@@ -24,6 +24,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTrans
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
 import org.jetbrains.intellij.platform.gradle.attributes.ComposedJarRule
+import org.jetbrains.intellij.platform.gradle.attributes.DistributionRule
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
@@ -177,7 +178,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Platform plugin dependencies internal collector",
             ) {
                 extendsFrom(intellijPlatformPluginDependenciesConfiguration)
-//                extendsFrom(intellijPlatformPluginLocalConfiguration)
+                extendsFrom(intellijPlatformPluginLocalConfiguration)
             }
             val intellijPlatformPluginConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN,
@@ -312,7 +313,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attribute(Attributes.extracted)
                 attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE) {
                     compatibilityRules.add(ComposedJarRule::class)
-//                    compatibilityRules.add(DistributionRule::class)
+                    compatibilityRules.add(DistributionRule::class)
                 }
             }
 
