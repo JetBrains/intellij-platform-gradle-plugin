@@ -9,6 +9,7 @@
 - Introduce `create(notation: String, useInstaller: Boolean)` dependency helper for adding a dependency on the IntelliJ Platform using notation string, like `IU-2024.2`
 - Introduce `jetbrainsRuntimeLocal(localPath: String)` dependency helper for adding a dependency on the local JetBrains Runtime instance
 - Introduce `GradleProperties` helper class for handling `org.jetbrains.intellij.platform.<propertyName>` Gradle properties, accepting multiple input types
+- `intellijPlatform` component for accessing the composed Jar with `components["intellijPlatform"]`
 
 ### Changed
 
@@ -22,6 +23,7 @@
 - Review the bundled plugins resolution
 - `bundledPlugin()`: provide a helpful message when specifying a well-known plugin path (valid in 1.x) instead of real plugin ID (`java` vs `com.intellij.java`) 
 - Renamed `org.jetbrains.intellij.platform.buildFeature.<propertyName>` Gradle properties to `org.jetbrains.intellij.platform.<propertyName>`
+- `localPlugin(project(":submodule"))` refers now to the distribution Zip archive
 
 ### Fixed
 

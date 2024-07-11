@@ -311,6 +311,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                     .from(pluginJar)
                     .eachFile { name = ensureName(file.toPath()) }
                 from(pluginsClasspath)
+//                from(project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL])
 
                 inputs.property("instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })
                 inputs.property("sandboxDirectory", sandboxDirectory.map { it.asPath.pathString })

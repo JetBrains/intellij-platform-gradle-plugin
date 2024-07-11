@@ -84,6 +84,21 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 )
             }
 
+            create(Configurations.INTELLIJ_PLATFORM_DISTRIBUTION) {
+                isCanBeConsumed = true
+                isCanBeResolved = false
+
+                attributes {
+                    attribute(Bundling.BUNDLING_ATTRIBUTE, project.objects.named(Bundling.EXTERNAL))
+                    attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
+                    attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, JavaVersion.current().majorVersion.toInt())
+                    attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
+                    attributes.attribute(Attribute.of("org.gradle.jvm.environment", String::class.java), "standard-jvm")
+                    attributes.attribute(Attribute.of("org.jetbrains.kotlin.platform.type", String::class.java), "jvm")
+                }
+            }
+
             named(Configurations.External.RUNTIME_CLASSPATH) {
                 attributes {
                     attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.COMPOSED_JAR_NAME))
@@ -142,7 +157,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Platform plugin local",
             ) {
                 attributes {
-                    attribute(Attributes.localPluginsNormalized, false)
+                    attribute(Attributes.extracted, false)
+//                    attribute(Attributes.localPluginsNormalized, false)
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.DISTRIBUTION_NAME))
                 }
             }
             val intellijPlatformPluginModuleConfiguration = create(
@@ -160,7 +177,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Platform plugin dependencies internal collector",
             ) {
                 extendsFrom(intellijPlatformPluginDependenciesConfiguration)
-                extendsFrom(intellijPlatformPluginLocalConfiguration)
+//                extendsFrom(intellijPlatformPluginLocalConfiguration)
             }
             val intellijPlatformPluginConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN,
@@ -169,6 +186,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attributes {
                     attribute(Attributes.extracted, true)
                     attribute(Attributes.localPluginsNormalized, true)
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.DISTRIBUTION_NAME))
                 }
 
                 extendsFrom(intellijPlatformPluginDependenciesConfiguration)
@@ -294,6 +312,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attribute(Attributes.extracted)
                 attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE) {
                     compatibilityRules.add(ComposedJarRule::class)
+//                    compatibilityRules.add(DistributionRule::class)
                 }
             }
 

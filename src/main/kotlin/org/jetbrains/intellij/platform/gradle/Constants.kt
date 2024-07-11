@@ -53,9 +53,14 @@ object Constants {
         const val VERIFY_PLUGIN = "verifyPlugin"
     }
 
+    object Components {
+        const val INTELLIJ_PLATFORM = "intellijPlatform"
+    }
+
     object Configurations {
         const val INTELLIJ_PLATFORM_COMPOSED_JAR = "intellijPlatformComposedJar"
         const val INTELLIJ_PLATFORM_DEPENDENCY = "intellijPlatformDependency"
+        const val INTELLIJ_PLATFORM_DISTRIBUTION = "intellijPlatformDistribution"
         const val INTELLIJ_PLATFORM_LOCAL = "intellijPlatformLocal"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
         const val INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY = "intellijPlatformPluginDependency"
@@ -78,6 +83,7 @@ object Constants {
 
         object Attributes {
             const val COMPOSED_JAR_NAME = "composed-jar"
+            const val DISTRIBUTION_NAME = "distribution"
 
             val localPluginsNormalized = Attribute.of("intellijPlatformLocalPluginsNormalized", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)

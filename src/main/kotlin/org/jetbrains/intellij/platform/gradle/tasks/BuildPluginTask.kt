@@ -5,8 +5,10 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.api.Project
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.tasks.bundling.Zip
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
@@ -35,6 +37,7 @@ abstract class BuildPluginTask : Zip() {
                 val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val projectNameProvider = project.extensionProvider.flatMap { it.projectName }
+                val intellijPlatformDistributionConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_DISTRIBUTION]
 
                 archiveBaseName.convention(projectNameProvider)
 
@@ -43,6 +46,8 @@ abstract class BuildPluginTask : Zip() {
                 }
                 from(prepareSandboxTaskProvider.map { it.pluginDirectory })
                 into(archiveBaseName)
+
+                project.artifacts.add(intellijPlatformDistributionConfiguration.name, this)
             }
     }
 }

@@ -779,6 +779,10 @@ class IntelliJPlatformDependenciesHelper(
             }
 
             val pluginCreationResult = IdePluginManager.createManager().createPlugin(pluginPath, false)
+            if (pluginCreationResult is PluginCreationFail) {
+                val details = pluginCreationResult.errorsAndWarnings.joinToString(separator = "\n") { it.message }
+                throw GradleException("Could not resolve plugin: '$pluginPath':\n$details")
+            }
 
             require(pluginCreationResult is PluginCreationSuccess)
             pluginCreationResult.plugin
