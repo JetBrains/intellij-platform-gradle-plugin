@@ -1,0 +1,14 @@
+<idea-plugin>
+    <id>base</id>
+    <name>Base</name>
+    <description>base plugin</description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+
+    <extensionPoints>
+        <extensionPoint name="baseExt" beanClass="com.intellij.lang.LanguageExtensionPoint" dynamic="true">
+            <with attribute="implementationClass" implements="base.BaseInterface"/>
+        </extensionPoint>
+    </extensionPoints>
+</idea-plugin>

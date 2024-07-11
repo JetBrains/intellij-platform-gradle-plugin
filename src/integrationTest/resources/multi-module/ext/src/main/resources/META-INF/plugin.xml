@@ -1,0 +1,13 @@
+<idea-plugin>
+    <id>ext</id>
+    <name>Ext</name>
+    <description>Ext plugin</description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+    <depends>base</depends>
+
+    <extensions defaultExtensionNs="base">
+        <demoExt language="JAVA" implementationClass="ext.DemoExt"/>
+    </extensions>
+</idea-plugin>
