@@ -152,7 +152,7 @@ internal fun collectBundledPluginsJars(intellijPlatformPath: Path) =
         .resolve("plugins")
         .listDirectoryEntries()
         .asSequence()
-        .flatMap { it.resolve("lib") + it.resolve("lib/modules") }
+        .flatMap { listOf(it.resolve("lib"), it.resolve("lib/modules")) }
         .mapNotNull { it.takeIf { it.exists() } }
         .flatMap { it.listDirectoryEntries("*.jar") }
         .toSet()
