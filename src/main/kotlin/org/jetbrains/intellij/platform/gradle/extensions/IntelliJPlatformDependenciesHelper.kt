@@ -2,9 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
-import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
-import com.jetbrains.plugin.structure.base.problems.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import kotlinx.serialization.encodeToString
@@ -110,21 +107,10 @@ class IntelliJPlatformDependenciesHelper(
             .resolve("plugins")
             .listDirectoryEntries()
             .filter { it.isDirectory() }
-            .map { pluginManager.createPlugin(it, false) }
-            .mapNotNull { result ->
-                when (result) {
-                    is PluginCreationSuccess -> result.plugin
-                    is PluginCreationFail -> {
-                        val problems = result.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-                        log.warn("Cannot create plugin from file '$this': $problems")
-                        null
-                    }
-
-                    else -> {
-                        log.warn("Cannot create plugin from file '$this'. $result")
-                        null
-                    }
-                }
+            .mapNotNull { path ->
+                pluginManager.safelyCreatePlugin(path)
+                    .onFailure { log.warn(it.message.orEmpty()) }
+                    .getOrNull()
             }
             .associateBy { requireNotNull(it.pluginId) }
     }
@@ -777,15 +763,7 @@ class IntelliJPlatformDependenciesHelper(
 
                 else -> artifactPath
             }
-
-            val pluginCreationResult = IdePluginManager.createManager().createPlugin(pluginPath, false)
-            if (pluginCreationResult is PluginCreationFail) {
-                val details = pluginCreationResult.errorsAndWarnings.joinToString(separator = "\n") { it.message }
-                throw GradleException("Could not resolve plugin: '$pluginPath':\n$details")
-            }
-
-            require(pluginCreationResult is PluginCreationSuccess)
-            pluginCreationResult.plugin
+            pluginManager.safelyCreatePlugin(pluginPath).getOrThrow()
         }
 
         val version = (plugin.pluginVersion ?: "0.0.0") + "+" + artifactPath.hash

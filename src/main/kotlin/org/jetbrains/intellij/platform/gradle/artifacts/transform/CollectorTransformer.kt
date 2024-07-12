@@ -26,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
+import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
@@ -59,10 +60,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                     it.takeIf { it.resolve("lib").exists() } ?: it.listDirectoryEntries().singleOrNull()
                 }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: '$path'")
 
-                val pluginCreationResult = manager.createPlugin(pluginPath, false)
-
-                require(pluginCreationResult is PluginCreationSuccess)
-                pluginCreationResult.plugin
+                manager.safelyCreatePlugin(pluginPath).getOrThrow()
             }
 
             val isIntelliJPlatform = path == parameters.intellijPlatform.platformPath()

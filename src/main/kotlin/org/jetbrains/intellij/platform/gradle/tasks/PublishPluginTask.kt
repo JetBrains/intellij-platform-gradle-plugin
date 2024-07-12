@@ -2,9 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
-import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
-import com.jetbrains.plugin.structure.base.problems.PluginProblem
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -17,10 +14,7 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.utils.IdeServicesPluginRepositoryService
-import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.*
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 
@@ -101,6 +95,7 @@ abstract class PublishPluginTask : DefaultTask() {
     @get:Optional
     abstract val ideServices: Property<Boolean>
 
+    private val pluginManager = IdePluginManager.createManager()
     private val log = Logger(javaClass)
 
     @TaskAction
@@ -110,47 +105,32 @@ abstract class PublishPluginTask : DefaultTask() {
         }
 
         val path = archiveFile.asPath
-        when (val creationResult = IdePluginManager.createManager().createPlugin(path)) {
-            is PluginCreationSuccess -> {
-                if (creationResult.unacceptableWarnings.isNotEmpty()) {
-                    val problems = creationResult.unacceptableWarnings.joinToString()
-                    throw GradleException("Cannot upload plugin: $problems")
+        val plugin = pluginManager.safelyCreatePlugin(path).getOrThrow()
+
+        val pluginId = plugin.pluginId
+        channels.get().forEach { channel ->
+            log.info("Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
+            try {
+                val repositoryClient = when (ideServices.get()) {
+                    true -> PluginRepositoryFactory.createWithImplementationClass(
+                        host.get(),
+                        token.get(),
+                        "Automation",
+                        IdeServicesPluginRepositoryService::class.java,
+                    )
+
+                    false -> PluginRepositoryFactory.create(host.get(), token.get())
                 }
-                val pluginId = creationResult.plugin.pluginId
-                channels.get().forEach { channel ->
-                    log.info("Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
-                    try {
-                        val repositoryClient = when (ideServices.get()) {
-                            true -> PluginRepositoryFactory.createWithImplementationClass(
-                                host.get(),
-                                token.get(),
-                                "Automation",
-                                IdeServicesPluginRepositoryService::class.java,
-                            )
-
-                            false -> PluginRepositoryFactory.create(host.get(), token.get())
-                        }
-                        repositoryClient.uploader.upload(
-                            id = pluginId as StringPluginId,
-                            file = path.toFile(),
-                            channel = channel.takeIf { it != "default" },
-                            notes = null,
-                            isHidden = hidden.get(),
-                        )
-                        log.info("Uploaded successfully")
-                    } catch (exception: Exception) {
-                        throw GradleException("Failed to upload plugin: ${exception.message}", exception)
-                    }
-                }
-            }
-
-            is PluginCreationFail -> {
-                val problems = creationResult.errorsAndWarnings.filter { it.level == PluginProblem.Level.ERROR }.joinToString()
-                throw GradleException("Cannot upload plugin: $problems")
-            }
-
-            else -> {
-                throw GradleException("Cannot upload plugin: $creationResult")
+                repositoryClient.uploader.upload(
+                    id = pluginId as StringPluginId,
+                    file = path.toFile(),
+                    channel = channel.takeIf { it != "default" },
+                    notes = null,
+                    isHidden = hidden.get(),
+                )
+                log.info("Uploaded successfully")
+            } catch (exception: Exception) {
+                throw GradleException("Failed to upload plugin: ${exception.message}", exception)
             }
         }
     }

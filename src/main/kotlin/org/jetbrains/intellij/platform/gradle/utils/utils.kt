@@ -2,6 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.utils
 
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
+import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -77,6 +80,17 @@ fun FileCollection.platformPath() = with(toList()) {
         """.trimIndent()
     )
 }
+
+internal fun IdePluginManager.safelyCreatePlugin(path: Path, validateDescriptor: Boolean = false) =
+    createPlugin(path, validateDescriptor).runCatching {
+        if (this is PluginCreationFail) {
+            val details = errorsAndWarnings.joinToString(separator = "\n") { it.message }
+            throw GradleException("Could not resolve plugin: '$path':\n$details")
+        }
+
+        require(this is PluginCreationSuccess)
+        plugin
+    }
 
 val Project.settings
     get() = (gradle as GradleInternal).settings
