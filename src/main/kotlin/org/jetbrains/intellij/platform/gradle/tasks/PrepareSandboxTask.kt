@@ -31,7 +31,6 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.kotlin.gradle.utils.named
-import java.nio.file.Path
 import kotlin.io.path.*
 
 /**
@@ -108,9 +107,9 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     abstract val runtimeClasspath: ConfigurableFileCollection
 
     /**
-     * Holds a list of names used to generate suffixed ones to avoid collisions.
+     * Holds a list of paths present in the produced sandbox.
      */
-    private val usedNames = mutableMapOf<String, Path>()
+    private val content = mutableSetOf<String>()
 
     private val log = Logger(javaClass)
 
@@ -229,18 +228,6 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         )
     }
 
-    fun ensureName(path: Path): String {
-        var name = path.name
-        var index = 1
-        var previousPath = usedNames.putIfAbsent(name, path)
-        while (previousPath != null && previousPath != path) {
-            name = "${path.nameWithoutExtension}_${index++}.${path.extension}"
-            previousPath = usedNames.putIfAbsent(name, path)
-        }
-
-        return name
-    }
-
     init {
         group = Plugin.GROUP_NAME
         description = "Prepares sandbox directory with installed plugin and its dependencies."
@@ -309,7 +296,17 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 intoChild(project.extensionProvider.flatMap { it.projectName.map { projectName -> "$projectName/lib" } })
                     .from(runtimeClasspath)
                     .from(pluginJar)
-                    .eachFile { name = ensureName(file.toPath()) }
+                    .eachFile {
+                        val originalName = file.toPath().nameWithoutExtension
+                        val extension = file.toPath().extension
+                        var i = 0
+
+                        while (content.contains(relativePath.pathString)) {
+                            name = "${originalName}_${++i}.$extension"
+                        }
+
+                        content.add(relativePath.pathString)
+                    }
                 from(pluginsClasspath)
 
                 inputs.property("instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })

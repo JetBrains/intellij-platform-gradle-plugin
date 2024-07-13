@@ -2,6 +2,12 @@
 
 ## [next]
 
+### Fixed
+
+- Fixed renaming files with the same name when preparing the sandbox.
+
+## [2.0.0-beta9] - 2024-07-12
+
 ### Added
 
 - Added `useInstaller: Boolean` property to `create(type, version)` (and product-specific) dependency helpers to distinguish the type of artifacts; `true` by default
