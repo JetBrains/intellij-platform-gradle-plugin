@@ -171,7 +171,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
-     * @return array with all available CLI options
+     * @return An array with all available CLI options
      * @throws InvalidUserDataException
      */
     private val arguments = sequence {

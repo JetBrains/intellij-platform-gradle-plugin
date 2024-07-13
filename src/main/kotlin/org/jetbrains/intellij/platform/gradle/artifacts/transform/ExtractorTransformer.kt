@@ -110,7 +110,7 @@ abstract class ExtractorTransformer @Inject constructor(
                     file.renameTo(destination)
                 }
 
-                // Remove empty directory.
+                // Remove an empty directory.
                 generateSequence(root) { it.parentFile }
                     .takeWhile { it != targetDirectory }
                     .forEach { it.delete() }
@@ -166,8 +166,8 @@ abstract class ExtractorTransformer @Inject constructor(
             .from(tempDirectory)
             .matching {
                 exclude {
-                    // DMG archives contain a symbolic link to Applications directory and dot-directories located in the root of the archive,
-                    // such as `.background` meta-directory, we have to exclude.
+                    // DMG archives contain a symbolic link to the Applications directory and dot-directories located in the root of the archive,
+                    // such as `.background` meta-directory we have to exclude.
                     it.file.run {
                         (name == "Applications" && Files.isSymbolicLink(toPath()))
                                 || it.relativePath.startsWith('.')

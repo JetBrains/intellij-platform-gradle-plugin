@@ -21,7 +21,7 @@ interface Resolver<T> {
     /**
      * Resolves the [T] object.
      *
-     * @return the resolved object.
+     * @return The resolved object.
      * @throws GradleException
      */
     @Throws(GradleException::class)

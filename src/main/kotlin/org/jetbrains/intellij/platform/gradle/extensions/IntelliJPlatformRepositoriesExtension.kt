@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.extensions
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.artifacts.repositories.ArtifactRepository
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.flow.FlowProviders
@@ -56,15 +55,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     rootProjectDirectory: Path,
 ) {
 
-    private val delegate = IntelliJPlatformRepositoriesHelper(
-        repositories,
-        providers,
-        objects,
-        flowScope,
-        flowProviders,
-        gradle,
-        rootProjectDirectory,
-    )
+    private val delegate = IntelliJPlatformRepositoriesHelper(repositories, providers, objects, flowScope, flowProviders, gradle, rootProjectDirectory)
 
     /**
      * Adds a repository for accessing IntelliJ Platform stable releases.
@@ -281,8 +272,5 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
 fun RepositoryHandler.intellijPlatform(configure: Action<IntelliJPlatformRepositoriesExtension>) =
     (this as ExtensionAware).extensions.configure(Extensions.INTELLIJ_PLATFORM, configure)
 
-/**
- * Type alias for a lambda function that takes a [ArtifactRepository] and performs some actions on it.
- */
 internal typealias MavenRepositoryAction = (MavenArtifactRepository.() -> Unit)
 internal typealias IvyRepositoryAction = (IvyArtifactRepository.() -> Unit)

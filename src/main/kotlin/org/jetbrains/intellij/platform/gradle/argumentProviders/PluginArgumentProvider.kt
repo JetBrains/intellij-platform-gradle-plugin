@@ -16,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 /**
  * Provides command line arguments for launching IntelliJ Platform locally.
  *
- * @property pluginXml The plugin.xml file
+ * @property pluginXml The plugin.xml file.
  */
 class PluginArgumentProvider(
     @InputFile

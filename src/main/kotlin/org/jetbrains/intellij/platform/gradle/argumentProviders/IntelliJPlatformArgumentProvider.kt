@@ -110,7 +110,10 @@ class IntelliJPlatformArgumentProvider(
         )
 
     /**
-     * Resolves the IDE home variable in the given string by replacing placeholders.
+     * Resolves the IDE home variable in the given string by replacing placeholders, like:
+     * `-Djna.boot.library.path=$APP_PACKAGE/Contents/lib/jna/aarch64`
+     *
+     * @receiver JVM argument with IDE home placeholder
      */
     private fun String.resolveIdeHomeVariable() =
         platformPath.pathString.let {

@@ -16,8 +16,8 @@ import kotlin.io.path.pathString
  * A custom implementation of [JavaLauncher] to make it possible to use custom Java Runtime, such as JBR bundled with IntelliJ Platform.
  * This custom launcher is used with [RunnableIdeAware] and [TestableAware] tasks.
  *
- * @param dir Java Runtime location
- * @param metadata Java Runtime metadata obtained with [JavaRuntimeMetadataValueSource]
+ * @param dir Java Runtime location.
+ * @param metadata Java Runtime metadata obtained with [JavaRuntimeMetadataValueSource].
  */
 internal class IntelliJPlatformJavaLauncher(
     private val dir: Directory,

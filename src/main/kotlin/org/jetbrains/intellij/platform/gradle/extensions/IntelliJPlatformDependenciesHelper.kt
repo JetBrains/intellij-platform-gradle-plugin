@@ -46,12 +46,12 @@ import kotlin.math.absoluteValue
 /**
  * Helper class for managing dependencies on the IntelliJ Platform in Gradle projects.
  *
- * @param configurations The Gradle `ConfigurationContainer` used for managing configurations.
- * @param dependencies The Gradle `DependencyHandler` used for managing dependencies.
- * @param layout The Gradle `ProjectLayout` used for managing project layout.
- * @param objects The Gradle `ObjectFactory` used for creating objects.
- * @param providers The Gradle `ProviderFactory` used for creating providers.
- * @param resources The Gradle `ResourceHandler` used for managing resources.
+ * @param configurations The Gradle [ConfigurationContainer] to manage configurations.
+ * @param dependencies The Gradle [DependencyHandler] to manage dependencies.
+ * @param layout The Gradle [ProjectLayout] to manage layout providers.
+ * @param objects The Gradle [ObjectFactory] used for creating objects.
+ * @param providers The Gradle [ProviderFactory] used for creating providers.
+ * @param resources The Gradle [ResourceHandler] used for managing resources.
  * @param rootProjectDirectory The root directory of the Gradle project.
  */
 class IntelliJPlatformDependenciesHelper(
@@ -122,7 +122,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Adds a dependency on a Jar bundled within the current IntelliJ Platform.
      *
-     * @param pathProvider Path to the bundled Jar file, like `lib/testFramework.jar`
+     * @param pathProvider Path to the bundled Jar file, like `lib/testFramework.jar`.
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
@@ -517,7 +517,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates Android Studio dependency.
      *
-     * @param version Android Studio version
+     * @param version Android Studio version.
      */
     private fun DependencyHandler.createAndroidStudio(version: String): Dependency {
         val type = IntelliJPlatformType.AndroidStudio
@@ -545,7 +545,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a [Dependency] using a Jar file resolved in [platformPath] with [path].
      *
-     * @param path relative path to the library, like: `lib/testFramework.jar`
+     * @param path Relative path to the library, like: `lib/testFramework.jar`.
      */
     private fun DependencyHandler.createBundledLibrary(path: String) = create(
         objects.fileCollection().from(platformPath.map {
@@ -556,8 +556,8 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates IntelliJ Platform dependency based on the provided version and type.
      *
-     * @param version IntelliJ Platform version
-     * @param type IntelliJ Platform type
+     * @param version IntelliJ Platform version.
+     * @param type IntelliJ Platform type.
      */
     private fun DependencyHandler.createIntelliJPlatform(type: IntelliJPlatformType, version: String): Dependency {
         requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
@@ -572,8 +572,8 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates IntelliJ Platform dependency based on the provided version and type.
      *
-     * @param version IntelliJ Platform version
-     * @param type IntelliJ Platform type
+     * @param version IntelliJ Platform version.
+     * @param type IntelliJ Platform type.
      */
     private fun DependencyHandler.createIntelliJPlatformInstaller(type: IntelliJPlatformType, version: String): Dependency {
         requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
@@ -600,7 +600,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency on a local IntelliJ Platform instance.
      *
-     * @param localPath Path to the local IntelliJ Platform
+     * @param localPath Path to the local IntelliJ Platform.
      */
     private fun DependencyHandler.createIntelliJPlatformLocal(artifactPath: Path): Dependency {
         val localProductInfo = artifactPath.productInfo()
@@ -628,9 +628,9 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency for an IntelliJ Platform plugin.
      *
-     * @param pluginId the ID of the plugin
-     * @param version the version of the plugin
-     * @param channel the channel of the plugin. Can be null or empty for the default channel.
+     * @param pluginId The ID of the plugin.
+     * @param version The version of the plugin.
+     * @param channel The channel of the plugin. Can be null or empty for the default channel.
      */
     private fun DependencyHandler.createIntelliJPlatformPlugin(pluginId: String, version: String, channel: String?): Dependency {
         val group = when (channel) {
@@ -648,7 +648,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency for an IntelliJ platform bundled plugin.
      *
-     * @param bundledPluginId The ID of the bundled plugin
+     * @param bundledPluginId The ID of the bundled plugin.
      */
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(id: String): Dependency {
         val plugin = bundledPlugins[id]
@@ -692,7 +692,7 @@ class IntelliJPlatformDependenciesHelper(
      * Collects all dependencies on plugins or modules of the current [IdePlugin].
      * The [path] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
      *
-     * @param path IDs of already traversed plugins or modules
+     * @param path IDs of already traversed plugins or modules.
      */
     private fun IdePlugin.collectDependencies(path: List<String> = emptyList()): List<IvyModule.Dependency> {
         val id = requireNotNull(pluginId)
@@ -748,7 +748,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency on a local IntelliJ Platform plugin.
      *
-     * @param localPath Path to the local plugin
+     * @param localPath Path to the local plugin.
      */
     private fun DependencyHandler.createIntelliJPlatformLocalPlugin(localPath: Any): Dependency {
         val artifactPath = resolvePath(localPath)
@@ -788,7 +788,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency on a local JetBrains Runtime instance.
      *
-     * @param artifactPath Path to the local JetBrains Runtime
+     * @param artifactPath Path to the local JetBrains Runtime.
      */
     private fun DependencyHandler.createJetBrainsRuntimeLocal(artifactPath: Path): Dependency {
         val runtimeMetadata = providers.of(JavaRuntimeMetadataValueSource::class) {
@@ -847,9 +847,9 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency.
      *
-     * @param subject Dependency name
-     * @param coordinates Dependency coordinates
-     * @param version Dependency version
+     * @param subject Dependency name.
+     * @param coordinates Dependency coordinates.
+     * @param version Dependency version.
      */
     private fun DependencyHandler.createDependency(
         coordinates: Coordinates,
@@ -914,9 +914,9 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates an IntelliJ Platform dependency and excludes transitive dependencies provided by the current IntelliJ Platform.
      *
-     * @param subject Dependency name
-     * @param coordinates Dependency coordinates
-     * @param version Dependency version
+     * @param subject Dependency name.
+     * @param coordinates Dependency coordinates.
+     * @param version Dependency version.
      */
     private fun DependencyHandler.createPlatformDependency(
         coordinates: Coordinates,
@@ -936,7 +936,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Adds a dependency on a Marketplace ZIP Signer required for signing plugin with [SignPluginTask].
      *
-     * @param version Marketplace ZIP Signer version
+     * @param version Marketplace ZIP Signer version.
      */
     private fun DependencyHandler.createMarketplaceZipSigner(version: String) = createDependency(
         coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
@@ -948,7 +948,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Adds a dependency on a Robot Server Plugin required for signing plugin with [TestIdeUiTask].
      *
-     * @param version Robot Server Plugin version
+     * @param version Robot Server Plugin version.
      */
     private fun DependencyHandler.createRobotServerPlugin(version: String) = createDependency(
         coordinates = Coordinates("com.intellij.remoterobot", "robot-server-plugin"),
@@ -994,5 +994,37 @@ class IntelliJPlatformDependenciesHelper(
         return "jbr_$variant-$jdk-$os-$arch-b$build"
     }
 
+    /**
+     * Resolves the artifact path for the given [path] as it may accept different data types.
+     *
+     * @param path The local path of the artifact. Accepts either [String], [File], or [Directory].
+     * @return The resolved artifact path.
+     * @throws IllegalArgumentException if the [path] is not of supported types.
+     */
+    @Throws(IllegalArgumentException::class)
+    internal fun resolveArtifactPath(path: Any) = resolvePath(path)
+        .let { it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents") }
+        .takeIf { it.exists() && it.isDirectory() }
+        .let { requireNotNull(it) { "Specified localPath '$path' doesn't exist or is not a directory." } }
+
+    /**
+     * Resolves the provided path into [Path].
+     *
+     * The method accepts a local path and converts it into a standardized Path object.
+     * The local path can be of type String, File, or Directory.
+     *
+     * @param path The local path to be resolved. Accepts either [String], [File], or [Directory].
+     * @throws IllegalArgumentException
+     */
+    @Throws(IllegalArgumentException::class)
+    internal fun resolvePath(path: Any) = when (path) {
+        is String -> path
+        is File -> path.absolutePath
+        is Directory -> path.asPath.pathString
+        else -> throw IllegalArgumentException("Invalid argument type: '${path.javaClass}'. Supported types: String, File, or Directory.")
+    }.let { Path(it) }
+
     //</editor-fold>
 }
+
+internal typealias DependencyAction = (Dependency.() -> Unit)

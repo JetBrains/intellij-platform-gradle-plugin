@@ -37,10 +37,10 @@ import org.jetbrains.intellij.platform.gradle.utils.*
  * interfaces it uses.
  * Every new task is supposed to be registered using this method to get extra configuration used.
  *
- * @param T the type of task to register
- * @param names names of tasks to be registered.
- * @param configureWithType if `true`, apply the provided [configuration] to all tasks of [T] type, otherwise — only to tasks defined with [names]
- * @param configuration a function used to configure tasks
+ * @param T The type of task to register.
+ * @param names Names of tasks to be registered.
+ * @param configureWithType If `true`, apply the provided [configuration] to all tasks of [T] type, otherwise — only to tasks defined with [names].
+ * @param configuration A function used to configure tasks.
  */
 internal inline fun <reified T : Task> Project.registerTask(
     vararg names: String,

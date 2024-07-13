@@ -43,14 +43,17 @@ class SandboxArgumentProvider(
 
     /**
      * The path to the directory containing the sandbox plugins.
-     *
-     * @TODO: redundant?
      */
     private val pluginPath
         get() = sandboxPluginsDirectory.ifExists {
             it.listDirectoryEntries().joinToString("${File.pathSeparator},")
         }
 
+    /**
+     * Computes the plugin path properties as a list of JVM arguments.
+     *
+     * @return A list of JVM arguments specifying the plugin paths if the relevant directories or paths exist.
+     */
     private fun computePluginPathProperties() = listOfNotNull(
         sandboxPluginsDirectory.ifExists { "-Didea.plugins.path=$it" },
         pluginPath?.let { "-Dplugin.path=$it" },
@@ -62,5 +65,13 @@ class SandboxArgumentProvider(
         sandboxLogDirectory.ifExists { "-Didea.log.path=$it" }
     ) + computePluginPathProperties()
 
+    /**
+     * Executes the provided block if the directory represented by the DirectoryProperty exists.
+     *
+     * @receiver Sandbox subdirectory.
+     * @param T The type of the value to be returned by the block.
+     * @param block The function to be executed with the directory, if exists.
+     * @return The result of the block execution, or null if the directory does not exist.
+     */
     private fun <T> DirectoryProperty.ifExists(block: (Path) -> T) = orNull?.asPath?.takeIf { it.exists() }?.run(block)
 }

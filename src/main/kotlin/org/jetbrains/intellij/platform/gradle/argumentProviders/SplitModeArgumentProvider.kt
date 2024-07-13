@@ -5,9 +5,12 @@ package org.jetbrains.intellij.platform.gradle.argumentProviders
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.process.CommandLineArgumentProvider
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 
 /**
  * Provides command line arguments for enabling Split Mode.
+ *
+ * @see SplitModeAware
  */
 class SplitModeArgumentProvider(
     @Input val splitMode: Provider<Boolean>,

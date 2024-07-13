@@ -222,7 +222,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * Collects all the options for the Plugin Verifier CLI provided with the task configuration.
      *
-     * @return array with all available CLI options
+     * @return An array with all available CLI options
      */
     private fun getOptions(): List<String> {
         val args = mutableListOf(

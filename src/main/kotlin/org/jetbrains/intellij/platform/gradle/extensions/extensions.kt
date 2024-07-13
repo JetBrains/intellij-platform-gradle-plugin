@@ -5,44 +5,20 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.Project
-import org.gradle.api.artifacts.Dependency
-import org.gradle.api.file.Directory
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.io.File
 import java.nio.file.Path
-import kotlin.io.path.*
-
-@Throws(IllegalArgumentException::class)
-internal fun resolvePath(localPath: Any) = when (localPath) {
-    is String -> localPath
-    is File -> localPath.absolutePath
-    is Directory -> localPath.asPath.pathString
-    else -> throw IllegalArgumentException("Invalid argument type: '${localPath.javaClass}'. Supported types: String, File, or Directory.")
-}.let { Path(it) }
+import kotlin.io.path.Path
+import kotlin.io.path.absolute
+import kotlin.io.path.createDirectories
 
 /**
- * Resolves the artifact path for the given [localPath] as it may accept different data types.
- *
- * @param localPath The local path of the artifact. Accepts either [String], [File], or [Directory].
- * @return The resolved artifact path as a Path object.
- * @throws IllegalArgumentException if the [localPath] is not of supported types.
- */
-@Throws(IllegalArgumentException::class)
-internal fun resolveArtifactPath(localPath: Any) = resolvePath(localPath)
-    .let { it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents") }
-    .takeIf { it.exists() && it.isDirectory() }
-    .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist or is not a directory." } }
-
-/**
- * Returns the Gradle project cache directory.
+ * Returns the IntelliJ Platform Gradle Plugin cache directory for the current project.
  */
 internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
     get(GradleProperties.IntellijPlatformCache).orNull
@@ -55,8 +31,6 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
  *
- * @see [createIvyDependencyFile]
- * @see [IntelliJPlatformRepositoriesExtension.jetbrainsCdn]
  * @see [GradleProperties.LocalPlatformArtifacts]
  */
 internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
@@ -68,7 +42,11 @@ internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Pa
         .absolute()
 
 /**
- * Retrieves URLs from registered repositories.
+ * Parses a string representation of an IntelliJ Platform type and version, such as `IU-2024.2`.
+ * If the type is missing, returns the default [IntelliJPlatformType.IntellijIdeaCommunity].
+ *
+ * @receiver The string representing the IntelliJ Platform notation.
+ * @return A pair consisting of the corresponding [IntelliJPlatformType] and version string.
  */
 internal fun String.parseIdeNotation() = trim().split('-').let {
     when {
@@ -78,9 +56,12 @@ internal fun String.parseIdeNotation() = trim().split('-').let {
 }
 
 /**
- * Parses the plugin notation into the `<id, version, channel` triple.
+ * Parses the plugin notation into the `<id, version, channel>` triple.
  *
  * Possible notations are `id:version` or `id:version@channel`.
+ *
+ * @receiver The string representing the plugin version notation.
+ * @return A triple consisting of the id, version, and channel.
  */
 internal fun String.parsePluginNotation() = trim()
     .takeIf { it.isNotEmpty() }
@@ -94,8 +75,3 @@ internal fun String.parsePluginNotation() = trim()
 internal interface Registrable<T> {
     fun register(project: Project, target: Any): T
 }
-
-/**
- * Type alias for a lambda function that takes a [Dependency] and performs some actions on it.
- */
-internal typealias DependencyAction = (Dependency.() -> Unit)

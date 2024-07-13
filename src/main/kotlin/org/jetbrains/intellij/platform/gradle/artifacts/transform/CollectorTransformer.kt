@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
-import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
@@ -33,17 +32,23 @@ import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 
 /**
- * The artifact transformer collecting JAR files located within the IntelliJ Platform or Marketplace Plugin archives.
+ * The artifact transformer collecting JAR files located within the IntelliJ Platform or plugin archives.
  */
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class CollectorTransformer : TransformAction<CollectorTransformer.Parameters> {
 
     interface Parameters : TransformParameters {
 
+        /**
+         * The current IntelliJ Platform.
+         */
         @get:Internal
         val intellijPlatform: ConfigurableFileCollection
     }
 
+    /**
+     * The input artifact provided for transformation.
+     */
     @get:InputArtifact
     @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
@@ -51,6 +56,15 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
     private val manager = IdePluginManager.createManager(createTempDirectory())
     private val log = Logger(javaClass)
 
+    /**
+     * The transform action determines if the [inputArtifact] is the currently used IntelliJ Platform or a plugin.
+     *
+     * To check it is the IntelliJ Platform, artifact is compared to the file collection available with the provided [Parameters.intellijPlatform].
+     * Otherwise, it parses the artifact with [IdePluginManager].
+     *
+     * @throws GradleException
+     */
+    @Throws(GradleException::class)
     override fun transform(outputs: TransformOutputs) {
         runCatching {
             val path = inputArtifact.asPath
@@ -125,7 +139,6 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                 }
             }
         }
-
     }
 }
 
