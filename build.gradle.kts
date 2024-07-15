@@ -162,8 +162,6 @@ fun Test.configureTests() {
         when (gradleVersion) {
             "nightly" -> gradleNightlyVersion()
             else -> gradleVersion
-        }.also {
-            println("it = ${it}")
         }
     }.get()
     systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
