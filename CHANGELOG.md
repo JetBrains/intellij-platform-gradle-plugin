@@ -4,6 +4,7 @@
 
 ### Fixed
 
+- Fixed broken resolution of the dependency on a local IntelliJ Platform.
 - Fixed renaming files with the same name when preparing the sandbox.
 
 ## [2.0.0-beta9] - 2024-07-12

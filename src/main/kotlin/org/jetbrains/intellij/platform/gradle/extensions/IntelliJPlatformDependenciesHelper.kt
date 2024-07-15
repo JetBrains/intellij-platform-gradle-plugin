@@ -621,7 +621,7 @@ class IntelliJPlatformDependenciesHelper(
         return create(
             group = Dependencies.LOCAL_IDE_GROUP,
             name = type.code,
-            version = localProductInfo.version,
+            version = version,
         )
     }
 
