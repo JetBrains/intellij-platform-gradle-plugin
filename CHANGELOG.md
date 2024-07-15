@@ -8,6 +8,10 @@
 - Fixed renaming files with the same name when preparing the sandbox.
 - Fixed the resolving of the IDEs list for `verifyPlugin`.
 
+### Removed
+
+- Removed `intellijPlatform.verifyPlugin.downloadDirectory` and `intellijPlatform.verifyPlugin.homeDirectory` as IDEs cache for Plugin Verifier is now managed with Gradle.
+
 ## [2.0.0-beta9] - 2024-07-12
 
 ### Added

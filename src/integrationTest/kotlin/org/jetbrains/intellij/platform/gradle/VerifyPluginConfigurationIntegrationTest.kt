@@ -21,7 +21,6 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
             "intellijVersion" to "2022.3",
             "sinceBuild" to "223",
             "languageVersion" to "17",
-            "downloadDirectory" to dir.resolve("home"),
         )
 
     @Test

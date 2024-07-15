@@ -40,8 +40,6 @@ import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlin.io.path.Path
-import kotlin.io.path.createDirectories
 
 /**
  * The IntelliJ Platform Gradle Plugin extension.
@@ -569,15 +567,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         val cliPath: RegularFileProperty
 
         /**
-         * The path to the directory where IDEs used for the verification will be downloaded.
-         *
-         * Default value: [homeDirectory]/ides
-         *
-         * @see VerifyPlugin.downloadDirectory
-         */
-        val downloadDirectory: DirectoryProperty
-
-        /**
          * The list of class prefixes from the external libraries.
          * The Plugin Verifier will not report `No such class` for classes of these packages.
          *
@@ -603,20 +592,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * @see VerifyPlugin.freeArgs
          */
         val freeArgs: ListProperty<String>
-
-        /**
-         * Retrieve the Plugin Verifier home directory used for storing downloaded IDEs.
-         * Following home directory resolving method is taken directly from the Plugin Verifier to keep the compatibility.
-         *
-         * Default value:
-         * - Directory specified with `plugin.verifier.home.dir` system property
-         * - Directory specified with `XDG_CACHE_HOME` environment variable
-         * - ~/.cache/pluginVerifier
-         * - [ProjectLayout.getBuildDirectory]/tmp/pluginVerifier
-         *
-         * @see VerifyPlugin.homeDirectory
-         */
-        val homeDirectory: DirectoryProperty
 
         /**
          * A file that contains a list of problems that will be ignored in a report.
@@ -864,27 +839,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         companion object : Registrable<VerifyPlugin> {
             override fun register(project: Project, target: Any) =
                 target.configureExtension<VerifyPlugin>(Extensions.VERIFY_PLUGIN) {
-                    homeDirectory.convention(
-                        project.providers
-                            .systemProperty("plugin.verifier.home.dir")
-                            .flatMap { project.layout.dir(project.provider { Path(it).toFile() }) }
-                            .orElse(
-                                project.providers.environmentVariable("XDG_CACHE_HOME")
-                                    .map { Path(it, "pluginVerifier").toFile() }
-                                    .let { project.layout.dir(it) }
-                            )
-                            .orElse(
-                                project.providers.systemProperty("user.home")
-                                    .map { Path(it, ".cache/pluginVerifier").toFile() }
-                                    .let { project.layout.dir(it) }
-                            )
-                            .orElse(
-                                project.layout.buildDirectory.dir("tmp/pluginVerifier")
-                            )
-                    )
-                    downloadDirectory.convention(homeDirectory.dir("ides").map {
-                        it.apply { asPath.createDirectories() }
-                    })
                     failureLevel.convention(listOf(VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS))
                     verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
                     verificationReportsFormats.convention(
