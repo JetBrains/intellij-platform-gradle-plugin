@@ -56,7 +56,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
 
     interface FilterParameters : ValueSourceParameters {
         /**
-         * Build number from which the binary IDE releases will be matched.
+         * The build number from which the binary IDE releases will be matched.
          */
         @get:Input
         @get:Optional
@@ -86,7 +86,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
 
     private val log = Logger(javaClass)
 
-    override fun obtain(): List<String>? = with(parameters) {
+    override fun obtain() = with(parameters) {
         val jetbrainsIdesReleases = jetbrainsIdesUrl.orNull
             ?.also { log.info("Reading JetBrains IDEs releases from: $it") }
             ?.let { URL(it).readText() }
@@ -160,6 +160,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         log.info("Filtering releases with since='$since', until='$until', types='${types.joinToString(",")}', channels='${channels.joinToString(",")}'")
 
         (jetbrainsIdesReleases + androidStudioReleases)
+            .asSequence()
             .filter { it.type in types }
             .filter { it.channel in channels }
             .filter { it.testVersion() }
@@ -167,6 +168,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .values
             .map { it.maxBy { release -> release.version } }
             .map { "${it.type.code}-${it.id}" }
+            .also { log.info("Resolved values: ${it.joinToString(",")}") }
     }
 }
 

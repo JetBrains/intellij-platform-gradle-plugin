@@ -814,16 +814,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see ProductReleasesValueSource
              */
             fun recommended() = delegate.addIntelliJPluginVerifierIdes(
-                notationsProvider = ProductReleasesValueSource {
-                    val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
-
-                    channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
-                    types.convention(extensionProvider.map {
-                        listOf(it.productInfo.productCode.toIntelliJPlatformType())
-                    })
-                    sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
-                    untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
-                },
+                notationsProvider = ProductReleasesValueSource(),
             )
 
             /**
@@ -841,7 +832,18 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * Extension function for the [IntelliJPlatformExtension.VerifyPlugin.Ides] extension to let filter IDE binary releases just using [FilterParameters].
              */
             @Suppress("FunctionName")
-            fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) = delegate.createProductReleasesValueSource(configure)
+            fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) = delegate.createProductReleasesValueSource {
+                val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
+
+                channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
+                types.convention(extensionProvider.map {
+                    listOf(it.productInfo.productCode.toIntelliJPlatformType())
+                })
+                sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
+                untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
+
+                configure()
+            }
 
             companion object : Registrable<Ides> {
                 override fun register(project: Project, target: Any) =
