@@ -28,3 +28,4 @@ xmlutil-serialization = { group = "io.github.pdvrieze.xmlutil", name = "serializ
 pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradlePluginPublish" }
 changelog = { id = "org.jetbrains.changelog", version.ref = "gradleChangelogPlugin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+buildLogic = { id = "build-logic" }

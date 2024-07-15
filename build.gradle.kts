@@ -16,6 +16,7 @@ plugins {
     alias(libs.plugins.pluginPublish)
     alias(libs.plugins.changelog)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.buildLogic)
 }
 
 val isSnapshot = properties("snapshot").get().toBoolean()
@@ -50,9 +51,9 @@ dependencies {
         exclude("org.slf4j")
     }
 
-    implementation(libs.kotlinx.serialization.json)
     implementation(libs.xmlutil.core)
     implementation(libs.xmlutil.serialization)
+    implementation(libs.kotlinx.serialization.json)
 
     constraints {
         listOf(libs.xmlutil.core, libs.xmlutil.serialization).forEach {
@@ -157,7 +158,14 @@ fun Test.configureTests() {
     systemProperties["test.gradle.home"] = testGradleHome
     systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
     systemProperties["test.gradle.default"] = properties("gradleVersion").get()
-    systemProperties["test.gradle.version"] = properties("testGradleVersion").get()
+    systemProperties["test.gradle.version"] = properties("testGradleVersion").map { gradleVersion ->
+        when (gradleVersion) {
+            "nightly" -> gradleNightlyVersion()
+            else -> gradleVersion
+        }.also {
+            println("it = ${it}")
+        }
+    }.get()
     systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
     systemProperties["test.intellijPlatform.type"] = properties("testIntellijPlatformType").get()
     systemProperties["test.intellijPlatform.version"] = properties("testIntellijPlatformVersion").get()

@@ -18,6 +18,7 @@ jobs:
         gradleVersion:
           - "8.2"
           - "8.9"
+          - "nightly"
         os:
           - windows-latest
           - ubuntu-latest
