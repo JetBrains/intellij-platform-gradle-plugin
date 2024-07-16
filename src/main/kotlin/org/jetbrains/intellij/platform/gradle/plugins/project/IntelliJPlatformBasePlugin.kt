@@ -3,16 +3,13 @@
 package org.jetbrains.intellij.platform.gradle.plugins.project
 
 import org.gradle.api.GradleException
-import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.attributes.*
 import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.kotlin.dsl.add
-import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.named
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
@@ -65,18 +62,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }
 
         with(project.configurations) configurations@{
-            create(Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR) {
-                isCanBeConsumed = true
-                isCanBeResolved = false
-
+            val intellijPlatformComposedJarConfiguration = create(Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR) {
                 attributes {
-                    attribute(Bundling.BUNDLING_ATTRIBUTE, project.objects.named(Bundling.EXTERNAL))
-                    attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
                     attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
-                    attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, JavaVersion.current().majorVersion.toInt())
-                    attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
-                    attributes.attribute(Attribute.of("org.gradle.jvm.environment", String::class.java), "standard-jvm")
-                    attributes.attribute(Attribute.of("org.jetbrains.kotlin.platform.type", String::class.java), "jvm")
                 }
 
                 extendsFrom(
@@ -85,15 +73,22 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 )
             }
 
-            create(Configurations.INTELLIJ_PLATFORM_DISTRIBUTION) {
-                isCanBeConsumed = true
-                isCanBeResolved = false
-
+            val intellijPlatformDistributionConfiguration = create(Configurations.INTELLIJ_PLATFORM_DISTRIBUTION) {
                 attributes {
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
+                }
+            }
+
+            listOf(intellijPlatformComposedJarConfiguration, intellijPlatformDistributionConfiguration).forEach {
+                it.isCanBeConsumed = true
+                it.isCanBeResolved = false
+
+                it.attributes {
                     attribute(Bundling.BUNDLING_ATTRIBUTE, project.objects.named(Bundling.EXTERNAL))
                     attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
-                    attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, JavaVersion.current().majorVersion.toInt())
+                    attributeProvider(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, project.provider {
+                        project.the<JavaPluginExtension>().targetCompatibility.majorVersion.toInt()
+                    })
                     attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
                     attributes.attribute(Attribute.of("org.gradle.jvm.environment", String::class.java), "standard-jvm")
                     attributes.attribute(Attribute.of("org.jetbrains.kotlin.platform.type", String::class.java), "jvm")
@@ -159,7 +154,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             ) {
                 attributes {
                     attribute(Attributes.extracted, false)
-//                    attribute(Attributes.localPluginsNormalized, false)
                     attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.DISTRIBUTION_NAME))
                 }
             }

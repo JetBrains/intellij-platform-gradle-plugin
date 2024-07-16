@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Use the actual JVM `targetCompatibility` when defining composed jar and distribution archive variants
+
 ### Fixed
 
 - Fixed the broken resolution of the dependency on a local IntelliJ Platform.
