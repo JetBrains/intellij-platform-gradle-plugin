@@ -4,12 +4,13 @@
 
 ### Added
 
-- Introduce `TestFrameworkType.Starter` for adding dependencies on the Starter UI testing framework
+- Introduce `TestFrameworkType.Starter` for adding dependencies on the Starter UI testing framework.
 
 ### Changed
 
-- Use the actual JVM `targetCompatibility` when defining composed jar and distribution archive variants
-- `testIdeUi` is now dedicated to work with `TestFrameworkType.Starter`
+- Use the actual JVM `targetCompatibility` when defining composed jar and distribution archive variants.
+- `testIdeUi` is now dedicated to work with `TestFrameworkType.Starter`.
+- Extend `testImplementation` configuration with dependencies from `intellijPlatformTestDependencies`.
 
 ### Fixed
 

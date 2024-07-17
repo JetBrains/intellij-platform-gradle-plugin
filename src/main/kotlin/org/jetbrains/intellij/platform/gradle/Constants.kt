@@ -119,6 +119,7 @@ object Constants {
             const val RUNTIME_ELEMENTS = JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME
             const val RUNTIME_ONLY = JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME
             const val TEST_COMPILE_CLASSPATH = JvmConstants.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
+            const val TEST_COMPILE_ONLY = JvmConstants.TEST_COMPILE_ONLY_CONFIGURATION_NAME
             const val TEST_IMPLEMENTATION = JvmConstants.TEST_IMPLEMENTATION_CONFIGURATION_NAME
             const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
             const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
