@@ -669,7 +669,8 @@ class IntelliJPlatformDependenciesHelper(
         }
 
         val artifactPath = requireNotNull(plugin.originalFile)
-        val version = "${plugin.pluginVersion}+${artifactPath.hash}"
+        val version = baseVersion.orElse(productInfo.map { it.version }).map { "$it+${artifactPath.hash}" }.get()
+//        val version = "${plugin.pluginVersion}+${artifactPath.hash}"
 
         IvyModule(
             info = IvyModule.Info(
@@ -867,7 +868,7 @@ class IntelliJPlatformDependenciesHelper(
         when (version) {
             Constraints.PLATFORM_VERSION ->
                 version {
-                    prefer("$buildNumber")
+                    prefer(baseVersion.get())
                 }
 
             Constraints.CLOSEST_VERSION ->
