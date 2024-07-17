@@ -18,6 +18,14 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
         Coordinates("com.jetbrains.intellij.tools", "ide-metrics-collector"),
         Coordinates("com.jetbrains.intellij.tools", "ide-util-common"),
     )
+    object Starter : TestFrameworkType(
+        Coordinates("com.jetbrains.intellij.tools","ide-starter-squashed"),
+        Coordinates("com.jetbrains.intellij.tools","ide-starter-junit5"),
+        Coordinates("com.jetbrains.intellij.tools","ide-starter-driver"),
+        Coordinates("com.jetbrains.intellij.driver","driver-client"),
+        Coordinates("com.jetbrains.intellij.driver","driver-sdk"),
+        Coordinates("com.jetbrains.intellij.driver","driver-model"),
+    )
 
     object Plugin {
         object Go : TestFrameworkType(Coordinates("com.jetbrains.intellij.go", "go-test-framework"))

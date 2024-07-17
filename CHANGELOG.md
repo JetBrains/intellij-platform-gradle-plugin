@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Introduce `TestFrameworkType.Starter` for adding dependencies on the Starter UI testing framework
+
 ### Changed
 
 - Use the actual JVM `targetCompatibility` when defining composed jar and distribution archive variants
