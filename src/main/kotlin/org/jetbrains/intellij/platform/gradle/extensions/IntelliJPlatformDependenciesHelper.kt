@@ -69,6 +69,7 @@ class IntelliJPlatformDependenciesHelper(
 
     private val baseType = objects.property<IntelliJPlatformType>()
     private val baseVersion = objects.property<String>()
+    private val baseUseInstaller = objects.property<Boolean>()
 
     /**
      * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
@@ -175,11 +176,17 @@ class IntelliJPlatformDependenciesHelper(
                 false -> also { baseVersion = this }
             }
         }
+        val finalUseInstallerProvider = with(useInstallerProvider) {
+            when (fallbackToBase) {
+                true -> orElse(baseUseInstaller)
+                false -> also { baseUseInstaller = this }
+            }
+        }
 
         configurations[configurationName].dependencies.addLater(finalTypeProvider.zip(finalVersionProvider) { type, version ->
             when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-                else -> when (useInstallerProvider.get()) {
+                else -> when (finalUseInstallerProvider.get()) {
                     true -> dependencies.createIntelliJPlatformInstaller(type, version)
                     false -> dependencies.createIntelliJPlatform(type, version)
                 }

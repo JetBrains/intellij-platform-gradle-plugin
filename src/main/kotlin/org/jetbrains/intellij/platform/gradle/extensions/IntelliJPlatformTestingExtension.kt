@@ -73,7 +73,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
                         type = type,
                         version = version,
                         configurationName = this@create.name,
-                        useInstaller = useInstaller.orElse(true),
+                        useInstaller = useInstaller,
                     )
                 }
 
