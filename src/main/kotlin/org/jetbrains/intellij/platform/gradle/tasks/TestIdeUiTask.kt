@@ -3,14 +3,16 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
+import org.gradle.api.tasks.testing.Test
+import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
-import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
 /**
@@ -23,19 +25,21 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
  * @see JavaExec
  */
 @UntrackedTask(because = "Should always run")
-@Deprecated("Should not be used for testing with the Robot Server Plugin; a placeholder for the new implementation")
-abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, IntelliJPlatformVersionAware {
+abstract class TestIdeUiTask : Test(), TestableAware {
+
+    @get:InputFile
+    abstract val archiveFile: RegularFileProperty
 
     /**
      * Executes the task, configures and runs the IDE.
      */
     @TaskAction
-    override fun exec() {
+    override fun executeTests() {
         validateIntelliJPlatformVersion()
 
-        workingDir = platformPath.toFile()
+        systemProperty("path.to.build.plugin", archiveFile.get())
 
-        super.exec()
+        super.executeTests()
     }
 
     init {
@@ -43,8 +47,26 @@ abstract class TestIdeUiTask : JavaExec(), RunnableIdeAware, TestableAware, Inte
         description = "Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing."
     }
 
+    /**
+     * TODO: Make sure it relies on sandbox.
+     */
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configureWithType = false) {}
+            project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configureWithType = false) {
+                val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
+//                val prepareTestIdeUiSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_UI_SANDBOX)
+
+//                applySandboxFrom(prepareTestIdeUiSandboxTaskProvider)
+                archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
+
+//                jvmArgumentProviders.add(
+//                    SandboxArgumentProvider(
+//                        sandboxConfigDirectory,
+//                        sandboxPluginsDirectory,
+//                        sandboxSystemDirectory,
+//                        sandboxLogDirectory,
+//                    )
+//                )
+            }
     }
 }

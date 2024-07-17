@@ -119,7 +119,7 @@ object Constants {
             const val RUNTIME_ELEMENTS = JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME
             const val RUNTIME_ONLY = JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME
             const val TEST_COMPILE_CLASSPATH = JvmConstants.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
-            const val TEST_COMPILE_ONLY = JvmConstants.TEST_COMPILE_ONLY_CONFIGURATION_NAME
+            const val TEST_IMPLEMENTATION = JvmConstants.TEST_IMPLEMENTATION_CONFIGURATION_NAME
             const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
             const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
         }
@@ -148,7 +148,7 @@ object Constants {
         const val SETUP_DEPENDENCIES = "setupDependencies"
         const val SIGN_PLUGIN = "signPlugin"
         const val TEST_IDE_PERFORMANCE = "testIdePerformance" // TODO: check
-        const val TEST_IDE_UI = "testIdeUi" // TODO: check
+        const val TEST_IDE_UI = "testIdeUi"
         const val VERIFY_PLUGIN = "verifyPlugin"
         const val VERIFY_PLUGIN_STRUCTURE = "verifyPluginStructure"
         const val VERIFY_PLUGIN_PROJECT_CONFIGURATION = "verifyPluginProjectConfiguration"

@@ -9,6 +9,7 @@
 ### Changed
 
 - Use the actual JVM `targetCompatibility` when defining composed jar and distribution archive variants
+- `testIdeUi` is now dedicated to work with `TestFrameworkType.Starter`
 
 ### Fixed
 

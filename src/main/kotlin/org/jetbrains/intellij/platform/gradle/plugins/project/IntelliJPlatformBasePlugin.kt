@@ -287,7 +287,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 intellijPlatformConfiguration,
                 intellijPlatformDependenciesConfiguration,
             )
-            this@configurations[Configurations.External.TEST_COMPILE_ONLY].extendsFrom(
+            this@configurations[Configurations.External.TEST_IMPLEMENTATION].extendsFrom(
                 intellijPlatformConfiguration,
                 intellijPlatformDependenciesConfiguration,
                 intellijPlatformTestDependenciesConfiguration,
