@@ -614,7 +614,7 @@ class IntelliJPlatformDependenciesHelper(
         localProductInfo.validateSupportedVersion()
 
         val type = localProductInfo.productCode.toIntelliJPlatformType()
-        val version = "${localProductInfo.version}+${artifactPath.hash}"
+        val version = "${localProductInfo.buildNumber}+${artifactPath.hash}"
 
         IvyModule(
             info = IvyModule.Info(
