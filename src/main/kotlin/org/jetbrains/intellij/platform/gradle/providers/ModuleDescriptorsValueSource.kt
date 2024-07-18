@@ -15,7 +15,7 @@ import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.util.jar.JarFile
-import kotlin.io.path.pathString
+import kotlin.io.path.invariantSeparatorsPathString
 
 /**
  * Obtains the list of coordinates from module descriptors provided by the IntelliJ Platform.
@@ -47,7 +47,7 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
         val collectedJars =
             collectIntelliJPlatformJars(productInfo, platformPath)
                 .plus(collectBundledPluginsJars(platformPath))
-                .map { platformPath.relativize(it).pathString }
+                .map { platformPath.relativize(it).invariantSeparatorsPathString }
 
         val jarFile = JarFile(moduleDescriptorsFile.toFile())
 
