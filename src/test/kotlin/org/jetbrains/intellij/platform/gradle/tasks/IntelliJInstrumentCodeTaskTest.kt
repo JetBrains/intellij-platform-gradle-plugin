@@ -54,6 +54,8 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
                     intellijPlatform {
                         instrumentationTools()
                     }
+                
+                    testImplementation("junit:junit:4.13.2")
                 }
                 
                 intellijPlatform {

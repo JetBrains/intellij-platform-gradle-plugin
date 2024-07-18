@@ -8,6 +8,7 @@
 
 ### Changed
 
+- JUnit4 is no longer provided via IntelliJ Platform — it is necessary to add it to the project with `testImplementation`.
 - Use the actual JVM `targetCompatibility` when defining composed jar and distribution archive variants.
 - `testIdeUi` is now dedicated to work with `TestFrameworkType.Starter`.
 - Extend `testImplementation` configuration with dependencies from `intellijPlatformTestDependencies`.

@@ -32,7 +32,7 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
                     listOf(
                         "IC-2023.2.6",
                         "IC-2023.1.6",
-                        "IC-223.8836.26",
+                        "IC-2022.3.3",
                         "AI-2023.2.1.23",
                         "AI-2023.1.1.26",
                         "AI-2022.3.1.18",
