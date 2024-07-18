@@ -31,7 +31,7 @@ private const val SEARCHABLE_OPTIONS_SUFFIX_JSON = "-searchableOptions.json"
 abstract class JarSearchableOptionsTask : Jar(), PluginAware {
 
     /**
-     * The directory from which the prepared searchable options are read.
+     * Specifies the directory where the prepared searchable options are read from.
      *
      * Default value: [BuildSearchableOptionsTask.outputDirectory]
      */
@@ -41,8 +41,10 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
     abstract val inputDirectory: DirectoryProperty
 
     /**
-     * Emit a warning if no searchable options are found.
-     * Can be disabled with [GradleProperties.NoSearchableOptionsWarning].
+     * Specifies if a warning is emitted when no searchable options are found.
+     * Can be disabled with [GradleProperties.NoSearchableOptionsWarning] Gradle property.
+     *
+     * Default value: [GradleProperties.NoSearchableOptionsWarning]
      */
     @get:Internal
     abstract val noSearchableOptionsWarning: Property<Boolean>

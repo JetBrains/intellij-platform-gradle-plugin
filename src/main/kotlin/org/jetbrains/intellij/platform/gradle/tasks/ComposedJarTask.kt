@@ -14,9 +14,17 @@ import org.jetbrains.intellij.platform.gradle.Constants.Components
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
+/**
+ * Composes a final Jar archive by combining the output of base [Tasks.External.JAR] or [Tasks.INSTRUMENTED_JAR] tasks,
+ * depending on if code instrumentation is enabled with [IntelliJPlatformExtension.instrumentCode].
+ *
+ * The final Jar is also combined with plugin modules marked using the [IntelliJPlatformDependenciesExtension.pluginModule] dependencies helper.
+ */
 @CacheableTask
 abstract class ComposedJarTask : Jar() {
 

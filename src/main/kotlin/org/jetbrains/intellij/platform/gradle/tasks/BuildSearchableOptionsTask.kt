@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.intellij.beans.PluginBean
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
@@ -21,27 +22,29 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import kotlin.io.path.pathString
 
 /**
- * Builds an index of UI components (searchable options) for the plugin.
+ * Builds the index of UI components (searchable options) for the plugin.
  * This task runs a headless IDE instance to collect all the available options provided by the plugin's [Settings](https://plugins.jetbrains.com/docs/intellij/settings.html).
  *
- * If your plugin doesn't implement custom settings, it is recommended to disable it with [IntelliJPlatformExtension.buildSearchableOptions].
+ * If the plugin doesn't implement custom settings, it is recommended to disable this task via [IntelliJPlatformExtension.buildSearchableOptions] flag.
  *
- * In the case of running the task for the plugin which has the [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor] configures,
+ * In the case of running the task for the plugin that has [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor] defined,
  * a warning will be logged regarding potential issues with running headless IDE for paid plugins.
- * It is possible to mute this warning with [GradleProperties.PaidPluginSearchableOptionsWarning] build feature flag.
+ * It is possible to mute this warning with the [GradleProperties.PaidPluginSearchableOptionsWarning] Gradle property.
  */
 @CacheableTask
 abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
 
     /**
-     * The directory to which searchable options will be generated.
+     * Specifies the directory where searchable options will be generated.
      */
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty
 
     /**
-     * Emit warning if the task is executed by a paid plugin.
-     * Can be disabled with [GradleProperties.PaidPluginSearchableOptionsWarning].
+     * Emits a warning when the task is executed by a paid plugin.
+     * Can be disabled with the [GradleProperties.PaidPluginSearchableOptionsWarning] Gradle property.
+     *
+     * Default value: [GradleProperties.PaidPluginSearchableOptionsWarning] && [PluginBean.productDescriptor] in [pluginXml] is defined
      */
     @get:Internal
     abstract val showPaidPluginWarning: Property<Boolean>

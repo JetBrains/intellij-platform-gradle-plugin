@@ -36,12 +36,11 @@ private const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilter
 private const val LOADER_REF = "java2.loader"
 
 /**
- * Task dedicated to executing the code instrumentation using the Ant tasks provided with the currently used IntelliJ Platform dependency.
+ * Executes the code instrumentation using the Ant tasks provided by the used IntelliJ Platform dependency.
  *
- * The code instrumentation scans the compiled Java and Kotlin classes for JetBrains Annotations usages to replace them with relevant functionalities
- * they're responsible for.
+ * The code instrumentation scans the compiled Java and Kotlin classes for JetBrains Annotations usages to replace them with their relevant functionalities.
  *
- * This task is controlled with the [IntelliJPlatformExtension.instrumentCode] extension property, enabled by default.
+ * The task is controlled with the [IntelliJPlatformExtension.instrumentCode] extension property, enabled by default.
  * To properly run the instrumentation, it is required to add [IntelliJPlatformDependenciesExtension.instrumentationTools] dependencies to the project.
  *
  * This dependency is available via the [IntelliJPlatformRepositoriesExtension.intellijDependencies] repository, which can be added separately
@@ -51,13 +50,13 @@ private const val LOADER_REF = "java2.loader"
 abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
     /**
-     * Compile classpath of the project's source set.
+     * Specifies the compile classpath of the project's source set.
      */
     @get:Internal
     abstract val sourceSetCompileClasspath: ConfigurableFileCollection
 
     /**
-     * The list of directories with compiled classes.
+     * Specifies the list of directories with compiled classes.
      *
      * Default value: `classesDirs` of the project's source sets.
      */
@@ -67,7 +66,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     abstract val classesDirs: ConfigurableFileCollection
 
     /**
-     * The list of directories with GUI Designer form files.
+     * Specifies the list of directories with GUI Designer form files.
      *
      * Default value: `.form` files of the project's source sets.
      */
@@ -77,7 +76,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     abstract val formsDirs: ConfigurableFileCollection
 
     /**
-     * Location of the source code.
+     * Specifies the location of the source code.
      */
     @get:Internal
     abstract val sourceDirs: ConfigurableFileCollection
@@ -91,7 +90,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     abstract val instrumentationLogs: Property<Boolean>
 
     /**
-     * The output directory for instrumented classes.
+     * Specifies the output directory for instrumented classes.
      */
     @get:OutputDirectory
     abstract val outputDirectory: DirectoryProperty

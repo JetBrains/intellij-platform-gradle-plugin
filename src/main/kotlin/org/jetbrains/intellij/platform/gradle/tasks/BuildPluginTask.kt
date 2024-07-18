@@ -19,8 +19,8 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  * It takes the output of the [PrepareSandboxTask] task containing the built project with all its modules and dependencies,
  * and the output of [JarSearchableOptionsTask] task.
  *
- * The produced archive is stored in the [ProjectLayout.getBuildDirectory]/distributions/[archiveFile] file.
- * The [archiveFile] name and location can be controlled with properties provided with the [Zip] base task.
+ * The produced archive is stored in the [ProjectLayout.getBuildDirectory]/distributions/[archiveFile],
+ * where the name and location of [archiveFile] can be controlled with properties provided with the [Zip] base task.
  * By default, the [archiveBaseName] is set to the plugin name specified in the `plugin.xml` file, after it gets patched with the [PatchPluginXmlTask] task.
  */
 @DisableCachingByDefault(because = "Zip based tasks do not benefit from caching")

@@ -2,8 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.StartParameter
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
@@ -29,19 +31,28 @@ import kotlin.io.path.*
 private const val CLEAN = "clean"
 
 /**
- * Initializes the IntelliJ Platform Gradle Plugin and performs various checks, like if the plugin is up-to-date.
+ * Executes before every other task introduced by IntelliJ Platform Gradle Plugin to prepare it to run.
+ * It is responsible for:
+ *
+ * - checking if the project uses IntelliJ Platform Gradle Plugin in the latest available version
+ * - preparing the KotlinX Coroutines Java Agent file to enable coroutines debugging when developing the plugin
+ *
+ * The self-update check can be disabled via [GradleProperties.SelfUpdateCheck] Gradle property.
+ * To make the Coroutines Java Agent available for the task, inherit from [CoroutinesJavaAgentAware].
  */
 @UntrackedTask(because = "Should always run")
 abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPlatformVersionAware {
 
     /**
-     * Indicates whether Gradle is run in offline mode.
+     * Determines if the operation is running in offline mode and depends on Gradle start parameters.
+     *
+     * Default value: [StartParameter.isOffline]
      */
     @get:Internal
     abstract val offline: Property<Boolean>
 
     /**
-     * Represents the property for checking if self-update is enabled.
+     * Represents the property for checking if self-update checks are enabled.
      *
      * Default value: [GradleProperties.SelfUpdateCheck]
      */
@@ -50,13 +61,15 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
 
     /**
      * Represents a lock file used to limit the plugin version checks in time.
-     * If a file is absent, and other conditions are met, the version check is performed.
+     * If the file is missing and other conditions are met, the version check is performed.
      */
     @get:Internal
     abstract val selfUpdateLock: RegularFileProperty
 
     /**
-     * Java Agent file for the Coroutines library, which is required to enable coroutines debugging.
+     * Specifies the Java Agent file for the Coroutines library required to enable coroutines debugging.
+     *
+     * Default value: [ProjectLayout.getBuildDirectory]/tmp/initializeIntelliJPlatformPlugin/coroutines-javaagent.jar
      *
      * @see [CoroutinesJavaAgentAware]
      */

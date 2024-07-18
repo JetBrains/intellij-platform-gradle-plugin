@@ -11,6 +11,9 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
 
+/**
+ * Creates a copy of the current module's `jar` task output with instrumented classes added.
+ */
 @CacheableTask
 abstract class InstrumentedJarTask : Jar() {
 
