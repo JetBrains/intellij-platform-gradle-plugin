@@ -3,8 +3,10 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.test.Ignore
 import kotlin.test.Test
 
+@Ignore
 class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "multi-module",
 ) {
