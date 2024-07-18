@@ -31,6 +31,8 @@ dependencies {
         instrumentationTools()
         testFramework(TestFrameworkType.Platform)
     }
+
+    testImplementation("junit:junit:4.13.2")
 }
 
 intellijPlatform {
