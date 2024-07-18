@@ -147,6 +147,7 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
         .asSequence()
         .filter { it.os == ProductInfo.Launch.OS.current }
         .flatMap { it.bootClassPathJarNames }
+        .minus("junit4.jar") // exclude `junit4.jar` from the list as JUnit shouldn't be in the classpath
         .map { "lib/$it" }
         .plus( // TODO: pick only relevant entries. TBD with VK
             productInfo.layout

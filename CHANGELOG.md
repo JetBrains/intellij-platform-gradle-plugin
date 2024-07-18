@@ -18,6 +18,7 @@
 - Fixed renaming files with the same name when preparing the sandbox.
 - Fixed the resolving of the IDEs list for `verifyPlugin`.
 - ProductReleasesValueSource: pick the IDE with the highest `build` number instead of `version`.
+- Exclude JUnit4 (`junit4.jar`) from the IntelliJ Platform classpath
 
 ### Removed
 
