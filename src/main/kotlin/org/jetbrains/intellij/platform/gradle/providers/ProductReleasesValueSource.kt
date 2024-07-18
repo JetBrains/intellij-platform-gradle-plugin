@@ -166,7 +166,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .filter { it.testVersion() }
             .groupBy { "${it.type.code}-${it.version.major}.${it.version.minor}" }
             .values
-            .map { it.maxBy { release -> release.version } }
+            .map { it.maxBy { release -> release.build } }
             .map { "${it.type.code}-${it.id}" }
             .also { log.info("Resolved values: ${it.joinToString(",")}") }
     }
