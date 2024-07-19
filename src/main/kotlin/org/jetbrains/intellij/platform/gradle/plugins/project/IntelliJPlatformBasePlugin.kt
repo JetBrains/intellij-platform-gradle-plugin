@@ -62,45 +62,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }
 
         with(project.configurations) configurations@{
-            val intellijPlatformComposedJarConfiguration = create(Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR) {
-                attributes {
-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
-                }
-
-                extendsFrom(
-                    this@configurations[Configurations.External.IMPLEMENTATION],
-                    this@configurations[Configurations.External.RUNTIME_ONLY],
-                )
-            }
-
-            val intellijPlatformDistributionConfiguration = create(Configurations.INTELLIJ_PLATFORM_DISTRIBUTION) {
-                attributes {
-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
-                }
-            }
-
-            listOf(intellijPlatformComposedJarConfiguration, intellijPlatformDistributionConfiguration).forEach {
-                it.isCanBeConsumed = true
-                it.isCanBeResolved = false
-
-                it.attributes {
-                    attribute(Bundling.BUNDLING_ATTRIBUTE, project.objects.named(Bundling.EXTERNAL))
-                    attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
-                    attributeProvider(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, project.provider {
-                        project.the<JavaPluginExtension>().targetCompatibility.majorVersion.toInt()
-                    })
-                    attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
-                    attributes.attribute(Attribute.of("org.gradle.jvm.environment", String::class.java), "standard-jvm")
-                    attributes.attribute(Attribute.of("org.jetbrains.kotlin.platform.type", String::class.java), "jvm")
-                }
-            }
-
-            named(Configurations.External.RUNTIME_CLASSPATH) {
-                attributes {
-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.COMPOSED_JAR_NAME))
-                }
-            }
-
             val intellijPlatformDependencyConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
                 description = "IntelliJ Platform dependency archive",
@@ -154,17 +115,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             ) {
                 attributes {
                     attribute(Attributes.extracted, false)
-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.DISTRIBUTION_NAME))
-                }
-            }
-            val intellijPlatformPluginModuleConfiguration = create(
-                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
-                description = "IntelliJ Platform plugin module",
-            ) {
-                isTransitive = false
-
-                attributes {
-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.COMPOSED_JAR_NAME))
                 }
             }
             create(
@@ -181,7 +131,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attributes {
                     attribute(Attributes.extracted, true)
                     attribute(Attributes.localPluginsNormalized, true)
-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(LibraryElements::class.java, Attributes.DISTRIBUTION_NAME))
                 }
 
                 extendsFrom(intellijPlatformPluginDependenciesConfiguration)
@@ -268,7 +217,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             ) {
                 extendsFrom(
                     intellijPlatformPluginConfiguration,
-                    intellijPlatformPluginModuleConfiguration,
                     intellijPlatformBundledPluginsConfiguration,
                 )
             }
@@ -308,10 +256,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             attributesSchema {
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
-                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE) {
-                    compatibilityRules.add(ComposedJarRule::class)
-                    compatibilityRules.add(DistributionRule::class)
-                }
             }
 
             ExtractorTransformer.register(

@@ -12,6 +12,7 @@
 - Use the actual JVM `targetCompatibility` when defining composed jar and distribution archive variants.
 - `testIdeUi` is now dedicated to work with `TestFrameworkType.Starter`.
 - Extend `testImplementation` configuration with dependencies from `intellijPlatformTestDependencies`.
+- Move `composed-jar` and `distribution` artifacts definition to the `org.jetbrains.intellij.platform.module` plugin.
 
 ### Fixed
 
