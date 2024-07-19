@@ -15,6 +15,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
@@ -227,7 +228,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      */
     fun disablePlugins(vararg ids: String) = disabled.addAll(*ids)
 
-    fun robotServerPlugin(version: String) = delegate.addRobotServerPluginDependency(
+    fun robotServerPlugin(version: String = Constraints.LATEST_VERSION) = delegate.addRobotServerPluginDependency(
         versionProvider = delegate.provider { version }
     )
 
