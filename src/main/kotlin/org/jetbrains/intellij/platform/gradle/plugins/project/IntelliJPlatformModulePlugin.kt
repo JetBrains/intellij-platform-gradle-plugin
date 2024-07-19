@@ -8,8 +8,8 @@ import org.gradle.kotlin.dsl.apply
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
-import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
-import org.jetbrains.intellij.platform.gradle.tasks.compaion.TestCompanion
+import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
+import org.jetbrains.intellij.platform.gradle.tasks.companion.TestCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 @Suppress("unused")

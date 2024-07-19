@@ -1,6 +1,6 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.tasks.compaion
+package org.jetbrains.intellij.platform.gradle.tasks.companion
 
 import org.gradle.api.Project
 import org.gradle.api.tasks.testing.Test

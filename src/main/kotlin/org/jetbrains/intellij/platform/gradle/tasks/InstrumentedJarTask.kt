@@ -9,7 +9,7 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
+import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
 
 /**
  * Creates a copy of the current module's `jar` task output with instrumented classes added.

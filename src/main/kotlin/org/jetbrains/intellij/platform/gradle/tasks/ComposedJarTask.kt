@@ -16,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.tasks.compaion.JarCompanion
+import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 /**
