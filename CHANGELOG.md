@@ -6,6 +6,10 @@
 
 - Set the default value of `IntelliJPlatformPluginsExtension.robotServerPlugin` to `Constraints.LATEST_VERSION`
 
+### Fixed
+
+- Use the custom task configuration when calling `IntelliJPlatformPluginsExtension.robotServerPlugin(version)`
+
 ## [2.0.0-RC1] - 2024-07-19
 
 The `2.0.0` release is completely rewritten. Please see [documentation page](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) for more details.

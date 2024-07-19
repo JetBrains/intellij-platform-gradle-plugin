@@ -229,11 +229,13 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun disablePlugins(vararg ids: String) = disabled.addAll(*ids)
 
     fun robotServerPlugin(version: String = Constraints.LATEST_VERSION) = delegate.addRobotServerPluginDependency(
-        versionProvider = delegate.provider { version }
+        versionProvider = delegate.provider { version },
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
     )
 
     fun robotServerPlugin(version: Provider<String>) = delegate.addRobotServerPluginDependency(
-        versionProvider = version
+        versionProvider = version,
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
     )
 
     companion object : Registrable<IntelliJPlatformPluginsExtension> {
