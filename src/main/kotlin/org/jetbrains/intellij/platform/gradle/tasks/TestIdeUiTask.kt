@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
@@ -9,18 +10,12 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
 /**
- * Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing.
- *
- * This task runs against the IntelliJ Platform and plugins specified in project dependencies.
- * To register a customized task, use [IntelliJPlatformTestingExtension.testIdeUi] instead.
- *
- * @see <a href="https://github.com/JetBrains/intellij-ui-test-robot>IntelliJ UI Test Robot</a>
- * @see JavaExec
+ * Runs the IDE instance with the developed plugin and Starter framework for UI testing.
  */
+@Incubating
 @UntrackedTask(because = "Should always run")
 abstract class TestIdeUiTask : Test(), TestableAware {
 
