@@ -24,15 +24,15 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  * with [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild]
  * and [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild] properties.
  *
- * The filer used for retrieving the release list can be customized by using properties provided with [ProductReleasesValueSource.FilterParameters].
+ * The filter used for retrieving the release list can be customized by using properties provided with [ProductReleasesValueSource.FilterParameters].
  */
 @UntrackedTask(because = "Prints output")
 abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSource.FilterParameters {
 
     /**
-     * Property holds the list of product releases to print.
+     * Property that holds the list of product releases to print and which can be used to retrieve the result list.
      *
-     * Can be used to retrieve the result list.
+     * Default value: The output of [ProductReleasesValueSource] using default configuration
      */
     @get:Input
     abstract val productsReleases: ListProperty<String>

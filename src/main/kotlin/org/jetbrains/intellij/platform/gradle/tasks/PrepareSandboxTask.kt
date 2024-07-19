@@ -17,7 +17,6 @@ import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.get
 import org.jdom2.Element
-import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
@@ -34,74 +33,68 @@ import org.jetbrains.kotlin.gradle.utils.named
 import kotlin.io.path.*
 
 /**
- * Prepares a sandbox environment with the installed plugin and its dependencies.
+ * Prepares a sandbox environment with the plugin and its dependencies installed.
  * The sandbox directory is required by tasks that run IDE and tests in isolation from other instances, like when multiple IntelliJ Platforms are used for
  * testing with [RunIdeTask], [TestIdeTask], [TestIdeUiTask], or [TestIdePerformanceTask] tasks.
+ * The sandbox directory is created within the container configurable with [IntelliJPlatformExtension.sandboxContainer].
  *
- * To fully use the sandbox capabilities in a task, make it extend the [SandboxAware] interface.
- *
- * @see SandboxAware
- * @see IntelliJPlatformExtension.sandboxContainer
- * @see Constants.Sandbox
+ * Tasks based on the [PrepareSandboxTask] are _sandbox producers_ and can be associated with _sandbox consumers_.
+ * To define the consumer task, make it extend from [SandboxAware] and apply the `consumer.applySandboxFrom(producer)` function.
  */
 @CacheableTask
 abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, SandboxStructure, SplitModeAware {
 
     /**
-     * Represents the suffix used i.e., for test-related tasks.
+     * Represents the suffix used i.e., for test-related or custom tasks.
+     *
+     * The default suffix is composed of the task [name] (`prepare[X]Sandbox[_Y]`) to the `-[X][Y]` format.
      */
     @get:Internal
     abstract val sandboxSuffix: Property<String>
 
     /**
-     * Default sandbox destination directory to where the plugin files will be copied into.
+     * Specifies the default sandbox destination directory where plugin files will be copied.
      *
      * Default value: [SandboxAware.sandboxPluginsDirectory]
-     *
-     * @see SandboxAware.sandboxPluginsDirectory
      */
     @get:Internal
     abstract val defaultDestinationDirectory: DirectoryProperty
 
     /**
+     * Specifies the directory where the plugin artifacts are to be placed.
+     *
+     * Default value: [defaultDestinationDirectory]/[IntelliJPlatformExtension.projectName]
+     */
+    @get:OutputDirectory
+    abstract val pluginDirectory: DirectoryProperty
+
+    /**
      * An internal field to hold a list of plugins to be disabled within the current sandbox.
      *
-     * This property is controlled with [IntelliJPlatformPluginsExtension].
+     * This property is controlled with [IntelliJPlatformPluginsExtension.disablePlugins].
      */
     @get:Internal
     abstract val disabledPlugins: SetProperty<String>
 
     /**
-     * The output of [Jar] task.
-     * The proper [Jar.archiveFile] is picked depending on if code instrumentation is enabled.
+     * Specifies the output of the [Jar] task.
+     * The proper [Jar.archiveFile] picked depends on whether code instrumentation is enabled.
      *
      * Default value: [Jar.archiveFile]
-     *
-     * @see JavaPlugin.JAR_TASK_NAME
-     * @see Tasks.INSTRUMENTED_JAR
-     * @see IntelliJPlatformExtension.instrumentCode
      */
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val pluginJar: RegularFileProperty
 
-    @get:OutputDirectory
-    abstract val pluginDirectory: DirectoryProperty
-
     /**
-     * List of dependencies on external plugins resolved from the [Configurations.INTELLIJ_PLATFORM_PLUGIN] configuration.
-     *
-     * @see Configurations.INTELLIJ_PLATFORM_PLUGIN
-     * @see IntelliJPlatformDependenciesExtension.plugin
-     * @see IntelliJPlatformDependenciesExtension.bundledPlugin
+     * Specifies a list of dependencies on external plugins resolved from the [Configurations.INTELLIJ_PLATFORM_PLUGIN] configuration
+     * added with [IntelliJPlatformDependenciesExtension.plugin] and [IntelliJPlatformDependenciesExtension.bundledPlugin].
      */
     @get:Classpath
     abstract val pluginsClasspath: ConfigurableFileCollection
 
     /**
      * Dependencies defined with the [JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME] configuration.
-     *
-     * @see JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
      */
     @get:Classpath
     abstract val runtimeClasspath: ConfigurableFileCollection

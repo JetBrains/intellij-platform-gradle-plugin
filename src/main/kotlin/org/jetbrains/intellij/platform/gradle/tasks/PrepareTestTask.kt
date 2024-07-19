@@ -9,14 +9,13 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 
 /**
- * This is a task used to prepare an immutable `test` task and provide all necessary dependencies and configuration for a proper testing configuration.
+ * Prepares an immutable `test` task and provides all necessary dependencies and configurations for a proper testing configuration.
  */
 @CacheableTask
-abstract class PrepareTestTask : DefaultTask(), TestableAware, SandboxAware {
+abstract class PrepareTestTask : DefaultTask(), TestableAware {
 
     init {
         group = Plugin.GROUP_NAME

@@ -41,7 +41,7 @@ import kotlin.io.path.nameWithoutExtension
  * @see RunIdeTask
  * @see JavaExec
  */
-@Deprecated(message = "CHECK")
+@Deprecated(message = "Not implemented")
 @Incubating
 @UntrackedTask(because = "Should always run")
 abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAware, IntelliJPlatformVersionAware {

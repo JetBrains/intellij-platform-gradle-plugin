@@ -25,24 +25,23 @@ import kotlin.io.path.nameWithoutExtension
 import kotlin.io.path.pathString
 
 /**
- * Signs the ZIP archive with the provided key using [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
+ * Signs the ZIP archive with the provided key using the [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
  *
  * To sign the plugin before publishing to [JetBrains Marketplace](https://plugins.jetbrains.com) with the [SignPluginTask] task,
  * it is required to provide a certificate chain and a private key with its password using [IntelliJPlatformExtension.Signing] extension.
  *
  * As soon as [privateKey] (or [privateKeyFile]) and [certificateChain] (or [certificateChainFile]) properties are specified, the task will be executed automatically right before the [PublishPluginTask] task.
  *
- * For more details, see [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html) article.
- *
- * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-signing.html">Plugin Signing</a>
- * @see <a href="https://github.com/JetBrains/marketplace-zip-signer">Marketplace ZIP Signer</a>
+ * For more details, see [Plugin Signing](https://plugins.jetbrains.com/docs/intellij/plugin-signing.html).
  */
 @CacheableTask
 abstract class SignPluginTask : JavaExec(), SigningAware {
 
     /**
-     * Input, unsigned ZIP archive file.
-     * Refers to `in` CLI option.
+     * Specifies the unsigned ZIP archive input file.
+     * Corresponds to the `in` CLI option.
+     *
+     * Default value: [BuildPluginTask.archiveFile]
      */
     @get:InputFile
     @get:SkipWhenEmpty
@@ -50,17 +49,22 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     abstract val archiveFile: RegularFileProperty
 
     /**
-     * Output, signed ZIP archive file.
-     * Refers to `out` CLI option.
+     * Specifies the signed ZIP archive output file.
+     * Corresponds to the `out` CLI option.
      *
      * Predefined with the name of the ZIP archive file with `-signed` name suffix attached.
+     * The output file is placed next to the input [SignPluginTask.archiveFile].
+     *
+     * Default value: [SignPluginTask.archiveFile] with `-signed` suffix applied to the name
      */
     @get:OutputFile
     abstract val signedArchiveFile: RegularFileProperty
 
     /**
-     * KeyStore file.
-     * Refers to `ks` CLI option.
+     * Specifies the KeyStore file path.
+     * Corresponds to the `ks` CLI option.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.keyStore]
      */
     @get:InputFile
     @get:Optional
@@ -68,50 +72,62 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     abstract val keyStore: RegularFileProperty
 
     /**
-     * KeyStore password.
-     * Refers to `ks-pass` CLI option.
+     * Specifies the KeyStore password.
+     * Corresponds to the `ks-pass` CLI option.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.keyStorePassword]
      */
     @get:Input
     @get:Optional
     abstract val keyStorePassword: Property<String>
 
     /**
-     * KeyStore key alias.
-     * Refers to `ks-key-alias` CLI option.
+     * Specifies the KeyStore key alias.
+     * Corresponds to the `ks-key-alias` CLI option.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.keyStoreKeyAlias]
      */
     @get:Input
     @get:Optional
     abstract val keyStoreKeyAlias: Property<String>
 
     /**
-     * KeyStore type.
-     * Refers to `ks-type` CLI option.
+     * Specifies the KeyStore type.
+     * Corresponds to the `ks-type` CLI option.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.keyStoreType]
      */
     @get:Input
     @get:Optional
     abstract val keyStoreType: Property<String>
 
     /**
-     * JCA KeyStore Provider name.
-     * Refers to `ks-provider-name` CLI option.
+     * Specifies the JCA KeyStore Provider name.
+     * Corresponds to the `ks-provider-name` CLI option.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.keyStoreProviderName]
      */
     @get:Input
     @get:Optional
     abstract val keyStoreProviderName: Property<String>
 
     /**
-     * Encoded private key in the PEM format.
-     * Refers to `key` CLI option.
+     * Specifies the encoded private key in the PEM format.
+     * Corresponds to the `key` CLI option.
      *
      * Takes precedence over the [privateKeyFile] property.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.privateKey]
      */
     @get:Input
     @get:Optional
     abstract val privateKey: Property<String>
 
     /**
-     * A file with an encoded private key in the PEM format.
-     * Refers to `key-file` CLI option.
+     * Specifies a file with an encoded private key in the PEM format.
+     * Corresponds to the `key-file` CLI option.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.privateKeyFile]
      */
     @get:InputFile
     @get:Optional
@@ -119,28 +135,34 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
     abstract val privateKeyFile: RegularFileProperty
 
     /**
-     * Password required to decrypt the private key.
-     * Refers to `key-pass` CLI option.
+     * Specifies the password required to decrypt the private key.
+     * Corresponds to the `key-pass` CLI option.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.password]
      */
     @get:Input
     @get:Optional
     abstract val password: Property<String>
 
     /**
-     * A string containing X509 certificates.
-     * The first certificate from the chain will be used as a certificate authority (CA).
-     * Refers to `cert` CLI option.
+     * Specifies a string containing X509 certificates.
+     * The first certificate in the chain will be used as a certificate authority (CA).
+     * This parameter corresponds to the `cert` CLI option.
      *
      * Takes precedence over the [certificateChainFile] property.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.certificateChain]
      */
     @get:Input
     @get:Optional
     abstract val certificateChain: Property<String>
 
     /**
-     * Path to the file containing X509 certificates.
-     * The first certificate from the chain will be used as a certificate authority (CA).
-     * Refers to `cert-file` CLI option.
+     * Specifies the path to the file containing X509 certificates.
+     * The first certificate in the chain will be used as a certificate authority (CA).
+     * Corresponds to the `cert-file` CLI option.
+     *
+     * Default value: [IntelliJPlatformExtension.Signing.certificateChainFile]
      */
     @get:InputFile
     @get:Optional

@@ -13,10 +13,10 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 /**
  * A deprecated method for setting up IntelliJ Platform dependencies.
  *
- * The `setupDependencies` task was automatically added to the ["After Sync" Gradle trigger](https://www.jetbrains.com/help/idea/work-with-gradle-tasks.html#config_triggers_gradle) to make the IntelliJ SDK dependency available for IntelliJ IDEA right after the Gradle synchronization.
- * With the IntelliJ Platform Gradle Plugin 2.0 release, this method is no longer needed as the native Gradle dependencies resolution is in use.
+ * The `setupDependencies` task was automatically added to the ["After Sync" Gradle trigger](https://www.jetbrains.com/help/idea/work-with-gradle-tasks.html#config_triggers_gradle) to make the IntelliJ Platform dependency available for IntelliJ IDEA right after the Gradle synchronization.
+ * This method is no longer needed as the dependency on IntelliJ Platform is declared directly in Gradle dependencies.
  *
- * To remove any references to this task, call the "Tasks Activation" action and remove the `setupDependencies` entry from the "After Sync" group.
+ * It's recommended to remove any references to `setupDependencies` task. See the [Migration](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html#setupdependencies) page for more details.
  */
 @DisableCachingByDefault(because = "No output state to track")
 abstract class SetupDependenciesTask : DefaultTask() {

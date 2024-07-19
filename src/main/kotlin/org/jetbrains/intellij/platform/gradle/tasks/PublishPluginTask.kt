@@ -19,7 +19,7 @@ import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 
 /**
- * The task for publishing plugin to the remote plugins repository, such as [JetBrains Marketplace](https://plugins.jetbrains.com).
+ * Publishes the plugin to the remote plugins repository, such as [JetBrains Marketplace](https://plugins.jetbrains.com).
  *
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/publishing-plugin.html#uploading-a-plugin-to-jetbrains-marketplace">Uploading a Plugin to JetBrains Marketplace</a>
  * @see <a href="https://plugins.jetbrains.com/docs/marketplace/plugin-upload.html">Plugin upload API</a>
@@ -29,7 +29,8 @@ import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 abstract class PublishPluginTask : DefaultTask() {
 
     /**
-     * ZIP archive to be published to the remote repository.
+     * Specifies the ZIP archive file to be published to the remote repository.
+     * By default, it uses the output [SignPluginTask.archiveFile] if plugin signing is configured, otherwise the [BuildPluginTask.archiveFile].
      *
      * Default value: [SignPluginTask.archiveFile] if plugin signing is configured, otherwise [BuildPluginTask.archiveFile].
      *
@@ -43,44 +44,37 @@ abstract class PublishPluginTask : DefaultTask() {
     abstract val archiveFile: RegularFileProperty
 
     /**
-     * URL host of a plugin repository.
+     * Specifies the URL host of a plugin repository.
      *
      * Default value: [IntelliJPlatformExtension.Publishing.host]
-     *
-     * @see IntelliJPlatformExtension.Publishing.host
      */
     @get:Input
     @get:Optional
     abstract val host: Property<String>
 
     /**
-     * Authorization token.
-     * Required.
+     * Specifies the authorization token.
      *
      * Default value: [IntelliJPlatformExtension.Publishing.token]
-     *
-     * @see IntelliJPlatformExtension.Publishing.token
+     * Required.
      */
     @get:Input
     @get:Optional
     abstract val token: Property<String>
 
     /**
-     * A list of channel names to upload plugin to.
+     * Specifies a list of [JetBrains Marketplace](https://plugins.jetbrains.com) channel names used as destination for the plugin upload.
      *
      * Default value: [IntelliJPlatformExtension.Publishing.channels]
-     *
-     * @see IntelliJPlatformExtension.Publishing.channels
      */
     @get:Input
     @get:Optional
     abstract val channels: ListProperty<String>
 
     /**
-     * Publish the plugin update and mark it as hidden to prevent public release after approval.
+     * Publishes the plugin update and marks it a [hidden](https://plugins.jetbrains.com/docs/marketplace/hidden-plugin.html) to prevent public visibility after approval.
      *
-     * @see IntelliJPlatformExtension.Publishing.hidden
-     * @see <a href="https://plugins.jetbrains.com/docs/marketplace/hidden-plugin.html">Hidden release</a>
+     * Default value: [IntelliJPlatformExtension.Publishing.hidden]
      */
     @get:Input
     @get:Optional
@@ -89,7 +83,7 @@ abstract class PublishPluginTask : DefaultTask() {
     /**
      * Specifies if the IDE Services plugin repository service should be used.
      *
-     * Default value: `false`
+     * Default value: [IntelliJPlatformExtension.Publishing.ideServices]
      */
     @get:Input
     @get:Optional

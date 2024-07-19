@@ -14,6 +14,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
@@ -21,6 +22,9 @@ import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
  * It directly extends the [Test] Gradle task, which allows for an extensive configuration (system properties, memory management, etc.).
+ *
+ * The [TestIdeTask] is a class used only for handling custom `testIde` tasks.
+ * To register a customized test task, use [IntelliJPlatformTestingExtension.testIde].
  */
 @UntrackedTask(because = "Should always run")
 abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware {

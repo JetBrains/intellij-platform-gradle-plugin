@@ -24,7 +24,7 @@ import kotlin.io.path.pathString
  * It directly extends the [JavaExec] Gradle task, which allows for an extensive configuration (system properties, memory management, etc.).
  *
  * This task runs against the IntelliJ Platform and plugins specified in project dependencies.
- * To register a customized task, use [IntelliJPlatformTestingExtension.runIde] instead.
+ * To register a customized task, use [IntelliJPlatformTestingExtension.runIde].
  */
 @UntrackedTask(because = "Should always run")
 abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, IntelliJPlatformVersionAware {
