@@ -9,15 +9,16 @@ pluginManagement {
 }
 
 plugins {
-    id("com.gradle.enterprise") version("3.17.5")
+    id("com.gradle.develocity") version("3.17.5")
 }
 
 rootProject.name = "IntelliJPlatformGradlePlugin"
 
-gradleEnterprise {
+develocity {
+    server = "https://ge.jetbrains.com"
+
     buildScan {
-        server = "https://ge.jetbrains.com"
-        termsOfServiceUrl = "https://ge.jetbrains.com/terms-of-service"
-        termsOfServiceAgree = "yes"
+        termsOfUseUrl = "https://ge.jetbrains.com/terms-of-service"
+        termsOfUseAgree = "yes"
     }
 }
