@@ -2,9 +2,48 @@
 
 ## [next]
 
+## [2.0.0-RC1] - 2024-07-19
+
+The `2.0.0` release is completely rewritten. Please see [documentation page](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) for more details.
+
 ### Added
 
 - Introduce `TestFrameworkType.Starter` for adding dependencies on the Starter UI testing framework.
+- Added `useInstaller: Boolean` property to `create(type, version)` (and product-specific) dependency helpers to distinguish the type of artifacts; `true` by default
+- Added `useInstaller: Boolean` property to configuration when creating custom tasks with `intelliJPlatformTesting`; `true` by default
+- Introduce `create(notation: String, useInstaller: Boolean)` dependency helper for adding a dependency on the IntelliJ Platform using notation string, like `IU-2024.2`
+- Introduce `jetbrainsRuntimeLocal(localPath: String)` dependency helper for adding a dependency on the local JetBrains Runtime instance
+- Introduce `GradleProperties` helper class for handling `org.jetbrains.intellij.platform.<propertyName>` Gradle properties, accepting multiple input types
+- `intellijPlatform` component for accessing the composed Jar with `components["intellijPlatform"]`
+- `intellijPlatformTesting` top-level extension for registering custom tasks
+- Resolving IntelliJ Platform artifacts from JetBrains CDN using common coordinates
+- `jetBrainsCdn()` repository helper
+- `DependencyVersion` for controlling how particular dependencies are resolved (latest/closest/match IntelliJ Platform/exact)
+- Added `-Didea.l10n.keys=only` to the `buildSearchableOptions` task
+- `VerifyPluginProjectConfigurationTask`: limit specific checks when `.module` plugin is only applied
+- `TestIdeUiTask` (`testIdeUi` task) + `CustomTestIdeUiTask` implementation
+- Dependencies extension: `platformDependency(groupId, artifactIt)` and `testPlatformDependency(groupId, artifactIt)` for adding dependencies on artifacts published to the IntelliJ Maven Repository
+- `TestFrameworkType.Metrics` for adding metrics and benchmarking tools for Test Framework
+- More info-level logging for `ExtractorTransformer`
+- Custom plugin repositories with authorization headers support
+- Introduce `KotlinMetadataAware` interface to provide metadata about the Kotlin setup
+- Support for Android Studio DMG archives
+- Introduce `VerifyPluginProjectConfigurationTask.hasModulePlugin` to exclude modules using `org.jetbrains.intellij.platform.module` subplugin from `plugin.xml` checks.
+- Better error handling in dependency helpers when missing values
+- Introduce `GenerateManifestTask` for generating `MANIFEST.MF` file
+- Introduce `ComposedJarTask` to compose and pick the final jar archive
+- Introduce `intellijPlatform.pluginModule(Dependency)` dependency helper to compose a single jar combined of multiple modules
+- `jetbrainsRuntime()` dependency helper for resolving a suitable JBR version for IntelliJ Platform fetched from IntelliJ Maven Repository
+- `jetbrainsRuntimeExplicit(explicitVersion)` dependency helper for specifying an explicit JBR version if necessary
+- `PrepareSandboxTask`: introduce `sandboxDirectoriesExistence` property to ensure all sandbox directories exist
+- `localPlugin()` dependency helper for adding local plugins as project dependencies and extending customizable tasks
+- Emit warning when using the `bundledLibrary` dependency helper.
+- Use IntelliJ Platform distribution from [download.jetbrains.com](http://download.jetbrains.com/) by default. To switch back to IntelliJ Maven Repository artifacts, use `org.jetbrains.intellij.platform.buildFeature.useBinaryReleases=false`
+- Introduced `Custom*` tasks. if you want to extend the `runIde` or `testSomething` tasks, use the `Custom*Task` classes. See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-custom-tasks.html
+- Better handling of missing dependencies/misconfiguration
+- Bring back the `SetupDependenciesTask` to avoid failing build when migrating from `1.x`
+- Better `ClosestVersionResolver` error messages
+- When running IDE in Split Mode, it’s possible to specify `splitModeTarget` (`BACKEND`, `FRONTEND`, `BACKEND_AND_FRONTEND`)
 
 ### Changed
 
@@ -13,6 +52,32 @@
 - `testIdeUi` is now dedicated to work with `TestFrameworkType.Starter`.
 - Extend `testImplementation` configuration with dependencies from `intellijPlatformTestDependencies`.
 - Move `composed-jar` and `distribution` artifacts definition to the `org.jetbrains.intellij.platform.module` plugin.
+- Rename `jetBrainsCdn()` repository helper to `jetbrainsIdeInstallers()`
+- Rename `binaryReleasesAndroidStudio()` repository helper to `androidStudioInstallers()`
+- Rewrite the latest/closest version resolution mechanism for performance reasons
+- Rewrite the latest Gradle plugin check for performance reasons
+- Enhance `PrintBundledPluginsTask` output
+- IntelliJPlatformTestingExtension: make the produced object `Buildable` so it can be used for `dependsOn()` purposes
+- Rewrite the local Ivy dependencies management
+- Review the bundled plugins resolution
+- `bundledPlugin()`: provide a helpful message when specifying a well-known plugin path (valid in 1.x) instead of real plugin ID (`java` vs `com.intellij.java`) 
+- Renamed `org.jetbrains.intellij.platform.buildFeature.<propertyName>` Gradle properties to `org.jetbrains.intellij.platform.<propertyName>`
+- `localPlugin(project(":submodule"))` refers now to the distribution Zip archive
+- Custom tasks registering refactoring
+- `testIdeUi` no longer runs IDE with Robot Server Plugin applied
+- `defaultRepositories()` repository helper executes now `jetBrainsCdn()` instead of `binaryReleases()`
+- Publish instrumented and composed artifact with variants instead of replacing the default artifact
+- Check the latest plugin version against Gradle Plugin Portal
+- Avoid calling `checkPluginVersion` and `createCoroutinesJavaAgentFile` methods when in a `.module`
+- Rename `TestFrameworkType.Platform.JUnit4` to `TestFrameworkType.Platform`
+- Rename `TestFrameworkType.Platform.JUnit5` to `TestFrameworkType.JUnit5`
+- Rename `TestFrameworkType.Platform.Bundled` to `TestFrameworkType.Bundled`
+- Prevent from updating the `IvyModule.Info.publication` with the current time as it breaks the configuration cache
+- Resolve Plugin Verifier IDEs using regular IntelliJ Platform dependency resolution
+- Update `PlatformJavaVersions` and `PlatformKotlinVersions`
+- Introduce a separated Sandbox for the Frontend part when running IDE in Split Mode
+- Rename `SandboxAware.sandboxContainerDirectory` to `SandboxAware.sandboxDirectory` to avoid confusion with `intellijPlatform.sandboxContainer`
+- Use custom task name as a suffix for dynamically created configuration and tasks instead of `UUID.randomUUID()`
 
 ### Fixed
 
@@ -22,10 +87,50 @@
 - ProductReleasesValueSource: pick the IDE with the highest `build` number instead of `version`.
 - Exclude JUnit4 (`junit4.jar`) from the IntelliJ Platform classpath
 - Use `Path.invariantSeparatorsPathString` in `ModuleDescriptorsValueSource` to collect modules for exclusion on Windows
+- `testFramework()` dependency helper must use `DependencyVersion.Closest` instead fixed `DependencyVersion.IntelliJPlatform`
+- Fixed `Task ... uses output .intellijPlatform/coroutines-javaagent.jar of task ... without declaring dependency`
+- Fixed the wrong Android Studio installer architecture on `x86`
+- Fixed `InvalidPathException: Illegal char <:>` exception on Windows when resolving IntelliJ Platform system properties
+- Fixed missing custom plugins in the sandbox when running a custom task
+- Fixed `Cannot snapshot ../system/jcef_cache/SingletonSocket: not a regular file` issue when preparing sandbox
+- Optimized resolving the latest/closest dependency version from available Maven repositories
+- Customizing the `sandboxDirectory` and `sandboxSuffix` when configuring `SandboxAware` tasks
+- Fixed content exclusion when extracting DMG archives of IntelliJ Platform on macOS
+- Could not find a field for name `metadata/modelVersion` (Attribute) in `MavenMetadata`
+- `PluginArtifactoryShim`: use only host when setting up proxy for custom plugin repositories
+- Fixed searchable options resolving on `2024.2+`
+- Add `idea.classpath.index.enabled=false` to tests system properties to avoid creating `classpath.index` file
+- Replace base archive file of the `Jar` task with `ComposedJarTask` archive file in all configuration artifact sets
+- Redundant whitespace when parsing plugin dependency IDs
+- Plugin Verifier: introduce partial configuration for resolving IntelliJ Platform dependencies with same coordinates but different versions
+- Regression: Cannot fingerprint input property `productInfo`
+- Regression: `GenerateManifestTask` property `kotlinStdlibBundled` doesn't have a configured value
+- Regression: `PrepareSandboxTask` doesn't create `system` and `log` sandbox directories
+- Revise creating custom tasks and IntelliJ Platform main dependency inheritance
+- Avoid leaking internal properties from `intellijPlatform` extensions
+- Fixed custom tasks suffixing
+- Fixed: Task `:test` uses this output of task `:prepareSandbox` without declaring an explicit or implicit dependency [#1609](../../issues/1609)
+- ExtractorTransformer: Exclude only `Applications` symlink
+- SandboxAware: inherit sandbox directory from producer
+- Add IntelliJ Platform path-based hash to Ivy files to better deal with cache (temporary workaround)
+- Fixed transitive dependencies of bundled plugin dependencies when IntelliJ Platform doesn't contain `ProductInfo.layout` model yet.
+- Produce customized (suffixed) configuration only for `CustomIntelliJPlatformVersionAware` tasks
+- Fixed including transitive modules/bundled plugins dependencies of declared plugin dependencies
+- Fixed JetBrains Runtime (JBR) resolving
+- Move `TestFrameworkType` from `org.jetbrains.intellij.platform.gradle.extensions` to `org.jetbrains.intellij.platform.gradle`
 
 ### Removed
 
 - Removed `intellijPlatform.verifyPlugin.downloadDirectory` and `intellijPlatform.verifyPlugin.homeDirectory` as IDEs cache for Plugin Verifier is now managed with Gradle.
+- Resolving IntelliJ Platform artifacts from JetBrains CDN using common coordinates
+- Remove `BundledPluginsListTransformer` and in-advance bundled plugins resolving with JSON serialization
+- Remove `BuildFeature.USE_CLOSEST_VERSION_RESOLVING`
+- Remove `BuildFeature` mechanism in favor of `GradleProperties`
+- `CustomRunIdeTask`, `CustomTestIdeTask`, `CustomTestIdePerformanceTask`, `CustomTestIdeUiTask` custom task classes
+- `CustomIntelliJPlatformVersionAware`, `SandboxProducerAware` task aware class
+- `binaryReleases()` repository helper
+- `org.jetbrains.intellij.platform.buildFeature.useBinaryReleases` flag
+- Dropped `testIde` task as `test` is now properly configured
 
 ## [2.0.0-beta9] - 2024-07-12
 
@@ -1224,16 +1329,18 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta8...HEAD
-[2.0.0-beta1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.4...v2.0.0-beta1
-[2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta1...v2.0.0-beta2
-[2.0.0-beta3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...v2.0.0-beta3
-[2.0.0-beta4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta3...v2.0.0-beta4
-[2.0.0-beta5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta4...v2.0.0-beta5
-[2.0.0-beta6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta5...v2.0.0-beta6
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-RC1...HEAD
+[2.0.0-RC1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta9...v2.0.0-RC1
+[2.0.0-beta9]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta8...v2.0.0-beta9
+[2.0.0-beta8]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta7...v2.0.0-beta8
 [2.0.0-beta7]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta6...v2.0.0-beta7
-[2.0.0-beta7]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta7...v2.0.0-beta8
-[1.17.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.4...v1.17.4
+[2.0.0-beta6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta5...v2.0.0-beta6
+[2.0.0-beta5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta4...v2.0.0-beta5
+[2.0.0-beta4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta3...v2.0.0-beta4
+[2.0.0-beta3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta2...v2.0.0-beta3
+[2.0.0-beta2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta1...v2.0.0-beta2
+[2.0.0-beta1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.4...v2.0.0-beta1
+[1.17.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.3...v1.17.4
 [1.17.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.2...v1.17.3
 [1.17.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.1...v1.17.2
 [1.17.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v1.17.0...v1.17.1
@@ -1308,58 +1415,58 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 [0.4.6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.4.5...v0.4.6
 [0.4.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.4.4...v0.4.5
 [0.4.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.4.3...v0.4.4
-[0.4.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.4.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.4.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.4.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.12]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.11]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.10]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.7]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.3.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.20]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.19]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.18]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.17]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.16]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.15]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.14]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.13]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.12]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.11]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.10]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.9]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.8]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.7]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.2.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.1.10]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.1.9]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.1.6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.1.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.1.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.41]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.39]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.37]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.35]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.34]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.33]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.32]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.30]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.29]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.28]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.27]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.25]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.21]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
-[0.0.10]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits
+[0.4.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.4.2...v0.4.3
+[0.4.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.4.1...v0.4.2
+[0.4.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.4.0...v0.4.1
+[0.4.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.12...v0.4.0
+[0.3.12]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.11...v0.3.12
+[0.3.11]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.10...v0.3.11
+[0.3.10]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.7...v0.3.10
+[0.3.7]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.6...v0.3.7
+[0.3.6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.5...v0.3.6
+[0.3.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.4...v0.3.5
+[0.3.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.3...v0.3.4
+[0.3.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.2...v0.3.3
+[0.3.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.1...v0.3.2
+[0.3.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.3.0...v0.3.1
+[0.3.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.20...v0.3.0
+[0.2.20]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.19...v0.2.20
+[0.2.19]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.18...v0.2.19
+[0.2.18]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.17...v0.2.18
+[0.2.17]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.16...v0.2.17
+[0.2.16]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.15...v0.2.16
+[0.2.15]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.14...v0.2.15
+[0.2.14]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.13...v0.2.14
+[0.2.13]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.12...v0.2.13
+[0.2.12]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.11...v0.2.12
+[0.2.11]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.10...v0.2.11
+[0.2.10]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.9...v0.2.10
+[0.2.9]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.8...v0.2.9
+[0.2.8]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.7...v0.2.8
+[0.2.7]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.6...v0.2.7
+[0.2.6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.5...v0.2.6
+[0.2.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.4...v0.2.5
+[0.2.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.3...v0.2.4
+[0.2.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.2...v0.2.3
+[0.2.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.1...v0.2.2
+[0.2.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.2.0...v0.2.1
+[0.2.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.1.10...v0.2.0
+[0.1.10]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.1.9...v0.1.10
+[0.1.9]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.1.6...v0.1.9
+[0.1.6]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.1.4...v0.1.6
+[0.1.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.1.0...v0.1.4
+[0.1.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.41...v0.1.0
+[0.0.41]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.39...v0.0.41
+[0.0.39]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.37...v0.0.39
+[0.0.37]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.35...v0.0.37
+[0.0.35]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.34...v0.0.35
+[0.0.34]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.33...v0.0.34
+[0.0.33]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.32...v0.0.33
+[0.0.32]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.30...v0.0.32
+[0.0.30]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.29...v0.0.30
+[0.0.29]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.28...v0.0.29
+[0.0.28]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.27...v0.0.28
+[0.0.27]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.25...v0.0.27
+[0.0.25]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.21...v0.0.25
+[0.0.21]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v0.0.10...v0.0.21
+[0.0.10]: https://github.com/JetBrains/intellij-platform-gradle-plugin/commits/v0.0.10
