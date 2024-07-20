@@ -10,6 +10,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 ### Added
 
 - Introduce `TestFrameworkType.Starter` for adding dependencies on the Starter UI testing framework.
+- Added `IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.eap` property
 
 ### Changed
 

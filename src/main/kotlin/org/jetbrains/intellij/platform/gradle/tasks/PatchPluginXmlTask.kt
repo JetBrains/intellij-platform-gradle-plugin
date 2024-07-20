@@ -157,6 +157,16 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
     abstract val productDescriptorOptional: Property<Boolean>
 
     /**
+     * Specifies the boolean value determining whether the plugin is an EAP release.
+     * The provided value will be assigned to the [`<product-descriptor eap="">`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor) element attribute.
+     *
+     * Default value: [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor.eap]
+     */
+    @get:Input
+    @get:Optional
+    abstract val productDescriptorEap: Property<Boolean>
+
+    /**
      * Specifies the lowest IDE version compatible with the plugin.
      * The provided value will be assigned to the [`<idea-version since-build="..."/>`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version) element attribute.
      *
@@ -230,6 +240,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
                 patch(productDescriptorReleaseDate, "product-descriptor", "release-date")
                 patch(productDescriptorReleaseVersion, "product-descriptor", "release-version")
                 patch(productDescriptorOptional.map { it.toString() }, "product-descriptor", "optional")
+                patch(productDescriptorEap.map { it.toString() }, "product-descriptor", "eap")
 
                 patch(sinceBuild, "idea-version", "since-build")
                 patch(untilBuild, "idea-version", "until-build", acceptNull = true)
@@ -341,6 +352,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
                 productDescriptorReleaseDate.convention(productDescriptorProvider.flatMap { it.releaseDate })
                 productDescriptorReleaseVersion.convention(productDescriptorProvider.flatMap { it.releaseVersion })
                 productDescriptorOptional.convention(productDescriptorProvider.flatMap { it.optional })
+                productDescriptorEap.convention(productDescriptorProvider.flatMap { it.eap })
 
                 sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
                 untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })

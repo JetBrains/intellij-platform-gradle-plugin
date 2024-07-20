@@ -275,8 +275,23 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              */
             val optional: Property<Boolean>
 
+            /**
+             * Specifies the boolean value determining whether the plugin is an EAP release.
+             *
+             * The provided value will be assigned to the [`<product-descriptor eap="">`](https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor) element attribute.
+             *
+             * Default value: `false`.
+             *
+             * @see PatchPluginXmlTask.productDescriptorEap
+             * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__product-descriptor">Plugin Configuration File: `product-descriptor`</a>
+             */
+            val eap: Property<Boolean>
+
             companion object : Registrable<ProductDescriptor> {
-                override fun register(project: Project, target: Any) = target.configureExtension<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
+                override fun register(project: Project, target: Any) = target.configureExtension<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR) {
+                    optional.convention(false)
+                    eap.convention(false)
+                }
             }
         }
 
