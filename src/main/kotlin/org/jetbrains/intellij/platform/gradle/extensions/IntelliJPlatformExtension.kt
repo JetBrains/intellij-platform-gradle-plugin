@@ -288,10 +288,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             val eap: Property<Boolean>
 
             companion object : Registrable<ProductDescriptor> {
-                override fun register(project: Project, target: Any) = target.configureExtension<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR) {
-                    optional.convention(false)
-                    eap.convention(false)
-                }
+                override fun register(project: Project, target: Any) = target.configureExtension<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
             }
         }
 
