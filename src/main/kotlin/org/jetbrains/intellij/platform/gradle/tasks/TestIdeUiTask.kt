@@ -19,6 +19,11 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 @UntrackedTask(because = "Should always run")
 abstract class TestIdeUiTask : Test(), TestableAware {
 
+    /**
+     * Specifies the archive file representing the input file to be tested.
+     *
+     * Default value: [BuildPluginTask.archiveFile]
+     */
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val archiveFile: RegularFileProperty
@@ -46,6 +51,8 @@ abstract class TestIdeUiTask : Test(), TestableAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configureWithType = false) {
+                enabled = false // TODO: workaround as `check` task runs it by default
+
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 //                val prepareTestIdeUiSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_UI_SANDBOX)
 

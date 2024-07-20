@@ -69,7 +69,7 @@ private object Messages {
             "The Robot Server Plugin integration is not yet available. Stay tuned!\n\n${Docs.migration}"
 
         const val runIdeForUiTests =
-            "Use `testIdeUi` task.\n\n${Docs.migration}"
+            "Declare `runIdeForUiTests` task as explained in the Migration guide.\n\n${Docs.migration}"
     }
 
     const val enabled =
