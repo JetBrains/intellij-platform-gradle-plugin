@@ -3,7 +3,7 @@
 ## [next]
 
 
-## [2.0.0-RC1] - 2024-07-19
+## [2.0.0-rc1] - 2024-07-19
 
 The `2.0.0` release is completely rewritten. Please see [documentation page](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) for more details.
 
@@ -1232,8 +1232,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-RC1...HEAD
-[2.0.0-RC1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta9...v2.0.0-RC1
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-rc1...HEAD
+[2.0.0-rc1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta9...v2.0.0-rc1
 [2.0.0-beta9]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta8...v2.0.0-beta9
 [2.0.0-beta8]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta7...v2.0.0-beta8
 [2.0.0-beta7]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta6...v2.0.0-beta7
