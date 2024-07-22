@@ -5,10 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.attributes.*
-import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.kotlin.dsl.*
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
@@ -20,8 +17,6 @@ import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
-import org.jetbrains.intellij.platform.gradle.attributes.ComposedJarRule
-import org.jetbrains.intellij.platform.gradle.attributes.DistributionRule
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*

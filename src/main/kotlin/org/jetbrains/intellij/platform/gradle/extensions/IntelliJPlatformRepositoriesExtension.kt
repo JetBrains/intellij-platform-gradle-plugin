@@ -62,6 +62,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
+    @JvmOverloads
     fun releases(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "IntelliJ Repository (Releases)",
         url = Locations.INTELLIJ_REPOSITORY_RELEASES,
@@ -74,6 +75,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
+    @JvmOverloads
     fun snapshots(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "IntelliJ Repository (Snapshots)",
         url = Locations.INTELLIJ_REPOSITORY_SNAPSHOTS,
@@ -86,6 +88,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
+    @JvmOverloads
     fun nightly(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "IntelliJ Repository (Nightly)",
         url = Locations.INTELLIJ_REPOSITORY_NIGHTLY,
@@ -98,6 +101,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
+    @JvmOverloads
     fun intellijDependencies(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "IntelliJ Platform Dependencies Repository",
         url = Locations.INTELLIJ_DEPENDENCIES_REPOSITORY,
@@ -110,6 +114,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
+    @JvmOverloads
     fun marketplace(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
         name = "JetBrains Marketplace Repository",
         url = Locations.MARKETPLACE_REPOSITORY,
@@ -117,6 +122,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         action = action,
     )
 
+    @JvmOverloads
     fun customPluginRepository(url: String, type: CustomPluginRepositoryType = CustomPluginRepositoryType.PLUGIN_REPOSITORY, action: IvyRepositoryAction = {}) =
         delegate.createCustomPluginRepository(
             repositoryName = "IntelliJ Platform Custom Plugin Repository ($url)",
@@ -130,6 +136,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
+    @JvmOverloads
     fun jetbrainsRuntime(action: IvyRepositoryAction = {}) = delegate.createIvyRepository(
         name = "JetBrains Runtime",
         url = Locations.CACHE_REDIRECTOR_JETBRAINS_RUNTIME_REPOSITORY,
@@ -142,6 +149,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
+    @JvmOverloads
     fun jetbrainsIdeInstallers(action: IvyRepositoryAction = {}): IvyArtifactRepository = delegate.createIvyRepository(
         name = "JetBrains IDE Installers",
         url = Locations.JETBRAINS_IDES_INSTALLERS,
@@ -172,6 +180,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
+    @JvmOverloads
     fun androidStudioInstallers(action: IvyRepositoryAction = {}) = delegate.createIvyRepository(
         name = "Android Studio Installers",
         url = Locations.ANDROID_STUDIO_INSTALLERS,
@@ -206,6 +215,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      *
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
+    @JvmOverloads
     fun localPlatformArtifacts(action: IvyRepositoryAction = {}) = delegate.createLocalIvyRepository(
         repositoryName = "Local IntelliJ Platform Artifacts Repository",
         action = action,

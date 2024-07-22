@@ -2,6 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
+import groovy.lang.Closure
+import groovy.lang.DelegatesTo
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -135,17 +138,62 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      */
     abstract val splitModeTarget: Property<SplitModeAware.SplitModeTarget>
 
+
     val pluginConfiguration
         get() = extensions.getByName<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION)
+
+    fun pluginConfiguration(action: Action<in PluginConfiguration>) {
+        action.execute(pluginConfiguration)
+    }
+
+    fun pluginConfiguration(@DelegatesTo(value = PluginConfiguration::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+        action.delegate = pluginConfiguration
+        action.resolveStrategy = Closure.DELEGATE_FIRST
+        action.call()
+    }
+
 
     val publishing
         get() = extensions.getByName<Publishing>(Extensions.PUBLISHING)
 
+    fun publishing(action: Action<in Publishing>) {
+        action.execute(publishing)
+    }
+
+    fun publishing(@DelegatesTo(value = Publishing::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+        action.delegate = publishing
+        action.resolveStrategy = Closure.DELEGATE_FIRST
+        action.call()
+    }
+
+
     val signing
         get() = extensions.getByName<Signing>(Extensions.SIGNING)
 
+    fun signing(action: Action<in Signing>) {
+        action.execute(signing)
+    }
+
+    fun signing(@DelegatesTo(value = Signing::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+        action.delegate = signing
+        action.resolveStrategy = Closure.DELEGATE_FIRST
+        action.call()
+    }
+
+
     val verifyPlugin
         get() = extensions.getByName<VerifyPlugin>(Extensions.VERIFY_PLUGIN)
+
+    fun verifyPlugin(action: Action<in VerifyPlugin>) {
+        action.execute(verifyPlugin)
+    }
+
+    fun verifyPlugin(@DelegatesTo(value = VerifyPlugin::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+        action.delegate = verifyPlugin
+        action.resolveStrategy = Closure.DELEGATE_FIRST
+        action.call()
+    }
+
 
     /**
      * Configures the plugin definition and stores in the `plugin.xml` file.
@@ -156,11 +204,44 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         val productDescriptor
             get() = extensions.getByName<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
 
+        fun productDescriptor(action: Action<in ProductDescriptor>) {
+            action.execute(productDescriptor)
+        }
+
+        fun productDescriptor(@DelegatesTo(value = ProductDescriptor::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+            action.delegate = productDescriptor
+            action.resolveStrategy = Closure.DELEGATE_FIRST
+            action.call()
+        }
+
+
         val ideaVersion
             get() = extensions.getByName<IdeaVersion>(Extensions.IDEA_VERSION)
 
+        fun ideaVersion(action: Action<in IdeaVersion>) {
+            action.execute(ideaVersion)
+        }
+
+        fun ideaVersion(@DelegatesTo(value = IdeaVersion::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+            action.delegate = ideaVersion
+            action.resolveStrategy = Closure.DELEGATE_FIRST
+            action.call()
+        }
+
+
         val vendor
             get() = extensions.getByName<Vendor>(Extensions.VENDOR)
+
+        fun vendor(action: Action<in Vendor>) {
+            action.execute(vendor)
+        }
+
+        fun vendor(@DelegatesTo(value = Vendor::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+            action.delegate = vendor
+            action.resolveStrategy = Closure.DELEGATE_FIRST
+            action.call()
+        }
+
 
         /**
          * The plugin's unique identifier.
@@ -570,6 +651,17 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          */
         val ides
             get() = extensions.getByName<Ides>(Extensions.IDES)
+
+        fun ides(action: Action<in Ides>) {
+            action.execute(ides)
+        }
+
+        fun ides(@DelegatesTo(value = Ides::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+            action.delegate = ides
+            action.resolveStrategy = Closure.DELEGATE_FIRST
+            action.call()
+        }
+
 
         /**
          * A path to the local IntelliJ Plugin Verifier CLI tool to be used.
