@@ -81,11 +81,11 @@ class IntelliJPlatformDependenciesHelper(
     //<editor-fold desc="Configuration Accessors">
 
     /**
-     * Retrieves the [Configurations.INTELLIJ_PLATFORM] configuration to access information about the main IntelliJ Platform added to the project.
+     * Retrieves the [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration to access information about the main IntelliJ Platform added to the project.
      * Used with [productInfo] and [platformPath] accessors.
      */
     private val intelliJPlatformConfiguration
-        get() = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
+        get() = configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].asLenient
 
     //</editor-fold>
 
@@ -160,7 +160,7 @@ class IntelliJPlatformDependenciesHelper(
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>,
-        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
         fallbackToBase: Boolean = false,
         action: DependencyAction = {},
     ) {

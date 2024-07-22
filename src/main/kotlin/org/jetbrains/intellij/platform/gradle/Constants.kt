@@ -59,10 +59,10 @@ object Constants {
 
     object Configurations {
         const val INTELLIJ_PLATFORM_COMPOSED_JAR = "intellijPlatformComposedJar"
-        const val INTELLIJ_PLATFORM_DEPENDENCY = "intellijPlatformDependency"
+        const val INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE = "intellijPlatformDependencyArchive"
         const val INTELLIJ_PLATFORM_DISTRIBUTION = "intellijPlatformDistribution"
         const val INTELLIJ_PLATFORM_LOCAL = "intellijPlatformLocal"
-        const val INTELLIJ_PLATFORM = "intellijPlatformInstance"
+        const val INTELLIJ_PLATFORM_DEPENDENCY = "intellijPlatformDependency"
         const val INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY = "intellijPlatformPluginDependency"
         const val INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR = "intellijPlatformPluginDependencyCollector"
         const val INTELLIJ_PLATFORM_PLUGIN_LOCAL = "intellijPlatformPluginLocal"

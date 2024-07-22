@@ -58,7 +58,7 @@ fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
 }
 
 /**
- * Retrieves the [Path] of the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.
+ * Retrieves the [Path] of the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration.
  *
  * @receiver The [Configuration] to retrieve the product information from.
  * @return The [Path] of the IntelliJ Platform

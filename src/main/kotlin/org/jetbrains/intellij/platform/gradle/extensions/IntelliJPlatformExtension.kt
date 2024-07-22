@@ -55,7 +55,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     rootProjectDirectory: Path,
 ) : ExtensionAware {
 
-    private val intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM].asLenient
+    private val intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].asLenient
 
     /**
      * Provides read-only access to the IntelliJ Platform project cache location.

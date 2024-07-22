@@ -19,7 +19,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES) {
             assertContains(
                 """
-                intellijPlatform - IntelliJ Platform
+                intellijPlatformDependency - IntelliJ Platform
                 No dependencies
                 """.trimIndent(),
                 output,
@@ -47,7 +47,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES) {
             assertContains(
                 """
-                intellijPlatformDependency - IntelliJ Platform dependency archive
+                intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
                 \--- idea:ideaIC:2022.3.3
                 """.trimIndent(),
                 output,
@@ -63,7 +63,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
 
             assertContains(
                 """
-                intellijPlatform - IntelliJ Platform
+                intellijPlatformDependency - IntelliJ Platform
                 \--- idea:ideaIC:2022.3.3
                 """.trimIndent(),
                 output,
@@ -108,7 +108,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES) {
             assertContains(
                 """
-                intellijPlatform - IntelliJ Platform
+                intellijPlatformDependency - IntelliJ Platform
                 \--- idea:ideaIC:2022.3.3 FAILED
                 """.trimIndent(),
                 output,
@@ -119,7 +119,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 > Failed to query the value of task ':verifyPluginProjectConfiguration' property 'runtimeDirectory'.
-                   > Could not resolve all files for configuration ':intellijPlatform'.
+                   > Could not resolve all files for configuration ':intellijPlatformDependency'.
                       > Could not find idea:ideaIC:2022.3.3.
                 """.trimIndent(),
                 output,

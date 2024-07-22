@@ -17,7 +17,7 @@ import java.nio.file.Path
 
 /**
  * Provides tasks a possibility for accessing information about the IntelliJ Platform currently used in the project.
- * The [intelliJPlatformConfiguration] input property receives a dependency added to the [Configurations.INTELLIJ_PLATFORM] configuration,
+ * The [intelliJPlatformConfiguration] input property receives a dependency added to the [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration,
  * which eventually is resolved and lets to access the IntelliJ Platform details such as [ProductInfo] or the path to the IntelliJ Platform directory.
  *
  * It is required to have a dependency on the IntelliJ Platform added to the project with helpers available in [IntelliJPlatformDependenciesExtension].
@@ -27,7 +27,7 @@ import java.nio.file.Path
 interface IntelliJPlatformVersionAware {
 
     /**
-     * Holds the [Configurations.INTELLIJ_PLATFORM] configuration with the IntelliJ Platform dependency added.
+     * Holds the [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration with the IntelliJ Platform dependency added.
      * It should not be directly accessed.
      *
      * @see platformPath

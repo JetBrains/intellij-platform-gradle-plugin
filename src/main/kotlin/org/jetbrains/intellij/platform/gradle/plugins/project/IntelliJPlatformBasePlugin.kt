@@ -58,7 +58,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         with(project.configurations) configurations@{
             val intellijPlatformDependencyConfiguration = create(
-                name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+                name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
                 description = "IntelliJ Platform dependency archive",
             )
             val intellijPlatformLocalConfiguration = create(
@@ -71,7 +71,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
 
             val intellijPlatformConfiguration = create(
-                name = Configurations.INTELLIJ_PLATFORM,
+                name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
                 description = "IntelliJ Platform",
             ) {
                 attributes {
@@ -262,7 +262,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 dependencies = this,
                 compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
                 testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
-                intellijPlatformConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM],
+                intellijPlatformConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY],
             )
             LocalPluginsNormalizationTransformers.register(
                 dependencies = this

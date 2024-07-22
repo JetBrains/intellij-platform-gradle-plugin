@@ -26,7 +26,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
             """.trimIndent()
 
             output containsText """
-                intellijPlatformDependency - IntelliJ Platform dependency archive
+                intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
                 \--- idea:ideaIC:$intellijPlatformVersion
             """.trimIndent()
 

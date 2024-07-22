@@ -21,7 +21,7 @@ private const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
  * Resolves Java Runtime.
  *
  * @param jetbrainsRuntime The [Configurations.JETBRAINS_RUNTIME] configuration.
- * @param intellijPlatform The [Configurations.INTELLIJ_PLATFORM] configuration.
+ * @param intellijPlatform The [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration.
  * @param javaToolchainSpec The Java Toolchain configured with [JavaPluginExtension].
  * @param javaToolchainService The [JavaToolchainService] used for finding a matching launcher.
  */

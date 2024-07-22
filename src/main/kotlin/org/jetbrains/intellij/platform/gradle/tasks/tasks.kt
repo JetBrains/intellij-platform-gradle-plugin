@@ -70,13 +70,13 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         }
 
         /**
-         * Applies the base [Configurations.INTELLIJ_PLATFORM] configuration to [IntelliJPlatformVersionAware] tasks so they can access details of the used IntelliJ
+         * Applies the base [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration to [IntelliJPlatformVersionAware] tasks so they can access details of the used IntelliJ
          * Platform, such as [ProductInfo] or its root directory location.
          *
          * @see IntelliJPlatformVersionAware
          */
         if (this is IntelliJPlatformVersionAware) {
-            intelliJPlatformConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM)
+            intelliJPlatformConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
             intelliJPlatformPluginConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_PLUGIN)
         }
 

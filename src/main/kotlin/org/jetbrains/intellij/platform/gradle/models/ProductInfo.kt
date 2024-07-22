@@ -178,7 +178,7 @@ fun Path.productInfo() =
         .let { decode<ProductInfo>(it) }
 
 /**
- * Retrieves the [ProductInfo] for the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM] configuration.
+ * Retrieves the [ProductInfo] for the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration.
  *
  * @receiver The [Configuration] to retrieve the product information from.
  * @return The [ProductInfo] object containing the product information.
