@@ -19,7 +19,7 @@ abstract class InstrumentedJarTask : Jar() {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Creates a JAR file with instrumented classes."
+        description = "Creates a Jar file with instrumented classes."
     }
 
     companion object : Registrable {

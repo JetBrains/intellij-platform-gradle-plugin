@@ -30,7 +30,7 @@ abstract class ComposedJarTask : Jar() {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Prepares a Jar archive with all the modules of the plugin."
+        description = "Composes a final Jar archive by combining the base jar, and instrumented classes, and declared submodules."
     }
 
     companion object : Registrable {

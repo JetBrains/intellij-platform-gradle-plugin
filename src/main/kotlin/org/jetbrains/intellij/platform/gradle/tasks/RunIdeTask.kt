@@ -55,7 +55,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Runs the IDE instance with the developed plugin installed."
+        description = "Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded."
     }
 
     companion object : Registrable {

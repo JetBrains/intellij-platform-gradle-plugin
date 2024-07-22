@@ -33,7 +33,7 @@ abstract class SetupDependenciesTask : DefaultTask() {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "The setupDependencies task is scheduled for removal"
+        description = "Deprecated. A deprecated method for setting up IntelliJ Platform dependencies."
     }
 
     companion object : Registrable {

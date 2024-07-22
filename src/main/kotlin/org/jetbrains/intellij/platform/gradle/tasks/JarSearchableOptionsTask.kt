@@ -71,7 +71,7 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Creates a JAR file with searchable options to be distributed with the plugin."
+        description = "Creates a Jar file with searchable options to be distributed with the plugin."
 
         includeEmptyDirs = false
     }

@@ -28,7 +28,7 @@ abstract class BuildPluginTask : Zip() {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Assembles plugin and prepares ZIP archive for deployment."
+        description = "Builds the plugin and prepares the ZIP archive for testing and deployment."
     }
 
     companion object : Registrable {

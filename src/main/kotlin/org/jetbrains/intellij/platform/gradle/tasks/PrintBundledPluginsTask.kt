@@ -26,7 +26,7 @@ abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionA
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Prints bundled plugins within the currently targeted IntelliJ-based IDE release."
+        description = "Prints the list of bundled plugins available within the currently targeted IntelliJ Platform."
     }
 
     companion object : Registrable {

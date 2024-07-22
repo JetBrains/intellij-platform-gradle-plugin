@@ -318,7 +318,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Patches `plugin.xml` file with values provided to the task."
+        description = "Patches plugin.xml file with provided values."
     }
 
     companion object : Registrable {

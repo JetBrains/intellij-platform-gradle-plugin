@@ -38,7 +38,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Runs tests using a custom IDE instance with the developed plugin installed."
+        description = "Runs tests using a custom IntelliJ Platform with the developed plugin installed."
     }
 
     companion object : Registrable {

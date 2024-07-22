@@ -203,7 +203,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Validates the plugin project configuration"
+        description = "Validates the plugin project configuration."
     }
 
     companion object : Registrable {

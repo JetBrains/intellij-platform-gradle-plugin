@@ -19,7 +19,7 @@ abstract class PrepareTestTask : DefaultTask(), TestableAware {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Configures the 'test' task to run tests from the current project."
+        description = "Prepares the test task."
     }
 
     companion object : Registrable {

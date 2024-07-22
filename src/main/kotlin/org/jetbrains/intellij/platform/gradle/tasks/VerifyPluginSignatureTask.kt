@@ -118,7 +118,7 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Verifies signed ZIP archive with the provided key using marketplace-zip-signer library."
+        description = "Validates the signature of the plugin archive file using the Marketplace ZIP Signer library."
 
         mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
         args = listOf("verify")

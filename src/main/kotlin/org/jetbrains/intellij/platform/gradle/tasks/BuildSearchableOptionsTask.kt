@@ -77,7 +77,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Builds an index of UI components (searchable options) for the plugin."
+        description = "Builds the index of UI components (searchable options) for the plugin."
     }
 
     companion object : Registrable {

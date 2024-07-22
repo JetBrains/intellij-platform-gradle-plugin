@@ -87,7 +87,7 @@ abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Generates the MANIFEST.MF file."
+        description = "Generates the MANIFEST.MF file with all relevant information about the project configuration."
     }
 
     companion object : Registrable {

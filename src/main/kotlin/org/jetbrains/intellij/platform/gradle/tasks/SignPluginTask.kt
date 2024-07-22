@@ -262,7 +262,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Signs the ZIP archive with the provided key using marketplace-zip-signer library."
+        description = "Signs the ZIP archive with the provided key using Marketplace ZIP Signer library."
 
         mainClass.set("org.jetbrains.zip.signer.ZipSigningTool")
         args = listOf("sign")

@@ -223,7 +223,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Prepares sandbox directory with installed plugin and its dependencies."
+        description = "Prepares a sandbox environment with the plugin and its dependencies installed."
         duplicatesStrategy = DuplicatesStrategy.FAIL
     }
 

@@ -121,7 +121,7 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Runs performance tests on the IDE with the developed plugin installed."
+        description = "Runs performance tests on the IntelliJ Platform with the developed plugin installed."
     }
 
     companion object : Registrable {

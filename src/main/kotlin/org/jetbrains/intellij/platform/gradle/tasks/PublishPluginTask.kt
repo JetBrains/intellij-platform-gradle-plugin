@@ -131,7 +131,7 @@ abstract class PublishPluginTask : DefaultTask() {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Publishes plugin to the remote Marketplace repository."
+        description = "Publishes the plugin to the remote plugins repository."
     }
 
     companion object : Registrable {

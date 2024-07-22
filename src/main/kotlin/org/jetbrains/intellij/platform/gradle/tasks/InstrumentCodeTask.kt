@@ -269,7 +269,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Code instrumentation task."
+        description = "Executes the code instrumentation."
     }
 
     companion object : Registrable {

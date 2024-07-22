@@ -44,7 +44,7 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Prints all available IntelliJ-based IDE releases with their updates."
+        description = "Prints the list of binary product releases that match criteria."
     }
 
     companion object : Registrable {

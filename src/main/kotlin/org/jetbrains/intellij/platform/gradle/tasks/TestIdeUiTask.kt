@@ -42,7 +42,7 @@ abstract class TestIdeUiTask : Test(), TestableAware {
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Runs the IDE instance with the developed plugin and robot-server installed and ready for UI testing."
+        description = "Runs the IDE instance with the developed plugin and Starter framework for UI testing."
     }
 
     /**
