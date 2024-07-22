@@ -142,7 +142,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
                 """
                 tasks {
                     val jetbrainsRuntimeConfiguration = configurations.getByName(Configurations.JETBRAINS_RUNTIME)
-                    val intellijPlatformConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM)
+                    val intellijPlatformConfiguration = configurations.getByName(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
                     val javaRuntimePathResolver = JavaRuntimePathResolver(
                         jetbrainsRuntime = jetbrainsRuntimeConfiguration,
                         intellijPlatform = intellijPlatformConfiguration,
