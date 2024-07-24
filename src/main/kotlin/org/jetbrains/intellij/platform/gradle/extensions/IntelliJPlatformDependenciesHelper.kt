@@ -262,8 +262,8 @@ class IntelliJPlatformDependenciesHelper(
         val plugins = pluginsProvider.orNull
         requireNotNull(plugins) { "The `intellijPlatform.plugins` dependency helper was called with no `plugins` value provided." }
 
-        plugins.map { (id, version, channel) ->
-            dependencies.createIntelliJPlatformPlugin(id, version, channel).apply(action)
+        plugins.map { (id, version, group) ->
+            dependencies.createIntelliJPlatformPlugin(id, version, group).apply(action)
         }
     })
 
@@ -637,16 +637,14 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param pluginId The ID of the plugin.
      * @param version The version of the plugin.
-     * @param channel The channel of the plugin. Can be null or empty for the default channel.
+     * @param group The channel of the plugin. Can be null or empty for the default channel.
      */
-    private fun DependencyHandler.createIntelliJPlatformPlugin(pluginId: String, version: String, channel: String?): Dependency {
-        val group = when (channel) {
-            "default", "", null -> Dependencies.MARKETPLACE_GROUP
-            else -> "$channel.${Dependencies.MARKETPLACE_GROUP}"
-        }
+    private fun DependencyHandler.createIntelliJPlatformPlugin(pluginId: String, version: String, group: String): Dependency {
+        val groupId = group.substringBefore('@').ifEmpty { Dependencies.MARKETPLACE_GROUP }
+        val channel = group.substringAfter('@', "")
 
         return create(
-            group = group,
+            group = "$channel.$groupId".trim('.'),
             name = pluginId.trim(),
             version = version,
         )

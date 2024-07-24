@@ -66,7 +66,13 @@ internal fun String.parseIdeNotation() = trim().split('-').let {
 internal fun String.parsePluginNotation() = trim()
     .takeIf { it.isNotEmpty() }
     ?.split(":", "@")
-    ?.run { Triple(getOrNull(0).orEmpty(), getOrNull(1).orEmpty(), getOrNull(2).orEmpty()) }
+    ?.run {
+        val pluginId = getOrNull(0).orEmpty()
+        val version = getOrNull(1).orEmpty()
+        val group = getOrNull(2)?.let { "@$it" }.orEmpty()
+
+        Triple(pluginId, version, group)
+    }
 
 /**
  * An interface to unify how IntelliJ Platform Gradle Plugin extensions are registered.

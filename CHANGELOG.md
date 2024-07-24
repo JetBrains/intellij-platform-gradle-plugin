@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Groovy support
+- Make `plugin(id, version, group)` dependency helper accept `group` in the format of: empty (use Marketplace groupId), `@channel`, or user-defined groupId
 
 ## [2.0.0-rc1] - 2024-07-19
 

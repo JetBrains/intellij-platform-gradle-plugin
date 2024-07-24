@@ -14,6 +14,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
@@ -873,11 +874,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param id The plugin identifier.
      * @param version The plugin version.
-     * @param channel The plugin distribution channel.
+     * @param group The plugin distribution channel.
      */
     @JvmOverloads
-    fun plugin(id: String, version: String, channel: String = "") = delegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = delegate.provider { listOf(Triple(id, version, channel)) },
+    fun plugin(id: String, version: String, group: String = Dependencies.MARKETPLACE_GROUP) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { listOf(Triple(id, version, group)) },
     )
 
     /**
@@ -885,10 +886,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param id The provider of the plugin identifier.
      * @param version The provider of the plugin version.
-     * @param channel The provider of the plugin distribution channel.
+     * @param group The provider of the plugin distribution channel.
      */
-    fun plugin(id: Provider<String>, version: Provider<String>, channel: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = delegate.provider { listOf(Triple(id.get(), version.get(), channel.get())) },
+    fun plugin(id: Provider<String>, version: Provider<String>, group: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = delegate.provider { listOf(Triple(id.get(), version.get(), group.get())) },
     )
 
     /**

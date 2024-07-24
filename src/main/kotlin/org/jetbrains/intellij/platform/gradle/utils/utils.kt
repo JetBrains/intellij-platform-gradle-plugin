@@ -113,7 +113,6 @@ internal fun Path.resolvePlatformPath() = generateSequence(this) { parent ->
     }
 }.last()
 
-
 internal fun IdePluginManager.safelyCreatePlugin(path: Path, validateDescriptor: Boolean = false) =
     createPlugin(path, validateDescriptor).runCatching {
         if (this is PluginCreationFail) {
