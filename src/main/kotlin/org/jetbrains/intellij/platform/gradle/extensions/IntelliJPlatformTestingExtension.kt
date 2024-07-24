@@ -139,7 +139,6 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
                     intelliJPlatformConfiguration = customIntelliJPlatformConfiguration
                     intelliJPlatformPluginConfiguration = customIntellijPlatformPluginConfiguration
 
-                    sandboxDirectory = this@all.sandboxDirectory.orElse(basePrepareSandboxTask.flatMap { it.sandboxDirectory })
                     splitMode = this@all.splitMode.orElse(basePrepareSandboxTask.flatMap { it.splitMode })
                     splitModeTarget = this@all.splitModeTarget.orElse(basePrepareSandboxTask.flatMap { it.splitModeTarget })
                     disabledPlugins = plugins.disabled

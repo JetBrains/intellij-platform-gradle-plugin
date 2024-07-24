@@ -7,6 +7,10 @@
 - Groovy support
 - Make `plugin(id, version, group)` dependency helper accept `group` in the format of: empty (use Marketplace groupId), `@channel`, or user-defined groupId
 
+### Fixed
+
+- Sandbox producer of a custom task shouldn't inherit `sandboxDirectory` from the base sandbox producer.
+
 ## [2.0.0-rc1] - 2024-07-19
 
 The `2.0.0` release is completely rewritten. Please see [documentation page](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html) for more details.
