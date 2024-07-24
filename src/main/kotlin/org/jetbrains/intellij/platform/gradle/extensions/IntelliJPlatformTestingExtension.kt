@@ -183,8 +183,16 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
         val task
             get() = project.tasks.named(name, taskClass)
 
+        fun task(action: Action<in T>) {
+            task.configure(action)
+        }
+
         val prepareSandboxTask
             get() = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX.withSuffix)
+
+        fun prepareSandboxTask(action: Action<in PrepareSandboxTask>) {
+            prepareSandboxTask.configure(action)
+        }
 
         override fun getName() = name
 
