@@ -2,11 +2,19 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.api.file.ProjectLayout
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCachePath
+import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsPath
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
+import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
 /**
@@ -28,12 +36,32 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      */
     object DownloadSources : GradleProperties<Boolean>(true)
 
+    /**
+     * Specifies the location of the local IntelliJ Platform cache directory for storing files related to the current project, like:
+     * - XML files generated for the [IntelliJPlatformRepositoriesExtension.localPlatformArtifacts] local Ivy repository
+     * - self-update lock file used by the [InitializeIntelliJPlatformPluginTask] task
+     *
+     * Note: this directory should be excluded from versioning.
+     *
+     * Default value: [ProjectLayout.getProjectDirectory]/.intellijPlatform/
+     *
+     * @see ProviderFactory.intellijPlatformCachePath
+     */
     object IntellijPlatformCache : GradleProperties<String>("")
 
+    /**
+     * The [IntelliJPlatformRepositoriesExtension.localPlatformArtifacts] entry applied to the `repositories {}` block is required
+     * to apply to the project dependencies that need extra pre-processing before they can be correctly used by the IntelliJ Platform Gradle Plugin
+     * and loaded by Gradle.
+     *
+     * Default value: [IntellijPlatformCache]/localPlatformArtifacts/
+     *
+     * @see ProviderFactory.localPlatformArtifactsPath
+     */
     object LocalPlatformArtifacts : GradleProperties<String>("")
 
     /**
-     * When the [BuildSearchableOptionsTask] doesn't produce any results, e.g., when the plugin doesn't implement any settings, a warning is shown
+     * When the [BuildSearchableOptionsTask] doesn't produce any results, for example, when the plugin doesn't implement any settings, a warning is shown
      * to suggest disabling it for better performance with [IntelliJPlatformExtension.buildSearchableOptions].
      */
     object NoSearchableOptionsWarning : GradleProperties<Boolean>(true)
@@ -42,11 +70,27 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      * Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin.
      * As paid plugins require providing a valid license and presenting a UI dialog, it is impossible to handle such a case, and the task will fail.
      * This feature flag displays the given warning when the task is run by a paid plugin.
+     *
+     * Default value: `true`
      */
     object PaidPluginSearchableOptionsWarning : GradleProperties<Boolean>(true)
 
+    /**
+     * Specifies the URL from which the list of all Android Studio releases is fetched.
+     * This listing is later parsed by [ProductReleasesValueSource] to provide a list of IDEs matching the filtering criteria for running
+     * the IntelliJ Plugin Verifier tool with the [VerifyPluginTask] task.
+     *
+     * Default value: [Locations.PRODUCTS_RELEASES_ANDROID_STUDIO]
+     */
     object ProductsReleasesAndroidStudioUrl : GradleProperties<String>(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
 
+    /**
+     * Specifies the URL from which the list of all JetBrains IDEs releases is fetched.
+     * This listing is later parsed by [ProductReleasesValueSource] to provide a list of IDEs matching the filtering criteria for running
+     * the IntelliJ Plugin Verifier tool with the [VerifyPluginTask] task.
+     *
+     * Default value: [Locations.PRODUCTS_RELEASES_JETBRAINS_IDES]
+     */
     object ProductsReleasesJetBrainsIdesUrl : GradleProperties<String>(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES)
 
     /**
@@ -60,6 +104,12 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      */
     object SelfUpdateCheck : GradleProperties<Boolean>(true)
 
+    /**
+     * Specifies the default Shim server port at which the local webserver is run.
+     * The Shim server is used to proxy requests to the authorized custom plugin repositories registered with [IntelliJPlatformRepositoriesExtension.customPluginRepository].
+     *
+     * Default value: `7348`
+     */
     object ShimServerPort : GradleProperties<Int>(7348)
 
     /**

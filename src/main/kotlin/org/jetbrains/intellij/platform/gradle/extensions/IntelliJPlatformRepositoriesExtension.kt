@@ -223,19 +223,20 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
 
     /**
      * Applies a set of recommended repositories required for running the most common tasks provided by the IntelliJ Platform Gradle Plugin:
-     * - [localPlatformArtifacts] — required to use plugins bundled with IntelliJ Platform or refer to the local IDE
-     * - [intellijDependencies] — required for resolving extra IntelliJ Platform dependencies used for running specific tasks
-     * - [releases] and [snapshots] — IntelliJ Platform releases channels
-     * - [marketplace] — JetBrains Marketplace plugins repository
-     * - [binaryReleases] — JetBrains IDEs releases required for running the IntelliJ Plugin Verifier
+     * - [jetbrainsIdeInstallers] and [androidStudioInstallers] – IntelliJ Platform and Android Studio installer releases channels required for development
+     *   and running the IntelliJ Plugin Verifier
+     * - [releases] and [snapshots] – IntelliJ Platform releases channels
+     * - [localPlatformArtifacts] – required to use plugins bundled with IntelliJ Platform or refer to the local IDE
+     * - [intellijDependencies] – required for resolving extra IntelliJ Platform dependencies used for running specific tasks
+     * - [marketplace] – JetBrains Marketplace plugins repository
      */
     fun defaultRepositories() {
         jetbrainsIdeInstallers()
         androidStudioInstallers()
-        localPlatformArtifacts()
-        intellijDependencies()
         releases()
         snapshots()
+        localPlatformArtifacts()
+        intellijDependencies()
         marketplace()
     }
 
