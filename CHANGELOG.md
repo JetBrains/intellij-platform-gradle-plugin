@@ -11,6 +11,7 @@
 
 - Sandbox producer of a custom task shouldn't inherit `sandboxDirectory` from the base sandbox producer.
 - Use lenient configuration when resolving JetBrains Runtime (JBR) dependencies
+- Add `exclusiveContent` to the `jetbrainsRuntime()` repository definition to resolve only JBR artifacts
 
 ## [2.0.0-rc1] - 2024-07-19
 

@@ -141,8 +141,16 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         name = "JetBrains Runtime",
         url = Locations.CACHE_REDIRECTOR_JETBRAINS_RUNTIME_REPOSITORY,
         patterns = listOf("[revision].tar.gz"),
-        action = action,
-    )
+    ) {
+        repositories.exclusiveContent {
+            forRepositories(this@createIvyRepository)
+            filter {
+                includeModule("com.jetbrains", "jbr")
+            }
+        }
+
+        action()
+    }
 
     /**
      * Adds a repository for accessing IntelliJ Platform binary releases.
