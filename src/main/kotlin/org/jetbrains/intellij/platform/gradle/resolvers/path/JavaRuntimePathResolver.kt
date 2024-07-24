@@ -45,10 +45,11 @@ class JavaRuntimePathResolver(
          * the [IntelliJPlatformDependenciesExtension.jetbrainsRuntime] dependencies extensions.
          */
         "JetBrains Runtime specified with dependencies" to {
-            jetbrainsRuntime.singleOrNull()
-                ?.toPath()
-                .resolveRuntimeDirectory()
-                .ensureExecutableExists()
+            jetbrainsRuntime.runCatching {
+                singleOrNull()?.toPath()
+                    .resolveRuntimeDirectory()
+                    .ensureExecutableExists()
+            }.getOrNull()
         },
         /**
          * The bundled JetBrains Runtime within the current IntelliJ Platform.
