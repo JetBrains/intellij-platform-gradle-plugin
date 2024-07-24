@@ -186,7 +186,7 @@ class IntelliJPlatformDependenciesHelper(
         configurations[configurationName].dependencies.addLater(finalTypeProvider.zip(finalVersionProvider) { type, version ->
             when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-                else -> when (finalUseInstallerProvider.get()) {
+                else -> when (finalUseInstallerProvider.orNull ?: true) {
                     true -> dependencies.createIntelliJPlatformInstaller(type, version)
                     false -> dependencies.createIntelliJPlatform(type, version)
                 }
