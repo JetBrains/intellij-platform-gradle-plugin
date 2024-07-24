@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.models
 
+import com.jetbrains.plugin.structure.base.utils.exists
 import kotlinx.serialization.Serializable
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
@@ -13,6 +14,8 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathReso
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
+import kotlin.io.path.Path
+import kotlin.io.path.pathString
 
 /**
  * Represents information about the IntelliJ Platform product.
@@ -163,6 +166,28 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
         .let { requireNotNull(it) { "Could not find launch information for the current OS: $name ($arch)" } }
         .run { copy(additionalJvmArguments = additionalJvmArguments.map { it.trim('"') }) }
 }
+
+/**
+ * Resolves the IDE home variable in the given string by replacing placeholders, like:
+ * `-Djna.boot.library.path=$APP_PACKAGE/Contents/lib/jna/aarch64`
+ *
+ * @receiver JVM argument with IDE home placeholder
+ */
+internal fun String.resolveIdeHomeVariable(platformPath: Path) =
+    platformPath.pathString.let {
+        this
+            .replace("\$APP_PACKAGE", it)
+            .replace("\$IDE_HOME", it)
+            .replace("%IDE_HOME%", it)
+            .replace("Contents/Contents", "Contents")
+            .let { entry ->
+                val (_, value) = entry.split("=")
+                when {
+                    runCatching { Path(value).exists() }.getOrElse { false } -> entry
+                    else -> entry.replace("/Contents", "")
+                }
+            }
+    }
 
 /**
  * Retrieves the [ProductInfo] for the IntelliJ Platform from the root directory.

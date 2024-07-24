@@ -14,11 +14,10 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.models.resolveIdeHomeVariable
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
-import kotlin.io.path.Path
-import kotlin.io.path.pathString
 import kotlin.io.path.readLines
 
 /**
@@ -98,7 +97,7 @@ class IntelliJPlatformArgumentProvider(
     private val additionalJvmArguments
         get() = launch.get()
             .additionalJvmArguments
-            .map { it.resolveIdeHomeVariable() }
+            .map { it.resolveIdeHomeVariable(platformPath) }
 
     /**
      * Allows overriding default [vmOptions] heap size with values provided with [options].
@@ -108,28 +107,6 @@ class IntelliJPlatformArgumentProvider(
             options.maxHeapSize?.let { "-Xmx${it}" },
             options.minHeapSize?.let { "-Xms${it}" },
         )
-
-    /**
-     * Resolves the IDE home variable in the given string by replacing placeholders, like:
-     * `-Djna.boot.library.path=$APP_PACKAGE/Contents/lib/jna/aarch64`
-     *
-     * @receiver JVM argument with IDE home placeholder
-     */
-    private fun String.resolveIdeHomeVariable() =
-        platformPath.pathString.let {
-            this
-                .replace("\$APP_PACKAGE", it)
-                .replace("\$IDE_HOME", it)
-                .replace("%IDE_HOME%", it)
-                .replace("Contents/Contents", "Contents")
-                .let { entry ->
-                    val (_, value) = entry.split("=")
-                    when {
-                        runCatching { Path(value).exists() }.getOrElse { false } -> entry
-                        else -> entry.replace("/Contents", "")
-                    }
-                }
-        }
 
     /**
      * Combines various arguments related to the IntelliJ Platform configuration to create a list of arguments to be passed to the platform.
