@@ -24,6 +24,9 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import java.nio.file.Path
 import kotlin.io.path.absolute
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 
 val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()
@@ -70,7 +73,7 @@ fun FileCollection.platformPath() = with(toList()) {
         0 -> "No IntelliJ Platform dependency found."
         1 -> null
         else -> "More than one IntelliJ Platform dependencies found."
-    } ?: return@with single().toPath().absolute()
+    } ?: return@with single().toPath().absolute().resolvePlatformPath()
 
     throw GradleException(
         """
@@ -80,6 +83,36 @@ fun FileCollection.platformPath() = with(toList()) {
         """.trimIndent()
     )
 }
+
+internal fun Path.resolvePlatformPath() = generateSequence(this) { parent ->
+    val entry = parent
+        .listDirectoryEntries()
+        .singleOrNull() // pick an entry if it is a singleton in a directory
+        ?.takeIf { it.isDirectory() } // and this entry is a directory
+        ?: return@generateSequence null
+
+    when {
+        // eliminate `/Application Name.app/Contents/...`
+        entry.name.endsWith(".app")
+            -> entry.listDirectoryEntries("Contents").firstOrNull()
+
+        // set the root to the directory containing `product-info.json`
+        entry.listDirectoryEntries("product-info.json").isNotEmpty()
+            -> entry
+
+        // set the root to the directory containing `Resources/product-info.json`
+        entry.listDirectoryEntries("Resources").firstOrNull()?.listDirectoryEntries("product-info.json").orEmpty().isNotEmpty()
+            -> entry
+
+        // stop when `lib/` is inside, even if it's a singleton
+        entry.listDirectoryEntries("lib").isNotEmpty()
+            -> null
+
+        else
+            -> null
+    }
+}.last()
+
 
 internal fun IdePluginManager.safelyCreatePlugin(path: Path, validateDescriptor: Boolean = false) =
     createPlugin(path, validateDescriptor).runCatching {

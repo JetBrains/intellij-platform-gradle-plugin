@@ -21,15 +21,12 @@ import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.resolvePlatformPath
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlin.io.path.createTempDirectory
-import kotlin.io.path.name
-import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.pathString
+import kotlin.io.path.*
 
 /**
  * A transformer used for extracting files from archive artifacts.
@@ -55,22 +52,22 @@ abstract class ExtractorTransformer @Inject constructor(
             val path = inputArtifact.asPath
             val name = path.nameWithoutExtension.removeSuffix(".tar")
             val extension = path.name.removePrefix("$name.")
-            val targetDirectory = outputs.dir(name)
+            val targetDirectory = outputs.dir(name).toPath()
 
             val artifactType = Attributes.ArtifactType.from(extension)
             val archiveOperator = when (artifactType) {
                 Attributes.ArtifactType.ZIP,
                 Attributes.ArtifactType.SIT,
-                -> archiveOperations::zipTree
+                    -> archiveOperations::zipTree
 
                 Attributes.ArtifactType.TAR_GZ,
-                -> archiveOperations::tarTree
+                    -> archiveOperations::tarTree
 
                 Attributes.ArtifactType.DMG,
-                -> ::dmgTree
+                    -> ::dmgTree
 
                 else
-                -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
+                    -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
             }
 
             log.info("Extracting archive '$path' to directory '$targetDirectory'.")
@@ -83,37 +80,23 @@ abstract class ExtractorTransformer @Inject constructor(
             // Resolve the first directory that contains more than a single directory.
             // This approach helps eliminate `/Application Name.app/Contents/...` macOS directories or nested directory from the `tar.gz` archive.
             log.info("Resolving the content directory in '$targetDirectory'.")
-            val root = generateSequence(targetDirectory) { parent ->
-                val entry = parent.listFiles()
-                    ?.singleOrNull() // pick an entry if it is a singleton in a directory
-                    ?.takeIf { it.isDirectory } // and this entry is a directory
-                    ?: return@generateSequence null
+            val platformPath = targetDirectory.resolvePlatformPath()
 
-                fun File.getOrNull(name: String) = listFiles { file -> file.name == name }?.singleOrNull()
-
-                when {
-                    entry.name.endsWith(".app") -> entry.getOrNull("Contents") // eliminate `/Application Name.app/Contents/...`
-                    entry.getOrNull("product-info.json") != null -> entry// set the root to the directory containing `product-info.json`
-                    entry.getOrNull("Resources")?.getOrNull("product-info.json") != null -> entry// set the root to the directory containing `Resources/product-info.json`
-                    entry.getOrNull("lib") != null -> null // stop when `lib/` is inside, even if it's a singleton
-                    else -> null
-                }
-            }.last()
-            log.info("The content directory is '$root'.")
+            log.info("The content directory is '$platformPath'.")
 
             // Move content from the resolved nested directory.
-            if (root != targetDirectory) {
-                log.info("Copying the content from '$root' to '$targetDirectory'.")
-                root.listFiles()?.forEach { file ->
-                    val destination = targetDirectory.resolve(file.toRelativeString(root))
-                    destination.parentFile?.mkdirs()
-                    file.renameTo(destination)
+            if (platformPath != targetDirectory) {
+                log.info("Copying the content from '$platformPath' to '$targetDirectory'.")
+                platformPath.listDirectoryEntries().forEach { file ->
+                    val destination = targetDirectory.resolve(platformPath.relativize(file))
+                    destination.parent.createDirectories()
+                    file.moveTo(destination)
                 }
 
                 // Remove an empty directory.
-                generateSequence(root) { it.parentFile }
+                generateSequence(platformPath) { it.parent }
                     .takeWhile { it != targetDirectory }
-                    .forEach { it.delete() }
+                    .forEach { it.deleteExisting() }
             }
 
             when (artifactType) {

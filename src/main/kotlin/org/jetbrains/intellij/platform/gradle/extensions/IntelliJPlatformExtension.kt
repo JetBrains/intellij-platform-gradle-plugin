@@ -246,7 +246,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         /**
          * The plugin's unique identifier.
          * This should mirror the structure of fully qualified Java packages and must remain distinct from the IDs of existing plugins.
-         * This ID is a technical descriptor used not only within the IDE, but also on [JetBrains Marketplace](https://plugins.jetbrains.com/).
+         * This ID is a technical descriptor used not only within the IDE but also on [JetBrains Marketplace](https://plugins.jetbrains.com/).
          *
          * Please restrict input to characters, numbers, and `.`/`-`/`_` symbols , and aim for a concise length.
          *
@@ -490,7 +490,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         val token: Property<String>
 
         /**
-         * A list of channel names to upload plugin to.
+         * A list of channel names to upload the plugin to.
          *
          * Default value: `listOf("default")`
          *
@@ -705,7 +705,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         val ignoredProblemsFile: RegularFileProperty
 
         /**
-         * Specifies which subsystems of IDE should be checked.
+         * Specifies which subsystems of the IDE should be checked.
          *
          * Default value: [Subsystems.ALL]
          *
@@ -889,7 +889,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * for IntelliJ Platform Verifier using the [ide] helper method.
              *
              * @see ide
-             * @see listProductReleases
              * @see ProductReleasesValueSource
              */
             fun recommended() = delegate.addIntelliJPluginVerifierIdes(
@@ -900,7 +899,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * Retrieves matching IDEs using custom filter parameters.
              *
              * @see ide
-             * @see listProductReleases
              * @see ProductReleasesValueSource
              */
             fun select(configure: FilterParameters.() -> Unit = {}) = delegate.addIntelliJPluginVerifierIdes(
