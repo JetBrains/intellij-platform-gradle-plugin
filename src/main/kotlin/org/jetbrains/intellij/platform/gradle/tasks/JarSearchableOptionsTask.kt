@@ -3,9 +3,10 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.*
+import org.gradle.api.tasks.CacheableTask
+import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.TaskAction
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
@@ -14,31 +15,15 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.get
-import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import kotlin.io.path.exists
 
-private const val SEARCHABLE_OPTIONS_SUFFIX_XML = ".searchableOptions.xml"
-private const val SEARCHABLE_OPTIONS_SUFFIX_JSON = "-searchableOptions.json"
 
 /**
  * Creates a JAR file with searchable options to be distributed with the plugin.
  */
 @CacheableTask
-abstract class JarSearchableOptionsTask : Jar(), PluginAware {
-
-    /**
-     * Specifies the directory where the prepared searchable options are read from.
-     *
-     * Default value: [BuildSearchableOptionsTask.outputDirectory]
-     */
-    @get:InputDirectory
-    @get:Optional
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val inputDirectory: DirectoryProperty
+abstract class JarSearchableOptionsTask : Jar() {
 
     /**
      * Specifies if a warning is emitted when no searchable options are found.
@@ -53,7 +38,6 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
 
     @TaskAction
     override fun copy() {
-        super.copy()
 
         if (noSearchableOptionsWarning.get()) {
             val noSearchableOptions = source.none {
@@ -67,6 +51,8 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
                 )
             }
         }
+
+        super.copy()
     }
 
     init {
@@ -79,39 +65,20 @@ abstract class JarSearchableOptionsTask : Jar(), PluginAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
+                val prepareJarSearchableOptionsTask = project.tasks.named<PrepareJarSearchableOptionsTask>(Tasks.PREPARE_JAR_SEARCHABLE_OPTIONS)
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
                 val buildSearchableOptionsEnabled = project.extensionProvider
                     .flatMap { it.buildSearchableOptions }
                     .zip(buildSearchableOptionsTaskProvider) { enabled, task ->
                         enabled && task.enabled
                     }
-                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-                val libContainerProvider = prepareSandboxTaskProvider.flatMap {
-                    it.pluginDirectory.dir("lib")
-                }
                 val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
 
-                inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
                 archiveClassifier.convention("searchableOptions")
                 destinationDirectory.convention(project.layout.buildDirectory.dir("libs"))
                 noSearchableOptionsWarning.convention(project.providers[GradleProperties.NoSearchableOptionsWarning])
 
-                from(inputDirectory)
-                include {
-                    when {
-                        it.isDirectory -> true
-                        it.name.endsWith(pluginXml.parse { id + SEARCHABLE_OPTIONS_SUFFIX_JSON }.get()) -> true
-                        it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_JSON) -> false
-                        !it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_XML) -> false
-                        else -> libContainerProvider.asPath.resolve(it.name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX_XML)).exists()
-                    }
-                }
-                eachFile {
-                    path = when {
-                        name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_JSON) -> name
-                        else -> "search/$name"
-                    }
-                }
+                from(prepareJarSearchableOptionsTask)
 
                 onlyIf {
                     buildSearchableOptionsEnabled.get()

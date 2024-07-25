@@ -28,6 +28,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             PatchPluginXmlTask,
             ProcessResourcesCompanion,
             BuildSearchableOptionsTask,
+            PrepareJarSearchableOptionsTask,
             JarSearchableOptionsTask,
             BuildPluginTask,
 

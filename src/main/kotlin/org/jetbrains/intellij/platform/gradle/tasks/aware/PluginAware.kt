@@ -13,6 +13,7 @@ import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import java.nio.file.Path
 import kotlin.io.path.inputStream
 
 /**
@@ -33,10 +34,15 @@ interface PluginAware {
 /**
  * Parses the `plugin.xml` file and provides access to the [PluginBean] object through the [block].
  */
-fun <T : Any> RegularFile.parse(block: PluginBean.() -> T) = asPath.inputStream().use {
+fun <T : Any> Path.parse(block: PluginBean.() -> T) = inputStream().use {
     val document = JDOMUtil.loadDocument(it)
     PluginBeanExtractor.extractPluginBean(document)
 }.block()
+
+/**
+ * Parses the `plugin.xml` file and provides access to the [PluginBean] object through the [block].
+ */
+fun <T : Any> RegularFile.parse(block: PluginBean.() -> T) = asPath.parse(block)
 
 /**
  * Parses the `plugin.xml` file and provides access to the [PluginBean] object through the [block].

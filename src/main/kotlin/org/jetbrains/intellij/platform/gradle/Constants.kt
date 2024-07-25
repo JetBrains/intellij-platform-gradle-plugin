@@ -137,6 +137,7 @@ object Constants {
         const val INSTRUMENTED_JAR = "instrumentedJar"
         const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
         const val PATCH_PLUGIN_XML = "patchPluginXml"
+        const val PREPARE_JAR_SEARCHABLE_OPTIONS = "prepareJarSearchableOptions"
         const val PREPARE_SANDBOX = "prepareSandbox"
         const val PREPARE_TEST = "prepareTest"
         const val PREPARE_TEST_SANDBOX = "prepareTestSandbox"
