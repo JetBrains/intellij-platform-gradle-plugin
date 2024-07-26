@@ -417,7 +417,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * A base method for adding a dependency on IntelliJ Plugin Verifier.
      *
-     * @param version The provider of the IntelliJ Plugin Verifier version.
+     * @param versionProvider The provider of the IntelliJ Plugin Verifier version.
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
@@ -437,7 +437,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * This dependency belongs to IntelliJ Platform repositories.
      *
-     * @param typeProvider The TestFramework type provider.
+     * @param type The TestFramework type provider.
      * @param versionProvider The version of the TestFramework.
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
@@ -464,8 +464,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * This dependency belongs to IntelliJ Platform repositories.
      *
-     * @param groupIdProvider The groupId of the IntelliJ Platform dependency.
-     * @param artifactIdProvider The artifactId of the IntelliJ Platform dependency.
+     * @param coordinates The coordinates of the IntelliJ Platform dependency.
      * @param versionProvider The version of the IntelliJ Platform dependency.
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
@@ -607,7 +606,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency on a local IntelliJ Platform instance.
      *
-     * @param localPath Path to the local IntelliJ Platform.
+     * @param artifactPath Path to the local IntelliJ Platform.
      */
     private fun DependencyHandler.createIntelliJPlatformLocal(artifactPath: Path): Dependency {
         val localProductInfo = artifactPath.productInfo()
@@ -616,14 +615,16 @@ class IntelliJPlatformDependenciesHelper(
         val type = localProductInfo.productCode.toIntelliJPlatformType()
         val version = "${localProductInfo.buildNumber}+${artifactPath.hash}"
 
-        IvyModule(
-            info = IvyModule.Info(
-                organisation = Dependencies.LOCAL_IDE_GROUP,
-                module = type.code,
-                revision = version,
-            ),
-            publications = listOf(artifactPath.toIvyArtifact()),
-        ).write()
+        writeIvyModule(Dependencies.LOCAL_IDE_GROUP, type.code, version) {
+            IvyModule(
+                info = IvyModule.Info(
+                    organisation = Dependencies.LOCAL_IDE_GROUP,
+                    module = type.code,
+                    revision = version,
+                ),
+                publications = listOf(artifactPath.toIvyArtifact()),
+            )
+        }
 
         return create(
             group = Dependencies.LOCAL_IDE_GROUP,
@@ -653,7 +654,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency for an IntelliJ platform bundled plugin.
      *
-     * @param bundledPluginId The ID of the bundled plugin.
+     * @param id The ID of the bundled plugin.
      */
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(id: String): Dependency {
         val plugin = bundledPlugins[id]
@@ -675,17 +676,18 @@ class IntelliJPlatformDependenciesHelper(
 
         val artifactPath = requireNotNull(plugin.originalFile)
         val version = baseVersion.orElse(productInfo.map { it.version }).map { "$it+${artifactPath.hash}" }.get()
-//        val version = "${plugin.pluginVersion}+${artifactPath.hash}"
 
-        IvyModule(
-            info = IvyModule.Info(
-                organisation = Dependencies.BUNDLED_PLUGIN_GROUP,
-                module = id,
-                revision = version,
-            ),
-            publications = listOf(artifactPath.toIvyArtifact()),
-            dependencies = plugin.collectDependencies(),
-        ).write()
+        writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version) {
+            IvyModule(
+                info = IvyModule.Info(
+                    organisation = Dependencies.BUNDLED_PLUGIN_GROUP,
+                    module = id,
+                    revision = version,
+                ),
+                publications = listOf(artifactPath.toIvyArtifact()),
+                dependencies = plugin.collectDependencies(),
+            )
+        }
 
         return create(
             group = Dependencies.BUNDLED_PLUGIN_GROUP,
@@ -708,20 +710,22 @@ class IntelliJPlatformDependenciesHelper(
 
         val plugins = dependencyIds
             .mapNotNull { bundledPlugins[it] }
-            .map {
-                val artifactPath = requireNotNull(it.originalFile)
+            .map { plugin ->
+                val artifactPath = requireNotNull(plugin.originalFile)
                 val group = Dependencies.BUNDLED_PLUGIN_GROUP
-                val name = requireNotNull(it.pluginId)
-                val version = "${it.pluginVersion}+${artifactPath.hash}"
+                val name = requireNotNull(plugin.pluginId)
+                val version = "${plugin.pluginVersion}+${artifactPath.hash}"
 
-                IvyModule(
-                    info = IvyModule.Info(group, name, version),
-                    publications = listOf(artifactPath.toIvyArtifact()),
-                    dependencies = when {
-                        id in path -> emptyList()
-                        else -> it.collectDependencies(path + id)
-                    },
-                ).write()
+                writeIvyModule(group, name, version) {
+                    IvyModule(
+                        info = IvyModule.Info(group, name, version),
+                        publications = listOf(artifactPath.toIvyArtifact()),
+                        dependencies = when {
+                            id in path -> emptyList()
+                            else -> plugin.collectDependencies(path + id)
+                        },
+                    )
+                }
 
                 IvyModule.Dependency(group, name, version)
             }
@@ -740,10 +744,12 @@ class IntelliJPlatformDependenciesHelper(
                 val name = it.name
                 val version = "$buildNumber+${platformPath.hash}"
 
-                IvyModule(
-                    info = IvyModule.Info(group, name, version),
-                    publications = artifactPaths,
-                ).write()
+                writeIvyModule(group, name, version) {
+                    IvyModule(
+                        info = IvyModule.Info(group, name, version),
+                        publications = artifactPaths,
+                    )
+                }
 
                 IvyModule.Dependency(group, name, version)
             }
@@ -775,14 +781,16 @@ class IntelliJPlatformDependenciesHelper(
         val version = (plugin.pluginVersion ?: "0.0.0") + "+" + artifactPath.hash
         val name = plugin.pluginId ?: artifactPath.name
 
-        IvyModule(
-            info = IvyModule.Info(
-                organisation = Dependencies.LOCAL_PLUGIN_GROUP,
-                module = name,
-                revision = version,
-            ),
-            publications = listOf(artifactPath.toIvyArtifact()),
-        ).write()
+        writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version) {
+            IvyModule(
+                info = IvyModule.Info(
+                    organisation = Dependencies.LOCAL_PLUGIN_GROUP,
+                    module = name,
+                    revision = version,
+                ),
+                publications = listOf(artifactPath.toIvyArtifact()),
+            )
+        }
 
         return create(
             group = Dependencies.LOCAL_PLUGIN_GROUP,
@@ -814,14 +822,16 @@ class IntelliJPlatformDependenciesHelper(
         val name = javaVendorVersion.substringBefore(javaVersion).trim('-')
         val version = javaVendorVersion.removePrefix(name).trim('-') + "+" + artifactPath.hash
 
-        IvyModule(
-            info = IvyModule.Info(
-                organisation = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
-                module = name,
-                revision = version,
-            ),
-            publications = listOf(artifactPath.toIvyArtifact()),
-        ).write()
+        writeIvyModule(Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP, name, version) {
+            IvyModule(
+                info = IvyModule.Info(
+                    organisation = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
+                    module = name,
+                    revision = version,
+                ),
+                publications = listOf(artifactPath.toIvyArtifact()),
+            )
+        }
 
         return create(
             group = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
@@ -853,9 +863,10 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency.
      *
-     * @param subject Dependency name.
      * @param coordinates Dependency coordinates.
      * @param version Dependency version.
+     * @param classifier Optional dependency classifier.
+     * @param extension Optional dependency extension.
      */
     private fun DependencyHandler.createDependency(
         coordinates: Coordinates,
@@ -895,12 +906,15 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
-     * Creates an Ivy dependency XML file for an external module.
+     * Creates and writes the Ivy module file for the specified group, artifact, and version, if absent.
+     *
+     * @param group The group identifier for the Ivy module.
+     * @param artifact The artifact name for the Ivy module.
+     * @param version The version of the Ivy module.
+     * @param block A lambda that returns an instance of IvyModule to be serialized into the file.
      */
-    private fun IvyModule.write() = apply {
-        val fileName = with(requireNotNull(info)) {
-            "$organisation-$module-$revision.xml"
-        }
+    private fun writeIvyModule(group: String, artifact: String, version: String, block: () -> IvyModule) = apply {
+        val fileName = "$group-$artifact-$version.xml"
         val ivyFile = providers
             .localPlatformArtifactsPath(rootProjectDirectory)
             .resolve(fileName)
@@ -914,13 +928,12 @@ class IntelliJPlatformDependenciesHelper(
             .createFile()
             .writeText(XML {
                 indentString = "  "
-            }.encodeToString(this))
+            }.encodeToString(block()))
     }
 
     /**
      * Creates an IntelliJ Platform dependency and excludes transitive dependencies provided by the current IntelliJ Platform.
      *
-     * @param subject Dependency name.
      * @param coordinates Dependency coordinates.
      * @param version Dependency version.
      */
@@ -963,7 +976,7 @@ class IntelliJPlatformDependenciesHelper(
     )
 
     private val Path.hash
-        get() = (hashCode().absoluteValue % 1000).toString()
+        get() = (absolutePathString().hashCode().absoluteValue % 1000).toString()
 
     internal fun buildJetBrainsRuntimeVersion(
         version: String,
