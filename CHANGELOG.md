@@ -7,6 +7,7 @@
 - Groovy support
 - Make `plugin(id, version, group)` dependency helper accept `group` in the format of: empty (use Marketplace groupId), `@channel`, or user-defined groupId
 - Introduce `PrepareJarSearchableOptionsTask` for performance purposes
+- Possibility for specifying `configurationName` when using `testFramework`, `platformDependency`, and `testPlatformDependency` dependency helpers
 
 ### Fixed
 

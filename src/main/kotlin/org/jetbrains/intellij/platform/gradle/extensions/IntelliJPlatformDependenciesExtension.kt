@@ -1096,12 +1096,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param type Test framework variant type.
      * @param version Test framework library version.
+     * @param configurationName The name of the configuration to add the dependency to.
      * @see TestFrameworkType
      */
     @JvmOverloads
-    fun testFramework(type: TestFrameworkType, version: String = Constraints.CLOSEST_VERSION) = delegate.addTestFrameworkDependency(
+    fun testFramework(
+        type: TestFrameworkType,
+        version: String = Constraints.CLOSEST_VERSION,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+    ) = delegate.addTestFrameworkDependency(
         type = type,
         versionProvider = delegate.provider { version },
+        configurationName = configurationName,
     )
 
     /**
@@ -1114,11 +1120,17 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param type Test Framework variant type.
      * @param version Library version.
+     * @param configurationName The name of the configuration to add the dependency to.
      * @see TestFrameworkType
      */
-    fun testFramework(type: TestFrameworkType, version: Provider<String>) = delegate.addTestFrameworkDependency(
+    fun testFramework(
+        type: TestFrameworkType,
+        version: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+    ) = delegate.addTestFrameworkDependency(
         type = type,
         versionProvider = version,
+        configurationName = configurationName,
     )
 
     /**
@@ -1128,12 +1140,17 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param coordinates IntelliJ Platform dependency coordinates.
      * @param version IntelliJ Platform dependency version.
+     * @param configurationName The name of the configuration to add the dependency to.
      */
     @JvmOverloads
-    fun platformDependency(coordinates: Coordinates, version: String = Constraints.CLOSEST_VERSION) = delegate.addPlatformDependency(
+    fun platformDependency(
+        coordinates: Coordinates,
+        version: String = Constraints.CLOSEST_VERSION,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+    ) = delegate.addPlatformDependency(
         coordinates = coordinates,
         versionProvider = delegate.provider { version },
-        configurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        configurationName = configurationName,
     )
 
     /**
@@ -1143,11 +1160,16 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param coordinates IntelliJ Platform dependency coordinates.
      * @param version IntelliJ Platform dependency version.
+     * @param configurationName The name of the configuration to add the dependency to.
      */
-    fun platformDependency(coordinates: Coordinates, version: Provider<String>) = delegate.addPlatformDependency(
+    fun platformDependency(
+        coordinates: Coordinates,
+        version: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+    ) = delegate.addPlatformDependency(
         coordinates = coordinates,
         versionProvider = version,
-        configurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        configurationName = configurationName,
     )
 
     /**
@@ -1157,12 +1179,17 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param coordinates IntelliJ Platform dependency coordinates.
      * @param version IntelliJ Platform dependency version.
+     * @param configurationName The name of the configuration to add the dependency to.
      */
     @JvmOverloads
-    fun testPlatformDependency(coordinates: Coordinates, version: String = Constraints.CLOSEST_VERSION) = delegate.addPlatformDependency(
+    fun testPlatformDependency(
+        coordinates: Coordinates,
+        version: String = Constraints.CLOSEST_VERSION,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+    ) = delegate.addPlatformDependency(
         coordinates = coordinates,
         versionProvider = delegate.provider { version },
-        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+        configurationName = configurationName,
     )
 
     /**
@@ -1172,11 +1199,16 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param coordinates IntelliJ Platform dependency coordinates.
      * @param version IntelliJ Platform dependency version.
+     * @param configurationName The name of the configuration to add the dependency to.
      */
-    fun testPlatformDependency(coordinates: Coordinates, version: Provider<String>) = delegate.addPlatformDependency(
+    fun testPlatformDependency(
+        coordinates: Coordinates,
+        version: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+    ) = delegate.addPlatformDependency(
         coordinates = coordinates,
         versionProvider = version,
-        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+        configurationName = configurationName,
     )
 
     /**
