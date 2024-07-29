@@ -8,7 +8,7 @@ import org.gradle.api.tasks.Internal
 
 /**
  * An interface that provides access to Kotlin-specific metadata for a Gradle project.
- * Task that inherits from this interface is automatically marked as dependent on the `compileKotlin` task.
+ * The task that inherits from this interface is automatically marked as dependent on the `compileKotlin` task.
  */
 interface KotlinMetadataAware {
 

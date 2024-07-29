@@ -82,7 +82,7 @@ private object Messages {
         "Use the `repositories {}` block to manage repositories instead.\n\n${Docs.repositories}\n${Docs.migration}"
 
     const val verifyPlugin =
-        "Task responsible for running the IntelliJ Plugin Verifier is now called `verifyPlugin`.\n\nUse `intellijPlatform.verifyPlugin` extension to configure it.\n\n${Docs.repositories}#intellijPlatform-verifyPlugin\n${Docs.migration}"
+        "Task responsible for running the IntelliJ Plugin Verifier is now called `verifyPlugin`.\n\nUse `intellijPlatform.pluginVerification` extension to configure it.\n\n${Docs.repositories}#intellijPlatform-pluginVerification\n${Docs.migration}"
 }
 
 @Suppress("unused")

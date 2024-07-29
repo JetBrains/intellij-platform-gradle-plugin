@@ -45,12 +45,12 @@ object Constants {
         const val INTELLIJ_PLATFORM = "intellijPlatform"
         const val INTELLIJ_PLATFORM_TESTING = "intellijPlatformTesting"
         const val PLUGIN_CONFIGURATION = "pluginConfiguration"
+        const val PLUGIN_VERIFICATION = "pluginVerification"
         const val PLUGINS = "plugins"
         const val PRODUCT_DESCRIPTOR = "productDescriptor"
         const val PUBLISHING = "publishing"
         const val SIGNING = "signing"
         const val VENDOR = "vendor"
-        const val VERIFY_PLUGIN = "verifyPlugin"
     }
 
     object Components {

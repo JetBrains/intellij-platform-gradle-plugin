@@ -133,7 +133,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is PluginVerifierAware) {
             val intelliJPluginVerifierPathResolver = IntelliJPluginVerifierPathResolver(
                 intellijPluginVerifier = configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER],
-                localPath = extensionProvider.flatMap { it.verifyPlugin.cliPath },
+                localPath = extensionProvider.flatMap { it.pluginVerification.cliPath },
             )
 
             pluginVerifierExecutable.convention(layout.file(provider {

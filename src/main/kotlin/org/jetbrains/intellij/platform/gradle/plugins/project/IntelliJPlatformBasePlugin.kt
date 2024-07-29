@@ -283,8 +283,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 Vendor.register(project, target = pluginConfiguration)
             }
 
-            VerifyPlugin.register(project, target = intelliJPlatform).let { verifyPlugin ->
-                VerifyPlugin.Ides.register(project, target = verifyPlugin)
+            PluginVerification.register(project, target = intelliJPlatform).let { pluginVerification ->
+                PluginVerification.Ides.register(project, target = pluginVerification)
             }
 
             Signing.register(project, target = intelliJPlatform)

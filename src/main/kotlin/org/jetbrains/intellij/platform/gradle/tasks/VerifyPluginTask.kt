@@ -185,8 +185,8 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             ?: throw GradleException(
                 """
                 No IntelliJ Plugin Verifier executable found.
-                Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.verifyPlugin.cliPath` extension property
-                See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-verifyPlugin
+                Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.pluginVerification.cliPath` extension property
+                See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification
                 """.trimIndent()
             )
 
@@ -199,8 +199,8 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 throw GradleException(
                     """
                     No IDE resolved for verification with the IntelliJ Plugin Verifier.
-                    Please ensure the `intellijPlatform.verifyPlugin.ides` extension block is configured along with the `defaultRepositories()` (or at least `localPlatformArtifacts()`) entry in the repositories section.
-                    See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-verifyPlugin-ides
+                    Please ensure the `intellijPlatform.pluginVerification.ides` extension block is configured along with the `defaultRepositories()` (or at least `localPlatformArtifacts()`) entry in the repositories section.
+                    See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides
                     """.trimIndent()
                 )
             }
@@ -299,7 +299,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
-                val verifyPluginProvider = project.extensionProvider.map { it.verifyPlugin }
+                val pluginVerificationProvider = project.extensionProvider.map { it.pluginVerification }
                 val intellijPluginVerifierIdesConfigurations = project.provider { // TODO: use .named when Gradle 8.6+
                     project.configurations.filter { configuration ->
                         with(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES) {
@@ -309,14 +309,14 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 
-                freeArgs.convention(verifyPluginProvider.flatMap { it.freeArgs })
-                failureLevel.convention(verifyPluginProvider.flatMap { it.failureLevel })
-                verificationReportsDirectory.convention(verifyPluginProvider.flatMap { it.verificationReportsDirectory })
-                verificationReportsFormats.convention(verifyPluginProvider.flatMap { it.verificationReportsFormats })
-                externalPrefixes.convention(verifyPluginProvider.flatMap { it.externalPrefixes })
-                teamCityOutputFormat.convention(verifyPluginProvider.flatMap { it.teamCityOutputFormat })
-                subsystemsToCheck.convention(verifyPluginProvider.flatMap { it.subsystemsToCheck })
-                ignoredProblemsFile.convention(verifyPluginProvider.flatMap { it.ignoredProblemsFile })
+                freeArgs.convention(pluginVerificationProvider.flatMap { it.freeArgs })
+                failureLevel.convention(pluginVerificationProvider.flatMap { it.failureLevel })
+                verificationReportsDirectory.convention(pluginVerificationProvider.flatMap { it.verificationReportsDirectory })
+                verificationReportsFormats.convention(pluginVerificationProvider.flatMap { it.verificationReportsFormats })
+                externalPrefixes.convention(pluginVerificationProvider.flatMap { it.externalPrefixes })
+                teamCityOutputFormat.convention(pluginVerificationProvider.flatMap { it.teamCityOutputFormat })
+                subsystemsToCheck.convention(pluginVerificationProvider.flatMap { it.subsystemsToCheck })
+                ignoredProblemsFile.convention(pluginVerificationProvider.flatMap { it.ignoredProblemsFile })
 
                 ides.from(intellijPluginVerifierIdesConfigurations)
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })

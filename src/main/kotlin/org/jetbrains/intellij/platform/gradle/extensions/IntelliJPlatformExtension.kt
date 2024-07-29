@@ -181,19 +181,38 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     }
 
 
+    @Deprecated("Use pluginVerification instead", ReplaceWith("pluginVerification(action)"))
     val verifyPlugin
-        get() = extensions.getByName<VerifyPlugin>(Extensions.VERIFY_PLUGIN)
+        get() = extensions.getByName<PluginVerification>(Extensions.PLUGIN_VERIFICATION)
 
-    fun verifyPlugin(action: Action<in VerifyPlugin>) {
-        action.execute(verifyPlugin)
+    @Deprecated("Use pluginVerification instead", ReplaceWith("pluginVerification(action)"))
+    fun verifyPlugin(action: Action<in PluginVerification>) {
+        action.execute(pluginVerification)
     }
 
-    fun verifyPlugin(@DelegatesTo(value = VerifyPlugin::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
-        action.delegate = verifyPlugin
+    @Deprecated("Use pluginVerification instead", ReplaceWith("pluginVerification(action)"))
+    fun verifyPlugin(@DelegatesTo(value = PluginVerification::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+        action.delegate = pluginVerification
         action.resolveStrategy = Closure.DELEGATE_FIRST
         action.call()
     }
 
+    @Deprecated("Use PluginVerification instead", ReplaceWith("PluginVerification"))
+    interface VerifyPlugin : PluginConfiguration
+
+
+    val pluginVerification
+        get() = extensions.getByName<PluginVerification>(Extensions.PLUGIN_VERIFICATION)
+
+    fun pluginVerification(action: Action<in PluginVerification>) {
+        action.execute(pluginVerification)
+    }
+
+    fun pluginVerification(@DelegatesTo(value = PluginVerification::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+        action.delegate = pluginVerification
+        action.resolveStrategy = Closure.DELEGATE_FIRST
+        action.call()
+    }
 
     /**
      * Configures the plugin definition and stores in the `plugin.xml` file.
@@ -642,7 +661,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * @see PluginVerifierAware
      */
     @IntelliJPlatform
-    interface VerifyPlugin : ExtensionAware {
+    interface PluginVerification : ExtensionAware {
 
         /**
          * The extension to define the IDEs to be used along with the IntelliJ Plugin Verifier CLI tool for the binary plugin verification.
@@ -938,9 +957,9 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             }
         }
 
-        companion object : Registrable<VerifyPlugin> {
+        companion object : Registrable<PluginVerification> {
             override fun register(project: Project, target: Any) =
-                target.configureExtension<VerifyPlugin>(Extensions.VERIFY_PLUGIN) {
+                target.configureExtension<PluginVerification>(Extensions.PLUGIN_VERIFICATION) {
                     failureLevel.convention(listOf(VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS))
                     verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
                     verificationReportsFormats.convention(

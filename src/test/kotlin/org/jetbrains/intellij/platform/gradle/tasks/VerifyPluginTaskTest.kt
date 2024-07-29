@@ -112,7 +112,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                     }
                 }
@@ -134,7 +134,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                         verificationReportsFormats = listOf(VerificationReportsFormats.MARKDOWN, VerificationReportsFormats.PLAIN)
                     }
@@ -163,7 +163,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         verificationReportsFormats.empty()
                         verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                     }
@@ -192,7 +192,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                     }
                 }
@@ -223,7 +223,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         ignoredProblemsFile = file("${ignoredProblems.invariantSeparatorsPathString}")
                     }
                 }
@@ -258,7 +258,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         failureLevel = listOf(FailureLevel.DEPRECATED_API_USAGES)
                     }
                 }
@@ -292,7 +292,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         ides {
                             ide("foo")
                         }
@@ -315,7 +315,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         ides {
                             recommended()
                         }
@@ -344,7 +344,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         failureLevel = FailureLevel.ALL
                     }
                 }
@@ -365,8 +365,8 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         buildFile write //language=kotlin
                 """
-                tasks {
-                    verifyPlugin {
+                intellijPlatform {
+                    pluginVerification {
                         failureLevel = VerifyPluginTask.FailureLevel.NONE
                     }
                 }
@@ -405,7 +405,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
                         freeArgs = listOf("-verification-reports-formats", "plain") 
                     }
@@ -434,7 +434,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         freeArgs = listOf("-suppress-internal-api-usages", "jetbrains-plugins") 
                     }
                 }
@@ -460,7 +460,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    verifyPlugin {
+                    pluginVerification {
                         ides {
                             ide("$type", "$version")
                         }
