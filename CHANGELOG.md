@@ -1,6 +1,23 @@
 # Changelog
 
-## [next]
+## [2.0.0] - 2024-07-30
+
+**IntelliJ Platform Gradle Plugin 2.0 is out!**
+
+_Read the [full blog post](https://blog.jetbrains.com/platform/2024/07/intellij-platform-gradle-plugin-2-0/)._
+
+Version 2.0 of the IntelliJ Platform Gradle Plugin is now available! Previously called the Gradle IntelliJ Plugin, this updated plugin for the Gradle build system simplifies the configuration of environments for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs. Redesigned and rewritten, it addresses community-reported issues and feature requests from previous versions.
+
+To start using version 2.0 of the IntelliJ Platform Gradle Plugin, visit the documentation pages at [IntelliJ Platform SDK | Tooling | IntelliJ Platform Gradle Plugin 2.x](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), where you will find a proper introduction to all of the new features and changes, a [migration guide](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html), and examples of various configurations you may be interested in.
+
+For projects created with the IntelliJ Platform Plugin Template, we advise taking a look at the 2.0.0 pull request applied on top of the obsolete Gradle IntelliJ Plugin 1.x configuration: https://github.com/JetBrains/intellij-platform-plugin-template/pull/458/files
+
+If you have any issues or requests, please submit them to our [GitHub Issues](https://github.com/JetBrains/intellij-platform-gradle-plugin/issues) page or the JetBrains Platform Slack.
+
+To submit questions or suggestions related to the [documentation](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), please use the feedback form at the bottom of the article.
+
+
+## [2.0.0-rc2] - 2024-07-26
 
 ### Added
 
