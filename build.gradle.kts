@@ -16,6 +16,7 @@ plugins {
     alias(libs.plugins.pluginPublish)
     alias(libs.plugins.changelog)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.bcv)
     alias(libs.plugins.buildLogic)
 }
 
