@@ -10,6 +10,7 @@ xmlutil = "0.86.3"
 
 # plugins
 dokka = "1.9.20"
+bcv = "0.16.2"
 gradlePluginPublish = "1.2.1"
 gradleChangelogPlugin = "2.2.1"
 
@@ -28,4 +29,5 @@ xmlutil-serialization = { group = "io.github.pdvrieze.xmlutil", name = "serializ
 pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradlePluginPublish" }
 changelog = { id = "org.jetbrains.changelog", version.ref = "gradleChangelogPlugin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
+bcv = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "bcv" }
 buildLogic = { id = "build-logic", version = "0.0.0" }
