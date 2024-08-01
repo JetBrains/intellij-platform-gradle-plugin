@@ -663,6 +663,7 @@ class IntelliJPlatformDependenciesHelper(
                 "copyright" -> "Use correct plugin ID 'com.intellij.copyright' instead of 'copyright'."
                 "css", "css-impl" -> "Use correct plugin ID 'com.intellij.css' instead of 'css'/'css-impl'."
                 "DatabaseTools" -> "Use correct plugin ID 'com.intellij.database' instead of 'DatabaseTools'."
+                "Groovy" -> "Use correct plugin ID 'org.intellij.groovy' instead of 'Groovy'."
                 "gradle" -> "Use correct plugin ID 'com.intellij.gradle' instead of 'gradle'."
                 "java" -> "Use correct plugin ID 'com.intellij.java' instead of 'java'."
                 "Kotlin" -> "Use correct plugin ID 'org.jetbrains.kotlin' instead of 'Kotlin'."
