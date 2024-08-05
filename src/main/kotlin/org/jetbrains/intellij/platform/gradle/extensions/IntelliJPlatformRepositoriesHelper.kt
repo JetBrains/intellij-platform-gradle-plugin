@@ -162,15 +162,12 @@ class IntelliJPlatformRepositoriesHelper(
             (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:/[artifact]") }
         }
     }.apply {
-        repositories.exclusiveContent {
-            forRepositories(this@apply)
-            filter {
-                includeGroup(Configurations.Dependencies.BUNDLED_MODULE_GROUP)
-                includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
-                includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
-                includeGroup(Configurations.Dependencies.LOCAL_PLUGIN_GROUP)
-                includeGroup(Configurations.Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP)
-            }
+        content {
+            includeGroup(Configurations.Dependencies.BUNDLED_MODULE_GROUP)
+            includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
+            includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
+            includeGroup(Configurations.Dependencies.LOCAL_PLUGIN_GROUP)
+            includeGroup(Configurations.Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP)
         }
         action()
     }

@@ -142,11 +142,8 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         url = Locations.CACHE_REDIRECTOR_JETBRAINS_RUNTIME_REPOSITORY,
         patterns = listOf("[revision].tar.gz"),
     ) {
-        repositories.exclusiveContent {
-            forRepositories(this@createIvyRepository)
-            filter {
-                includeModule("com.jetbrains", "jbr")
-            }
+        content {
+            includeModule("com.jetbrains", "jbr")
         }
 
         action()
@@ -168,16 +165,13 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
             "[organization]/[revision]/[module]-[revision](.[classifier]).[ext]",
         ),
         action = {
-            repositories.exclusiveContent {
-                forRepositories(this@createIvyRepository)
-                filter {
-                    IntelliJPlatformType.values()
-                        .filter { it != IntelliJPlatformType.AndroidStudio }
-                        .mapNotNull { it.installer }
-                        .forEach {
-                            includeModule(it.groupId, it.artifactId)
-                        }
-                }
+            content {
+                IntelliJPlatformType.values()
+                    .filter { it != IntelliJPlatformType.AndroidStudio }
+                    .mapNotNull { it.installer }
+                    .forEach {
+                        includeModule(it.groupId, it.artifactId)
+                    }
             }
             action()
         },
@@ -197,22 +191,15 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
             "/install/[revision]/[artifact]-[revision]-[classifier].[ext]",
         ),
         action = {
-            repositories.exclusiveContent {
-                forRepositories(this@createIvyRepository)
-                filter {
-                    val coordinates = IntelliJPlatformType.AndroidStudio.installer
-                    requireNotNull(coordinates)
+            content {
+                val coordinates = IntelliJPlatformType.AndroidStudio.installer
+                requireNotNull(coordinates)
 
-                    includeModule(coordinates.groupId, coordinates.artifactId)
-                }
+                includeModule(coordinates.groupId, coordinates.artifactId)
             }
             action()
         },
     )
-
-    // TODO: check the case when marketplace() is higher on the list — most likely it takes the precedence over ivy and fails on built-in java plugin
-    //       see https://stackoverflow.com/questions/23023069/gradle-download-and-unzip-file-from-url/34327202#34327202 and exclusiveContent
-    // TODO: check if the bundled plugin hash matters — if it has to be different every time as always extract transformer is called, so previous dir may no longer exist
 
     /**
      * Certain dependencies, such as the IntelliJ Platform and bundled IDE plugins, need extra pre-processing before
