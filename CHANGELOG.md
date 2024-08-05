@@ -1,5 +1,11 @@
 # Changelog
 
+## [next]
+
+### Fixed
+
+- Fixed "No IDE resolved for verification with the IntelliJ Plugin Verifier" when `untilBuild` is an empty string [#1717](../../issues/1717)
+
 ## [2.0.0] - 2024-07-30
 
 **IntelliJ Platform Gradle Plugin 2.0 is out!**
@@ -15,7 +21,6 @@ For projects created with the IntelliJ Platform Plugin Template, we advise takin
 If you have any issues or requests, please submit them to our [GitHub Issues](https://github.com/JetBrains/intellij-platform-gradle-plugin/issues) page or the JetBrains Platform Slack.
 
 To submit questions or suggestions related to the [documentation](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), please use the feedback form at the bottom of the article.
-
 
 ## [2.0.0-rc2] - 2024-07-26
 

@@ -17,7 +17,6 @@ import org.jetbrains.intellij.platform.gradle.models.JetBrainsIdesReleases
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.models.decode
-import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
 import org.jetbrains.intellij.platform.gradle.tasks.PrintProductsReleasesTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
@@ -40,14 +39,14 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
 
     interface Parameters : FilterParameters {
         /**
-         * The URL to the resource containing the XML with all available JetBrains IDEs releases.
+         * The URL to the resource containing the XML with all JetBrains IDEs releases.
          *
          * @see GradleProperties.ProductsReleasesJetBrainsIdesUrl
          */
         val jetbrainsIdesUrl: Property<String>
 
         /**
-         * The URL to the resource containing the XML with all available Android Studio releases.
+         * The URL to the resource containing the XML with all Android Studio releases.
          *
          * @see GradleProperties.ProductsReleasesAndroidStudioUrl
          */
@@ -144,14 +143,14 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             }
             .orEmpty()
 
-        val since = sinceBuild.map { it.toVersion() }.get()
-        val until = untilBuild.map { it.replace("*", "99999").toVersion() }.orNull
+        val since = sinceBuild.get().toVersion()
+        val until = untilBuild.map { it.replace("*", "99999") }.orNull?.ifBlank { null }?.toVersion()
         fun ProductRelease.testVersion(): Boolean {
             fun getComparativeVersion(version: Version) = when (version.major) {
                 in 100..999 -> build
                 else -> this.version
             }
-            return getComparativeVersion(since) >= since && (until?.let { getComparativeVersion(it) <= it } ?: true)
+            return getComparativeVersion(since) >= since && (until?.let { getComparativeVersion(it) <= it } != false)
         }
 
         val types = types.get()
