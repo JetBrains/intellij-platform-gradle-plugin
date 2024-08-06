@@ -34,29 +34,17 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
         with(project.configurations) configurations@{
             val intellijPlatformComposedJarConfiguration = create(Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR) {
-                attributes {
-                    attribute(
-                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
-                        project.objects.named(Attributes.COMPOSED_JAR_NAME)
-                    )
-                }
-
                 extendsFrom(
                     this@configurations[Configurations.External.IMPLEMENTATION],
                     this@configurations[Configurations.External.RUNTIME_ONLY],
                 )
             }
+            val intellijPlatformDistributionConfiguration = create(Configurations.INTELLIJ_PLATFORM_DISTRIBUTION)
 
-            val intellijPlatformDistributionConfiguration = create(Configurations.INTELLIJ_PLATFORM_DISTRIBUTION) {
-                attributes {
-                    attribute(
-                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
-                        project.objects.named(Attributes.DISTRIBUTION_NAME)
-                    )
-                }
-            }
-
-            listOf(intellijPlatformComposedJarConfiguration, intellijPlatformDistributionConfiguration).forEach {
+            listOf(
+                intellijPlatformComposedJarConfiguration,
+                intellijPlatformDistributionConfiguration,
+            ).forEach {
                 it.isCanBeConsumed = true
                 it.isCanBeResolved = false
 
@@ -72,46 +60,39 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 }
             }
 
-            named(Configurations.External.RUNTIME_CLASSPATH) {
-                attributes {
-                    attribute(
-                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
-                        project.objects.named(LibraryElements::class.java, Attributes.COMPOSED_JAR_NAME)
-                    )
-                }
-            }
-
-            named(Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL) {
-                attributes {
-                    attribute(
-                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
-                        project.objects.named(LibraryElements::class.java, Attributes.DISTRIBUTION_NAME)
-                    )
-                }
-            }
-            named(Configurations.INTELLIJ_PLATFORM_PLUGIN) {
-                attributes {
-                    attribute(
-                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
-                        project.objects.named(LibraryElements::class.java, Attributes.DISTRIBUTION_NAME)
-                    )
-                }
-            }
             val intellijPlatformPluginModuleConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
                 description = "IntelliJ Platform plugin module",
-            ) {
-                isTransitive = false
+            ) { isTransitive = false }
 
-                attributes {
-                    attribute(
-                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
-                        project.objects.named(LibraryElements::class.java, Attributes.COMPOSED_JAR_NAME)
-                    )
-                }
-            }
             named(Configurations.INTELLIJ_PLATFORM_DEPENDENCIES) {
                 extendsFrom(intellijPlatformPluginModuleConfiguration)
+            }
+
+
+            listOf(
+                Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR,
+                Configurations.External.RUNTIME_CLASSPATH,
+                Configurations.External.TEST_RUNTIME_CLASSPATH,
+                Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
+            ).forEach {
+                named(it) {
+                    attributes {
+                        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
+                    }
+                }
+            }
+
+            listOf(
+                Configurations.INTELLIJ_PLATFORM_DISTRIBUTION,
+                Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+                Configurations.INTELLIJ_PLATFORM_PLUGIN,
+            ).forEach {
+                named(it) {
+                    attributes {
+                        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
+                    }
+                }
             }
         }
 

@@ -6,6 +6,7 @@
 
 - Fixed "No IDE resolved for verification with the IntelliJ Plugin Verifier" when `untilBuild` is an empty string [#1717](../../issues/1717)
 - Dependency resolution fails if a repository with `exclusiveContent` rules is added twice – use `content` inclusive rule instead [#1728](../../issues/1728)
+- Apply `composedJar` library elements attribute to `testRuntimeClasspath` configuration
 
 ## [2.0.0] - 2024-07-30
 

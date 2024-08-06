@@ -123,6 +123,7 @@ object Constants {
             const val TEST_IMPLEMENTATION = JvmConstants.TEST_IMPLEMENTATION_CONFIGURATION_NAME
             const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
             const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
+            const val TEST_RUNTIME_CLASSPATH = JavaPlugin.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME
         }
     }
 
