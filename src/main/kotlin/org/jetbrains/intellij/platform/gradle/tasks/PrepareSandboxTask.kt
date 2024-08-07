@@ -232,7 +232,6 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
             project.registerTask<PrepareSandboxTask>(
                 Tasks.PREPARE_SANDBOX,
                 Tasks.PREPARE_TEST_SANDBOX,
-                Tasks.PREPARE_TEST_IDE_UI_SANDBOX,
                 Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX,
             ) {
                 val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]

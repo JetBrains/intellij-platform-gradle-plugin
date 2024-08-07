@@ -321,52 +321,6 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    @Ignore
-    fun `prepare ui tests sandbox task`() {
-        writeJavaFile()
-        dir.resolve("src/main/resources/META-INF/other.xml") write //language=xml
-                """
-                <idea-plugin />
-                """.trimIndent()
-
-        dir.resolve("src/main/resources/META-INF/nonIncluded.xml") write //language=xml
-                """
-                <idea-plugin />
-                """.trimIndent()
-
-        pluginXml write //language=xml
-                """
-                <idea-plugin>
-                    <depends config-file="other.xml" />
-                </idea-plugin>
-                """.trimIndent()
-
-        buildFile write //language=kotlin
-                """
-                dependencies {
-                    implementation("joda-time:joda-time:2.8.1")
-    
-                    intellijPlatform {
-                        bundledPlugin("com.intellij.copyright")
-                    }
-                }
-    //            downloadRobotServerPlugin.version = '0.11.1'
-                """.trimIndent()
-
-        build(Tasks.PREPARE_TEST_IDE_UI_SANDBOX)
-
-        assertEquals(
-            setOf(
-                "config-uiTest/options/updates.xml",
-                "plugins-uiTest/projectName/lib/joda-time-2.8.1.jar",
-                "plugins-uiTest/projectName/lib/projectName-1.0.0.jar",
-                "plugins-uiTest/robot-server-plugin/lib/robot-server-plugin-0.11.1.jar",
-            ),
-            collectPaths(sandbox),
-        )
-    }
-
-    @Test
     fun `prepare sandbox for splitMode with plugin installed on frontend`() {
         buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.FRONTEND)
         assertFileContent(

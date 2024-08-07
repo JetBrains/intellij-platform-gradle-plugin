@@ -50,9 +50,7 @@ abstract class TestIdeUiTask : Test(), TestableAware {
      */
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<TestIdeUiTask>(Tasks.TEST_IDE_UI, configureWithType = false) {
-                enabled = false // TODO: workaround as `check` task runs it by default
-
+            project.registerTask<TestIdeUiTask>(configureWithType = false) {
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 //                val prepareTestIdeUiSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_UI_SANDBOX)
 

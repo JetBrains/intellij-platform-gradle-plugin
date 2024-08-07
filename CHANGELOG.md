@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Don't register the `testIdeUi` task by default
+
 ### Fixed
 
 - Fixed "No IDE resolved for verification with the IntelliJ Plugin Verifier" when `untilBuild` is an empty string [#1717](../../issues/1717)

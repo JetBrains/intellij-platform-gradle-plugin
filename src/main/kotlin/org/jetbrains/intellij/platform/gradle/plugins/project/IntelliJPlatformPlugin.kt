@@ -34,7 +34,6 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
             // Test
             TestIdePerformanceTask,
-            TestIdeUiTask,
 
             // Run
             RunIdeTask,

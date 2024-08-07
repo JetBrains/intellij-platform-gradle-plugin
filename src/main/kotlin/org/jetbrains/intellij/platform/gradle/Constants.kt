@@ -142,7 +142,6 @@ object Constants {
         const val PREPARE_SANDBOX = "prepareSandbox"
         const val PREPARE_TEST = "prepareTest"
         const val PREPARE_TEST_SANDBOX = "prepareTestSandbox"
-        const val PREPARE_TEST_IDE_UI_SANDBOX = "prepareTestIdeUiSandbox" // TODO: check
         const val PREPARE_TEST_IDE_PERFORMANCE_SANDBOX = "prepareTestIdePerformanceSandbox" // TODO: check
         const val PRINT_BUNDLED_PLUGINS = "printBundledPlugins"
         const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
@@ -151,7 +150,6 @@ object Constants {
         const val SETUP_DEPENDENCIES = "setupDependencies"
         const val SIGN_PLUGIN = "signPlugin"
         const val TEST_IDE_PERFORMANCE = "testIdePerformance" // TODO: check
-        const val TEST_IDE_UI = "testIdeUi"
         const val VERIFY_PLUGIN = "verifyPlugin"
         const val VERIFY_PLUGIN_STRUCTURE = "verifyPluginStructure"
         const val VERIFY_PLUGIN_PROJECT_CONFIGURATION = "verifyPluginProjectConfiguration"
