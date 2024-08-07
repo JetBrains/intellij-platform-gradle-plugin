@@ -5,6 +5,7 @@
 ### Changed
 
 - Don't register the `testIdeUi` task by default
+- Make the `prepareSandbox` task always run whenever any of the sandbox directories is missing [#1730](../../issues/1730)
 
 ### Fixed
 

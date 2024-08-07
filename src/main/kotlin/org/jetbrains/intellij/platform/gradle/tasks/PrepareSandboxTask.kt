@@ -306,33 +306,37 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 inputs.property("sandboxSuffix", sandboxSuffix)
                 inputs.files(runtimeConfiguration)
 
-                sandboxConfigDirectory
-                sandboxPluginsDirectory
-                sandboxLogDirectory
-                sandboxSystemDirectory
-                splitMode.map { isSplitMode ->
-                    when {
-                        isSplitMode -> sandboxConfigFrontendDirectory
-                        else -> sandboxConfigDirectory
-                    }
-                }
-                splitMode.map { isSplitMode ->
-                    when {
-                        isSplitMode -> sandboxPluginsFrontendDirectory
-                        else -> sandboxPluginsDirectory
-                    }
-                }
-                splitMode.map { isSplitMode ->
-                    when {
-                        isSplitMode -> sandboxLogFrontendDirectory
-                        else -> sandboxLogDirectory
-                    }
-                }
-                splitMode.map { isSplitMode ->
-                    when {
-                        isSplitMode -> sandboxSystemFrontendDirectory
-                        else -> sandboxSystemDirectory
-                    }
+                outputs.upToDateWhen {
+                    listOf(
+                        sandboxConfigDirectory,
+                        sandboxPluginsDirectory,
+                        sandboxLogDirectory,
+                        sandboxSystemDirectory,
+                        splitMode.flatMap { isSplitMode ->
+                            when {
+                                isSplitMode -> sandboxConfigFrontendDirectory
+                                else -> sandboxConfigDirectory
+                            }
+                        },
+                        splitMode.flatMap { isSplitMode ->
+                            when {
+                                isSplitMode -> sandboxPluginsFrontendDirectory
+                                else -> sandboxPluginsDirectory
+                            }
+                        },
+                        splitMode.flatMap { isSplitMode ->
+                            when {
+                                isSplitMode -> sandboxLogFrontendDirectory
+                                else -> sandboxLogDirectory
+                            }
+                        },
+                        splitMode.flatMap { isSplitMode ->
+                            when {
+                                isSplitMode -> sandboxSystemFrontendDirectory
+                                else -> sandboxSystemDirectory
+                            }
+                        },
+                    ).all { it.asPath.exists() }
                 }
             }
     }

@@ -3,11 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.io.File
@@ -24,14 +20,10 @@ import kotlin.io.path.listDirectoryEntries
  * @property sandboxLogDirectory The output directory where the sandbox log files will be written.
  */
 class SandboxArgumentProvider(
-    @Optional
-    @InputDirectory
-    @PathSensitive(RELATIVE)
+    @Internal
     val sandboxConfigDirectory: DirectoryProperty,
 
-    @Optional
-    @InputDirectory
-    @PathSensitive(RELATIVE)
+    @Internal
     val sandboxPluginsDirectory: DirectoryProperty,
 
     @Internal
