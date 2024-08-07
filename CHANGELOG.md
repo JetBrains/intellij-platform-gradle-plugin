@@ -8,6 +8,7 @@
 - Dependency resolution fails if a repository with `exclusiveContent` rules is added twice – use `content` inclusive rule instead [#1728](../../issues/1728)
 - Apply `composedJar` library elements attribute to `testRuntimeClasspath` configuration
 - When adding new IDEs for Plugin Verifier, do not mutate existing `intellijPluginVerifierIdes_X` configurations if present
+- Respect the `sandboxDirectory` property when configuring custom tasks with `intellijPlatformTesting` extension [#1723](../../issues/1723)
 
 ## [2.0.0] - 2024-07-30
 
