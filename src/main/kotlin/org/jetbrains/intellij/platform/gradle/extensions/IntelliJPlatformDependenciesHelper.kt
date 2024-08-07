@@ -215,12 +215,16 @@ class IntelliJPlatformDependenciesHelper(
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
                 else -> dependencies.createIntelliJPlatformInstaller(type, version)
             }.apply(action).also { dependency ->
-                val dependencyConfiguration = configurations.maybeCreate("${dependencyConfigurationName}_$notation").apply {
-                    dependencies.add(dependency)
-                }
+                val dependencyConfigurationNameWithNotation = "${dependencyConfigurationName}_$notation"
+                val configurationNameWithNotation = "${configurationName}_$notation"
 
-                configurations.findByName("${configurationName}_$notation")
-                    ?: configurations.create("${configurationName}_$notation").apply {
+                val dependencyConfiguration = configurations.findByName(dependencyConfigurationNameWithNotation)
+                    ?: configurations.create(dependencyConfigurationNameWithNotation) {
+                        dependencies.add(dependency)
+                    }
+
+                configurations.findByName(configurationNameWithNotation)
+                    ?: configurations.create(configurationNameWithNotation) {
                         attributes {
                             attribute(Attributes.extracted, true)
                         }
