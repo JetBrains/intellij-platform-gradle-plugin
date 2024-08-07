@@ -187,7 +187,6 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field PREPARE_SANDBOX Ljava/lang/String;
 	public static final field PREPARE_TEST Ljava/lang/String;
 	public static final field PREPARE_TEST_IDE_PERFORMANCE_SANDBOX Ljava/lang/String;
-	public static final field PREPARE_TEST_IDE_UI_SANDBOX Ljava/lang/String;
 	public static final field PREPARE_TEST_SANDBOX Ljava/lang/String;
 	public static final field PRINT_BUNDLED_PLUGINS Ljava/lang/String;
 	public static final field PRINT_PRODUCTS_RELEASES Ljava/lang/String;
@@ -196,7 +195,6 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field SETUP_DEPENDENCIES Ljava/lang/String;
 	public static final field SIGN_PLUGIN Ljava/lang/String;
 	public static final field TEST_IDE_PERFORMANCE Ljava/lang/String;
-	public static final field TEST_IDE_UI Ljava/lang/String;
 	public static final field VERIFY_PLUGIN Ljava/lang/String;
 	public static final field VERIFY_PLUGIN_PROJECT_CONFIGURATION Ljava/lang/String;
 	public static final field VERIFY_PLUGIN_SIGNATURE Ljava/lang/String;
