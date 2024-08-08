@@ -171,7 +171,6 @@ fun Test.configureTests() {
     systemProperties["test.kotlin.version"] = properties("testKotlinVersion").get()
     systemProperties["test.ci"] = environment("CI").orElse("false")
     systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
-    systemProperties["plugins.repository"] = properties("pluginsRepository").get()
 
     jvmArgs(
         "--add-opens=java.base/java.lang=ALL-UNNAMED",
