@@ -2580,6 +2580,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandbo
 	public abstract fun getDisabledPlugins ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getPluginDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getPluginJar ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getPluginName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPluginsClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getSandboxSuffix ()Lorg/gradle/api/provider/Property;
