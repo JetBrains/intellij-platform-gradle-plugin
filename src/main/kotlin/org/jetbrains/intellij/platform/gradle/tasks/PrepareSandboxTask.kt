@@ -62,7 +62,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     abstract val defaultDestinationDirectory: DirectoryProperty
 
     /**
-     * The name of the plugin directory in the sandbox.
+     * Specifies the name of the plugin directory in the sandbox.
      *
      * Default value: [IntelliJPlatformExtension.projectName].
      */
