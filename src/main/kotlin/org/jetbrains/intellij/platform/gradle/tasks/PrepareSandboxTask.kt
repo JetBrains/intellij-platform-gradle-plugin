@@ -62,9 +62,17 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     abstract val defaultDestinationDirectory: DirectoryProperty
 
     /**
+     * The name of the plugin directory in the sandbox.
+     *
+     * Default value: [IntelliJPlatformExtension.projectName].
+     */
+    @get:Internal
+    abstract val pluginName: Property<String>
+
+    /**
      * Specifies the directory where the plugin artifacts are to be placed.
      *
-     * Default value: [defaultDestinationDirectory]/[IntelliJPlatformExtension.projectName]
+     * Default value: [defaultDestinationDirectory]/[pluginName]
      */
     @get:OutputDirectory
     abstract val pluginDirectory: DirectoryProperty
@@ -275,18 +283,15 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                         else -> sandboxPluginsDirectory
                     }
                 })
-                pluginDirectory.convention(
-                    project.extensionProvider.flatMap { extension ->
-                        defaultDestinationDirectory.dir(extension.projectName)
-                    }
-                )
+                pluginName.convention(project.extensionProvider.flatMap { it.projectName })
+                pluginDirectory.convention(defaultDestinationDirectory.dir(pluginName))
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
                 runtimeClasspath.from(runtimeConfiguration - intellijPlatformPluginModuleConfiguration)
 
                 splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })
 
-                intoChild(project.extensionProvider.flatMap { it.projectName.map { projectName -> "$projectName/lib" } })
+                intoChild(pluginName.map { "$it/lib" })
                     .from(runtimeClasspath)
                     .from(pluginJar)
                     .eachFile {

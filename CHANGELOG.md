@@ -2,6 +2,12 @@
 
 ## [next]
 
+### Added
+
+- Added `PrepareSandboxTask.pluginName` for easier accessing of the plugin directory name
+
+## [2.0.1] - 2024-08-08
+
 ### Changed
 
 - Don't register the `testIdeUi` task by default
