@@ -6,6 +6,10 @@
 
 - Added `PrepareSandboxTask.pluginName` for easier accessing of the plugin directory name
 
+### Fixed
+
+- Fixed caching for `IntelliJPlatformArgumentProvider.coroutinesJavaAgentFile`.
+
 ## [2.0.1] - 2024-08-08
 
 ### Changed

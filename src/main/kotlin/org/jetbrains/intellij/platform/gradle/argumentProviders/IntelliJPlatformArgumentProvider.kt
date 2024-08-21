@@ -33,8 +33,7 @@ class IntelliJPlatformArgumentProvider(
     @PathSensitive(RELATIVE)
     val intellijPlatformConfiguration: FileCollection,
 
-    @InputFile
-    @PathSensitive(RELATIVE)
+    @Classpath
     @Optional
     val coroutinesJavaAgentFile: Provider<RegularFile>,
 
