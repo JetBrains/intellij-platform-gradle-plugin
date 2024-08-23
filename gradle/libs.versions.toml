@@ -5,7 +5,7 @@ intellijStructure = "3.284"
 intellijPluginRepositoryRestClient = "2.0.39"
 kotlinxSerializationJson = "1.6.3"
 retrofit = "2.11.0"
-undertow = "2.3.15.Final"
+undertow = "2.3.16.Final"
 xmlutil = "0.86.3"
 
 # plugins
