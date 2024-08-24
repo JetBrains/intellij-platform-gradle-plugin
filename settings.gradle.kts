@@ -14,10 +14,13 @@ plugins {
 
 rootProject.name = "IntelliJPlatformGradlePlugin"
 
+val isCi = System.getenv("CI") != null
+
 develocity {
     server = "https://ge.jetbrains.com"
 
     buildScan {
         termsOfUseAgree = "yes"
+        publishing.onlyIf { isCi }
     }
 }
