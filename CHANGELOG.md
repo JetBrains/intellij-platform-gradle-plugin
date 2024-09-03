@@ -6,6 +6,10 @@
 
 - Added `PrepareSandboxTask.pluginName` for easier accessing of the plugin directory name
 
+### Fixed
+
+- `intellijPlatform.pluginConfiguration.description` appends content instead of replacing it [#1744](../../issues/1744)
+
 ## [2.0.1] - 2024-08-08
 
 ### Changed

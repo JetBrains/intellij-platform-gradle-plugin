@@ -289,7 +289,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
                     log.warn("Patching plugin.xml: value of '$tagName[$existingValue]' tag will be set to '$value'")
                 }
                 when {
-                    isCDATA -> element.addContent(CDATA(value))
+                    isCDATA -> element.setContent(CDATA(value))
                     else -> element.text = value
                 }
             }
