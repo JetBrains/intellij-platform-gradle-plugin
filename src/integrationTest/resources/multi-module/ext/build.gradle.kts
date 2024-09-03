@@ -36,4 +36,5 @@ dependencies {
 
 intellijPlatform {
     buildSearchableOptions = false
+    instrumentCode = false
 }

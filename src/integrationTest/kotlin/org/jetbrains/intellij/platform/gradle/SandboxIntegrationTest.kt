@@ -4,7 +4,9 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.io.path.readText
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 private const val CUSTOM_RUN_IDE_TASK_NAME = "customRunIde"
 private const val CUSTOM_TEST_IDE_TASK_NAME = "customTestIde"
@@ -107,6 +109,31 @@ class SandboxIntegrationTest : IntelliJPlatformIntegrationTestBase(
             assertExists(sandboxDirectory.resolve(Sandbox.LOG))
             assertExists(sandboxDirectory.resolve(Sandbox.PLUGINS))
             assertExists(sandboxDirectory.resolve(Sandbox.SYSTEM))
+        }
+    }
+
+    @Test
+    fun `invalidate sandbox content when disabledPlugins property is changed`() {
+        val sandboxDirectory = buildDirectory.resolve("idea-sandbox").resolve("$intellijPlatformType-$intellijPlatformVersion")
+        val suffix = "_$CUSTOM_RUN_IDE_TASK_NAME"
+        val disabledPluginsFile = sandboxDirectory.resolve(Sandbox.CONFIG + suffix).resolve("disabled_plugins.txt")
+
+        build(CUSTOM_RUN_IDE_TASK_NAME, projectProperties = defaultProjectProperties) {
+            assertExists(disabledPluginsFile)
+            assertEquals("", disabledPluginsFile.readText().trim())
+        }
+
+        buildFile write //language=kotlin
+                """
+                tasks.named<org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask>("prepareSandbox_$CUSTOM_RUN_IDE_TASK_NAME") {
+                    disabledPlugins.add("Git4Idea")
+                }
+                """.trimIndent()
+
+
+        build(CUSTOM_RUN_IDE_TASK_NAME, projectProperties = defaultProjectProperties) {
+            assertExists(disabledPluginsFile)
+            assertEquals("Git4Idea", disabledPluginsFile.readText().trim())
         }
     }
 }

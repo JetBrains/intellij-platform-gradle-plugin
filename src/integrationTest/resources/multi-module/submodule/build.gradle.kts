@@ -25,6 +25,9 @@ dependencies {
 
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
-        instrumentationTools()
     }
+}
+
+intellijPlatform {
+    instrumentCode = false
 }

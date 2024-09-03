@@ -352,7 +352,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `ignore unseting the until-build with null passed to extension`() {
+    fun `ignore unsetting the until-build with null passed to extension`() {
         pluginXml write //language=xml
                 """
                 <idea-plugin />
@@ -381,6 +381,38 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
             )
 
             assertNotContains("will be overwritten", output)
+        }
+    }
+
+    @Test
+    fun `override the description specified in the XML file`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <description>Foo</description>
+                </idea-plugin>
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        description = "Bar"
+                    }
+                }
+                """.trimIndent()
+
+        build(Tasks.PATCH_PLUGIN_XML) {
+            assertFileContent(
+                patchedPluginXml,
+                """
+                <idea-plugin>
+                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <version>1.0.0</version>
+                  <description><![CDATA[Bar]]></description>
+                </idea-plugin>
+                """.trimIndent(),
+            )
         }
     }
 }

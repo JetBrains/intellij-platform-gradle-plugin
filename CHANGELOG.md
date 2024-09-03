@@ -9,6 +9,9 @@
 ### Fixed
 
 - Fixed caching for `IntelliJPlatformArgumentProvider.coroutinesJavaAgentFile`.
+- `intellijPlatform.pluginConfiguration.description` appends content instead of replacing it [#1744](../../issues/1744)
+- The `disabledPlugins.txt` file is not updated when disabling bundled plugins [#1745](../../issues/1745)
+- Plugin sandbox created by `IntelliJPlatformTestingExtension` is not correct for `localPlugin(org.gradle.api.artifacts.ProjectDependency)` [#1743](../../issues/1743)  
 
 ## [2.0.1] - 2024-08-08
 
