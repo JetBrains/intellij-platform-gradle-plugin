@@ -31,10 +31,10 @@ dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
         bundledPlugins("com.intellij.java")
-        instrumentationTools()
     }
 }
 
 intellijPlatform {
     buildSearchableOptions = false
+    instrumentCode = false
 }

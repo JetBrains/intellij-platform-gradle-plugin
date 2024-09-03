@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.*
+import org.gradle.api.attributes.LibraryElements
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.tasks.DefaultTaskDependency
 import org.gradle.api.plugins.ExtensionAware
@@ -113,6 +114,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
                     name = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL.withSuffix,
                     description = "Custom IntelliJ Platform plugin local",
                 ) {
+                    attributes {
+                        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
+                    }
+
                     extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL])
                 }
 
@@ -122,6 +127,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
                 ) {
                     attributes {
                         attribute(Attributes.extracted, true)
+                        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
                     }
 
                     extendsFrom(customIntellijPlatformPluginDependencyConfiguration)
