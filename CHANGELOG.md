@@ -9,6 +9,7 @@
 ### Fixed
 
 - `intellijPlatform.pluginConfiguration.description` appends content instead of replacing it [#1744](../../issues/1744)
+- The `disabledPlugins.txt` file is not updated when disabling bundled plugins [#1745](../../issues/1745)
 
 ## [2.0.1] - 2024-08-08
 

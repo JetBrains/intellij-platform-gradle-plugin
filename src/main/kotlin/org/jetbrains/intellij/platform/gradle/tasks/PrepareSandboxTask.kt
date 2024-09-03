@@ -26,11 +26,15 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
-import org.jetbrains.intellij.platform.gradle.tasks.aware.*
+import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxStructure
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.kotlin.gradle.utils.named
+import kotlin.Throws
 import kotlin.io.path.*
 
 /**
@@ -82,7 +86,8 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
      *
      * This property is controlled with [IntelliJPlatformPluginsExtension.disablePlugins].
      */
-    @get:Internal
+    @get:Input
+    @get:Optional
     abstract val disabledPlugins: SetProperty<String>
 
     /**
