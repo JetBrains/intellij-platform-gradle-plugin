@@ -803,9 +803,15 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public static synthetic fun ProductReleasesValueSource$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/gradle/api/provider/Provider;
 	public final fun ide (Ljava/lang/String;)V
 	public final fun ide (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun ide (Ljava/lang/String;Ljava/lang/String;Z)V
 	public final fun ide (Lorg/gradle/api/provider/Provider;)V
 	public final fun ide (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
+	public final fun ide (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Z)V
 	public final fun ide (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;)V
+	public final fun ide (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;Z)V
+	public static synthetic fun ide$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)V
+	public static synthetic fun ide$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;ZILjava/lang/Object;)V
+	public static synthetic fun ide$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZILjava/lang/Object;)V
 	public final fun ides (Ljava/util/List;)V
 	public final fun ides (Lorg/gradle/api/provider/Provider;)V
 	public final fun local (Ljava/io/File;)V

@@ -31,7 +31,6 @@ import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
-import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
@@ -793,11 +792,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param type The IntelliJ Platform dependency.
              * @param version The version of the IntelliJ Platform dependency.
+             * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
              */
-            fun ide(type: IntelliJPlatformType, version: String) = delegate.addIntelliJPlatformDependency(
+            @JvmOverloads
+            fun ide(type: IntelliJPlatformType, version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
                 typeProvider = delegate.provider { type },
                 versionProvider = delegate.provider { version },
-                useInstallerProvider = delegate.provider { true },
+                useInstallerProvider = delegate.provider { useInstaller },
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
@@ -806,11 +807,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param type The IntelliJ Platform dependency.
              * @param version The version of the IntelliJ Platform dependency.
+             * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
              */
-            fun ide(type: String, version: String) = delegate.addIntelliJPlatformDependency(
+            @JvmOverloads
+            fun ide(type: String, version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
                 typeProvider = delegate.provider { type },
                 versionProvider = delegate.provider { version },
-                useInstallerProvider = delegate.provider { true },
+                useInstallerProvider = delegate.provider { useInstaller },
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
@@ -819,11 +822,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
              * @param version The provider for the version of the IntelliJ Platform dependency.
+             * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
              */
-            fun ide(type: Provider<*>, version: Provider<String>) = delegate.addIntelliJPlatformDependency(
+            @JvmOverloads
+            fun ide(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
                 typeProvider = type,
                 versionProvider = version,
-                useInstallerProvider = delegate.provider { true },
+                useInstallerProvider = delegate.provider { useInstaller },
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
 
