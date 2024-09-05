@@ -6,7 +6,6 @@ import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.projectFeatures.githubIssues
 import jetbrains.buildServer.configs.kotlin.sequential
-import jetbrains.buildServer.configs.kotlin.ui.add
 import jetbrains.buildServer.configs.kotlin.version
 
 /*
@@ -31,7 +30,7 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 'Debug' option is available in the context menu for the task.
 */
 
-version = "2024.03"
+version = "2024.07"
 
 project {
     description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/intellij-platform-gradle-plugin"
@@ -44,44 +43,68 @@ project {
         }
     }
 
-    val operatingSystems = listOf("Linux", "Windows", "macOS")
+    val operatingSystems = listOf("Linux", "Mac OS", "Windows")
     val gradleVersions = listOf("8.2", "8.10")
 
+
     val buildChain = sequential {
-        operatingSystems.forEach { os ->
-            this@project.buildType {
-                id("UnitTests${os.uppercase()}")
-                name = "Unit Tests ($os)"
+        project.buildType {
+            id("UnitTests")
+            name = "Unit Tests"
 
-                vcs {
-                    root(DslContext.settingsRoot)
-                }
+            vcs {
+                root(DslContext.settingsRoot)
+            }
 
-                steps {
-                    gradleVersions.forEach { gradleVersion ->
-                        gradle {
-                            name = "Unit Tests – Gradle $gradleVersion"
-                            tasks = "check -PtestGradleVersion=$gradleVersion"
+            features {
+                commitStatusPublisher {
+                    publisher = github {
+                        githubUrl = "https://api.github.com"
+                        authType = personalToken {
+                            token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
                         }
                     }
+                    param("github_oauth_user", "hsz")
                 }
+            }
 
-                features {
-                    commitStatusPublisher {
-                        publisher = github {
-                            githubUrl = "https://api.github.com"
-                            authType = personalToken {
-                                token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
-                            }
+            steps {
+                gradle {
+                    name = "Unit Tests"
+                    tasks = "check"
+                }
+            }
+        }
+
+        project.buildType {
+            id("UnitTests")
+            name = "Unit Tests"
+
+            vcs {
+                root(DslContext.settingsRoot)
+            }
+
+            features {
+                commitStatusPublisher {
+                    publisher = github {
+                        githubUrl = "https://api.github.com"
+                        authType = personalToken {
+                            token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
                         }
-                        param("github_oauth_user", "hsz")
                     }
+                    param("github_oauth_user", "hsz")
                 }
 
-                requirements {
-                    add {
-                        equals("teamcity.agent.jvm.os.family", os)
-                    }
+                matrix {
+                    os = operatingSystems.map(::value)
+                    param("Gradle", gradleVersions.map(::value))
+                }
+            }
+
+            steps {
+                gradle {
+                    name = "Unit Tests – Gradle %Gradle%"
+                    tasks = "check -PtestGradleVersion=%Gradle%"
                 }
             }
         }
