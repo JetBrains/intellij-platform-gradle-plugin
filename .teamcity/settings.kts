@@ -5,7 +5,6 @@ import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.project
 import jetbrains.buildServer.configs.kotlin.projectFeatures.githubIssues
-import jetbrains.buildServer.configs.kotlin.sequential
 import jetbrains.buildServer.configs.kotlin.version
 
 /*
@@ -46,68 +45,36 @@ project {
         }
     }
 
-    val buildChain = sequential {
-        buildType {
-            id("UnitTests")
-            name = "Unit Tests"
+    buildType {
+        id("UnitTests")
+        name = "Unit Tests"
 
-            vcs {
-                root(DslContext.settingsRoot)
-            }
+        vcs {
+            root(DslContext.settingsRoot)
+        }
 
-            features {
-                commitStatusPublisher {
-                    publisher = github {
-                        githubUrl = "https://api.github.com"
-                        authType = personalToken {
-                            token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
-                        }
+        features {
+            commitStatusPublisher {
+                publisher = github {
+                    githubUrl = "https://api.github.com"
+                    authType = personalToken {
+                        token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
                     }
-                    param("github_oauth_user", "hsz")
                 }
+                param("github_oauth_user", "hsz")
             }
 
-            steps {
-                gradle {
-                    name = "Unit Tests"
-                    tasks = "check"
-                }
+            matrix {
+                os = operatingSystems.map(::value)
+                param("Gradle", gradleVersions.map(::value))
             }
         }
 
-        buildType {
-            id("UnitTests")
-            name = "Unit Tests"
-
-            vcs {
-                root(DslContext.settingsRoot)
-            }
-
-            features {
-                commitStatusPublisher {
-                    publisher = github {
-                        githubUrl = "https://api.github.com"
-                        authType = personalToken {
-                            token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
-                        }
-                    }
-                    param("github_oauth_user", "hsz")
-                }
-
-                matrix {
-                    os = operatingSystems.map(::value)
-                    param("Gradle", gradleVersions.map(::value))
-                }
-            }
-
-            steps {
-                gradle {
-                    name = "Unit Tests – Gradle %Gradle%"
-                    tasks = "check -PtestGradleVersion=%Gradle%"
-                }
+        steps {
+            gradle {
+                name = "Unit Tests – Gradle %Gradle%"
+                tasks = "check -PtestGradleVersion=%Gradle%"
             }
         }
     }
-
-    buildChain.buildTypes().forEach { buildType(it) }
 }
