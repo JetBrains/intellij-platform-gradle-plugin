@@ -1,7 +1,6 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 import org.jetbrains.dokka.gradle.DokkaTask
-import org.jetbrains.kotlin.gradle.plugin.KotlinPlatformType
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun environment(key: String) = providers.environmentVariable(key)
@@ -53,16 +52,10 @@ dependencies {
     }
 
     implementation(libs.xmlutil.core)
-    implementation(libs.xmlutil.serialization)
-    implementation(libs.kotlinx.serialization.json)
-
-    constraints {
-        listOf(libs.xmlutil.core, libs.xmlutil.serialization).forEach {
-            implementation(it) {
-                attributes { attribute(KotlinPlatformType.attribute, KotlinPlatformType.jvm) }
-            }
-        }
+    implementation(libs.xmlutil.serialization) {
+        exclude("io.github.pdvrieze.xmlutil", "core")
     }
+    implementation(libs.kotlinx.serialization.json)
 
     compileOnly(embeddedKotlin("gradle-plugin"))
     additionalPluginClasspath(embeddedKotlin("gradle-plugin"))

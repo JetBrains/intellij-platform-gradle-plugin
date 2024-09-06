@@ -22,8 +22,8 @@ intellij-structure-intellij = { group = "org.jetbrains.intellij.plugins", name =
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 undertow = { group = "io.undertow", name = "undertow-core", version.ref = "undertow" }
-xmlutil-core = { group = "io.github.pdvrieze.xmlutil", name = "core", version.ref = "xmlutil" }
-xmlutil-serialization = { group = "io.github.pdvrieze.xmlutil", name = "serialization", version.ref = "xmlutil" }
+xmlutil-core = { group = "io.github.pdvrieze.xmlutil", name = "core-jvm", version.ref = "xmlutil" }
+xmlutil-serialization = { group = "io.github.pdvrieze.xmlutil", name = "serialization-jvm", version.ref = "xmlutil" }
 
 [plugins]
 pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradlePluginPublish" }
