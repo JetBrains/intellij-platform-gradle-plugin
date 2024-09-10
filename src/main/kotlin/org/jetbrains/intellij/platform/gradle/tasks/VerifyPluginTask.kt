@@ -34,10 +34,9 @@ import kotlin.io.path.pathString
  * @see <a href="https://github.com/JetBrains/intellij-plugin-verifier">IntelliJ Plugin Verifier</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/verifying-plugin-compatibility.html">Verifying Plugin Compatibility</a>
  *
- * TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
- * TODO: Parallel run? https://docs.gradle.org/current/userguide/worker_api.html#converting_to_worker_api
  */
-@UntrackedTask(because = "Should always run")
+// TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
+// TODO: Parallel run? https://docs.gradle.org/current/userguide/worker_api.html#converting_to_worker_api@UntrackedTask(because = "Should always run")
 abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware {
 
     /**
@@ -185,7 +184,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             ?: throw GradleException(
                 """
                 No IntelliJ Plugin Verifier executable found.
-                Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.pluginVerification.cliPath` extension property
+                Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.pluginVerification.cliPath` extension property is set
                 See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification
                 """.trimIndent()
             )
