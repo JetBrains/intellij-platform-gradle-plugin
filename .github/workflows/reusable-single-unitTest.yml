@@ -53,6 +53,7 @@ jobs:
 
       - name: Run Tests
         env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           TEST_NAME: ${{ inputs.testName }}
         shell: bash
         run: |

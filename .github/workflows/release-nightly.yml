@@ -77,6 +77,7 @@ jobs:
       # Publish the plugin to the Gradle Plugins
       - name: Publish Plugin
         env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           OSSRH_USERNAME: ${{ secrets.OSSRH_USERNAME }}
           OSSRH_PASSWORD: ${{ secrets.OSSRH_PASSWORD }}
         run: ./gradlew publish -Psnapshot=true -PossrhUsername=$OSSRH_USERNAME -PossrhPassword=$OSSRH_PASSWORD

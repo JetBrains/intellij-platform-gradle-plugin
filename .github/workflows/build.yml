@@ -71,6 +71,8 @@ jobs:
       # Set environment variables
       - name: Export Properties
         id: properties
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
         shell: bash
         run: |
           PROPERTIES="$(./gradlew properties --console=plain -q)"
@@ -88,6 +90,8 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Build Plugin
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
         run: ./gradlew build -x test
 
       # Store already-built plugin as an artifact for downloading
