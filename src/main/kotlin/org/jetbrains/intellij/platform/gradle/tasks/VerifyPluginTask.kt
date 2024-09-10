@@ -30,7 +30,7 @@ import kotlin.io.path.pathString
 /**
  * Runs the IntelliJ Plugin Verifier CLI tool to check compatibility with specified IDE builds.
  *
- * @see IntelliJPlatformExtension.VerifyPlugin
+ * @see IntelliJPlatformExtension.PluginVerification
  * @see <a href="https://github.com/JetBrains/intellij-plugin-verifier">IntelliJ Plugin Verifier</a>
  * @see <a href="https://plugins.jetbrains.com/docs/intellij/verifying-plugin-compatibility.html">Verifying Plugin Compatibility</a>
  *
@@ -43,9 +43,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * Holds a reference to IntelliJ Platform IDEs which will be used by the IntelliJ Plugin Verifier CLI tool for verification.
      *
-     * The list of IDEs is controlled with the [IntelliJPlatformExtension.VerifyPlugin.Ides] extension.
+     * The list of IDEs is controlled with the [IntelliJPlatformExtension.PluginVerification.Ides] extension.
      *
-     * @see [IntelliJPlatformExtension.VerifyPlugin.Ides]
+     * @see [IntelliJPlatformExtension.PluginVerification.Ides]
      */
     @get:Classpath
     abstract val ides: ConfigurableFileCollection
@@ -65,9 +65,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      * The list of class prefixes from the external libraries.
      * The Plugin Verifier will not report `No such class` for classes of these packages.
      *
-     * Default value: [IntelliJPlatformExtension.VerifyPlugin.externalPrefixes]
+     * Default value: [IntelliJPlatformExtension.PluginVerification.externalPrefixes]
      *
-     * @see IntelliJPlatformExtension.VerifyPlugin.externalPrefixes
+     * @see IntelliJPlatformExtension.PluginVerification.externalPrefixes
      */
     @get:Input
     @get:Optional
@@ -76,10 +76,10 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * Defines the verification level at which the task should fail if any reported issue matches.
      *
-     * Default value: [IntelliJPlatformExtension.VerifyPlugin.failureLevel]
+     * Default value: [IntelliJPlatformExtension.PluginVerification.failureLevel]
      *
      * @see FailureLevel
-     * @see IntelliJPlatformExtension.VerifyPlugin.failureLevel
+     * @see IntelliJPlatformExtension.PluginVerification.failureLevel
      */
     @get:Input
     abstract val failureLevel: ListProperty<FailureLevel>
@@ -89,9 +89,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      *
      * They can be used in addition to the arguments that are provided by dedicated options.
      *
-     * Default value: [IntelliJPlatformExtension.VerifyPlugin.freeArgs]
+     * Default value: [IntelliJPlatformExtension.PluginVerification.freeArgs]
      *
-     * @see IntelliJPlatformExtension.VerifyPlugin.freeArgs
+     * @see IntelliJPlatformExtension.PluginVerification.freeArgs
      */
     @get:Input
     @get:Optional
@@ -100,9 +100,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * A file that contains a list of problems that will be ignored in a report.
      *
-     * Default value: [IntelliJPlatformExtension.VerifyPlugin.ignoredProblemsFile]
+     * Default value: [IntelliJPlatformExtension.PluginVerification.ignoredProblemsFile]
      *
-     * @see IntelliJPlatformExtension.VerifyPlugin.ignoredProblemsFile
+     * @see IntelliJPlatformExtension.PluginVerification.ignoredProblemsFile
      */
     @get:InputFile
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -123,10 +123,10 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * Specifies which subsystems of IDE should be checked.
      *
-     * Default value: [IntelliJPlatformExtension.VerifyPlugin.subsystemsToCheck]
+     * Default value: [IntelliJPlatformExtension.PluginVerification.subsystemsToCheck]
      *
      * @see Subsystems
-     * @see IntelliJPlatformExtension.VerifyPlugin.subsystemsToCheck
+     * @see IntelliJPlatformExtension.PluginVerification.subsystemsToCheck
      */
     @get:Input
     @get:Optional
@@ -135,9 +135,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * A flag that controls the output format - if set to `true`, the TeamCity compatible output will be returned to stdout.
      *
-     * Default value: [IntelliJPlatformExtension.VerifyPlugin.teamCityOutputFormat]
+     * Default value: [IntelliJPlatformExtension.PluginVerification.teamCityOutputFormat]
      *
-     * @see IntelliJPlatformExtension.VerifyPlugin.teamCityOutputFormat
+     * @see IntelliJPlatformExtension.PluginVerification.teamCityOutputFormat
      */
     @get:Input
     @get:Optional
@@ -146,9 +146,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * The path to the directory where verification reports will be saved.
      *
-     * Default value: [IntelliJPlatformExtension.VerifyPlugin.verificationReportsDirectory]
+     * Default value: [IntelliJPlatformExtension.PluginVerification.verificationReportsDirectory]
      *
-     * @see IntelliJPlatformExtension.VerifyPlugin.verificationReportsDirectory
+     * @see IntelliJPlatformExtension.PluginVerification.verificationReportsDirectory
      */
     @get:OutputDirectory
     @get:Optional
@@ -157,10 +157,10 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * The output formats of the verification reports.
      *
-     * Default value: [IntelliJPlatformExtension.VerifyPlugin.verificationReportsFormats]
+     * Default value: [IntelliJPlatformExtension.PluginVerification.verificationReportsFormats]
      *
      * @see VerificationReportsFormats
-     * @see IntelliJPlatformExtension.VerifyPlugin.verificationReportsFormats
+     * @see IntelliJPlatformExtension.PluginVerification.verificationReportsFormats
      */
     @get:Input
     @get:Optional

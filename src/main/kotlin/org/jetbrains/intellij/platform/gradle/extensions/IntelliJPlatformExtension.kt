@@ -692,7 +692,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * The list of class prefixes from the external libraries.
          * The Plugin Verifier will not report `No such class` for classes of these packages.
          *
-         * @see VerifyPlugin.externalPrefixes
+         * @see PluginVerification.externalPrefixes
          */
         val externalPrefixes: ListProperty<String>
 
@@ -702,7 +702,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * Default value: [FailureLevel.COMPATIBILITY_PROBLEMS]
          *
          * @see FailureLevel
-         * @see VerifyPlugin.failureLevel
+         * @see PluginVerification.failureLevel
          */
         val failureLevel: ListProperty<FailureLevel>
 
@@ -711,14 +711,14 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          *
          * They can be used in addition to the arguments that are provided by dedicated options.
          *
-         * @see VerifyPlugin.freeArgs
+         * @see PluginVerification.freeArgs
          */
         val freeArgs: ListProperty<String>
 
         /**
          * A file that contains a list of problems that will be ignored in a report.
          *
-         * @see VerifyPlugin.ignoredProblemsFile
+         * @see PluginVerification.ignoredProblemsFile
          */
         val ignoredProblemsFile: RegularFileProperty
 
@@ -728,7 +728,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * Default value: [Subsystems.ALL]
          *
          * @see Subsystems
-         * @see VerifyPlugin.subsystemsToCheck
+         * @see PluginVerification.subsystemsToCheck
          */
         val subsystemsToCheck: Property<Subsystems>
 
@@ -737,7 +737,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          *
          * Default value: `false`
          *
-         * @see VerifyPlugin.teamCityOutputFormat
+         * @see PluginVerification.teamCityOutputFormat
          */
         val teamCityOutputFormat: Property<Boolean>
 
@@ -746,7 +746,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          *
          * Default value: [ProjectLayout.getBuildDirectory]/reports/pluginVerifier
          *
-         * @see VerifyPlugin.verificationReportsDirectory
+         * @see PluginVerification.verificationReportsDirectory
          */
         val verificationReportsDirectory: DirectoryProperty
 
@@ -756,7 +756,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * Default value: ([VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML])
          *
          * @see VerificationReportsFormats
-         * @see VerifyPlugin.verificationReportsFormats
+         * @see PluginVerification.verificationReportsFormats
          */
         val verificationReportsFormats: ListProperty<VerificationReportsFormats>
 
@@ -930,7 +930,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             )
 
             /**
-             * Extension function for the [IntelliJPlatformExtension.VerifyPlugin.Ides] extension to let filter IDE binary releases just using [FilterParameters].
+             * Extension function for the [IntelliJPlatformExtension.PluginVerification.Ides] extension to let filter IDE binary releases just using [FilterParameters].
              */
             @Suppress("FunctionName")
             fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) = delegate.createProductReleasesValueSource {
