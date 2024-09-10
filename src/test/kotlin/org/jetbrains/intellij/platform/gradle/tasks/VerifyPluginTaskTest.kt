@@ -3,12 +3,9 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
-import org.jetbrains.intellij.platform.gradle.Constants.Locations.MAVEN_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
-import java.net.URL
 import java.util.*
 import kotlin.io.path.*
 import kotlin.test.*
@@ -230,7 +227,10 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
-            assertContains("Compatible. 1 usage of scheduled for removal API and 1 usage of deprecated API. 1 usage of internal API", output)
+            assertContains(
+                "Compatible. 1 usage of scheduled for removal API and 1 usage of deprecated API. 1 usage of internal API",
+                output
+            )
             assertNotContains("Reference to a missing property", output)
         }
     }
