@@ -111,9 +111,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     /**
      * Determines if the operation is running in offline mode.
      *
-     * Default value: [StartParameter.offline]
+     * Default value: [org.gradle.StartParameter.offline]
      *
-     * @see StartParameter
+     * @see org.gradle.StartParameter
      * @see <a href="https://docs.gradle.org/current/userguide/command_line_interface.html#sec:command_line_execution_options">Command Line Execution options</a>
      */
     @get:Internal

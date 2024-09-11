@@ -86,7 +86,7 @@ data class IvyModule(
  * As we remove the drive letter, we later have to guess which drive the artifact belongs to by iterating over A:/, B:/, C:/, ...
  * but that's not a huge problem.
  *
- * @see IntelliJPlatformRepositoriesExtension.jetbrainsCdn
+ * @see IntelliJPlatformRepositoriesExtension.jetbrainsIdeInstallers
  */
 internal fun Path.toIvyArtifact() = IvyModule.Artifact(
     name = invariantSeparatorsPathString.replaceFirst(Regex("^[a-zA-Z]:/"), "/"),

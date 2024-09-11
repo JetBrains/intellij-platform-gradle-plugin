@@ -33,7 +33,8 @@ import kotlin.io.path.nameWithoutExtension
  * This task runs against the IntelliJ Platform and plugins specified in project dependencies.
  * To register a customized task, use [IntelliJPlatformTestingExtension.testIdePerformance] instead.
  *
- * The [TestIdePerformanceTask] task extends the [RunIdeBase] task, so all configuration attributes of [JavaExec] and [RunIdeTask] tasks can be used in the [TestIdePerformanceTask] as well.
+ * The [TestIdePerformanceTask] task extends the [JavaExec] task and implements [RunnableIdeAware],
+ * so all configuration attributes of [JavaExec] and [RunIdeTask] tasks can be used in the [TestIdePerformanceTask] as well.
  * See [RunIdeTask] task for more details.
  *
  * Currently, the task is under adaptation; more documentation will be added in the future.
@@ -127,7 +128,8 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
     companion object : Registrable {
 
         internal val configuration: TestIdePerformanceTask.() -> Unit = {
-            val prepareTestIdePerformanceSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX)
+            val prepareTestIdePerformanceSandboxTaskProvider =
+                project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX)
             applySandboxFrom(prepareTestIdePerformanceSandboxTaskProvider)
 
 //                artifactsDirectory.convention(extension.type.flatMap { type ->
@@ -163,7 +165,11 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
         }
 
         override fun register(project: Project) =
-            project.registerTask<TestIdePerformanceTask>(Tasks.TEST_IDE_PERFORMANCE, configureWithType = false, configuration = configuration)
+            project.registerTask<TestIdePerformanceTask>(
+                Tasks.TEST_IDE_PERFORMANCE,
+                configureWithType = false,
+                configuration = configuration
+            )
     }
 
 //    private fun resolveLatestPluginUpdate(pluginId: String, buildNumber: String, channel: String = "") =

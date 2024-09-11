@@ -74,7 +74,7 @@ class IntelliJPlatformRepositoriesHelper(
      *
      * @param name The name of the repository.
      * @param url The URL of the repository.
-     * @param pattern The pattern used for artifact resolution. Defaults to an empty string.
+     * @param patterns The patterns used for artifact resolution. Defaults to an empty list.
      * @param action The action to be performed on the repository. Defaults to an empty action.
      */
     internal fun createIvyRepository(

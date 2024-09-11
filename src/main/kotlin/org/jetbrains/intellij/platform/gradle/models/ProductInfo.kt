@@ -141,10 +141,9 @@ fun ProductInfo.validateSupportedVersion() {
 }
 
 /**
- * Finds the [ProductInfo.Launch] object for the given architecture and OS.
+ * Finds the [ProductInfo.Launch] object for the given architecture and current OS.
  *
  * @param architecture The architecture of the target system.
- * @param os The operating system of the target system. By default, it refers to [OperatingSystem.current].
  * @return The launch configuration for the specified architecture.
  * @throws GradleException If the specified architecture is not supported.
  * @throws IllegalArgumentException If the launch information for the current OS and architecture is not found.
