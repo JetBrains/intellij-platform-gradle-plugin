@@ -83,7 +83,7 @@ abstract class PluginArtifactRepository @Inject constructor(
     private fun <T : Credentials?> instantiateCredentials(credentialType: Class<T>) = when {
         PasswordCredentials::class.java.isAssignableFrom(credentialType) -> credentialType.cast(instantiator.newInstance(PasswordCredentials::class.java))
         HttpHeaderCredentials::class.java.isAssignableFrom(credentialType) -> credentialType.cast(instantiator.newInstance(HttpHeaderCredentials::class.java))
-        else -> throw IllegalArgumentException("Unrecognized credential type: ${credentialType.getName()}");
+        else -> throw IllegalArgumentException("Unrecognized credential type: ${credentialType.getName()}")
     }
 }
 

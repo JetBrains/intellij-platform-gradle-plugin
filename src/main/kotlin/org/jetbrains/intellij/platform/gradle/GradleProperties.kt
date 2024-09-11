@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.file.ProjectLayout
-import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
