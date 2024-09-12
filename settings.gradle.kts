@@ -18,7 +18,6 @@ develocity {
     server = "https://ge.jetbrains.com"
 
     buildScan {
-        termsOfUseUrl = "https://ge.jetbrains.com/terms-of-service"
         termsOfUseAgree = "yes"
     }
 }
