@@ -32,7 +32,7 @@ To debug in IntelliJ Idea, open the 'Maven Projects' tool window (View
 version = "2024.07"
 
 val operatingSystems = listOf("Linux", "Mac OS", "Windows")
-val gradleVersions = listOf("8.2", "8.10")
+val gradleVersions = listOf("8.2", "8.10.1")
 
 project {
     description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/intellij-platform-gradle-plugin"
