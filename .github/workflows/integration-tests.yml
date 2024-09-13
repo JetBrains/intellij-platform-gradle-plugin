@@ -12,10 +12,12 @@ jobs:
     name: Integration Tests
     needs: gradleValidation
     uses: ./.github/workflows/reusable-integrationTests.yml
+    secrets: inherit
 
 #  integrationTestsEAP:
 #    name: Integration Tests EAP
 #    needs: gradleValidation
 #    uses: ./.github/workflows/reusable-integrationTests.yml
+#    secrets: inherit
 #    with:
 #      platformVersion: 222-EAP-SNAPSHOT

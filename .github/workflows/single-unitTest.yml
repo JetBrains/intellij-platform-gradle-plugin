@@ -25,6 +25,7 @@ jobs:
   unitTest:
     name: Gradle ${{ inputs.gradleVersion }} @ ${{ inputs.os }}
     uses: ./.github/workflows/reusable-single-unitTest.yml
+    secrets: inherit
     with:
       gradleVersion: ${{ inputs.gradleVersion }}
       os: ${{ inputs.os }}
