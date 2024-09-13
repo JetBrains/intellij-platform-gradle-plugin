@@ -63,7 +63,8 @@ jobs:
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
             ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }} \
             $TESTS \
-            --console=plain
+            --console=plain \
+            --no-build-cache
 
       - name: Test Report
         uses: dorny/test-reporter@v1
