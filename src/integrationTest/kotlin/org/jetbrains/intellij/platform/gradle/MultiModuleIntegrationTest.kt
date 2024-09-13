@@ -11,7 +11,6 @@ import kotlin.test.Test
 
 private const val CUSTOM_RUN_IDE_TASK_NAME = "customRunIde"
 
-@Ignore
 class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "multi-module",
 ) {

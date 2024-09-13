@@ -59,7 +59,8 @@ jobs:
           ./gradlew integrationTest \
             -PtestGradleVersion="${{ matrix.gradleVersion }}" \
             ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }} \
-            --console=plain
+            --console=plain \
+            --no-build-cache
 
       - name: Test Report
         uses: dorny/test-reporter@v1
