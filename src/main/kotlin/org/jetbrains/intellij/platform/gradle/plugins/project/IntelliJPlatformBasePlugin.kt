@@ -6,7 +6,8 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
-import org.gradle.kotlin.dsl.*
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.get
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
@@ -136,6 +137,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
                 description = "IntelliJ Platform bundled plugins",
             )
+            val intellijPlatformBundledModulesConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES,
+                description = "IntelliJ Platform bundled modules",
+            )
 
             val jetbrainsRuntimeDependencyConfiguration = create(
                 name = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
@@ -213,6 +218,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 extendsFrom(
                     intellijPlatformPluginConfiguration,
                     intellijPlatformBundledPluginsConfiguration,
+                    intellijPlatformBundledModulesConfiguration,
                 )
             }
 

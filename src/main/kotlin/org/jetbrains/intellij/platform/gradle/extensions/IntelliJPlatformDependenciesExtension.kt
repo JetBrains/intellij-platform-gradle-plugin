@@ -993,6 +993,51 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a dependency on a bundled IntelliJ Platform module.
+     *
+     * @param id The bundled module identifier.
+     */
+    fun bundledModule(id: String) = delegate.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = delegate.provider { listOf(id) },
+    )
+
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform module.
+     *
+     * @param id The provider of the bundled module identifier.
+     */
+    fun bundledModule(id: Provider<String>) = delegate.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = id.map { listOf(it) },
+    )
+
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform modules.
+     *
+     * @param ids The bundled module identifiers.
+     */
+    fun bundledModules(vararg ids: String) = delegate.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = delegate.provider { ids.asList() },
+    )
+
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform modules.
+     *
+     * @param ids The bundled module identifiers.
+     */
+    fun bundledModules(ids: List<String>) = delegate.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = delegate.provider { ids },
+    )
+
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform modules.
+     *
+     * @param ids The bundled module identifiers.
+     */
+    fun bundledModules(ids: Provider<List<String>>) = delegate.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = ids,
+    )
+
+    /**
      * Adds a dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.

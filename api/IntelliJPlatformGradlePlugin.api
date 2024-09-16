@@ -15,6 +15,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Components {
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Configurations {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Configurations;
+	public static final field INTELLIJ_PLATFORM_BUNDLED_MODULES Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_BUNDLED_PLUGINS Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_COMPOSED_JAR Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_DEPENDENCIES Ljava/lang/String;
@@ -473,6 +474,11 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public static synthetic fun aqua$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZILjava/lang/Object;)V
 	public final fun bundledLibrary (Ljava/lang/String;)V
 	public final fun bundledLibrary (Lorg/gradle/api/provider/Provider;)V
+	public final fun bundledModule (Ljava/lang/String;)V
+	public final fun bundledModule (Lorg/gradle/api/provider/Provider;)V
+	public final fun bundledModules (Ljava/util/List;)V
+	public final fun bundledModules (Lorg/gradle/api/provider/Provider;)V
+	public final fun bundledModules ([Ljava/lang/String;)V
 	public final fun bundledPlugin (Ljava/lang/String;)V
 	public final fun bundledPlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun bundledPlugins (Ljava/util/List;)V

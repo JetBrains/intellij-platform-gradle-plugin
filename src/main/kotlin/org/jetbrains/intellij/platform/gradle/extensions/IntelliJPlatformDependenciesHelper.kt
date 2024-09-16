@@ -272,9 +272,9 @@ class IntelliJPlatformDependenciesHelper(
     })
 
     /**
-     * A base method for adding a dependency on a plugin for IntelliJ Platform.
+     * A base method for adding a dependency on an IntelliJ Platform bundled plugin.
      *
-     * @param bundledPluginsProvider The provider of the list containing triples with plugin identifier, version, and channel.
+     * @param bundledPluginsProvider The provider of the list containing bundled plugin identifiers.
      * @param configurationName The name of the configuration to add the dependency to.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
@@ -290,6 +290,28 @@ class IntelliJPlatformDependenciesHelper(
             .map(String::trim)
             .filter(String::isNotEmpty)
             .map { dependencies.createIntelliJPlatformBundledPlugin(it) }
+            .onEach(action)
+    })
+
+    /**
+     * A base method for adding a dependency on an IntelliJ Platform bundled module.
+     *
+     * @param bundledModulesProvider The provider of the list containing bundled module identifiers.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider: Provider<List<String>>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        val bundledModules = bundledModulesProvider.orNull
+        requireNotNull(bundledModules) { "The `intellijPlatform.bundledModules` dependency helper was called with no `bundledModules` value provided." }
+
+        bundledModules
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .map { dependencies.createIntelliJPlatformBundledModule(it) }
             .onEach(action)
     })
 
@@ -696,6 +718,37 @@ class IntelliJPlatformDependenciesHelper(
 
         return create(
             group = Dependencies.BUNDLED_PLUGIN_GROUP,
+            name = id,
+            version = version,
+        )
+    }
+
+    /**
+     * Creates a dependency for an IntelliJ platform bundled module.
+     *
+     * @param id The ID of the bundled module.
+     */
+    private fun DependencyHandler.createIntelliJPlatformBundledModule(id: String): Dependency {
+        val bundledModule = productInfo.get().layout
+            .find { layout -> layout.name == id }
+            .let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
+        val platformPath = platformPath.get()
+        val artifactPaths = bundledModule.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
+        val version = baseVersion.orElse(productInfo.map { it.version }).map { "$it+${platformPath.hash}" }.get()
+
+        writeIvyModule(Dependencies.BUNDLED_MODULE_GROUP, id, version) {
+            IvyModule(
+                info = IvyModule.Info(
+                    organisation = Dependencies.BUNDLED_MODULE_GROUP,
+                    module = id,
+                    revision = version,
+                ),
+                publications = artifactPaths,
+            )
+        }
+
+        return create(
+            group = Dependencies.BUNDLED_MODULE_GROUP,
             name = id,
             version = version,
         )
