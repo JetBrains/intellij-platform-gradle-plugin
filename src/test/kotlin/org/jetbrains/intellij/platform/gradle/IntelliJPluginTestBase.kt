@@ -27,12 +27,14 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                         id("com.gradle.develocity") version "3.17.5"
                     }
                     
+                    val isCI = (System.getenv("CI") ?: "false").toBoolean()
+                    
                     develocity {
                         server = "https://ge.jetbrains.com"
                     
                         buildScan {
-                            termsOfUseUrl = "https://ge.jetbrains.com/terms-of-service"
                             termsOfUseAgree = "yes"
+                            publishing.onlyIf { isCI }
                         }
                     }
                     """.trimIndent()

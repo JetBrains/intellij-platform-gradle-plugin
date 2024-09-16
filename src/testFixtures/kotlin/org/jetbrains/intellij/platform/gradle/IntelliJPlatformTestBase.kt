@@ -16,7 +16,8 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPlatformTestBase {
 
-    var debugEnabled = !(System.getenv("CI") ?: "false").toBoolean()
+    val isCI = (System.getenv("CI") ?: "false").toBoolean()
+    var debugEnabled = !isCI
     val gradleDefault = System.getProperty("test.gradle.default")
     val gradleScan = System.getProperty("test.gradle.scan").toBoolean()
     val gradleArguments =
@@ -24,7 +25,6 @@ abstract class IntelliJPlatformTestBase {
     val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
     val gradleHome = Path(System.getProperty("test.gradle.home"))
-    val isCI get() = System.getProperty("test.ci").toBoolean()
 
     val intellijPlatformType = System.getProperty("test.intellijPlatform.type").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellijPlatform.type' isn't provided")

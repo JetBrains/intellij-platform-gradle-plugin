@@ -162,7 +162,6 @@ fun Test.configureTests() {
     systemProperties["test.intellijPlatform.type"] = properties("testIntellijPlatformType").get()
     systemProperties["test.intellijPlatform.version"] = properties("testIntellijPlatformVersion").get()
     systemProperties["test.kotlin.version"] = properties("testKotlinVersion").get()
-    systemProperties["test.ci"] = environment("CI").orElse("false")
     systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
 
     jvmArgs(
