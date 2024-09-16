@@ -27,6 +27,7 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
 import java.nio.file.Path
+import kotlin.Throws
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
@@ -149,12 +150,6 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
         .flatMap { it.bootClassPathJarNames }
         .minus("junit4.jar") // exclude `junit4.jar` from the list as JUnit shouldn't be in the classpath
         .map { "lib/$it" }
-        .plus( // TODO: pick only relevant entries. TBD with VK
-            productInfo.layout
-                .asSequence()
-                .filter { it.kind == ProductInfo.LayoutItemKind.productModuleV2 }
-                .flatMap { it.classPath }
-        )
         .map { intellijPlatformPath.resolve(it) }
         .mapNotNull { it.takeIf { it.exists() } }
         .toSet()

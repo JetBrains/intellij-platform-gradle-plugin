@@ -14,6 +14,7 @@
 - The `disabledPlugins.txt` file is not updated when disabling bundled plugins [#1745](../../issues/1745)
 - Plugin sandbox created by `IntelliJPlatformTestingExtension` is not correct for `localPlugin(org.gradle.api.artifacts.ProjectDependency)` [#1743](../../issues/1743)  
 - Better resolving the JVM variant of the `io.github.pdvrieze.xmlutil` dependency [#1741](../../issues/1741)
+- Remove the inclusion of all IntelliJ Platform v2 bundled modules to the classpath [#1761](../../issues/1761)
 
 ## [2.0.1] - 2024-08-08
 
