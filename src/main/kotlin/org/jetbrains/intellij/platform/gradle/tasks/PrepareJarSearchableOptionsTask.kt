@@ -10,6 +10,7 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -21,6 +22,10 @@ import kotlin.io.path.exists
 internal const val SEARCHABLE_OPTIONS_SUFFIX_XML = ".searchableOptions.xml"
 internal const val SEARCHABLE_OPTIONS_SUFFIX_JSON = "-searchableOptions.json"
 
+/**
+ * A Gradle task for preparing searchable options used by the [JarSearchableOptionsTask].
+ * The task filters and prepares content from various directories to a specified output directory.
+ */
 @CacheableTask
 abstract class PrepareJarSearchableOptionsTask @Inject constructor(
     private val fileSystemOperations: FileSystemOperations,
@@ -90,6 +95,11 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
                 }
             }
         }
+    }
+
+    init {
+        group = Plugin.GROUP_NAME
+        description = "Prepares the content used by the jarSearchableOptions task."
     }
 
     companion object : Registrable {
