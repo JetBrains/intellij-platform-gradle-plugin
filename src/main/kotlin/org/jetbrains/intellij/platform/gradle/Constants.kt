@@ -73,6 +73,8 @@ object Constants {
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
         const val INTELLIJ_PLATFORM_JAVA_COMPILER = "intellijPlatformJavaCompiler"
         const val INTELLIJ_PLATFORM_TEST_DEPENDENCIES = "intellijPlatformTestDependencies"
+        const val INTELLIJ_PLATFORM_TEST_CLASSPATH = "intellijPlatformTestClasspath"
+        const val INTELLIJ_PLATFORM_RUNTIME_CLASSPATH = "intellijPlatformRuntimeClasspath"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES = "intellijPluginVerifierIdes"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY = "intellijPluginVerifierIdesDependency"
@@ -124,7 +126,6 @@ object Constants {
             const val TEST_IMPLEMENTATION = JvmConstants.TEST_IMPLEMENTATION_CONFIGURATION_NAME
             const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
             const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
-            const val TEST_RUNTIME_CLASSPATH = JavaPlugin.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME
         }
     }
 

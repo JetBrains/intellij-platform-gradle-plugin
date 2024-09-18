@@ -34,6 +34,7 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.kotlin.gradle.utils.named
+import kotlin.Throws
 import kotlin.io.path.*
 
 /**
@@ -47,6 +48,9 @@ import kotlin.io.path.*
  */
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, SandboxStructure, SplitModeAware {
+
+    @Throws(GradleException::class)
+    fun foo() = 1
 
     /**
      * Represents the suffix used i.e., for test-related or custom tasks.
@@ -247,9 +251,9 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 Tasks.PREPARE_TEST_SANDBOX,
                 Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX,
             ) {
-                val runtimeConfiguration = project.configurations[Configurations.External.RUNTIME_CLASSPATH]
                 val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
+                val intellijPlatformRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH]
 
                 sandboxSuffix.convention(
                     name
@@ -290,7 +294,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 pluginName.convention(project.extensionProvider.flatMap { it.projectName })
                 pluginDirectory.convention(defaultDestinationDirectory.dir(pluginName))
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
-                runtimeClasspath.from(runtimeConfiguration - intellijPlatformPluginModuleConfiguration)
+                runtimeClasspath.from(intellijPlatformRuntimeClasspathConfiguration - intellijPlatformPluginModuleConfiguration)
 
                 splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })
@@ -314,7 +318,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 inputs.property("instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })
                 inputs.property("sandboxDirectory", sandboxDirectory.map { it.asPath.pathString })
                 inputs.property("sandboxSuffix", sandboxSuffix)
-                inputs.files(runtimeConfiguration)
+                inputs.files(intellijPlatformRuntimeClasspathConfiguration)
 
                 outputs.upToDateWhen {
                     listOf(

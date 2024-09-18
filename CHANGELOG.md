@@ -16,6 +16,8 @@
 - Plugin sandbox created by `IntelliJPlatformTestingExtension` is not correct for `localPlugin(org.gradle.api.artifacts.ProjectDependency)` [#1743](../../issues/1743)  
 - Better resolving the JVM variant of the `io.github.pdvrieze.xmlutil` dependency [#1741](../../issues/1741)
 - Remove the inclusion of all IntelliJ Platform v2 bundled modules to the classpath [#1761](../../issues/1761)
+- Duplicate bundled template error in tests [#1755](../../issues/1755)
+- Fixed IDE problem when submodule jars appear as External Libraries
 
 ## [2.0.1] - 2024-08-08
 

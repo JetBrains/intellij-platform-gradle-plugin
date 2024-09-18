@@ -60,8 +60,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 .flatMap { it.outputDirectory }
                 .let { project.files(it) }
 
-        private val Test.testCompileClasspathConfiguration
-            get() = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH]
+        private val Test.intellijPlatformTestClasspathConfiguration
+            get() = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH]
 
         internal val configuration: Test.() -> Unit = {
             enableAssertions = true
@@ -90,7 +90,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("idea.force.use.core.classloader", "true")
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-            classpath = instrumentedCode + instrumentedTestCode + classpath + testCompileClasspathConfiguration
+            classpath = instrumentedCode + instrumentedTestCode + classpath + intellijPlatformTestClasspathConfiguration
             testClassesDirs = instrumentedTestCode + testClassesDirs
             javaLauncher = sourceTask.runtimeDirectory.zip(sourceTask.runtimeMetadata) { directory, metadata ->
                 IntelliJPlatformJavaLauncher(directory, metadata)

@@ -164,13 +164,14 @@ abstract class ExtractorTransformer @Inject constructor(
             dependencies: DependencyHandler,
             compileClasspathConfiguration: Configuration,
             testCompileClasspathConfiguration: Configuration,
+            intellijPlatformTestClasspath: Configuration,
         ) {
             Attributes.ArtifactType.Archives.forEach {
                 dependencies.artifactTypes.maybeCreate(it.toString())
                     .attributes.attribute(Attributes.extracted, false)
             }
 
-            listOf(compileClasspathConfiguration, testCompileClasspathConfiguration).forEach {
+            listOf(compileClasspathConfiguration, testCompileClasspathConfiguration, intellijPlatformTestClasspath).forEach {
                 it.attributes.attribute(Attributes.extracted, true)
             }
 

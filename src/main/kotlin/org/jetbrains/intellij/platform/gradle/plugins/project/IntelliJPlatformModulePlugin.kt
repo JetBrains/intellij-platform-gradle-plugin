@@ -72,8 +72,12 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
             listOf(
                 Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR,
-                Configurations.External.RUNTIME_CLASSPATH,
-                Configurations.External.TEST_RUNTIME_CLASSPATH,
+                Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
+                Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
+                Configurations.External.COMPILE_CLASSPATH,
+                Configurations.External.TEST_COMPILE_CLASSPATH,
+                // TODO: required for test fixtures?
+                //       Configurations.External.TEST_FIXTURES_COMPILE_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
             ).forEach {
                 named(it) {

@@ -112,6 +112,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
             dependencies: DependencyHandler,
             compileClasspathConfiguration: Configuration,
             testCompileClasspathConfiguration: Configuration,
+            intellijPlatformTestClasspath: Configuration,
             intellijPlatformConfiguration: Configuration,
         ) {
             Attributes.ArtifactType.values().forEach {
@@ -119,13 +120,9 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                     .attributes.attribute(Attributes.collected, false)
             }
 
-            compileClasspathConfiguration
-                .attributes
-                .attribute(Attributes.collected, true)
-
-            testCompileClasspathConfiguration
-                .attributes
-                .attribute(Attributes.collected, true)
+            listOf(compileClasspathConfiguration, testCompileClasspathConfiguration, intellijPlatformTestClasspath).forEach {
+                it.attributes.attribute(Attributes.collected, true)
+            }
 
             dependencies.registerTransform(CollectorTransformer::class) {
                 from

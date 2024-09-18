@@ -231,6 +231,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
                 description = "IntelliJ Platform Test Dependencies"
             )
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
+                description = "IntelliJ Platform Test Classpath resolvable configuration"
+            )
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
+                description = "IntelliJ Platform Runtime Classpath resolvable configuration"
+            )
 
             this@configurations[Configurations.External.COMPILE_ONLY].extendsFrom(
                 intellijPlatformConfiguration,
@@ -240,6 +248,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 intellijPlatformConfiguration,
                 intellijPlatformDependenciesConfiguration,
                 intellijPlatformTestDependenciesConfiguration,
+            )
+            this@configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH].extendsFrom(
+                intellijPlatformConfiguration,
+                intellijPlatformDependenciesConfiguration,
+                intellijPlatformTestDependenciesConfiguration,
+            )
+            this@configurations[Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH].extendsFrom(
+                this@configurations[Configurations.External.RUNTIME_CLASSPATH],
             )
             this@configurations[Configurations.External.TEST_IMPLEMENTATION].extendsFrom(
                 intellijPlatformTestDependenciesConfiguration,
@@ -263,11 +279,13 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 dependencies = this,
                 compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
                 testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
+                intellijPlatformTestClasspath = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH],
             )
             CollectorTransformer.register(
                 dependencies = this,
                 compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
                 testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
+                intellijPlatformTestClasspath = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH],
                 intellijPlatformConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY],
             )
             LocalPluginsNormalizationTransformers.register(
