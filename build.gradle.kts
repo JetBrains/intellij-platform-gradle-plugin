@@ -3,7 +3,6 @@
 import org.jetbrains.dokka.gradle.DokkaTask
 
 fun properties(key: String) = providers.gradleProperty(key)
-fun environment(key: String) = providers.environmentVariable(key)
 fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 
 plugins {

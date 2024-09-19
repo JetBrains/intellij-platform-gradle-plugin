@@ -49,9 +49,6 @@ import kotlin.io.path.*
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, SandboxStructure, SplitModeAware {
 
-    @Throws(GradleException::class)
-    fun foo() = 1
-
     /**
      * Represents the suffix used i.e., for test-related or custom tasks.
      *
