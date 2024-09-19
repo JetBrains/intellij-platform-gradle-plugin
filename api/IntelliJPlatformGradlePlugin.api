@@ -2588,7 +2588,6 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandbo
 	public synthetic fun configure (Lgroovy/lang/Closure;)Ljava/lang/Object;
 	public fun configure (Lgroovy/lang/Closure;)Lorg/gradle/api/Task;
 	protected fun copy ()V
-	public final fun foo ()I
 	public abstract fun getDefaultDestinationDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public fun getDestinationDir ()Ljava/io/File;
 	public abstract fun getDisabledPlugins ()Lorg/gradle/api/provider/SetProperty;
