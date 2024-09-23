@@ -15,9 +15,11 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
+import kotlin.io.path.exists
 
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
@@ -90,7 +92,20 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("idea.force.use.core.classloader", "true")
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-            classpath = instrumentedCode + instrumentedTestCode + classpath + intellijPlatformTestClasspathConfiguration
+            // Provide IntelliJ Platform product modules
+            val productModules = project.files(project.provider {
+                val intellijPlatformPath = sourceTask.platformPath
+                sourceTask.productInfo.layout
+                    .asSequence()
+                    .filter { it.kind == ProductInfo.LayoutItemKind.productModuleV2 }
+                    .onEach { item -> println("item.name = ${item.name}") }
+                    .flatMap { it.classPath }
+                    .map { intellijPlatformPath.resolve(it) }
+                    .mapNotNull { it.takeIf { it.exists() } }
+                    .toSet()
+            })
+
+            classpath = instrumentedCode + instrumentedTestCode + classpath + intellijPlatformTestClasspathConfiguration + productModules
             testClassesDirs = instrumentedTestCode + testClassesDirs
             javaLauncher = sourceTask.runtimeDirectory.zip(sourceTask.runtimeMetadata) { directory, metadata ->
                 IntelliJPlatformJavaLauncher(directory, metadata)
