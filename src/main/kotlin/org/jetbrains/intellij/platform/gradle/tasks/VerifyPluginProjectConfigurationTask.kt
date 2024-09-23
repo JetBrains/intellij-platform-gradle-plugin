@@ -179,7 +179,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
             }
             if (kotlinxCoroutinesLibraryPresent) {
-                yield("The Kotlin Coroutines library must not be added explicitly to the project as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines")
+                yield("The Kotlin Coroutines library must not be added explicitly to the project nor as a transitive dependency as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines")
             }
             if (runtimeMetadata.get()["java.vendor"] != "JetBrains s.r.o.") {
                 yield("The currently selected Java Runtime is not JetBrains Runtime (JBR). This may lead to unexpected IDE behaviors. Please use IntelliJ Platform binary release with bundled JBR or define it explicitly with project dependencies or JVM Toolchain, see: https://jb.gg/intellij-platform-with-jbr")

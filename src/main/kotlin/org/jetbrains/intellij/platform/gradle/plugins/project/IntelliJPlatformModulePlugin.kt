@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.*
 import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.plugins.JavaPluginExtension
@@ -33,22 +34,8 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
         }
 
         with(project.configurations) configurations@{
-            val intellijPlatformComposedJarConfiguration = create(Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR) {
-                extendsFrom(
-                    this@configurations[Configurations.External.IMPLEMENTATION],
-                    this@configurations[Configurations.External.RUNTIME_ONLY],
-                )
-            }
-            val intellijPlatformDistributionConfiguration = create(Configurations.INTELLIJ_PLATFORM_DISTRIBUTION)
-
-            listOf(
-                intellijPlatformComposedJarConfiguration,
-                intellijPlatformDistributionConfiguration,
-            ).forEach {
-                it.isCanBeConsumed = true
-                it.isCanBeResolved = false
-
-                it.attributes {
+            fun Configuration.applyVariantAttributes() {
+                attributes {
                     attribute(Bundling.BUNDLING_ATTRIBUTE, project.objects.named(Bundling.EXTERNAL))
                     attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
                     attributeProvider(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, project.provider {
@@ -58,6 +45,30 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                     attributes.attribute(Attribute.of("org.gradle.jvm.environment", String::class.java), "standard-jvm")
                     attributes.attribute(Attribute.of("org.jetbrains.kotlin.platform.type", String::class.java), "jvm")
                 }
+            }
+
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR,
+                description = "IntelliJ Platform final composed Jar archive",
+            ) {
+                isCanBeConsumed = true
+                isCanBeResolved = true
+
+                applyVariantAttributes()
+
+                extendsFrom(
+                    this@configurations[Configurations.External.IMPLEMENTATION],
+                    this@configurations[Configurations.External.RUNTIME_ONLY],
+                )
+            }
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_DISTRIBUTION,
+                description = "IntelliJ Platform distribution Zip archive",
+            ) {
+                isCanBeConsumed = true
+                isCanBeResolved = false
+
+                applyVariantAttributes()
             }
 
             val intellijPlatformPluginModuleConfiguration = create(

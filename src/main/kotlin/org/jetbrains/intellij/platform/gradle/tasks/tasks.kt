@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.Task
+import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
@@ -232,15 +233,14 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is KotlinMetadataAware) {
             kotlinPluginAvailable.convention(false)
 
-            val implementationConfiguration = project.configurations[Configurations.External.IMPLEMENTATION]
-            val compileOnlyConfiguration = project.configurations[Configurations.External.COMPILE_ONLY]
-
+            val composedJarConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR]
             kotlinxCoroutinesLibraryPresent.convention(project.provider {
-                listOf(implementationConfiguration, compileOnlyConfiguration).any { configuration ->
-                    configuration.dependencies.any {
-                        it.group == "org.jetbrains.kotlinx" && it.name.startsWith("kotlinx-coroutines")
-                    }
-                }
+                composedJarConfiguration
+                    .resolvedConfiguration
+                    .resolvedArtifacts
+                    .asSequence()
+                    .mapNotNull { it.id.componentIdentifier as? ModuleComponentIdentifier }
+                    .any { it.group == "org.jetbrains.kotlinx" && it.module.startsWith("kotlinx-coroutines") }
             })
 
             project.pluginManager.withPlugin(Plugins.External.KOTLIN) {

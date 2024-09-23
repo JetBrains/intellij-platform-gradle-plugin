@@ -7,6 +7,10 @@
 - Added `PrepareSandboxTask.pluginName` for easier accessing of the plugin directory name
 - Allow for using non-installer IDEs for plugin verification [#1715](../../issues/1715)
 - Added `bundledModule()` dependency extension helpers
+- Detect and warn about the `kotlinx-coroutines` library in transitive dependencies
+
+### Changed
+- Add IntelliJ Platform v2 product modules to the test classpath
 
 ### Fixed
 
