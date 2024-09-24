@@ -24,6 +24,7 @@
 - Remove the inclusion of all IntelliJ Platform v2 bundled modules to the classpath [#1761](../../issues/1761)
 - Duplicate bundled template error in tests [#1755](../../issues/1755)
 - Fixed IDE problem when submodule jars appear as External Libraries
+- Fixed `java.util.ConcurrentModificationException` on Gradle sync caused by the `pluginVerification` configuration [#1714](../../issues/1714)
 
 ## [2.0.1] - 2024-08-08
 

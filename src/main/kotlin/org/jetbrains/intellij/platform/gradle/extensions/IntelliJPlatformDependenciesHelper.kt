@@ -238,30 +238,30 @@ class IntelliJPlatformDependenciesHelper(
         dependencyConfigurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
         action: DependencyAction = {},
-    ) = configurations[dependencyConfigurationName].dependencies.addAllLater(cachedListProvider {
+    ) = configurations.addAllLater(cachedListProvider {
         notationsProvider.get()
             .map { it.parseIdeNotation() }
             .map { (type, version) ->
-                when (type) {
+                val dependency = when (type) {
                     IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
                     else -> dependencies.createIntelliJPlatformInstaller(type, version)
-                }.apply(action).also { dependency ->
-                    val dependencyConfigurationNameWithNotation = "${dependencyConfigurationName}_${type}_${version}"
-                    val configurationNameWithNotation = "${configurationName}_${type}_${version}"
+                }.apply(action)
 
-                    val dependencyConfiguration = configurations.findByName(dependencyConfigurationNameWithNotation)
-                        ?: configurations.create(dependencyConfigurationNameWithNotation) {
-                            dependencies.add(dependency)
-                        }
+                val dependencyConfigurationNameWithNotation = "${dependencyConfigurationName}_${type}_${version}"
+                val configurationNameWithNotation = "${configurationName}_${type}_${version}"
 
-                    configurations.findByName(configurationNameWithNotation)
-                        ?: configurations.create(configurationNameWithNotation) {
-                            attributes {
-                                attribute(Attributes.extracted, true)
-                            }
-                            extendsFrom(dependencyConfiguration)
+                val dependencyConfiguration = configurations.findByName(dependencyConfigurationNameWithNotation)
+                    ?: configurations.create(dependencyConfigurationNameWithNotation) {
+                        dependencies.add(dependency)
+                    }
+
+                configurations.findByName(configurationNameWithNotation)
+                    ?: configurations.create(configurationNameWithNotation) {
+                        attributes {
+                            attribute(Attributes.extracted, true)
                         }
-                }
+                        extendsFrom(dependencyConfiguration)
+                    }
             }
     })
 
