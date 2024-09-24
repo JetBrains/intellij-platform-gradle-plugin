@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.models
 
-import com.jetbrains.plugin.structure.base.utils.exists
 import kotlinx.serialization.Serializable
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
@@ -14,7 +13,9 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathReso
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
+import kotlin.Throws
 import kotlin.io.path.Path
+import kotlin.io.path.exists
 import kotlin.io.path.pathString
 
 /**

@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.argumentProviders
 
-import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.InputFile
@@ -12,6 +11,7 @@ import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import kotlin.io.path.exists
 
 /**
  * Provides command line arguments for launching IntelliJ Platform locally.

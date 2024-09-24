@@ -5,7 +5,6 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.base.utils.deleteLogged
-import com.jetbrains.plugin.structure.base.utils.deleteQuietly
 import groovy.lang.Closure
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
@@ -30,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import kotlin.Throws
 import kotlin.io.path.*
 
 private const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
@@ -98,6 +98,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     private val log = Logger(javaClass)
 
     @TaskAction
+    @OptIn(ExperimentalPathApi::class)
     fun instrumentCode(inputChanges: InputChanges) = runCatching {
         ant.invokeMethod(
             "taskdef",
@@ -116,7 +117,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
         val temporaryDirPath = temporaryDir
             .toPath()
             .also {
-                it.deleteQuietly()
+                it.deleteRecursively()
                 it.createDirectories()
             }
 

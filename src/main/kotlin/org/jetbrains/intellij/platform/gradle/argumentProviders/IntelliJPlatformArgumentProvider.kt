@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.argumentProviders
 
-import com.jetbrains.plugin.structure.base.utils.exists
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
@@ -18,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.models.resolveIdeHomeVariable
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
+import kotlin.io.path.exists
 import kotlin.io.path.readLines
 
 /**
