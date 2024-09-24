@@ -11,6 +11,7 @@
 - Introduce caching when creating dependencies 
 
 ### Changed
+
 - Add IntelliJ Platform v2 product modules to the test classpath
 - Invalidate local dependency artifacts XML files running
 
@@ -25,6 +26,7 @@
 - Duplicate bundled template error in tests [#1755](../../issues/1755)
 - Fixed IDE problem when submodule jars appear as External Libraries
 - Fixed `java.util.ConcurrentModificationException` on Gradle sync caused by the `pluginVerification` configuration [#1714](../../issues/1714)
+- Fixed Configuration Cache issues related to the `intellijPlatform.buildSearchableOptions` flag
 
 ## [2.0.1] - 2024-08-08
 

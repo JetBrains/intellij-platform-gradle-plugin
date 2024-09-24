@@ -106,11 +106,7 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
         override fun register(project: Project) =
             project.registerTask<PrepareJarSearchableOptionsTask>(Tasks.PREPARE_JAR_SEARCHABLE_OPTIONS) {
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
-                val buildSearchableOptionsEnabled = project.extensionProvider
-                    .flatMap { it.buildSearchableOptions }
-                    .zip(buildSearchableOptionsTaskProvider) { enabled, task ->
-                        enabled && task.enabled
-                    }
+                val buildSearchableOptionsEnabledProvider = project.extensionProvider.flatMap { it.buildSearchableOptions }
                 val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
 
@@ -124,7 +120,7 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
                 )
 
                 onlyIf {
-                    buildSearchableOptionsEnabled.get()
+                    buildSearchableOptionsEnabledProvider.get()
                 }
             }
     }

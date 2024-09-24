@@ -66,12 +66,7 @@ abstract class JarSearchableOptionsTask : Jar() {
         override fun register(project: Project) =
             project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
                 val prepareJarSearchableOptionsTask = project.tasks.named<PrepareJarSearchableOptionsTask>(Tasks.PREPARE_JAR_SEARCHABLE_OPTIONS)
-                val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
-                val buildSearchableOptionsEnabled = project.extensionProvider
-                    .flatMap { it.buildSearchableOptions }
-                    .zip(buildSearchableOptionsTaskProvider) { enabled, task ->
-                        enabled && task.enabled
-                    }
+                val buildSearchableOptionsEnabledProvider = project.extensionProvider.flatMap { it.buildSearchableOptions }
                 val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
 
                 archiveClassifier.convention("searchableOptions")
@@ -81,7 +76,7 @@ abstract class JarSearchableOptionsTask : Jar() {
                 from(prepareJarSearchableOptionsTask)
 
                 onlyIf {
-                    buildSearchableOptionsEnabled.get()
+                    buildSearchableOptionsEnabledProvider.get()
                 }
 
                 project.artifacts.add(runtimeElementsConfiguration.name, archiveFile)

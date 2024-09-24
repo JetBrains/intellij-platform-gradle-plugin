@@ -83,10 +83,9 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
+                val buildSearchableOptionsEnabledProvider = project.extensionProvider.flatMap { it.buildSearchableOptions }
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 applySandboxFrom(prepareSandboxTaskProvider)
-
-                val buildSearchableOptionsEnabled = project.extensionProvider.flatMap { it.buildSearchableOptions }
 
                 outputDirectory.convention(
                     project.layout.dir(project.provider {
@@ -101,10 +100,10 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
 
                 systemPropertyDefault("idea.l10n.keys", "only")
 
-                inputs.property("intellijPlatform.buildSearchableOptions", buildSearchableOptionsEnabled)
+                inputs.property("intellijPlatform.buildSearchableOptions", buildSearchableOptionsEnabledProvider)
 
                 onlyIf {
-                    buildSearchableOptionsEnabled.get()
+                    buildSearchableOptionsEnabledProvider.get()
                 }
             }
     }
