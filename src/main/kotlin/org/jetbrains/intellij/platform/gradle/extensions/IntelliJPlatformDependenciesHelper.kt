@@ -67,6 +67,7 @@ class IntelliJPlatformDependenciesHelper(
 
     private val log = Logger(javaClass)
     private val pluginManager = IdePluginManager.createManager()
+    private val writtenIvyModules = mutableSetOf<String>()
 
     private val baseType = objects.property<IntelliJPlatformType>()
     private val baseVersion = objects.property<String>()
@@ -78,6 +79,30 @@ class IntelliJPlatformDependenciesHelper(
     internal inline fun <reified T : Any> provider(crossinline value: () -> T) = providers.provider {
         value()
     }
+
+    /**
+     * Helper function for creating cached [ProviderFactory.provider].
+     */
+    internal inline fun <reified T> cachedProvider(crossinline value: () -> T) =
+        objects
+            .property<T>()
+            .value(providers.provider { value() })
+            .apply {
+                disallowChanges()
+                finalizeValueOnRead()
+            }
+
+    /**
+     * Helper function for creating cached list [ProviderFactory.provider].
+     */
+    internal inline fun <reified T> cachedListProvider(crossinline value: () -> List<T>) =
+        objects
+            .listProperty<T>()
+            .value(providers.provider { value() })
+            .apply {
+                disallowChanges()
+                finalizeValueOnRead()
+            }
 
     //<editor-fold desc="Configuration Accessors">
 
@@ -132,7 +157,7 @@ class IntelliJPlatformDependenciesHelper(
         pathProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
         val path = pathProvider.orNull
         requireNotNull(path) { "The `intellijPlatform.bundledLibrary` dependency helper was called with no `path` value provided." }
 
@@ -184,7 +209,12 @@ class IntelliJPlatformDependenciesHelper(
             }
         }
 
-        configurations[configurationName].dependencies.addLater(finalTypeProvider.zip(finalVersionProvider) { type, version ->
+        configurations[configurationName].dependencies.addLater(cachedProvider {
+            val type = finalTypeProvider.orNull
+            val version = finalVersionProvider.orNull
+            requireNotNull(type) { "The IntelliJ Platform dependency helper was called with no `type` value provided." }
+            requireNotNull(version) { "The IntelliJ Platform dependency helper was called with no `version` value provided." }
+
             when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
                 else -> when (finalUseInstallerProvider.orNull ?: true) {
@@ -208,31 +238,31 @@ class IntelliJPlatformDependenciesHelper(
         dependencyConfigurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
         action: DependencyAction = {},
-    ) = configurations[dependencyConfigurationName].dependencies.addAllLater(notationsProvider.map { notations ->
-        notations.map { notation ->
-            val (type, version) = notation.parseIdeNotation()
+    ) = configurations[dependencyConfigurationName].dependencies.addAllLater(cachedListProvider {
+        notationsProvider.get()
+            .map { it.parseIdeNotation() }
+            .map { (type, version) ->
+                when (type) {
+                    IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
+                    else -> dependencies.createIntelliJPlatformInstaller(type, version)
+                }.apply(action).also { dependency ->
+                    val dependencyConfigurationNameWithNotation = "${dependencyConfigurationName}_${type}_${version}"
+                    val configurationNameWithNotation = "${configurationName}_${type}_${version}"
 
-            when (type) {
-                IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-                else -> dependencies.createIntelliJPlatformInstaller(type, version)
-            }.apply(action).also { dependency ->
-                val dependencyConfigurationNameWithNotation = "${dependencyConfigurationName}_$notation"
-                val configurationNameWithNotation = "${configurationName}_$notation"
-
-                val dependencyConfiguration = configurations.findByName(dependencyConfigurationNameWithNotation)
-                    ?: configurations.create(dependencyConfigurationNameWithNotation) {
-                        dependencies.add(dependency)
-                    }
-
-                configurations.findByName(configurationNameWithNotation)
-                    ?: configurations.create(configurationNameWithNotation) {
-                        attributes {
-                            attribute(Attributes.extracted, true)
+                    val dependencyConfiguration = configurations.findByName(dependencyConfigurationNameWithNotation)
+                        ?: configurations.create(dependencyConfigurationNameWithNotation) {
+                            dependencies.add(dependency)
                         }
-                        extendsFrom(dependencyConfiguration)
-                    }
+
+                    configurations.findByName(configurationNameWithNotation)
+                        ?: configurations.create(configurationNameWithNotation) {
+                            attributes {
+                                attribute(Attributes.extracted, true)
+                            }
+                            extendsFrom(dependencyConfiguration)
+                        }
+                }
             }
-        }
     })
 
     /**
@@ -248,8 +278,12 @@ class IntelliJPlatformDependenciesHelper(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(localPathProvider.map { resolveArtifactPath(it) }.map { localPath ->
-        dependencies.createIntelliJPlatformLocal(localPath).apply(action)
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
+        val localPath = localPathProvider.orNull ?: return@cachedProvider null
+
+        resolveArtifactPath(localPath)
+            .let { dependencies.createIntelliJPlatformLocal(it) }
+            .apply(action)
     })
 
     /**
@@ -263,7 +297,7 @@ class IntelliJPlatformDependenciesHelper(
         pluginsProvider: Provider<List<Triple<String, String, String>>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(provider {
+    ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
         val plugins = pluginsProvider.orNull
         requireNotNull(plugins) { "The `intellijPlatform.plugins` dependency helper was called with no `plugins` value provided." }
 
@@ -283,7 +317,7 @@ class IntelliJPlatformDependenciesHelper(
         bundledPluginsProvider: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(provider {
+    ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
         val bundledPlugins = bundledPluginsProvider.orNull
         requireNotNull(bundledPlugins) { "The `intellijPlatform.bundledPlugins` dependency helper was called with no `bundledPlugins` value provided." }
 
@@ -305,7 +339,7 @@ class IntelliJPlatformDependenciesHelper(
         bundledModulesProvider: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(provider {
+    ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
         val bundledModules = bundledModulesProvider.orNull
         requireNotNull(bundledModules) { "The `intellijPlatform.bundledModules` dependency helper was called with no `bundledModules` value provided." }
 
@@ -327,7 +361,7 @@ class IntelliJPlatformDependenciesHelper(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
         val localPath = localPathProvider.orNull
         requireNotNull(localPath) { "The `intellijPlatform.localPlugin` dependency helper was called with no `localPath` value provided." }
 
@@ -371,7 +405,10 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.javaCompiler` dependency helper was called with no `version` value provided." }
+
         dependencies.createDependency(
             coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
             version = version,
@@ -389,7 +426,7 @@ class IntelliJPlatformDependenciesHelper(
         explicitVersionProvider: Provider<String>,
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
         val explicitVersion = explicitVersionProvider.orNull
         requireNotNull(explicitVersion) { "The `intellijPlatform.jetbrainsRuntime`/`intellijPlatform.jetbrainsRuntimeExplicit` dependency helper was called with no `version` value provided." }
 
@@ -432,7 +469,10 @@ class IntelliJPlatformDependenciesHelper(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(localPathProvider.map { localPath ->
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
+        val localPath = localPathProvider.orNull
+        requireNotNull(localPath) { "The `intellijPlatform.jetbrainsRuntimeLocal` dependency helper was called with no `localPath` value provided." }
+
         val artifactPath = resolvePath(localPath)
             .takeIf { it.exists() }
             ?.resolveJavaRuntimeDirectory()
@@ -452,7 +492,10 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.pluginVerifier` dependency helper was called with no `version` value provided." }
+
         dependencies.createPluginVerifier(version).apply(action)
     })
 
@@ -474,14 +517,19 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(versionProvider.map { version ->
+    ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
         when (type) {
             TestFrameworkType.Bundled -> type.coordinates.map {
                 dependencies.createBundledLibrary(it.artifactId)
             }
 
-            else -> type.coordinates.map {
-                dependencies.createPlatformDependency(it, version)
+            else -> {
+                val version = versionProvider.orNull
+                requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
+
+                type.coordinates.map {
+                    dependencies.createPlatformDependency(it, version)
+                }
             }
         }.onEach(action)
     })
@@ -501,7 +549,10 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
+        val version = versionProvider.get()
+        requireNotNull(version) { "The `intellijPlatform.platformDependency`/`intellijPlatform.testPlatformDependency` dependency helper was called with no `version` value provided." }
+
         dependencies.createPlatformDependency(coordinates, version).apply(action)
     })
 
@@ -516,7 +567,10 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.zipSigner` dependency helper was called with no `version` value provided." }
+
         dependencies.createMarketplaceZipSigner(version).apply(action)
     })
 
@@ -531,7 +585,10 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(versionProvider.map { version ->
+    ) = configurations[configurationName].dependencies.addLater(cachedProvider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.robotServerPlugin` dependency helper was called with no `version` value provided." }
+
         dependencies.createRobotServerPlugin(version).apply(action)
     })
 
@@ -974,20 +1031,23 @@ class IntelliJPlatformDependenciesHelper(
      */
     private fun writeIvyModule(group: String, artifact: String, version: String, block: () -> IvyModule) = apply {
         val fileName = "$group-$artifact-$version.xml"
+        if (writtenIvyModules.contains(fileName)) {
+            return@apply
+        }
+
         val ivyFile = providers
             .localPlatformArtifactsPath(rootProjectDirectory)
             .resolve(fileName)
 
-        if (ivyFile.exists()) {
-            return@apply
-        }
-
         ivyFile
             .apply { parent.createDirectories() }
+            .apply { deleteIfExists() }
             .createFile()
             .writeText(XML {
                 indentString = "  "
             }.encodeToString(block()))
+
+        writtenIvyModules.add(fileName)
     }
 
     /**

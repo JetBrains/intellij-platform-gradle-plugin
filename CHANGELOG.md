@@ -8,9 +8,11 @@
 - Allow for using non-installer IDEs for plugin verification [#1715](../../issues/1715)
 - Added `bundledModule()` dependency extension helpers
 - Detect and warn about the `kotlinx-coroutines` library in transitive dependencies
+- Introduce caching when creating dependencies 
 
 ### Changed
 - Add IntelliJ Platform v2 product modules to the test classpath
+- Invalidate local dependency artifacts XML files running
 
 ### Fixed
 
