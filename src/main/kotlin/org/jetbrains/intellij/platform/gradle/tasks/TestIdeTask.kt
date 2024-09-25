@@ -98,7 +98,6 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 sourceTask.productInfo.layout
                     .asSequence()
                     .filter { it.kind == ProductInfo.LayoutItemKind.productModuleV2 }
-                    .onEach { item -> println("item.name = ${item.name}") }
                     .flatMap { it.classPath }
                     .map { intellijPlatformPath.resolve(it) }
                     .mapNotNull { it.takeIf { it.exists() } }
