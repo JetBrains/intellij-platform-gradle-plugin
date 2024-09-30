@@ -130,6 +130,7 @@ object Constants {
     }
 
     object Tasks {
+        const val CLEAN = "clean"
         const val BUILD_PLUGIN = "buildPlugin"
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val COMPOSED_JAR = "composedJar"
