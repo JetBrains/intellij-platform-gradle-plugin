@@ -176,6 +176,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox {
 public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field BUILD_PLUGIN Ljava/lang/String;
 	public static final field BUILD_SEARCHABLE_OPTIONS Ljava/lang/String;
+	public static final field CLEAN Ljava/lang/String;
 	public static final field COMPOSED_JAR Ljava/lang/String;
 	public static final field GENERATE_MANIFEST Ljava/lang/String;
 	public static final field INITIALIZE_INTELLIJ_PLATFORM_PLUGIN Ljava/lang/String;

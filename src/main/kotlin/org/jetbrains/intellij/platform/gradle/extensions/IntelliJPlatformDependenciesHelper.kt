@@ -40,9 +40,7 @@ import java.io.File
 import java.io.FileReader
 import java.nio.file.Path
 import java.util.*
-import kotlin.Throws
 import kotlin.io.path.*
-import kotlin.math.absoluteValue
 
 /**
  * Helper class for managing dependencies on the IntelliJ Platform in Gradle projects.
@@ -697,7 +695,7 @@ class IntelliJPlatformDependenciesHelper(
         localProductInfo.validateSupportedVersion()
 
         val type = localProductInfo.productCode.toIntelliJPlatformType()
-        val version = "${localProductInfo.buildNumber}+${artifactPath.hash}"
+        val version = localProductInfo.buildNumber
 
         writeIvyModule(Dependencies.LOCAL_IDE_GROUP, type.code, version) {
             IvyModule(
@@ -760,7 +758,7 @@ class IntelliJPlatformDependenciesHelper(
         }
 
         val artifactPath = requireNotNull(plugin.originalFile)
-        val version = baseVersion.orElse(productInfo.map { it.version }).map { "$it+${artifactPath.hash}" }.get()
+        val version = baseVersion.orElse(productInfo.map { it.version }).get()
 
         writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version) {
             IvyModule(
@@ -792,7 +790,7 @@ class IntelliJPlatformDependenciesHelper(
             .let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
         val platformPath = platformPath.get()
         val artifactPaths = bundledModule.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
-        val version = baseVersion.orElse(productInfo.map { it.version }).map { "$it+${platformPath.hash}" }.get()
+        val version = baseVersion.orElse(productInfo.map { it.version }).get()
 
         writeIvyModule(Dependencies.BUNDLED_MODULE_GROUP, id, version) {
             IvyModule(
@@ -830,7 +828,7 @@ class IntelliJPlatformDependenciesHelper(
                 val artifactPath = requireNotNull(plugin.originalFile)
                 val group = Dependencies.BUNDLED_PLUGIN_GROUP
                 val name = requireNotNull(plugin.pluginId)
-                val version = "${plugin.pluginVersion}+${artifactPath.hash}"
+                val version = "${plugin.pluginVersion}"
 
                 writeIvyModule(group, name, version) {
                     IvyModule(
@@ -858,7 +856,7 @@ class IntelliJPlatformDependenciesHelper(
                 val artifactPaths = it.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
                 val group = Dependencies.BUNDLED_MODULE_GROUP
                 val name = it.name
-                val version = "$buildNumber+${platformPath.hash}"
+                val version = buildNumber
 
                 writeIvyModule(group, name, version) {
                     IvyModule(
@@ -894,7 +892,7 @@ class IntelliJPlatformDependenciesHelper(
             pluginManager.safelyCreatePlugin(pluginPath).getOrThrow()
         }
 
-        val version = (plugin.pluginVersion ?: "0.0.0") + "+" + artifactPath.hash
+        val version = (plugin.pluginVersion ?: "0.0.0")
         val name = plugin.pluginId ?: artifactPath.name
 
         writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version) {
@@ -936,7 +934,7 @@ class IntelliJPlatformDependenciesHelper(
         requireNotNull(javaVersion)
 
         val name = javaVendorVersion.substringBefore(javaVersion).trim('-')
-        val version = javaVendorVersion.removePrefix(name).trim('-') + "+" + artifactPath.hash
+        val version = javaVendorVersion.removePrefix(name).trim('-')
 
         writeIvyModule(Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP, name, version) {
             IvyModule(
@@ -1093,9 +1091,6 @@ class IntelliJPlatformDependenciesHelper(
         version = version,
         extension = "zip",
     )
-
-    private val Path.hash
-        get() = (absolutePathString().hashCode().absoluteValue % 1000).toString()
 
     internal fun buildJetBrainsRuntimeVersion(
         version: String,
