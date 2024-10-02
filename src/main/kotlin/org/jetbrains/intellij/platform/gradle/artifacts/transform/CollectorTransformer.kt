@@ -87,6 +87,15 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                 }
 
                 isPlugin -> {
+                    // We should never get to here for bundledPlugin & localPlugin & bundledModule because they list
+                    // their jars ar artifacts instead of pointing to a directory, which then requires jars to be found
+                    // (collected). See:
+                    // org.jetbrains.intellij.platform.gradle.models.IvyModuleKt.toLocalPluginIvyArtifacts
+                    // org.jetbrains.intellij.platform.gradle.models.IvyModuleKt.toBundledPluginIvyArtifacts
+                    //
+                    // It should be needed only for non bundled plugins, i.e. from the marketplace. See:
+                    // IntelliJPlatformDependenciesHelper.createIntelliJPlatformPlugin
+                    // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html#non-bundled-plugin
                     plugin.originalFile?.let { pluginPath ->
                         collectJars(
                             pluginPath.resolve("lib"),
@@ -102,11 +111,13 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
         }
     }
 
-    private fun collectJars(vararg paths: Path?) = paths
-        .mapNotNull { it?.takeIfExists() }
-        .flatMap { it.listDirectoryEntries("*.jar") }
-
     companion object {
+        internal fun collectJars(vararg paths: Path?): List<Path> {
+            return paths
+                .mapNotNull { it?.takeIfExists() }
+                .flatMap { it.listDirectoryEntries("*.jar") }
+        }
+
         internal fun register(
             dependencies: DependencyHandler,
             compileClasspathConfiguration: Configuration,

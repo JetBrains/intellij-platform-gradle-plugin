@@ -8,6 +8,7 @@ import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
@@ -767,6 +768,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          */
         @IntelliJPlatform
         abstract class Ides @Inject constructor(
+            repositories: RepositoryHandler,
             configurations: ConfigurationContainer,
             dependencies: DependencyHandler,
             layout: ProjectLayout,
@@ -778,6 +780,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         ) {
 
             private val delegate = IntelliJPlatformDependenciesHelper(
+                repositories,
                 configurations,
                 dependencies,
                 layout,
@@ -950,6 +953,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 override fun register(project: Project, target: Any) =
                     target.configureExtension<Ides>(
                         Extensions.IDES,
+                        project.repositories,
                         project.configurations,
                         project.dependencies,
                         project.layout,
