@@ -15,6 +15,23 @@ kotlin {
     jvmToolchain(17)
 }
 
+// Disable dependency verification for these configuration if signature verification is being used (pgp option),
+// because they break Gradle's logic for signature generation with a very obscure error: "Invalid UTF-8 input".
+// There seems to be a few bugs in Gradle related to this error and also for generating a signature for JDK.
+// https://github.com/gradle/gradle/issues?q=%22Invalid+UTF-8+input%22
+// https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1779#issuecomment-2384461002
+configurations {
+    named("jetbrainsRuntimeLocalInstance") {
+        resolutionStrategy.disableDependencyVerification()
+    }
+    named("jetbrainsRuntimeDependency") {
+        resolutionStrategy.disableDependencyVerification()
+    }
+    named("jetbrainsRuntime") {
+        resolutionStrategy.disableDependencyVerification()
+    }
+}
+
 buildscript {
     // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1778
     // https://docs.gradle.org/current/userguide/dependency_locking.html
@@ -22,7 +39,8 @@ buildscript {
         lockAllConfigurations()
         lockFile = file("gradle/locks/root/gradle-buildscript.lockfile")
         lockMode.set(LockMode.DEFAULT)
-        //ignoredDependencies.add()
+        //ignoredDependencies.add("bundledModule:*")
+        //ignoredDependencies.add("bundledPlugin:*")
     }
 }
 // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1778
@@ -38,6 +56,7 @@ repositories {
     mavenCentral()
 
     intellijPlatform {
+        //jetbrainsRuntime()
         defaultRepositories()
     }
 }
@@ -45,7 +64,7 @@ repositories {
 dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
-        instrumentationTools()
+        //instrumentationTools()
         testFramework(TestFrameworkType.Platform)
 
         // This is important for bug reproduction because we need some dependencies in the test

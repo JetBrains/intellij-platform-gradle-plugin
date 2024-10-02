@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.companion.TestCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
+import org.jetbrains.intellij.platform.gradle.utils.settings
 
 @Suppress("unused")
 abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
@@ -186,7 +187,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
         // TODO: share with Base plugin?
         val dependenciesHelper = with(project) {
-            IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, rootProjectPath)
+            IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, rootProjectPath, project.settings.dependencyResolutionManagement.rulesMode)
         }
 
         IntelliJPlatformTestingExtension.register(project, dependenciesHelper, target = project)
