@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
@@ -32,6 +33,7 @@ import javax.inject.Inject
  */
 @IntelliJPlatform
 abstract class IntelliJPlatformPluginsExtension @Inject constructor(
+    repositories: RepositoryHandler,
     configurations: ConfigurationContainer,
     dependencies: DependencyHandler,
     layout: ProjectLayout,
@@ -45,6 +47,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     internal val intellijPlatformPluginLocalConfigurationName = objects.property<String>()
 
     private val delegate = IntelliJPlatformDependenciesHelper(
+        repositories,
         configurations,
         dependencies,
         layout,
@@ -242,6 +245,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
         override fun register(project: Project, target: Any) =
             target.configureExtension<IntelliJPlatformPluginsExtension>(
                 Extensions.PLUGINS,
+                project.repositories,
                 project.configurations,
                 project.dependencies,
                 project.layout,

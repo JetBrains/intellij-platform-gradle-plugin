@@ -319,8 +319,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             Publishing.register(project, target = intelliJPlatform)
         }
 
-        IntelliJPlatformDependenciesExtension.register(project, target = project.dependencies)
         IntelliJPlatformRepositoriesExtension.register(project, target = project.repositories)
+        IntelliJPlatformDependenciesExtension.register(project, target = project.dependencies)
 
         project.tasks.matching {
             when (it) {

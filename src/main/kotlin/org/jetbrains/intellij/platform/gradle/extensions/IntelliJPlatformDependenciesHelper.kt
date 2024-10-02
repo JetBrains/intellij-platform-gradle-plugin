@@ -11,6 +11,7 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
@@ -40,7 +41,6 @@ import java.io.File
 import java.io.FileReader
 import java.nio.file.Path
 import java.util.*
-import kotlin.Throws
 import kotlin.io.path.*
 
 /**
@@ -55,6 +55,7 @@ import kotlin.io.path.*
  * @param rootProjectDirectory The root directory of the Gradle project.
  */
 class IntelliJPlatformDependenciesHelper(
+    private val repositories: RepositoryHandler,
     private val configurations: ConfigurationContainer,
     private val dependencies: DependencyHandler,
     private val layout: ProjectLayout,
@@ -742,6 +743,7 @@ class IntelliJPlatformDependenciesHelper(
      */
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(id: String): Dependency {
         val plugin = bundledPlugins[id]
+
         requireNotNull(plugin) {
             val unresolvedPluginId = when (id) {
                 "copyright" -> "Use correct plugin ID 'com.intellij.copyright' instead of 'copyright'."
@@ -769,8 +771,8 @@ class IntelliJPlatformDependenciesHelper(
                     module = id,
                     revision = version,
                 ),
-                publications = listOf(artifactPath.toIvyArtifact()),
-                dependencies = plugin.collectDependencies(),
+                publications = artifactPath.toBundledPluginIvyArtifacts(),
+                dependencies = plugin.collectBundledPluginDependencies(),
             )
         }
 
@@ -791,7 +793,9 @@ class IntelliJPlatformDependenciesHelper(
             .find { layout -> layout.name == id }
             .let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
         val platformPath = platformPath.get()
-        val artifactPaths = bundledModule.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
+        val artifactPaths = bundledModule.classPath.flatMap { path ->
+            platformPath.resolve(path).toBundledModuleIvyArtifacts()
+        }
         val version = baseVersion.orElse(productInfo.map { it.version }).get()
 
         writeIvyModule(Dependencies.BUNDLED_MODULE_GROUP, id, version) {
@@ -818,7 +822,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param path IDs of already traversed plugins or modules.
      */
-    private fun IdePlugin.collectDependencies(path: List<String> = emptyList()): List<IvyModule.Dependency> {
+    private fun IdePlugin.collectBundledPluginDependencies(path: List<String> = emptyList()): List<IvyModule.Dependency> {
         val id = requireNotNull(pluginId)
         val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name } - id).toSet()
         val buildNumber by lazy { productInfo.get().buildNumber }
@@ -835,10 +839,10 @@ class IntelliJPlatformDependenciesHelper(
                 writeIvyModule(group, name, version) {
                     IvyModule(
                         info = IvyModule.Info(group, name, version),
-                        publications = listOf(artifactPath.toIvyArtifact()),
+                        publications = artifactPath.toBundledPluginIvyArtifacts(),
                         dependencies = when {
                             id in path -> emptyList()
-                            else -> plugin.collectDependencies(path + id)
+                            else -> plugin.collectBundledPluginDependencies(path + id)
                         },
                     )
                 }
@@ -855,7 +859,9 @@ class IntelliJPlatformDependenciesHelper(
             .mapNotNull { layoutItems.find { layout -> layout.name == it } }
             .filterNot { it.classPath.isEmpty() }
             .map {
-                val artifactPaths = it.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
+                val artifactPaths = it.classPath.flatMap { path ->
+                    platformPath.resolve(path).toBundledModuleIvyArtifacts()
+                }
                 val group = Dependencies.BUNDLED_MODULE_GROUP
                 val name = it.name
                 val version = buildNumber
@@ -904,7 +910,7 @@ class IntelliJPlatformDependenciesHelper(
                     module = name,
                     revision = version,
                 ),
-                publications = listOf(artifactPath.toIvyArtifact()),
+                publications = artifactPath.toLocalPluginIvyArtifacts(),
             )
         }
 

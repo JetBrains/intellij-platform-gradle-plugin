@@ -7,6 +7,7 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
@@ -51,6 +52,7 @@ import kotlin.io.path.absolute
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
 abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
+    repositories: RepositoryHandler,
     configurations: ConfigurationContainer,
     dependencies: DependencyHandler,
     layout: ProjectLayout,
@@ -60,7 +62,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     rootProjectDirectory: Path,
 ) {
 
-    private val delegate = IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, resources, rootProjectDirectory)
+    private val delegate = IntelliJPlatformDependenciesHelper(repositories, configurations, dependencies, layout, objects, providers, resources, rootProjectDirectory)
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -1309,6 +1311,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         override fun register(project: Project, target: Any) =
             target.configureExtension<IntelliJPlatformDependenciesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
+                project.repositories,
                 project.configurations,
                 project.dependencies,
                 project.layout,

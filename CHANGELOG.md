@@ -6,6 +6,7 @@
 
 - Fixed issue #1778 by removing a hash of the absolute artifact path appended to the end of the version string. That hash made artifact version different on different PCs and also breaks Gradle dependency locking.
 - Add the missing `org.jetbrains.kotlin.platform.type=jvm` attribute to the `intellijPlatformRuntimeClasspath` configuration manually as it's not inherited from the `runtimeClasspath`.
+- #1779 Fixes compatibility with Gradle dependency verification. Previously it was failing with "Failed to create MD5 hash for file".
 
 ## [2.1.0]
 
