@@ -149,8 +149,18 @@ class IntelliJPlatformRepositoriesHelper(
         val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
         ivyPattern("${localPlatformArtifactsPath.pathString}/[organization]-[module]-[revision].[ext]")
 
-        // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
-        artifactPattern("/[artifact]")
+        // "type" may contain an optional absolute path to the actual location of the artifact, in different situations
+        // it may point to a completely unrelated locations on the file system.
+        // Yes, attribute named types does not fit very good for storing a path, but there is no better alternative.
+        // "artifact" maps to IvyModule#name here we expect to have the second part of the path.
+        // "ext" is file extension, e.g. "jar" or "directory", not used here.
+        //
+        // The type can be empty fur the "artifact" (IvyModule#name) can not.
+        //
+        // It has to be prefixed by "/" because: If this pattern is not a fully-qualified URL, it will be interpreted
+        // as a file relative to the project directory.
+        val pattern = "/([type])[artifact]"
+        artifactPattern(pattern)
 
         /**
          * Because artifact paths always start with `/` (see [toPublication] for details),
@@ -159,7 +169,7 @@ class IntelliJPlatformRepositoriesHelper(
          * starting with `c` for the sake of micro-optimization.
          */
         if (OperatingSystem.current().isWindows) {
-            (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:/[artifact]") }
+            (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:$pattern") }
         }
     }.apply {
         content {
