@@ -9,6 +9,7 @@
 ### Changed
 
 - Move `localPlatformArtifacts()` to the top of the `defaultRepositories()` list
+- Improved build performance by making the local Ivy repository an exclusive Gradle repository.
 
 ### Fixed
 
@@ -20,6 +21,7 @@
 - Fixed incorrect transitive dependencies calculation for bundled modules. [#1791](../../issues/1791)
 - Fixed IOB exception while running tests from Gradle.
 - Fixed an error while building the searchable options: `Unable to create shared archive file $IDE_CACHE_DIR/pycharm243.18137.19.jsa: (No such file or directory).`
+- Fixed compatibility with Gradle dependency verification. Previously it was failing with "Failed to create MD5 hash for file".
 
 ## [2.1.0]
 

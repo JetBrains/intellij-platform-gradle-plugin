@@ -13,6 +13,7 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.initialization.resolve.RulesMode
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
@@ -61,6 +62,7 @@ class IntelliJPlatformDependenciesHelper(
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,
     private val rootProjectDirectory: Path,
+    private val metadataRulesModeProvider: Provider<RulesMode>
 ) {
 
     private val log = Logger(javaClass)
@@ -708,7 +710,7 @@ class IntelliJPlatformDependenciesHelper(
                     module = type.code,
                     revision = version,
                 ),
-                publications = listOf(artifactPath.toIvyArtifact()),
+                publications = listOf(artifactPath.toAbsolutePathIvyArtifact()),
             )
         }
 
@@ -771,7 +773,7 @@ class IntelliJPlatformDependenciesHelper(
                     module = id,
                     revision = version,
                 ),
-                publications = listOf(artifactPath.toIvyArtifact()),
+                publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath.get()),
                 dependencies = plugin.collectDependencies(),
             )
         }
@@ -822,7 +824,7 @@ class IntelliJPlatformDependenciesHelper(
                     writeIvyModule(group, name, version, artifactPath) {
                         IvyModule(
                             info = IvyModule.Info(group, name, version),
-                            publications = listOf(artifactPath.toIvyArtifact()),
+                            publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath.get()),
                             dependencies = plugin.collectDependencies(alreadyProcessedOrProcessing + id),
                         )
                     }
@@ -858,7 +860,9 @@ class IntelliJPlatformDependenciesHelper(
         val group = Dependencies.BUNDLED_MODULE_GROUP
         val version = productInfo.get().buildNumber
         val platformPath = platformPath.get()
-        val artifacts = classPath.map { platformPath.resolve(it).toIvyArtifact() }
+        val artifacts = classPath.flatMap {
+                path -> platformPath.resolve(path).toIvyArtifacts(metadataRulesModeProvider, platformPath)
+        }
 
         /**
          * For bundled modules, usually we don't have a path to their archive (jar), since we get them from [ProductInfo.layout], which does not have a path.
@@ -905,7 +909,7 @@ class IntelliJPlatformDependenciesHelper(
                     module = name,
                     revision = version,
                 ),
-                publications = listOf(artifactPath.toIvyArtifact()),
+                publications = listOf(artifactPath.toAbsolutePathIvyArtifact()),
             )
         }
 
@@ -946,7 +950,7 @@ class IntelliJPlatformDependenciesHelper(
                     module = name,
                     revision = version,
                 ),
-                publications = listOf(artifactPath.toIvyArtifact()),
+                publications = listOf(artifactPath.toAbsolutePathIvyArtifact()),
             )
         }
 

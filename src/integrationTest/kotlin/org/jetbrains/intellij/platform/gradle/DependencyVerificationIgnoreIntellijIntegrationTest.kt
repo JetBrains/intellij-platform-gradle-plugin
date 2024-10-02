@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.readText
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -44,7 +43,6 @@ class DependencyVerificationIgnoreIntellijIntegrationTest : IntelliJPlatformInte
     }
 
     @Test
-    @Ignore("https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1779")
     fun `build plugin with dependency locks, hash & signature verification ignoring intellij artifacts`() {
         build(
             Tasks.External.CLEAN,

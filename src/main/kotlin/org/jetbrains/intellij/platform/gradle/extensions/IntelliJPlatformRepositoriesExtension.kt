@@ -16,6 +16,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
@@ -64,7 +65,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     @JvmOverloads
     fun releases(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
-        name = "IntelliJ Repository (Releases)",
+        name = Constants.Repositories.INTELLI_J_REPOSITORY_RELEASES,
         url = Locations.INTELLIJ_REPOSITORY_RELEASES,
         urlWithCacheRedirector = Locations.CACHE_REDIRECTOR_INTELLIJ_REPOSITORY_RELEASES,
         action = action,
@@ -77,7 +78,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     @JvmOverloads
     fun snapshots(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
-        name = "IntelliJ Repository (Snapshots)",
+        name = Constants.Repositories.INTELLI_J_REPOSITORY_SNAPSHOTS,
         url = Locations.INTELLIJ_REPOSITORY_SNAPSHOTS,
         urlWithCacheRedirector = Locations.CACHE_REDIRECTOR_INTELLIJ_REPOSITORY_SNAPSHOTS,
         action = action,
@@ -90,7 +91,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     @JvmOverloads
     fun nightly(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
-        name = "IntelliJ Repository (Nightly)",
+        name = Constants.Repositories.INTELLI_J_REPOSITORY_NIGHTLY,
         url = Locations.INTELLIJ_REPOSITORY_NIGHTLY,
         urlWithCacheRedirector = Locations.CACHE_REDIRECTOR_INTELLIJ_REPOSITORY_NIGHTLY,
         action = action,
@@ -103,7 +104,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     @JvmOverloads
     fun intellijDependencies(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
-        name = "IntelliJ Platform Dependencies Repository",
+        name = Constants.Repositories.INTELLI_J_PLATFORM_DEPENDENCIES,
         url = Locations.INTELLIJ_DEPENDENCIES_REPOSITORY,
         urlWithCacheRedirector = Locations.CACHE_REDIRECTOR_INTELLIJ_DEPENDENCIES_REPOSITORY,
         action = action,
@@ -116,7 +117,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     @JvmOverloads
     fun marketplace(action: MavenRepositoryAction = {}) = delegate.createMavenRepository(
-        name = "JetBrains Marketplace Repository",
+        name = Constants.Repositories.JET_BRAINS_MARKETPLACE,
         url = Locations.MARKETPLACE_REPOSITORY,
         urlWithCacheRedirector = Locations.CACHE_REDIRECTOR_MARKETPLACE_REPOSITORY,
         action = action,
@@ -125,7 +126,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     @JvmOverloads
     fun customPluginRepository(url: String, type: CustomPluginRepositoryType = CustomPluginRepositoryType.PLUGIN_REPOSITORY, action: IvyRepositoryAction = {}) =
         delegate.createCustomPluginRepository(
-            repositoryName = "IntelliJ Platform Custom Plugin Repository ($url)",
+            repositoryName = Constants.Repositories.INTELLI_J_PLATFORM_CUSTOM_PLUGIN + " ($url)",
             repositoryUrl = url,
             repositoryType = type,
             action = action,
@@ -138,7 +139,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     @JvmOverloads
     fun jetbrainsRuntime(action: IvyRepositoryAction = {}) = delegate.createIvyRepository(
-        name = "JetBrains Runtime",
+        name = Constants.Repositories.JET_BRAINS_RUNTIME,
         url = Locations.CACHE_REDIRECTOR_JETBRAINS_RUNTIME_REPOSITORY,
         patterns = listOf("[revision].tar.gz"),
     ) {
@@ -156,7 +157,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     @JvmOverloads
     fun jetbrainsIdeInstallers(action: IvyRepositoryAction = {}): IvyArtifactRepository = delegate.createIvyRepository(
-        name = "JetBrains IDE Installers",
+        name = Constants.Repositories.JET_BRAINS_IDE_INSTALLERS,
         url = Locations.JETBRAINS_IDES_INSTALLERS,
         patterns = listOf(
             "[organization]/[module]-[revision](-[classifier]).[ext]",
@@ -184,7 +185,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     @JvmOverloads
     fun androidStudioInstallers(action: IvyRepositoryAction = {}) = delegate.createIvyRepository(
-        name = "Android Studio Installers",
+        name = Constants.Repositories.ANDROID_STUDIO_INSTALLERS,
         url = Locations.ANDROID_STUDIO_INSTALLERS,
         patterns = listOf(
             "/ide-zips/[revision]/[artifact]-[revision]-[classifier].[ext]",
@@ -212,7 +213,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     @JvmOverloads
     fun localPlatformArtifacts(action: IvyRepositoryAction = {}) = delegate.createLocalIvyRepository(
-        repositoryName = "Local IntelliJ Platform Artifacts Repository",
+        repositoryName = Constants.Repositories.LOCAL_INTELLI_J_PLATFORM_ARTIFACTS,
         action = action,
     )
 
