@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.readText
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -24,8 +25,8 @@ class DependencyVerificationIgnoreIntellijIntegrationTest : IntelliJPlatformInte
     @Test
     fun `build plugin with dependency locks & hash verification ignoring intellij artifacts`() {
         build(
-            Constants.Tasks.CLEAN,
-            Constants.Tasks.BUILD_PLUGIN,
+            Tasks.External.CLEAN,
+            Tasks.BUILD_PLUGIN,
             projectProperties = defaultProjectProperties,
             args = listOf("--info", "--write-verification-metadata", "md5,sha1,sha256,sha512")
         ) {
@@ -33,8 +34,8 @@ class DependencyVerificationIgnoreIntellijIntegrationTest : IntelliJPlatformInte
         }
 
         build(
-            Constants.Tasks.CLEAN,
-            Constants.Tasks.BUILD_PLUGIN,
+            Tasks.External.CLEAN,
+            Tasks.BUILD_PLUGIN,
             projectProperties = defaultProjectProperties
         ) {
             buildDirectory containsFile "libs/test-1.0.0.jar"
@@ -46,8 +47,8 @@ class DependencyVerificationIgnoreIntellijIntegrationTest : IntelliJPlatformInte
     @Ignore("https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1779")
     fun `build plugin with dependency locks, hash & signature verification ignoring intellij artifacts`() {
         build(
-            Constants.Tasks.CLEAN,
-            Constants.Tasks.BUILD_PLUGIN,
+            Tasks.External.CLEAN,
+            Tasks.BUILD_PLUGIN,
             projectProperties = defaultProjectProperties,
             args = listOf("--info", "--write-verification-metadata", "md5,sha1,sha256,sha512,pgp")
         ) {
@@ -56,8 +57,8 @@ class DependencyVerificationIgnoreIntellijIntegrationTest : IntelliJPlatformInte
         }
 
         build(
-            Constants.Tasks.CLEAN,
-            Constants.Tasks.BUILD_PLUGIN,
+            Tasks.External.CLEAN,
+            Tasks.BUILD_PLUGIN,
             projectProperties = defaultProjectProperties
         ) {
             buildDirectory containsFile "libs/test-1.0.0.jar"

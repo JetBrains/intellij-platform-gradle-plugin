@@ -40,6 +40,7 @@ import java.io.File
 import java.io.FileReader
 import java.nio.file.Path
 import java.util.*
+import kotlin.Throws
 import kotlin.io.path.*
 
 /**
@@ -133,6 +134,7 @@ class IntelliJPlatformDependenciesHelper(
             .listDirectoryEntries()
             .filter { it.isDirectory() }
             .mapNotNull { path ->
+                // TODO: try not to parse all plugins at once
                 pluginManager.safelyCreatePlugin(path)
                     .onFailure { log.warn(it.message.orEmpty()) }
                     .getOrNull()
@@ -828,7 +830,7 @@ class IntelliJPlatformDependenciesHelper(
                 val artifactPath = requireNotNull(plugin.originalFile)
                 val group = Dependencies.BUNDLED_PLUGIN_GROUP
                 val name = requireNotNull(plugin.pluginId)
-                val version = "${plugin.pluginVersion}"
+                val version = requireNotNull(plugin.pluginVersion)
 
                 writeIvyModule(group, name, version) {
                     IvyModule(
@@ -892,7 +894,7 @@ class IntelliJPlatformDependenciesHelper(
             pluginManager.safelyCreatePlugin(pluginPath).getOrThrow()
         }
 
-        val version = (plugin.pluginVersion ?: "0.0.0")
+        val version = plugin.pluginVersion ?: "0.0.0"
         val name = plugin.pluginId ?: artifactPath.name
 
         writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version) {

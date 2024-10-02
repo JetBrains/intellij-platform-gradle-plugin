@@ -130,7 +130,6 @@ object Constants {
     }
 
     object Tasks {
-        const val CLEAN = "clean"
         const val BUILD_PLUGIN = "buildPlugin"
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val COMPOSED_JAR = "composedJar"
@@ -159,6 +158,7 @@ object Constants {
         const val VERIFY_PLUGIN_SIGNATURE = "verifyPluginSignature"
 
         object External {
+            const val CLEAN = "clean"
             const val COMPILE_JAVA = JavaPlugin.COMPILE_JAVA_TASK_NAME
             const val COMPILE_KOTLIN = "compileKotlin"
             const val JAR = JavaPlugin.JAR_TASK_NAME
