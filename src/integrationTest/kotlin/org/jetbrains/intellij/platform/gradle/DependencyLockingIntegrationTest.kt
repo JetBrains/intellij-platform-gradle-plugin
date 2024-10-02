@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.fileSize
 import kotlin.test.Test
 import kotlin.test.assertTrue
@@ -16,8 +17,8 @@ class DependencyLockingIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `build plugin with dependency locks`() {
         build(
-            Constants.Tasks.CLEAN,
-            Constants.Tasks.BUILD_PLUGIN,
+            Tasks.External.CLEAN,
+            Tasks.BUILD_PLUGIN,
             projectProperties = defaultProjectProperties,
             args = listOf("--info", "--write-locks")
         ) {
@@ -25,8 +26,8 @@ class DependencyLockingIntegrationTest : IntelliJPlatformIntegrationTestBase(
         }
 
         build(
-            Constants.Tasks.CLEAN,
-            Constants.Tasks.BUILD_PLUGIN,
+            Tasks.External.CLEAN,
+            Tasks.BUILD_PLUGIN,
             projectProperties = defaultProjectProperties
         ) {
             buildDirectory containsFile "libs/test-1.0.0.jar"
