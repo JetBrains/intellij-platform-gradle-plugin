@@ -226,11 +226,12 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      * - [marketplace] – JetBrains Marketplace plugins repository
      */
     fun defaultRepositories() {
+        // Try local first, because it should be the fastest.
+        localPlatformArtifacts()
         jetbrainsIdeInstallers()
         androidStudioInstallers()
         releases()
         snapshots()
-        localPlatformArtifacts()
         intellijDependencies()
         marketplace()
     }

@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Improved build performance by making the local Ivy repository first in the list and prefixing all "fake" artifact groups with "com.jetbrains.localhost-only" and excluding that group from already declared remote repositories.
+
 ### Fixed
 
 - Fixed issue #1778 by removing a hash of the absolute artifact path appended to the end of the version string. That hash made artifact version different on different PCs and also breaks Gradle dependency locking.
