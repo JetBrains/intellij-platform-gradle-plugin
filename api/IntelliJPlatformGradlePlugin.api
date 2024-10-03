@@ -48,6 +48,8 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Configurations$Attributes;
 	public final fun getCollected ()Lorg/gradle/api/attributes/Attribute;
 	public final fun getExtracted ()Lorg/gradle/api/attributes/Attribute;
+	public final fun getJvmEnvironment ()Lorg/gradle/api/attributes/Attribute;
+	public final fun getKotlinJPlatformType ()Lorg/gradle/api/attributes/Attribute;
 	public final fun getLocalPluginsNormalized ()Lorg/gradle/api/attributes/Attribute;
 }
 
