@@ -238,7 +238,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             create(
                 name = Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
                 description = "IntelliJ Platform Runtime Classpath resolvable configuration"
-            )
+            ) {
+                attributes {
+                    attributes.attribute(Attributes.kotlinJPlatformType, "jvm")
+                }
+            }
 
             this@configurations[Configurations.External.COMPILE_ONLY].extendsFrom(
                 intellijPlatformConfiguration,

@@ -91,6 +91,8 @@ object Constants {
             val localPluginsNormalized = Attribute.of("intellijPlatformLocalPluginsNormalized", Boolean::class.javaObjectType)
             val collected = Attribute.of("intellijPlatformCollected", Boolean::class.javaObjectType)
             val extracted = Attribute.of("intellijPlatformExtracted", Boolean::class.javaObjectType)
+            val jvmEnvironment = Attribute.of("org.gradle.jvm.environment", String::class.java)
+            val kotlinJPlatformType = Attribute.of("org.jetbrains.kotlin.platform.type", String::class.java)
 
             enum class ArtifactType {
                 DIRECTORY, DMG, TAR_GZ, SIT, ZIP;

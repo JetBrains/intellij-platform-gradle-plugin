@@ -5,7 +5,10 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.attributes.*
+import org.gradle.api.attributes.Bundling
+import org.gradle.api.attributes.Category
+import org.gradle.api.attributes.LibraryElements
+import org.gradle.api.attributes.Usage
 import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.kotlin.dsl.*
@@ -42,8 +45,8 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                         project.the<JavaPluginExtension>().targetCompatibility.majorVersion.toInt()
                     })
                     attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
-                    attributes.attribute(Attribute.of("org.gradle.jvm.environment", String::class.java), "standard-jvm")
-                    attributes.attribute(Attribute.of("org.jetbrains.kotlin.platform.type", String::class.java), "jvm")
+                    attributes.attribute(Attributes.jvmEnvironment, "standard-jvm")
+                    attributes.attribute(Attributes.kotlinJPlatformType, "jvm")
                 }
             }
 
