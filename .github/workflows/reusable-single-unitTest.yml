@@ -27,6 +27,7 @@ jobs:
     runs-on: ${{ inputs.os }}
     permissions:
       checks: write
+      contents: write
     steps:
 
       # Free GitHub Actions Environment Disk Space
