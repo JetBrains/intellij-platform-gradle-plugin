@@ -75,6 +75,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 	public static final field BUNDLED_MODULE_GROUP Ljava/lang/String;
 	public static final field BUNDLED_PLUGIN_GROUP Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Configurations$Dependencies;
+	public static final field JB_LOCAL_PREFIX Ljava/lang/String;
 	public static final field LOCAL_IDE_GROUP Ljava/lang/String;
 	public static final field LOCAL_JETBRAINS_RUNTIME_GROUP Ljava/lang/String;
 	public static final field LOCAL_PLUGIN_GROUP Ljava/lang/String;

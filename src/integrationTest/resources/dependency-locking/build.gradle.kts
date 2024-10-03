@@ -22,7 +22,8 @@ buildscript {
         lockAllConfigurations()
         lockFile = file("gradle/locks/root/gradle-buildscript.lockfile")
         lockMode.set(LockMode.DEFAULT)
-        //ignoredDependencies.add()
+        //ignoredDependencies.add("com.jetbrains.localhost-only.bundledModule:*")
+        //ignoredDependencies.add("com.jetbrains.localhost-only.bundledPlugin:*")
     }
 }
 // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1778

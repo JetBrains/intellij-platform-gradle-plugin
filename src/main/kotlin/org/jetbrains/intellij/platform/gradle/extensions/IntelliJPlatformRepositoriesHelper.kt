@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
 import org.gradle.api.flow.FlowProviders
@@ -142,12 +143,24 @@ class IntelliJPlatformRepositoriesHelper(
         return repository
     }
 
-    internal fun createLocalIvyRepository(repositoryName: String, action: IvyRepositoryAction = {}) = repositories.ivy {
-        name = repositoryName
+    internal fun createLocalIvyRepository(repositoryName: String, action: IvyRepositoryAction = {}): IvyArtifactRepository {
+        repositories.forEach {
+            it.content {
+                // For performance reasons exclude the group from already added repos, since we do not expect it to
+                // exist in any public repositories.
+                // The ones declared after, should not matter, as long as the artifact is found in this repo,
+                // because Gradle checks repos in their declaration order.
+                // Tests on an env with removed caches show that this is actually necessary to prevent extra requests.
+                excludeGroupAndSubgroups(Configurations.Dependencies.JB_LOCAL_PREFIX)
+            }
+        }
 
-        // Location of Ivy files generated for the current project.
-        val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
-        ivyPattern("${localPlatformArtifactsPath.pathString}/[organization]-[module]-[revision].[ext]")
+        return repositories.ivy {
+            name = repositoryName
+
+            // Location of Ivy files generated for the current project.
+            val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
+            ivyPattern("${localPlatformArtifactsPath.pathString}/[organization]-[module]-[revision].[ext]")
 
         // "type" may contain an optional absolute path to the actual location of the artifact, in different situations
         // it may point to a completely unrelated locations on the file system.
@@ -162,23 +175,24 @@ class IntelliJPlatformRepositoriesHelper(
         val pattern = "/([type])[artifact]"
         artifactPattern(pattern)
 
-        /**
-         * Because artifact paths always start with `/` (see [toPublication] for details),
-         * on Windows, we have to guess to which drive letter the artifact path belongs to.
-         * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
-         * starting with `c` for the sake of micro-optimization.
-         */
-        if (OperatingSystem.current().isWindows) {
+            /**
+             * Because artifact paths always start with `/` (see [toPublication] for details),
+             * on Windows, we have to guess to which drive letter the artifact path belongs to.
+             * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
+             * starting with `c` for the sake of micro-optimization.
+             */
+            if (OperatingSystem.current().isWindows) {
             (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:$pattern") }
+            }
+        }.apply {
+            content {
+                includeGroup(Configurations.Dependencies.BUNDLED_MODULE_GROUP)
+                includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
+                includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
+                includeGroup(Configurations.Dependencies.LOCAL_PLUGIN_GROUP)
+                includeGroup(Configurations.Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP)
+            }
+            action()
         }
-    }.apply {
-        content {
-            includeGroup(Configurations.Dependencies.BUNDLED_MODULE_GROUP)
-            includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
-            includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
-            includeGroup(Configurations.Dependencies.LOCAL_PLUGIN_GROUP)
-            includeGroup(Configurations.Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP)
-        }
-        action()
     }
 }
