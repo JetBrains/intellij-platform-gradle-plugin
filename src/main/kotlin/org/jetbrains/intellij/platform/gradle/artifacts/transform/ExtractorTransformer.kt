@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
@@ -14,11 +15,20 @@ import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.FileTree
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.tasks.Classpath
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.process.ExecOperations
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.IVY_FILES_DIRECTORY
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper.Companion.collectBundledPluginDependencies
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper.Companion.getBundledPlugins
+import org.jetbrains.intellij.platform.gradle.models.IvyModule
+import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.models.toBundledIvyArtifactsRelativeTo
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.resolvePlatformPath
@@ -36,6 +46,7 @@ abstract class ExtractorTransformer @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val execOperations: ExecOperations,
     private val objectFactory: ObjectFactory,
+    private val providerFactory: ProviderFactory,
     private val fileSystemOperations: FileSystemOperations,
 ) : TransformAction<TransformParameters.None> {
 
@@ -106,14 +117,64 @@ abstract class ExtractorTransformer @Inject constructor(
                         commandLine("hdiutil", "detach", "-force", "-quiet", tempDirectory)
                     }
                 }
-
                 else -> {}
             }
 
             log.info("Extracting to '$targetDirectory' completed.")
+
+            createIvyXmls(targetDirectory.resolvePlatformPath())
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
         }
+    }
+
+    /**
+     * Pre-create Ivy XML files so that later this directory can be used as an Ivy repository without having to discover
+     * modules & plugins each time the build is run.
+     */
+    private fun createIvyXmls(platformPath: Path) {
+        val isIde = platformPath.listDirectoryEntries().map { it.name }.containsAll(
+            listOf("bin", "lib", "plugins")
+        )
+        if (!isIde) {
+            log.info("The directory '$platformPath' is not an IDE, Ivy repository is not needed there.")
+            return
+        }
+
+        log.info("Creating an Ivy repository in '$platformPath'.")
+
+        val writtenIvyModules = HashSet<String>()
+        val productInfo = platformPath.productInfo()
+        val version = productInfo.buildNumber
+
+        val pluginManager = IdePluginManager.createManager(createTempDirectory())
+        val bundledPlugins = platformPath.getBundledPlugins(pluginManager)
+
+        for (plugin in bundledPlugins.values) {
+            val pluginId = plugin.pluginId
+            val pluginVersion = plugin.pluginVersion
+            val pluginPath = plugin.originalFile
+            if (null == pluginId || null == pluginVersion || null == pluginPath) {
+                continue
+            }
+
+            val group = Constants.Configurations.Dependencies.BUNDLED_PLUGIN_GROUP
+
+            val ivyDirPath = platformPath.resolve(IVY_FILES_DIRECTORY).absolute().normalize()
+            IntelliJPlatformDependenciesHelper.writeIvyModule(group, pluginId, version, writtenIvyModules, ivyDirPath) {
+                val publications = pluginPath.toBundledIvyArtifactsRelativeTo(platformPath)
+                val dependencies = plugin.collectBundledPluginDependencies(
+                    emptyList(), productInfo, platformPath, bundledPlugins, writtenIvyModules, providerFactory, ivyDirPath
+                )
+                IvyModule(
+                    info = IvyModule.Info(group, pluginId, version),
+                    publications = publications,
+                    dependencies = dependencies,
+                )
+            }
+        }
+
+        log.info("Creation of an Ivy repository in '$platformPath' finished.")
     }
 
     private fun dmgTree(path: Path): FileTree {
@@ -153,7 +214,7 @@ abstract class ExtractorTransformer @Inject constructor(
                     // such as `.background` meta-directory we have to exclude.
                     it.file.run {
                         (name == "Applications" && Files.isSymbolicLink(toPath()))
-                                || it.relativePath.startsWith('.')
+                            || it.relativePath.startsWith('.')
                     }
                 }
             }
@@ -168,8 +229,7 @@ abstract class ExtractorTransformer @Inject constructor(
             intellijPlatformTestClasspath: Configuration,
         ) {
             Attributes.ArtifactType.Archives.forEach {
-                dependencies.artifactTypes.maybeCreate(it.toString())
-                    .attributes.attribute(Attributes.extracted, false)
+                dependencies.artifactTypes.maybeCreate(it.toString()).attributes.attribute(Attributes.extracted, false)
             }
 
             listOf(compileClasspathConfiguration, testCompileClasspathConfiguration, intellijPlatformClasspath, intellijPlatformTestClasspath).forEach {

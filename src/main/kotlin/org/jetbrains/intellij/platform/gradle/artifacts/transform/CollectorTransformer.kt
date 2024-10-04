@@ -91,7 +91,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html#non-bundled-plugin
                     // For other plugins, we never (usually?) get into this block, because their Ivy artifacts already
                     // list jars, instead of pointing to a directory, see:
-                    // See also org.jetbrains.intellij.platform.gradle.models.IvyModuleKt.explodeIntoIvyJarsArtifacts
+                    // See also org.jetbrains.intellij.platform.gradle.models.IvyModuleKt.explodeIntoIvyJarsArtifactsRelativeTo
                     plugin.originalFile?.let { pluginPath ->
                         val jars = collectJars(pluginPath)
                         jars.forEach {
@@ -110,7 +110,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
     companion object {
         internal fun collectJars(path: Path): List<Path> {
             val libPath = path.resolve("lib")
-            val libModulesPath = path.resolve("lib/modules")
+            val libModulesPath = libPath.resolve("modules")
 
             return listOf(libPath, libModulesPath)
                 .mapNotNull { it.takeIfExists() }

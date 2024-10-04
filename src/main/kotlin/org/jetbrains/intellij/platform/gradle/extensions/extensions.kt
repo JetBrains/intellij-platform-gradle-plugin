@@ -8,6 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
+import org.jetbrains.intellij.platform.gradle.Constants.IVY_FILES_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.get
@@ -20,11 +21,11 @@ import kotlin.io.path.createDirectories
 /**
  * Returns the IntelliJ Platform Gradle Plugin cache directory for the current project.
  */
-internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
+internal fun ProviderFactory.intellijPlatformCachePath(path: Path) =
     get(GradleProperties.IntellijPlatformCache).orNull
         .takeUnless { it.isNullOrBlank() }
         ?.let { Path(it) }
-        .run { this ?: rootProjectDirectory.resolve(CACHE_DIRECTORY) }
+        .run { this ?: path.resolve(CACHE_DIRECTORY) }
         .createDirectories()
         .absolute()
 
@@ -33,11 +34,11 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
  *
  * @see [GradleProperties.LocalPlatformArtifacts]
  */
-internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
+internal fun ProviderFactory.localPlatformArtifactsPath(path: Path) =
     get(GradleProperties.LocalPlatformArtifacts).orNull
         .takeUnless { it.isNullOrBlank() }
         ?.let { Path(it) }
-        .run { this ?: intellijPlatformCachePath(rootProjectDirectory).resolve("localPlatformArtifacts") }
+        .run { this ?: intellijPlatformCachePath(path).resolve(IVY_FILES_DIRECTORY) }
         .createDirectories()
         .absolute()
 
