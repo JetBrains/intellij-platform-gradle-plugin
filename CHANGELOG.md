@@ -18,6 +18,7 @@
 - Fixed generation of duplicate files in ".intellijPlatform/localPlatformArtifacts" with different version numbers.
 - Gradle's api & compileOnlyApi configurations created by its java-library plugin don't work, and transitive implementation scope dependencies get exposed, when this plugin is used. [#1799](../../issues/1799)
 - Fixed incorrect transitive dependencies calculation for bundled modules. [#1791](../../issues/1791)
+- Fixed IOB exception while running tests from Gradle.
 
 ## [2.1.0]
 
