@@ -177,6 +177,7 @@ internal fun String.resolveIdeHomeVariable(platformPath: Path) =
     platformPath.pathString.let {
         this.replace("\$APP_PACKAGE", it)
             .replace("\$IDE_HOME", it)
+            .replace("\$IDE_CACHE_DIR", it)
             .replace("%IDE_HOME%", it)
             .replace("Contents/Contents", "Contents")
             .let { entry ->
