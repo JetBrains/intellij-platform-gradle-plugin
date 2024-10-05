@@ -175,13 +175,16 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
  */
 internal fun String.resolveIdeHomeVariable(platformPath: Path) =
     platformPath.pathString.let {
-        this
-            .replace("\$APP_PACKAGE", it)
+        this.replace("\$APP_PACKAGE", it)
             .replace("\$IDE_HOME", it)
             .replace("%IDE_HOME%", it)
             .replace("Contents/Contents", "Contents")
             .let { entry ->
-                val (_, value) = entry.split("=")
+                val delimiters = "="
+                if (!entry.contains(delimiters)) {
+                    return entry
+                }
+                val (_, value) = entry.split(delimiters)
                 when {
                     runCatching { Path(value).exists() }.getOrElse { false } -> entry
                     else -> entry.replace("/Contents", "")
