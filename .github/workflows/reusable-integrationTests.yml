@@ -64,7 +64,7 @@ jobs:
 
       - name: Test Report
         uses: dorny/test-reporter@v1
-        if: ${{ always() }}
+        if: github.event_name != 'pull_request'
         with:
           name: "Integration Tests Report: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}"
           path: "**/build/test-results/*/TEST-*.xml"
