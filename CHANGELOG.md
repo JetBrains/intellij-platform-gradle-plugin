@@ -12,6 +12,7 @@
 - Add the missing `org.jetbrains.kotlin.platform.type=jvm` attribute to the `intellijPlatformRuntimeClasspath` configuration manually as it's not inherited from the `runtimeClasspath`.
 - Fixed `Could not generate a decorated class for type PluginArtifactRepository.` when creating a custom plugin repository.
 - Fix #1777: IOB exception while running tests from Gradle.
+- Fix #1777: An error while building searchable options: "Unable to create shared archive file $IDE_CACHE_DIR/pycharm243.18137.19.jsa: (No such file or directory)."
 
 ## [2.1.0]
 
