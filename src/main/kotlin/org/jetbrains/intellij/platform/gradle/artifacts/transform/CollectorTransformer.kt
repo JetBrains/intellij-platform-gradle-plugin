@@ -111,6 +111,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
             dependencies: DependencyHandler,
             compileClasspathConfiguration: Configuration,
             testCompileClasspathConfiguration: Configuration,
+            intellijPlatformClasspath: Configuration,
             intellijPlatformTestClasspath: Configuration,
             intellijPlatformConfiguration: Configuration,
         ) {
@@ -119,7 +120,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                     .attributes.attribute(Attributes.collected, false)
             }
 
-            listOf(compileClasspathConfiguration, testCompileClasspathConfiguration, intellijPlatformTestClasspath).forEach {
+            listOf(compileClasspathConfiguration, testCompileClasspathConfiguration, intellijPlatformClasspath, intellijPlatformTestClasspath).forEach {
                 it.attributes.attribute(Attributes.collected, true)
             }
 
