@@ -410,6 +410,13 @@ class IntelliJPlatformDependenciesHelper(
             }
         }
 
+        // It would be better to make it createExclusiveIvyRepository.
+        // However, since we are creating it lazily, by this time some already registered repositories could have been
+        // "used". That creates an error, because an exclusive repository tries to add constraints on already existing
+        // repositories, which is not allowed for "used". To make it exclusive, it should be created with empty artifact
+        // & ivy paths in
+        // org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension.defaultRepositories
+        // then the paths should be updated here once they are known.
         IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository(
             repositoryName,
             repositories,

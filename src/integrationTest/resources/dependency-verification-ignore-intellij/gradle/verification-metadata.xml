@@ -13,8 +13,8 @@
          <key-server uri="https://keys.openpgp.org/"/>
       </key-servers>
       <trusted-artifacts>
-         <trust group="com.jetbrains.localhost-only.bundledModule" reason="Testing"/>
-         <trust group="com.jetbrains.localhost-only.bundledPlugin" reason="Testing"/>
+         <trust group="bundledModule" reason="Testing"/>
+         <trust group="bundledPlugin" reason="Testing"/>
       </trusted-artifacts>
    </configuration>
 </verification-metadata>

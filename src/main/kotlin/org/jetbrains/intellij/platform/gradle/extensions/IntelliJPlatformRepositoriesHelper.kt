@@ -286,7 +286,7 @@ class IntelliJPlatformRepositoriesHelper(
                 //
                 //       - Artifact name may also come up in Gradle errors, e.g. if for some reason the artifact is not
                 //         resolved. In that case the artifact coordinates may look very weird like:
-                //         com.jetbrains.localhost-only.bundledPlugin:/some/path/more/path/some.jar:123.456.789
+                //         bundledPlugin:/some/path/more/path/some.jar:123.456.789
                 //         For the same reason file extension is also stored in "ext".
                 //
                 // - "artifact" (IvyModule#name) is mandatory and contains the second part of the path, which is file

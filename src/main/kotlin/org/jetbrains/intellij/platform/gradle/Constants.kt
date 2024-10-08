@@ -123,13 +123,11 @@ object Constants {
         }
 
         object Dependencies {
-            /** This group does not exist in any public repository, it is just a prefix for our local repo. */
-            const val JB_LOCAL_PREFIX = "com.jetbrains.localhost-only"
-            const val LOCAL_IDE_GROUP = "$JB_LOCAL_PREFIX.ide"
-            const val LOCAL_PLUGIN_GROUP = "$JB_LOCAL_PREFIX.plugin"
-            const val LOCAL_JETBRAINS_RUNTIME_GROUP = "$JB_LOCAL_PREFIX.jetBrainsRuntime"
-            const val BUNDLED_MODULE_GROUP = "$JB_LOCAL_PREFIX.bundledModule"
-            const val BUNDLED_PLUGIN_GROUP = "$JB_LOCAL_PREFIX.bundledPlugin"
+            const val LOCAL_IDE_GROUP = "localIde"
+            const val LOCAL_PLUGIN_GROUP = "localPlugin"
+            const val LOCAL_JETBRAINS_RUNTIME_GROUP = "localJetBrainsRuntime"
+            const val BUNDLED_MODULE_GROUP = "bundledModule"
+            const val BUNDLED_PLUGIN_GROUP = "bundledPlugin"
             const val MARKETPLACE_GROUP = "com.jetbrains.plugins"
         }
 

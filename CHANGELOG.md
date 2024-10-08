@@ -10,7 +10,7 @@
 
 - Move `localPlatformArtifacts()` to the top of the `defaultRepositories()` list
 - Improved build performance by pre-creating Ivy XML files in the extracted IDE location.
-- Improved build performance by making the local Ivy repository first in the list and prefixing all "fake" artifact groups with "com.jetbrains.localhost-only" and excluding that group from already declared remote repositories.
+- Improved build performance by making the local Ivy repository first in the list and making it an exclusive Gradle repository.
 
 ### Fixed
 

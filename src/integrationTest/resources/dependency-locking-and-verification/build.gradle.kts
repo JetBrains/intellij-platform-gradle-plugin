@@ -21,8 +21,8 @@ buildscript {
         lockAllConfigurations()
         lockFile = file("gradle/locks/root/gradle-buildscript.lockfile")
         lockMode.set(LockMode.DEFAULT)
-        //ignoredDependencies.add("com.jetbrains.localhost-only.bundledModule:*")
-        //ignoredDependencies.add("com.jetbrains.localhost-only.bundledPlugin:*")
+        //ignoredDependencies.add("bundledModule:*")
+        //ignoredDependencies.add("bundledPlugin:*")
     }
 }
 // https://docs.gradle.org/current/userguide/dependency_locking.html
