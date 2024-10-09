@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.artifacts.repositories
 
 import org.gradle.api.Action
 import org.gradle.api.GradleException
+import org.gradle.api.artifacts.repositories.AuthenticationContainer
 import org.gradle.api.artifacts.repositories.AuthenticationSupported
 import org.gradle.api.artifacts.repositories.PasswordCredentials
 import org.gradle.api.credentials.Credentials
@@ -16,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.shim.Shim
 import java.net.URI
 import javax.inject.Inject
+import kotlin.Throws
 
 /**
  * Represents a repository used for handling custom plugin repositories with authentication support.
@@ -36,10 +38,12 @@ abstract class PluginArtifactRepository @Inject constructor(
     name: String,
     url: URI,
     val type: CustomPluginRepositoryType,
-    allowInsecureProtocol: Boolean = true,
+    allowInsecureProtocol: Boolean,
 ) : BaseArtifactRepository(name, url, allowInsecureProtocol), AuthenticationSupported {
 
     private val credentials = objects.property(Credentials::class)
+
+    override fun getCredentials() = getCredentials(PasswordCredentials::class.java)
 
     /**
      * Retrieves the credentials of the specified type for the repository.
@@ -66,10 +70,14 @@ abstract class PluginArtifactRepository @Inject constructor(
      * @param action The action used to configure the credentials.
      */
     override fun <T : Credentials?> credentials(credentialsType: Class<T>, action: Action<in T>) {
-        val credentialsValue = instantiateCredentials(credentialsType)
+        val credentialsValue = requireNotNull(instantiateCredentials(credentialsType))
         action.execute(credentialsValue)
         credentials = credentialsValue
     }
+
+    override fun credentials(action: Action<in PasswordCredentials>) = credentials(PasswordCredentials::class.java, action)
+
+    override fun credentials(credentialsType: Class<out Credentials?>) = throw UnsupportedOperationException()
 
     /**
      * Instantiates a specific type of credentials based on the provided credential type.
@@ -85,6 +93,10 @@ abstract class PluginArtifactRepository @Inject constructor(
         HttpHeaderCredentials::class.java.isAssignableFrom(credentialType) -> credentialType.cast(instantiator.newInstance(HttpHeaderCredentials::class.java))
         else -> throw IllegalArgumentException("Unrecognized credential type: ${credentialType.getName()}")
     }
+
+    override fun getAuthentication() = throw UnsupportedOperationException()
+
+    override fun authentication(action: Action<in AuthenticationContainer>) = throw UnsupportedOperationException()
 }
 
 /**

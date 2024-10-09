@@ -96,7 +96,7 @@ class IntelliJPlatformRepositoriesHelper(
         repositoryType: CustomPluginRepositoryType,
         action: IvyRepositoryAction = {},
     ): PluginArtifactRepository {
-        val repository = objects.newInstance<PluginArtifactRepository>(repositoryName, URI(repositoryUrl), repositoryType)
+        val repository = objects.newInstance<PluginArtifactRepository>(repositoryName, URI(repositoryUrl), repositoryType, true)
         val shimServer = shimManager.get().start(repository)
 
         flowScope.always(StopShimServerAction::class) {

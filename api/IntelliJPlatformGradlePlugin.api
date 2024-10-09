@@ -410,8 +410,15 @@ public abstract class org/jetbrains/intellij/platform/gradle/artifacts/repositor
 
 public abstract class org/jetbrains/intellij/platform/gradle/artifacts/repositories/PluginArtifactRepository : org/jetbrains/intellij/platform/gradle/artifacts/repositories/BaseArtifactRepository, org/gradle/api/artifacts/repositories/AuthenticationSupported {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/internal/reflect/Instantiator;Ljava/lang/String;Ljava/net/URI;Lcom/jetbrains/plugin/structure/intellij/repository/CustomPluginRepositoryListingType;Z)V
-	public synthetic fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/internal/reflect/Instantiator;Ljava/lang/String;Ljava/net/URI;Lcom/jetbrains/plugin/structure/intellij/repository/CustomPluginRepositoryListingType;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun authentication (Lorg/gradle/api/Action;)Ljava/lang/Void;
+	public synthetic fun authentication (Lorg/gradle/api/Action;)V
+	public fun credentials (Ljava/lang/Class;)Ljava/lang/Void;
+	public synthetic fun credentials (Ljava/lang/Class;)V
 	public fun credentials (Ljava/lang/Class;Lorg/gradle/api/Action;)V
+	public fun credentials (Lorg/gradle/api/Action;)V
+	public fun getAuthentication ()Ljava/lang/Void;
+	public synthetic fun getAuthentication ()Lorg/gradle/api/artifacts/repositories/AuthenticationContainer;
+	public fun getCredentials ()Lorg/gradle/api/artifacts/repositories/PasswordCredentials;
 	public fun getCredentials (Ljava/lang/Class;)Lorg/gradle/api/credentials/Credentials;
 	public final fun getType ()Lcom/jetbrains/plugin/structure/intellij/repository/CustomPluginRepositoryListingType;
 }
