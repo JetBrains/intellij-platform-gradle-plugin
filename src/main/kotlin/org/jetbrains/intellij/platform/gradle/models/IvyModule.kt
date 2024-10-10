@@ -127,7 +127,7 @@ internal fun Path.toAbsolutePathIvyArtifact(): IvyModule.Artifact {
 }
 
 /**
- * @see IntelliJPlatformDependenciesHelper.registerIntellijPlatformIvyRepo
+ * @see IntelliJPlatformRepositoriesHelper.Companion.createDynamicBundledIvyArtifactsRepository
  */
 internal fun Path.toBundledIvyArtifactsRelativeTo(basePath: Path) = explodeIntoIvyJarsArtifactsRelativeTo(basePath)
 
@@ -139,9 +139,6 @@ internal fun Path.toBundledIvyArtifactsRelativeTo(basePath: Path) = explodeIntoI
  */
 internal fun Path.toAbsolutePathLocalPluginIvyArtifacts() = explodeIntoIvyJarsArtifactsRelativeTo(null)
 
-/**
- * @see IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
- */
 private fun Path.explodeIntoIvyJarsArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {
     // The contract is that we're working with absolute normalized paths here.
     val absNormalizedPath = this.absolute().normalize()

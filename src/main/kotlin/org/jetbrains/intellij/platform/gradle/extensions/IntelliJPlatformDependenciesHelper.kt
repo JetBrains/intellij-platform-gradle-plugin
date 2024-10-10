@@ -336,7 +336,6 @@ class IntelliJPlatformDependenciesHelper(
      * Registers an Ivy repository containing IntelliJ Platform bundled plugins and modules.
      * It has to be done like this, because if that repository is not local (created using [createIntelliJPlatformLocal]),
      * we don't know its location until [ExtractorTransformer] has finished.
-     * For the local repository, we do the same to keep it simple.
      * @see Path.toBundledIvyArtifactsRelativeTo
      */
     private fun registerIntellijPlatformIvyRepo() {
@@ -363,38 +362,6 @@ class IntelliJPlatformDependenciesHelper(
             else -> artifactLocationPath.resolve(IVY_FILES_DIRECTORY)
         }.absolute().normalize()
 
-        val repositoryName = "${Repositories.LOCAL_INTELLI_J_PLATFORM_ARTIFACTS} (${artifactLocationPath.invariantSeparatorsPathString})"
-
-        // It may be called more than once
-        if (repositories.findByName(repositoryName) != null) {
-            return
-        }
-
-        /**
-         * We can't use [IntelliJPlatformRepositoriesHelper.createExclusiveIvyRepository] here because it would try to change already declared repositories,
-         * and if any of them have been already "used" by something, it would throw an exception.
-         * See: [org.gradle.api.internal.artifacts.repositories.DefaultRepositoryContentDescriptor.assertMutable]
-         */
-        repositories.forEach {
-            try {
-                it.content {
-                    /**
-                     * For performance reasons exclude the group from already added repos, since we don't expect it to exist in any public repositories.
-                     * The ones declared after shouldn't matter, as long as the artifact is found in this repository,
-                     * because Gradle checks repositories in their declaration order.
-                     * Tests on an env with removed caches show that this is actually necessary to prevent extra requests.
-                     */
-                    excludeGroup(Dependencies.BUNDLED_MODULE_GROUP)
-                    excludeGroup(Dependencies.BUNDLED_PLUGIN_GROUP)
-                    // Could be improved some day to the next, but today it fails on Gradle 8.2, works on 8.10.2
-                    //excludeGroupAndSubgroups(Dependencies.BUNDLED_MODULE_GROUP)
-                    //excludeGroupAndSubgroups(Dependencies.BUNDLED_PLUGIN_GROUP)
-                }
-            } catch (e: Exception) {
-                // Ignore, don't care.
-            }
-        }
-
         /**
          * It would be better to make it [IntelliJPlatformRepositoriesHelper.createExclusiveIvyRepository].
          * However, since we're creating it lazily, by this time some already registered repositories could have been "used".
@@ -402,15 +369,9 @@ class IntelliJPlatformDependenciesHelper(
          * To make it exclusive, it should be created with empty artifact anv Ivy paths in [IntelliJPlatformRepositoriesExtension.defaultRepositories]
          * then the paths should be updated here once they're known.
          */
-        IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository(
-            repositoryName, repositories, ivyLocationPath, artifactLocationPath
-        ).content {
-            includeGroup(Dependencies.BUNDLED_MODULE_GROUP)
-            includeGroup(Dependencies.BUNDLED_PLUGIN_GROUP)
-            // Could be improved some day to the next, but today it fails on Gradle 8.2, works on 8.10.2
-            //includeGroupAndSubgroups(Dependencies.BUNDLED_MODULE_GROUP)
-            //includeGroupAndSubgroups(Dependencies.BUNDLED_PLUGIN_GROUP)
-        }
+        IntelliJPlatformRepositoriesHelper.createDynamicBundledIvyArtifactsRepository(
+            repositories, ivyLocationPath, artifactLocationPath
+        )
     }
 
     /**

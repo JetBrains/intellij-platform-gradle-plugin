@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.artifacts.repositories.IvyArtifactRepository
+import org.gradle.api.artifacts.repositories.RepositoryContentDescriptor
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
 import org.gradle.api.flow.FlowProviders
@@ -15,6 +16,7 @@ import org.gradle.authentication.http.HttpHeaderAuthentication
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
+import org.jetbrains.intellij.platform.gradle.Constants.Repositories
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
@@ -25,6 +27,7 @@ import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
 import org.jetbrains.kotlin.util.removeSuffixIfPresent
 import java.net.URI
 import java.nio.file.Path
+import kotlin.io.path.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -68,6 +71,11 @@ class IntelliJPlatformRepositoriesHelper(
                 }
             ) {
                 this.name = name
+
+                this.content {
+                    excludeBundledModuleAndPluginGroups()
+                }
+
                 action()
             }
         }
@@ -91,6 +99,11 @@ class IntelliJPlatformRepositoriesHelper(
         this.url = URI(url)
         patternLayout { patterns.forEach { artifact(it) } }
         metadataSources { artifact() }
+
+        this.content {
+            excludeBundledModuleAndPluginGroups()
+        }
+
         action()
     }
 
@@ -141,6 +154,10 @@ class IntelliJPlatformRepositoriesHelper(
                     }
                 }
             }
+
+            this.content {
+                excludeBundledModuleAndPluginGroups()
+            }
         }.apply(action)
 
         return repository
@@ -161,107 +178,177 @@ class IntelliJPlatformRepositoriesHelper(
                 Dependencies.LOCAL_PLUGIN_GROUP,
                 Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP
             ),
-            repositories,
             ivyLocationPath,
-            // We can not know it, since this repo is used to store all kinds of things located in unrelated paths.
-            artifactLocationPath = null,
             action
         )
     }
 
-    companion object {
-        internal fun createExclusiveIvyRepository(
-            repositoryName: String,
-            exclusiveGroups: Set<String> = emptySet(),
-            repositories: RepositoryHandler,
-            ivyLocationPath: Path,
-            artifactLocationPath: Path?,
-            action: IvyRepositoryAction = {},
-        ): IvyArtifactRepository {
-            val repository = createIvyArtifactRepository(
-                repositoryName, repositories, ivyLocationPath, artifactLocationPath
-            )
+    private fun createExclusiveIvyRepository(
+        repositoryName: String,
+        exclusiveGroups: Set<String> = emptySet(),
+        ivyLocationPath: Path,
+        action: IvyRepositoryAction = {}
+    ): IvyArtifactRepository {
+        val repository = createIvyArtifactRepository(
+            repositoryName, ivyLocationPath
+        )
 
-            // For performance reasons make it exclusive.
-            // https://docs.gradle.org/current/userguide/declaring_repositories_adv.html#declaring_content_exclusively_found_in_one_repository
-            repositories.exclusiveContent {
-                forRepository {
-                    repository
-                }
-
-                filter {
-                    for (exclusiveGroup in exclusiveGroups) {
-                        includeGroup(exclusiveGroup)
-                        // Could be improved some day to the next, but today it fails on Gradle 8.2, works on 8.10.2
-                        //includeGroupAndSubgroups(exclusiveGroup)
-                    }
-                }
+        // For performance reasons make it exclusive.
+        // https://docs.gradle.org/current/userguide/declaring_repositories_adv.html#declaring_content_exclusively_found_in_one_repository
+        repositories.exclusiveContent {
+            forRepository {
+                repository
             }
 
-            repository.apply {
-                action()
+            filter {
+                for (exclusiveGroup in exclusiveGroups) {
+                    includeGroup(exclusiveGroup)
+                    // Could be improved some day to the next, but today it fails on Gradle 8.2, works on 8.10.2
+                    //includeGroupAndSubgroups(exclusiveGroup)
+                }
             }
-
-            return repository
         }
 
+        repository.apply {
+            action()
+        }
+
+        return repository
+    }
+
+    /**
+     * @see org.jetbrains.intellij.platform.gradle.models.IvyModule.toAbsolutePathIvyArtifact
+     * @see org.jetbrains.intellij.platform.gradle.models.IvyModule.toBundledIvyArtifactsRelativeTo
+     * @see org.jetbrains.intellij.platform.gradle.models.IvyModule.toAbsolutePathLocalPluginIvyArtifacts
+     * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper.registerIntellijPlatformIvyRepo
+     */
+    private fun createIvyArtifactRepository(
+        repositoryName: String,
+        ivyLocationPath: Path
+    ) = repositories.ivy {
+        name = repositoryName
+
+        // The contract is that we are working with absolute normalized paths here.
+        val absNormIvyLocationPath = ivyLocationPath.absolute().normalize()
+
+        // Location of Ivy files generated for the current project.
+        val ivyPath = absNormIvyLocationPath
+            .absolute()
+            .normalize()
+            .invariantSeparatorsPathString
+            .removeSuffixIfPresent("/")
+
+        ivyPattern("$ivyPath/[organization]-[module]-[revision].[ext]")
+
+        // If the path is not given, we expect the "artifact" (IvyModule#name) to contain the absolute paths
+        // In different situations it may point to a completely unrelated locations on the file system.
+
+        // It has to be prefixed by "/" because if this pattern is not a fully-qualified URL, it will be interpreted
+        // as a file relative to the project directory, even if the "artifact" (IvyModule#name) starts with a "/".
+        // We can not rid of this leading separator as long as the repository created by createLocalIvyRepository
+        // or (localPlatformArtifacts() in public API) is used to reference completely unrelated paths. If they were
+        // split into multiple repositories, each could be prefixed with an absolute path specific to that repo.
+
+        // In this case, name is the full path (without the leading "/"), so type is not needed.
+        // In this case, it should be ok to have an absolute path in the name, because this is a fallback method,
+        // which called for directories only (at least at the moment of writing this), where it is not clear how
+        // to split it into two pieces: path and artifact.
+        // See IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository on why having abs path in name may be bad.
+        val artifactPattern = "/[artifact]"
+        artifactPattern(artifactPattern)
+
         /**
+         * Because artifact paths always start with `/` (see [toPublication] for details),
+         * on Windows, we have to guess to which drive letter the artifact path belongs to.
+         * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
+         * starting with `c` for the sake of micro-optimization.
+         *
+         * This is not needed in "createDynamicBundledIvyArtifactsRepository",
+         * where the artifact path is given, because it is already prefixed.
+         */
+        if (OperatingSystem.current().isWindows) {
+            (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:$artifactPattern") }
+        }
+
+        this.content {
+            excludeBundledModuleAndPluginGroups()
+        }
+    }
+
+    /**
+     * Explicitly exclude these two groups from any declared repositories, because we do not expect
+     * such artifacts to exist anywhere except in the repo created by:
+     *
+     * @see createDynamicBundledIvyArtifactsRepository
+     */
+    private fun RepositoryContentDescriptor.excludeBundledModuleAndPluginGroups() {
+        this.excludeGroup(Dependencies.BUNDLED_MODULE_GROUP)
+        this.excludeGroup(Dependencies.BUNDLED_PLUGIN_GROUP)
+    }
+
+    companion object {
+
+        /**
+         * Registers an Ivy repository containing IntelliJ Platform bundled plugins and modules.
+         * @see Path.toBundledIvyArtifactsRelativeTo
          * @see org.jetbrains.intellij.platform.gradle.models.IvyModule.toAbsolutePathIvyArtifact
          * @see org.jetbrains.intellij.platform.gradle.models.IvyModule.toBundledIvyArtifactsRelativeTo
          * @see org.jetbrains.intellij.platform.gradle.models.IvyModule.toAbsolutePathLocalPluginIvyArtifacts
          * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper.registerIntellijPlatformIvyRepo
          */
-        internal fun createIvyArtifactRepository(
-            repositoryName: String,
+        internal fun createDynamicBundledIvyArtifactsRepository(
             repositories: RepositoryHandler,
             ivyLocationPath: Path,
-            artifactLocationPath: Path?
-        ) = repositories.ivy {
-            name = repositoryName
+            artifactLocationPath: Path
+        ) {
+            val repositoryName = "${Repositories.LOCAL_INTELLI_J_PLATFORM_ARTIFACTS} (${artifactLocationPath.invariantSeparatorsPathString})"
 
-            // The contract is that we are working with absolute normalized paths here.
-            val absNormIvyLocationPath = ivyLocationPath.absolute().normalize()
-            val absNormArtifactLocationPath = artifactLocationPath?.absolute()?.normalize()
+            // It may be called more than once
+            if (repositories.findByName(repositoryName) != null) {
+                return
+            }
 
-            // Location of Ivy files generated for the current project.
-            val ivyPath = absNormIvyLocationPath
-                .absolute()
-                .normalize()
-                .invariantSeparatorsPathString
-                .removeSuffixIfPresent("/")
-
-            ivyPattern("$ivyPath/[organization]-[module]-[revision].[ext]")
-
-            if (null == absNormArtifactLocationPath) {
-                // If the path is not given, we expect the "artifact" (IvyModule#name) to contain the absolute paths
-                // In different situations it may point to a completely unrelated locations on the file system.
-
-                // It has to be prefixed by "/" because if this pattern is not a fully-qualified URL, it will be interpreted
-                // as a file relative to the project directory, even if the "artifact" (IvyModule#name) starts with a "/".
-                // We can not rid of this leading separator as long as the repository created by createLocalIvyRepository
-                // or (localPlatformArtifacts() in public API) is used to reference completely unrelated paths. If they were
-                // split into multiple repositories, each could be prefixed with an absolute path specific to that repo.
-
-                // In this case, name is the full path (without the leading "/"), so type is not needed.
-                // In this case, it should be ok to have an absolute path in the name, because this is a fallback method,
-                // which called for directories only (at least at the moment of writing this), where it is not clear how
-                // to split it into two pieces: path and artifact.
-                // See IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository on why having abs path in name may be bad.
-                val artifactPattern = "/[artifact]"
-                artifactPattern(artifactPattern)
-
-                /**
-                 * Because artifact paths always start with `/` (see [toPublication] for details),
-                 * on Windows, we have to guess to which drive letter the artifact path belongs to.
-                 * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
-                 * starting with `c` for the sake of micro-optimization.
-                 *
-                 * This is not needed in "else", where the artifact path is given, because it is already prefixed.
-                 */
-                if (OperatingSystem.current().isWindows) {
-                    (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:$artifactPattern") }
+            /**
+             * We can't use [IntelliJPlatformRepositoriesHelper.createExclusiveIvyRepository] here because it would try to change already declared repositories,
+             * and if any of them have been already "used" by something, it would throw an exception.
+             * See: [org.gradle.api.internal.artifacts.repositories.DefaultRepositoryContentDescriptor.assertMutable]
+             */
+            repositories.forEach {
+                try {
+                    it.content {
+                        /**
+                         * For performance reasons exclude the group from already added repos, since we don't expect it to exist in any public repositories.
+                         * The ones declared after shouldn't matter, as long as the artifact is found in this repository,
+                         * because Gradle checks repositories in their declaration order.
+                         * Tests on an env with removed caches show that this is actually necessary to prevent extra requests.
+                         */
+                        excludeGroup(Dependencies.BUNDLED_MODULE_GROUP)
+                        excludeGroup(Dependencies.BUNDLED_PLUGIN_GROUP)
+                        // Could be improved some day to the next, but today it fails on Gradle 8.2, works on 8.10.2
+                        //excludeGroupAndSubgroups(Dependencies.BUNDLED_MODULE_GROUP)
+                        //excludeGroupAndSubgroups(Dependencies.BUNDLED_PLUGIN_GROUP)
+                    }
+                } catch (e: Exception) {
+                    // Ignore, don't care.
                 }
-            } else {
+            }
+
+            repositories.ivy {
+                name = repositoryName
+
+                // The contract is that we are working with absolute normalized paths here.
+                val absNormIvyLocationPath = ivyLocationPath.absolute().normalize()
+                val absNormArtifactLocationPath = artifactLocationPath.absolute().normalize()
+
+                // Location of Ivy files generated for the current project.
+                val ivyPath = absNormIvyLocationPath
+                    .absolute()
+                    .normalize()
+                    .invariantSeparatorsPathString
+                    .removeSuffixIfPresent("/")
+
+                ivyPattern("$ivyPath/[organization]-[module]-[revision].[ext]")
+
                 // If the path is given, we expect:
                 // - All artifacts in this repo are stored inside artifactLocationPath and the repo is never used for
                 //   any paths outside optionalPath. See IvyModuleKt.toBundledIvyArtifactsRelativeTo
@@ -297,6 +384,14 @@ class IntelliJPlatformRepositoriesHelper(
                 //   expect to have a directory, always only files.
                 val optionalPath = absNormArtifactLocationPath.invariantSeparatorsPathString.removeSuffixIfPresent("/")
                 artifactPattern("$optionalPath/([type]/)[artifact](.[ext])")
+
+                content {
+                    includeGroup(Dependencies.BUNDLED_MODULE_GROUP)
+                    includeGroup(Dependencies.BUNDLED_PLUGIN_GROUP)
+                    // Could be improved some day to the next, but today it fails on Gradle 8.2, works on 8.10.2
+                    //includeGroupAndSubgroups(Dependencies.BUNDLED_MODULE_GROUP)
+                    //includeGroupAndSubgroups(Dependencies.BUNDLED_PLUGIN_GROUP)
+                }
             }
         }
     }
