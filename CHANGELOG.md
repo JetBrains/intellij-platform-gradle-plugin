@@ -6,11 +6,17 @@
 
 - Introduce `intellijPlatformClasspath` configuration to allow retrieving the processed IntelliJ Platform and plugins dependencies. 
 
+### Changed
+
+- Improved build performance by pre-creating Ivy XML files in the extracted IDE location.
+- Improved build performance by making the local Ivy repository first in the list and making it an exclusive Gradle repository.
+
 ### Fixed
 
 - Fixed issue #1778 by removing a hash of the absolute artifact path appended to the end of the version string. That hash made artifact version different on different PCs and also breaks Gradle dependency locking.
 - Add the missing `org.jetbrains.kotlin.platform.type=jvm` attribute to the `intellijPlatformRuntimeClasspath` configuration manually as it's not inherited from the `runtimeClasspath`.
 - Fixed `Could not generate a decorated class for type PluginArtifactRepository.` when creating a custom plugin repository.
+- #1779 Fixes compatibility with Gradle dependency verification. Previously it was failing with "Failed to create MD5 hash for file".
 
 ## [2.1.0]
 

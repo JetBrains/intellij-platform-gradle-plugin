@@ -6,6 +6,7 @@ public final class org/jetbrains/intellij/platform/gradle/BuildException : org/g
 public final class org/jetbrains/intellij/platform/gradle/Constants {
 	public static final field CACHE_DIRECTORY Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants;
+	public static final field IVY_FILES_DIRECTORY Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Components {
@@ -165,6 +166,20 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Plugins$Exte
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Plugins$External;
 	public static final field JAVA_TEST_FIXTURES Ljava/lang/String;
 	public static final field KOTLIN Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/Constants$Repositories {
+	public static final field ANDROID_STUDIO_INSTALLERS Ljava/lang/String;
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Repositories;
+	public static final field INTELLI_J_PLATFORM_CUSTOM_PLUGIN Ljava/lang/String;
+	public static final field INTELLI_J_PLATFORM_DEPENDENCIES Ljava/lang/String;
+	public static final field INTELLI_J_REPOSITORY_NIGHTLY Ljava/lang/String;
+	public static final field INTELLI_J_REPOSITORY_RELEASES Ljava/lang/String;
+	public static final field INTELLI_J_REPOSITORY_SNAPSHOTS Ljava/lang/String;
+	public static final field JET_BRAINS_IDE_INSTALLERS Ljava/lang/String;
+	public static final field JET_BRAINS_MARKETPLACE Ljava/lang/String;
+	public static final field JET_BRAINS_RUNTIME Ljava/lang/String;
+	public static final field LOCAL_INTELLI_J_PLATFORM_ARTIFACTS Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox {
@@ -439,7 +454,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/artifacts
 
 public abstract class org/jetbrains/intellij/platform/gradle/artifacts/transform/ExtractorTransformer : org/gradle/api/artifacts/transform/TransformAction {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/artifacts/transform/ExtractorTransformer$Companion;
-	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/process/ExecOperations;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/file/FileSystemOperations;)V
+	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/process/ExecOperations;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/file/FileSystemOperations;)V
 	public abstract fun getInputArtifact ()Lorg/gradle/api/provider/Provider;
 	public fun transform (Lorg/gradle/api/artifacts/transform/TransformOutputs;)V
 }
@@ -471,7 +486,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/attributes/Distribu
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension$Companion;
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/resources/ResourceHandler;Ljava/nio/file/Path;)V
+	public fun <init> (Lorg/gradle/api/artifacts/dsl/RepositoryHandler;Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/resources/ResourceHandler;Ljava/nio/file/Path;)V
 	public final fun androidStudio (Ljava/lang/String;)V
 	public final fun androidStudio (Ljava/lang/String;Z)V
 	public final fun androidStudio (Lorg/gradle/api/provider/Provider;)V
@@ -695,7 +710,11 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper {
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/resources/ResourceHandler;Ljava/nio/file/Path;)V
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper$Companion;
+	public fun <init> (Lorg/gradle/api/artifacts/dsl/RepositoryHandler;Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/resources/ResourceHandler;Ljava/nio/file/Path;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper$Companion {
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension : org/gradle/api/plugins/ExtensionAware {
@@ -816,7 +835,7 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion;
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/resources/ResourceHandler;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;)V
+	public fun <init> (Lorg/gradle/api/artifacts/dsl/RepositoryHandler;Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/resources/ResourceHandler;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;)V
 	public final fun ProductReleasesValueSource (Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
 	public static synthetic fun ProductReleasesValueSource$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/gradle/api/provider/Provider;
 	public final fun ide (Ljava/lang/String;)V
@@ -885,7 +904,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/extension
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension : org/gradle/api/plugins/ExtensionAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension$Companion;
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/resources/ResourceHandler;Ljava/nio/file/Path;)V
+	public fun <init> (Lorg/gradle/api/artifacts/dsl/RepositoryHandler;Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/resources/ResourceHandler;Ljava/nio/file/Path;)V
 	public final fun disablePlugin (Ljava/lang/String;)V
 	public final fun disablePlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun disablePlugins (Ljava/util/List;)V
@@ -962,7 +981,11 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformRepositoriesHelper {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformRepositoriesHelper$Companion;
 	public fun <init> (Lorg/gradle/api/artifacts/dsl/RepositoryHandler;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/flow/FlowScope;Lorg/gradle/api/flow/FlowProviders;Lorg/gradle/api/invocation/Gradle;Ljava/nio/file/Path;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformRepositoriesHelper$Companion {
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension : org/gradle/api/plugins/ExtensionAware {
