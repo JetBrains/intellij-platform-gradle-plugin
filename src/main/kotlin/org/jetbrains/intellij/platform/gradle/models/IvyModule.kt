@@ -8,10 +8,8 @@ import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper
-import org.jetbrains.kotlin.util.removeSuffixIfPresent
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.extension
@@ -162,7 +160,7 @@ private fun Path.toArtifactRelativeTo(basePath: Path?): IvyModule.Artifact {
     val extString = absNormalizedPath.extension
     val absPathStringWithoutLeading = absNormalizedPath.containingDirPathStringRelativeTo(absNormalizedBasePath)
     // Remove the extension, if present, because the artifact pattern adds it.
-    val fileNameWithoutExt = absNormalizedPath.fileName.toString().removeSuffixIfPresent(".$extString")
+    val fileNameWithoutExt = absNormalizedPath.fileName.toString().removeSuffix(".$extString")
 
     return IvyModule.Artifact(
         type = absPathStringWithoutLeading,

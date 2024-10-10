@@ -24,7 +24,6 @@ import org.jetbrains.intellij.platform.gradle.flow.StopShimServerAction
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.models.toBundledIvyArtifactsRelativeTo
 import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
-import org.jetbrains.kotlin.util.removeSuffixIfPresent
 import java.net.URI
 import java.nio.file.Path
 import kotlin.io.path.Path
@@ -236,7 +235,7 @@ class IntelliJPlatformRepositoriesHelper(
             .absolute()
             .normalize()
             .invariantSeparatorsPathString
-            .removeSuffixIfPresent("/")
+            .removeSuffix("/")
 
         ivyPattern("$ivyPath/[organization]-[module]-[revision].[ext]")
 
@@ -345,7 +344,7 @@ class IntelliJPlatformRepositoriesHelper(
                     .absolute()
                     .normalize()
                     .invariantSeparatorsPathString
-                    .removeSuffixIfPresent("/")
+                    .removeSuffix("/")
 
                 ivyPattern("$ivyPath/[organization]-[module]-[revision].[ext]")
 
@@ -382,7 +381,7 @@ class IntelliJPlatformRepositoriesHelper(
                 // - "ext" (IvyModule#ext) is an optional file extension, e.g. "jar". It is optional only because files
                 //   do not always have extensions. For directories, it would be "directory", but, in this case we never
                 //   expect to have a directory, always only files.
-                val optionalPath = absNormArtifactLocationPath.invariantSeparatorsPathString.removeSuffixIfPresent("/")
+                val optionalPath = absNormArtifactLocationPath.invariantSeparatorsPathString.removeSuffix("/")
                 artifactPattern("$optionalPath/([type]/)[artifact](.[ext])")
 
                 content {
