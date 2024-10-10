@@ -130,7 +130,7 @@ abstract class ExtractorTransformer @Inject constructor(
 
     /**
      * Pre-create Ivy XML files so that later this directory can be used as an Ivy repository without having to discover
-     * modules & plugins each time the build is run.
+     * modules and plugins each time the build is run.
      */
     private fun createIvyXmls(platformPath: Path) {
         val isIde = platformPath.listDirectoryEntries().map { it.name }.containsAll(
@@ -150,12 +150,12 @@ abstract class ExtractorTransformer @Inject constructor(
         val pluginManager = IdePluginManager.createManager(createTempDirectory())
         val bundledPlugins = platformPath.getBundledPlugins(pluginManager)
 
-        for (plugin in bundledPlugins.values) {
+        bundledPlugins.values.forEach { plugin ->
             val pluginId = plugin.pluginId
             val pluginVersion = plugin.pluginVersion
             val pluginPath = plugin.originalFile
             if (null == pluginId || null == pluginVersion || null == pluginPath) {
-                continue
+                return@forEach
             }
 
             val group = Constants.Configurations.Dependencies.BUNDLED_PLUGIN_GROUP

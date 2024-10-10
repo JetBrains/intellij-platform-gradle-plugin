@@ -27,6 +27,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependenc
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.IVY_FILES_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Repositories
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
@@ -42,6 +43,7 @@ import java.io.File
 import java.io.FileReader
 import java.nio.file.Path
 import java.util.*
+import kotlin.Throws
 import kotlin.io.path.*
 
 /**
@@ -71,6 +73,13 @@ class IntelliJPlatformDependenciesHelper(
     private val baseVersion = objects.property<String>()
     private val baseUseInstaller = objects.property<Boolean>()
 
+
+    /**
+     * Allows checking if local IntelliJ Platform installation is being used.
+     * */
+    internal val isIntelliJPlatformLocal
+        get() = configurations[Configurations.INTELLIJ_PLATFORM_LOCAL].dependencies.isNotEmpty()
+
     /**
      * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
      */
@@ -81,26 +90,19 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Helper function for creating cached [ProviderFactory.provider].
      */
-    internal inline fun <reified T> cachedProvider(crossinline value: () -> T) =
-        objects
-            .property<T>()
-            .value(providers.provider { value() })
-            .apply {
-                disallowChanges()
-                finalizeValueOnRead()
-            }
+    internal inline fun <reified T> cachedProvider(crossinline value: () -> T) = objects.property<T>().value(providers.provider { value() }).apply {
+        disallowChanges()
+        finalizeValueOnRead()
+    }
 
     /**
      * Helper function for creating cached list [ProviderFactory.provider].
      */
     internal inline fun <reified T> cachedListProvider(crossinline value: () -> List<T>) =
-        objects
-            .listProperty<T>()
-            .value(providers.provider { value() })
-            .apply {
-                disallowChanges()
-                finalizeValueOnRead()
-            }
+        objects.listProperty<T>().value(providers.provider { value() }).apply {
+            disallowChanges()
+            finalizeValueOnRead()
+        }
 
     //<editor-fold desc="Configuration Accessors">
 
@@ -228,30 +230,27 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
         action: DependencyAction = {},
     ) = configurations.addAllLater(cachedListProvider {
-        notationsProvider.get()
-            .map { it.parseIdeNotation() }
-            .map { (type, version) ->
-                val dependency = when (type) {
-                    IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-                    else -> dependencies.createIntelliJPlatformInstaller(type, version)
-                }.apply(action)
+        notationsProvider.get().map { it.parseIdeNotation() }.map { (type, version) ->
+            val dependency = when (type) {
+                IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
+                else -> dependencies.createIntelliJPlatformInstaller(type, version)
+            }.apply(action)
 
-                val dependencyConfigurationNameWithNotation = "${dependencyConfigurationName}_${type}_${version}"
-                val configurationNameWithNotation = "${configurationName}_${type}_${version}"
+            val dependencyConfigurationNameWithNotation = "${dependencyConfigurationName}_${type}_${version}"
+            val configurationNameWithNotation = "${configurationName}_${type}_${version}"
 
-                val dependencyConfiguration = configurations.findByName(dependencyConfigurationNameWithNotation)
-                    ?: configurations.create(dependencyConfigurationNameWithNotation) {
-                        dependencies.add(dependency)
-                    }
+            val dependencyConfiguration =
+                configurations.findByName(dependencyConfigurationNameWithNotation) ?: configurations.create(dependencyConfigurationNameWithNotation) {
+                    dependencies.add(dependency)
+                }
 
-                configurations.findByName(configurationNameWithNotation)
-                    ?: configurations.create(configurationNameWithNotation) {
-                        attributes {
-                            attribute(Attributes.extracted, true)
-                        }
-                        extendsFrom(dependencyConfiguration)
-                    }
+            configurations.findByName(configurationNameWithNotation) ?: configurations.create(configurationNameWithNotation) {
+                attributes {
+                    attribute(Attributes.extracted, true)
+                }
+                extendsFrom(dependencyConfiguration)
             }
+        }
     })
 
     /**
@@ -270,15 +269,8 @@ class IntelliJPlatformDependenciesHelper(
     ) = configurations[configurationName].dependencies.addLater(cachedProvider {
         val localPath = localPathProvider.orNull ?: return@cachedProvider null
 
-        resolveArtifactPath(localPath)
-            .let { dependencies.createIntelliJPlatformLocal(it) }
-            .apply(action)
+        resolveArtifactPath(localPath).let { dependencies.createIntelliJPlatformLocal(it) }.apply(action)
     })
-
-    /** Allows to check if local IntelliJ platform installation is being used. */
-    internal fun isIntelliJPlatformLocal(): Boolean {
-        return configurations[Configurations.INTELLIJ_PLATFORM_LOCAL].dependencies.isNotEmpty()
-    }
 
     /**
      * A base method for adding a dependency on a plugin for IntelliJ Platform.
@@ -315,13 +307,9 @@ class IntelliJPlatformDependenciesHelper(
         val bundledPluginsList = bundledPluginsProvider.orNull
         requireNotNull(bundledPluginsList) { "The `intellijPlatform.bundledPlugins` dependency helper was called with no `bundledPlugins` value provided." }
 
-        this.registerIntellijPlatformIvyRepo()
+        registerIntellijPlatformIvyRepo()
 
-        bundledPluginsList
-            .map(String::trim)
-            .filter(String::isNotEmpty)
-            .map { dependencies.createIntelliJPlatformBundledPlugin(it) }
-            .onEach(action)
+        bundledPluginsList.map(String::trim).filter(String::isNotEmpty).map { dependencies.createIntelliJPlatformBundledPlugin(it) }.onEach(action)
     })
 
     /**
@@ -339,66 +327,63 @@ class IntelliJPlatformDependenciesHelper(
         val bundledModules = bundledModulesProvider.orNull
         requireNotNull(bundledModules) { "The `intellijPlatform.bundledModules` dependency helper was called with no `bundledModules` value provided." }
 
-        this.registerIntellijPlatformIvyRepo()
+        registerIntellijPlatformIvyRepo()
 
-        bundledModules
-            .map(String::trim)
-            .filter(String::isNotEmpty)
-            .map { dependencies.createIntelliJPlatformBundledModule(it) }
-            .onEach(action)
+        bundledModules.map(String::trim).filter(String::isNotEmpty).map { dependencies.createIntelliJPlatformBundledModule(it) }.onEach(action)
     })
 
     /**
-     * Registers an Ivy repository containing an IDE's bundled plugins & modules.
-     * It has to be done like this, because if that repository is not local i.e.
-     * [org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper.createIntelliJPlatformLocal]
-     * we do not know its location until
-     * [org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer]
-     * has finished. For the local repository we do the same just to keep it simple.
-     * @see org.jetbrains.intellij.platform.gradle.models.IvyModule.toBundledIvyArtifactsRelativeTo
+     * Registers an Ivy repository containing IntelliJ Platform bundled plugins and modules.
+     * It has to be done like this, because if that repository is not local (created using [createIntelliJPlatformLocal]),
+     * we don't know its location until [ExtractorTransformer] has finished.
+     * For the local repository, we do the same to keep it simple.
+     * @see Path.toBundledIvyArtifactsRelativeTo
      */
     private fun registerIntellijPlatformIvyRepo() {
-        // The contract is that we are working with absolute normalized paths here.
+        // The contract is that we're working with absolute normalized paths here.
 
         // All artifacts in this repo are expected to have paths relative to this.
         val artifactLocationPath = platformPath.get().absolute().normalize()
-        val ivyLocationPath = if (isIntelliJPlatformLocal()) {
-            // For local IntelliJ platform we can not use pre-create Ivy XML files (see ExtractorTransformer) because it
-            // may be located in location like "/opt/ideaIU" were will not have file system permissions to write.
-            // Because of that we use project's directory.
-            providers.localPlatformArtifactsPath(rootProjectDirectory)
-        } else {
-            // If not in local mode, then we are using IntelliJ platform processed by the ExtractorTransformer, where
-            // Ivy XML files already exist, and we should add it as a local repository on the fly. This improves
-            // performance because we do not have to locate plugins & create those files, since it is done only once by
-            // the ExtractorTransformer.
-            // For this case we do not allow to customize the location, because then a change of the location will
-            // the extracted IDE impossible to use, since we can not do things like "If Ivy files exist, use them, if
-            // not create" because in order to understand that they exist, we need to resolve all plugins & modules,
-            // which defeats the purpose.
-            artifactLocationPath.resolve(IVY_FILES_DIRECTORY)
+        val ivyLocationPath = when {
+            /**
+             * For local IntelliJ Platform, we can't use pre-create Ivy XML files (see [ExtractorTransformer]) because it maybe located in location
+             * like `/opt/ideaIU` were will not have file system permissions to write.
+             * Because of that, we use the project's directory.
+             */
+            isIntelliJPlatformLocal -> providers.localPlatformArtifactsPath(rootProjectDirectory)
+
+            /**
+             * If not in local mode, then we're using IntelliJ Platform processed by the [ExtractorTransformer], where Ivy XML files already exist,
+             * and we should add it as a local repository on the fly.
+             * This improves performance as we don't have to locate plugins and create those files, since it is done only once by the [ExtractorTransformer].
+             * For this case, we do not allow to customize the location, because then a change of the location will the extracted IntelliJ Platform impossible
+             * to use, since we can not do things like "If Ivy files exist, use them, if not create" because in order to understand that they exist,
+             * we need to resolve all plugins & modules, which defeats the purpose.
+             */
+            else -> artifactLocationPath.resolve(IVY_FILES_DIRECTORY)
         }.absolute().normalize()
 
-        val repositoryName = Repositories.LOCAL_INTELLI_J_PLATFORM_ARTIFACTS +
-                " (${artifactLocationPath.invariantSeparatorsPathString})"
+        val repositoryName = "${Repositories.LOCAL_INTELLI_J_PLATFORM_ARTIFACTS} (${artifactLocationPath.invariantSeparatorsPathString})"
 
         // It may be called more than once
-        if (repositories.map { it.name }.contains(repositoryName)) {
+        if (repositories.findByName(repositoryName) != null) {
             return
         }
 
-        // We can not use IntelliJPlatformRepositoriesHelper.createExclusiveIvyRepository here because it would try
-        // to change already declared repositories and if any of them have been already "used" by something, it would
-        // throw an exception. See:
-        // org.gradle.api.internal.artifacts.repositories.DefaultRepositoryContentDescriptor.assertMutable
+        /**
+         * We can't use [IntelliJPlatformRepositoriesHelper.createExclusiveIvyRepository] here because it would try to change already declared repositories,
+         * and if any of them have been already "used" by something, it would throw an exception.
+         * See: [org.gradle.api.internal.artifacts.repositories.DefaultRepositoryContentDescriptor.assertMutable]
+         */
         repositories.forEach {
             try {
                 it.content {
-                    // For performance reasons exclude the group from already added repos, since we do not expect it to
-                    // exist in any public repositories.
-                    // The ones declared after, should not matter, as long as the artifact is found in this repo,
-                    // because Gradle checks repos in their declaration order.
-                    // Tests on an env with removed caches show that this is actually necessary to prevent extra requests.
+                    /**
+                     * For performance reasons exclude the group from already added repos, since we don't expect it to exist in any public repositories.
+                     * The ones declared after shouldn't matter, as long as the artifact is found in this repository,
+                     * because Gradle checks repositories in their declaration order.
+                     * Tests on an env with removed caches show that this is actually necessary to prevent extra requests.
+                     */
                     excludeGroup(Dependencies.BUNDLED_MODULE_GROUP)
                     excludeGroup(Dependencies.BUNDLED_PLUGIN_GROUP)
                     // Could be improved some day to the next, but today it fails on Gradle 8.2, works on 8.10.2
@@ -406,22 +391,19 @@ class IntelliJPlatformDependenciesHelper(
                     //excludeGroupAndSubgroups(Dependencies.BUNDLED_PLUGIN_GROUP)
                 }
             } catch (e: Exception) {
-                // Ignore, do not care.
+                // Ignore, don't care.
             }
         }
 
-        // It would be better to make it createExclusiveIvyRepository.
-        // However, since we are creating it lazily, by this time some already registered repositories could have been
-        // "used". That creates an error, because an exclusive repository tries to add constraints on already existing
-        // repositories, which is not allowed for "used". To make it exclusive, it should be created with empty artifact
-        // & ivy paths in
-        // org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension.defaultRepositories
-        // then the paths should be updated here once they are known.
+        /**
+         * It would be better to make it [IntelliJPlatformRepositoriesHelper.createExclusiveIvyRepository].
+         * However, since we're creating it lazily, by this time some already registered repositories could have been "used".
+         * That creates an error because an exclusive repository tries to add constraints on already existing repositories, which is not allowed for "used".
+         * To make it exclusive, it should be created with empty artifact anv Ivy paths in [IntelliJPlatformRepositoriesExtension.defaultRepositories]
+         * then the paths should be updated here once they're known.
+         */
         IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository(
-            repositoryName,
-            repositories,
-            ivyLocationPath,
-            artifactLocationPath
+            repositoryName, repositories, ivyLocationPath, artifactLocationPath
         ).content {
             includeGroup(Dependencies.BUNDLED_MODULE_GROUP)
             includeGroup(Dependencies.BUNDLED_PLUGIN_GROUP)
@@ -538,9 +520,7 @@ class IntelliJPlatformDependenciesHelper(
         val localPath = localPathProvider.orNull
         requireNotNull(localPath) { "The `intellijPlatform.jetbrainsRuntimeLocal` dependency helper was called with no `localPath` value provided." }
 
-        val artifactPath = resolvePath(localPath)
-            .takeIf { it.exists() }
-            ?.resolveJavaRuntimeDirectory()
+        val artifactPath = resolvePath(localPath).takeIf { it.exists() }?.resolveJavaRuntimeDirectory()
             .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
 
         dependencies.createJetBrainsRuntimeLocal(artifactPath).apply(action)
@@ -802,22 +782,25 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
-     * Creates a dependency for an IntelliJ platform bundled plugin.
+     * Creates a dependency for an IntelliJ Platform bundled plugin.
      *
      * @param id The ID of the bundled plugin.
      */
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(id: String): Dependency {
-        // We can not use baseVersion for creating dependencies, because it may be something like "242-EAP-SNAPSHOT",
-        // which is a value provided by the user in the build.gradle file.
-        // But the IDE is extracted by the Extractor transformer and Ivy XML files are created in there as well,
-        // and that class does not know if the user is going to use an alias like "242-EAP-SNAPSHOT" or a build number,
-        // so we always use the build number.
-        //val version = baseVersion.orElse(productInfo.map { it.version }).get()
+        /**
+         * We can't use [baseVersion] for creating dependencies, because it may be something like `242-EAP-SNAPSHOT`,
+         * which is a value provided by the user in the `build.gradle.kts` file.
+         * But the IntelliJ Platform is extracted by the Extractor transformer, and Ivy XML files are created in there as well,
+         * and that class doesn't know if the user is going to use an alias like "242-EAP-SNAPSHOT" or a build number,
+         * so we always use the build number.
+         */
         val version = productInfo.get().buildNumber
 
-        // For local IntelliJ platform we can not use pre-create Ivy XML files (see ExtractorTransformer) because it
-        // may be located in location like "/opt/ideaIU" were will not have file system permissions to write.
-        if (isIntelliJPlatformLocal()) {
+        /**
+         * For local IntelliJ Platform, we can't use pre-create Ivy XML files (see [ExtractorTransformer]), because it could be located in location
+         * like `/opt/ideaIU` were will not have file system permissions to write.
+         */
+        if (isIntelliJPlatformLocal) {
             val plugin = bundledPlugins[id]
 
             requireNotNull(plugin) {
@@ -865,34 +848,34 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
-     * Creates a dependency for an IntelliJ platform bundled module.
+     * Creates a dependency for an IntelliJ Platform bundled module.
      *
      * @param id The ID of the bundled module.
      */
     private fun DependencyHandler.createIntelliJPlatformBundledModule(id: String): Dependency {
-        // We can not use baseVersion for creating dependencies, because it may be something like "242-EAP-SNAPSHOT",
-        // which is a value provided by the user in the build.gradle file.
-        // But the IDE is extracted by the Extractor transformer and Ivy XML files are created in there as well,
-        // and that class does not know if the user is going to use an alias like "242-EAP-SNAPSHOT" or a build number,
-        // so we always use the build number.
-        //val version = baseVersion.orElse(productInfo.map { it.version }).get()
+        /**
+         * We can't use [baseVersion] for creating dependencies, because it may be something like `242-EAP-SNAPSHOT`,
+         * which is a value provided by the user in the `build.gradle.kts` file.
+         * But the IntelliJ Platform is extracted by the Extractor transformer, and Ivy XML files are created in there as well,
+         * and that class doesn't know if the user is going to use an alias like "242-EAP-SNAPSHOT" or a build number,
+         * so we always use the build number.
+         */
         val version = productInfo.get().buildNumber
 
-        // For local IntelliJ platform we can not use pre-create Ivy XML files (see ExtractorTransformer) because it
-        // may be located in location like "/opt/ideaIU" were will not have file system permissions to write.
-        if (isIntelliJPlatformLocal()) {
-            val bundledModule = productInfo.get().layout
-                .find { layout -> layout.name == id }
-                .let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
+        /**
+         * For local IntelliJ Platform, we can't use pre-create Ivy XML files (see [ExtractorTransformer]), because it could be located in location
+         * like `/opt/ideaIU` were will not have file system permissions to write.
+         */
+        if (isIntelliJPlatformLocal) {
+            val bundledModule =
+                productInfo.get().layout.find { layout -> layout.name == id }.let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
             val platformPath = platformPath.get()
             val artifactPaths = bundledModule.classPath.flatMap { path ->
                 platformPath.resolve(path).toBundledIvyArtifactsRelativeTo(platformPath)
             }
 
             val ivyDirPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
-            writeIvyModule(
-                Dependencies.BUNDLED_MODULE_GROUP, id, version, writtenIvyModules, ivyDirPath
-            ) {
+            writeIvyModule(Dependencies.BUNDLED_MODULE_GROUP, id, version, writtenIvyModules, ivyDirPath) {
                 IvyModule(
                     info = IvyModule.Info(
                         organisation = Dependencies.BUNDLED_MODULE_GROUP,
@@ -914,18 +897,11 @@ class IntelliJPlatformDependenciesHelper(
     companion object {
         private val log = Logger(IntelliJPlatformDependenciesHelper::class.java)
 
-        internal fun Path.getBundledPlugins(pluginManager: IdePluginManager): Map<String, IdePlugin> {
-            return this.resolve("plugins")
-                .listDirectoryEntries()
-                .filter { it.isDirectory() }
-                .mapNotNull { path ->
-                    // TODO: try not to parse all plugins at once
-                    pluginManager.safelyCreatePlugin(path)
-                        .onFailure { log.warn(it.message.orEmpty()) }
-                        .getOrNull()
-                }
-                .associateBy { requireNotNull(it.pluginId) }
-        }
+        internal fun Path.getBundledPlugins(pluginManager: IdePluginManager) =
+            resolve("plugins").listDirectoryEntries().filter { it.isDirectory() }.mapNotNull { path ->
+                // TODO: try not to parse all plugins at once
+                pluginManager.safelyCreatePlugin(path).onFailure { log.warn(it.message.orEmpty()) }.getOrNull()
+            }.associateBy { requireNotNull(it.pluginId) }
 
         /**
          * Collects all dependencies on plugins or modules of the current [IdePlugin].
@@ -935,58 +911,45 @@ class IntelliJPlatformDependenciesHelper(
          */
         internal fun IdePlugin.collectBundledPluginDependencies(
             path: List<String> = emptyList(),
-
             productInfo: ProductInfo,
             platformPath: Path,
             bundledPlugins: Map<String, IdePlugin>,
-
             writtenIvyModules: MutableSet<String>,
             providers: ProviderFactory,
-            ivyDirPath: Path
+            ivyDirPath: Path,
         ): List<IvyModule.Dependency> {
             val id = requireNotNull(pluginId)
-            val dependencyIds = (
-                dependencies.map { it.id } +
-                    optionalDescriptors.map { it.dependency.id } +
-                    modulesDescriptors.map { it.name } - id
-                ).toSet()
-            val buildNumber= productInfo.buildNumber
+            val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name } - id).toSet()
+            val buildNumber = productInfo.buildNumber
 
-            val plugins = dependencyIds
-                .mapNotNull { bundledPlugins[it] }
-                .map { plugin ->
-                    val artifactPath = requireNotNull(plugin.originalFile)
-                    val group = Dependencies.BUNDLED_PLUGIN_GROUP
-                    val name = requireNotNull(plugin.pluginId)
-                    val version = requireNotNull(plugin.pluginVersion)
+            val plugins = dependencyIds.mapNotNull { bundledPlugins[it] }.map { plugin ->
+                val artifactPath = requireNotNull(plugin.originalFile)
+                val group = Dependencies.BUNDLED_PLUGIN_GROUP
+                val name = requireNotNull(plugin.pluginId)
+                val version = requireNotNull(plugin.pluginVersion)
 
-                    writeIvyModule(group, name, version, writtenIvyModules, ivyDirPath) {
-                        IvyModule(
-                            info = IvyModule.Info(group, name, version),
-                            publications = artifactPath.toBundledIvyArtifactsRelativeTo(platformPath),
-                            dependencies = when {
-                                id in path -> emptyList()
-                                else -> plugin.collectBundledPluginDependencies(
-                                    path + id,
-                                    productInfo, platformPath, bundledPlugins,
-                                    writtenIvyModules, providers, ivyDirPath,
-                                )
-                            },
-                        )
-                    }
-
-                    IvyModule.Dependency(group, name, version)
+                writeIvyModule(group, name, version, writtenIvyModules, ivyDirPath) {
+                    IvyModule(
+                        info = IvyModule.Info(group, name, version),
+                        publications = artifactPath.toBundledIvyArtifactsRelativeTo(platformPath),
+                        dependencies = when {
+                            id in path -> emptyList()
+                            else -> plugin.collectBundledPluginDependencies(
+                                path + id,
+                                productInfo, platformPath, bundledPlugins,
+                                writtenIvyModules, providers, ivyDirPath,
+                            )
+                        },
+                    )
                 }
 
-            val layoutItems = productInfo.layout
-                .filter { layout -> layout.name in dependencyIds }
-                .filter { layout -> layout.classPath.isNotEmpty() }
+                IvyModule.Dependency(group, name, version)
+            }
 
-            val modules = dependencyIds
-                .filterNot { bundledPlugins.containsKey(it) }
-                .mapNotNull { layoutItems.find { layout -> layout.name == it } }
-                .filterNot { it.classPath.isEmpty() }
-                .map {
+            val layoutItems = productInfo.layout.filter { layout -> layout.name in dependencyIds }.filter { layout -> layout.classPath.isNotEmpty() }
+
+            val modules = dependencyIds.filterNot { bundledPlugins.containsKey(it) }.mapNotNull { layoutItems.find { layout -> layout.name == it } }
+                .filterNot { it.classPath.isEmpty() }.map {
                     val artifactPaths = it.classPath.flatMap { path ->
                         platformPath.resolve(path).toBundledIvyArtifactsRelativeTo(platformPath)
                     }
@@ -1019,11 +982,9 @@ class IntelliJPlatformDependenciesHelper(
             group: String,
             artifact: String,
             version: String,
-
             writtenIvyModules: MutableSet<String>,
             ivyDirPath: Path,
-
-            block: () -> IvyModule
+            block: () -> IvyModule,
         ) = apply {
             val fileName = "$group-$artifact-$version.xml"
             if (writtenIvyModules.contains(fileName)) {
@@ -1031,13 +992,9 @@ class IntelliJPlatformDependenciesHelper(
             }
 
             val ivyFile = ivyDirPath.resolve(fileName)
-            ivyFile
-                .apply { parent.createDirectories() }
-                .apply { deleteIfExists() }
-                .createFile()
-                .writeText(XML {
-                    indentString = "  "
-                }.encodeToString(block()))
+            ivyFile.apply { parent.createDirectories() }.apply { deleteIfExists() }.createFile().writeText(XML {
+                indentString = "  "
+            }.encodeToString(block()))
 
             writtenIvyModules.add(fileName)
         }
@@ -1049,9 +1006,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param localPath Path to the local plugin.
      */
     private fun DependencyHandler.createIntelliJPlatformLocalPlugin(localPath: Any): Dependency {
-        val artifactPath = resolvePath(localPath)
-            .takeIf { it.exists() }
-            .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
+        val artifactPath = resolvePath(localPath).takeIf { it.exists() }.let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
 
         val plugin by lazy {
             val pluginPath = when {
@@ -1293,29 +1248,25 @@ class IntelliJPlatformDependenciesHelper(
         classifier = classifier,
         ext = extension,
     ).apply {
+        val buildNumber by lazy { productInfo.map { it.buildNumber.toVersion() }.get() }
 
         when (version) {
-            Constraints.PLATFORM_VERSION ->
-                version {
-                    prefer(baseVersion.get())
-                }
+            Constraints.PLATFORM_VERSION -> version {
+                prefer(baseVersion.get())
+            }
 
-            Constraints.CLOSEST_VERSION ->
-                version {
-                    val buildNumber = productInfo.map { it.buildNumber.toVersion() }.get()
-                    strictly("[${buildNumber.major}, $buildNumber]")
-                    prefer("$buildNumber")
-                }
+            Constraints.CLOSEST_VERSION -> version {
+                strictly("[${buildNumber.major}, $buildNumber]")
+                prefer("$buildNumber")
+            }
 
-            Constraints.LATEST_VERSION ->
-                version {
-                    prefer("+")
-                }
+            Constraints.LATEST_VERSION -> version {
+                prefer("+")
+            }
 
-            else ->
-                version {
-                    prefer(version)
-                }
+            else -> version {
+                prefer(version)
+            }
         }
     }
 
@@ -1325,10 +1276,10 @@ class IntelliJPlatformDependenciesHelper(
      * @param coordinates Dependency coordinates.
      * @param version Dependency version.
      */
-    private fun DependencyHandler.createPlatformDependency(
-        coordinates: Coordinates,
-        version: String,
-    ) = createDependency(coordinates, version).apply {
+    private fun DependencyHandler.createPlatformDependency(coordinates: Coordinates, version: String) = createDependency(
+        coordinates = coordinates,
+        version = version,
+    ).apply {
         val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
             parameters {
                 intellijPlatformPath = layout.dir(platformPath.map { it.toFile() })
@@ -1387,10 +1338,9 @@ class IntelliJPlatformDependenciesHelper(
      * @throws IllegalArgumentException if the [path] is not of supported types.
      */
     @Throws(IllegalArgumentException::class)
-    internal fun resolveArtifactPath(path: Any) = resolvePath(path)
-        .let { it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents") }
-        .takeIf { it.exists() && it.isDirectory() }
-        .let { requireNotNull(it) { "Specified localPath '$path' doesn't exist or is not a directory." } }
+    internal fun resolveArtifactPath(path: Any) =
+        resolvePath(path).let { it.takeUnless { OperatingSystem.current().isMacOsX && it.extension == "app" } ?: it.resolve("Contents") }
+            .takeIf { it.exists() && it.isDirectory() }.let { requireNotNull(it) { "Specified localPath '$path' doesn't exist or is not a directory." } }
 
     /**
      * Resolves the provided path into [Path].

@@ -8,10 +8,15 @@ import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper
 import org.jetbrains.kotlin.util.removeSuffixIfPresent
 import java.nio.file.Path
-import kotlin.io.path.*
+import kotlin.io.path.absolute
+import kotlin.io.path.extension
+import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.isDirectory
 
 @Serializable
 @XmlSerialName("ivy-module")
@@ -100,60 +105,60 @@ data class IvyModule(
  * but that's not a huge problem.
  *
  * @see IntelliJPlatformRepositoriesExtension.jetbrainsIdeInstallers
- * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
+ * @see IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
  */
 internal fun Path.toAbsolutePathIvyArtifact(): IvyModule.Artifact {
-    // The contract is that we are working with absolute normalized paths here.
+    // The contract is that we're working with absolute normalized paths here.
     val absNormalizedPath = this.absolute().normalize()
 
     val optionalExtString = when {
-        // This value for some reason is very important, without it, artifacts pointing to dirs do not work.
+        // This value for some reason is very important; without it, artifacts pointing to dirs don't work.
         absNormalizedPath.isDirectory() -> "directory"
         else -> absNormalizedPath.extension
     }
 
     // Remove the leading "/" or drive letter for Windows, if present, because the artifact pattern adds it.
     val absPathStringWithoutLeading = absNormalizedPath.invariantSeparatorsPathString.removeLeadingPathSeparator()
-    return IvyModule.Artifact(type = "", name = absPathStringWithoutLeading,  ext = optionalExtString)
+    return IvyModule.Artifact(
+        type = "",
+        name = absPathStringWithoutLeading,
+        ext = optionalExtString,
+    )
 }
 
 /**
- * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper.registerIntellijPlatformIvyRepo
+ * @see IntelliJPlatformDependenciesHelper.registerIntellijPlatformIvyRepo
  */
-internal fun Path.toBundledIvyArtifactsRelativeTo(basePath: Path): List<IvyModule.Artifact> {
-    return this.explodeIntoIvyJarsArtifactsRelativeTo(basePath)
-}
+internal fun Path.toBundledIvyArtifactsRelativeTo(basePath: Path) = explodeIntoIvyJarsArtifactsRelativeTo(basePath)
 
 /**
- * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper.createLocalIvyRepository
+ * For local plugins, we don't use relative paths.
+ * Since a base path is null, the result will be an absolute path.
+ *
+ * @see IntelliJPlatformRepositoriesHelper.createLocalIvyRepository
  */
-internal fun Path.toAbsolutePathLocalPluginIvyArtifacts(): List<IvyModule.Artifact> {
-    // For local plugins we do not use relative paths.
-    // Since base path is null, the result will be an absolute path.
-    return this.explodeIntoIvyJarsArtifactsRelativeTo(null)
-}
+internal fun Path.toAbsolutePathLocalPluginIvyArtifacts() = explodeIntoIvyJarsArtifactsRelativeTo(null)
 
 /**
- * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
+ * @see IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
  */
 private fun Path.explodeIntoIvyJarsArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {
-    // The contract is that we are working with absolute normalized paths here.
+    // The contract is that we're working with absolute normalized paths here.
     val absNormalizedPath = this.absolute().normalize()
     val absNormalizedBasePath = basePath?.absolute()?.normalize()
 
     // Never ever return an Artifact pointing to a directory from this method.
-    val jars: List<Path> = if (absNormalizedPath.isDirectory()) {
-        CollectorTransformer.collectJars(absNormalizedPath)
-    } else {
-        listOf(absNormalizedPath)
+    val jars = when {
+        absNormalizedPath.isDirectory() -> CollectorTransformer.collectJars(absNormalizedPath)
+        else -> listOf(absNormalizedPath)
     }
 
     val absoluteNormalizedPaths = jars.map { it.absolute().normalize() }
-    return absoluteNormalizedPaths.map { it: Path -> it.toArtifactRelativeTo(absNormalizedBasePath) }
+    return absoluteNormalizedPaths.map { it.toArtifactRelativeTo(absNormalizedBasePath) }
 }
 
 private fun Path.toArtifactRelativeTo(basePath: Path?): IvyModule.Artifact {
-    // The contract is that we are working with absolute normalized paths here.
+    // The contract is that we're working with absolute normalized paths here.
     val absNormalizedPath = this.absolute().normalize()
     val absNormalizedBasePath = basePath?.absolute()?.normalize()
 
@@ -165,52 +170,55 @@ private fun Path.toArtifactRelativeTo(basePath: Path?): IvyModule.Artifact {
     return IvyModule.Artifact(
         type = absPathStringWithoutLeading,
         name = fileNameWithoutExt,
-        ext = extString
+        ext = extString,
     )
 }
 
 /**
- * Returns an absolute, normalized & invariant path string of the contenting directory.
+ * Returns an absolute, normalized, and invariant path string of the contenting directory.
  * The path will not have a leading path separator or drive letter for windows.
  *
- * Also, if the optional basePath is given, the path will be relative to it. In this case it also does not have the
- * leading path separator.
+ * Also, if the optional basePath is given, the path will be relative to it.
+ * In this case, it also doesn't have the leading path separator.
  *
- * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
+ * @see IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
  */
 private fun Path.containingDirPathStringRelativeTo(basePath: Path? = null): String {
-    // The contract is that we are working with absolute normalized paths here.
+    // The contract is that we're working with absolute normalized paths here.
     val absNormalizedPath = this.absolute().normalize()
     val absNormalizedBasePath = basePath?.absolute()?.normalize()
 
-    val absNormalizedPathStringWithoutLeading = if (null == absNormalizedBasePath) {
+    val absNormalizedPathStringWithoutLeading = when (absNormalizedBasePath) {
         // Remove the leading "/" or drive letter for Windows, if present, because the artifact pattern adds it.
-        absNormalizedPath.invariantSeparatorsPathString.removeLeadingPathSeparator()
-    } else {
-        if (!absNormalizedPath.normalize().startsWith(absNormalizedBasePath.normalize())) {
-            // Since the two paths must point to the same location, the validation is possible, and if not that is a
-            // bug, and the artifact won't be found, because repository's artifact pattern will an absolute path build
-            // into it. They should not match just by a chance because we've removed drive letters for Windows.
-            throw IllegalStateException(
-                "The path '${absNormalizedPath}' is supposed to start with '${absNormalizedBasePath.normalize()}' ."
-            )
-        }
+        null -> absNormalizedPath.invariantSeparatorsPathString.removeLeadingPathSeparator()
 
-        // If base path is given, we make the returned path relative to it.
-        // In this case the drive letter on Windows gets removed automatically.
-        // Also, there should be no leading "/", but to be safe, remove it too.
-        absNormalizedBasePath.relativize(absNormalizedPath).invariantSeparatorsPathString.removePrefix("/")
+        else -> {
+            /**
+             * Since the two paths must point to the same location, the validation is possible, and if not, that is a bug, and the artifact won't be found,
+             * because the repository's artifact pattern will an absolute path build into it.
+             * They shouldn't match only by a chance because we've removed drive letters for Windows.
+             */
+            if (!absNormalizedPath.normalize().startsWith(absNormalizedBasePath.normalize())) {
+                throw IllegalStateException("The path '${absNormalizedPath}' is supposed to start with '${absNormalizedBasePath.normalize()}' .")
+            }
+
+            /**
+             * If a base path is given, we make the returned path relative to it.
+             * In this case, the drive letter on Windows gets removed automatically.
+             * Also, there should be no leading "/", but to be safe, remove it too.
+             */
+            absNormalizedBasePath.relativize(absNormalizedPath).invariantSeparatorsPathString.removePrefix("/")
+        }
     }
 
-    // Removes the file name or the first directory, if this is a directory.
+    // Removes the filename or the first directory if this is a directory.
     return absNormalizedPathStringWithoutLeading.substringBeforeLast("/")
 }
 
-private fun String.removeLeadingPathSeparator(): String {
-    // The contract is that we are working with absolute normalized paths here.
-    if (OperatingSystem.current().isWindows) {
-        return this.replaceFirst(Regex("^[a-zA-Z]:/"), "")
-    } else {
-        return this.removePrefix("/")
-    }
+/**
+ * The contract is that we're working with absolute normalized paths here.
+ */
+private fun String.removeLeadingPathSeparator() = when {
+    OperatingSystem.current().isWindows -> replaceFirst(Regex("^[a-zA-Z]:/"), "")
+    else -> removePrefix("/")
 }
