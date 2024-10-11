@@ -18,7 +18,6 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByName
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -772,7 +771,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             layout: ProjectLayout,
             objects: ObjectFactory,
             providers: ProviderFactory,
-            resources: ResourceHandler,
             rootProjectDirectory: Path,
             private val extensionProvider: Provider<IntelliJPlatformExtension>,
         ) {
@@ -783,7 +781,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 layout,
                 objects,
                 providers,
-                resources,
                 rootProjectDirectory,
             )
 
@@ -955,7 +952,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         project.layout,
                         project.objects,
                         project.providers,
-                        project.resources,
                         project.rootProjectPath,
                         project.extensionProvider,
                     )

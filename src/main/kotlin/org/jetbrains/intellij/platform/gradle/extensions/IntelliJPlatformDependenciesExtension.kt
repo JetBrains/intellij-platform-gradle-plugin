@@ -12,7 +12,6 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.resources.ResourceHandler
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
@@ -45,7 +44,6 @@ import kotlin.io.path.absolute
  * @param layout The Gradle [ProjectLayout] to manage layout providers.
  * @param objects The Gradle [ObjectFactory] used for creating objects.
  * @param providers The Gradle [ProviderFactory] used for creating providers.
- * @param resources The Gradle [ResourceHandler] used for managing resources.
  * @param rootProjectDirectory The root directory of the Gradle project.
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
@@ -56,11 +54,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     layout: ProjectLayout,
     objects: ObjectFactory,
     providers: ProviderFactory,
-    resources: ResourceHandler,
     rootProjectDirectory: Path,
 ) {
 
-    private val delegate = IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, resources, rootProjectDirectory)
+    private val delegate = IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, rootProjectDirectory)
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -1314,7 +1311,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 project.layout,
                 project.objects,
                 project.providers,
-                project.resources,
                 project.rootProject.rootDir.toPath().absolute(),
             )
     }

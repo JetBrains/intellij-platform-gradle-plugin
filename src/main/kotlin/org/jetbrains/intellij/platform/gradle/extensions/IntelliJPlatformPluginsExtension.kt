@@ -12,7 +12,6 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.setProperty
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
@@ -37,7 +36,6 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     layout: ProjectLayout,
     objects: ObjectFactory,
     providers: ProviderFactory,
-    resources: ResourceHandler,
     rootProjectDirectory: Path,
 ) : ExtensionAware {
 
@@ -50,7 +48,6 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
         layout,
         objects,
         providers,
-        resources,
         rootProjectDirectory,
     )
 
@@ -247,7 +244,6 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
                 project.layout,
                 project.objects,
                 project.providers,
-                project.resources,
                 project.rootProjectPath,
             )
     }

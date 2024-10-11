@@ -16,7 +16,6 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.resources.ResourceHandler
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.*
@@ -51,7 +50,6 @@ import kotlin.io.path.*
  * @param layout The Gradle [ProjectLayout] to manage layout providers.
  * @param objects The Gradle [ObjectFactory] used for creating objects.
  * @param providers The Gradle [ProviderFactory] used for creating providers.
- * @param resources The Gradle [ResourceHandler] used for managing resources.
  * @param rootProjectDirectory The root directory of the Gradle project.
  */
 class IntelliJPlatformDependenciesHelper(
@@ -60,7 +58,6 @@ class IntelliJPlatformDependenciesHelper(
     private val layout: ProjectLayout,
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,
-    private val resources: ResourceHandler,
     private val rootProjectDirectory: Path,
 ) {
 
