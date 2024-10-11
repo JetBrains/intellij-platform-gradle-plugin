@@ -406,10 +406,7 @@ class IntelliJPlatformDependenciesHelper(
         val version = versionProvider.orNull
         requireNotNull(version) { "The `intellijPlatform.javaCompiler` dependency helper was called with no `version` value provided." }
 
-        dependencies.createDependency(
-            coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
-            version = version,
-        ).apply(action)
+        dependencies.createJavaCompiler(version).apply(action)
     })
 
     /**
@@ -952,6 +949,14 @@ class IntelliJPlatformDependenciesHelper(
             version = version,
         )
     }
+
+    /**
+     * Creates Java Compiler dependency.
+     */
+    private fun DependencyHandler.createJavaCompiler(version: String) = createDependency(
+        coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
+        version = version,
+    )
 
     /**
      * Creates JetBrains Runtime (JBR) dependency.
