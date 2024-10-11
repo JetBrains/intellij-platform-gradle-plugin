@@ -15,12 +15,14 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `use an existing file provided with localPath`() {
+        val latestVersion = Coordinates("org.jetbrains.intellij.plugins", "verifier-cli").resolveLatestVersion()
         val dummyFile = dir.resolve("dummyFile").createFile()
         prepareTest("layout.file(provider { file(\"${dummyFile.invariantSeparatorsPathString}\") })")
 
         build(randomTaskName) {
             assertLogValue("intellijPluginVerifierPathProvider: ") {
-                assertTrue(it.isEmpty())
+                assertTrue(it.isNotEmpty())
+                assertTrue(it.endsWith("/verifier-cli-$latestVersion-all.jar"))
             }
             assertLogValue("pathProvider: ") {
                 assertEquals(dummyFile.invariantSeparatorsPathString, it)
@@ -33,7 +35,7 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
         prepareTest("layout.file(provider { file(\"/missingFile\") })")
 
         buildAndFail(randomTaskName) {
-            assertContains("> Cannot resolve 'IntelliJ Plugin Verifier'", output)
+            assertContains("> IntelliJ Plugin Verifier not found at: /missingFile", output)
         }
     }
 

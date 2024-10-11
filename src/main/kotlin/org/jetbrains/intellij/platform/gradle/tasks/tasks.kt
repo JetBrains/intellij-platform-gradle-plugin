@@ -62,8 +62,9 @@ internal inline fun <reified T : Task> Project.registerTask(
     }
 }
 
+// Preconfigure all tasks of T type if they inherit from *Aware interfaces
 internal fun <T : Task> Project.preconfigureTask(task: T) {
-    // Preconfigure all tasks of T type if they inherit from *Aware interfaces
+    val log = Logger(javaClass)
 
     with(task) task@{
         if (name != Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
@@ -141,6 +142,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             pluginVerifierExecutable.convention(layout.file(provider {
                 intelliJPluginVerifierPathResolver
                     .runCatching { resolve().toFile() }
+                    .onFailure { log.error(it.message ?: "Failed to resolve IntelliJ Plugin Verifier") }
                     .getOrNull()
             }))
         }
@@ -157,6 +159,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             zipSignerExecutable.convention(layout.file(provider {
                 marketplaceZipSignerPathResolver
                     .runCatching { resolve().toFile() }
+                    .onFailure { log.error(it.message ?: "Failed to resolve Marketplace ZIP Signer") }
                     .getOrNull()
             }))
         }

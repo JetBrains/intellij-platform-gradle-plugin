@@ -25,7 +25,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -55,7 +55,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner("0.1.21")
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -78,7 +78,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -101,7 +101,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -125,7 +125,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -147,7 +147,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner("0.1.21")
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -171,7 +171,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 """.trimIndent()
 
@@ -187,7 +187,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner("0.0.1")
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -207,6 +207,30 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
             assertContains("No Marketplace ZIP Signer executable found.", output)
         }
     }
+    
+    @Test
+    fun `run Marketplace ZIP Signer and fail on invalid CLI path`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    signing {
+                        privateKey = "foo"
+                        certificateChain = "bar"
+                        cliPath = file("invalid")
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            gradleVersion = gradleVersion,
+            fail = true,
+            assertValidConfigurationCache = false,
+            Tasks.SIGN_PLUGIN,
+        ) {
+            assertContains("Marketplace ZIP Signer not found at:", output)
+            assertContains("No Marketplace ZIP Signer executable found.", output)
+        }
+    }
 
     @Test
     fun `output file contains version when specified in build file`() {
@@ -215,7 +239,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 
                 intellijPlatform {

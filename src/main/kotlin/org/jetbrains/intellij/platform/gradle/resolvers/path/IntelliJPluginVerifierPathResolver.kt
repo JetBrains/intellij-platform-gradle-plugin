@@ -7,6 +7,7 @@ import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import kotlin.io.path.exists
 
 /**
  * Resolves the path to the IntelliJ Plugin Verifier executable.
@@ -32,7 +33,7 @@ class IntelliJPluginVerifierPathResolver(
              */
             localPath.orNull
                 ?.asPath
-                ?.takeIfExists()
+                ?.also { require(it.exists()) { "$subject not found at: $it" } }
         },
         "$subject specified with dependencies" to {
             /**

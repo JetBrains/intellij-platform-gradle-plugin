@@ -1012,9 +1012,7 @@ class IntelliJPlatformDependenciesHelper(
             }
         } ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
 
-        buildJetBrainsRuntimeVersion(version).also {
-            println("JBR version = ${it}")
-        }
+        buildJetBrainsRuntimeVersion(version)
     }
 
     /**

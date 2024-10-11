@@ -2,13 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
-import org.gradle.internal.jvm.Jvm
 import org.jetbrains.intellij.platform.gradle.*
 import kotlin.io.path.Path
-import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.readText
 import kotlin.test.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
@@ -27,7 +24,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
 
         prepareTest()
 
-        build(randomTaskName, args = listOf("--debug")) {
+        build(randomTaskName, args = listOf()) {
             assertLogValue("jetbrainsRuntimePath: ") {
                 assertTrue(it.isEmpty())
             }
@@ -151,7 +148,9 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
                     )
                 
                     val jetbrainsRuntimePathProvider = provider {
-                        jetbrainsRuntimeConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
+                        jetbrainsRuntimeConfiguration.runCatching {
+                            singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()
+                        }.getOrNull() ?: ""
                     }
                     val intellijPlatformPathProvider = provider {
                         intellijPlatformConfiguration.singleOrNull()?.toPath()?.invariantSeparatorsPathString.orEmpty()

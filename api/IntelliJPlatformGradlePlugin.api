@@ -471,7 +471,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/attributes/Distribu
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension$Companion;
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/nio/file/Path;)V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;)V
 	public final fun androidStudio (Ljava/lang/String;)V
 	public final fun androidStudio (Ljava/lang/String;Z)V
 	public final fun androidStudio (Lorg/gradle/api/provider/Provider;)V
@@ -689,9 +689,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public static synthetic fun zipSigner$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
-public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
-	public synthetic fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension$Companion {
+	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper {
@@ -816,7 +815,7 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion;
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;)V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;)V
 	public final fun ProductReleasesValueSource (Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
 	public static synthetic fun ProductReleasesValueSource$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/gradle/api/provider/Provider;
 	public final fun ide (Ljava/lang/String;)V
@@ -841,9 +840,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public static synthetic fun select$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
 
-public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
-	public synthetic fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion {
+	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Publishing {
@@ -885,7 +883,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/extension
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension : org/gradle/api/plugins/ExtensionAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension$Companion;
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/nio/file/Path;)V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun disablePlugin (Ljava/lang/String;)V
 	public final fun disablePlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun disablePlugins (Ljava/util/List;)V
@@ -909,9 +907,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public static synthetic fun robotServerPlugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
-public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
-	public synthetic fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension;
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension$Companion {
+	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/model/ObjectFactory;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformRepositoriesExtension {
@@ -967,7 +964,7 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension : org/gradle/api/plugins/ExtensionAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$Companion;
-	public fun <init> (Lorg/gradle/api/Project;)V
+	public fun <init> (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;)V
 	public final fun getRunIde ()Lorg/gradle/api/NamedDomainObjectContainer;
 	public final fun getTestIde ()Lorg/gradle/api/NamedDomainObjectContainer;
 	public final fun getTestIdePerformance ()Lorg/gradle/api/NamedDomainObjectContainer;
@@ -993,9 +990,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun task (Lorg/gradle/api/Action;)V
 }
 
-public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
-	public synthetic fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Ljava/lang/Object;
-	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension;
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$Companion {
+	public final fun register (Lorg/gradle/api/Project;Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$RunIdeParameters : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters {

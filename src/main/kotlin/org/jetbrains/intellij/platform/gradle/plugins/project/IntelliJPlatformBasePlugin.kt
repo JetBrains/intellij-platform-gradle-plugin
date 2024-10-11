@@ -30,6 +30,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.create
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
@@ -345,14 +346,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
 
             PluginVerification.register(project, target = intelliJPlatform).let { pluginVerification ->
-                PluginVerification.Ides.register(project, target = pluginVerification)
+                PluginVerification.Ides.register(dependenciesHelper, project.extensionProvider, target = pluginVerification)
             }
 
             Signing.register(project, target = intelliJPlatform)
             Publishing.register(project, target = intelliJPlatform)
         }
 
-        IntelliJPlatformDependenciesExtension.register(project, target = project.dependencies)
+        IntelliJPlatformDependenciesExtension.register(dependenciesHelper, target = project.dependencies)
         IntelliJPlatformRepositoriesExtension.register(project, target = project.repositories)
 
         project.tasks.matching {

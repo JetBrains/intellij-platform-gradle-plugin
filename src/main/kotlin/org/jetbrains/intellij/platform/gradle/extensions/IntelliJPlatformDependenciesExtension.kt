@@ -2,16 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import org.gradle.api.Project
-import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
-import org.gradle.api.file.ProjectLayout
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
@@ -27,7 +22,6 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlin.io.path.absolute
 
 // TODO synchronize with
 // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
@@ -39,25 +33,13 @@ import kotlin.io.path.absolute
  * It also includes methods for adding JetBrains Runtime, IntelliJ Platform plugins, IntelliJ Platform bundled plugins, IntelliJ Plugin Verifier,
  * and Marketplace ZIP Signer.
  *
- * @param configurations The Gradle [ConfigurationContainer] to manage configurations.
- * @param dependencies The Gradle [DependencyHandler] to manage dependencies.
- * @param layout The Gradle [ProjectLayout] to manage layout providers.
- * @param objects The Gradle [ObjectFactory] used for creating objects.
- * @param providers The Gradle [ProviderFactory] used for creating providers.
- * @param rootProjectDirectory The root directory of the Gradle project.
+ * @param dependenciesHelper IntelliJ Platform dependencies helper instance
  */
 @Suppress("unused", "MemberVisibilityCanBePrivate")
 @IntelliJPlatform
 abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
-    configurations: ConfigurationContainer,
-    dependencies: DependencyHandler,
-    layout: ProjectLayout,
-    objects: ObjectFactory,
-    providers: ProviderFactory,
-    rootProjectDirectory: Path,
+    private val dependenciesHelper: IntelliJPlatformDependenciesHelper,
 ) {
-
-    private val delegate = IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, rootProjectDirectory)
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -67,10 +49,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun create(type: String, version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { type.toIntelliJPlatformType() },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun create(type: String, version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { type.toIntelliJPlatformType() },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -81,10 +63,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun create(type: Provider<*>, version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
+    fun create(type: Provider<*>, version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
         typeProvider = type,
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -95,10 +77,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun create(type: IntelliJPlatformType, version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { type },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun create(type: IntelliJPlatformType, version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { type },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -109,10 +91,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun create(type: String, version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { type.toIntelliJPlatformType() },
+    fun create(type: String, version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { type.toIntelliJPlatformType() },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -123,10 +105,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun create(type: IntelliJPlatformType, version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { type },
+    fun create(type: IntelliJPlatformType, version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { type },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -138,10 +120,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configurationName The name of the configuration to add the dependency to.
      */
     @JvmOverloads
-    fun create(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true, configurationName: String) = delegate.addIntelliJPlatformDependency(
+    fun create(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true, configurationName: String) = dependenciesHelper.addIntelliJPlatformDependency(
         typeProvider = type,
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
         configurationName = configurationName,
     )
 
@@ -153,10 +135,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun create(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
+    fun create(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
         typeProvider = type,
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -166,7 +148,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider for the version of the IntelliJ Platform dependency.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
-    fun create(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>) = delegate.addIntelliJPlatformDependency(
+    fun create(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>) = dependenciesHelper.addIntelliJPlatformDependency(
         typeProvider = type,
         versionProvider = version,
         useInstallerProvider = useInstaller,
@@ -182,10 +164,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun create(notation: String, useInstaller: Boolean = true) {
         val (type, version) = notation.parseIdeNotation()
 
-        delegate.addIntelliJPlatformDependency(
-            typeProvider = delegate.provider { type },
-            versionProvider = delegate.provider { version },
-            useInstallerProvider = delegate.provider { useInstaller },
+        dependenciesHelper.addIntelliJPlatformDependency(
+            typeProvider = dependenciesHelper.provider { type },
+            versionProvider = dependenciesHelper.provider { version },
+            useInstallerProvider = dependenciesHelper.provider { useInstaller },
         )
     }
 
@@ -199,10 +181,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun create(notation: Provider<String>, useInstaller: Boolean = true) {
         val parsedNotationProvider = notation.map { it.parseIdeNotation() }
 
-        delegate.addIntelliJPlatformDependency(
+        dependenciesHelper.addIntelliJPlatformDependency(
             typeProvider = parsedNotationProvider.map { it.first },
             versionProvider = parsedNotationProvider.map { it.second },
-            useInstallerProvider = delegate.provider { useInstaller },
+            useInstallerProvider = dependenciesHelper.provider { useInstaller },
         )
     }
 
@@ -215,10 +197,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configurationName The name of the configuration to add the dependency to.
      */
     internal fun customCreate(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true, configurationName: String) =
-        delegate.addIntelliJPlatformDependency(
+        dependenciesHelper.addIntelliJPlatformDependency(
             typeProvider = type,
             versionProvider = version,
-            useInstallerProvider = delegate.provider { useInstaller },
+            useInstallerProvider = dependenciesHelper.provider { useInstaller },
             configurationName = configurationName,
             fallbackToBase = true,
         )
@@ -232,7 +214,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configurationName The name of the configuration to add the dependency to.
      */
     internal fun customCreate(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>, configurationName: String) =
-        delegate.addIntelliJPlatformDependency(
+        dependenciesHelper.addIntelliJPlatformDependency(
             typeProvider = type,
             versionProvider = version,
             useInstallerProvider = useInstaller,
@@ -247,10 +229,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun androidStudio(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.AndroidStudio },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun androidStudio(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.AndroidStudio },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -260,10 +242,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun androidStudio(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.AndroidStudio },
+    fun androidStudio(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.AndroidStudio },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -273,10 +255,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun aqua(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.Aqua },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun aqua(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Aqua },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -286,10 +268,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun aqua(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.Aqua },
+    fun aqua(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Aqua },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -299,10 +281,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun datagrip(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.DataGrip },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun datagrip(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.DataGrip },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -312,10 +294,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun datagrip(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.DataGrip },
+    fun datagrip(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.DataGrip },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -325,10 +307,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun dataspell(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.DataSpell },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun dataspell(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.DataSpell },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -338,10 +320,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun dataspell(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.DataSpell },
+    fun dataspell(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.DataSpell },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -351,10 +333,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun clion(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.CLion },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun clion(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.CLion },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -364,10 +346,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun clion(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.CLion },
+    fun clion(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.CLion },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -377,10 +359,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun fleetBackend(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.FleetBackend },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun fleetBackend(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.FleetBackend },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -390,10 +372,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun fleetBackend(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.FleetBackend },
+    fun fleetBackend(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.FleetBackend },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -403,10 +385,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun gateway(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.Gateway },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun gateway(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Gateway },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -416,10 +398,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun gateway(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.Gateway },
+    fun gateway(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Gateway },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -429,10 +411,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun goland(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.GoLand },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun goland(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.GoLand },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -442,10 +424,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun goland(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.GoLand },
+    fun goland(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.GoLand },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -455,10 +437,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun intellijIdeaCommunity(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.IntellijIdeaCommunity },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun intellijIdeaCommunity(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.IntellijIdeaCommunity },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -468,10 +450,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun intellijIdeaCommunity(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.IntellijIdeaCommunity },
+    fun intellijIdeaCommunity(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.IntellijIdeaCommunity },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -481,10 +463,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun intellijIdeaUltimate(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.IntellijIdeaUltimate },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun intellijIdeaUltimate(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.IntellijIdeaUltimate },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -494,10 +476,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun intellijIdeaUltimate(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.IntellijIdeaUltimate },
+    fun intellijIdeaUltimate(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.IntellijIdeaUltimate },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -507,10 +489,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun mps(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.MPS },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun mps(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.MPS },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -520,10 +502,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun mps(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.MPS },
+    fun mps(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.MPS },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -532,10 +514,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The version of PhpStorm.
      */
     @JvmOverloads
-    fun phpstorm(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.PhpStorm },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun phpstorm(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PhpStorm },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -545,10 +527,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun phpstorm(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.PhpStorm },
+    fun phpstorm(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PhpStorm },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -558,10 +540,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun pycharmCommunity(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.PyCharmCommunity },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun pycharmCommunity(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PyCharmCommunity },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -571,10 +553,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun pycharmCommunity(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.PyCharmCommunity },
+    fun pycharmCommunity(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PyCharmCommunity },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -584,10 +566,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun pycharmProfessional(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.PyCharmProfessional },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun pycharmProfessional(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PyCharmProfessional },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -597,10 +579,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun pycharmProfessional(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.PyCharmProfessional },
+    fun pycharmProfessional(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PyCharmProfessional },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -610,10 +592,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun rider(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.Rider },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun rider(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Rider },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -623,10 +605,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun rider(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.Rider },
+    fun rider(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Rider },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -636,10 +618,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun rubymine(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.RubyMine },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun rubymine(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.RubyMine },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -649,10 +631,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun rubymine(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.RubyMine },
+    fun rubymine(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.RubyMine },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -662,10 +644,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun rustRover(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.RustRover },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun rustRover(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.RustRover },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -675,10 +657,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun rustRover(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.RustRover },
+    fun rustRover(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.RustRover },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -688,10 +670,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun webstorm(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.WebStorm },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun webstorm(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.WebStorm },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -701,10 +683,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun webstorm(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.WebStorm },
+    fun webstorm(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.WebStorm },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -714,10 +696,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun writerside(version: String, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.Writerside },
-        versionProvider = delegate.provider { version },
-        useInstallerProvider = delegate.provider { useInstaller },
+    fun writerside(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Writerside },
+        versionProvider = dependenciesHelper.provider { version },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -727,10 +709,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
-    fun writerside(version: Provider<String>, useInstaller: Boolean = true) = delegate.addIntelliJPlatformDependency(
-        typeProvider = delegate.provider { IntelliJPlatformType.Writerside },
+    fun writerside(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Writerside },
         versionProvider = version,
-        useInstallerProvider = delegate.provider { useInstaller },
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
     )
 
     /**
@@ -738,8 +720,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath The local path of the IntelliJ Platform dependency.
      */
-    fun local(localPath: String) = delegate.addIntelliJPlatformLocalDependency(
-        localPathProvider = delegate.provider { localPath },
+    fun local(localPath: String) = dependenciesHelper.addIntelliJPlatformLocalDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
     )
 
     /**
@@ -747,8 +729,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath The local path of the IntelliJ Platform dependency.
      */
-    fun local(localPath: File) = delegate.addIntelliJPlatformLocalDependency(
-        localPathProvider = delegate.provider { localPath },
+    fun local(localPath: File) = dependenciesHelper.addIntelliJPlatformLocalDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
     )
 
     /**
@@ -756,8 +738,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath The local path of the IntelliJ Platform dependency.
      */
-    fun local(localPath: Directory) = delegate.addIntelliJPlatformLocalDependency(
-        localPathProvider = delegate.provider { localPath },
+    fun local(localPath: Directory) = dependenciesHelper.addIntelliJPlatformLocalDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
     )
 
     /**
@@ -765,7 +747,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
      */
-    fun local(localPath: Provider<*>) = delegate.addIntelliJPlatformLocalDependency(
+    fun local(localPath: Provider<*>) = dependenciesHelper.addIntelliJPlatformLocalDependency(
         localPathProvider = localPath,
     )
 
@@ -775,7 +757,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param localPath The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
      * @param configurationName The name of the configuration to add the dependency to.
      */
-    fun local(localPath: Provider<*>, configurationName: String) = delegate.addIntelliJPlatformLocalDependency(
+    fun local(localPath: Provider<*>, configurationName: String) = dependenciesHelper.addIntelliJPlatformLocalDependency(
         localPathProvider = localPath,
         configurationName = configurationName,
     )
@@ -784,15 +766,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Adds a dependency on JetBrains Runtime.
      * The version is calculated using the current IntelliJ Platform.
      */
-    fun jetbrainsRuntime() = delegate.addJetBrainsRuntimeObtainedDependency()
+    fun jetbrainsRuntime() = dependenciesHelper.addJetBrainsRuntimeObtainedDependency()
 
     /**
      * Adds a dependency on JetBrains Runtime.
      *
      * @param explicitVersion The explicit version of the JetBrains Runtime.
      */
-    fun jetbrainsRuntimeExplicit(explicitVersion: String) = delegate.addJetBrainsRuntimeDependency(
-        explicitVersionProvider = delegate.provider { explicitVersion },
+    fun jetbrainsRuntimeExplicit(explicitVersion: String) = dependenciesHelper.addJetBrainsRuntimeDependency(
+        explicitVersionProvider = dependenciesHelper.provider { explicitVersion },
     )
 
     /**
@@ -800,7 +782,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param explicitVersion The provider for the explicit version of the JetBrains Runtime.
      */
-    fun jetbrainsRuntimeExplicit(explicitVersion: Provider<String>) = delegate.addJetBrainsRuntimeDependency(
+    fun jetbrainsRuntimeExplicit(explicitVersion: Provider<String>) = dependenciesHelper.addJetBrainsRuntimeDependency(
         explicitVersionProvider = explicitVersion,
     )
 
@@ -811,9 +793,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param variant The JetBrains Runtime variant.
      * @param architecture The JetBrains Runtime architecture.
      */
-    fun jetbrainsRuntime(version: String, variant: String? = null, architecture: String? = null) = delegate.addJetBrainsRuntimeDependency(
-        explicitVersionProvider = delegate.provider {
-            delegate.buildJetBrainsRuntimeVersion(version, variant, architecture)
+    fun jetbrainsRuntime(version: String, variant: String? = null, architecture: String? = null) = dependenciesHelper.addJetBrainsRuntimeDependency(
+        explicitVersionProvider = dependenciesHelper.provider {
+            dependenciesHelper.buildJetBrainsRuntimeVersion(version, variant, architecture)
         },
     )
 
@@ -824,9 +806,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param variant The provider of the JetBrains Runtime variant.
      * @param architecture The provider of the JetBrains Runtime architecture.
      */
-    fun jetbrainsRuntime(version: Provider<String>, variant: Provider<String>, architecture: Provider<String>) = delegate.addJetBrainsRuntimeDependency(
-        explicitVersionProvider = delegate.provider {
-            delegate.buildJetBrainsRuntimeVersion(version.get(), variant.orNull, architecture.orNull)
+    fun jetbrainsRuntime(version: Provider<String>, variant: Provider<String>, architecture: Provider<String>) = dependenciesHelper.addJetBrainsRuntimeDependency(
+        explicitVersionProvider = dependenciesHelper.provider {
+            dependenciesHelper.buildJetBrainsRuntimeVersion(version.get(), variant.orNull, architecture.orNull)
         },
     )
 
@@ -835,8 +817,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath Path to the local JetBrains Runtime.
      */
-    fun jetbrainsRuntimeLocal(localPath: String) = delegate.addJetBrainsRuntimeLocalDependency(
-        localPathProvider = delegate.provider { localPath },
+    fun jetbrainsRuntimeLocal(localPath: String) = dependenciesHelper.addJetBrainsRuntimeLocalDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
     )
 
     /**
@@ -844,8 +826,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath Path to the local JetBrains Runtime.
      */
-    fun jetbrainsRuntimeLocal(localPath: Directory) = delegate.addJetBrainsRuntimeLocalDependency(
-        localPathProvider = delegate.provider { localPath },
+    fun jetbrainsRuntimeLocal(localPath: Directory) = dependenciesHelper.addJetBrainsRuntimeLocalDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
     )
 
     /**
@@ -853,8 +835,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath Path to the local JetBrains Runtime.
      */
-    fun jetbrainsRuntimeLocal(localPath: Path) = delegate.addJetBrainsRuntimeLocalDependency(
-        localPathProvider = delegate.provider { localPath },
+    fun jetbrainsRuntimeLocal(localPath: Path) = dependenciesHelper.addJetBrainsRuntimeLocalDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
     )
 
     /**
@@ -862,7 +844,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath Path to the local JetBrains Runtime.
      */
-    fun jetbrainsRuntimeLocal(localPath: Provider<*>) = delegate.addJetBrainsRuntimeLocalDependency(
+    fun jetbrainsRuntimeLocal(localPath: Provider<*>) = dependenciesHelper.addJetBrainsRuntimeLocalDependency(
         localPathProvider = localPath,
     )
 
@@ -874,8 +856,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param group The plugin distribution channel.
      */
     @JvmOverloads
-    fun plugin(id: String, version: String, group: String = Dependencies.MARKETPLACE_GROUP) = delegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = delegate.provider { listOf(Triple(id, version, group)) },
+    fun plugin(id: String, version: String, group: String = Dependencies.MARKETPLACE_GROUP) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOf(Triple(id, version, group)) },
     )
 
     /**
@@ -885,8 +867,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider of the plugin version.
      * @param group The provider of the plugin distribution channel.
      */
-    fun plugin(id: Provider<String>, version: Provider<String>, group: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = delegate.provider { listOf(Triple(id.get(), version.get(), group.get())) },
+    fun plugin(id: Provider<String>, version: Provider<String>, group: Provider<String>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOf(Triple(id.get(), version.get(), group.get())) },
     )
 
     /**
@@ -896,7 +878,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugin(notation: Provider<String>) = delegate.addIntelliJPlatformPluginDependencies(
+    fun plugin(notation: Provider<String>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
         pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
     )
 
@@ -907,8 +889,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugin(notation: String) = delegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = delegate.provider { listOfNotNull(notation.parsePluginNotation()) },
+    fun plugin(notation: String) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOfNotNull(notation.parsePluginNotation()) },
     )
 
     /**
@@ -918,8 +900,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugins(vararg notations: String) = delegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = delegate.provider { notations.mapNotNull { it.parsePluginNotation() } },
+    fun plugins(vararg notations: String) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { notations.mapNotNull { it.parsePluginNotation() } },
     )
 
     /**
@@ -929,8 +911,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugins(notations: List<String>) = delegate.addIntelliJPlatformPluginDependencies(
-        pluginsProvider = delegate.provider { notations.mapNotNull { it.parsePluginNotation() } },
+    fun plugins(notations: List<String>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { notations.mapNotNull { it.parsePluginNotation() } },
     )
 
     /**
@@ -940,7 +922,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
      */
-    fun plugins(notations: Provider<List<String>>) = delegate.addIntelliJPlatformPluginDependencies(
+    fun plugins(notations: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
         pluginsProvider = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } },
     )
 
@@ -949,8 +931,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param id The bundled plugin identifier.
      */
-    fun bundledPlugin(id: String) = delegate.addIntelliJPlatformBundledPluginDependencies(
-        bundledPluginsProvider = delegate.provider { listOf(id) },
+    fun bundledPlugin(id: String) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = dependenciesHelper.provider { listOf(id) },
     )
 
     /**
@@ -958,7 +940,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param id The provider of the bundled plugin identifier.
      */
-    fun bundledPlugin(id: Provider<String>) = delegate.addIntelliJPlatformBundledPluginDependencies(
+    fun bundledPlugin(id: Provider<String>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
         bundledPluginsProvider = id.map { listOf(it) },
     )
 
@@ -967,8 +949,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param ids The bundled plugin identifiers.
      */
-    fun bundledPlugins(vararg ids: String) = delegate.addIntelliJPlatformBundledPluginDependencies(
-        bundledPluginsProvider = delegate.provider { ids.asList() },
+    fun bundledPlugins(vararg ids: String) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = dependenciesHelper.provider { ids.asList() },
     )
 
     /**
@@ -976,8 +958,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param ids The bundled plugin identifiers.
      */
-    fun bundledPlugins(ids: List<String>) = delegate.addIntelliJPlatformBundledPluginDependencies(
-        bundledPluginsProvider = delegate.provider { ids },
+    fun bundledPlugins(ids: List<String>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = dependenciesHelper.provider { ids },
     )
 
     /**
@@ -985,7 +967,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param ids The bundled plugin identifiers.
      */
-    fun bundledPlugins(ids: Provider<List<String>>) = delegate.addIntelliJPlatformBundledPluginDependencies(
+    fun bundledPlugins(ids: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
         bundledPluginsProvider = ids,
     )
 
@@ -994,8 +976,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param id The bundled module identifier.
      */
-    fun bundledModule(id: String) = delegate.addIntelliJPlatformBundledModuleDependencies(
-        bundledModulesProvider = delegate.provider { listOf(id) },
+    fun bundledModule(id: String) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = dependenciesHelper.provider { listOf(id) },
     )
 
     /**
@@ -1003,7 +985,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param id The provider of the bundled module identifier.
      */
-    fun bundledModule(id: Provider<String>) = delegate.addIntelliJPlatformBundledModuleDependencies(
+    fun bundledModule(id: Provider<String>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
         bundledModulesProvider = id.map { listOf(it) },
     )
 
@@ -1012,8 +994,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param ids The bundled module identifiers.
      */
-    fun bundledModules(vararg ids: String) = delegate.addIntelliJPlatformBundledModuleDependencies(
-        bundledModulesProvider = delegate.provider { ids.asList() },
+    fun bundledModules(vararg ids: String) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = dependenciesHelper.provider { ids.asList() },
     )
 
     /**
@@ -1021,8 +1003,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param ids The bundled module identifiers.
      */
-    fun bundledModules(ids: List<String>) = delegate.addIntelliJPlatformBundledModuleDependencies(
-        bundledModulesProvider = delegate.provider { ids },
+    fun bundledModules(ids: List<String>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = dependenciesHelper.provider { ids },
     )
 
     /**
@@ -1030,7 +1012,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param ids The bundled module identifiers.
      */
-    fun bundledModules(ids: Provider<List<String>>) = delegate.addIntelliJPlatformBundledModuleDependencies(
+    fun bundledModules(ids: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
         bundledModulesProvider = ids,
     )
 
@@ -1039,8 +1021,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: File) = delegate.addIntelliJPlatformLocalPluginDependency(
-        localPathProvider = delegate.provider { localPath },
+    fun localPlugin(localPath: File) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
     )
 
     /**
@@ -1048,8 +1030,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: String) = delegate.addIntelliJPlatformLocalPluginDependency(
-        localPathProvider = delegate.provider { localPath },
+    fun localPlugin(localPath: String) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
     )
 
     /**
@@ -1057,8 +1039,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: Directory) = delegate.addIntelliJPlatformLocalPluginDependency(
-        localPathProvider = delegate.provider { localPath },
+    fun localPlugin(localPath: Directory) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
     )
 
     /**
@@ -1066,7 +1048,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath Path to the local plugin.
      */
-    fun localPlugin(localPath: Provider<*>) = delegate.addIntelliJPlatformLocalPluginDependency(
+    fun localPlugin(localPath: Provider<*>) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
         localPathProvider = localPath,
     )
 
@@ -1075,7 +1057,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param dependency Project dependency.
      */
-    fun localPlugin(dependency: ProjectDependency) = delegate.addIntelliJPlatformLocalPluginProjectDependency(
+    fun localPlugin(dependency: ProjectDependency) = dependenciesHelper.addIntelliJPlatformLocalPluginProjectDependency(
         dependency = dependency,
     )
 
@@ -1085,7 +1067,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param dependency Plugin module dependency.
      */
     fun pluginModule(dependency: Dependency?) = dependency?.run {
-        delegate.addIntelliJPlatformPluginModuleDependency(
+        dependenciesHelper.addIntelliJPlatformPluginModuleDependency(
             dependency = dependency,
         )
     }
@@ -1096,8 +1078,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The IntelliJ Plugin Verifier version.
      */
     @JvmOverloads
-    fun pluginVerifier(version: String = Constraints.LATEST_VERSION) = delegate.addPluginVerifierDependency(
-        versionProvider = delegate.provider { version },
+    fun pluginVerifier(version: String = Constraints.LATEST_VERSION) = dependenciesHelper.addPluginVerifierDependency(
+        versionProvider = dependenciesHelper.provider { version },
     )
 
     /**
@@ -1105,7 +1087,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider of the IntelliJ Plugin Verifier version.
      */
-    fun pluginVerifier(version: Provider<String>) = delegate.addPluginVerifierDependency(
+    fun pluginVerifier(version: Provider<String>) = dependenciesHelper.addPluginVerifierDependency(
         versionProvider = version,
     )
 
@@ -1115,8 +1097,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The Marketplace ZIP Signer version.
      */
     @JvmOverloads
-    fun zipSigner(version: String = Constraints.LATEST_VERSION) = delegate.addZipSignerDependency(
-        versionProvider = delegate.provider { version },
+    fun zipSigner(version: String = Constraints.LATEST_VERSION) = dependenciesHelper.addZipSignerDependency(
+        versionProvider = dependenciesHelper.provider { version },
     )
 
     /**
@@ -1124,7 +1106,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The provider of the Marketplace ZIP Signer version.
      */
-    fun zipSigner(version: Provider<String>) = delegate.addZipSignerDependency(
+    fun zipSigner(version: Provider<String>) = dependenciesHelper.addZipSignerDependency(
         versionProvider = version,
     )
 
@@ -1146,9 +1128,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         type: TestFrameworkType,
         version: String = Constraints.CLOSEST_VERSION,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
-    ) = delegate.addTestFrameworkDependency(
+    ) = dependenciesHelper.addTestFrameworkDependency(
         type = type,
-        versionProvider = delegate.provider { version },
+        versionProvider = dependenciesHelper.provider { version },
         configurationName = configurationName,
     )
 
@@ -1169,7 +1151,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         type: TestFrameworkType,
         version: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
-    ) = delegate.addTestFrameworkDependency(
+    ) = dependenciesHelper.addTestFrameworkDependency(
         type = type,
         versionProvider = version,
         configurationName = configurationName,
@@ -1189,9 +1171,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         coordinates: Coordinates,
         version: String = Constraints.CLOSEST_VERSION,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
-    ) = delegate.addPlatformDependency(
+    ) = dependenciesHelper.addPlatformDependency(
         coordinates = coordinates,
-        versionProvider = delegate.provider { version },
+        versionProvider = dependenciesHelper.provider { version },
         configurationName = configurationName,
     )
 
@@ -1208,7 +1190,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         coordinates: Coordinates,
         version: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
-    ) = delegate.addPlatformDependency(
+    ) = dependenciesHelper.addPlatformDependency(
         coordinates = coordinates,
         versionProvider = version,
         configurationName = configurationName,
@@ -1228,9 +1210,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         coordinates: Coordinates,
         version: String = Constraints.CLOSEST_VERSION,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
-    ) = delegate.addPlatformDependency(
+    ) = dependenciesHelper.addPlatformDependency(
         coordinates = coordinates,
-        versionProvider = delegate.provider { version },
+        versionProvider = dependenciesHelper.provider { version },
         configurationName = configurationName,
     )
 
@@ -1247,7 +1229,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         coordinates: Coordinates,
         version: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
-    ) = delegate.addPlatformDependency(
+    ) = dependenciesHelper.addPlatformDependency(
         coordinates = coordinates,
         versionProvider = version,
         configurationName = configurationName,
@@ -1261,8 +1243,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version Java Compiler version.
      */
     @JvmOverloads
-    fun javaCompiler(version: String = Constraints.CLOSEST_VERSION) = delegate.addJavaCompilerDependency(
-        versionProvider = delegate.provider { version },
+    fun javaCompiler(version: String = Constraints.CLOSEST_VERSION) = dependenciesHelper.addJavaCompilerDependency(
+        versionProvider = dependenciesHelper.provider { version },
     )
 
     /**
@@ -1272,7 +1254,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version Java Compiler version.
      */
-    fun javaCompiler(version: Provider<String>) = delegate.addJavaCompilerDependency(
+    fun javaCompiler(version: Provider<String>) = dependenciesHelper.addJavaCompilerDependency(
         versionProvider = version,
     )
 
@@ -1290,8 +1272,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param path Path to the bundled Jar file, like `lib/testFramework.jar`.
      */
-    fun bundledLibrary(path: String) = delegate.addBundledLibrary(
-        pathProvider = delegate.provider { path },
+    fun bundledLibrary(path: String) = dependenciesHelper.addBundledLibrary(
+        pathProvider = dependenciesHelper.provider { path },
     )
 
     /**
@@ -1299,20 +1281,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param path Path to the bundled Jar file, like `lib/testFramework.jar`.
      */
-    fun bundledLibrary(path: Provider<String>) = delegate.addBundledLibrary(
+    fun bundledLibrary(path: Provider<String>) = dependenciesHelper.addBundledLibrary(
         pathProvider = path,
     )
 
-    companion object : Registrable<IntelliJPlatformDependenciesExtension> {
-        override fun register(project: Project, target: Any) =
+    companion object {
+        fun register(dependenciesHelper: IntelliJPlatformDependenciesHelper, target: Any) =
             target.configureExtension<IntelliJPlatformDependenciesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
-                project.configurations,
-                project.dependencies,
-                project.layout,
-                project.objects,
-                project.providers,
-                project.rootProject.rootDir.toPath().absolute(),
+                dependenciesHelper,
             )
     }
 }

@@ -17,12 +17,14 @@ class MarketplaceZipSignerPathResolverTest : IntelliJPluginTestBase() {
 
     @Test
     fun `use an existing file provided with localPath`() {
+        val latestVersion = Coordinates("org.jetbrains", "marketplace-zip-signer").resolveLatestVersion()
         val dummyFile = dir.resolve("dummyFile").createFile()
         prepareTest("layout.file(provider { file(\"${dummyFile.invariantSeparatorsPathString}\") })")
 
         build(randomTaskName) {
             assertLogValue("marketplaceZipSignerPathProvider: ") {
-                assertTrue(it.isEmpty())
+                assertTrue(it.isNotEmpty())
+                assertTrue(it.endsWith("/marketplace-zip-signer-$latestVersion-cli.jar"))
             }
             assertLogValue("pathProvider: ") {
                 assertEquals(dummyFile.invariantSeparatorsPathString, it)
@@ -35,7 +37,7 @@ class MarketplaceZipSignerPathResolverTest : IntelliJPluginTestBase() {
         prepareTest("layout.file(provider { file(\"/missingFile\") })")
 
         buildAndFail(randomTaskName) {
-            assertContains("> Cannot resolve 'Marketplace ZIP Signer'", output)
+            assertContains("> Marketplace ZIP Signer not found at: /missingFile", output)
         }
     }
 

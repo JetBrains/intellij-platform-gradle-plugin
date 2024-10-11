@@ -9,7 +9,6 @@ import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.Path
-import kotlin.io.path.deleteRecursively
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -45,7 +44,7 @@ abstract class IntelliJPlatformTestBase {
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
     open fun tearDown() {
-        dir.deleteRecursively()
+//        dir.deleteRecursively()
     }
 
     protected inline fun build(

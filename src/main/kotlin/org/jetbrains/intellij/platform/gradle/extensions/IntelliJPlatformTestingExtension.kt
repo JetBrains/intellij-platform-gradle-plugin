@@ -26,7 +26,10 @@ import org.jetbrains.intellij.platform.gradle.utils.isModule
 import javax.inject.Inject
 
 @IntelliJPlatform
-abstract class IntelliJPlatformTestingExtension @Inject constructor(private val project: Project) : ExtensionAware {
+abstract class IntelliJPlatformTestingExtension @Inject constructor(
+    private val project: Project,
+    private val dependenciesHelper: IntelliJPlatformDependenciesHelper,
+) : ExtensionAware {
 
     val runIde = register<RunIdeParameters, _>()
     val testIde = register<TestIdeParameters, _>()
@@ -51,7 +54,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
                 val dependenciesExtension = project.dependencies.the<IntelliJPlatformDependenciesExtension>()
                 val baseIntelliJPlatformLocalConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_LOCAL]
                 val basePrepareSandboxTask = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-                val plugins = IntelliJPlatformPluginsExtension.register(project, target = this)
+                val plugins = IntelliJPlatformPluginsExtension.register(dependenciesHelper, project.objects, target = this)
 
                 val customIntelliJPlatformLocalConfiguration = project.configurations.create(
                     name = Configurations.INTELLIJ_PLATFORM_LOCAL.withSuffix,
@@ -162,9 +165,13 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(private val 
             }
         }
 
-    companion object : Registrable<IntelliJPlatformTestingExtension> {
-        override fun register(project: Project, target: Any) =
-            target.configureExtension<IntelliJPlatformTestingExtension>(Extensions.INTELLIJ_PLATFORM_TESTING, project)
+    companion object {
+        fun register(project: Project, dependenciesHelper: IntelliJPlatformDependenciesHelper, target: Any) =
+            target.configureExtension<IntelliJPlatformTestingExtension>(
+                Extensions.INTELLIJ_PLATFORM_TESTING,
+                project,
+                dependenciesHelper,
+            )
     }
 
     abstract class CommonParameters<T : Task> @Inject constructor(

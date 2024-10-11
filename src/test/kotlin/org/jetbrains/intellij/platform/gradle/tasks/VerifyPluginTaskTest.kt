@@ -49,6 +49,32 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         }
     }
 
+
+    @Test
+    fun `run plugin verifier and fail on invalid CLI path`() {
+        writePluginXmlFile()
+        writePluginVerifierIde()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        cliPath = file("invalid")
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            gradleVersion = gradleVersion,
+            fail = true,
+            assertValidConfigurationCache = false,
+            Tasks.VERIFY_PLUGIN,
+        ) {
+            assertContains("IntelliJ Plugin Verifier not found at:", output)
+            assertContains("No IntelliJ Plugin Verifier executable found.", output)
+        }
+    }
+
     @Test
     fun `run plugin verifier in the latest version`() {
         writePluginXmlFile()
