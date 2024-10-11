@@ -406,7 +406,7 @@ class IntelliJPlatformDependenciesHelper(
         val version = versionProvider.orNull
         requireNotNull(version) { "The `intellijPlatform.javaCompiler` dependency helper was called with no `version` value provided." }
 
-        dependencies.createJavaCompiler(version).apply(action)
+        createJavaCompiler(version).apply(action)
     })
 
     /**
@@ -424,7 +424,7 @@ class IntelliJPlatformDependenciesHelper(
         val explicitVersion = explicitVersionProvider.orNull
         requireNotNull(explicitVersion) { "The `intellijPlatform.jetbrainsRuntime`/`intellijPlatform.jetbrainsRuntimeExplicit` dependency helper was called with no `version` value provided." }
 
-        dependencies.createJetBrainsRuntime(explicitVersion).apply(action)
+        createJetBrainsRuntime(explicitVersion).apply(action)
     })
 
     /**
@@ -436,22 +436,9 @@ class IntelliJPlatformDependenciesHelper(
     internal fun addJetBrainsRuntimeObtainedDependency(
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
         action: DependencyAction = {},
-    ) = addJetBrainsRuntimeDependency(
-        provider {
-            val version = platformPath.get().resolve("dependencies.txt").takeIf { it.exists() }?.let {
-                FileReader(it.toFile()).use { reader ->
-                    with(Properties()) {
-                        load(reader)
-                        getProperty("runtimeBuild") ?: getProperty("jdkBuild")
-                    }
-                }
-            } ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
-
-            buildJetBrainsRuntimeVersion(version)
-        },
-        configurationName,
-        action,
-    )
+    ) = configurations[configurationName].dependencies.addLater(obtainJetBrainsRuntimeVersion().map { version ->
+        createJetBrainsRuntime(version).apply(action)
+    })
 
     /**
      * A base method for adding a dependency on JetBrains Runtime.
@@ -490,7 +477,7 @@ class IntelliJPlatformDependenciesHelper(
         val version = versionProvider.orNull
         requireNotNull(version) { "The `intellijPlatform.pluginVerifier` dependency helper was called with no `version` value provided." }
 
-        dependencies.createPluginVerifier(version).apply(action)
+        createPluginVerifier(version).apply(action)
     })
 
     /**
@@ -565,7 +552,7 @@ class IntelliJPlatformDependenciesHelper(
         val version = versionProvider.orNull
         requireNotNull(version) { "The `intellijPlatform.zipSigner` dependency helper was called with no `version` value provided." }
 
-        dependencies.createMarketplaceZipSigner(version).apply(action)
+        createMarketplaceZipSigner(version).apply(action)
     })
 
     /**
@@ -583,7 +570,7 @@ class IntelliJPlatformDependenciesHelper(
         val version = versionProvider.orNull
         requireNotNull(version) { "The `intellijPlatform.robotServerPlugin` dependency helper was called with no `version` value provided." }
 
-        dependencies.createRobotServerPlugin(version).apply(action)
+        createRobotServerPlugin(version).apply(action)
     })
 
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
@@ -952,31 +939,83 @@ class IntelliJPlatformDependenciesHelper(
 
     /**
      * Creates Java Compiler dependency.
+     *
+     * @param version Java Compiler dependency version
      */
-    private fun DependencyHandler.createJavaCompiler(version: String) = createDependency(
-        coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
-        version = version,
-    )
+    internal fun createJavaCompiler(version: String = Constraints.CLOSEST_VERSION) =
+        dependencies.createDependency(
+            coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
+            version = version,
+        )
 
     /**
      * Creates JetBrains Runtime (JBR) dependency.
+     *
+     * @param version JetBrains Runtime (JBR) dependency version
      */
-    private fun DependencyHandler.createJetBrainsRuntime(version: String) = create(
-        group = "com.jetbrains",
-        name = "jbr",
-        version = version,
-        ext = "tar.gz",
-    )
+    internal fun createJetBrainsRuntime(version: String) =
+        dependencies.create(
+            group = "com.jetbrains",
+            name = "jbr",
+            version = version,
+            ext = "tar.gz",
+        )
 
     /**
      * Creates IntelliJ Plugin Verifier CLI tool dependency.
+     *
+     * @param version IntelliJ Plugin Verifier CLI tool dependency version
      */
-    private fun DependencyHandler.createPluginVerifier(version: String) = createDependency(
-        coordinates = Coordinates("org.jetbrains.intellij.plugins", "verifier-cli"),
-        version = version,
-        classifier = "all",
-        extension = "jar",
-    )
+    internal fun createPluginVerifier(version: String = Constraints.LATEST_VERSION) =
+        dependencies.createDependency(
+            coordinates = Coordinates("org.jetbrains.intellij.plugins", "verifier-cli"),
+            version = version,
+            classifier = "all",
+            extension = "jar",
+        )
+
+    /**
+     * Adds a dependency on a Marketplace ZIP Signer required for signing plugin with [SignPluginTask].
+     *
+     * @param version Marketplace ZIP Signer version.
+     */
+    internal fun createMarketplaceZipSigner(version: String = Constraints.LATEST_VERSION) =
+        dependencies.createDependency(
+            coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
+            version = version,
+            classifier = "cli",
+            extension = "jar",
+        )
+
+    /**
+     * Adds a dependency on a Robot Server Plugin required for signing plugin with [TestIdeUiTask].
+     *
+     * @param version Robot Server Plugin version.
+     */
+    internal fun createRobotServerPlugin(version: String) =
+        dependencies.createDependency(
+            coordinates = Coordinates("com.intellij.remoterobot", "robot-server-plugin"),
+            version = version,
+            extension = "zip",
+        )
+
+    /**
+     * Creates a [Provider] that holds a JetBrains Runtime version obtained using the currently used IntelliJ Platform.
+     */
+    internal fun obtainJetBrainsRuntimeVersion() = cachedProvider {
+        val version = platformPath.get().resolve("dependencies.txt").takeIf { it.exists() }?.let {
+            FileReader(it.toFile()).use { reader ->
+                with(Properties()) {
+                    load(reader)
+                    getProperty("runtimeBuild") ?: getProperty("jdkBuild")
+                }
+            }
+        } ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+
+        buildJetBrainsRuntimeVersion(version).also {
+            println("JBR version = ${it}")
+        }
+    }
 
     /**
      * Creates a dependency.
@@ -1072,29 +1111,6 @@ class IntelliJPlatformDependenciesHelper(
             exclude(it.groupId, it.artifactId)
         }
     }
-
-    /**
-     * Adds a dependency on a Marketplace ZIP Signer required for signing plugin with [SignPluginTask].
-     *
-     * @param version Marketplace ZIP Signer version.
-     */
-    private fun DependencyHandler.createMarketplaceZipSigner(version: String) = createDependency(
-        coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
-        version = version,
-        classifier = "cli",
-        extension = "jar",
-    )
-
-    /**
-     * Adds a dependency on a Robot Server Plugin required for signing plugin with [TestIdeUiTask].
-     *
-     * @param version Robot Server Plugin version.
-     */
-    private fun DependencyHandler.createRobotServerPlugin(version: String) = createDependency(
-        coordinates = Coordinates("com.intellij.remoterobot", "robot-server-plugin"),
-        version = version,
-        extension = "zip",
-    )
 
     internal fun buildJetBrainsRuntimeVersion(
         version: String,

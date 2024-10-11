@@ -116,6 +116,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             )
 
             runtimeDirectory = layout.dir(provider {
+                // TODO: this gets invoked several times – memoize?
                 javaRuntimePathResolver.resolve().toFile()
             })
             runtimeMetadata = providers.of(JavaRuntimeMetadataValueSource::class) {

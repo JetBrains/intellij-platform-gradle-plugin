@@ -1280,6 +1280,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Applies a set of dependencies required for running the [InstrumentCodeTask] task.
      * - [javaCompiler] — Java Compiler dependency used for running Ant tasks
      */
+    @Deprecated("Calling instrumentationTools() is no longer necessary.")
     fun instrumentationTools() {
         javaCompiler()
     }

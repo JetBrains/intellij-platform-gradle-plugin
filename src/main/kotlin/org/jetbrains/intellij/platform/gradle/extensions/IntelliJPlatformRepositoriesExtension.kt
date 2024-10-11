@@ -227,6 +227,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
      */
     fun defaultRepositories() {
         localPlatformArtifacts()
+        jetbrainsRuntime()
         jetbrainsIdeInstallers()
         androidStudioInstallers()
         releases()

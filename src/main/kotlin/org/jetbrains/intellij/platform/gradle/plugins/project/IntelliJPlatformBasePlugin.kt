@@ -19,6 +19,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTrans
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
@@ -43,6 +44,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         with(project.plugins) {
             apply(JavaPlugin::class)
             apply(IdeaPlugin::class)
+        }
+
+        val dependenciesHelper = with(project) {
+            IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, rootProjectPath)
         }
 
         /**
@@ -149,6 +154,12 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attributes {
                     attribute(Attributes.extracted, false)
                 }
+
+                defaultDependencies {
+                    addLater(dependenciesHelper.obtainJetBrainsRuntimeVersion().map { version ->
+                        dependenciesHelper.createJetBrainsRuntime(version)
+                    })
+                }
             }
 
             val jetbrainsRuntimeLocalConfiguration = create(
@@ -175,7 +186,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             create(
                 name = Configurations.INTELLIJ_PLUGIN_VERIFIER,
                 description = "IntelliJ Plugin Verifier",
-            )
+            ) {
+                defaultDependencies {
+                    add(dependenciesHelper.createPluginVerifier())
+                }
+            }
 
             val intellijPluginVerifierIdesDependencyConfiguration = create(
                 name = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
@@ -209,7 +224,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             create(
                 name = Configurations.MARKETPLACE_ZIP_SIGNER,
                 description = "Marketplace ZIP Signer",
-            )
+            ) {
+                defaultDependencies {
+                    add(dependenciesHelper.createMarketplaceZipSigner())
+                }
+            }
 
             val intellijPlatformDependenciesConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
@@ -225,7 +244,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             create(
                 name = Configurations.INTELLIJ_PLATFORM_JAVA_COMPILER,
                 description = "Java Compiler used by Ant tasks",
-            )
+            ) {
+                defaultDependencies {
+                    add(dependenciesHelper.createJavaCompiler())
+                }
+            }
 
             val intellijPlatformTestDependenciesConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
