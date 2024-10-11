@@ -6,6 +6,10 @@
 
 - Introduce `intellijPlatformClasspath` configuration to allow retrieving the processed IntelliJ Platform and plugins dependencies. 
 
+### Changed
+
+- Move `localPlatformArtifacts()` to the top of the `defaultRepositories()` list
+
 ### Fixed
 
 - Fixed issue #1778 by removing a hash of the absolute artifact path appended to the end of the version string. That hash made artifact version different on different PCs and also breaks Gradle dependency locking.
