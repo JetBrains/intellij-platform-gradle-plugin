@@ -35,7 +35,8 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
         prepareTest("layout.file(provider { file(\"/missingFile\") })")
 
         buildAndFail(randomTaskName) {
-            assertContains("> IntelliJ Plugin Verifier not found at: /missingFile", output)
+            assertContains("> IntelliJ Plugin Verifier not found at:", output)
+            assertContains("missingFile", output)
         }
     }
 

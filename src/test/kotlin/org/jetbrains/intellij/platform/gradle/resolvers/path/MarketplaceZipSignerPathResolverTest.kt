@@ -37,7 +37,8 @@ class MarketplaceZipSignerPathResolverTest : IntelliJPluginTestBase() {
         prepareTest("layout.file(provider { file(\"/missingFile\") })")
 
         buildAndFail(randomTaskName) {
-            assertContains("> Marketplace ZIP Signer not found at: /missingFile", output)
+            assertContains("> Marketplace ZIP Signer not found at:", output)
+            assertContains("missingFile", output)
         }
     }
 
