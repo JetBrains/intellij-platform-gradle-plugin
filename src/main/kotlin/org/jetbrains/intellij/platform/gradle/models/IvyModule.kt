@@ -117,15 +117,11 @@ internal fun Path.toAbsolutePathIvyArtifact(): IvyModule.Artifact {
 
     // Remove the leading "/" or drive letter for Windows, if present, because the artifact pattern adds it.
     val absPathStringWithoutLeading = absNormalizedPath.invariantSeparatorsPathString.removeLeadingPathSeparator()
-    return IvyModule.Artifact(
-        type = "",
-        name = absPathStringWithoutLeading,
-        ext = optionalExtString,
-    )
+    return IvyModule.Artifact(name = absPathStringWithoutLeading, ext = optionalExtString)
 }
 
 /**
- * @see IntelliJPlatformRepositoriesHelper.Companion.createDynamicBundledIvyArtifactsRepository
+ * @see org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
  */
 internal fun Path.toBundledIvyArtifactsRelativeTo(basePath: Path) = explodeIntoIvyJarsArtifactsRelativeTo(basePath)
 
@@ -163,7 +159,7 @@ private fun Path.toArtifactRelativeTo(basePath: Path?): IvyModule.Artifact {
     val fileNameWithoutExt = absNormalizedPath.fileName.toString().removeSuffix(".$extString")
 
     return IvyModule.Artifact(
-        type = absPathStringWithoutLeading,
+        url = absPathStringWithoutLeading,
         name = fileNameWithoutExt,
         ext = extString,
     )
@@ -171,7 +167,7 @@ private fun Path.toArtifactRelativeTo(basePath: Path?): IvyModule.Artifact {
 
 /**
  * Returns an absolute, normalized, and invariant path string of the contenting directory.
- * The path will not have a leading path separator or drive letter for windows.
+ * The path will not have a leading path separator or a drive letter for Windows.
  *
  * Also, if the optional basePath is given, the path will be relative to it.
  * In this case, it also doesn't have the leading path separator.
@@ -184,13 +180,13 @@ private fun Path.containingDirPathStringRelativeTo(basePath: Path? = null): Stri
     val absNormalizedBasePath = basePath?.absolute()?.normalize()
 
     val absNormalizedPathStringWithoutLeading = when (absNormalizedBasePath) {
-        // Remove the leading "/" or drive letter for Windows, if present, because the artifact pattern adds it.
+        // Remove the leading "/" or a drive letter for Windows, if present, because the artifact pattern adds it.
         null -> absNormalizedPath.invariantSeparatorsPathString.removeLeadingPathSeparator()
 
         else -> {
             /**
-             * Since the two paths must point to the same location, the validation is possible, and if not, that is a bug, and the artifact won't be found,
-             * because the repository's artifact pattern will an absolute path build into it.
+             * Since the two paths must point to the same location, the validation is possible, and if not, that is a bug,
+             * and the artifact won't be found, because the repository's artifact pattern will an absolute path build into it.
              * They shouldn't match only by a chance because we've removed drive letters for Windows.
              */
             if (!absNormalizedPath.normalize().startsWith(absNormalizedBasePath.normalize())) {

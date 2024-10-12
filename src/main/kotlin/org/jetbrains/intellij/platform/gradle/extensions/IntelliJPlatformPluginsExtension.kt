@@ -3,8 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.ProjectDependency
-import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.artifacts.dsl.RepositoryHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware

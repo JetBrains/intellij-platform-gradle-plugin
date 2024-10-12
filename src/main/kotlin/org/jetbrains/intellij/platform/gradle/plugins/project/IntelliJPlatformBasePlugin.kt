@@ -6,6 +6,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPlugin
+import org.gradle.kotlin.dsl.all
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
 import org.gradle.plugins.ide.idea.IdeaPlugin
@@ -17,6 +18,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
@@ -24,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.tasks.*
@@ -31,7 +34,10 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
+import kotlin.io.path.absolute
+import kotlin.io.path.invariantSeparatorsPathString
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
@@ -104,6 +110,23 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
                         """.trimIndent()
                     )
+                }
+            }
+
+            /** Registers LocalIvyArtifactPathComponentMetadataRule */
+            intellijPlatformConfiguration.incoming.afterResolve {
+                if (intellijPlatformConfiguration.resolvedConfiguration.hasError()) {
+                    log.warn("Configuration '$intellijPlatformConfiguration' has some resolution errors.")
+                } else if (intellijPlatformConfiguration.isEmpty) {
+                    log.warn("Configuration '$intellijPlatformConfiguration' is empty.")
+                } else {
+                    val platformPath = intellijPlatformConfiguration.platformPath()
+                    val artifactLocationPath = platformPath.absolute().normalize().invariantSeparatorsPathString
+                    val ivyLocationPath = project.providers.localPlatformArtifactsPath(project.rootProjectPath).absolute().normalize().invariantSeparatorsPathString
+
+                    project.dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
+                        params(artifactLocationPath, ivyLocationPath)
+                    }
                 }
             }
 
@@ -348,12 +371,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 Vendor.register(project, target = pluginConfiguration)
             }
 
+
             PluginVerification.register(project, target = intelliJPlatform).let { pluginVerification ->
-                PluginVerification.Ides.register(
-                    dependenciesHelper,
-                    project.extensionProvider,
-                    target = pluginVerification
-                )
+                PluginVerification.Ides.register(dependenciesHelper, project.extensionProvider, target = pluginVerification)
             }
 
             Signing.register(project, target = intelliJPlatform)

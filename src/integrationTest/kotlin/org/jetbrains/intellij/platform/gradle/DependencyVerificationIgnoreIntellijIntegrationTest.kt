@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.readText
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 

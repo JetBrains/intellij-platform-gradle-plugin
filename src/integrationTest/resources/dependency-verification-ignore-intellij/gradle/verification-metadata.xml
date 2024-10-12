@@ -15,6 +15,10 @@
       <trusted-artifacts>
          <trust group="bundledModule" reason="Testing"/>
          <trust group="bundledPlugin" reason="Testing"/>
+         <trust group="localIde" reason="Testing"/>
+         <trust group="localPlugin" reason="Testing"/>
+         <trust group="localJetBrainsRuntime" reason="Testing"/>
+         <trust group="com.jetbrains" name="jbr" reason="Testing"/>
       </trusted-artifacts>
    </configuration>
 </verification-metadata>

@@ -33,6 +33,7 @@ import kotlin.io.path.listDirectoryEntries
 
 /**
  * The artifact transformer collecting JAR files located within the IntelliJ Platform or plugin archives.
+ * @see org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
  */
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class CollectorTransformer : TransformAction<CollectorTransformer.Parameters> {
@@ -91,7 +92,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                     // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html#non-bundled-plugin
                     // For other plugins, we never (usually?) get into this block, because their Ivy artifacts already
                     // list jars, instead of pointing to a directory, see:
-                    // See also org.jetbrains.intellij.platform.gradle.models.IvyModuleKt.explodeIntoIvyJarsArtifactsRelativeTo
+                    // org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
                     plugin.originalFile?.let { pluginPath ->
                         val jars = collectJars(pluginPath)
                         jars.forEach {

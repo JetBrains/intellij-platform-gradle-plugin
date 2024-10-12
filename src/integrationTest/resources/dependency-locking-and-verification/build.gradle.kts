@@ -15,6 +15,21 @@ kotlin {
     jvmToolchain(17)
 }
 
+// Ignore configurations containing dependencies pointing to a directory, because when used with Grale's dependency
+// verification (pgp option) it fails to create a hash for the directories, with a very obscure error:
+// Ivalid UTF-8 input
+configurations {
+    named("jetbrainsRuntimeLocalInstance") {
+        resolutionStrategy.disableDependencyVerification()
+    }
+    named("jetbrainsRuntimeDependency") {
+        resolutionStrategy.disableDependencyVerification()
+    }
+    named("jetbrainsRuntime") {
+        resolutionStrategy.disableDependencyVerification()
+    }
+}
+
 buildscript {
     // https://docs.gradle.org/current/userguide/dependency_locking.html
     dependencyLocking {
@@ -37,6 +52,7 @@ repositories {
     mavenCentral()
 
     intellijPlatform {
+        //jetbrainsRuntime()
         defaultRepositories()
     }
 }
@@ -44,7 +60,7 @@ repositories {
 dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
-        instrumentationTools()
+        //instrumentationTools()
         testFramework(TestFrameworkType.Platform)
 
         // This is important for bug reproduction because we need some dependencies in the test
