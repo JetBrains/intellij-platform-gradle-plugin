@@ -2372,7 +2372,7 @@ public final class org/jetbrains/intellij/platform/gradle/resolvers/path/Intelli
 }
 
 public final class org/jetbrains/intellij/platform/gradle/resolvers/path/JavaRuntimePathResolver : org/jetbrains/intellij/platform/gradle/resolvers/path/PathResolver {
-	public fun <init> (Lorg/gradle/api/file/FileCollection;Lorg/gradle/api/file/FileCollection;Lorg/gradle/jvm/toolchain/JavaToolchainSpec;Lorg/gradle/jvm/toolchain/JavaToolchainService;)V
+	public fun <init> (Lorg/gradle/api/file/FileCollection;Lorg/gradle/api/artifacts/Configuration;Lorg/gradle/jvm/toolchain/JavaToolchainSpec;Lorg/gradle/jvm/toolchain/JavaToolchainService;)V
 	public fun getPredictions ()Lkotlin/sequences/Sequence;
 	public fun getSubject ()Ljava/lang/String;
 	public synthetic fun getSubjectInput ()Ljava/lang/Object;

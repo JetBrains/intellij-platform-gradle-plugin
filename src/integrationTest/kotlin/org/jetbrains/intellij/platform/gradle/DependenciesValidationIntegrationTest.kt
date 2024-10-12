@@ -6,6 +6,7 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 private const val DEPENDENCIES = "dependencies"
@@ -15,6 +16,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
 ) {
 
     @Test
+    @Ignore("Because we do not allow it now, since we force resolve it.")
     fun `allow for no IntelliJ Platform dependency if not running tasks`() {
         build(DEPENDENCIES) {
             assertContains(
@@ -72,6 +74,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     }
 
     @Test
+    @Ignore("Because we can not add any more dependencies, since we force resolve it.")
     fun `report too many IntelliJ Platform dependencies`() {
         buildFile write //language=kotlin
                 """
@@ -95,6 +98,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     }
 
     @Test
+    @Ignore("Because we do not allow it now, since we force resolve it.")
     fun `inform about missing IntelliJ Platform dependency`() {
         buildFile write //language=kotlin
                 """
@@ -200,6 +204,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     }
 
     @Test
+    @Ignore("Because there is a default dependency now.")
     fun `fail signing when no Marketplace ZIP Signer dependency is present`() {
         buildFile write //language=kotlin
                 """

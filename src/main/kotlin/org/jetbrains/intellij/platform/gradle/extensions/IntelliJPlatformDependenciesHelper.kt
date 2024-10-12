@@ -999,10 +999,26 @@ class IntelliJPlatformDependenciesHelper(
             extension = "zip",
         )
 
+
     /**
      * Creates a [Provider] that holds a JetBrains Runtime version obtained using the currently used IntelliJ Platform.
      */
     internal fun obtainJetBrainsRuntimeVersion() = cachedProvider {
+        val version = tryObtainJetBrainsRuntimeVersion()
+        if (!version.isNullOrEmpty()) {
+            return@cachedProvider buildJetBrainsRuntimeVersion(version)
+        }
+
+        return@cachedProvider tryObtainBundledJetBrainsRuntimeVersion()
+    }
+
+    /**
+     * The Multi-OS Archives don't bundle JetBrains Runtime (JBR) needed to run the IDE locally, perform testing,
+     * and other crucial operations. Therefore, it is required to explicitly add a dependency on JetBrains Runtime
+     * (JBR) by adding extra jetbrainsRuntime() repository and dependency entries.
+     * On these dependencies.txt is not present.
+     */
+    private fun tryObtainJetBrainsRuntimeVersion(): String? {
         val version = platformPath.get().resolve("dependencies.txt").takeIf { it.exists() }?.let {
             FileReader(it.toFile()).use { reader ->
                 with(Properties()) {
@@ -1010,9 +1026,61 @@ class IntelliJPlatformDependenciesHelper(
                     getProperty("runtimeBuild") ?: getProperty("jdkBuild")
                 }
             }
-        } ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+        }
 
-        buildJetBrainsRuntimeVersion(version)
+        return version
+    }
+
+    /**
+     * IntelliJ Platform installers are OS-specific and contain bundled JetBrains Runtime (JBR), but are limited
+     * to public releases only.
+     * Installers are always used when running the verifyPlugin task to perform the binary compatibility checks.
+     */
+    private fun tryObtainBundledJetBrainsRuntimeVersion(): String {
+        val releaseFile = with(OperatingSystem.current()) {
+            when {
+                isMacOsX -> "jbr/Contents/Home/release"
+                isLinux -> "jbr/release"
+                isWindows -> "jbr/release"
+                else -> throw GradleException("Failed to obtain platform OS for: $this")
+            }
+        }
+
+        val releaseFilePath = platformPath.get().resolve(releaseFile).takeIf { it.exists() }
+            ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+
+        val properties = releaseFilePath.let {
+            FileReader(it.toFile()).use { reader ->
+                with(Properties()) {
+                    load(reader)
+                    this
+                }
+            }
+        }
+
+        // JAVA_RUNTIME_VERSION property is missing in old versions.
+        // E.g., JAVA_VERSION="17.0.6"
+        val javaVersion = properties.getProperty("JAVA_VERSION")?.replace("\"", "")
+            ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+        // E.g., IMPLEMENTOR_VERSION="JBR-17.0.6+1-653.34-jcef"
+        // Very old IDE's like IU-192.7142.36 do not have this property, they have only JAVA_VERSION & IMPLEMENTOR="N/A"
+        val implementorVersion = properties.getProperty("IMPLEMENTOR_VERSION")?.replace("\"", "")
+            ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+        // E.g. +1-653.34
+        val subString = implementorVersion.substringAfter(javaVersion).removeSuffix("-jcef").removeSuffix("-JCEF")
+        // E.g. 653.34-jcef
+        val buildVersion = subString.replace(Regex("^([+][0-9]+-)"), "")
+        // E.g. 17.0.6-b653.34-jcef
+        // It is actually could be also "17.0.6-b829.4"
+        // https://github.com/JetBrains/JetBrainsRuntime/releases?page=8
+        // The latest are without -
+        // https://github.com/JetBrains/JetBrainsRuntime/releases
+        val fixedVersion = "${javaVersion}b${buildVersion}"
+
+        val isJcef = implementorVersion.endsWith("-jcef") || implementorVersion.endsWith("-JCEF")
+        val variant = if (isJcef) "jcef" else null
+
+        return buildJetBrainsRuntimeVersion(fixedVersion, variant)
     }
 
     /**
@@ -1034,7 +1102,6 @@ class IntelliJPlatformDependenciesHelper(
         classifier = classifier,
         ext = extension,
     ).apply {
-        val buildNumber by lazy { productInfo.map { it.buildNumber.toVersion() }.get() }
 
         when (version) {
             Constraints.PLATFORM_VERSION ->
@@ -1044,6 +1111,7 @@ class IntelliJPlatformDependenciesHelper(
 
             Constraints.CLOSEST_VERSION ->
                 version {
+                    val buildNumber = productInfo.map { it.buildNumber.toVersion() }.get()
                     strictly("[${buildNumber.major}, $buildNumber]")
                     prefer("$buildNumber")
                 }
@@ -1119,8 +1187,12 @@ class IntelliJPlatformDependenciesHelper(
         val variant = runtimeVariant ?: "jcef"
 
         val (jdk, build) = version.split('b').also {
-            assert(it.size == 1) {
-                "Incorrect JetBrains Runtime version: $version. Use [sdk]b[build] format, like: 21.0.3b446.1"
+            assert(it.size == 2) {
+                // It is actually could be also "17.0.6-b829.4"
+                // https://github.com/JetBrains/JetBrainsRuntime/releases?page=8
+                // The latest are without -
+                // https://github.com/JetBrains/JetBrainsRuntime/releases
+                "Incorrect JetBrains Runtime version: '$version'. Use [sdk]b[build] format, like: '21.0.3b446.1'"
             }
         }
 

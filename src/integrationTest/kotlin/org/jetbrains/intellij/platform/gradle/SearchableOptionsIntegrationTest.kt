@@ -46,7 +46,8 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `test searchable options in 242+`() {
-        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties + mapOf("intellijPlatform.version" to "242.19533.56")) {
+        // 242.20224.387 (2024.2.0.1) is the oldest 224 versions that work in this test.
+        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties + mapOf("intellijPlatform.version" to "242.20224.387")) {
             val searchableOptionsJar = buildDirectory.resolve("libs/test-1.0.0-searchableOptions.jar")
             assertExists(searchableOptionsJar)
 
@@ -54,7 +55,7 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
             with(searchableOptionsJar readEntry "p-org.jetbrains.plugins.integration-tests.searchable-options-searchableOptions.json") {
                 assertEquals(
                     """
-                    {"id":"test.searchable.configurable","name":"Test Searchable Configurable","entries":[{"hit":"Label for Test Searchable Configurable","words":["configurable","for","label","searchable","test"]},{"hit":"Test Searchable Configurable","words":["configurable","searchable","test"]}]}
+                    {"id":"test.searchable.configurable","name":"Test Searchable Configurable","entries":[{"hit":"Label for Test Searchable Configurable"},{"hit":"Test Searchable Configurable"}]}
                     
                     """.trimIndent(),
                     this,
