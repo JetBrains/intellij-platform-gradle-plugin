@@ -63,7 +63,7 @@ class IntelliJPlatformDependenciesHelper(
 
     private val log = Logger(javaClass)
     private val pluginManager = IdePluginManager.createManager()
-    private val writtenIvyModules = mutableSetOf<String>()
+    private val writtenIvyModules = mutableMapOf<String, IvyModule>()
 
     private val baseType = objects.property<IntelliJPlatformType>()
     private val baseVersion = objects.property<String>()
@@ -778,11 +778,11 @@ class IntelliJPlatformDependenciesHelper(
 
     /**
      * Collects all dependencies on plugins or modules of the current [IdePlugin].
-     * The [path] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
+     * The [alreadyProcessedOrProcessing] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
      *
-     * @param path IDs of already traversed plugins or modules.
+     * @param alreadyProcessedOrProcessing IDs of already traversed plugins or modules.
      */
-    private fun IdePlugin.collectDependencies(path: List<String> = emptyList()): List<IvyModule.Dependency> {
+    private fun IdePlugin.collectDependencies(alreadyProcessedOrProcessing: List<String> = emptyList()): List<IvyModule.Dependency> {
         val id = requireNotNull(pluginId)
         val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name } - id).toSet()
 
@@ -794,15 +794,17 @@ class IntelliJPlatformDependenciesHelper(
                 val name = requireNotNull(plugin.pluginId)
                 val version = requireNotNull(plugin.pluginVersion)
 
-                writeIvyModule(group, name, version) {
-                    IvyModule(
-                        info = IvyModule.Info(group, name, version),
-                        publications = listOf(artifactPath.toIvyArtifact()),
-                        dependencies = when {
-                            id in path -> emptyList()
-                            else -> plugin.collectDependencies(path + id)
-                        },
-                    )
+                val doesNotDependOnSelf = id != plugin.pluginId
+                val hasNeverBeenSeen = plugin.pluginId !in alreadyProcessedOrProcessing
+
+                if (doesNotDependOnSelf && hasNeverBeenSeen) {
+                    writeIvyModule(group, name, version) {
+                        IvyModule(
+                            info = IvyModule.Info(group, name, version),
+                            publications = listOf(artifactPath.toIvyArtifact()),
+                            dependencies = plugin.collectDependencies(alreadyProcessedOrProcessing + id),
+                        )
+                    }
                 }
 
                 IvyModule.Dependency(group, name, version)
@@ -1067,25 +1069,32 @@ class IntelliJPlatformDependenciesHelper(
      * @param version The version of the Ivy module.
      * @param block A lambda that returns an instance of IvyModule to be serialized into the file.
      */
-    private fun writeIvyModule(group: String, artifact: String, version: String, block: () -> IvyModule) = apply {
+    private fun writeIvyModule(group: String, artifact: String, version: String, block: () -> IvyModule): IvyModule {
         val fileName = "$group-$artifact-$version.xml"
-        if (writtenIvyModules.contains(fileName)) {
-            return@apply
+
+        val ivyModule = writtenIvyModules[fileName]
+        if (null != ivyModule) {
+            // Ideally, we should also check if the previous and new modules match, because if they do not, it is a bug.
+            log.warn("An attempt to rewrite an already created Ivy module '${fileName}' has been detected. Sipping.")
+            return ivyModule
         }
 
         val ivyFile = providers
             .localPlatformArtifactsPath(rootProjectDirectory)
             .resolve(fileName)
 
+        val newIvyModule = block()
         ivyFile
             .apply { parent.createDirectories() }
             .apply { deleteIfExists() }
             .createFile()
             .writeText(XML {
                 indentString = "  "
-            }.encodeToString(block()))
+            }.encodeToString(newIvyModule))
 
-        writtenIvyModules.add(fileName)
+        writtenIvyModules[fileName] = newIvyModule
+
+        return newIvyModule
     }
 
     /**
