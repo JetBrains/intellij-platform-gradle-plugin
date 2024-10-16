@@ -16,6 +16,7 @@
 - Add the missing `org.jetbrains.kotlin.platform.type=jvm` attribute to the `intellijPlatformRuntimeClasspath` configuration manually as it's not inherited from the `runtimeClasspath`.
 - Fixed `Could not generate a decorated class for type PluginArtifactRepository.` when creating a custom plugin repository.
 - Fixed generation of duplicate files in ".intellijPlatform/localPlatformArtifacts" with different version numbers.
+- #1799: Gradle's api & compileOnlyApi configurations created by its java-library plugin do not work, and transitive implementation scope dependencies get exposed, when this plugin is used.
 
 ## [2.1.0]
 

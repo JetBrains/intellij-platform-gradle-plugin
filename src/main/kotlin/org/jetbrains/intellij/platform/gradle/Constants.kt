@@ -57,8 +57,13 @@ object Constants {
         const val INTELLIJ_PLATFORM = "intellijPlatform"
     }
 
+    /**
+     * See:
+     * - [Variant-aware sharing of artifacts between projects](https://docs.gradle.org/current/userguide/cross_project_publications.html#sec:variant-aware-sharing)
+     */
     object Configurations {
         const val INTELLIJ_PLATFORM_COMPOSED_JAR = "intellijPlatformComposedJar"
+        const val INTELLIJ_PLATFORM_COMPOSED_JAR_API = "intellijPlatformComposedJarApi"
         const val INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE = "intellijPlatformDependencyArchive"
         const val INTELLIJ_PLATFORM_DISTRIBUTION = "intellijPlatformDistribution"
         const val INTELLIJ_PLATFORM_LOCAL = "intellijPlatformLocal"
@@ -117,11 +122,19 @@ object Constants {
             const val MARKETPLACE_GROUP = "com.jetbrains.plugins"
         }
 
+        /**
+         * See:
+         * - [The Java Library plugin configurations](https://docs.gradle.org/current/userguide/java_library_plugin.html#sec:java_library_configurations_graph)
+         * - [The Java plugin configurations](https://docs.gradle.org/current/userguide/java_plugin.html#resolvable_configurations)
+         */
         object External {
             const val COMPILE_CLASSPATH = JvmConstants.COMPILE_CLASSPATH_CONFIGURATION_NAME
             const val COMPILE_ONLY = JvmConstants.COMPILE_ONLY_CONFIGURATION_NAME
+            const val COMPILE_ONLY_API = JvmConstants.COMPILE_ONLY_API_CONFIGURATION_NAME
+            const val API = JvmConstants.API_CONFIGURATION_NAME
             const val IMPLEMENTATION = JvmConstants.IMPLEMENTATION_CONFIGURATION_NAME
             const val RUNTIME_CLASSPATH = JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
+            const val API_ELEMENTS = JavaPlugin.API_ELEMENTS_CONFIGURATION_NAME
             const val RUNTIME_ELEMENTS = JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME
             const val RUNTIME_ONLY = JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME
             const val TEST_COMPILE_CLASSPATH = JvmConstants.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
