@@ -24,6 +24,12 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  * depending on if code instrumentation is enabled with [IntelliJPlatformExtension.instrumentCode].
  *
  * The final Jar is also combined with plugin modules marked using the [IntelliJPlatformDependenciesExtension.pluginModule] dependencies helper.
+ *
+ * To understand what is going on in this class read & watch this:
+ * - [1](https://youtu.be/2gPJD0mAres?t=461)
+ * - [2](https://www.youtube.com/watch?v=8z5KFCLZDd0)
+ * - [3](https://docs.gradle.org/current/userguide/variant_attributes.html#sec:standard_attributes)
+ * - [4](https://docs.gradle.org/current/userguide/cross_project_publications.html#sec:variant-aware-sharing)
  */
 @CacheableTask
 abstract class ComposedJarTask : Jar() {
@@ -41,6 +47,7 @@ abstract class ComposedJarTask : Jar() {
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
                 val intellijPlatformComposedJarConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR]
+                val intellijPlatformComposedJarApiConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API]
 
                 val sourceTaskProvider = project.extensionProvider.flatMap {
                     it.instrumentCode.flatMap { value ->
@@ -64,7 +71,8 @@ abstract class ComposedJarTask : Jar() {
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
                 JarCompanion.applyPluginManifest(this)
 
-                project.artifacts.add(intellijPlatformComposedJarConfiguration.name, this)
+                intellijPlatformComposedJarConfiguration.outgoing.artifact(this)
+                intellijPlatformComposedJarApiConfiguration.outgoing.artifact(this)
 
                 softwareComponentFactory.adhoc(Components.INTELLIJ_PLATFORM).apply {
                     project.components.add(this)
