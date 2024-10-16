@@ -40,6 +40,7 @@ import java.io.FileReader
 import java.nio.file.Path
 import java.util.*
 import kotlin.Throws
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.*
 
 /**
@@ -63,7 +64,25 @@ class IntelliJPlatformDependenciesHelper(
 
     private val log = Logger(javaClass)
     private val pluginManager = IdePluginManager.createManager()
-    private val writtenIvyModules = mutableMapOf<String, IvyModule>()
+
+    /**
+     * Key -- Ivy module XML file name.
+     * Value is either:
+     * 1) The Ivy Module, representing the contents of XML file. In the case if we did not have a path for the module.
+     * 2) Otherwise it is a pair of:
+     *     2.1) The Ivy Module, representing the contents of XML file.
+     *     2.2) The path from which this module was created.
+     *
+     * Since we store Ivy XML files into the same directory, but create them from completely unrelated paths.
+     * This structure is being used to validate that we do not try to create duplicate XML files with the same name from
+     * different paths (which would either a bug in this plugin, or duplicated dependency on the file system).
+     *
+     * [ConcurrentHashMap] has been used because Gradle is multithreaded. It won't provide absolute thread safety,
+     * but is good enough for the task, considering what this is for.
+     *
+     * @see writeIvyModule
+     */
+    private val writtenIvyModules = ConcurrentHashMap<String, Any>()
 
     private val baseType = objects.property<IntelliJPlatformType>()
     private val baseVersion = objects.property<String>()
@@ -680,7 +699,7 @@ class IntelliJPlatformDependenciesHelper(
         val type = localProductInfo.productCode.toIntelliJPlatformType()
         val version = localProductInfo.buildNumber
 
-        writeIvyModule(Dependencies.LOCAL_IDE_GROUP, type.code, version) {
+        writeIvyModule(Dependencies.LOCAL_IDE_GROUP, type.code, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.LOCAL_IDE_GROUP,
@@ -743,7 +762,7 @@ class IntelliJPlatformDependenciesHelper(
         val artifactPath = requireNotNull(plugin.originalFile)
         val version = requireNotNull(plugin.pluginVersion)
 
-        writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version) {
+        writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.BUNDLED_PLUGIN_GROUP,
@@ -798,7 +817,7 @@ class IntelliJPlatformDependenciesHelper(
                 val hasNeverBeenSeen = plugin.pluginId !in alreadyProcessedOrProcessing
 
                 if (doesNotDependOnSelf && hasNeverBeenSeen) {
-                    writeIvyModule(group, name, version) {
+                    writeIvyModule(group, name, version, artifactPath) {
                         IvyModule(
                             info = IvyModule.Info(group, name, version),
                             publications = listOf(artifactPath.toIvyArtifact()),
@@ -839,7 +858,10 @@ class IntelliJPlatformDependenciesHelper(
         val platformPath = platformPath.get()
         val artifacts = classPath.map { platformPath.resolve(it).toIvyArtifact() }
 
-        writeIvyModule(group, name, version) {
+        // For bundled modules, usually we do not have a path to their archive (jar),
+        // since we get them from [ProductInfo.layout], which does not have a path.
+        // They are located in "IDE/lib/modules" and duplication should not be an issue, so we can try to ignore the path comparison.
+        writeIvyModule(group, name, version, null) {
             IvyModule(
                 info = IvyModule.Info(group, name, version),
                 publications = artifacts,
@@ -873,7 +895,7 @@ class IntelliJPlatformDependenciesHelper(
         val version = plugin.pluginVersion ?: "0.0.0"
         val name = plugin.pluginId ?: artifactPath.name
 
-        writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version) {
+        writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.LOCAL_PLUGIN_GROUP,
@@ -914,7 +936,7 @@ class IntelliJPlatformDependenciesHelper(
         val name = javaVendorVersion.substringBefore(javaVersion).trim('-')
         val version = javaVendorVersion.removePrefix(name).trim('-')
 
-        writeIvyModule(Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP, name, version) {
+        writeIvyModule(Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP, name, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
@@ -1068,15 +1090,51 @@ class IntelliJPlatformDependenciesHelper(
      * @param artifact The artifact name for the Ivy module.
      * @param version The version of the Ivy module.
      * @param block A lambda that returns an instance of IvyModule to be serialized into the file.
+     * @param artifactPath Path of the IvyModule, it will be stored into cache, to make sure that no other module with
+     * a different path tries to store an Ivy XML file for the same coordinates.
+     *
+     * @see writtenIvyModules
      */
-    private fun writeIvyModule(group: String, artifact: String, version: String, block: () -> IvyModule): IvyModule {
+    private fun writeIvyModule(group: String, artifact: String, version: String, artifactPath: Path?, block: () -> IvyModule): IvyModule {
         val fileName = "$group-$artifact-$version.xml"
 
-        val ivyModule = writtenIvyModules[fileName]
-        if (null != ivyModule) {
-            // Ideally, we should also check if the previous and new modules match, because if they do not, it is a bug.
-            log.warn("An attempt to rewrite an already created Ivy module '${fileName}' has been detected. Sipping.")
-            return ivyModule
+        // See comments on writtenIvyModules
+        val cachedValue = writtenIvyModules[fileName]
+        if (cachedValue is IvyModule && null == artifactPath) {
+            log.info("An attempt to rewrite an already created Ivy module '${fileName}' has been detected." +
+                    " It is ok. The cached value will be used.")
+            return cachedValue
+        }
+
+        if (cachedValue is Pair<*, *> && null != artifactPath) {
+            val cachedIvyModule = cachedValue.first
+            val cachedModulePath = cachedValue.second
+
+            if (cachedIvyModule is IvyModule && cachedModulePath is Path) {
+                val cachedModulePathString = cachedModulePath.absolute().normalize().invariantSeparatorsPathString
+                val newModulePathString = artifactPath.absolute().normalize().invariantSeparatorsPathString
+
+                if (cachedModulePathString == newModulePathString) {
+                    log.info(
+                        "An attempt to rewrite an already created Ivy module '${fileName}' has been detected." +
+                                " It is ok since their paths match '$cachedModulePathString'. The cached value will used."
+                    )
+                } else {
+                    log.warn(
+                        "An attempt to rewrite an already created Ivy module '${fileName}' has been detected" +
+                                " and their artifact paths do not match: '$cachedModulePathString' vs '$newModulePathString'." +
+                                " It means that the same artifact has been found in two different locations." +
+                                " The first one will be used: '$cachedModulePathString'."
+                    )
+                }
+                return cachedIvyModule
+            }
+        } else if (null != cachedValue) {
+            // If this happened, it means that this method is called somewhere with wrong parameters.
+            log.warn(
+                "This is not supposed to happen. Please report a bug at ${Constants.GIT_HUB_ISSUES_URL}." +
+                        " File: '$fileName', path: '$artifactPath', cached value: '$cachedValue'."
+            )
         }
 
         val ivyFile = providers
@@ -1092,7 +1150,7 @@ class IntelliJPlatformDependenciesHelper(
                 indentString = "  "
             }.encodeToString(newIvyModule))
 
-        writtenIvyModules[fileName] = newIvyModule
+        writtenIvyModules[fileName] = if (null == artifactPath) newIvyModule else Pair(newIvyModule, artifactPath)
 
         return newIvyModule
     }
