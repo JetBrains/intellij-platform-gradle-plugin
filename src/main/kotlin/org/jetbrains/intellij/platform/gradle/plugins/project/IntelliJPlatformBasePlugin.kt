@@ -157,8 +157,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 }
 
                 defaultDependencies {
-                    addLater(dependenciesHelper.obtainJetBrainsRuntimeVersion().map { version ->
-                        dependenciesHelper.createJetBrainsRuntime(version)
+                    // The provider is pointless, but it improves stack traces because they point to this line
+                    addLater(project.providers.provider {
+                        // Shouldn't we skip this if the JBR is bundled? For now, let's add for consistency.
+                        dependenciesHelper.obtainJetBrainsRuntimeVersion()
+                            .map { version -> dependenciesHelper.createJetBrainsRuntime(version) }.get()
                     })
                 }
             }
@@ -189,7 +192,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Plugin Verifier",
             ) {
                 defaultDependencies {
-                    add(dependenciesHelper.createPluginVerifier())
+                    addLater(project.providers.provider { dependenciesHelper.createPluginVerifier() })
                 }
             }
 
@@ -227,7 +230,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "Marketplace ZIP Signer",
             ) {
                 defaultDependencies {
-                    add(dependenciesHelper.createMarketplaceZipSigner())
+                    addLater(project.providers.provider { dependenciesHelper.createMarketplaceZipSigner() })
                 }
             }
 
@@ -247,7 +250,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "Java Compiler used by Ant tasks",
             ) {
                 defaultDependencies {
-                    add(dependenciesHelper.createJavaCompiler())
+                    addLater(project.providers.provider { dependenciesHelper.createJavaCompiler() })
                 }
             }
 
@@ -346,7 +349,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
 
             PluginVerification.register(project, target = intelliJPlatform).let { pluginVerification ->
-                PluginVerification.Ides.register(dependenciesHelper, project.extensionProvider, target = pluginVerification)
+                PluginVerification.Ides.register(
+                    dependenciesHelper,
+                    project.extensionProvider,
+                    target = pluginVerification
+                )
             }
 
             Signing.register(project, target = intelliJPlatform)

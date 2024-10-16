@@ -40,6 +40,7 @@ import java.io.FileReader
 import java.nio.file.Path
 import java.util.*
 import kotlin.Throws
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.*
 
 /**
@@ -63,7 +64,25 @@ class IntelliJPlatformDependenciesHelper(
 
     private val log = Logger(javaClass)
     private val pluginManager = IdePluginManager.createManager()
-    private val writtenIvyModules = mutableSetOf<String>()
+
+    /**
+     * Key -- Ivy module XML file name.
+     * Value is either:
+     * 1) The Ivy Module, representing the contents of XML file. In the case if we did not have a path for the module.
+     * 2) Otherwise it is a pair of:
+     *     2.1) The Ivy Module, representing the contents of XML file.
+     *     2.2) The path from which this module was created.
+     *
+     * Since we store Ivy XML files into the same directory, but create them from completely unrelated paths.
+     * This structure is being used to validate that we do not try to create duplicate XML files with the same name from
+     * different paths (which would either a bug in this plugin, or duplicated dependency on the file system).
+     *
+     * [ConcurrentHashMap] has been used because Gradle is multithreaded. It won't provide absolute thread safety,
+     * but is good enough for the task, considering what this is for.
+     *
+     * @see writeIvyModule
+     */
+    private val writtenIvyModules = ConcurrentHashMap<String, Any>()
 
     private val baseType = objects.property<IntelliJPlatformType>()
     private val baseVersion = objects.property<String>()
@@ -680,7 +699,7 @@ class IntelliJPlatformDependenciesHelper(
         val type = localProductInfo.productCode.toIntelliJPlatformType()
         val version = localProductInfo.buildNumber
 
-        writeIvyModule(Dependencies.LOCAL_IDE_GROUP, type.code, version) {
+        writeIvyModule(Dependencies.LOCAL_IDE_GROUP, type.code, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.LOCAL_IDE_GROUP,
@@ -743,7 +762,7 @@ class IntelliJPlatformDependenciesHelper(
         val artifactPath = requireNotNull(plugin.originalFile)
         val version = baseVersion.orElse(productInfo.map { it.version }).get()
 
-        writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version) {
+        writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.BUNDLED_PLUGIN_GROUP,
@@ -775,7 +794,7 @@ class IntelliJPlatformDependenciesHelper(
         val artifactPaths = bundledModule.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
         val version = baseVersion.orElse(productInfo.map { it.version }).get()
 
-        writeIvyModule(Dependencies.BUNDLED_MODULE_GROUP, id, version) {
+        writeIvyModuleForBundledModule(Dependencies.BUNDLED_MODULE_GROUP, id, version) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.BUNDLED_MODULE_GROUP,
@@ -795,11 +814,11 @@ class IntelliJPlatformDependenciesHelper(
 
     /**
      * Collects all dependencies on plugins or modules of the current [IdePlugin].
-     * The [path] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
+     * The [alreadyProcessedOrProcessing] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
      *
-     * @param path IDs of already traversed plugins or modules.
+     * @param alreadyProcessedOrProcessing IDs of already traversed plugins or modules.
      */
-    private fun IdePlugin.collectDependencies(path: List<String> = emptyList()): List<IvyModule.Dependency> {
+    private fun IdePlugin.collectDependencies(alreadyProcessedOrProcessing: List<String> = emptyList()): List<IvyModule.Dependency> {
         val id = requireNotNull(pluginId)
         val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name } - id).toSet()
         val buildNumber by lazy { productInfo.get().buildNumber }
@@ -813,15 +832,17 @@ class IntelliJPlatformDependenciesHelper(
                 val name = requireNotNull(plugin.pluginId)
                 val version = requireNotNull(plugin.pluginVersion)
 
-                writeIvyModule(group, name, version) {
-                    IvyModule(
-                        info = IvyModule.Info(group, name, version),
-                        publications = listOf(artifactPath.toIvyArtifact()),
-                        dependencies = when {
-                            id in path -> emptyList()
-                            else -> plugin.collectDependencies(path + id)
-                        },
-                    )
+                val doesNotDependOnSelf = id != plugin.pluginId
+                val hasNeverBeenSeen = plugin.pluginId !in alreadyProcessedOrProcessing
+
+                if (doesNotDependOnSelf && hasNeverBeenSeen) {
+                    writeIvyModule(group, name, version, artifactPath) {
+                        IvyModule(
+                            info = IvyModule.Info(group, name, version),
+                            publications = listOf(artifactPath.toIvyArtifact()),
+                            dependencies = plugin.collectDependencies(alreadyProcessedOrProcessing + id),
+                        )
+                    }
                 }
 
                 IvyModule.Dependency(group, name, version)
@@ -841,7 +862,7 @@ class IntelliJPlatformDependenciesHelper(
                 val name = it.name
                 val version = buildNumber
 
-                writeIvyModule(group, name, version) {
+                writeIvyModuleForBundledModule(group, name, version) {
                     IvyModule(
                         info = IvyModule.Info(group, name, version),
                         publications = artifactPaths,
@@ -878,7 +899,7 @@ class IntelliJPlatformDependenciesHelper(
         val version = plugin.pluginVersion ?: "0.0.0"
         val name = plugin.pluginId ?: artifactPath.name
 
-        writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version) {
+        writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.LOCAL_PLUGIN_GROUP,
@@ -919,7 +940,7 @@ class IntelliJPlatformDependenciesHelper(
         val name = javaVendorVersion.substringBefore(javaVersion).trim('-')
         val version = javaVendorVersion.removePrefix(name).trim('-')
 
-        writeIvyModule(Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP, name, version) {
+        writeIvyModule(Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP, name, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
@@ -999,10 +1020,26 @@ class IntelliJPlatformDependenciesHelper(
             extension = "zip",
         )
 
+
     /**
      * Creates a [Provider] that holds a JetBrains Runtime version obtained using the currently used IntelliJ Platform.
      */
     internal fun obtainJetBrainsRuntimeVersion() = cachedProvider {
+        val version = tryObtainJetBrainsRuntimeVersion()
+        if (!version.isNullOrEmpty()) {
+            return@cachedProvider buildJetBrainsRuntimeVersion(version)
+        }
+
+        return@cachedProvider tryObtainBundledJetBrainsRuntimeVersion()
+    }
+
+    /**
+     * The Multi-OS Archives don't bundle JetBrains Runtime (JBR) needed to run the IDE locally, perform testing,
+     * and other crucial operations. Therefore, it is required to explicitly add a dependency on JetBrains Runtime
+     * (JBR) by adding extra jetbrainsRuntime() repository and dependency entries.
+     * On these dependencies.txt is not present.
+     */
+    private fun tryObtainJetBrainsRuntimeVersion(): String? {
         val version = platformPath.get().resolve("dependencies.txt").takeIf { it.exists() }?.let {
             FileReader(it.toFile()).use { reader ->
                 with(Properties()) {
@@ -1010,9 +1047,61 @@ class IntelliJPlatformDependenciesHelper(
                     getProperty("runtimeBuild") ?: getProperty("jdkBuild")
                 }
             }
-        } ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+        }
 
-        buildJetBrainsRuntimeVersion(version)
+        return version
+    }
+
+    /**
+     * IntelliJ Platform installers are OS-specific and contain bundled JetBrains Runtime (JBR), but are limited
+     * to public releases only.
+     * Installers are always used when running the verifyPlugin task to perform the binary compatibility checks.
+     */
+    private fun tryObtainBundledJetBrainsRuntimeVersion(): String {
+        val releaseFile = with(OperatingSystem.current()) {
+            when {
+                isMacOsX -> "jbr/Contents/Home/release"
+                isLinux -> "jbr/release"
+                isWindows -> "jbr/release"
+                else -> throw GradleException("Failed to obtain platform OS for: $this")
+            }
+        }
+
+        val releaseFilePath = platformPath.get().resolve(releaseFile).takeIf { it.exists() }
+            ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+
+        val properties = releaseFilePath.let {
+            FileReader(it.toFile()).use { reader ->
+                with(Properties()) {
+                    load(reader)
+                    this
+                }
+            }
+        }
+
+        // JAVA_RUNTIME_VERSION property is missing in old versions.
+        // E.g., JAVA_VERSION="17.0.6"
+        val javaVersion = properties.getProperty("JAVA_VERSION")?.replace("\"", "")
+            ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+        // E.g., IMPLEMENTOR_VERSION="JBR-17.0.6+1-653.34-jcef"
+        // Very old IDE's like IU-192.7142.36 do not have this property, they have only JAVA_VERSION & IMPLEMENTOR="N/A"
+        val implementorVersion = properties.getProperty("IMPLEMENTOR_VERSION")?.replace("\"", "")
+            ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+        // E.g. +1-653.34
+        val subString = implementorVersion.substringAfter(javaVersion).removeSuffix("-jcef").removeSuffix("-JCEF")
+        // E.g. 653.34-jcef
+        val buildVersion = subString.replace(Regex("^([+][0-9]+-)"), "")
+        // E.g. 17.0.6-b653.34-jcef
+        // It is actually could be also "17.0.6-b829.4"
+        // https://github.com/JetBrains/JetBrainsRuntime/releases?page=8
+        // The latest are without -
+        // https://github.com/JetBrains/JetBrainsRuntime/releases
+        val fixedVersion = "${javaVersion}b${buildVersion}"
+
+        val isJcef = implementorVersion.endsWith("-jcef") || implementorVersion.endsWith("-JCEF")
+        val variant = if (isJcef) "jcef" else null
+
+        return buildJetBrainsRuntimeVersion(fixedVersion, variant)
     }
 
     /**
@@ -1034,7 +1123,6 @@ class IntelliJPlatformDependenciesHelper(
         classifier = classifier,
         ext = extension,
     ).apply {
-        val buildNumber by lazy { productInfo.map { it.buildNumber.toVersion() }.get() }
 
         when (version) {
             Constraints.PLATFORM_VERSION ->
@@ -1044,6 +1132,7 @@ class IntelliJPlatformDependenciesHelper(
 
             Constraints.CLOSEST_VERSION ->
                 version {
+                    val buildNumber = productInfo.map { it.buildNumber.toVersion() }.get()
                     strictly("[${buildNumber.major}, $buildNumber]")
                     prefer("$buildNumber")
                 }
@@ -1061,32 +1150,85 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
+     * The same as [writeIvyModule] but without path validation.
+     * Intended to be used for bundled modules; because for them, usually we do not have a path to their archive (jar),
+     * since we get them from [ProductInfo.layout], which does not have a path.
+     * They are located in "IDE/lib/modules" and duplication should not be an issue, so we can try to ignore the path comparison.
+     */
+    private fun writeIvyModuleForBundledModule(group: String, artifact: String, version: String, block: () -> IvyModule): IvyModule {
+        return writeIvyModule(group, artifact, version, null, block)
+    }
+
+    /**
      * Creates and writes the Ivy module file for the specified group, artifact, and version, if absent.
      *
      * @param group The group identifier for the Ivy module.
      * @param artifact The artifact name for the Ivy module.
      * @param version The version of the Ivy module.
      * @param block A lambda that returns an instance of IvyModule to be serialized into the file.
+     * @param artifactPath Path of the IvyModule, it will be stored into cache, to make sure that no other module with
+     * a different path tries to store an Ivy XML file for the same coordinates.
+     *
+     * @see writtenIvyModules
      */
-    private fun writeIvyModule(group: String, artifact: String, version: String, block: () -> IvyModule) = apply {
+    private fun writeIvyModule(group: String, artifact: String, version: String, artifactPath: Path?, block: () -> IvyModule): IvyModule {
         val fileName = "$group-$artifact-$version.xml"
-        if (writtenIvyModules.contains(fileName)) {
-            return@apply
+
+        // See comments on writtenIvyModules
+        val cachedValue = writtenIvyModules[fileName]
+        if (cachedValue is IvyModule && null == artifactPath) {
+            log.info("An attempt to rewrite an already created Ivy module '${fileName}' has been detected." +
+                    " It is ok. The cached value will be used.")
+            return cachedValue
+        }
+
+        if (cachedValue is Pair<*, *> && null != artifactPath) {
+            val cachedIvyModule = cachedValue.first
+            val cachedModulePath = cachedValue.second
+
+            if (cachedIvyModule is IvyModule && cachedModulePath is Path) {
+                val cachedModulePathString = cachedModulePath.absolute().normalize().invariantSeparatorsPathString
+                val newModulePathString = artifactPath.absolute().normalize().invariantSeparatorsPathString
+
+                if (cachedModulePathString == newModulePathString) {
+                    log.info(
+                        "An attempt to rewrite an already created Ivy module '${fileName}' has been detected." +
+                                " It is ok since their paths match '$cachedModulePathString'. The cached value will used."
+                    )
+                } else {
+                    log.warn(
+                        "An attempt to rewrite an already created Ivy module '${fileName}' has been detected" +
+                                " and their artifact paths do not match: '$cachedModulePathString' vs '$newModulePathString'." +
+                                " It means that the same artifact has been found in two different locations." +
+                                " The first one will be used: '$cachedModulePathString'."
+                    )
+                }
+                return cachedIvyModule
+            }
+        } else if (null != cachedValue) {
+            // If this happened, it means that this method is called somewhere with wrong parameters.
+            log.warn(
+                "This is not supposed to happen. Please report a bug at ${Constants.GIT_HUB_ISSUES_URL}." +
+                        " File: '$fileName', path: '$artifactPath', cached value: '$cachedValue'."
+            )
         }
 
         val ivyFile = providers
             .localPlatformArtifactsPath(rootProjectDirectory)
             .resolve(fileName)
 
+        val newIvyModule = block()
         ivyFile
             .apply { parent.createDirectories() }
             .apply { deleteIfExists() }
             .createFile()
             .writeText(XML {
                 indentString = "  "
-            }.encodeToString(block()))
+            }.encodeToString(newIvyModule))
 
-        writtenIvyModules.add(fileName)
+        writtenIvyModules[fileName] = if (null == artifactPath) newIvyModule else Pair(newIvyModule, artifactPath)
+
+        return newIvyModule
     }
 
     /**
@@ -1119,8 +1261,12 @@ class IntelliJPlatformDependenciesHelper(
         val variant = runtimeVariant ?: "jcef"
 
         val (jdk, build) = version.split('b').also {
-            assert(it.size == 1) {
-                "Incorrect JetBrains Runtime version: $version. Use [sdk]b[build] format, like: 21.0.3b446.1"
+            assert(it.size == 2) {
+                // It is actually could be also "17.0.6-b829.4"
+                // https://github.com/JetBrains/JetBrainsRuntime/releases?page=8
+                // The latest are without -
+                // https://github.com/JetBrains/JetBrainsRuntime/releases
+                "Incorrect JetBrains Runtime version: '$version'. Use [sdk]b[build] format, like: '21.0.3b446.1'"
             }
         }
 
