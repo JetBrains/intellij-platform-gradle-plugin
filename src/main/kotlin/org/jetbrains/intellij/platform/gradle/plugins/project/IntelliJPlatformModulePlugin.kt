@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.attributes.AttributeContainer
 import org.gradle.api.attributes.Bundling
 import org.gradle.api.attributes.Category
 import org.gradle.api.attributes.LibraryElements
@@ -38,18 +39,59 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             apply(IntelliJPlatformBasePlugin::class)
         }
 
+        // To understand what is going on below read & watch this:
+        // https://youtu.be/2gPJD0mAres?t=461
+        // https://www.youtube.com/watch?v=8z5KFCLZDd0
+        // https://docs.gradle.org/current/userguide/variant_attributes.html#sec:standard_attributes
+        // https://docs.gradle.org/current/userguide/cross_project_publications.html#sec:variant-aware-sharing
         with(project.configurations) configurations@{
-            fun Configuration.applyVariantAttributes() {
+            fun Configuration.applyVariantCommonAttributes(customAction: AttributeContainer.() -> Unit = {}) {
                 attributes {
                     attribute(Bundling.BUNDLING_ATTRIBUTE, project.objects.named(Bundling.EXTERNAL))
                     attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
+
+                    // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1772
+                    // https://docs.gradle.org/current/userguide/cross_project_publications.html#targeting-different-platforms
+                    // > By default, the org.gradle.jvm.version is set to the value of the release property
+                    // > (or as fallback to the targetCompatibility value) of the main compilation task of the source set.
                     attributeProvider(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, project.provider {
                         project.the<JavaPluginExtension>().targetCompatibility.majorVersion.toInt()
                     })
-                    attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
+
                     attributes.attribute(Attributes.jvmEnvironment, "standard-jvm")
                     attributes.attribute(Attributes.kotlinJPlatformType, "jvm")
+
+                    customAction()
                 }
+            }
+
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API,
+                description = "IntelliJ Platform final composed Jar archive Api",
+            ) {
+                // true & true is deprecated.
+                // https://docs.gradle.org/current/userguide/declaring_dependencies_adv.html#sec:resolvable-consumable-configs
+                // > For backwards compatibility, both flags have a default value of true, but as a plugin author,
+                // you should always determine the right values for those flags, or you might accidentally introduce
+                // resolution errors.
+                isCanBeConsumed = true
+                isCanBeResolved = false
+
+                applyVariantCommonAttributes {
+                    attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_API))
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
+                }
+
+                // A separate consumable _API configuration is necessary so that we can register a separate outgoing variant
+                // with `attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_API))` so that custom
+                // configurations api & compileOnlyApi created by `java-library` plugin can actually work.
+                // https://docs.gradle.org/current/userguide/java_library_plugin.html
+                // We cannot extend here from Configurations.External.COMPILE_ONLY_API.API_ELEMENTS because then
+                // we will inherit its -base.jar registered by the java plugin by default, which we do not want.
+                extendsFrom(
+                    this@configurations[Configurations.External.API],
+                    this@configurations[Configurations.External.COMPILE_ONLY_API]
+                )
             }
 
             create(
@@ -59,8 +101,13 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 isCanBeConsumed = true
                 isCanBeResolved = true
 
-                applyVariantAttributes()
+                applyVariantCommonAttributes {
+                    attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
+                }
 
+                // We cannot extend here from Configurations.External.COMPILE_ONLY_API.RUNTIME_ELEMENTS because then
+                // we will inherit its -base.jar registered by the java plugin by default, which we do not want.
                 extendsFrom(
                     this@configurations[Configurations.External.IMPLEMENTATION],
                     this@configurations[Configurations.External.RUNTIME_ONLY],
@@ -70,10 +117,17 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_DISTRIBUTION,
                 description = "IntelliJ Platform distribution Zip archive",
             ) {
+                // true & true is deprecated.
+                // https://docs.gradle.org/current/userguide/declaring_dependencies_adv.html#sec:resolvable-consumable-configs
+                // > For backwards compatibility, both flags have a default value of true, but as a plugin author,
+                // you should always determine the right values for those flags, or you might accidentally introduce
+                // resolution errors.
                 isCanBeConsumed = true
                 isCanBeResolved = false
 
-                applyVariantAttributes()
+                applyVariantCommonAttributes {
+                    attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
+                }
             }
 
             val intellijPlatformPluginModuleConfiguration = create(
@@ -85,9 +139,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 extendsFrom(intellijPlatformPluginModuleConfiguration)
             }
 
-
             listOf(
-                Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR,
                 Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
                 Configurations.External.COMPILE_CLASSPATH,
