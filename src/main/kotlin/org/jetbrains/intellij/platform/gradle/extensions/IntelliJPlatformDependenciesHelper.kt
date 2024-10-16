@@ -751,7 +751,7 @@ class IntelliJPlatformDependenciesHelper(
                     revision = version,
                 ),
                 publications = listOf(artifactPath.toIvyArtifact()),
-                dependencies = plugin.collectDependencies(),
+                dependencies = plugin.collectDependencies(listOf(id)),
             )
         }
 
@@ -795,11 +795,11 @@ class IntelliJPlatformDependenciesHelper(
 
     /**
      * Collects all dependencies on plugins or modules of the current [IdePlugin].
-     * The [path] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
+     * The [processingIds] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
      *
-     * @param path IDs of already traversed plugins or modules.
+     * @param processingIds IDs of already traversed plugins or modules.
      */
-    private fun IdePlugin.collectDependencies(path: List<String> = emptyList()): List<IvyModule.Dependency> {
+    private fun IdePlugin.collectDependencies(processingIds: List<String> = emptyList()): List<IvyModule.Dependency> {
         val id = requireNotNull(pluginId)
         val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name } - id).toSet()
         val buildNumber by lazy { productInfo.get().buildNumber }
@@ -813,15 +813,15 @@ class IntelliJPlatformDependenciesHelper(
                 val name = requireNotNull(plugin.pluginId)
                 val version = requireNotNull(plugin.pluginVersion)
 
-                writeIvyModule(group, name, version) {
-                    IvyModule(
-                        info = IvyModule.Info(group, name, version),
-                        publications = listOf(artifactPath.toIvyArtifact()),
-                        dependencies = when {
-                            id in path -> emptyList()
-                            else -> plugin.collectDependencies(path + id)
-                        },
-                    )
+                // Do not try to create ivy xml file for plugins which is already processing
+                if (name !in processingIds) {
+                    writeIvyModule(group, name, version) {
+                        IvyModule(
+                            info = IvyModule.Info(group, name, version),
+                            publications = listOf(artifactPath.toIvyArtifact()),
+                            dependencies = plugin.collectDependencies(processingIds + name),
+                        )
+                    }
                 }
 
                 IvyModule.Dependency(group, name, version)
