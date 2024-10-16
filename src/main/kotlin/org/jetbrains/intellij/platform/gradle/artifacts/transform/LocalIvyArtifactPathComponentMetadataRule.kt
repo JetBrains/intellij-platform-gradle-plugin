@@ -14,6 +14,9 @@ import java.io.File
 import javax.inject.Inject
 
 /**
+ * This comes into play only when [org.gradle.api.initialization.resolve.RulesMode.PREFER_PROJECT] (the default) is
+ * used in Gradle's settings.
+ *
  * Fixes relative URLs of dependencies from the local Ivy repository [IntelliJPlatformRepositoriesHelper.createLocalIvyRepository]
  * by appending the full absolute path. It is necessary only for bundledPlugin & bundledModule dependency types.
  *
@@ -53,6 +56,12 @@ import javax.inject.Inject
  *
  * This is called after Ivy XML metadata is already found and parsed, so all dependencies and publications are known,
  * but not yet resolved on the file system, so we have a chance to fix the paths.
+ *
+ * A separate note on [CacheableRule], since there is not enough information on it in the internet.
+ * First, see the comments in [org.gradle.internal.resolve.caching.CachingRuleExecutor].
+ * I tried to debug it, and it seems like rule parameters are taken into account. It happens in:
+ * [org.gradle.internal.resolve.caching.CrossBuildCachingRuleExecutor.computeExplicitInputsSnapshot]
+ * Which should mean that we can use the caching, because if the paths change, it should be re-evaluated.
  *
  * @see org.jetbrains.intellij.platform.gradle.models.IvyModule
  * @see org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin.apply

@@ -6,10 +6,13 @@ import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlChildrenName
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import org.gradle.api.initialization.resolve.RulesMode
+import org.gradle.api.provider.Provider
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.extension
@@ -71,6 +74,8 @@ data class IvyModule(
     }
 }
 
+private val log = Logger(IvyModule::class.java)
+
 /**
  * Create a publication artifact element for Ivy XML file, like:
  *
@@ -102,6 +107,7 @@ data class IvyModule(
  * As we remove the drive letter, we later have to guess which drive the artifact belongs to by iterating over A:/, B:/, C:/, ...
  * but that's not a huge problem.
  *
+ * @see toIvyArtifacts
  * @see IntelliJPlatformRepositoriesExtension.jetbrainsIdeInstallers
  * @see IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
  */
@@ -115,23 +121,39 @@ internal fun Path.toAbsolutePathIvyArtifact(): IvyModule.Artifact {
         else -> absNormalizedPath.extension
     }
 
-    // Remove the leading "/" or drive letter for Windows, if present, because the artifact pattern adds it.
+    // Remove the leading "/" or a drive letter for Windows, if present, because the artifact pattern adds it.
     val absPathStringWithoutLeading = absNormalizedPath.invariantSeparatorsPathString.removeLeadingPathSeparator()
+
+    log.info("Created IvyModule.Artifact: name='$absPathStringWithoutLeading', ext='$optionalExtString'.")
     return IvyModule.Artifact(name = absPathStringWithoutLeading, ext = optionalExtString)
 }
 
 /**
+ * Creates Ivy artifacts from the current [Path].
+ *
+ * If the [metadataRulesModeProvider] is [RulesMode.PREFER_PROJECT] all created artifacts will have paths relative to
+ * [basePath], despite that the local Ivy repository is created with no absolute path provided.
+ *
+ * Otherwise, absolute paths will be used.
+ *
+ * It is possible because [RulesMode.PREFER_PROJECT] allows registering a component metadata rule to fix the relative
+ * paths on the fly.
+ *
+ * For more information, see the below links.
+ *
+ * @see toAbsolutePathIvyArtifact
+ * @see IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
+ * @see org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin
  * @see org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
  */
-internal fun Path.toBundledIvyArtifactsRelativeTo(basePath: Path) = explodeIntoIvyJarsArtifactsRelativeTo(basePath)
-
-/**
- * For local plugins, we don't use relative paths.
- * Since a base path is null, the result will be an absolute path.
- *
- * @see IntelliJPlatformRepositoriesHelper.createLocalIvyRepository
- */
-internal fun Path.toAbsolutePathLocalPluginIvyArtifacts() = explodeIntoIvyJarsArtifactsRelativeTo(null)
+internal fun Path.toIvyArtifacts(metadataRulesModeProvider: Provider<RulesMode>, basePath: Path): List<IvyModule.Artifact> {
+    return when (metadataRulesModeProvider.get()) {
+        // Only with this setting we can register & use LocalIvyArtifactPathComponentMetadataRule
+        RulesMode.PREFER_PROJECT -> explodeIntoIvyJarsArtifactsRelativeTo(basePath)
+        // Otherwise fallback to the absolute paths, since the rule won't be registered.
+        else -> listOf(toAbsolutePathIvyArtifact())
+    }
+}
 
 private fun Path.explodeIntoIvyJarsArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {
     // The contract is that we're working with absolute normalized paths here.
@@ -158,11 +180,8 @@ private fun Path.toArtifactRelativeTo(basePath: Path?): IvyModule.Artifact {
     // Remove the extension, if present, because the artifact pattern adds it.
     val fileNameWithoutExt = absNormalizedPath.fileName.toString().removeSuffix(".$extString")
 
-    return IvyModule.Artifact(
-        url = absPathStringWithoutLeading,
-        name = fileNameWithoutExt,
-        ext = extString,
-    )
+    log.info("Created IvyModule.Artifact: url='$absPathStringWithoutLeading', name='$fileNameWithoutExt', ext='$extString'.")
+    return IvyModule.Artifact(url = absPathStringWithoutLeading, name = fileNameWithoutExt, ext = extString)
 }
 
 /**

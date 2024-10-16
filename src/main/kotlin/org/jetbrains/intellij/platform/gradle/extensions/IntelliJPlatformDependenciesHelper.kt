@@ -13,6 +13,7 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.initialization.resolve.RulesMode
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
@@ -58,6 +59,7 @@ class IntelliJPlatformDependenciesHelper(
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,
     private val rootProjectDirectory: Path,
+    private val metadataRulesModeProvider: Provider<RulesMode>
 ) {
 
     private val log = Logger(javaClass)
@@ -749,7 +751,7 @@ class IntelliJPlatformDependenciesHelper(
                     module = id,
                     revision = version,
                 ),
-                publications = artifactPath.toBundledIvyArtifactsRelativeTo(platformPath.get()),
+                publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath.get()),
                 dependencies = plugin.collectDependencies(),
             )
         }
@@ -772,7 +774,7 @@ class IntelliJPlatformDependenciesHelper(
             .let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
         val platformPath = platformPath.get()
         val artifactPaths = bundledModule.classPath.flatMap {
-            path -> platformPath.resolve(path).toBundledIvyArtifactsRelativeTo(platformPath)
+            path -> platformPath.resolve(path).toIvyArtifacts(metadataRulesModeProvider, platformPath)
         }
         val version = baseVersion.orElse(productInfo.map { it.version }).get()
 
@@ -817,7 +819,7 @@ class IntelliJPlatformDependenciesHelper(
                 writeIvyModule(group, name, version) {
                     IvyModule(
                         info = IvyModule.Info(group, name, version),
-                        publications = artifactPath.toBundledIvyArtifactsRelativeTo(platformPath),
+                        publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath),
                         dependencies = when {
                             id in path -> emptyList()
                             else -> plugin.collectDependencies(path + id)
@@ -838,7 +840,7 @@ class IntelliJPlatformDependenciesHelper(
             .filterNot { it.classPath.isEmpty() }
             .map {
                 val artifactPaths = it.classPath.flatMap {
-                    path -> platformPath.resolve(path).toBundledIvyArtifactsRelativeTo(platformPath)
+                    path -> platformPath.resolve(path).toIvyArtifacts(metadataRulesModeProvider, platformPath)
                 }
                 val group = Dependencies.BUNDLED_MODULE_GROUP
                 val name = it.name
@@ -888,7 +890,7 @@ class IntelliJPlatformDependenciesHelper(
                     module = name,
                     revision = version,
                 ),
-                publications = artifactPath.toAbsolutePathLocalPluginIvyArtifacts(),
+                publications = listOf(artifactPath.toAbsolutePathIvyArtifact()),
             )
         }
 

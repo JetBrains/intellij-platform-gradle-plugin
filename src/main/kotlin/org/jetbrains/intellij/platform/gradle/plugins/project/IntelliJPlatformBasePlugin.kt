@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.initialization.resolve.RulesMode
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.kotlin.dsl.all
 import org.gradle.kotlin.dsl.apply
@@ -31,11 +32,8 @@ import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
-import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.*
 import org.jetbrains.intellij.platform.gradle.utils.create
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import org.jetbrains.intellij.platform.gradle.utils.platformPath
-import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import kotlin.io.path.absolute
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -54,7 +52,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }
 
         val dependenciesHelper = with(project) {
-            IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, rootProjectPath)
+            IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, rootProjectPath, project.settings.dependencyResolutionManagement.rulesMode)
         }
 
         /**
@@ -115,18 +113,28 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
             /** Registers LocalIvyArtifactPathComponentMetadataRule */
             intellijPlatformConfiguration.incoming.afterResolve {
-                if (intellijPlatformConfiguration.resolvedConfiguration.hasError()) {
-                    log.warn("Configuration '$intellijPlatformConfiguration' has some resolution errors.")
-                } else if (intellijPlatformConfiguration.isEmpty) {
-                    log.warn("Configuration '$intellijPlatformConfiguration' is empty.")
-                } else {
-                    val platformPath = intellijPlatformConfiguration.platformPath()
-                    val artifactLocationPath = platformPath.absolute().normalize().invariantSeparatorsPathString
-                    val ivyLocationPath = project.providers.localPlatformArtifactsPath(project.rootProjectPath).absolute().normalize().invariantSeparatorsPathString
+                val ruleName = LocalIvyArtifactPathComponentMetadataRule::class.simpleName
+                // Intentionally delaying the check just in case if it changes somehow late in the lifecycle.
+                val rulesMode = project.settings.dependencyResolutionManagement.rulesMode.get()
 
-                    project.dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
-                        params(artifactLocationPath, ivyLocationPath)
+                if (RulesMode.PREFER_PROJECT == rulesMode) {
+                    if (intellijPlatformConfiguration.resolvedConfiguration.hasError()) {
+                        log.warn("Configuration '$intellijPlatformConfiguration' has some resolution errors. $ruleName will not be registered.")
+                    } else if (intellijPlatformConfiguration.isEmpty) {
+                        log.warn("Configuration '$intellijPlatformConfiguration' is empty. $ruleName will not be registered.")
+                    } else {
+                        val platformPath = intellijPlatformConfiguration.platformPath()
+                        val artifactLocationPath = platformPath.absolute().normalize().invariantSeparatorsPathString
+                        val ivyLocationPath = project.providers.localPlatformArtifactsPath(project.rootProjectPath).absolute().normalize().invariantSeparatorsPathString
+
+                        project.dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
+                            params(artifactLocationPath, ivyLocationPath)
+                        }
+
+                        log.info("$ruleName has been registered.")
                     }
+                }  else {
+                    log.info("$ruleName can not be registered because '${rulesMode}' mode is used in settings.")
                 }
             }
 

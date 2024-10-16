@@ -15,9 +15,11 @@ kotlin {
     jvmToolchain(17)
 }
 
-// Ignore configurations containing dependencies pointing to a directory, because when used with Grale's dependency
-// verification (pgp option) it fails to create a hash for the directories, with a very obscure error:
-// Ivalid UTF-8 input
+// Disable dependency verification for these configuration if signature verification is being used (pgp option),
+// because they break Gradle's logic for signature generation with a very obscure error: "Invalid UTF-8 input".
+// There seems to be a few bugs in Gradle related to this error and also for generating a signature for JDK.
+// https://github.com/gradle/gradle/issues?q=%22Invalid+UTF-8+input%22
+// https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1779#issuecomment-2384461002
 configurations {
     named("jetbrainsRuntimeLocalInstance") {
         resolutionStrategy.disableDependencyVerification()
