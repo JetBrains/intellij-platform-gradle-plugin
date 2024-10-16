@@ -6,8 +6,19 @@
       <verify-metadata>true</verify-metadata>
       <verify-signatures>false</verify-signatures>
       <keyring-format>armored</keyring-format>
+      <!-- For better stability add extra key servers, in case if default ones are not enough. -->
       <key-servers>
          <key-server uri="https://keyserver.ubuntu.com"/>
+         <key-server uri="https://keyoxide.org/"/>
+         <key-server uri="https://keys.openpgp.org/"/>
       </key-servers>
+      <trusted-artifacts>
+         <!--<trust group="bundledModule" reason="Testing"/>-->
+         <!--<trust group="bundledPlugin" reason="Testing"/>-->
+         <!--<trust group="localIde" reason="Testing"/>-->
+         <!--<trust group="localPlugin" reason="Testing"/>-->
+         <!--<trust group="localJetBrainsRuntime" reason="Testing"/>-->
+         <!--<trust group="com.jetbrains" name="jbr" reason="Testing"/>-->
+      </trusted-artifacts>
    </configuration>
 </verification-metadata>

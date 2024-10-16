@@ -57,6 +57,19 @@ object Constants {
         const val INTELLIJ_PLATFORM = "intellijPlatform"
     }
 
+    object Repositories {
+        const val LOCAL_INTELLI_J_PLATFORM_ARTIFACTS = "Local IntelliJ Platform Artifacts Repository"
+        const val INTELLI_J_PLATFORM_CUSTOM_PLUGIN = "IntelliJ Platform Custom Plugin Repository"
+        const val JET_BRAINS_MARKETPLACE = "JetBrains Marketplace Repository"
+        const val INTELLI_J_PLATFORM_DEPENDENCIES = "IntelliJ Platform Dependencies Repository"
+        const val INTELLI_J_REPOSITORY_NIGHTLY = "IntelliJ Repository (Nightly)"
+        const val INTELLI_J_REPOSITORY_SNAPSHOTS = "IntelliJ Repository (Snapshots)"
+        const val INTELLI_J_REPOSITORY_RELEASES = "IntelliJ Repository (Releases)"
+        const val JET_BRAINS_RUNTIME = "JetBrains Runtime"
+        const val JET_BRAINS_IDE_INSTALLERS = "JetBrains IDE Installers"
+        const val ANDROID_STUDIO_INSTALLERS = "Android Studio Installers"
+    }
+
     object Configurations {
         const val INTELLIJ_PLATFORM_COMPOSED_JAR = "intellijPlatformComposedJar"
         const val INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE = "intellijPlatformDependencyArchive"

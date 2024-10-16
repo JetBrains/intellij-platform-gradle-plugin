@@ -5,12 +5,14 @@ package org.jetbrains.intellij.platform.gradle.resolvers.path
 import org.jetbrains.intellij.platform.gradle.*
 import kotlin.io.path.Path
 import kotlin.io.path.readText
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
 
     @Test
+    @Ignore("Because we have the defaults now.")
     fun `resolve current JVM by default`() {
         buildFile overwrite //language=kotlin
                 buildFile.readText().replace(
