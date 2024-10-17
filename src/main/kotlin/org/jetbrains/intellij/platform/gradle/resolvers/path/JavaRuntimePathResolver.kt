@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.gradle.api.GradleException
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.internal.jvm.Jvm
@@ -27,7 +28,7 @@ private const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
  */
 class JavaRuntimePathResolver(
     private val jetbrainsRuntime: FileCollection,
-    private val intellijPlatform: FileCollection,
+    private val intellijPlatform: Configuration,
     private val javaToolchainSpec: JavaToolchainSpec,
     private val javaToolchainService: JavaToolchainService,
 ) : PathResolver() {
@@ -55,6 +56,7 @@ class JavaRuntimePathResolver(
          * The bundled JetBrains Runtime within the current IntelliJ Platform.
          */
         "JetBrains Runtime bundled within the IntelliJ Platform" to {
+            intellijPlatform.resolve()
             intellijPlatform
                 .platformPath()
                 .resolveRuntimeDirectory()
