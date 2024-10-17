@@ -741,7 +741,7 @@ class IntelliJPlatformDependenciesHelper(
         }
 
         val artifactPath = requireNotNull(plugin.originalFile)
-        val version = baseVersion.orElse(productInfo.map { it.version }).get()
+        val version = getVersionForBundledPlugin(plugin)
 
         writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version) {
             IvyModule(
@@ -773,7 +773,7 @@ class IntelliJPlatformDependenciesHelper(
             .let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
         val platformPath = platformPath.get()
         val artifactPaths = bundledModule.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
-        val version = baseVersion.orElse(productInfo.map { it.version }).get()
+        val version = getVersionForBundledModule()
 
         writeIvyModule(Dependencies.BUNDLED_MODULE_GROUP, id, version) {
             IvyModule(
@@ -793,6 +793,12 @@ class IntelliJPlatformDependenciesHelper(
         )
     }
 
+    // These two methods were created to make clearly visible that we want to use consistent version numbers in
+    // collectDependencies as well as in createIntelliJPlatformBundledModule & createIntelliJPlatformBundledPlugin
+    // When the version is retrieved like this, it is impossible to change it one place & forger to chang another.
+    private fun getVersionForBundledModule() = productInfo.get().buildNumber
+    private fun getVersionForBundledPlugin(plugin: IdePlugin) = requireNotNull(plugin.pluginVersion)
+
     /**
      * Collects all dependencies on plugins or modules of the current [IdePlugin].
      * The [path] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
@@ -802,7 +808,6 @@ class IntelliJPlatformDependenciesHelper(
     private fun IdePlugin.collectDependencies(path: List<String> = emptyList()): List<IvyModule.Dependency> {
         val id = requireNotNull(pluginId)
         val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name } - id).toSet()
-        val buildNumber by lazy { productInfo.get().buildNumber }
         val platformPath by lazy { platformPath.get() }
 
         val plugins = dependencyIds
@@ -811,7 +816,7 @@ class IntelliJPlatformDependenciesHelper(
                 val artifactPath = requireNotNull(plugin.originalFile)
                 val group = Dependencies.BUNDLED_PLUGIN_GROUP
                 val name = requireNotNull(plugin.pluginId)
-                val version = requireNotNull(plugin.pluginVersion)
+                val version = getVersionForBundledPlugin(plugin)
 
                 writeIvyModule(group, name, version) {
                     IvyModule(
@@ -839,7 +844,7 @@ class IntelliJPlatformDependenciesHelper(
                 val artifactPaths = it.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
                 val group = Dependencies.BUNDLED_MODULE_GROUP
                 val name = it.name
-                val version = buildNumber
+                val version = getVersionForBundledModule()
 
                 writeIvyModule(group, name, version) {
                     IvyModule(

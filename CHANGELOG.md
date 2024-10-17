@@ -15,6 +15,7 @@
 - Fixed issue #1778 by removing a hash of the absolute artifact path appended to the end of the version string. That hash made artifact version different on different PCs and also breaks Gradle dependency locking.
 - Add the missing `org.jetbrains.kotlin.platform.type=jvm` attribute to the `intellijPlatformRuntimeClasspath` configuration manually as it's not inherited from the `runtimeClasspath`.
 - Fixed `Could not generate a decorated class for type PluginArtifactRepository.` when creating a custom plugin repository.
+- Fixed generation of duplicate files in ".intellijPlatform/localPlatformArtifacts" with different version numbers.
 
 ## [2.1.0]
 
