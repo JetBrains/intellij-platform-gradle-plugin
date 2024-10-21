@@ -14,6 +14,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.nio.file.Path
+import kotlin.Throws
 
 private const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
 

@@ -200,7 +200,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     }
 
     @Test
-    fun `fail signing when no Marketplace ZIP Signer dependency is present`() {
+    fun `correctly resolve Marketplace ZIP Signer dependency in the latest version when a default dependency is used`() {
         buildFile write //language=kotlin
                 """
                 repositories {
@@ -225,15 +225,19 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        buildAndFail(Tasks.SIGN_PLUGIN) {
+        val latestVersion = Coordinates("org.jetbrains", "marketplace-zip-signer").resolveLatestVersion()
+        build(DEPENDENCIES) {
             assertContains(
                 """
-               > No Marketplace ZIP Signer executable found.
-                 Please ensure the `zipSigner()` entry is present in the project dependencies section or `intellijPlatform.signing.cliPath` extension property
-                 See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-signing
+                marketplaceZipSigner - Marketplace ZIP Signer
+                \--- org.jetbrains:marketplace-zip-signer:{prefer +} -> $latestVersion
                 """.trimIndent(),
                 output,
             )
+        }
+
+        build(Tasks.SIGN_PLUGIN) {
+            assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SUCCESS)
         }
     }
 

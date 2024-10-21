@@ -1003,14 +1003,16 @@ class IntelliJPlatformDependenciesHelper(
      * Creates a [Provider] that holds a JetBrains Runtime version obtained using the currently used IntelliJ Platform.
      */
     internal fun obtainJetBrainsRuntimeVersion() = cachedProvider {
-        val version = platformPath.get().resolve("dependencies.txt").takeIf { it.exists() }?.let {
-            FileReader(it.toFile()).use { reader ->
-                with(Properties()) {
-                    load(reader)
-                    getProperty("runtimeBuild") ?: getProperty("jdkBuild")
-                }
+        val dependencies = runCatching {
+            platformPath.get().resolve("dependencies.txt").takeIf { it.exists() }
+        }.getOrNull() ?: return@cachedProvider null
+
+        val version = FileReader(dependencies.toFile()).use { reader ->
+            with(Properties()) {
+                load(reader)
+                getProperty("runtimeBuild") ?: getProperty("jdkBuild")
             }
-        } ?: throw GradleException("Could not obtain JetBrains Runtime version with the current IntelliJ Platform.")
+        } ?: return@cachedProvider null
 
         buildJetBrainsRuntimeVersion(version)
     }
@@ -1034,8 +1036,6 @@ class IntelliJPlatformDependenciesHelper(
         classifier = classifier,
         ext = extension,
     ).apply {
-        val buildNumber by lazy { productInfo.map { it.buildNumber.toVersion() }.get() }
-
         when (version) {
             Constraints.PLATFORM_VERSION ->
                 version {
@@ -1044,6 +1044,12 @@ class IntelliJPlatformDependenciesHelper(
 
             Constraints.CLOSEST_VERSION ->
                 version {
+                    val buildNumber by lazy {
+                        runCatching {
+                            productInfo.map { it.buildNumber.toVersion() }.get()
+                        }.getOrDefault(Version()) // fallback to 0.0.0 if IntelliJ Platform is missing
+                    }
+
                     strictly("[${buildNumber.major}, $buildNumber]")
                     prefer("$buildNumber")
                 }
