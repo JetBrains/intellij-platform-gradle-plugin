@@ -1119,7 +1119,7 @@ class IntelliJPlatformDependenciesHelper(
         val variant = runtimeVariant ?: "jcef"
 
         val (jdk, build) = version.split('b').also {
-            assert(it.size == 1) {
+            require(it.size == 2) {
                 "Incorrect JetBrains Runtime version: $version. Use [sdk]b[build] format, like: 21.0.3b446.1"
             }
         }
