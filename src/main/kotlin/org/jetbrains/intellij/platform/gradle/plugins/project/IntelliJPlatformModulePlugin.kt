@@ -5,11 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
-import org.gradle.api.attributes.AttributeContainer
-import org.gradle.api.attributes.Bundling
-import org.gradle.api.attributes.Category
-import org.gradle.api.attributes.LibraryElements
-import org.gradle.api.attributes.Usage
+import org.gradle.api.attributes.*
 import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.kotlin.dsl.*
@@ -45,7 +41,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
         // https://docs.gradle.org/current/userguide/variant_attributes.html#sec:standard_attributes
         // https://docs.gradle.org/current/userguide/cross_project_publications.html#sec:variant-aware-sharing
         with(project.configurations) configurations@{
-            fun Configuration.applyVariantCommonAttributes(customAction: AttributeContainer.() -> Unit = {}) {
+            fun Configuration.applyVariantCommonAttributes(block: AttributeContainer.() -> Unit = {}) {
                 attributes {
                     attribute(Bundling.BUNDLING_ATTRIBUTE, project.objects.named(Bundling.EXTERNAL))
                     attribute(Category.CATEGORY_ATTRIBUTE, project.objects.named(Category.LIBRARY))
@@ -61,7 +57,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                     attributes.attribute(Attributes.jvmEnvironment, "standard-jvm")
                     attributes.attribute(Attributes.kotlinJPlatformType, "jvm")
 
-                    customAction()
+                    block()
                 }
             }
 
@@ -69,11 +65,14 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API,
                 description = "IntelliJ Platform final composed Jar archive Api",
             ) {
-                // true & true is deprecated.
-                // https://docs.gradle.org/current/userguide/declaring_dependencies_adv.html#sec:resolvable-consumable-configs
-                // > For backwards compatibility, both flags have a default value of true, but as a plugin author,
-                // you should always determine the right values for those flags, or you might accidentally introduce
-                // resolution errors.
+                /**
+                 * Setting both flags to `true` is deprecated:
+                 *
+                 * > For backwards compatibility, both flags have a default value of true, but as a plugin author,
+                 * > you should always determine the right values for those flags, or you might accidentally introduce resolution errors.
+                 *
+                 * See: https://docs.gradle.org/current/userguide/declaring_dependencies_adv.html#sec:resolvable-consumable-configs
+                 */
                 isCanBeConsumed = true
                 isCanBeResolved = false
 
@@ -82,12 +81,15 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                     attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
                 }
 
-                // A separate consumable _API configuration is necessary so that we can register a separate outgoing variant
-                // with `attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_API))` so that custom
-                // configurations api & compileOnlyApi created by `java-library` plugin can actually work.
-                // https://docs.gradle.org/current/userguide/java_library_plugin.html
-                // We cannot extend here from Configurations.External.COMPILE_ONLY_API.API_ELEMENTS because then
-                // we will inherit its -base.jar registered by the java plugin by default, which we do not want.
+                /**
+                 * A separate consumable [Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API] configuration is necessary so that we can register
+                 * a separate outgoing variant with `attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_API))` so that custom
+                 * configurations `api` & `compileOnlyApi` created by the `java-library` plugin can actually work.
+                 * See: https://docs.gradle.org/current/userguide/java_library_plugin.html
+                 *
+                 * We can't extend here from [Configurations.External.COMPILE_ONLY_API.API_ELEMENTS] because then
+                 * we will inherit its `-base.jar` registered by the java plugin by default, which we don't want.
+                 */
                 extendsFrom(
                     this@configurations[Configurations.External.API],
                     this@configurations[Configurations.External.COMPILE_ONLY_API]
@@ -106,8 +108,10 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                     attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
                 }
 
-                // We cannot extend here from Configurations.External.COMPILE_ONLY_API.RUNTIME_ELEMENTS because then
-                // we will inherit its -base.jar registered by the java plugin by default, which we do not want.
+                /**
+                 * We can't extend here from [Configurations.External.RUNTIME_ELEMENTS] because then
+                 * we will inherit its `-base.jar` registered by the java plugin by default, which we don't want.
+                 */
                 extendsFrom(
                     this@configurations[Configurations.External.IMPLEMENTATION],
                     this@configurations[Configurations.External.RUNTIME_ONLY],
@@ -117,11 +121,14 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_DISTRIBUTION,
                 description = "IntelliJ Platform distribution Zip archive",
             ) {
-                // true & true is deprecated.
-                // https://docs.gradle.org/current/userguide/declaring_dependencies_adv.html#sec:resolvable-consumable-configs
-                // > For backwards compatibility, both flags have a default value of true, but as a plugin author,
-                // you should always determine the right values for those flags, or you might accidentally introduce
-                // resolution errors.
+                /**
+                 * Setting both flags to `true` is deprecated:
+                 *
+                 * > For backwards compatibility, both flags have a default value of true, but as a plugin author,
+                 * > you should always determine the right values for those flags, or you might accidentally introduce resolution errors.
+                 *
+                 * See: https://docs.gradle.org/current/userguide/declaring_dependencies_adv.html#sec:resolvable-consumable-configs
+                 */
                 isCanBeConsumed = true
                 isCanBeResolved = false
 

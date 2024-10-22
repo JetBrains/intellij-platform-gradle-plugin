@@ -84,7 +84,6 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Configurations$External {
 	public static final field API Ljava/lang/String;
-	public static final field API_ELEMENTS Ljava/lang/String;
 	public static final field COMPILE_CLASSPATH Ljava/lang/String;
 	public static final field COMPILE_ONLY Ljava/lang/String;
 	public static final field COMPILE_ONLY_API Ljava/lang/String;
