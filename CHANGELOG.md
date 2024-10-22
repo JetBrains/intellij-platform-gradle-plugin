@@ -17,7 +17,7 @@
 - Fixed `Could not generate a decorated class for type PluginArtifactRepository.` when creating a custom plugin repository.
 - Fixed generation of duplicate files in ".intellijPlatform/localPlatformArtifacts" with different version numbers.
 - Gradle's api & compileOnlyApi configurations created by its java-library plugin don't work, and transitive implementation scope dependencies get exposed, when this plugin is used. [#1799](../../issues/1799)
-- #1791: Fixed incorrect transitive dependencies calculation for bundled modules. 
+- Fixed incorrect transitive dependencies calculation for bundled modules. [#1791](../../issues/1791)
 
 ## [2.1.0]
 

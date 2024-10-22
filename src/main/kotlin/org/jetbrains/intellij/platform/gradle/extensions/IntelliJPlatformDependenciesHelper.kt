@@ -24,6 +24,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
+import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
@@ -39,8 +40,8 @@ import java.io.File
 import java.io.FileReader
 import java.nio.file.Path
 import java.util.*
-import kotlin.Throws
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.Throws
 import kotlin.io.path.*
 
 /**
@@ -66,19 +67,20 @@ class IntelliJPlatformDependenciesHelper(
     private val pluginManager = IdePluginManager.createManager()
 
     /**
-     * Key -- Ivy module XML file name.
+     * Key is Ivy module XML filename.
      * Value is either:
-     * 1) The Ivy Module, representing the contents of XML file. In the case if we did not have a path for the module.
-     * 2) Otherwise it is a pair of:
-     *     2.1) The Ivy Module, representing the contents of XML file.
-     *     2.2) The path from which this module was created.
+     * 1. The Ivy Module, representing the contents of XML file.
+     *    In the case if we didn't have a path for the module.
+     * 2. Otherwise, it is a pair of:
+     *    - The Ivy Module, representing the contents of XML file.
+     *    - The path from which this module was created.
      *
      * Since we store Ivy XML files into the same directory, but create them from completely unrelated paths.
-     * This structure is being used to validate that we do not try to create duplicate XML files with the same name from
+     * This structure is being used to validate that we don't try to create duplicate XML files with the same name from
      * different paths (which would either a bug in this plugin, or duplicated dependency on the file system).
      *
-     * [ConcurrentHashMap] has been used because Gradle is multithreaded. It won't provide absolute thread safety,
-     * but is good enough for the task, considering what this is for.
+     * [ConcurrentHashMap] has been used because Gradle is multithreaded.
+     * It won't provide absolute thread safety, but is good enough for the task, considering what this is for.
      *
      * @see writeIvyModule
      */
@@ -858,9 +860,10 @@ class IntelliJPlatformDependenciesHelper(
         val platformPath = platformPath.get()
         val artifacts = classPath.map { platformPath.resolve(it).toIvyArtifact() }
 
-        // For bundled modules, usually we do not have a path to their archive (jar),
-        // since we get them from [ProductInfo.layout], which does not have a path.
-        // They are located in "IDE/lib/modules" and duplication should not be an issue, so we can try to ignore the path comparison.
+        /**
+         * For bundled modules, usually we don't have a path to their archive (jar), since we get them from [ProductInfo.layout], which does not have a path.
+         * They're located in "IDE/lib/modules" and duplication shouldn't be an issue, so we can try to ignore the path comparison.
+         */
         writeIvyModule(group, name, version, null) {
             IvyModule(
                 info = IvyModule.Info(group, name, version),
@@ -1090,8 +1093,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param artifact The artifact name for the Ivy module.
      * @param version The version of the Ivy module.
      * @param block A lambda that returns an instance of IvyModule to be serialized into the file.
-     * @param artifactPath Path of the IvyModule, it will be stored into cache, to make sure that no other module with
-     * a different path tries to store an Ivy XML file for the same coordinates.
+     * @param artifactPath Path of the IvyModule, stored in cache to prevent path conflicts for Ivy XML coordinates.
      *
      * @see writtenIvyModules
      */
@@ -1101,12 +1103,11 @@ class IntelliJPlatformDependenciesHelper(
         // See comments on writtenIvyModules
         val cachedValue = writtenIvyModules[fileName]
         if (cachedValue is IvyModule && null == artifactPath) {
-            log.info("An attempt to rewrite an already created Ivy module '${fileName}' has been detected." +
-                    " It is ok. The cached value will be used.")
+            log.info("An attempt to rewrite an already created Ivy module '${fileName}' has been detected, the cached value will be used.")
             return cachedValue
         }
 
-        if (cachedValue is Pair<*, *> && null != artifactPath) {
+        if (cachedValue is Pair<*, *> && artifactPath != null) {
             val cachedIvyModule = cachedValue.first
             val cachedModulePath = cachedValue.second
 
@@ -1115,25 +1116,28 @@ class IntelliJPlatformDependenciesHelper(
                 val newModulePathString = artifactPath.absolute().normalize().invariantSeparatorsPathString
 
                 if (cachedModulePathString == newModulePathString) {
-                    log.info(
-                        "An attempt to rewrite an already created Ivy module '${fileName}' has been detected." +
-                                " It is ok since their paths match '$cachedModulePathString'. The cached value will used."
-                    )
+                    log.info("Rewriting Ivy module '$fileName' detected. Paths match '$cachedModulePathString', the cached value will used.")
                 } else {
                     log.warn(
-                        "An attempt to rewrite an already created Ivy module '${fileName}' has been detected" +
-                                " and their artifact paths do not match: '$cachedModulePathString' vs '$newModulePathString'." +
-                                " It means that the same artifact has been found in two different locations." +
-                                " The first one will be used: '$cachedModulePathString'."
+                        """
+                        Rewriting Ivy module '$fileName' detected. Paths do not match: '$cachedModulePathString' vs '$newModulePathString'.
+                        The same artifact has been found in two different locations, the first one will be used: '$cachedModulePathString'.
+                        """.trimIndent()
                     )
                 }
                 return cachedIvyModule
             }
-        } else if (null != cachedValue) {
+        } else if (cachedValue != null) {
             // If this happened, it means that this method is called somewhere with wrong parameters.
             log.warn(
-                "This is not supposed to happen. Please report a bug at ${Constants.GIT_HUB_ISSUES_URL}." +
-                        " File: '$fileName', path: '$artifactPath', cached value: '$cachedValue'."
+                """
+                Unexpected flow.                
+                Please file an issue attaching the content and exception message to: $GITHUB_REPOSITORY/issues/new
+                
+                File: $fileName
+                Path: $artifactPath
+                Cached value: $cachedValue
+                """.trimIndent()
             )
         }
 
@@ -1150,7 +1154,10 @@ class IntelliJPlatformDependenciesHelper(
                 indentString = "  "
             }.encodeToString(newIvyModule))
 
-        writtenIvyModules[fileName] = if (null == artifactPath) newIvyModule else Pair(newIvyModule, artifactPath)
+        writtenIvyModules[fileName] = when (artifactPath) {
+            null -> newIvyModule
+            else -> Pair(newIvyModule, artifactPath)
+        }
 
         return newIvyModule
     }
