@@ -379,7 +379,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 Vendor.register(project, target = pluginConfiguration)
             }
 
-
             PluginVerification.register(project, target = intelliJPlatform).let { pluginVerification ->
                 PluginVerification.Ides.register(dependenciesHelper, project.extensionProvider, target = pluginVerification)
             }

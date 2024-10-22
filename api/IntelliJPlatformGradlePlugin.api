@@ -170,20 +170,6 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Plugins$Exte
 	public static final field KOTLIN Ljava/lang/String;
 }
 
-public final class org/jetbrains/intellij/platform/gradle/Constants$Repositories {
-	public static final field ANDROID_STUDIO_INSTALLERS Ljava/lang/String;
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Repositories;
-	public static final field INTELLI_J_PLATFORM_CUSTOM_PLUGIN Ljava/lang/String;
-	public static final field INTELLI_J_PLATFORM_DEPENDENCIES Ljava/lang/String;
-	public static final field INTELLI_J_REPOSITORY_NIGHTLY Ljava/lang/String;
-	public static final field INTELLI_J_REPOSITORY_RELEASES Ljava/lang/String;
-	public static final field INTELLI_J_REPOSITORY_SNAPSHOTS Ljava/lang/String;
-	public static final field JET_BRAINS_IDE_INSTALLERS Ljava/lang/String;
-	public static final field JET_BRAINS_MARKETPLACE Ljava/lang/String;
-	public static final field JET_BRAINS_RUNTIME Ljava/lang/String;
-	public static final field LOCAL_INTELLI_J_PLATFORM_ARTIFACTS Ljava/lang/String;
-}
-
 public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox {
 	public static final field CONFIG Ljava/lang/String;
 	public static final field CONTAINER Ljava/lang/String;
