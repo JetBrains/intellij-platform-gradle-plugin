@@ -27,13 +27,14 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
 import java.nio.file.Path
+import kotlin.Throws
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
 
 /**
  * The artifact transformer collecting JAR files located within the IntelliJ Platform or plugin archives.
- * @see org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
+ * @see LocalIvyArtifactPathComponentMetadataRule
  */
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class CollectorTransformer : TransformAction<CollectorTransformer.Parameters> {
@@ -87,12 +88,14 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                         .forEach { outputs.file(it) }
                 }
 
+                /**
+                 * Normally, we get into here for third party JetBrains Marketplace plugins.
+                 * https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html#non-bundled-plugin
+                 *
+                 * For other plugins, we never (usually?) get into this block because their Ivy artifacts already list jars,
+                 * instead of pointing to a directory, see: [LocalIvyArtifactPathComponentMetadataRule]
+                 */
                 isPlugin -> {
-                    // Normally we get into here for 3rd party marketplace plugins.
-                    // https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html#non-bundled-plugin
-                    // For other plugins, we never (usually?) get into this block, because their Ivy artifacts already
-                    // list jars, instead of pointing to a directory, see:
-                    // org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
                     plugin.originalFile?.let { pluginPath ->
                         val jars = collectJars(pluginPath)
                         jars.forEach {
