@@ -12,11 +12,11 @@
 
 ### Fixed
 
-- Fixed issue #1778 by removing a hash of the absolute artifact path appended to the end of the version string. That hash made artifact version different on different PCs and also breaks Gradle dependency locking.
-- Add the missing `org.jetbrains.kotlin.platform.type=jvm` attribute to the `intellijPlatformRuntimeClasspath` configuration manually as it's not inherited from the `runtimeClasspath`.
+- Fixed by removing a hash of the absolute artifact path appended to the end of the version string. That hash made an artifact version different on different PCs and also broke Gradle dependency locking. [#1778](../../issues/1778)
+- Add the missing `org.jetbrains.kotlin.platform.type=jvm` attribute to the `intellijPlatformRuntimeClasspath` configuration manually as it is not inherited from the `runtimeClasspath`.
 - Fixed `Could not generate a decorated class for type PluginArtifactRepository.` when creating a custom plugin repository.
 - Fixed generation of duplicate files in ".intellijPlatform/localPlatformArtifacts" with different version numbers.
-- #1799: Gradle's api & compileOnlyApi configurations created by its java-library plugin do not work, and transitive implementation scope dependencies get exposed, when this plugin is used.
+- Gradle's api & compileOnlyApi configurations created by its java-library plugin don't work, and transitive implementation scope dependencies get exposed, when this plugin is used. [#1799](../../issues/1799)
 
 ## [2.1.0]
 

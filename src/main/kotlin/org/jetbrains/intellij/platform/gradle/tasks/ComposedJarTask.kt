@@ -25,11 +25,11 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  *
  * The final Jar is also combined with plugin modules marked using the [IntelliJPlatformDependenciesExtension.pluginModule] dependencies helper.
  *
- * To understand what is going on in this class read & watch this:
- * - [1](https://youtu.be/2gPJD0mAres?t=461)
- * - [2](https://www.youtube.com/watch?v=8z5KFCLZDd0)
- * - [3](https://docs.gradle.org/current/userguide/variant_attributes.html#sec:standard_attributes)
- * - [4](https://docs.gradle.org/current/userguide/cross_project_publications.html#sec:variant-aware-sharing)
+ * To understand what is going on in this class read and watch:
+ * - [Understanding Gradle #13 – Aggregating Custom Artifacts](https://youtu.be/2gPJD0mAres?t=461)
+ * - [Understanding Gradle #12 – Publishing Libraries](https://www.youtube.com/watch?v=8z5KFCLZDd0)
+ * - [Working with Variant Attributes](https://docs.gradle.org/current/userguide/variant_attributes.html#sec:standard_attributes)
+ * - [Variant-aware sharing of artifacts between projects](https://docs.gradle.org/current/userguide/cross_project_publications.html#sec:variant-aware-sharing)
  */
 @CacheableTask
 abstract class ComposedJarTask : Jar() {
