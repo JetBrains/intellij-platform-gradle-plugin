@@ -5,7 +5,6 @@ public final class org/jetbrains/intellij/platform/gradle/BuildException : org/g
 
 public final class org/jetbrains/intellij/platform/gradle/Constants {
 	public static final field CACHE_DIRECTORY Ljava/lang/String;
-	public static final field GIT_HUB_ISSUES_URL Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants;
 }
 
