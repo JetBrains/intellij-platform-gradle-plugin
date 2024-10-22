@@ -40,7 +40,7 @@ import javax.inject.Inject
  *       In that case, the artifact coordinates may look very weird like: `bundledPlugin:/some/path/more/path/some.jar:123.456.789`
  *       For the same reason file extension is also stored in "ext".
  *
- *  - "ext" (IvyModule#ext) is an optional file extension, like "jar".
+ *  - "ext" [IvyModule.Artifact.ext] is an optional file extension, like "jar".
  *    It is optional only because files don't always have extensions.
  *    For directories, it would be "directory", but in this case, we never expect to have a directory, always only files.
  *
