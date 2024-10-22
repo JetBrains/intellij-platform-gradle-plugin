@@ -10,7 +10,6 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
-    const val GIT_HUB_ISSUES_URL = "https://github.com/JetBrains/intellij-platform-gradle-plugin/issues"
 
     object Plugin {
         const val ID = "org.jetbrains.intellij.platform"
