@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.dsl.RepositoryHandler
-import org.gradle.api.artifacts.repositories.IvyArtifactRepository
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
 import org.gradle.api.flow.FlowProviders
@@ -14,7 +13,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.authentication.http.HttpHeaderAuthentication
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
@@ -23,8 +22,7 @@ import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
 import java.net.URI
 import java.nio.file.Path
-import kotlin.io.path.absolute
-import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.pathString
 
 private const val SHIM_MANAGER = "shimManager"
 
@@ -146,91 +144,17 @@ class IntelliJPlatformRepositoriesHelper(
 
     /**
      * @see org.jetbrains.intellij.platform.gradle.models.IvyModule
-     */
-    internal fun createLocalIvyRepository(repositoryName: String, action: IvyRepositoryAction = {}): IvyArtifactRepository {
-        // The contract is that we are working with absolute normalized paths here.
-        val ivyLocationPath = providers.localPlatformArtifactsPath(rootProjectDirectory).absolute().normalize()
-
-        return createExclusiveIvyRepository(
-            repositoryName,
-            setOf(
-                Dependencies.LOCAL_IDE_GROUP,
-                Dependencies.LOCAL_PLUGIN_GROUP,
-                Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
-                Dependencies.BUNDLED_MODULE_GROUP,
-                Dependencies.BUNDLED_PLUGIN_GROUP
-            ),
-            ivyLocationPath,
-            action
-        )
-    }
-
-    private fun createExclusiveIvyRepository(
-        repositoryName: String,
-        exclusiveGroups: Set<String> = emptySet(),
-        ivyLocationPath: Path,
-        action: IvyRepositoryAction = {}
-    ): IvyArtifactRepository {
-        val repository = createIvyArtifactRepository(
-            repositoryName, ivyLocationPath
-        )
-
-        // For performance and security reasons, make it exclusive.
-        // https://docs.gradle.org/current/userguide/declaring_repositories_adv.html#declaring_content_exclusively_found_in_one_repository
-        repositories.exclusiveContent {
-            forRepository {
-                repository
-            }
-
-            filter {
-                for (exclusiveGroup in exclusiveGroups) {
-                    includeGroup(exclusiveGroup)
-                    // Could be improved some day to the next, but today it fails on Gradle 8.2, works on 8.10.2
-                    //includeGroupAndSubgroups(exclusiveGroup)
-                }
-            }
-        }
-
-        repository.apply {
-            action()
-        }
-
-        return repository
-    }
-
-    /**
-     * @see org.jetbrains.intellij.platform.gradle.models.IvyModule
      * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper.registerIntellijPlatformIvyRepo
      */
-    private fun createIvyArtifactRepository(
-        repositoryName: String,
-        ivyLocationPath: Path
-    ) = repositories.ivy {
+    internal fun createLocalIvyRepository(repositoryName: String, action: IvyRepositoryAction = {}) = repositories.ivy {
         name = repositoryName
 
-        // The contract is that we are working with absolute normalized paths here.
-        val absNormIvyLocationPath = ivyLocationPath.absolute().normalize()
-
         // Location of Ivy files generated for the current project.
-        val ivyPath = absNormIvyLocationPath
-            .absolute()
-            .normalize()
-            .invariantSeparatorsPathString
-            .removeSuffix("/")
+        val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
+        ivyPattern("${localPlatformArtifactsPath.pathString}/[organization]-[module]-[revision].[ext]")
 
-        ivyPattern("$ivyPath/[organization]-[module]-[revision].[ext]")
-
-        // In different situations, it may point to a completely unrelated locations on the file system.
-
-        // It has to be prefixed by "/" because if this pattern is not a fully qualified URL, it will be interpreted
-        // as a file relative to the project directory, even if the "artifact" (IvyModule#name) starts with a "/".
-        // We cannot rid of this leading separator as long as the repository created by createLocalIvyRepository
-        // or (localPlatformArtifacts() in public API) is used to reference completely unrelated paths. If they were
-        // split into multiple repositories, each could be prefixed with an absolute path specific to that repo.
-        //
-        // See org.gradle.api.internal.artifacts.repositories.PatternHelper.substituteTokens
-        val artifactPattern = "/[artifact]"
-        artifactPattern(artifactPattern)
+        // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
+        artifactPattern("/[artifact]")
 
         /**
          * Because artifact paths always start with `/` (see [toPublication] for details),
@@ -239,7 +163,16 @@ class IntelliJPlatformRepositoriesHelper(
          * starting with `c` for the sake of micro-optimization.
          */
         if (OperatingSystem.current().isWindows) {
-            (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:$artifactPattern") }
+            (('c'..'z') + 'a' + 'b').forEach { artifactPattern("$it:/[artifact]") }
         }
+    }.apply {
+        content {
+            includeGroup(Configurations.Dependencies.BUNDLED_MODULE_GROUP)
+            includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
+            includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
+            includeGroup(Configurations.Dependencies.LOCAL_PLUGIN_GROUP)
+            includeGroup(Configurations.Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP)
+        }
+        action()
     }
 }
