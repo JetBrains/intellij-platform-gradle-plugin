@@ -741,7 +741,7 @@ class IntelliJPlatformDependenciesHelper(
         }
 
         val artifactPath = requireNotNull(plugin.originalFile)
-        val version = getVersionForBundledPlugin(plugin)
+        val version = requireNotNull(plugin.pluginVersion)
 
         writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version) {
             IvyModule(
@@ -771,33 +771,10 @@ class IntelliJPlatformDependenciesHelper(
         val bundledModule = productInfo.get().layout
             .find { layout -> layout.name == id }
             .let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
-        val platformPath = platformPath.get()
-        val artifactPaths = bundledModule.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
-        val version = getVersionForBundledModule()
 
-        writeIvyModule(Dependencies.BUNDLED_MODULE_GROUP, id, version) {
-            IvyModule(
-                info = IvyModule.Info(
-                    organisation = Dependencies.BUNDLED_MODULE_GROUP,
-                    module = id,
-                    revision = version,
-                ),
-                publications = artifactPaths,
-            )
-        }
-
-        return create(
-            group = Dependencies.BUNDLED_MODULE_GROUP,
-            name = id,
-            version = version,
-        )
+        val (group, name, version) = writeBundledModuleDependency(id, bundledModule.classPath)
+        return create(group, name, version)
     }
-
-    // These two methods were created to make clearly visible that we want to use consistent version numbers in
-    // collectDependencies as well as in createIntelliJPlatformBundledModule & createIntelliJPlatformBundledPlugin
-    // When the version is retrieved like this, it is impossible to change it one place & forger to chang another.
-    private fun getVersionForBundledModule() = productInfo.get().buildNumber
-    private fun getVersionForBundledPlugin(plugin: IdePlugin) = requireNotNull(plugin.pluginVersion)
 
     /**
      * Collects all dependencies on plugins or modules of the current [IdePlugin].
@@ -816,7 +793,7 @@ class IntelliJPlatformDependenciesHelper(
                 val artifactPath = requireNotNull(plugin.originalFile)
                 val group = Dependencies.BUNDLED_PLUGIN_GROUP
                 val name = requireNotNull(plugin.pluginId)
-                val version = getVersionForBundledPlugin(plugin)
+                val version = requireNotNull(plugin.pluginVersion)
 
                 writeIvyModule(group, name, version) {
                     IvyModule(
@@ -841,22 +818,34 @@ class IntelliJPlatformDependenciesHelper(
             .mapNotNull { layoutItems.find { layout -> layout.name == it } }
             .filterNot { it.classPath.isEmpty() }
             .map {
-                val artifactPaths = it.classPath.map { path -> platformPath.resolve(path).toIvyArtifact() }
-                val group = Dependencies.BUNDLED_MODULE_GROUP
-                val name = it.name
-                val version = getVersionForBundledModule()
-
-                writeIvyModule(group, name, version) {
-                    IvyModule(
-                        info = IvyModule.Info(group, name, version),
-                        publications = artifactPaths,
-                    )
-                }
-
+                val (group, name, version) = writeBundledModuleDependency(it.name, it.classPath)
                 IvyModule.Dependency(group, name, version)
             }
 
         return plugins + modules
+    }
+
+    /**
+     * Writes a bundled module Ivy XML configuration file.
+     *
+     * @param name The name of the module.
+     * @param classPath A list of class path entries for the module.
+     * @return A [Triple] containing dependency group, name, and version
+     */
+    private fun writeBundledModuleDependency(name: String, classPath: List<String>): Triple<String, String, String> {
+        val group = Dependencies.BUNDLED_MODULE_GROUP
+        val version = productInfo.get().buildNumber
+        val platformPath = platformPath.get()
+        val artifacts = classPath.map { platformPath.resolve(it).toIvyArtifact() }
+
+        writeIvyModule(group, name, version) {
+            IvyModule(
+                info = IvyModule.Info(group, name, version),
+                publications = artifacts,
+            )
+        }
+
+        return Triple(group, name, version)
     }
 
     /**
