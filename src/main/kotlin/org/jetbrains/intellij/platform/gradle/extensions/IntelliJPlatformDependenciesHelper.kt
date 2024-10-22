@@ -785,7 +785,6 @@ class IntelliJPlatformDependenciesHelper(
     private fun IdePlugin.collectDependencies(path: List<String> = emptyList()): List<IvyModule.Dependency> {
         val id = requireNotNull(pluginId)
         val dependencyIds = (dependencies.map { it.id } + optionalDescriptors.map { it.dependency.id } + modulesDescriptors.map { it.name } - id).toSet()
-        val platformPath by lazy { platformPath.get() }
 
         val plugins = dependencyIds
             .mapNotNull { bundledPlugins[it] }
