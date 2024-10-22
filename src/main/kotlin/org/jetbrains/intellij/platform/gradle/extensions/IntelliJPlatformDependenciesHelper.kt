@@ -62,7 +62,7 @@ class IntelliJPlatformDependenciesHelper(
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,
     private val rootProjectDirectory: Path,
-    private val metadataRulesModeProvider: Provider<RulesMode>
+    private val metadataRulesModeProvider: Provider<RulesMode>,
 ) {
 
     private val log = Logger(javaClass)
@@ -861,7 +861,7 @@ class IntelliJPlatformDependenciesHelper(
         val version = productInfo.get().buildNumber
         val platformPath = platformPath.get()
         val artifacts = classPath.flatMap {
-                path -> platformPath.resolve(path).toIvyArtifacts(metadataRulesModeProvider, platformPath)
+            platformPath.resolve(it).toIvyArtifacts(metadataRulesModeProvider, platformPath)
         }
 
         /**

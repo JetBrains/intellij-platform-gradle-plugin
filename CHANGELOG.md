@@ -9,7 +9,6 @@
 ### Changed
 
 - Move `localPlatformArtifacts()` to the top of the `defaultRepositories()` list
-- Improved build performance by making the local Ivy repository an exclusive Gradle repository.
 
 ### Fixed
 

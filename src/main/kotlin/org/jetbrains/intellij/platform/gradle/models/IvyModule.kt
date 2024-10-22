@@ -49,7 +49,7 @@ data class IvyModule(
         val type: String? = null,
         val ext: String? = null,
         val conf: String? = "default",
-        // Does not seem to be supported by Gradle:
+        // Doesn't seem to be supported by Gradle:
         // https://ant.apache.org/ivy/history/2.4.0/ivyfile/artifact.html
         // https://docs.gradle.org/current/javadoc/org/gradle/api/publish/ivy/IvyArtifact.html
         val url: String? = null,
@@ -131,29 +131,26 @@ internal fun Path.toAbsolutePathIvyArtifact(): IvyModule.Artifact {
 /**
  * Creates Ivy artifacts from the current [Path].
  *
- * If the [metadataRulesModeProvider] is [RulesMode.PREFER_PROJECT] all created artifacts will have paths relative to
- * [basePath], despite that the local Ivy repository is created with no absolute path provided.
+ * If the [metadataRulesModeProvider] is [RulesMode.PREFER_PROJECT] all created artifacts will have paths relative to [basePath],
+ * despite that the local Ivy repository is created with no absolute path provided.
  *
  * Otherwise, absolute paths will be used.
  *
- * It is possible because [RulesMode.PREFER_PROJECT] allows registering a component metadata rule to fix the relative
- * paths on the fly.
+ * It is possible because [RulesMode.PREFER_PROJECT] allows registering a component metadata rule to fix the relative paths on the fly.
  *
  * For more information, see the below links.
  *
  * @see toAbsolutePathIvyArtifact
- * @see IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
  * @see org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin
  * @see org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
  */
-internal fun Path.toIvyArtifacts(metadataRulesModeProvider: Provider<RulesMode>, basePath: Path): List<IvyModule.Artifact> {
-    return when (metadataRulesModeProvider.get()) {
-        // Only with this setting we can register & use LocalIvyArtifactPathComponentMetadataRule
+internal fun Path.toIvyArtifacts(metadataRulesModeProvider: Provider<RulesMode>, basePath: Path) =
+    when (metadataRulesModeProvider.get()) {
+        // Only with this setting we can register and use LocalIvyArtifactPathComponentMetadataRule
         RulesMode.PREFER_PROJECT -> explodeIntoIvyJarsArtifactsRelativeTo(basePath)
         // Otherwise fallback to the absolute paths, since the rule won't be registered.
         else -> listOf(toAbsolutePathIvyArtifact())
     }
-}
 
 private fun Path.explodeIntoIvyJarsArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {
     // The contract is that we're working with absolute normalized paths here.
@@ -209,7 +206,7 @@ private fun Path.containingDirPathStringRelativeTo(basePath: Path? = null): Stri
              * They shouldn't match only by a chance because we've removed drive letters for Windows.
              */
             if (!absNormalizedPath.normalize().startsWith(absNormalizedBasePath.normalize())) {
-                throw IllegalStateException("The path '${absNormalizedPath}' is supposed to start with '${absNormalizedBasePath.normalize()}' .")
+                throw IllegalStateException("The path '${absNormalizedPath}' is supposed to start with '${absNormalizedBasePath.normalize()}'.")
             }
 
             /**
