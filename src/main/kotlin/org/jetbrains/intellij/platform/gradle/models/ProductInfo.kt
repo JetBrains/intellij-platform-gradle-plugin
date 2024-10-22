@@ -110,14 +110,14 @@ data class ProductInfo(
     data class CustomProperty(
         val key: String? = null,
         val value: String? = null,
-    ): java.io.Serializable
+    ) : java.io.Serializable
 
     @Serializable
     data class LayoutItem(
         val name: String,
         val kind: LayoutItemKind,
         val classPath: List<String> = mutableListOf(),
-    ): java.io.Serializable
+    ) : java.io.Serializable
 
     @Serializable
     enum class LayoutItemKind {
@@ -175,17 +175,13 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
  */
 internal fun String.resolveIdeHomeVariable(platformPath: Path) =
     platformPath.pathString.let {
-        this.replace("\$APP_PACKAGE", it)
+        this
+            .replace("\$APP_PACKAGE", it)
             .replace("\$IDE_HOME", it)
-            .replace("\$IDE_CACHE_DIR", it)
             .replace("%IDE_HOME%", it)
             .replace("Contents/Contents", "Contents")
             .let { entry ->
-                val delimiters = "="
-                if (!entry.contains(delimiters)) {
-                    return entry
-                }
-                val (_, value) = entry.split(delimiters)
+                val value = entry.split("=").getOrNull(1) ?: entry
                 when {
                     runCatching { Path(value).exists() }.getOrElse { false } -> entry
                     else -> entry.replace("/Contents", "")
