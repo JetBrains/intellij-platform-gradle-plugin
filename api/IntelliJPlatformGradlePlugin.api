@@ -2103,6 +2103,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Lay
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfoKt {
+	public static final fun getFullVersion (Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;)Ljava/lang/String;
 	public static final fun productInfo (Ljava/nio/file/Path;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public static final fun productInfo (Lorg/gradle/api/file/FileCollection;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public static final fun validateSupportedVersion (Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;)V
