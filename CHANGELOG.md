@@ -10,6 +10,7 @@
 ### Changed
 
 - Move `localPlatformArtifacts()` to the top of the `defaultRepositories()` list
+- Reorder test classpath elements to promote instrumented modules over the regular classpath
 
 ### Fixed
 
