@@ -322,6 +322,15 @@ class IntelliJPlatformDependenciesHelper(
         requireNotNull(plugins) { "The `intellijPlatform.plugins` dependency helper was called with no `plugins` value provided." }
 
         plugins.map { (id, version, group) ->
+            require(id.isNotBlank()) {
+                "The `intellijPlatform.plugins` dependency helper was called with a plugin with no `id` provided."
+            }
+            require(version.isNotBlank()) {
+                """
+                The `intellijPlatform.plugins` dependency helper was called with the `$id` plugin with no `version` provided.
+                If you expect to add a dependency on a bundled plugin, use `intellijPlatform.bundledPlugin` or `intellijPlatform.bundledPlugins` instead.
+                """.trimIndent()
+            }
             dependencies.createIntelliJPlatformPlugin(id, version, group).apply(action)
         }
     })

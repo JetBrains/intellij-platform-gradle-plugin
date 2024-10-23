@@ -5,6 +5,7 @@
 ### Added
 
 - Introduce `intellijPlatformClasspath` configuration to allow retrieving the processed IntelliJ Platform and plugins dependencies. 
+- Warn if bundled plugin provided to `intellijPlatform.plugins` dependency helper.
 
 ### Changed
 
