@@ -710,7 +710,10 @@ class IntelliJPlatformDependenciesHelper(
         localProductInfo.validateSupportedVersion()
 
         val type = localProductInfo.productCode.toIntelliJPlatformType()
-        val version = localProductInfo.buildNumber
+        // It is crucial to use the IDE type + build number to the version.
+        // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
+        // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
+        val version = localProductInfo.getFullVersion()
 
         writeIvyModule(Dependencies.LOCAL_IDE_GROUP, type.code, version, artifactPath) {
             IvyModule(
@@ -773,7 +776,11 @@ class IntelliJPlatformDependenciesHelper(
         }
 
         val artifactPath = requireNotNull(plugin.originalFile)
-        val version = requireNotNull(plugin.pluginVersion)
+        // It is crucial to use the IDE type + build number to the version.
+        // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
+        // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
+        // Should be the same as [collectDependencies]
+        val version = productInfo.get().getFullVersion()
 
         writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version, artifactPath) {
             IvyModule(
@@ -824,7 +831,11 @@ class IntelliJPlatformDependenciesHelper(
                 val artifactPath = requireNotNull(plugin.originalFile)
                 val group = Dependencies.BUNDLED_PLUGIN_GROUP
                 val name = requireNotNull(plugin.pluginId)
-                val version = requireNotNull(plugin.pluginVersion)
+                // It is crucial to use the IDE type + build number to the version.
+                // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
+                // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
+                // Should be the same as [createIntelliJPlatformBundledPlugin]
+                val version = productInfo.get().getFullVersion()
 
                 val doesNotDependOnSelf = id != plugin.pluginId
                 val hasNeverBeenSeen = plugin.pluginId !in alreadyProcessedOrProcessing
@@ -867,7 +878,10 @@ class IntelliJPlatformDependenciesHelper(
      */
     private fun writeBundledModuleDependency(name: String, classPath: List<String>): Triple<String, String, String> {
         val group = Dependencies.BUNDLED_MODULE_GROUP
-        val version = productInfo.get().buildNumber
+        // It is crucial to use the IDE type + build number to the version.
+        // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
+        // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
+        val version = productInfo.get().getFullVersion()
         val platformPath = platformPath.get()
         val artifacts = classPath.flatMap {
             platformPath.resolve(it).toIvyArtifacts(metadataRulesModeProvider, platformPath)
@@ -908,7 +922,10 @@ class IntelliJPlatformDependenciesHelper(
             pluginManager.safelyCreatePlugin(pluginPath).getOrThrow()
         }
 
-        val version = plugin.pluginVersion ?: "0.0.0"
+        // It is crucial to use the IDE type + build number to the version.
+        // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
+        // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
+        val version = productInfo.get().getFullVersion() + "-" + (plugin.pluginVersion ?: "0.0.0")
         val name = plugin.pluginId ?: artifactPath.name
 
         writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version, artifactPath) {
@@ -943,13 +960,21 @@ class IntelliJPlatformDependenciesHelper(
             }
         }.get()
 
+        // E.g.: JBR-21.0.4+13-509.17-jcef
         val javaVendorVersion = runtimeMetadata["java.vendor.version"]
         requireNotNull(javaVendorVersion)
 
+        // E.g.: 21.0.4
         val javaVersion = runtimeMetadata["java.version"]
         requireNotNull(javaVersion)
 
+        // E.g.: JBR
         val name = javaVendorVersion.substringBefore(javaVersion).trim('-')
+        // It is crucial to use the full version.
+        // Because if someone decides to bump JBR within the same marketing version,
+        // but in the next build – it’ll still refer to the incorrect version as they’ll be treated equally.
+        // They would rewrite each other's Ivy XML files since they would have the same name.
+        // E.g.: 21.0.4+13-509.17-jcef
         val version = javaVendorVersion.removePrefix(name).trim('-')
 
         writeIvyModule(Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP, name, version, artifactPath) {
