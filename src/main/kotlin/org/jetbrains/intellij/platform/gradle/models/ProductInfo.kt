@@ -125,6 +125,9 @@ data class ProductInfo(
     }
 }
 
+/** [ProductInfo.productCode] + "-" + [ProductInfo.buildNumber] */
+fun ProductInfo.getFullVersion() = productCode + "-" + buildNumber
+
 /**
  * Validates that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.
  *
