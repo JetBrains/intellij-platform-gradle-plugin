@@ -105,6 +105,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             })
 
             classpath = instrumentedCode + instrumentedTestCode + classpath + intellijPlatformTestClasspathConfiguration + productModules
+//            classpath = classpath + productModules
+
             testClassesDirs = instrumentedTestCode + testClassesDirs
             javaLauncher = sourceTask.runtimeDirectory.zip(sourceTask.runtimeMetadata) { directory, metadata ->
                 IntelliJPlatformJavaLauncher(directory, metadata)

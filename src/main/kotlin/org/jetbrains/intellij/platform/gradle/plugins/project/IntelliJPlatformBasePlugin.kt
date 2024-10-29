@@ -351,6 +351,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 project.configurations[Configurations.External.COMPILE_CLASSPATH],
                 project.configurations[Configurations.External.RUNTIME_CLASSPATH],
                 project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
+                project.configurations[Configurations.External.TEST_RUNTIME_CLASSPATH],
                 project.configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH],
                 project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH],
             ).forEach {
