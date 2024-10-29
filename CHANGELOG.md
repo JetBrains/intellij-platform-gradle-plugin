@@ -5,23 +5,23 @@
 ### Added
 
 - Introduce `intellijPlatformClasspath` configuration to allow retrieving the processed IntelliJ Platform and plugins dependencies. 
-- Warn if bundled plugin provided to `intellijPlatform.plugins` dependency helper.
+- Warn if trying to refer to a bundled plugin via `intellijPlatform.plugins` instead of required `intellijPlatform.bundledPlugin`.
 
 ### Changed
 
-- Move `localPlatformArtifacts()` to the top of the `defaultRepositories()` list
+- Move `localPlatformArtifacts()` to the top of the `defaultRepositories()` list. 
 
 ### Fixed
 
-- Fixed by removing a hash of the absolute artifact path appended to the end of the version string. That hash made an artifact version different on different PCs and also broke Gradle dependency locking. [#1778](../../issues/1778)
+- Adjust local artifact definition in Ivy XML files to satisfy Gradle dependency locking. [#1778](../../issues/1778)
 - Add the missing `org.jetbrains.kotlin.platform.type=jvm` attribute to the `intellijPlatformRuntimeClasspath` configuration manually as it is not inherited from the `runtimeClasspath`.
-- Fixed `Could not generate a decorated class for type PluginArtifactRepository.` when creating a custom plugin repository.
-- Fixed generation of duplicate files in ".intellijPlatform/localPlatformArtifacts" with different version numbers.
-- Gradle's api & compileOnlyApi configurations created by its java-library plugin don't work, and transitive implementation scope dependencies get exposed, when this plugin is used. [#1799](../../issues/1799)
-- Fixed incorrect transitive dependencies calculation for bundled modules. [#1791](../../issues/1791)
-- Fixed IOB exception while running tests from Gradle.
-- Fixed an error while building the searchable options: `Unable to create shared archive file $IDE_CACHE_DIR/pycharm243.18137.19.jsa: (No such file or directory).`
-- Fixed compatibility with Gradle dependency verification. Previously it was failing with "Failed to create MD5 hash for file".
+- `Could not generate a decorated class for type PluginArtifactRepository.` when creating a custom plugin repository.
+- Generation of duplicate files in `.intellijPlatform/localPlatformArtifacts` with different version numbers.
+- Gradle's `api` & `compileOnlyApi` configurations created by its _java-library_ plugin don't work, and transitive implementation scope dependencies get exposed, when this plugin is used. [#1799](../../issues/1799)
+- Incorrect transitive dependencies calculation for bundled modules. [#1791](../../issues/1791)
+- Fixed IOOB exception while running tests from Gradle.
+- Building the searchable options: `Unable to create shared archive file $IDE_CACHE_DIR/pycharm243.18137.19.jsa: (No such file or directory).`
+- Compatibility with Gradle dependency verification. Previously it was failing with `Failed to create MD5 hash for file`.
 
 ## [2.1.0]
 
