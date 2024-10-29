@@ -7,9 +7,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
@@ -62,9 +60,6 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 .flatMap { it.outputDirectory }
                 .let { project.files(it) }
 
-        private val Test.intellijPlatformTestClasspathConfiguration
-            get() = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH]
-
         internal val configuration: Test.() -> Unit = {
             enableAssertions = true
 
@@ -104,8 +99,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     .toSet()
             })
 
-            classpath = classpath + intellijPlatformTestClasspathConfiguration + productModules
-
+            classpath = classpath + productModules
             testClassesDirs = instrumentedTestCode + testClassesDirs
             javaLauncher = sourceTask.runtimeDirectory.zip(sourceTask.runtimeMetadata) { directory, metadata ->
                 IntelliJPlatformJavaLauncher(directory, metadata)

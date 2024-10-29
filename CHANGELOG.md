@@ -10,6 +10,7 @@
 ### Changed
 
 - Move `localPlatformArtifacts()` to the top of the `defaultRepositories()` list. 
+- Make IntelliJ Platform dependencies available to `testImplementation` by default to avoid mutating tests classpath
 
 ### Fixed
 

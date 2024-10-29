@@ -305,7 +305,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 intellijPlatformConfiguration,
                 intellijPlatformDependenciesConfiguration,
             )
-            this@configurations[Configurations.External.TEST_COMPILE_ONLY].extendsFrom(
+            this@configurations[Configurations.External.TEST_IMPLEMENTATION].extendsFrom(
                 intellijPlatformConfiguration,
                 intellijPlatformDependenciesConfiguration,
                 intellijPlatformTestDependenciesConfiguration,
@@ -321,9 +321,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             )
             this@configurations[Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH].extendsFrom(
                 this@configurations[Configurations.External.RUNTIME_CLASSPATH],
-            )
-            this@configurations[Configurations.External.TEST_IMPLEMENTATION].extendsFrom(
-                intellijPlatformTestDependenciesConfiguration,
             )
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {
                 this@configurations[Configurations.External.TEST_FIXTURES_COMPILE_ONLY].extendsFrom(
