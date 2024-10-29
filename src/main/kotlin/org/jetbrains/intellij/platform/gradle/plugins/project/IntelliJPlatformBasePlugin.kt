@@ -21,19 +21,14 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTrans
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.extensions.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
-import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
-import org.jetbrains.intellij.platform.gradle.utils.create
 import kotlin.io.path.absolute
 import kotlin.io.path.invariantSeparatorsPathString
 
@@ -136,7 +131,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                         log.info("$ruleName has been registered.")
                     }
-                }  else {
+                } else {
                     log.info("$ruleName can not be registered because '${rulesMode}' mode is used in settings.")
                 }
             }
@@ -345,24 +340,28 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attribute(Attributes.extracted)
             }
 
-            ExtractorTransformer.register(
-                dependencies = this,
-                compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
-                testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
-                intellijPlatformClasspath = project.configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH],
-                intellijPlatformTestClasspath = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH],
-            )
-            CollectorTransformer.register(
-                dependencies = this,
-                compileClasspathConfiguration = project.configurations[Configurations.External.COMPILE_CLASSPATH],
-                testCompileClasspathConfiguration = project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
-                intellijPlatformClasspath = project.configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH],
-                intellijPlatformTestClasspath = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH],
-                intellijPlatformConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY],
-            )
-            LocalPluginsNormalizationTransformers.register(
-                dependencies = this
-            )
+            Attributes.ArtifactType.Archives.forEach {
+                artifactTypes.maybeCreate(it.toString())
+                    .attributes
+                    .attribute(Attributes.extracted, false)
+                    .attribute(Attributes.collected, false)
+            }
+
+            listOf(
+                project.configurations[Configurations.External.COMPILE_CLASSPATH],
+                project.configurations[Configurations.External.RUNTIME_CLASSPATH],
+                project.configurations[Configurations.External.TEST_COMPILE_CLASSPATH],
+                project.configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH],
+                project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH],
+            ).forEach {
+                it.attributes
+                    .attribute(Attributes.extracted, true)
+                    .attribute(Attributes.collected, true)
+            }
+
+            ExtractorTransformer.register(this)
+            CollectorTransformer.register(this, project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY])
+            LocalPluginsNormalizationTransformers.register(this)
 
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {
                 project.configurations[Configurations.External.TEST_FIXTURES_COMPILE_CLASSPATH]

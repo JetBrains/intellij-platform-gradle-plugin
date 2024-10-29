@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
@@ -160,22 +159,7 @@ abstract class ExtractorTransformer @Inject constructor(
     }
 
     companion object {
-        internal fun register(
-            dependencies: DependencyHandler,
-            compileClasspathConfiguration: Configuration,
-            testCompileClasspathConfiguration: Configuration,
-            intellijPlatformClasspath: Configuration,
-            intellijPlatformTestClasspath: Configuration,
-        ) {
-            Attributes.ArtifactType.Archives.forEach {
-                dependencies.artifactTypes.maybeCreate(it.toString())
-                    .attributes.attribute(Attributes.extracted, false)
-            }
-
-            listOf(compileClasspathConfiguration, testCompileClasspathConfiguration, intellijPlatformClasspath, intellijPlatformTestClasspath).forEach {
-                it.attributes.attribute(Attributes.extracted, true)
-            }
-
+        internal fun register(dependencies: DependencyHandler) {
             dependencies.registerTransform(ExtractorTransformer::class) {
                 from.attribute(Attributes.extracted, false)
                 to.attribute(Attributes.extracted, true)

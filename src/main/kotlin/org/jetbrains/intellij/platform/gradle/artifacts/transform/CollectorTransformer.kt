@@ -121,23 +121,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                 .flatMap { it.listDirectoryEntries("*.jar") }
         }
 
-        internal fun register(
-            dependencies: DependencyHandler,
-            compileClasspathConfiguration: Configuration,
-            testCompileClasspathConfiguration: Configuration,
-            intellijPlatformClasspath: Configuration,
-            intellijPlatformTestClasspath: Configuration,
-            intellijPlatformConfiguration: Configuration,
-        ) {
-            Attributes.ArtifactType.values().forEach {
-                dependencies.artifactTypes.maybeCreate(it.toString())
-                    .attributes.attribute(Attributes.collected, false)
-            }
-
-            listOf(compileClasspathConfiguration, testCompileClasspathConfiguration, intellijPlatformClasspath, intellijPlatformTestClasspath).forEach {
-                it.attributes.attribute(Attributes.collected, true)
-            }
-
+        internal fun register(dependencies: DependencyHandler, intellijPlatformConfiguration: Configuration) {
             dependencies.registerTransform(CollectorTransformer::class) {
                 from
                     .attribute(Attributes.extracted, true)
