@@ -301,41 +301,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 }
             }
 
-// 1. Works
-//
-//            this@configurations[Configurations.External.COMPILE_ONLY].extendsFrom(
-//                intellijPlatformConfiguration,
-//                intellijPlatformDependenciesConfiguration,
-//            )
-//            this@configurations[Configurations.External.TEST_COMPILE_ONLY].extendsFrom(
-//                intellijPlatformConfiguration,
-//                intellijPlatformDependenciesConfiguration,
-//                intellijPlatformTestDependenciesConfiguration,
-//            )
-//            this@configurations[Configurations.External.TEST_IMPLEMENTATION].extendsFrom(
-//                intellijPlatformConfiguration,
-//                intellijPlatformDependenciesConfiguration,
-//                intellijPlatformTestDependenciesConfiguration,
-//            )
-
-// 2. Fails on
-//
-// > Could not resolve all files for configuration ':plugin:docker:compileClasspath'.
-//   > Could not find remoteRun.jar (bundledPlugin:org.jetbrains.plugins.remote-run:IU-242.20224.300).
-//     Searched in the following locations:
-//         file:/Users/hsz/.gradle/caches/8.10/transforms/e1bfb550f936ac3e236f53e2b942b591/transformed/ideaIC-2024.2/plugins/remoteRun/lib/remoteRun.jar
-//
-//            this@configurations["implementation"].extendsFrom(
-//                intellijPlatformConfiguration,
-//                intellijPlatformDependenciesConfiguration,
-//            )
-//            this@configurations["testImplementation"].extendsFrom(
-//                intellijPlatformConfiguration,
-//                intellijPlatformDependenciesConfiguration,
-//                intellijPlatformTestDependenciesConfiguration,
-//            )
-
-// 3. Also fails, as above
             this@configurations[Configurations.External.API].extendsFrom(
                 intellijPlatformConfiguration,
                 intellijPlatformDependenciesConfiguration,
