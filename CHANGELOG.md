@@ -13,6 +13,7 @@
 
 ### Fixed
 
+- Make the `testRuntimeClasspath` configuration request instrumented and composed jars of imported modules when running tests
 - Adjust local artifact definition in Ivy XML files to satisfy Gradle dependency locking. [#1778](../../issues/1778)
 - Add the missing `org.jetbrains.kotlin.platform.type=jvm` attribute to the `intellijPlatformRuntimeClasspath` configuration manually as it is not inherited from the `runtimeClasspath`.
 - `Could not generate a decorated class for type PluginArtifactRepository.` when creating a custom plugin repository.

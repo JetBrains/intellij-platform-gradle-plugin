@@ -139,6 +139,7 @@ object Constants {
             const val TEST_COMPILE_CLASSPATH = JvmConstants.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
             const val TEST_COMPILE_ONLY = JvmConstants.TEST_COMPILE_ONLY_CONFIGURATION_NAME
             const val TEST_IMPLEMENTATION = JvmConstants.TEST_IMPLEMENTATION_CONFIGURATION_NAME
+            const val TEST_RUNTIME_CLASSPATH = JvmConstants.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME
             const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
             const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
         }
