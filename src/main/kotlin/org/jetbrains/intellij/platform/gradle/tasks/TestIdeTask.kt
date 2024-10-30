@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
+import org.gradle.api.tasks.SourceSet
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
@@ -48,12 +50,6 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 else -> project.tasks.named<PrepareTestTask>(Tasks.PREPARE_TEST).get()
             }
 
-        private val Test.instrumentedCode
-            get() = project.tasks.named<InstrumentCodeTask>(Tasks.INSTRUMENT_CODE)
-                .also { dependsOn(it) }
-                .flatMap { it.outputDirectory }
-                .let { project.files(it) }
-
         private val Test.instrumentedTestCode
             get() = project.tasks.named<InstrumentCodeTask>(Tasks.INSTRUMENT_TEST_CODE)
                 .also { dependsOn(it) }
@@ -87,6 +83,9 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("idea.force.use.core.classloader", "true")
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
+            val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
+            val mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
+
             // Provide IntelliJ Platform product modules
             val productModules = project.files(project.provider {
                 val intellijPlatformPath = sourceTask.platformPath
@@ -99,7 +98,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     .toSet()
             })
 
-            classpath = classpath + productModules
+            classpath = project.fileTree(sourceTask.sandboxPluginsDirectory) + instrumentedTestCode + classpath + productModules - mainSourceSet
             testClassesDirs = instrumentedTestCode + testClassesDirs
             javaLauncher = sourceTask.runtimeDirectory.zip(sourceTask.runtimeMetadata) { directory, metadata ->
                 IntelliJPlatformJavaLauncher(directory, metadata)
