@@ -42,7 +42,6 @@ import java.io.FileReader
 import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.Throws
 import kotlin.io.path.*
 
 /**
@@ -258,7 +257,7 @@ class IntelliJPlatformDependenciesHelper(
         dependencyConfigurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
         action: DependencyAction = {},
-    ) = configurations.addAllLater(cachedListProvider {
+    ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
         notationsProvider.get()
             .map { it.parseIdeNotation() }
             .map { (type, version) ->
@@ -282,6 +281,7 @@ class IntelliJPlatformDependenciesHelper(
                         }
                         extendsFrom(dependencyConfiguration)
                     }
+                dependency
             }
     })
 
