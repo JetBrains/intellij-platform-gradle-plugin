@@ -2,7 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.Project
+import org.gradle.api.file.FileTree
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
@@ -10,6 +13,7 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.named
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
@@ -18,8 +22,14 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTesting
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
+import org.jetbrains.intellij.platform.gradle.utils.*
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
+import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.*
 import kotlin.io.path.exists
+import kotlin.io.path.name
 
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
@@ -84,7 +94,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
             val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
-            val mainSourceSet = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
+            val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
+            val nonInstrumentedTestCode = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME).output.classesDirs
 
             // Provide IntelliJ Platform product modules
             val productModules = project.files(project.provider {
@@ -98,10 +109,103 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     .toSet()
             })
 
-            classpath = project.fileTree(sourceTask.sandboxPluginsDirectory) + instrumentedTestCode + classpath + productModules - mainSourceSet
+            // The below is needed to simulate the behavior of com.intellij.ide.plugins.cl.PluginClassLoader
+            // which is present in the IDE when the plugin is used in "production".
+            // https://plugins.jetbrains.com/docs/intellij/plugin-class-loaders.html
+            // https://github.com/JetBrains/intellij-community/blob/master/platform/core-impl/src/com/intellij/ide/plugins/cl/PluginClassLoader.kt
+            //
+            // The main difference is that the plugin classloader will first try to load any class from the libraries
+            // present in the plugin and only then delegate the loading to the IDE and other plugins it depends on.
+            //
+            // This way the libs, which are present in the "lib" directory of the plugin's zip distribution file can
+            // override IDE's dependencies.
+            //
+            // But when we run tests, the classpath is built by Gradle according to the defined dependencies, and there
+            // is no separation into "plugin's dependencies" and the "IDE's dependencies"; it is just one list.
+            //
+            // So to make the test environment more like the production environment, we should put the plugin's direct
+            // dependencies the first on the classpath.
+            if (!project.pluginManager.isModule) {
+                // Removes the default runtime dependencies from the classpath because their order is unknown.
+                classpath -= runtimeDependencies
+
+                val currentPluginLibsProvider = getCurrentPluginLibs()
+                val otherPluginsLibsProvider = getOtherPluginLibs()
+                classpath = project.files(currentPluginLibsProvider, otherPluginsLibsProvider) + classpath
+            }
+
+            // Removes the original compiled test classes added by Gradle
+            // because we want to replace them with the instrumented test code.
+            classpath -= nonInstrumentedTestCode
+            // Add IDE modules at the end.
+            classpath += productModules
+            // And add the instrumented test code at the very end to avoid overriding any dependency by the test code.
+            classpath += instrumentedTestCode
+
             testClassesDirs = instrumentedTestCode + testClassesDirs
+
             javaLauncher = sourceTask.runtimeDirectory.zip(sourceTask.runtimeMetadata) { directory, metadata ->
                 IntelliJPlatformJavaLauncher(directory, metadata)
+            }
+        }
+
+        private fun Test.getCurrentPluginLibs(): Provider<FileTree> {
+            val currentPluginName = project.extensionProvider.flatMap { it.projectName }
+            val currentPluginDirectory = sourceTask.sandboxPluginsDirectory.dir(currentPluginName)
+
+            return currentPluginDirectory.map {
+                // Load only the contents of the lib directory because some plugins have arbitrary files in their
+                // distribution zip file, which break the JVM when added to the classpath.
+                // The order of the libs within a single plugin should not matter.
+                it.dir(Constants.Sandbox.Plugin.LIB).asFileTree
+            }
+        }
+
+        private fun Test.getOtherPluginLibs() = getOrderedOtherPluginsDirs().map { pluginDirPath ->
+            pluginDirPath.map {
+                // Load only the contents of the lib directory because some plugins have arbitrary files in their
+                // distribution zip file, which break the JVM when added to the classpath.
+                it.resolve(Constants.Sandbox.Plugin.LIB)
+            }.flatMap {
+                // The order of the libs within a single plugin should not matter.
+                project.fileTree(it)
+            }
+        }
+
+        /**
+         * Returns a list of directories in the sandbox plugins dir, omitting the current plugin,
+         * ordered according to the order of the current plugin dependencies, as returned by the IdePluginManager.
+         *
+         * In the "production" (i.e., when the plugin is running in the IDE instead of tests)
+         * if the current plugin class loader does not resolve a class,
+         * its loading is delegated to the class loaders of other plugins it depends on.
+         *
+         * And there the order might depend on the order of the dependencies in the "plugin.xml".
+         * So here we rely on the order provided by the IdePluginManager.
+         */
+        private fun Test.getOrderedOtherPluginsDirs(): Provider<MutableList<Path>> {
+            val currentPluginName = project.extensionProvider.flatMap { it.projectName }
+            val currentPluginDirectory = sourceTask.sandboxPluginsDirectory.dir(currentPluginName)
+            val pluginManager = IdePluginManager.createManager()
+
+            val currentPluginDependencyIds = project.providers.provider {
+                pluginManager.safelyCreatePlugin(currentPluginDirectory.get().asPath, false)
+                    .getOrThrow()
+                    .dependencies
+                    .map { it.id }
+            }
+
+             return sourceTask.sandboxPluginsDirectory.map {
+                Files.list(it.asPath)
+                    // Filter out the current plugin.
+                    .filter { it.name != currentPluginName.get() }
+                    .map { Pair(pluginManager.safelyCreatePlugin(it, false).getOrNull()?.pluginId, it) }
+                    .map { (pluginId, pluginDirPath) ->
+                        Triple(pluginId, pluginDirPath, currentPluginDependencyIds.get().indexOf(pluginId))
+                    }
+                    .sorted(Comparator.comparingInt { (_, _, orderInTheDependencies) -> orderInTheDependencies })
+                    .map { (_, pluginDirPath, _) -> pluginDirPath }
+                    .toList()
             }
         }
 

@@ -895,8 +895,8 @@ class IntelliJPlatformDependenciesHelper(
         val plugin by lazy {
             val pluginPath = when {
                 artifactPath.isDirectory() -> generateSequence(artifactPath) {
-                    it.takeIf { it.resolve("lib").exists() } ?: it.listDirectoryEntries().singleOrNull()
-                }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: '$artifactPath'")
+                    it.takeIf { it.resolve(Constants.Sandbox.Plugin.LIB).exists() } ?: it.listDirectoryEntries().singleOrNull()
+                }.firstOrNull { it.resolve(Constants.Sandbox.Plugin.LIB).exists() } ?: throw GradleException("Could not resolve plugin directory: '$artifactPath'")
 
                 else -> artifactPath
             }

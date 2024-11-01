@@ -8,6 +8,7 @@ import org.gradle.api.tasks.bundling.Zip
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -42,7 +43,7 @@ abstract class BuildPluginTask : Zip() {
                 archiveBaseName.convention(projectNameProvider)
 
                 from(jarSearchableOptionsTaskProvider) {
-                    into("lib")
+                    into(Constants.Sandbox.Plugin.LIB)
                 }
                 from(prepareSandboxTaskProvider.map { it.pluginDirectory })
                 into(archiveBaseName)

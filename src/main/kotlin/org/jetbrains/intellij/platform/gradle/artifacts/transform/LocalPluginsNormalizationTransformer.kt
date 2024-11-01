@@ -13,6 +13,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -40,7 +41,7 @@ abstract class LocalPluginsNormalizationTransformers @Inject constructor(
             val path = inputArtifact.asPath
 
             when {
-                path.resolve("lib").exists() -> {
+                path.resolve(Constants.Sandbox.Plugin.LIB).exists() -> {
                     val targetDirectory = outputs.dir(path.name).resolve(path.name)
 
                     log.info(

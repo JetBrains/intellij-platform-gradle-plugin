@@ -105,7 +105,7 @@ internal fun Path.resolvePlatformPath() = generateSequence(this) { parent ->
             -> entry
 
         // stop when `lib/` is inside, even if it's a singleton
-        entry.listDirectoryEntries("lib").isNotEmpty()
+        entry.listDirectoryEntries(Constants.Sandbox.Plugin.LIB).isNotEmpty()
             -> null
 
         else

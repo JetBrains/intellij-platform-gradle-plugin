@@ -10,6 +10,7 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
@@ -112,7 +113,7 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
 
                 inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
                 composedJarFile.convention(composedJarTaskProvider.flatMap { it.archiveFile })
-                libContainer.convention(prepareSandboxTaskProvider.flatMap { it.pluginDirectory.dir("lib") })
+                libContainer.convention(prepareSandboxTaskProvider.flatMap { it.pluginDirectory.dir(Constants.Sandbox.Plugin.LIB) })
                 outputDirectory.convention(
                     project.layout.dir(project.provider {
                         temporaryDir

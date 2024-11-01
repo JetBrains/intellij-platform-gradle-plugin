@@ -296,7 +296,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })
 
-                intoChild(pluginName.map { "$it/lib" })
+                intoChild(pluginName.map { "$it/" + Sandbox.Plugin.LIB })
                     .from(runtimeClasspath)
                     .from(pluginJar)
                     .eachFile {

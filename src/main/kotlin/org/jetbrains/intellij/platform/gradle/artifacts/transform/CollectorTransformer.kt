@@ -18,6 +18,7 @@ import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
@@ -73,8 +74,8 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
             val productInfo = parameters.intellijPlatform.platformPath().productInfo()
             val plugin by lazy {
                 val pluginPath = generateSequence(path) {
-                    it.takeIf { it.resolve("lib").exists() } ?: it.listDirectoryEntries().singleOrNull()
-                }.firstOrNull { it.resolve("lib").exists() } ?: throw GradleException("Could not resolve plugin directory: '$path'")
+                    it.takeIf { it.resolve(Constants.Sandbox.Plugin.LIB).exists() } ?: it.listDirectoryEntries().singleOrNull()
+                }.firstOrNull { it.resolve(Constants.Sandbox.Plugin.LIB).exists() } ?: throw GradleException("Could not resolve plugin directory: '$path'")
 
                 manager.safelyCreatePlugin(pluginPath).getOrThrow()
             }
@@ -113,8 +114,8 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
 
     companion object {
         internal fun collectJars(path: Path): List<Path> {
-            val libPath = path.resolve("lib")
-            val libModulesPath = libPath.resolve("modules")
+            val libPath = path.resolve(Constants.Sandbox.Plugin.LIB)
+            val libModulesPath = libPath.resolve(Constants.Sandbox.Plugin.MODULES)
 
             return listOf(libPath, libModulesPath)
                 .mapNotNull { it.takeIfExists() }
@@ -154,7 +155,7 @@ internal fun collectBundledPluginsJars(intellijPlatformPath: Path) =
         .resolve("plugins")
         .listDirectoryEntries()
         .asSequence()
-        .flatMap { listOf(it.resolve("lib"), it.resolve("lib/modules")) }
+        .flatMap { listOf(it.resolve(Constants.Sandbox.Plugin.LIB), it.resolve(Constants.Sandbox.Plugin.LIB_MODULES)) }
         .mapNotNull { it.takeIf { it.exists() } }
         .flatMap { it.listDirectoryEntries("*.jar") }
         .toSet()
