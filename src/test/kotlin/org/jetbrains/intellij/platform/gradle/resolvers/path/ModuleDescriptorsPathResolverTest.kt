@@ -39,7 +39,7 @@ class ModuleDescriptorsPathResolverTest : IntelliJPluginTestBase() {
     @Test
     fun `pass on a present file in provided platformPath`() {
         val file = dir
-            .resolve("modules")
+            .resolve(Constants.Sandbox.Plugin.MODULES)
             .createDirectories()
             .resolve("module-descriptors.jar")
             .createFile()

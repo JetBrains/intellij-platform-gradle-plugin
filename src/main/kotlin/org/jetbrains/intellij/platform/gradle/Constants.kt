@@ -187,6 +187,12 @@ object Constants {
         const val PLUGINS = "plugins"
         const val SYSTEM = "system"
         const val LOG = "log"
+
+        object Plugin {
+            const val LIB = "lib"
+            const val MODULES = "modules"
+            const val LIB_MODULES = "$LIB/$MODULES"
+        }
     }
 
     object Locations {

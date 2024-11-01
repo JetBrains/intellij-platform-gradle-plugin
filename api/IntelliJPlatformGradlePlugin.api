@@ -179,6 +179,13 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox {
 	public static final field SYSTEM Ljava/lang/String;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox$Plugin {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Sandbox$Plugin;
+	public static final field LIB Ljava/lang/String;
+	public static final field LIB_MODULES Ljava/lang/String;
+	public static final field MODULES Ljava/lang/String;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field BUILD_PLUGIN Ljava/lang/String;
 	public static final field BUILD_SEARCHABLE_OPTIONS Ljava/lang/String;
