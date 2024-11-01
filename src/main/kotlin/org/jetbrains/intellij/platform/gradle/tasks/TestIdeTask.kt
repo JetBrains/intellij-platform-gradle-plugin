@@ -22,7 +22,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import org.jetbrains.intellij.platform.gradle.utils.isModule
 import kotlin.io.path.exists
 
 /**
@@ -118,14 +117,12 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             //
             // So to make the test environment more like the production environment, we should put the plugin's direct
             // dependencies the first on the classpath.
-            if (!project.pluginManager.isModule) {
-                // Removes the default runtime dependencies from the classpath because their order is unknown.
-                classpath -= runtimeDependencies
+            // Removes the default runtime dependencies from the classpath because their order is unknown.
+            classpath -= runtimeDependencies
 
-                val currentPluginLibsProvider = getCurrentPluginLibs()
-                val otherPluginsLibsProvider = getOtherPluginLibs()
-                classpath = project.files(currentPluginLibsProvider, otherPluginsLibsProvider) + classpath
-            }
+            val currentPluginLibsProvider = getCurrentPluginLibs()
+            val otherPluginsLibsProvider = getOtherPluginLibs()
+            classpath = project.files(currentPluginLibsProvider, otherPluginsLibsProvider) + classpath
 
             // Add IDE modules at the end.
             classpath += productModules
