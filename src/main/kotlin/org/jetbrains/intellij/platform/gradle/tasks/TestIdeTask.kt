@@ -20,8 +20,9 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTesting
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
-import org.jetbrains.intellij.platform.gradle.utils.*
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.isModule
 import kotlin.io.path.exists
 
 /**
@@ -88,7 +89,6 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
 
             val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
             val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
-            val nonInstrumentedTestCode = sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME).output.classesDirs
 
             // Provide IntelliJ Platform product modules
             val productModules = project.files(project.provider {
@@ -127,13 +127,22 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 classpath = project.files(currentPluginLibsProvider, otherPluginsLibsProvider) + classpath
             }
 
-            // Removes the original compiled test classes added by Gradle
-            // because we want to replace them with the instrumented test code.
-            classpath -= nonInstrumentedTestCode
             // Add IDE modules at the end.
             classpath += productModules
-            // And add the instrumented test code at the very end to avoid overriding any dependency by the test code.
-            classpath += instrumentedTestCode
+
+            // Since this code is getting called before the value of "project.extensionProvider.get().instrumentCode"
+            // is known, we cannot add "instrumentedTestCode" to the classpath only when needed.
+            // Because of that, removing the original compiled test classes added by Gradle like this:
+            // classpath -= sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME).output.classesDirs
+            // is not possible because it will break the tests when "instrumentCode" is off.
+            // Because if we remove it, there is nothing else to replace it with.
+            // So we add it to the beginning of the classpath, so that when "instrumentCode" is on and both:
+            // the instrumented test code and non-instrumented test code are present,
+            // the instrumented version will override the other because it comes first.
+            //
+            // But when "instrumentCode" was on, the classes were generated, then it was turned off, and the next build
+            // runs without a clean, the instrumented code will still be added to the classpath, as long as it exists.
+            classpath = instrumentedTestCode + classpath
 
             testClassesDirs = instrumentedTestCode + testClassesDirs
 
