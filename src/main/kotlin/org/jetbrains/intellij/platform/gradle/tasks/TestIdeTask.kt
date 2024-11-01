@@ -2,10 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.Project
-import org.gradle.api.file.FileTree
-import org.gradle.api.provider.Provider
+import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
@@ -24,12 +22,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.*
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
-import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.*
 import kotlin.io.path.exists
-import kotlin.io.path.name
 
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
@@ -149,30 +142,36 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             }
         }
 
-        private fun Test.getCurrentPluginLibs(): Provider<FileTree> {
-            val currentPluginName = project.extensionProvider.flatMap { it.projectName }
-            val currentPluginDirectory = sourceTask.sandboxPluginsDirectory.dir(currentPluginName)
+        private fun Test.getCurrentPluginLibs(): FileCollection {
+            val currentPluginName = project.extensionProvider.flatMap { it.projectName }.get()
 
-            return currentPluginDirectory.map {
+            return sourceTask.sandboxPluginsDirectory.asFileTree.matching {
                 // Load only the contents of the lib directory because some plugins have arbitrary files in their
                 // distribution zip file, which break the JVM when added to the classpath.
-                // The order of the libs within a single plugin should not matter.
-                it.dir(Constants.Sandbox.Plugin.LIB).asFileTree
+                include("$currentPluginName/${Constants.Sandbox.Plugin.LIB}/**")
             }
         }
 
-        private fun Test.getOtherPluginLibs() = getOrderedOtherPluginsDirs().map { pluginDirPath ->
-            pluginDirPath.map {
+        private fun Test.getOtherPluginLibs(): FileCollection {
+            val currentPluginName = project.extensionProvider.flatMap { it.projectName }.get()
+
+            return sourceTask.sandboxPluginsDirectory.asFileTree.matching {
                 // Load only the contents of the lib directory because some plugins have arbitrary files in their
                 // distribution zip file, which break the JVM when added to the classpath.
-                it.resolve(Constants.Sandbox.Plugin.LIB)
-            }.flatMap {
-                // The order of the libs within a single plugin should not matter.
-                project.fileTree(it)
+                include("*/${Constants.Sandbox.Plugin.LIB}/**")
+                // Exclude the libs from the current plugin because we need to put before all other libs.
+                exclude("$currentPluginName/**")
             }
         }
 
         /**
+         * Unfortunately, this is possible only during the execution phase, when all the directories in the build dir
+         * are already created.
+         *
+         * To do this in advance, during the configuration phase, we need to know names of the directories for other
+         * plugins in the sandbox. Which can be done only if they are named using plugin id. But even then it may not
+         * work if the plugin defines an alias for its ID.
+         *
          * Returns a list of directories in the sandbox plugins dir, omitting the current plugin,
          * ordered according to the order of the current plugin dependencies, as returned by the IdePluginManager.
          *
@@ -183,6 +182,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
          * And there the order might depend on the order of the dependencies in the "plugin.xml".
          * So here we rely on the order provided by the IdePluginManager.
          */
+        /*
         private fun Test.getOrderedOtherPluginsDirs(): Provider<MutableList<Path>> {
             val currentPluginName = project.extensionProvider.flatMap { it.projectName }
             val currentPluginDirectory = sourceTask.sandboxPluginsDirectory.dir(currentPluginName)
@@ -196,7 +196,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             }
 
              return sourceTask.sandboxPluginsDirectory.map {
-                Files.list(it.asPath)
+                Files.list(it.asPath) // <<< Not possible during the configuration phase.
                     // Filter out the current plugin.
                     .filter { it.name != currentPluginName.get() }
                     .map { Pair(pluginManager.safelyCreatePlugin(it, false).getOrNull()?.pluginId, it) }
@@ -208,6 +208,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     .toList()
             }
         }
+        */
 
         override fun register(project: Project) =
             project.registerTask<TestIdeTask>(configuration = configuration)
