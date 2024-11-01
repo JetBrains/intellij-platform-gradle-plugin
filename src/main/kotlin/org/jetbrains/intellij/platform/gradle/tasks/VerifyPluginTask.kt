@@ -12,8 +12,10 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -194,8 +196,8 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
         classpath = objectFactory.fileCollection().from(executable)
 
-        with(ides.files) {
-            if (isEmpty()) {
+        with(ides) {
+            if (isEmpty) {
                 throw GradleException(
                     """
                     No IDE resolved for verification with the IntelliJ Plugin Verifier.
@@ -299,15 +301,17 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
+                val intellijPluginVerifierIdesConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES]
                 val pluginVerificationProvider = project.extensionProvider.map { it.pluginVerification }
-                val intellijPluginVerifierIdesConfigurations = project.provider { // TODO: use .named when Gradle 8.6+
-                    project.configurations.filter { configuration ->
-                        with(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES) {
-                            configuration.name == this || configuration.name.startsWith("${this}_")
-                        }
-                    }
-                }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
+
+                ides.from(project.provider {
+                    intellijPluginVerifierIdesConfiguration.incoming.dependencies.flatMap {
+                        project.configurations.detachedConfiguration(it).apply {
+                            attributes { attribute(Attributes.extracted, true) }
+                        }.resolve()
+                    }
+                })
 
                 freeArgs.convention(pluginVerificationProvider.flatMap { it.freeArgs })
                 failureLevel.convention(pluginVerificationProvider.flatMap { it.failureLevel })
@@ -318,7 +322,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 subsystemsToCheck.convention(pluginVerificationProvider.flatMap { it.subsystemsToCheck })
                 ignoredProblemsFile.convention(pluginVerificationProvider.flatMap { it.ignoredProblemsFile })
 
-                ides.from(intellijPluginVerifierIdesConfigurations)
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 offline.convention(project.gradle.startParameter.isOffline)
             }

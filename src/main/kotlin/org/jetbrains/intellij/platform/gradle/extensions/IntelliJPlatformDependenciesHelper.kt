@@ -21,7 +21,6 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
@@ -254,34 +253,16 @@ class IntelliJPlatformDependenciesHelper(
     @Throws(GradleException::class)
     internal fun addIntelliJPluginVerifierIdes(
         notationsProvider: Provider<List<String>>,
-        dependencyConfigurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-        configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
+        configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
         notationsProvider.get()
             .map { it.parseIdeNotation() }
             .map { (type, version) ->
-                val dependency = when (type) {
+                when (type) {
                     IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
                     else -> dependencies.createIntelliJPlatformInstaller(type, version)
                 }.apply(action)
-
-                val dependencyConfigurationNameWithNotation = "${dependencyConfigurationName}_${type}_${version}"
-                val configurationNameWithNotation = "${configurationName}_${type}_${version}"
-
-                val dependencyConfiguration = configurations.findByName(dependencyConfigurationNameWithNotation)
-                    ?: configurations.create(dependencyConfigurationNameWithNotation) {
-                        dependencies.add(dependency)
-                    }
-
-                configurations.findByName(configurationNameWithNotation)
-                    ?: configurations.create(configurationNameWithNotation) {
-                        attributes {
-                            attribute(Attributes.extracted, true)
-                        }
-                        extendsFrom(dependencyConfiguration)
-                    }
-                dependency
             }
     })
 
