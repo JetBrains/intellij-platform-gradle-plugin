@@ -14,7 +14,7 @@ import retrofit2.http.Part
 interface IdeServicesPluginRepositoryService : PluginRepositoryService {
 
     @Multipart
-    @POST("/api/ij-plugins/upload")
+    @POST("/api/plugins")
     override fun uploadById(
         @Part("pluginId") pluginId: Int,
         @Part("channel") channel: RequestBody?,
@@ -24,7 +24,7 @@ interface IdeServicesPluginRepositoryService : PluginRepositoryService {
     ): Call<PluginUpdateBean>
 
     @Multipart
-    @POST("/api/ij-plugins/upload")
+    @POST("/api/plugins")
     override fun uploadByStringId(
         @Part("xmlId") pluginXmlId: RequestBody,
         @Part("channel") channel: RequestBody?,
