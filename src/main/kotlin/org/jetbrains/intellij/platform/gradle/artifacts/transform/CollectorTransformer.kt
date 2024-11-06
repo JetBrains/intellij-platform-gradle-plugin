@@ -18,8 +18,8 @@ import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
@@ -28,7 +28,6 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
 import java.nio.file.Path
-import kotlin.Throws
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
@@ -74,8 +73,8 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
             val productInfo = parameters.intellijPlatform.platformPath().productInfo()
             val plugin by lazy {
                 val pluginPath = generateSequence(path) {
-                    it.takeIf { it.resolve(Constants.Sandbox.Plugin.LIB).exists() } ?: it.listDirectoryEntries().singleOrNull()
-                }.firstOrNull { it.resolve(Constants.Sandbox.Plugin.LIB).exists() } ?: throw GradleException("Could not resolve plugin directory: '$path'")
+                    it.takeIf { it.resolve(Sandbox.Plugin.LIB).exists() } ?: it.listDirectoryEntries().singleOrNull()
+                }.firstOrNull { it.resolve(Sandbox.Plugin.LIB).exists() } ?: throw GradleException("Could not resolve plugin directory: '$path'")
 
                 manager.safelyCreatePlugin(pluginPath).getOrThrow()
             }
@@ -114,8 +113,8 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
 
     companion object {
         internal fun collectJars(path: Path): List<Path> {
-            val libPath = path.resolve(Constants.Sandbox.Plugin.LIB)
-            val libModulesPath = libPath.resolve(Constants.Sandbox.Plugin.MODULES)
+            val libPath = path.resolve(Sandbox.Plugin.LIB)
+            val libModulesPath = libPath.resolve(Sandbox.Plugin.MODULES)
 
             return listOf(libPath, libModulesPath)
                 .mapNotNull { it.takeIfExists() }
@@ -155,7 +154,7 @@ internal fun collectBundledPluginsJars(intellijPlatformPath: Path) =
         .resolve("plugins")
         .listDirectoryEntries()
         .asSequence()
-        .flatMap { listOf(it.resolve(Constants.Sandbox.Plugin.LIB), it.resolve(Constants.Sandbox.Plugin.LIB_MODULES)) }
+        .flatMap { listOf(it.resolve(Sandbox.Plugin.LIB), it.resolve(Sandbox.Plugin.LIB_MODULES)) }
         .mapNotNull { it.takeIf { it.exists() } }
         .flatMap { it.listDirectoryEntries("*.jar") }
         .toSet()

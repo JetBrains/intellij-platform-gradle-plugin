@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createFile
 import kotlin.test.Test
@@ -39,7 +40,7 @@ class ModuleDescriptorsPathResolverTest : IntelliJPluginTestBase() {
     @Test
     fun `pass on a present file in provided platformPath`() {
         val file = dir
-            .resolve(Constants.Sandbox.Plugin.MODULES)
+            .resolve(Sandbox.Plugin.MODULES)
             .createDirectories()
             .resolve("module-descriptors.jar")
             .createFile()
