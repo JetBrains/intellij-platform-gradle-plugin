@@ -11,8 +11,8 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
@@ -26,7 +26,7 @@ import kotlin.io.path.exists
 
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
- * It directly extends the [Test] Gradle task, which allows for an extensive configuration (system properties, memory management, etc.).
+ * It directly extends the [Test] Gradle task, which allows for an extensive configuration (system properties, memory management, and so).
  *
  * The [TestIdeTask] is a class used only for handling custom `testIde` tasks.
  * To register a customized test task, use [IntelliJPlatformTestingExtension.testIde].
@@ -113,7 +113,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // override IDE's dependencies.
             //
             // But when we run tests, the classpath is built by Gradle according to the defined dependencies, and there
-            // is no separation into "plugin's dependencies" and the "IDE's dependencies"; it is just one list.
+            // is no separation into "plugin's dependencies" and the "IDE's dependencies"; it is one list.
             //
             // So to make the test environment more like the production environment, we should put the plugin's direct
             // dependencies the first on the classpath.
@@ -128,7 +128,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             classpath += productModules
 
             // Since this code is getting called before the value of "project.extensionProvider.get().instrumentCode"
-            // is known, we cannot add "instrumentedTestCode" to the classpath only when needed.
+            // is known, we can't add "instrumentedTestCode" to the classpath only when needed.
             // Because of that, removing the original compiled test classes added by Gradle like this:
             // classpath -= sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME).output.classesDirs
             // is not possible because it will break the tests when "instrumentCode" is off.
@@ -154,7 +154,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             return sourceTask.sandboxPluginsDirectory.asFileTree.matching {
                 // Load only the contents of the lib directory because some plugins have arbitrary files in their
                 // distribution zip file, which break the JVM when added to the classpath.
-                include("$currentPluginName/${Constants.Sandbox.Plugin.LIB}/**")
+                include("$currentPluginName/${Sandbox.Plugin.LIB}/**")
             }
         }
 
@@ -164,7 +164,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             return sourceTask.sandboxPluginsDirectory.asFileTree.matching {
                 // Load only the contents of the lib directory because some plugins have arbitrary files in their
                 // distribution zip file, which break the JVM when added to the classpath.
-                include("*/${Constants.Sandbox.Plugin.LIB}/**")
+                include("*/${Sandbox.Plugin.LIB}/**")
                 // Exclude the libs from the current plugin because we need to put before all other libs.
                 exclude("$currentPluginName/**")
             }
@@ -175,14 +175,14 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
          * are already created.
          *
          * To do this in advance, during the configuration phase, we need to know names of the directories for other
-         * plugins in the sandbox. Which can be done only if they are named using plugin id. But even then it may not
-         * work if the plugin defines an alias for its ID.
+         * plugins in the sandbox.
+         * Which can be done only if they're named using plugin id.
+         * But even then it may not work if the plugin defines an alias for its ID.
          *
          * Returns a list of directories in the sandbox plugins dir, omitting the current plugin,
          * ordered according to the order of the current plugin dependencies, as returned by the IdePluginManager.
          *
-         * In the "production" (i.e., when the plugin is running in the IDE instead of tests)
-         * if the current plugin class loader does not resolve a class,
+         * In the "production" (like when running plugin in the IDE instead of tests), if the current plugin class loader doesn't resolve a class,
          * its loading is delegated to the class loaders of other plugins it depends on.
          *
          * And there the order might depend on the order of the dependencies in the "plugin.xml".

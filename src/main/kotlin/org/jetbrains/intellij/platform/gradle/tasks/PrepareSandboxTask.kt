@@ -34,7 +34,6 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.kotlin.gradle.utils.named
-import kotlin.Throws
 import kotlin.io.path.*
 
 /**
@@ -296,7 +295,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })
 
-                intoChild(pluginName.map { "$it/" + Sandbox.Plugin.LIB })
+                intoChild(pluginName.map { "$it/${Sandbox.Plugin.LIB}" })
                     .from(runtimeClasspath)
                     .from(pluginJar)
                     .eachFile {

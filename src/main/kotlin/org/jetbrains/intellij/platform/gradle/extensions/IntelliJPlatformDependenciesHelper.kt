@@ -25,6 +25,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
@@ -895,8 +896,8 @@ class IntelliJPlatformDependenciesHelper(
         val plugin by lazy {
             val pluginPath = when {
                 artifactPath.isDirectory() -> generateSequence(artifactPath) {
-                    it.takeIf { it.resolve(Constants.Sandbox.Plugin.LIB).exists() } ?: it.listDirectoryEntries().singleOrNull()
-                }.firstOrNull { it.resolve(Constants.Sandbox.Plugin.LIB).exists() } ?: throw GradleException("Could not resolve plugin directory: '$artifactPath'")
+                    it.takeIf { it.resolve(Sandbox.Plugin.LIB).exists() } ?: it.listDirectoryEntries().singleOrNull()
+                }.firstOrNull { it.resolve(Sandbox.Plugin.LIB).exists() } ?: throw GradleException("Could not resolve plugin directory: '$artifactPath'")
 
                 else -> artifactPath
             }

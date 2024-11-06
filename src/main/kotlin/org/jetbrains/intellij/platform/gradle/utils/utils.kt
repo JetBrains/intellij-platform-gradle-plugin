@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import java.nio.file.Path
 import kotlin.io.path.absolute
@@ -105,7 +106,7 @@ internal fun Path.resolvePlatformPath() = generateSequence(this) { parent ->
             -> entry
 
         // stop when `lib/` is inside, even if it's a singleton
-        entry.listDirectoryEntries(Constants.Sandbox.Plugin.LIB).isNotEmpty()
+        entry.listDirectoryEntries(Sandbox.Plugin.LIB).isNotEmpty()
             -> null
 
         else
