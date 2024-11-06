@@ -2976,6 +2976,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeA
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware : org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware {
+	public abstract fun getPluginDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/companion/JarCompanion {
