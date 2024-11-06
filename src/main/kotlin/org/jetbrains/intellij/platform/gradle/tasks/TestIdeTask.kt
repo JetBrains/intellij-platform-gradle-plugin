@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
-import org.gradle.api.file.FileCollection
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
@@ -21,8 +20,9 @@ import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.exists
+import kotlin.io.path.name
 
 /**
  * Runs plugin tests against the currently selected IntelliJ Platform with the built plugin loaded.
@@ -148,25 +148,24 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             }
         }
 
-        private fun Test.getCurrentPluginLibs(): FileCollection {
-            val currentPluginName = project.extensionProvider.flatMap { it.projectName }.get()
-
-            return sourceTask.sandboxPluginsDirectory.asFileTree.matching {
-                // Load only the contents of the lib directory because some plugins have arbitrary files in their
-                // distribution zip file, which break the JVM when added to the classpath.
-                include("$currentPluginName/${Sandbox.Plugin.LIB}/**")
-            }
+        /**
+         * Load only the contents of the lib directory because some plugins have arbitrary files in their
+         * distribution zip file, which break the JVM when added to the classpath.
+         */
+        private fun Test.getCurrentPluginLibs() = sourceTask.pluginDirectory.asFileTree.matching {
+            include("${Sandbox.Plugin.LIB}/**")
         }
 
-        private fun Test.getOtherPluginLibs(): FileCollection {
-            val currentPluginName = project.extensionProvider.flatMap { it.projectName }.get()
-
-            return sourceTask.sandboxPluginsDirectory.asFileTree.matching {
-                // Load only the contents of the lib directory because some plugins have arbitrary files in their
-                // distribution zip file, which break the JVM when added to the classpath.
+        /**
+         * Load only the contents of the lib directory because some plugins have arbitrary files in their
+         * distribution zip file, which break the JVM when added to the classpath.
+         */
+        private fun Test.getOtherPluginLibs() = sourceTask.sandboxPluginsDirectory.zip(sourceTask.pluginDirectory) { sandboxPluginsDirectory, pluginDirectory ->
+            val pluginName = pluginDirectory.asPath.name
+            sandboxPluginsDirectory.asFileTree.matching {
                 include("*/${Sandbox.Plugin.LIB}/**")
                 // Exclude the libs from the current plugin because we need to put before all other libs.
-                exclude("$currentPluginName/**")
+                exclude("$pluginName/**")
             }
         }
 

@@ -289,6 +289,11 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 "kotlinStdlibDefaultDependency" to project.provider { kotlinStdlibDefaultDependency.orNull.toString() },
             )
         }
+
+        if (this is TestableAware) {
+            val pluginName = extensionProvider.flatMap { it.projectName }
+            pluginDirectory = sandboxPluginsDirectory.dir(pluginName)
+        }
     }
 }
 
