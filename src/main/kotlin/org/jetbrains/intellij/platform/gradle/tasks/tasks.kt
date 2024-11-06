@@ -208,6 +208,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             )
 
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
+            systemProperty("ide.native.launcher", "false")
 
             if (this is JavaExec) {
                 mainClass = "com.intellij.idea.Main"

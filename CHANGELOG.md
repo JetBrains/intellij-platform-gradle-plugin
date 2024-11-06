@@ -6,6 +6,7 @@
 
 - Introduce `intellijPlatformClasspath` configuration to allow retrieving the processed IntelliJ Platform and plugins dependencies. 
 - Warn if trying to refer to a bundled plugin via `intellijPlatform.plugins` instead of required `intellijPlatform.bundledPlugin`.
+- Set `ide.native.launcher=false` for `RunnableIdeAware` tasks to prevent from showing the `The IDE seems to be launched with a script launcher` warning notification.
 
 ### Changed
 
