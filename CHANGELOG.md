@@ -28,6 +28,7 @@
 - Compatibility with Gradle dependency verification. Previously it was failing with `Failed to create MD5 hash for file`.
 - Rework how the IDEs from Plugin Verification are resolved. JetBrains/intellij-platform-gradle-plugin#1784
 - Exclude `kotlin-stdlib` and `kotlinx-coroutines` transitive dependencies in various variants from IntelliJ Platform dependencies. JetBrains/intellij-platform-gradle-plugin#1817
+- Can't find `performanceTesting.jar` when building against Android Studio 242+. JetBrains/intellij-platform-gradle-plugin#1738
 
 ## [2.1.0]
 

@@ -837,12 +837,11 @@ class IntelliJPlatformDependenciesHelper(
 
         val layoutItems = productInfo.get().layout
             .filter { layout -> layout.name in dependencyIds }
-            .filter { layout -> layout.classPath.isNotEmpty() }
+            .filter { layout -> layout.classPath.any { platformPath.get().resolve(it).exists() } }
 
         val modules = dependencyIds
             .filterNot { bundledPlugins.containsKey(it) }
             .mapNotNull { layoutItems.find { layout -> layout.name == it } }
-            .filterNot { it.classPath.isEmpty() }
             .map {
                 val (group, name, version) = writeBundledModuleDependency(it.name, it.classPath)
                 IvyModule.Dependency(group, name, version)
