@@ -2,14 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.InputDirectory
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
+import org.gradle.api.tasks.*
 import org.gradle.jvm.toolchain.JavaLauncher
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
 
 /**
@@ -18,6 +17,14 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathReso
  * @see JavaRuntimePathResolver
  */
 interface RuntimeAware : IntelliJPlatformVersionAware {
+
+    /**
+     * Holds the [Configurations.JETBRAINS_RUNTIME] configuration with the JetBrains Runtime dependency added.
+     * It should not be directly accessed.
+     */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    val jetbrainsRuntimeConfiguration: ConfigurableFileCollection
 
     /**
      * Java Runtime parent directory.

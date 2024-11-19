@@ -1040,10 +1040,12 @@ class IntelliJPlatformDependenciesHelper(
 
     /**
      * Creates a [Provider] that holds a JetBrains Runtime version obtained using the currently used IntelliJ Platform.
+     *
+     * @param platformPathProvider The path to the IntelliJ Platform to be used for resolving JetBrains Runtime version.
      */
-    internal fun obtainJetBrainsRuntimeVersion() = cachedProvider {
+    internal fun obtainJetBrainsRuntimeVersion(platformPathProvider: Provider<Path> = platformPath) = cachedProvider {
         val dependencies = runCatching {
-            platformPath.get().resolve("dependencies.txt").takeIf { it.exists() }
+            platformPathProvider.get().resolve("dependencies.txt").takeIf { it.exists() }
         }.getOrNull() ?: return@cachedProvider null
 
         val version = FileReader(dependencies.toFile()).use { reader ->

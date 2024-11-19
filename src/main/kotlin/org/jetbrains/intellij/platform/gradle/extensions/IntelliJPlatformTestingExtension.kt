@@ -19,10 +19,12 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.isModule
+import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import javax.inject.Inject
 
 @IntelliJPlatform
@@ -36,7 +38,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
     val testIdeUi = register<TestIdeUiParameters, _>()
     val testIdePerformance = register<TestIdePerformanceParameters, _>()
 
-    private inline fun <reified C : CommonParameters<T>, reified T> register() where T : Task, T : IntelliJPlatformVersionAware, T : SandboxAware =
+    private inline fun <reified C : CommonParameters<T>, reified T> register() where T : Task, T : IntelliJPlatformVersionAware, T : RuntimeAware, T : SandboxAware =
         project.objects.domainObjectContainer(
             elementType = C::class,
             factory = { project.objects.newInstance<C>(it, project) },
@@ -104,6 +106,23 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                         })
                     }
                 }
+                val customJetBrainsRuntimeConfiguration = project.configurations.create(
+                    name = Configurations.JETBRAINS_RUNTIME.withSuffix,
+                    description = "Custom JetBrains Runtime",
+                ) {
+                    attributes {
+                        attribute(Attributes.extracted, true)
+                    }
+
+                    defaultDependencies {
+                        val customPlatformPath = project.provider {
+                            customIntelliJPlatformConfiguration.platformPath()
+                        }
+                        addLater(dependenciesHelper.obtainJetBrainsRuntimeVersion(customPlatformPath).map { version ->
+                            dependenciesHelper.createJetBrainsRuntime(version)
+                        })
+                    }
+                }
 
                 val customIntellijPlatformPluginDependencyConfiguration = project.configurations.create(
                     name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY.withSuffix,
@@ -159,6 +178,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
 
                     intelliJPlatformConfiguration = customIntelliJPlatformConfiguration
                     intelliJPlatformPluginConfiguration = customIntellijPlatformPluginConfiguration
+                    jetbrainsRuntimeConfiguration = customJetBrainsRuntimeConfiguration
 
                     applySandboxFrom(prepareSandboxTask)
                 }
