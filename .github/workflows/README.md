@@ -7,7 +7,7 @@
 Gradle versions:
 
 - minimum supported version (`8.2`, see `IntelliJPluginConstants.Constraints.getMINIMAL_GRADLE_VERSION`)
-- latest GA (e.g., `8.10.2`)
+- latest GA (e.g., `8.11`)
 - RC of next GA (potentially)
 
 When updating _latest GA_ version, adjust `exclude` section 
