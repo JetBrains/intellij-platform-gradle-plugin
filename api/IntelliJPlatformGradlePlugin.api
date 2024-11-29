@@ -710,7 +710,7 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper {
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;)V
+	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/resources/ResourceHandler;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;)V
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension : org/gradle/api/plugins/ExtensionAware {
@@ -2369,7 +2369,9 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/providers
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource$Parameters : org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource$FilterParameters {
+	public abstract fun getAndroidStudio ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getAndroidStudioUrl ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJetbrainsIdes ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getJetbrainsIdesUrl ()Lorg/gradle/api/provider/Property;
 }
 
