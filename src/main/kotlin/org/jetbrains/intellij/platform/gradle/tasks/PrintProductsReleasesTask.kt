@@ -18,6 +18,7 @@ import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.resolveUrl
 
 /**
  * Prints the list of binary product releases that, by default, match the currently selected IntelliJ Platform along
@@ -56,6 +57,8 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
                     project.providers.of(ProductReleasesValueSource::class.java) {
                         parameters.jetbrainsIdesUrl = project.providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
                         parameters.androidStudioUrl = project.providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
+                        parameters.jetbrainsIdes = parameters.jetbrainsIdesUrl.map { project.resources.resolveUrl(it) }
+                        parameters.androidStudio = parameters.androidStudioUrl.map { project.resources.resolveUrl(it) }
 
                         parameters.sinceBuild = this@registerTask.sinceBuild
                         parameters.untilBuild = this@registerTask.untilBuild

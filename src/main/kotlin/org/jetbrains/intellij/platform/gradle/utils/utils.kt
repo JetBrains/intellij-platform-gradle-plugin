@@ -16,6 +16,7 @@ import org.gradle.api.internal.GradleInternal
 import org.gradle.api.plugins.PluginManager
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -136,3 +137,6 @@ val Project.extensionProvider
 
 internal val PluginManager.isModule
     get() = hasPlugin(Plugins.MODULE) && !hasPlugin(Plugin.ID)
+
+// TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
+internal fun ResourceHandler.resolveUrl(url: String) = text.fromUri(url).asFile("UTF-8")

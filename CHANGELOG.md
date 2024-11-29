@@ -31,6 +31,7 @@
 - Exclude `kotlin-stdlib` and `kotlinx-coroutines` transitive dependencies in various variants from IntelliJ Platform dependencies. JetBrains/intellij-platform-gradle-plugin#1817
 - Can't find `performanceTesting.jar` when building against Android Studio 242+. JetBrains/intellij-platform-gradle-plugin#1738
 - Custom `runIde` task do not find the right runtime, if `useInstaller` is `false`. JetBrains/intellij-platform-gradle-plugin#1827
+- PluginVerifier doesn't honor gradle offline mode. JetBrains/intellij-platform-gradle-plugin#1820
 
 ## [2.1.0]
 

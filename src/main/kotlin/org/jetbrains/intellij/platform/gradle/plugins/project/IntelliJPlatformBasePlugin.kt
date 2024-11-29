@@ -50,7 +50,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }
 
         val dependenciesHelper = with(project) {
-            IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, rootProjectPath, project.settings.dependencyResolutionManagement.rulesMode)
+            IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, resources, rootProjectPath, project.settings.dependencyResolutionManagement.rulesMode)
         }
 
         /**

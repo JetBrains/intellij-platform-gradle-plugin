@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.providers
 
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ValueSource
@@ -22,8 +23,8 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
-import java.net.URL
 
 /**
  * Provides a complete list of binary IntelliJ Platform product releases matching the given [FilterParameters] criteria.
@@ -38,6 +39,20 @@ import java.net.URL
 abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductReleasesValueSource.Parameters> {
 
     interface Parameters : FilterParameters {
+        /**
+         * A file containing the XML with all available JetBrains IDEs releases.
+         *
+         * @see jetbrainsIdesUrl
+         */
+        val jetbrainsIdes: RegularFileProperty
+
+        /**
+         * A file containing the XML with all available Android Studio releases.
+         *
+         * @see androidStudioUrl
+         */
+        val androidStudio: RegularFileProperty
+
         /**
          * The URL to the resource containing the XML with all JetBrains IDEs releases.
          *
@@ -88,8 +103,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
     override fun obtain() = with(parameters) {
         val jetbrainsIdesReleases = jetbrainsIdesUrl.orNull
             ?.also { log.info("Reading JetBrains IDEs releases from: $it") }
-            ?.let { URL(it).readText() }
-            ?.let { decode<JetBrainsIdesReleases>(it) }
+            ?.let { jetbrainsIdes.orNull }
+            ?.let { decode<JetBrainsIdesReleases>(it.asPath) }
             ?.let {
                 sequence {
                     it.products.forEach { product ->
@@ -126,8 +141,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
 
         val androidStudioReleases = androidStudioUrl.orNull
             ?.also { log.info("Reading Android Studio releases from: $it") }
-            ?.let { URL(it).readText() }
-            ?.let { decode<AndroidStudioReleases>(it) }
+            ?.let { androidStudio.orNull }
+            ?.let { decode<AndroidStudioReleases>(it.asPath) }
             ?.items
             ?.mapNotNull { item ->
                 val channel = runCatching { Channel.valueOf(item.channel.uppercase()) }.getOrNull() ?: return@mapNotNull null
