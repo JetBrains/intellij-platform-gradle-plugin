@@ -57,8 +57,8 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
                     project.providers.of(ProductReleasesValueSource::class.java) {
                         parameters.jetbrainsIdesUrl = project.providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
                         parameters.androidStudioUrl = project.providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
-                        parameters.jetbrainsIdes = parameters.jetbrainsIdesUrl.map { project.resources.resolveUrl(it) }
-                        parameters.androidStudio = parameters.androidStudioUrl.map { project.resources.resolveUrl(it) }
+                        parameters.jetbrainsIdes = project.resources.resolveUrl(parameters.jetbrainsIdesUrl)
+                        parameters.androidStudio = project.resources.resolveUrl(parameters.androidStudioUrl)
 
                         parameters.sinceBuild = this@registerTask.sinceBuild
                         parameters.untilBuild = this@registerTask.untilBuild

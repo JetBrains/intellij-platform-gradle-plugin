@@ -139,4 +139,4 @@ internal val PluginManager.isModule
     get() = hasPlugin(Plugins.MODULE) && !hasPlugin(Plugin.ID)
 
 // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
-internal fun ResourceHandler.resolveUrl(url: String) = text.fromUri(url).asFile("UTF-8")
+internal fun ResourceHandler.resolveUrl(url: Property<String>) = text.fromUri(url).asFile("UTF-8")

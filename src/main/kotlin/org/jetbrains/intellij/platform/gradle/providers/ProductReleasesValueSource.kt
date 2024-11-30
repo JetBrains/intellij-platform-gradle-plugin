@@ -101,9 +101,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
     private val log = Logger(javaClass)
 
     override fun obtain() = with(parameters) {
-        val jetbrainsIdesReleases = jetbrainsIdesUrl.orNull
-            ?.also { log.info("Reading JetBrains IDEs releases from: $it") }
-            ?.let { jetbrainsIdes.orNull }
+        val jetbrainsIdesReleases = jetbrainsIdes.orNull
+            ?.also { log.info("Reading JetBrains IDEs releases from: $it (jetbrainsIdesUrl=$jetbrainsIdesUrl)") }
             ?.let { decode<JetBrainsIdesReleases>(it.asPath) }
             ?.let {
                 sequence {
@@ -139,9 +138,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .orEmpty()
             .toList()
 
-        val androidStudioReleases = androidStudioUrl.orNull
-            ?.also { log.info("Reading Android Studio releases from: $it") }
-            ?.let { androidStudio.orNull }
+        val androidStudioReleases = androidStudio.orNull
+            ?.also { log.info("Reading Android Studio releases from: ${androidStudio.orNull} (androidStudioUrl=$androidStudioUrl)") }
             ?.let { decode<AndroidStudioReleases>(it.asPath) }
             ?.items
             ?.mapNotNull { item ->

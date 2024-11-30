@@ -593,8 +593,8 @@ class IntelliJPlatformDependenciesHelper(
         providers.of(ProductReleasesValueSource::class.java) {
             parameters.jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
             parameters.androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
-            parameters.jetbrainsIdes = parameters.jetbrainsIdesUrl.map { resources.resolveUrl(it) }
-            parameters.androidStudio = parameters.androidStudioUrl.map { resources.resolveUrl(it) }
+            parameters.jetbrainsIdes = resources.resolveUrl(parameters.jetbrainsIdesUrl)
+            parameters.androidStudio = resources.resolveUrl(parameters.androidStudioUrl)
 
             parameters(configure)
         }
