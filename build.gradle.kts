@@ -39,14 +39,14 @@ dependencies {
     implementation(libs.annotations)
     implementation(libs.undertow)
 
-    shadow(libs.intellij.structure.base) {
+    implementation(libs.intellij.structure.base) {
         exclude("org.jetbrains.kotlin")
     }
-    shadow(libs.intellij.structure.ide) {
+    implementation(libs.intellij.structure.ide) {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")
     }
-    shadow(libs.intellij.structure.intellij) {
+    implementation(libs.intellij.structure.intellij) {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")
     }
@@ -105,7 +105,6 @@ tasks {
 
     shadowJar {
         archiveClassifier = ""
-        configurations = listOf(project.configurations.shadow.get())
     }
 
 //    @Suppress("UnstableApiUsage")
