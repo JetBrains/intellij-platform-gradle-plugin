@@ -241,6 +241,73 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         }
     }
 
+    @Test
+    fun `resolve all transitive dependencies on bundled modules for Git4Idea`() {
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "2024.3")
+                        bundledPlugin("Git4Idea")
+                    }
+                }
+                
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        build(DEPENDENCIES) {
+            assertContains(
+                """
+                |    +--- bundledPlugin:com.jetbrains.performancePlugin:IC-243.21565.193
+                |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193
+                """.trimIndent(),
+                output,
+            )
+        }
+    }
+
+    @Test
+    fun `resolve all transitive dependencies on bundled modules for Coverage`() {
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "2024.3")
+                        bundledPlugin("Coverage")
+                    }
+                }
+                
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        build(DEPENDENCIES) {
+            assertContains(
+                """
+                |    +--- bundledModule:intellij.platform.coverage:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
+                """.trimIndent(),
+                output,
+            )
+        }
+    }
+
     // TODO: verify missing IntelliJ Platform dependency when no repositories are added
     // TODO: use IntelliJ Platform from local
 }

@@ -16,6 +16,7 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.bcv)
     alias(libs.plugins.buildLogic)
+    alias(libs.plugins.shadow)
 }
 
 val isSnapshot = properties("snapshot").get().toBoolean()
@@ -29,6 +30,7 @@ description = properties("description").get()
 repositories {
     mavenCentral()
     maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
+    maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
 }
 
 val additionalPluginClasspath: Configuration by configurations.creating
@@ -37,10 +39,14 @@ dependencies {
     implementation(libs.annotations)
     implementation(libs.undertow)
 
-    implementation(libs.intellij.structure.base) {
+    shadow(libs.intellij.structure.base) {
         exclude("org.jetbrains.kotlin")
     }
-    implementation(libs.intellij.structure.intellij) {
+    shadow(libs.intellij.structure.ide) {
+        exclude("org.jetbrains.kotlin")
+        exclude("org.jetbrains.kotlinx")
+    }
+    shadow(libs.intellij.structure.intellij) {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")
     }
@@ -95,6 +101,11 @@ tasks {
 
     validatePlugins {
         enableStricterValidation.set(true)
+    }
+
+    shadowJar {
+        archiveClassifier = ""
+        configurations = listOf(project.configurations.shadow.get())
     }
 
 //    @Suppress("UnstableApiUsage")

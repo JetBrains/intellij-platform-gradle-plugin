@@ -1,10 +1,11 @@
 [versions]
 # libraries
 annotations = "26.0.1"
-intellijStructure = "3.287"
+intellijStructure = "3.292"
 intellijPluginRepositoryRestClient = "2.0.39"
 kotlinxSerializationJson = "1.6.3"
 retrofit = "2.11.0"
+shadow = "8.3.5"
 undertow = "2.3.18.Final"
 xmlutil = "0.86.3"
 
@@ -18,6 +19,7 @@ gradleChangelogPlugin = "2.2.1"
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
 intellij-pluginRepositoryRestClient = { group = "org.jetbrains.intellij", name = "plugin-repository-rest-client", version.ref = "intellijPluginRepositoryRestClient" }
 intellij-structure-base = { group = "org.jetbrains.intellij.plugins", name = "structure-base", version.ref = "intellijStructure" }
+intellij-structure-ide = { group = "org.jetbrains.intellij.plugins", name = "structure-ide", version.ref = "intellijStructure" }
 intellij-structure-intellij = { group = "org.jetbrains.intellij.plugins", name = "structure-intellij", version.ref = "intellijStructure" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
@@ -30,4 +32,5 @@ pluginPublish = { id = "com.gradle.plugin-publish", version.ref = "gradlePluginP
 changelog = { id = "org.jetbrains.changelog", version.ref = "gradleChangelogPlugin" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 bcv = { id = "org.jetbrains.kotlinx.binary-compatibility-validator", version.ref = "bcv" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 buildLogic = { id = "build-logic", version = "0.0.0" }
