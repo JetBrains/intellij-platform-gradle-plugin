@@ -2,6 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.ide.IdeManager
+import com.jetbrains.plugin.structure.intellij.plugin.dependencies.Dependency
+import com.jetbrains.plugin.structure.intellij.plugin.dependencies.DependencyTree
+import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
@@ -15,6 +19,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
@@ -101,6 +106,28 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     .toSet()
             })
 
+            // Provide IntelliJ Platform bundled plugins
+            val bundledPlugins = project.files(project.provider {
+                val ide = IdeManager.createManager().createIde(sourceTask.platformPath)
+                val dependencyTree = DependencyTree(ide)
+
+                ide.bundledPlugins.flatMap {
+                    dependencyTree.getTransitiveDependencies(it).flatMap { dependency ->
+                        when (dependency) {
+                            is Dependency.Module -> {
+                                (dependency.plugin as? IdeModule)?.classpath.orEmpty()
+                            }
+
+                            is Dependency.Plugin -> {
+                                dependency.plugin.originalFile?.let { CollectorTransformer.collectJars(it) }.orEmpty()
+                            }
+
+                            else -> emptyList()
+                        }
+                    }
+                }
+            })
+
             // The below is needed to simulate the behavior of com.intellij.ide.plugins.cl.PluginClassLoader
             // which is present in the IDE when the plugin is used in "production".
             // https://plugins.jetbrains.com/docs/intellij/plugin-class-loaders.html
@@ -126,6 +153,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
 
             // Add IDE modules at the end.
             classpath += productModules
+            classpath += bundledPlugins
 
             // Since this code is getting called before the value of "project.extensionProvider.get().instrumentCode"
             // is known, we can't add "instrumentedTestCode" to the classpath only when needed.
@@ -160,14 +188,15 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
          * Load only the contents of the lib directory because some plugins have arbitrary files in their
          * distribution zip file, which break the JVM when added to the classpath.
          */
-        private fun Test.getOtherPluginLibs() = sourceTask.sandboxPluginsDirectory.zip(sourceTask.pluginDirectory) { sandboxPluginsDirectory, pluginDirectory ->
-            val pluginName = pluginDirectory.asPath.name
-            sandboxPluginsDirectory.asFileTree.matching {
-                include("*/${Sandbox.Plugin.LIB}/**")
-                // Exclude the libs from the current plugin because we need to put before all other libs.
-                exclude("$pluginName/**")
+        private fun Test.getOtherPluginLibs() =
+            sourceTask.sandboxPluginsDirectory.zip(sourceTask.pluginDirectory) { sandboxPluginsDirectory, pluginDirectory ->
+                val pluginName = pluginDirectory.asPath.name
+                sandboxPluginsDirectory.asFileTree.matching {
+                    include("*/${Sandbox.Plugin.LIB}/**")
+                    // Exclude the libs from the current plugin because we need to put before all other libs.
+                    exclude("$pluginName/**")
+                }
             }
-        }
 
         /**
          * Unfortunately, this is possible only during the execution phase, when all the directories in the build dir

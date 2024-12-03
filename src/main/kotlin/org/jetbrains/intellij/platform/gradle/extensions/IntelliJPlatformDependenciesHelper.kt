@@ -154,7 +154,7 @@ class IntelliJPlatformDependenciesHelper(
         platformPath.productInfo()
     }
 
-    internal val ideProvider by lazy {
+    internal val ide by lazy {
         IdeManager.createManager().createIde(platformPath)
     }
 
@@ -738,7 +738,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param id The ID of the bundled plugin.
      */
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(id: String): Dependency {
-        val plugin = ideProvider.findPluginById(id)
+        val plugin = ide.findPluginById(id)
         requireNotNull(plugin) {
             val unresolvedPluginId = when (id) {
                 "copyright" -> "Use correct plugin ID 'com.intellij.copyright' instead of 'copyright'."
@@ -808,7 +808,6 @@ class IntelliJPlatformDependenciesHelper(
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
         // Should be the same as [createIntelliJPlatformBundledPlugin]
         val id = requireNotNull(pluginId)
-        val ide = ideProvider
         val version = ide.version.toString()
 
         return dependencies
