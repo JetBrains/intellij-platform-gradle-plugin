@@ -36,6 +36,7 @@
 - Custom `runIde` task do not find the right runtime, if `useInstaller` is `false`. JetBrains/intellij-platform-gradle-plugin#1827
 - PluginVerifier doesn't honor gradle offline mode. JetBrains/intellij-platform-gradle-plugin#1820
 - Make  `intellij.rider` bundled module automatically available for Rider. JetBrains/intellij-platform-gradle-plugin#1774
+- Bump vulnerable `com.squareup.okio:okio:1.17.2` to `1.17.6`. JetBrains/intellij-platform-gradle-plugin#1795
 
 ## [2.1.0]
 
