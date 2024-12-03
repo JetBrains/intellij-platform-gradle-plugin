@@ -8,6 +8,7 @@
 - Warn if trying to refer to a bundled plugin via `intellijPlatform.plugins` instead of required `intellijPlatform.bundledPlugin`.
 - Set `ide.native.launcher=false` for `RunnableIdeAware` tasks to prevent from showing the `The IDE seems to be launched with a script launcher` warning notification.
 - Add bundledPlugins with transitive dependencies to the tests runtime classpath.
+- Set `intellij.testFramework.rethrow.logged.errors=true` to make logged errors fails test immediately. JetBrains/intellij-platform-gradle-plugin#1828
 
 ### Changed
 

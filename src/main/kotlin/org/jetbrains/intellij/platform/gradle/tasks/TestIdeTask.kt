@@ -89,6 +89,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
             systemProperty("idea.use.core.classloader.for.plugin.path", "true")
             systemProperty("idea.force.use.core.classloader", "true")
+            systemProperty("intellij.testFramework.rethrow.logged.errors", "true")
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
             val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
