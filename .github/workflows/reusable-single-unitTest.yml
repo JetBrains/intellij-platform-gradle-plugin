@@ -25,6 +25,8 @@ jobs:
   unitTests:
     name: Gradle ${{ inputs.gradleVersion }} @ ${{ inputs.os }}
     runs-on: ${{ inputs.os }}
+    permissions:
+      checks: write
     steps:
 
       # Free GitHub Actions Environment Disk Space
