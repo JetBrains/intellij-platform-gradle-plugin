@@ -20,9 +20,11 @@ import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
@@ -74,7 +76,8 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
             val plugin by lazy {
                 val pluginPath = generateSequence(path) {
                     it.takeIf { it.resolve(Sandbox.Plugin.LIB).exists() } ?: it.listDirectoryEntries().singleOrNull()
-                }.firstOrNull { it.resolve(Sandbox.Plugin.LIB).exists() } ?: throw GradleException("Could not resolve plugin directory: '$path'")
+                }.firstOrNull { it.resolve(Sandbox.Plugin.LIB).exists() }
+                    ?: throw GradleException("Could not resolve plugin directory: '$path'")
 
                 manager.safelyCreatePlugin(pluginPath).getOrThrow()
             }
@@ -145,6 +148,16 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
         .flatMap { it.bootClassPathJarNames }
         .minus("junit4.jar") // exclude `junit4.jar` from the list as JUnit shouldn't be in the classpath
         .map { "lib/$it" }
+        .plus(
+            when (productInfo.productCode.toIntelliJPlatformType()) {
+                IntelliJPlatformType.Rider ->
+                    productInfo.layout
+                        .filter { it.name == "intellij.rider" }
+                        .flatMap { it.classPath }
+
+                else -> emptyList()
+            }
+        )
         .map { intellijPlatformPath.resolve(it) }
         .mapNotNull { it.takeIf { it.exists() } }
         .toSet()
