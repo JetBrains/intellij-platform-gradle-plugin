@@ -182,7 +182,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
          * distribution zip file, which break the JVM when added to the classpath.
          */
         private fun Test.getCurrentPluginLibs() = sourceTask.pluginDirectory.asFileTree.matching {
-            include("${Sandbox.Plugin.LIB}/**")
+            include("${Sandbox.Plugin.LIB}/**/*.jar")
         }
 
         /**
@@ -193,7 +193,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             sourceTask.sandboxPluginsDirectory.zip(sourceTask.pluginDirectory) { sandboxPluginsDirectory, pluginDirectory ->
                 val pluginName = pluginDirectory.asPath.name
                 sandboxPluginsDirectory.asFileTree.matching {
-                    include("*/${Sandbox.Plugin.LIB}/**")
+                    include("*/${Sandbox.Plugin.LIB}/**/*.jar")
                     // Exclude the libs from the current plugin because we need to put before all other libs.
                     exclude("$pluginName/**")
                 }
