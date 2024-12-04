@@ -3,8 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.ide.IdeManager
-import com.jetbrains.plugin.structure.intellij.plugin.dependencies.Dependency
-import com.jetbrains.plugin.structure.intellij.plugin.dependencies.DependencyTree
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSet
@@ -27,6 +25,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.exists
+import kotlin.io.path.extension
 import kotlin.io.path.name
 
 /**
@@ -96,6 +95,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
 
             // Provide IntelliJ Platform product modules
+            // TODO: relay eventually on Plugin Verifier
             val productModules = project.files(project.provider {
                 val intellijPlatformPath = sourceTask.platformPath
                 sourceTask.productInfo.layout
@@ -108,25 +108,30 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             })
 
             // Provide IntelliJ Platform bundled plugins
+            // TODO: relay eventually on Plugin Verifier
             val bundledPlugins = project.files(project.provider {
+                val bundledPluginIds = sourceTask.productInfo.bundledPlugins
+                    // com.intellij is covered by base jars already
+                    // com.intellij.openRewrite fails as it has `testServiceImplementation` and we can't find test class
+                    .minus(listOf("com.intellij", "com.intellij.openRewrite"))
                 val ide = IdeManager.createManager().createIde(sourceTask.platformPath)
-                val dependencyTree = DependencyTree(ide)
 
-                ide.bundledPlugins.flatMap {
-                    dependencyTree.getTransitiveDependencies(it).flatMap { dependency ->
-                        when (dependency) {
-                            is Dependency.Module -> {
-                                (dependency.plugin as? IdeModule)?.classpath.orEmpty()
+                bundledPluginIds
+                    .mapNotNull { ide.findPluginById(it) }
+                    .flatMap { bundledPlugin ->
+                        when {
+                            bundledPlugin is IdeModule -> bundledPlugin.classpath
+                            bundledPlugin.originalFile == null -> emptyList()
+                            else -> {
+                                val file = bundledPlugin.originalFile
+                                val pluginDirectory = when {
+                                    file?.extension == "jar" -> file.parent.parent
+                                    else -> file
+                                }
+                                pluginDirectory?.let { CollectorTransformer.collectJars(it) } ?: emptyList()
                             }
-
-                            is Dependency.Plugin -> {
-                                dependency.plugin.originalFile?.let { CollectorTransformer.collectJars(it) }.orEmpty()
-                            }
-
-                            else -> emptyList()
                         }
-                    }
-                }
+                    }.toSet()
             })
 
             // The below is needed to simulate the behavior of com.intellij.ide.plugins.cl.PluginClassLoader
