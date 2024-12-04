@@ -7,6 +7,8 @@ jobs:
     name: Gradle 8.11 @ ubuntu-latest
     uses: ./.github/workflows/reusable-single-unitTest.yml
     secrets: inherit
+    permissions:
+      checks: write
     with:
       gradleVersion: "8.11"
       os: ubuntu-latest
@@ -16,6 +18,8 @@ jobs:
     needs: baseUnitTest
     uses: ./.github/workflows/reusable-single-unitTest.yml
     secrets: inherit
+    permissions:
+      checks: write
     with:
       gradleVersion: ${{ matrix.gradleVersion }}
       os: ${{ matrix.os }}

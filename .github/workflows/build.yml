@@ -26,6 +26,8 @@ jobs:
     needs: gradleValidation
     uses: ./.github/workflows/reusable-unitTests.yml
     secrets: inherit
+    permissions:
+      checks: write
 
   integrationTests:
     name: Integration Tests
