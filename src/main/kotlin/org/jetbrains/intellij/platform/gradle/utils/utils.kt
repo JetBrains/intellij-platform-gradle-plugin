@@ -18,7 +18,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.resources.ResourceHandler
 import org.gradle.kotlin.dsl.the
-import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
@@ -48,12 +47,6 @@ internal fun ConfigurationContainer.create(name: String, description: String, co
 
 internal val Configuration.asLenient
     get() = incoming.artifactView { lenient(true) }.files
-
-internal val ALL_TASKS
-    get() = Constants.Tasks::class.java.declaredFields
-        .filter { it.name != "INSTANCE" }
-        .map { it.get(null).toString() }
-        .minus("INSTANCE")
 
 fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
     null -> false

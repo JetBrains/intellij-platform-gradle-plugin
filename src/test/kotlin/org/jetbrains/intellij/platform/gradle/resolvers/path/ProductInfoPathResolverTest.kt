@@ -76,7 +76,7 @@ class ProductInfoPathResolverTest : IntelliJPluginTestBase() {
     }
 
     private fun prepareTest() {
-        buildFile prepend  //language=kotlin
+        buildFile prepend //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
                 import kotlin.io.path.invariantSeparatorsPathString

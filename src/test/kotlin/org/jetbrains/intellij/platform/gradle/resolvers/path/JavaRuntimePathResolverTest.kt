@@ -127,7 +127,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
     }
 
     private fun prepareTest() {
-        buildFile prepend  //language=kotlin
+        buildFile prepend //language=kotlin
                 """
                 import org.gradle.api.internal.project.ProjectInternal
                 import org.jetbrains.intellij.platform.gradle.Constants.Configurations

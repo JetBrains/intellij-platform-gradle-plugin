@@ -609,7 +609,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.PREPARE_SANDBOX) {
-            updatesFile overwrite  //language=xml
+            updatesFile overwrite //language=xml
                     """
                     <application>
                         <component name="SomeOtherComponent">

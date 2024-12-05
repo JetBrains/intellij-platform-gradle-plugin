@@ -95,7 +95,8 @@ class IntelliJPluginVerifierPathResolverTest : IntelliJPluginTestBase() {
     }
 
     private fun prepareTest(localPathValue: String = "layout.file(provider { null })") {
-        buildFile prepend  //language=kotlin
+        @Suppress("kotlin")
+        buildFile prepend //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
                 import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
