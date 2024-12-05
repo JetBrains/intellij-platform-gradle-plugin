@@ -17,6 +17,7 @@
 - For running testing, use test sandbox instead of compiled classes from `build/classes` directory 
 - Updated the `publishPlugin()` task to use IDE Services’ new `POST /api/plugins` API when configured to publish to the IDE Services plugin repository, replacing the deprecated `POST /api/ij-plugins/upload` endpoint
 - Rewrite bundled plugins/modules resolution by using IntelliJ Structure library.
+- Update minimal supported Gradle version to `8.5`
 
 ### Fixed
 
