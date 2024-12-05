@@ -266,9 +266,49 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES) {
             assertContains(
                 """
+                compileClasspath - Compile classpath for 'main'.
+                +--- bundledPlugin:Git4Idea:IC-243.21565.193
                 |    +--- bundledPlugin:com.jetbrains.performancePlugin:IC-243.21565.193
                 |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193
+                |    |    |    \--- bundledModule:intellij.libraries.microba:IC-243.21565.193
                 |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193
+                |    |         \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.collaborationTools:IC-243.21565.193
+                |    |    +--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-243.21565.193
+                |    |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
+                |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.ide.newUiOnboarding:IC-243.21565.193
+                |    +--- bundledPlugin:org.jetbrains.plugins.terminal:IC-243.21565.193
+                |    |    \--- bundledPlugin:com.jetbrains.sh:IC-243.21565.193
+                |    |         +--- bundledPlugin:org.jetbrains.plugins.terminal:IC-243.21565.193 (*)
+                |    |         +--- bundledPlugin:com.intellij.copyright:IC-243.21565.193
+                |    |         |    \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
+                |    |         \--- bundledPlugin:org.intellij.plugins.markdown:IC-243.21565.193
+                |    |              +--- bundledPlugin:org.intellij.intelliLang:IC-243.21565.193
+                |    |              +--- bundledPlugin:com.intellij.modules.json:IC-243.21565.193
+                |    |              +--- bundledPlugin:org.jetbrains.plugins.yaml:IC-243.21565.193
+                |    |              |    \--- bundledPlugin:com.intellij.modules.json:IC-243.21565.193
+                |    |              +--- bundledPlugin:org.toml.lang:IC-243.21565.193
+                |    |              |    +--- bundledPlugin:com.intellij.modules.json:IC-243.21565.193
+                |    |              |    \--- bundledPlugin:tanvd.grazi:IC-243.21565.193
+                |    |              |         +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
+                |    |              |         +--- bundledPlugin:com.intellij.java:IC-243.21565.193
+                |    |              |         |    +--- bundledPlugin:com.intellij.copyright:IC-243.21565.193 (*)
+                |    |              |         |    +--- bundledPlugin:com.intellij.platform.images:IC-243.21565.193
+                |    |              |         |    +--- bundledModule:intellij.performanceTesting.vcs:IC-243.21565.193
+                |    |              |         |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
+                |    |              |         |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
+                |    |              |         |    +--- bundledPlugin:com.jetbrains.performancePlugin:IC-243.21565.193 (*)
+                |    |              |         |    \--- bundledPlugin:org.jetbrains.plugins.terminal:IC-243.21565.193 (*)
+                |    |              |         +--- bundledPlugin:com.intellij.modules.json:IC-243.21565.193
+                |    |              |         +--- bundledPlugin:org.intellij.plugins.markdown:IC-243.21565.193 (*)
+                |    |              |         +--- bundledPlugin:com.intellij.properties:IC-243.21565.193
+                |    |              |         |    \--- bundledPlugin:com.intellij.copyright:IC-243.21565.193 (*)
+                |    |              |         \--- bundledPlugin:org.jetbrains.plugins.yaml:IC-243.21565.193 (*)
+                |    |              \--- bundledPlugin:com.intellij.platform.images:IC-243.21565.193
+                |    \--- bundledModule:intellij.platform.coverage:IC-243.21565.193
+                |         \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
+                \--- idea:ideaIC:2024.3
                 """.trimIndent(),
                 output,
             )

@@ -41,7 +41,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
             buildDirectory.resolve("classes/kotlin/main").let {
                 it.resolve("MainKt.class").let { file ->
                     assertExists(file)
-                    assertEquals(957, file.fileSize())
+                    assertEquals(974, file.fileSize())
                 }
             }
 
@@ -58,7 +58,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
                 assertEquals(607, (jar readEntry "Main.class").length)
 
                 jar containsFileInArchive "MainKt.class"
-                assertEquals(955, (jar readEntry "MainKt.class").length)
+                assertEquals(972, (jar readEntry "MainKt.class").length)
             }
 
             assert(buildDirectory.resolve("instrumented").notExists())
@@ -89,7 +89,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
                 }
                 it.resolve("MainKt.class").let { file ->
                     assertExists(file)
-                    assertEquals(957, file.fileSize())
+                    assertEquals(974, file.fileSize())
                 }
             }
 
@@ -106,7 +106,7 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
                 assertEquals(964, (jar readEntry "Main.class").length)
 
                 jar containsFileInArchive "MainKt.class"
-                assertEquals(955, (jar readEntry "MainKt.class").length)
+                assertEquals(972, (jar readEntry "MainKt.class").length)
             }
 
             buildDirectory.resolve("instrumented").let {

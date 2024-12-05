@@ -63,7 +63,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
             }
             buildDirectory.resolve("classes/kotlin/main/MainKt.class").let {
                 assertExists(it)
-                assertEquals(782, it.fileSize())
+                assertEquals(787, it.fileSize())
             }
 
             buildDirectory.resolve("idea-sandbox/IC-2022.3.3/plugins/test/lib/test-1.0.0.jar").let { jar ->
@@ -74,7 +74,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertEquals(1220, (jar readEntry "Form.class").length)
 
                 jar containsFileInArchive "MainKt.class"
-                assertEquals(1174, (jar readEntry "MainKt.class").length)
+                assertEquals(1179, (jar readEntry "MainKt.class").length)
 
                 jar containsFileInArchive "CustomMain.class"
                 assertEquals(989, (jar readEntry "CustomMain.class").length)
@@ -88,7 +88,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertEquals(977, (jar readEntry "MainSub.class").length)
 
                 jar containsFileInArchive "MyProjectService.class"
-                assertEquals(578, (jar readEntry "MyProjectService.class").length)
+                assertEquals(583, (jar readEntry "MyProjectService.class").length)
             }
         }
     }

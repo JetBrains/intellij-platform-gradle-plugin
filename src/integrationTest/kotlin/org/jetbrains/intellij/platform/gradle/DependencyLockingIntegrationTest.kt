@@ -28,7 +28,7 @@ class DependencyLockingIntegrationTest : IntelliJPlatformIntegrationTestBase(
         build(
             Tasks.External.CLEAN,
             Tasks.BUILD_PLUGIN,
-            projectProperties = defaultProjectProperties
+            projectProperties = defaultProjectProperties,
         ) {
             buildDirectory containsFile "libs/test-1.0.0.jar"
             assertLockFilesExist()

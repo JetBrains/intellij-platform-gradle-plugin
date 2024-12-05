@@ -103,7 +103,6 @@ dependencies {
             "com.intellij.tasks",
             "com.intellij.tracing.ide",
             "com.intellij.uiDesigner",
-            "com.jetbrains.codeWithMe",
             "com.jetbrains.packagesearch.intellij-plugin",
             "com.jetbrains.projector.libs",
             "com.jetbrains.sh",

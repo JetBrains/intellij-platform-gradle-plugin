@@ -20,7 +20,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     fun `dependencies should contain IntelliJ Platform and Markdown plugin`() {
         build(DEPENDENCIES, projectProperties = defaultProjectProperties) {
             output containsText """
-                compileClasspath - Compile classpath for null/main.
+                compileClasspath - Compile classpath for 'main'.
                 +--- idea:ideaIC:$intellijPlatformVersion
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
