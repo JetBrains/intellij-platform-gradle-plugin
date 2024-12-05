@@ -7,11 +7,11 @@ import nl.adaptivity.xmlutil.serialization.XmlChildrenName
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.gradle.api.initialization.resolve.RulesMode
+import org.gradle.api.internal.file.BaseDirFileResolver
 import org.gradle.api.provider.Provider
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.nio.file.Path
 import kotlin.io.path.absolute
@@ -109,7 +109,6 @@ private val log = Logger(IvyModule::class.java)
  *
  * @see toIvyArtifacts
  * @see IntelliJPlatformRepositoriesExtension.jetbrainsIdeInstallers
- * @see IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
  */
 internal fun Path.toAbsolutePathIvyArtifact(): IvyModule.Artifact {
     // The contract is that we're working with absolute normalized paths here.
@@ -187,8 +186,6 @@ private fun Path.toArtifactRelativeTo(basePath: Path?): IvyModule.Artifact {
  *
  * Also, if the optional basePath is given, the path will be relative to it.
  * In this case, it also doesn't have the leading path separator.
- *
- * @see IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
  */
 private fun Path.containingDirPathStringRelativeTo(basePath: Path? = null): String {
     // The contract is that we're working with absolute normalized paths here.

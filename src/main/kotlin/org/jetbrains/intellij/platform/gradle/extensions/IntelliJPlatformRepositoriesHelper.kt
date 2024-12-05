@@ -144,7 +144,6 @@ class IntelliJPlatformRepositoriesHelper(
 
     /**
      * @see org.jetbrains.intellij.platform.gradle.models.IvyModule
-     * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper.registerIntellijPlatformIvyRepo
      */
     internal fun createLocalIvyRepository(repositoryName: String, action: IvyRepositoryAction = {}) = repositories.ivy {
         name = repositoryName
@@ -157,7 +156,7 @@ class IntelliJPlatformRepositoriesHelper(
         artifactPattern("/[artifact]")
 
         /**
-         * Because artifact paths always start with `/` (see [toPublication] for details),
+         * Because artifact paths always start with `/`,
          * on Windows, we have to guess to which drive letter the artifact path belongs to.
          * To do so, we add all drive letters (`a:/[artifact]`, `b:/[artifact]`, `c:/[artifact]`, ...) to the stack,
          * starting with `c` for the sake of micro-optimization.

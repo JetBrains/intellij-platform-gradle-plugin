@@ -87,7 +87,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                  * configurations `api` & `compileOnlyApi` created by the `java-library` plugin can actually work.
                  * See: https://docs.gradle.org/current/userguide/java_library_plugin.html
                  *
-                 * We can't extend here from [Configurations.External.COMPILE_ONLY_API.API_ELEMENTS] because then
+                 * We can't extend here from [Configurations.External.API_ELEMENTS] because then
                  * we will inherit its `-base.jar` registered by the java plugin by default, which we don't want.
                  */
                 extendsFrom(

@@ -11,6 +11,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
+import org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin
 import java.io.File
 import javax.inject.Inject
 
@@ -61,9 +62,8 @@ import javax.inject.Inject
  * It happens in [org.gradle.internal.resolve.caching.CrossBuildCachingRuleExecutor.computeExplicitInputsSnapshot]
  * Which should mean that we can use the caching, because if the paths change, it should be re-evaluated.
  *
- * @see org.jetbrains.intellij.platform.gradle.models.IvyModule
- * @see org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin.apply
- * @see org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper.createIvyArtifactRepository
+ * @see IvyModule
+ * @see IntelliJPlatformBasePlugin.apply
  */
 @CacheableRule
 abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
