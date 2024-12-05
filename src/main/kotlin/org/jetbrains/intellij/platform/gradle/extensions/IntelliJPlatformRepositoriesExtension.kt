@@ -43,7 +43,7 @@ import kotlin.io.path.absolute
  * @param providers The Gradle [ProviderFactory] to create providers.
  * @param rootProjectDirectory The root project directory location.
  */
-@Suppress("unused", "MemberVisibilityCanBePrivate", "UnstableApiUsage")
+@Suppress("unused", "UnstableApiUsage")
 @IntelliJPlatform
 abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
     private val repositories: RepositoryHandler,

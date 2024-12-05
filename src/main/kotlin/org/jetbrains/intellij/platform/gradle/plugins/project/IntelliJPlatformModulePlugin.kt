@@ -24,7 +24,6 @@ import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import org.jetbrains.intellij.platform.gradle.utils.settings
 
-@Suppress("unused")
 abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
     private val log = Logger(javaClass)

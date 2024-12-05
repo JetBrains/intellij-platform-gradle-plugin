@@ -10,7 +10,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.companion.ProcessResourcesCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
-@Suppress("unused")
 abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
     private val log = Logger(javaClass)
