@@ -2785,11 +2785,6 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginProj
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginProjectConfigurationTask$Companion$register$1$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
-	public fun <init> (Lkotlin/jvm/functions/Function1;)V
-	public final synthetic fun execute (Ljava/lang/Object;)V
-}
-
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginSignatureTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/SigningAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginSignatureTask$Companion;
 	public fun <init> ()V
