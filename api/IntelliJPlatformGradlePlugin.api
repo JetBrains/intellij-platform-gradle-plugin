@@ -344,6 +344,10 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$JavaScript;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$LSP : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$LSP;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Maven : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Maven;
 }

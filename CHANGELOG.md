@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Introduce LSP API Test Framework entry as `TestFrameworkType.Plugin.LSP`
+
 ### Changed
 
 - Better resolve the plugin dependency path with nested directories in the plugin archive.

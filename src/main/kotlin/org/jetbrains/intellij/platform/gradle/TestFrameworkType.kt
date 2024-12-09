@@ -32,6 +32,7 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
         object Ruby : TestFrameworkType(Coordinates("com.jetbrains.intellij.idea", "ruby-test-framework"))
         object Java : TestFrameworkType(Coordinates("com.jetbrains.intellij.java", "java-test-framework"))
         object JavaScript : TestFrameworkType(Coordinates("com.jetbrains.intellij.javascript", "javascript-test-framework"))
+        object LSP : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-lsp-framework"))
         object Maven : TestFrameworkType(Coordinates("com.jetbrains.intellij.maven", "maven-test-framework"))
         object ReSharper : TestFrameworkType(Coordinates("com.jetbrains.intellij.resharper", "resharper-test-framework"))
     }
