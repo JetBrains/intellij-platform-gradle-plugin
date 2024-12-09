@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.2.0] - 2024-12-06
+
 ### Added
 
 - Introduce `intellijPlatformClasspath` configuration to allow retrieving the processed IntelliJ Platform and plugins dependencies. 
@@ -1344,7 +1346,12 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-rc1...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.2.0...HEAD
+[2.2.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.1.0...v2.2.0
+[2.1.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.1...v2.1.0
+[2.0.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0...v2.0.1
+[2.0.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-rc2...v2.0.0
+[2.0.0-rc2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-rc1...v2.0.0-rc2
 [2.0.0-rc1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta9...v2.0.0-rc1
 [2.0.0-beta9]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta8...v2.0.0-beta9
 [2.0.0-beta8]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0-beta7...v2.0.0-beta8
