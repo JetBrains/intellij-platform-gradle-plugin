@@ -25,10 +25,7 @@ import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.platformPath
-import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
+import org.jetbrains.intellij.platform.gradle.utils.*
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
@@ -74,11 +71,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
             val path = inputArtifact.asPath
             val productInfo = parameters.intellijPlatform.platformPath().productInfo()
             val plugin by lazy {
-                val pluginPath = generateSequence(path) {
-                    it.takeIf { it.resolve(Sandbox.Plugin.LIB).exists() } ?: it.listDirectoryEntries().singleOrNull()
-                }.firstOrNull { it.resolve(Sandbox.Plugin.LIB).exists() }
-                    ?: throw GradleException("Could not resolve plugin directory: '$path'")
-
+                val pluginPath = path.resolvePluginPath()
                 manager.safelyCreatePlugin(pluginPath).getOrThrow()
             }
 
@@ -92,7 +85,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                 }
 
                 /**
-                 * Normally, we get into here for third party JetBrains Marketplace plugins.
+                 * Normally, we get into here for third-party JetBrains Marketplace plugins.
                  * https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html#non-bundled-plugin
                  *
                  * For other plugins, we never (usually?) get into this block because their Ivy artifacts already list jars,

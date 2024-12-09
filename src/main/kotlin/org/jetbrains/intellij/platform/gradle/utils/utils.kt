@@ -79,34 +79,49 @@ fun FileCollection.platformPath() = with(toList()) {
     )
 }
 
-internal fun Path.resolvePlatformPath() = generateSequence(this) { parent ->
+private fun Path.deepResolve(block: Path.() -> Path?) = generateSequence(this) { parent ->
     val entry = parent
         .listDirectoryEntries()
         .singleOrNull() // pick an entry if it is a singleton in a directory
         ?.takeIf { it.isDirectory() } // and this entry is a directory
         ?: return@generateSequence null
+    block(entry)
+}.last()
 
+internal fun Path.resolvePlatformPath() = deepResolve {
     when {
         // eliminate `/Application Name.app/Contents/...`
-        entry.name.endsWith(".app")
-            -> entry.listDirectoryEntries("Contents").firstOrNull()
+        name.endsWith(".app")
+            -> this.listDirectoryEntries("Contents").firstOrNull()
 
         // set the root to the directory containing `product-info.json`
-        entry.listDirectoryEntries("product-info.json").isNotEmpty()
-            -> entry
+        listDirectoryEntries("product-info.json").isNotEmpty()
+            -> this
 
         // set the root to the directory containing `Resources/product-info.json`
-        entry.listDirectoryEntries("Resources").firstOrNull()?.listDirectoryEntries("product-info.json").orEmpty().isNotEmpty()
-            -> entry
+        listDirectoryEntries("Resources").firstOrNull()?.listDirectoryEntries("product-info.json").orEmpty()
+            .isNotEmpty()
+            -> this
 
         // stop when `lib/` is inside, even if it's a singleton
-        entry.listDirectoryEntries(Sandbox.Plugin.LIB).isNotEmpty()
+        listDirectoryEntries(Sandbox.Plugin.LIB).isNotEmpty()
             -> null
 
         else
             -> null
     }
-}.last()
+}
+
+internal fun Path.resolvePluginPath() = deepResolve {
+    when {
+        // set the root to the directory containing `lib/`
+        listDirectoryEntries(Sandbox.Plugin.LIB).isNotEmpty()
+            -> this
+
+        else
+            -> null
+    }
+}
 
 internal fun IdePluginManager.safelyCreatePlugin(path: Path, validateDescriptor: Boolean = false) =
     createPlugin(path, validateDescriptor).runCatching {

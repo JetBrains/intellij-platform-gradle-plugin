@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Better resolve the plugin dependency path with nested directories in the plugin archive.
+
 ## [2.2.0] - 2024-12-06
 
 ### Added
