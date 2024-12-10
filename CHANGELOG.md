@@ -10,6 +10,10 @@
 
 - Better resolve the plugin dependency path with nested directories in the plugin archive.
 
+### Fixed
+
+- Local IntelliJ Platform wasn't handled with the `CollectorTransformer` due to the missing attributes applied to the `directory` archive.
+
 ## [2.2.0] - 2024-12-06
 
 ### Added

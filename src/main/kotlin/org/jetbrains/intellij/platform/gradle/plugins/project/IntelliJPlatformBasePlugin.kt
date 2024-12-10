@@ -343,6 +343,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     .attribute(Attributes.extracted, false)
                     .attribute(Attributes.collected, false)
             }
+            artifactTypes.maybeCreate(Attributes.ArtifactType.DIRECTORY.toString())
+                .attributes
+                .attribute(Attributes.extracted, true)
+                .attribute(Attributes.collected, false)
 
             listOf(
                 project.configurations[Configurations.External.COMPILE_CLASSPATH],
