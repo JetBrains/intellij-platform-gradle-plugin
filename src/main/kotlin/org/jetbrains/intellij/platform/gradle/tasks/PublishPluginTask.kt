@@ -99,7 +99,7 @@ abstract class PublishPluginTask : DefaultTask() {
         }
 
         val path = archiveFile.asPath
-        val plugin = pluginManager.safelyCreatePlugin(path).getOrThrow()
+        val plugin = pluginManager.safelyCreatePlugin(path, suppressPluginProblems = false).getOrThrow()
 
         val pluginId = plugin.pluginId
         channels.get().forEach { channel ->

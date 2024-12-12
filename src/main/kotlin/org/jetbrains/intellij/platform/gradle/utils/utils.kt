@@ -5,6 +5,9 @@ package org.jetbrains.intellij.platform.gradle.utils
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import com.jetbrains.plugin.structure.intellij.problems.IntelliJPluginCreationResultResolver
+import com.jetbrains.plugin.structure.intellij.problems.JetBrainsPluginCreationResultResolver
+import com.jetbrains.plugin.structure.intellij.problems.PluginCreationResultResolver
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -123,8 +126,8 @@ internal fun Path.resolvePluginPath() = deepResolve {
     }
 }
 
-internal fun IdePluginManager.safelyCreatePlugin(path: Path, validateDescriptor: Boolean = false) =
-    createPlugin(path, validateDescriptor).runCatching {
+internal fun IdePluginManager.safelyCreatePlugin(path: Path, validateDescriptor: Boolean = false, suppressPluginProblems: Boolean = true) =
+    createPlugin(path, validateDescriptor, problemResolver = getProblemResolver(suppressPluginProblems)).runCatching {
         if (this is PluginCreationFail) {
             val details = errorsAndWarnings.joinToString(separator = "\n") { it.message }
             throw GradleException("Could not resolve plugin: '$path':\n$details")
@@ -133,6 +136,14 @@ internal fun IdePluginManager.safelyCreatePlugin(path: Path, validateDescriptor:
         require(this is PluginCreationSuccess)
         plugin
     }
+
+private fun getProblemResolver(suppressPluginProblems: Boolean): PluginCreationResultResolver {
+    return if (suppressPluginProblems) {
+        JetBrainsPluginCreationResultResolver.fromClassPathJson(IntelliJPluginCreationResultResolver())
+    } else {
+        IntelliJPluginCreationResultResolver()
+    }
+}
 
 val Project.settings
     get() = (gradle as GradleInternal).settings
