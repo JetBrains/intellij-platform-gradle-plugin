@@ -889,7 +889,7 @@ class IntelliJPlatformDependenciesHelper(
                 artifactPath.isDirectory() -> artifactPath.resolvePluginPath()
                 else -> artifactPath
             }
-            pluginManager.safelyCreatePlugin(pluginPath).getOrThrow()
+            pluginManager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
         }
 
         // It is crucial to use the IDE type + build number to the version.

@@ -72,7 +72,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
             val productInfo = parameters.intellijPlatform.platformPath().productInfo()
             val plugin by lazy {
                 val pluginPath = path.resolvePluginPath()
-                manager.safelyCreatePlugin(pluginPath).getOrThrow()
+                manager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
             }
 
             val isIntelliJPlatform = path == parameters.intellijPlatform.platformPath()
