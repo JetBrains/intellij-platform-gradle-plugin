@@ -1,7 +1,7 @@
 [versions]
 # libraries
 annotations = "26.0.1"
-intellijStructure = "3.293"
+intellijStructure = "3.294"
 intellijPluginRepositoryRestClient = "2.0.39"
 kotlinxSerializationJson = "1.6.3"
 okio = "1.17.6"
