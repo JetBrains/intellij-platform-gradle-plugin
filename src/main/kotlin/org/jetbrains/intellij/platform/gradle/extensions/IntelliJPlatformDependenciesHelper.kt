@@ -2,7 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import com.jetbrains.plugin.structure.ide.IdeManager
+import com.jetbrains.plugin.structure.ide.createIde
+import com.jetbrains.plugin.structure.ide.layout.MissingLayoutFileMode.SKIP_SILENTLY
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
@@ -154,7 +155,10 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     internal val ide by lazy {
-        IdeManager.createManager().createIde(platformPath)
+        createIde {
+            missingLayoutFileMode = SKIP_SILENTLY
+            path = platformPath
+        }
     }
 
     //</editor-fold>
