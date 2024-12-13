@@ -14,6 +14,7 @@ import org.gradle.authentication.http.HttpHeaderAuthentication
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
@@ -109,8 +110,12 @@ class IntelliJPlatformRepositoriesHelper(
             isAllowInsecureProtocol = true
 
             patternLayout {
-                artifact("[module]/[revision]/download")
-                ivy("[module]/[revision]/descriptor.ivy")
+                artifact("[organization]/[module]/[revision]/download")
+                ivy("[organization]/[module]/[revision]/descriptor.ivy")
+            }
+
+            content {
+                includeGroup(Dependencies.MARKETPLACE_GROUP) // TODO: parametrize?
             }
 
             metadataSources {

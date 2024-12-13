@@ -23,18 +23,27 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
     private val repositoryListing by lazy {
         repository.url.toURL().let { url ->
             url.openConnection().run {
-                repository.getCredentials(PasswordCredentials::class.java).let {
-                    val encoded = Base64.getEncoder().encode("${it.username}:${it.password}".toByteArray())
-                    setRequestProperty("Authorization", "Basic $encoded")
+                repository.runCatching {
+                    getCredentials(PasswordCredentials::class.java).let {
+                        val encoded = Base64.getEncoder().encode("${it.username}:${it.password}".toByteArray())
+                        setRequestProperty("Authorization", "Basic $encoded")
+                    }
                 }
-                repository.getCredentials(HttpHeaderCredentials::class.java).let {
-                    setRequestProperty(it.name, it.value)
+                repository.runCatching {
+                    getCredentials(HttpHeaderCredentials::class.java).let {
+                        setRequestProperty(it.name, it.value)
+                    }
                 }
 
                 runCatching {
                     getInputStream().use { inputStream ->
                         inputStream.reader().use { reader ->
-                            CustomPluginRepositoryListingParser.parseListOfPlugins(reader.readText(), url, url, repository.type)
+                            CustomPluginRepositoryListingParser.parseListOfPlugins(
+                                reader.readText(),
+                                url,
+                                url,
+                                repository.type
+                            )
                         }
                     }
                 }.onFailure {
@@ -81,14 +90,27 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
 
         val plugin = findPlugin(artifactId, version)
 
-        when (plugin) {
-            null -> {
-                exchange.statusCode = StatusCodes.NOT_FOUND
+        when (exchange.requestMethod) {
+            Methods.HEAD -> when (plugin) {
+                null -> {
+                    exchange.statusCode = StatusCodes.NOT_FOUND
+                }
+
+                else -> {
+                    exchange.statusCode = StatusCodes.FOUND
+                    exchange.responseHeaders.put(Headers.CONTENT_TYPE, "application/zip")
+                }
             }
 
-            else -> {
-                exchange.statusCode = StatusCodes.FOUND
-                exchange.responseHeaders.put(Headers.CONTENT_TYPE, "application/zip")
+            else -> when {
+                plugin == null -> Unit
+
+                plugin.downloadUrl.host == repository.url.host -> proxyHandler.handleRequest(exchange)
+
+                else -> {
+                    exchange.statusCode = StatusCodes.TEMPORARY_REDIRECT
+                    exchange.responseHeaders.put(Headers.LOCATION, plugin.downloadUrl.toString())
+                }
             }
         }
     }
@@ -99,7 +121,7 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
         .add(Methods.HEAD, DESCRIPTOR_PATH, ivyDescriptorHandler)
         .add(Methods.GET, DESCRIPTOR_PATH, ivyDescriptorHandler)
         .add(Methods.HEAD, DOWNLOAD_PATH, downloadHandler)
-        .add(Methods.GET, DOWNLOAD_PATH, proxyHandler::handleRequest)
+        .add(Methods.GET, DOWNLOAD_PATH, downloadHandler)
 
     inner class PluginArtifactRepositoryProxyClient(url: URI) : ShimProxyClient(url) {
 
@@ -110,7 +132,7 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
                 ?.removeSuffix("/download")
                 ?.split('/')
                 ?.run {
-                    val (id, version) = this
+                    val (_, id, version) = this
                     findPlugin(id, version)
                 }
                 ?.downloadUrl

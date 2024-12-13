@@ -17,7 +17,6 @@ import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.shim.Shim
 import java.net.URI
 import javax.inject.Inject
-import kotlin.Throws
 
 /**
  * Represents a repository used for handling custom plugin repositories with authentication support.

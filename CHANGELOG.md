@@ -15,6 +15,7 @@
 - Local IntelliJ Platform wasn't handled with the `CollectorTransformer` due to the missing attributes applied to the `directory` archive.
 - Plugin Verifier: suppress plugin problems for bundled or third-party plugins
 - Plugin Verifier: when creating an IDE, silently skip missing layout entries
+- Custom plugin repository adjustments
 
 ## [2.2.0] - 2024-12-06
 
