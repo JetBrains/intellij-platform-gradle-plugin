@@ -635,9 +635,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param path Relative path to the library, like: `lib/testFramework.jar`.
      */
     private fun DependencyHandler.createBundledLibrary(path: String) = create(
-        objects.fileCollection().from(platformPath.map {
-            it.resolve(path)
-        })
+        objects.fileCollection().from(platformPath.resolve(path))
     )
 
     /**
