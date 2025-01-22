@@ -843,6 +843,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun ide (Ljava/lang/String;Ljava/lang/String;Z)V
 	public final fun ide (Lorg/gradle/api/provider/Provider;)V
 	public final fun ide (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
+	public final fun ide (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
 	public final fun ide (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Z)V
 	public final fun ide (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;)V
 	public final fun ide (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;Z)V
