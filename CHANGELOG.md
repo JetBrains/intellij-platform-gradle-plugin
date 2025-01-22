@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add `ide(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>)` overload to the `pluginVerification.ides` block.
+
 ### Fixed
 
 - Fixed the broken path resolution in the `bundledLibrary` helper and the `TestFrameworkType.Bundled` test framework
