@@ -4,7 +4,7 @@
 
 ### Fixed
 
-- Fixed the broken path resolution in the ` bundledLibrary` helper and the `TestFrameworkType.Bundled` test framework
+- Fixed the broken path resolution in the `bundledLibrary` helper and the `TestFrameworkType.Bundled` test framework
 
 ## [2.2.1] - 2025-01-21
 
