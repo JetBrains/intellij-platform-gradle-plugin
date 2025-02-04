@@ -5,6 +5,7 @@ intellijStructure = "3.294"
 intellijPluginRepositoryRestClient = "2.0.45"
 kotlinxSerializationJson = "1.8.0"
 okio = "1.17.6"
+okhttp = "4.12.0"
 retrofit = "2.11.0"
 shadow = "8.3.5"
 undertow = "2.3.18.Final"
@@ -24,6 +25,7 @@ intellij-structure-ide = { group = "org.jetbrains.intellij.plugins", name = "str
 intellij-structure-intellij = { group = "org.jetbrains.intellij.plugins", name = "structure-intellij", version.ref = "intellijStructure" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 undertow = { group = "io.undertow", name = "undertow-core", version.ref = "undertow" }
 xmlutil-core = { group = "io.github.pdvrieze.xmlutil", name = "core-jvm", version.ref = "xmlutil" }

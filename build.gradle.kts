@@ -66,6 +66,7 @@ dependencies {
     additionalPluginClasspath(embeddedKotlin("gradle-plugin"))
 
     api(libs.okio)
+    api(libs.okhttp)
     api(libs.retrofit)
 
     testImplementation(gradleTestKit())
