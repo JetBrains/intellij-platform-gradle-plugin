@@ -1069,7 +1069,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Companion {
@@ -1110,7 +1109,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Item;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Item$Companion {
@@ -1141,7 +1139,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Item$Download;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Item$Download$Companion {
@@ -1196,7 +1193,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$$seri
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Artifact {
@@ -1231,7 +1227,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Artif
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Artifact;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Artifact$Companion {
@@ -1266,7 +1261,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Confi
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Configuration;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Configuration$Companion {
@@ -1300,7 +1294,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Depen
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Dependency;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Dependency$Artifact {
@@ -1330,7 +1323,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Depen
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Dependency$Artifact;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Dependency$Artifact$Companion {
@@ -1369,7 +1361,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Info$
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Info;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Info$Companion {
@@ -1396,7 +1387,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Companion {
@@ -1427,7 +1417,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel {
@@ -1464,7 +1453,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build {
@@ -1502,7 +1490,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost {
@@ -1525,7 +1512,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost$Companion {
@@ -1557,7 +1543,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button$Companion {
@@ -1592,7 +1577,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch$Companion {
@@ -1635,7 +1619,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/MavenMetadata$$
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/MavenMetadata;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/MavenMetadata$Companion {
@@ -1668,7 +1651,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/MavenMetadata$M
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/MavenMetadata$MavenMetadataVersioning;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/MavenMetadata$MavenMetadataVersioning$Companion {
@@ -1699,7 +1681,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescripto
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ModuleDescriptor;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Companion {
@@ -1726,7 +1707,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescripto
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Dependency;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Dependency$Companion {
@@ -1753,7 +1733,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescripto
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Resources;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Resources$Companion {
@@ -1780,7 +1759,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescripto
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Resources$ResourceRoot;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Resources$ResourceRoot$Companion {
@@ -1885,7 +1863,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/PluginsCache$$s
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/PluginsCache;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/PluginsCache$Companion {
@@ -1917,7 +1894,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/PluginsCache$Pl
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/PluginsCache$PluginsCachePlugin;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/PluginsCache$PluginsCachePlugin$Companion {
@@ -1972,7 +1948,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$$se
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Companion {
@@ -2003,7 +1978,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Cus
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo$CustomProperty;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$CustomProperty$Companion {
@@ -2046,7 +2020,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Lau
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo$Launch;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Launch$Companion {
@@ -2092,7 +2065,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Lay
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo$LayoutItem;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$LayoutItem$Companion {
@@ -2298,7 +2270,6 @@ public final class org/jetbrains/intellij/platform/gradle/providers/Data$$serial
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/providers/Data;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/providers/Data$Companion {
@@ -2325,7 +2296,6 @@ public final class org/jetbrains/intellij/platform/gradle/providers/Data$Item$$s
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/providers/Data$Item;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/providers/Data$Item$Companion {
