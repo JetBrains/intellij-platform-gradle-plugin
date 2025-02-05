@@ -23,6 +23,7 @@ interface IdeServicesPluginRepositoryService : PluginRepositoryService {
         @Part file: MultipartBody.Part,
     ): Call<PluginUpdateBean>
 
+    @Deprecated("Use uploadByStringIdAndFamily(pluginXmlId, family, channel, notes, isHidden, file)")
     @Multipart
     @POST("/api/plugins")
     override fun uploadByStringId(

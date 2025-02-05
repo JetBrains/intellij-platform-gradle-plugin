@@ -142,7 +142,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         action.execute(pluginConfiguration)
     }
 
-    fun pluginConfiguration(@DelegatesTo(value = PluginConfiguration::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+    fun pluginConfiguration(
+        @DelegatesTo(
+            value = PluginConfiguration::class,
+            strategy = Closure.DELEGATE_FIRST
+        ) action: Closure<*>
+    ) {
         action.delegate = pluginConfiguration
         action.resolveStrategy = Closure.DELEGATE_FIRST
         action.call()
@@ -187,7 +192,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     }
 
     @Deprecated("Use pluginVerification instead", ReplaceWith("pluginVerification(action)"))
-    fun verifyPlugin(@DelegatesTo(value = PluginVerification::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+    fun verifyPlugin(
+        @DelegatesTo(
+            value = PluginVerification::class,
+            strategy = Closure.DELEGATE_FIRST
+        ) action: Closure<*>
+    ) {
         action.delegate = pluginVerification
         action.resolveStrategy = Closure.DELEGATE_FIRST
         action.call()
@@ -204,7 +214,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         action.execute(pluginVerification)
     }
 
-    fun pluginVerification(@DelegatesTo(value = PluginVerification::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+    fun pluginVerification(
+        @DelegatesTo(
+            value = PluginVerification::class,
+            strategy = Closure.DELEGATE_FIRST
+        ) action: Closure<*>
+    ) {
         action.delegate = pluginVerification
         action.resolveStrategy = Closure.DELEGATE_FIRST
         action.call()
@@ -223,7 +238,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             action.execute(productDescriptor)
         }
 
-        fun productDescriptor(@DelegatesTo(value = ProductDescriptor::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+        fun productDescriptor(
+            @DelegatesTo(
+                value = ProductDescriptor::class,
+                strategy = Closure.DELEGATE_FIRST
+            ) action: Closure<*>
+        ) {
             action.delegate = productDescriptor
             action.resolveStrategy = Closure.DELEGATE_FIRST
             action.call()
@@ -237,7 +257,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             action.execute(ideaVersion)
         }
 
-        fun ideaVersion(@DelegatesTo(value = IdeaVersion::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+        fun ideaVersion(
+            @DelegatesTo(
+                value = IdeaVersion::class,
+                strategy = Closure.DELEGATE_FIRST
+            ) action: Closure<*>
+        ) {
             action.delegate = ideaVersion
             action.resolveStrategy = Closure.DELEGATE_FIRST
             action.call()
@@ -384,7 +409,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             val eap: Property<Boolean>
 
             companion object : Registrable<ProductDescriptor> {
-                override fun register(project: Project, target: Any) = target.configureExtension<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
+                override fun register(project: Project, target: Any) =
+                    target.configureExtension<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
             }
         }
 
@@ -470,7 +496,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             val url: Property<String>
 
             companion object : Registrable<Vendor> {
-                override fun register(project: Project, target: Any) = target.configureExtension<Vendor>(Extensions.VENDOR)
+                override fun register(project: Project, target: Any) =
+                    target.configureExtension<Vendor>(Extensions.VENDOR)
             }
         }
 
@@ -779,12 +806,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
              */
             @JvmOverloads
-            fun ide(type: IntelliJPlatformType, version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = dependenciesHelper.provider { type },
-                versionProvider = dependenciesHelper.provider { version },
-                useInstallerProvider = dependenciesHelper.provider { useInstaller },
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-            )
+            fun ide(type: IntelliJPlatformType, version: String, useInstaller: Boolean = true) =
+                dependenciesHelper.addIntelliJPlatformDependency(
+                    typeProvider = dependenciesHelper.provider { type },
+                    versionProvider = dependenciesHelper.provider { version },
+                    useInstallerProvider = dependenciesHelper.provider { useInstaller },
+                    configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -794,12 +822,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
              */
             @JvmOverloads
-            fun ide(type: String, version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = dependenciesHelper.provider { type },
-                versionProvider = dependenciesHelper.provider { version },
-                useInstallerProvider = dependenciesHelper.provider { useInstaller },
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-            )
+            fun ide(type: String, version: String, useInstaller: Boolean = true) =
+                dependenciesHelper.addIntelliJPlatformDependency(
+                    typeProvider = dependenciesHelper.provider { type },
+                    versionProvider = dependenciesHelper.provider { version },
+                    useInstallerProvider = dependenciesHelper.provider { useInstaller },
+                    configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -809,12 +838,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
              */
             @JvmOverloads
-            fun ide(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = type,
-                versionProvider = version,
-                useInstallerProvider = dependenciesHelper.provider { useInstaller },
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-            )
+            fun ide(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true) =
+                dependenciesHelper.addIntelliJPlatformDependency(
+                    typeProvider = type,
+                    versionProvider = version,
+                    useInstallerProvider = dependenciesHelper.provider { useInstaller },
+                    configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -931,21 +961,26 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * Extension function for the [IntelliJPlatformExtension.PluginVerification.Ides] extension to let filter IDE binary releases just using [FilterParameters].
              */
             @Suppress("FunctionName")
-            fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) = dependenciesHelper.createProductReleasesValueSource {
-                val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
+            fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) =
+                dependenciesHelper.createProductReleasesValueSource {
+                    val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
 
-                channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
-                types.convention(extensionProvider.map {
-                    listOf(it.productInfo.productCode.toIntelliJPlatformType())
-                })
-                sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
-                untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
+                    channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
+                    types.convention(extensionProvider.map {
+                        listOf(it.productInfo.productCode.toIntelliJPlatformType())
+                    })
+                    sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
+                    untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
 
-                configure()
-            }
+                    configure()
+                }
 
             companion object {
-                fun register(dependenciesHelper: IntelliJPlatformDependenciesHelper, extensionProvider: Provider<IntelliJPlatformExtension>, target: Any) =
+                fun register(
+                    dependenciesHelper: IntelliJPlatformDependenciesHelper,
+                    extensionProvider: Provider<IntelliJPlatformExtension>,
+                    target: Any
+                ) =
                     target.configureExtension<Ides>(
                         Extensions.IDES,
                         dependenciesHelper,
@@ -957,12 +992,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         companion object : Registrable<PluginVerification> {
             override fun register(project: Project, target: Any) =
                 target.configureExtension<PluginVerification>(Extensions.PLUGIN_VERIFICATION) {
-                    failureLevel.convention(listOf(VerifyPluginTask.FailureLevel.COMPATIBILITY_PROBLEMS))
+                    failureLevel.convention(listOf(FailureLevel.COMPATIBILITY_PROBLEMS))
                     verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
                     verificationReportsFormats.convention(
                         listOf(
-                            VerifyPluginTask.VerificationReportsFormats.PLAIN,
-                            VerifyPluginTask.VerificationReportsFormats.HTML,
+                            VerificationReportsFormats.PLAIN,
+                            VerificationReportsFormats.HTML,
                         )
                     )
                     teamCityOutputFormat.convention(false)

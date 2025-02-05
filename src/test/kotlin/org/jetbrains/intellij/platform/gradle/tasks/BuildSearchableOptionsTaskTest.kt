@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.junit.Ignore
 import kotlin.io.path.readText
 import kotlin.test.Test
 

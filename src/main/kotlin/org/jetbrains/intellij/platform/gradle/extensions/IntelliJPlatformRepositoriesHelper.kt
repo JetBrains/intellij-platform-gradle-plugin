@@ -13,7 +13,6 @@ import org.gradle.api.provider.ProviderFactory
 import org.gradle.authentication.http.HttpHeaderAuthentication
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.CustomPluginRepositoryType
 import org.jetbrains.intellij.platform.gradle.GradleProperties
@@ -171,11 +170,11 @@ class IntelliJPlatformRepositoriesHelper(
         }
     }.apply {
         content {
-            includeGroup(Configurations.Dependencies.BUNDLED_MODULE_GROUP)
-            includeGroup(Configurations.Dependencies.BUNDLED_PLUGIN_GROUP)
-            includeGroup(Configurations.Dependencies.LOCAL_IDE_GROUP)
-            includeGroup(Configurations.Dependencies.LOCAL_PLUGIN_GROUP)
-            includeGroup(Configurations.Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP)
+            includeGroup(Dependencies.BUNDLED_MODULE_GROUP)
+            includeGroup(Dependencies.BUNDLED_PLUGIN_GROUP)
+            includeGroup(Dependencies.LOCAL_IDE_GROUP)
+            includeGroup(Dependencies.LOCAL_PLUGIN_GROUP)
+            includeGroup(Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP)
         }
         action()
     }

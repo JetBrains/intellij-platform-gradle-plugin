@@ -2,16 +2,14 @@
 
 package org.jetbrains.intellij.platform.gradle.providers
 
-import org.gradle.internal.jvm.Jvm
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.write
-import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
- class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
+class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
 
     @Test
     fun `resolve the Android Studio link for the specific version and current OS`() {

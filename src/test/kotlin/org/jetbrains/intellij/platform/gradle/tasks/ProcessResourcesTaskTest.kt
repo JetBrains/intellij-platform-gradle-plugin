@@ -4,11 +4,8 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotEquals
 
 private const val PROCESS_RESOURCES = "processResources"
 

@@ -20,6 +20,7 @@ import javax.inject.Inject
  * @param objects Gradle [ObjectFactory] instance
  * @param dependenciesHelper IntelliJ Platform dependencies helper instance
  */
+@Suppress("unused")
 @IntelliJPlatform
 abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     private val dependenciesHelper: IntelliJPlatformDependenciesHelper,
@@ -119,7 +120,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     )
 
     /**
-     * Adds dependency on a local IntelliJ Platform plugin.
+     * Adds a dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
      */
@@ -129,7 +130,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     )
 
     /**
-     * Adds dependency on a local IntelliJ Platform plugin.
+     * Adds a dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
      */
@@ -139,7 +140,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     )
 
     /**
-     * Adds dependency on a local IntelliJ Platform plugin.
+     * Adds a dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
      */
@@ -149,7 +150,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     )
 
     /**
-     * Adds dependency on a local IntelliJ Platform plugin.
+     * Adds a dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
      */
@@ -159,7 +160,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     )
 
     /**
-     * Adds dependency on a local IntelliJ Platform plugin.
+     * Adds a dependency on a local IntelliJ Platform plugin.
      *
      * @param dependency Project dependency.
      */

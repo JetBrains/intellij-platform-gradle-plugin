@@ -3,10 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.resolvers.path
 
 import org.jetbrains.intellij.platform.gradle.*
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
-import java.net.URL
 import kotlin.io.path.createFile
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test

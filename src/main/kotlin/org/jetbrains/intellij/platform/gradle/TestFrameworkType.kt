@@ -9,6 +9,7 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
  *
  * @param coordinates Maven coordinates of test framework artifact.
  */
+@Suppress("unused")
 sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
     object Platform : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework"))
     object JUnit5 : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5"))

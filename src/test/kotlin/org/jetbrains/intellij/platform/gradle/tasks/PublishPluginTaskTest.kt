@@ -7,7 +7,6 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertEquals
 
 class PublishPluginTaskTest : IntelliJPluginTestBase() {
 

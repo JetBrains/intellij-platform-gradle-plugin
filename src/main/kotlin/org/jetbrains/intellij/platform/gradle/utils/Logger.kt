@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.utils
 import org.gradle.api.logging.Logging
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 
+@Suppress("unused")
 class Logger(cls: Class<*>) {
 
     private val logger = Logging.getLogger(cls)

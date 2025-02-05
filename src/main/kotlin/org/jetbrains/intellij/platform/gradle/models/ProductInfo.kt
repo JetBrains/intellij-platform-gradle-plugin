@@ -13,7 +13,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathReso
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
-import kotlin.Throws
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 import kotlin.io.path.pathString
@@ -88,10 +87,10 @@ data class ProductInfo(
             companion object {
                 fun from(os: OperatingSystem) = with(os) {
                     when {
-                        isLinux -> ProductInfo.Launch.OS.Linux
-                        isWindows -> ProductInfo.Launch.OS.Windows
-                        isMacOsX -> ProductInfo.Launch.OS.macOS
-                        else -> ProductInfo.Launch.OS.Linux
+                        isLinux -> Linux
+                        isWindows -> Windows
+                        isMacOsX -> macOS
+                        else -> Linux
                     }
                 }
 
@@ -119,6 +118,7 @@ data class ProductInfo(
         val classPath: List<String> = mutableListOf(),
     ) : java.io.Serializable
 
+    @Suppress("EnumEntryName", "unused")
     @Serializable
     enum class LayoutItemKind {
         plugin, pluginAlias, productModuleV2, moduleV2
@@ -126,7 +126,7 @@ data class ProductInfo(
 }
 
 /** [ProductInfo.productCode] + "-" + [ProductInfo.buildNumber] */
-fun ProductInfo.getFullVersion() = productCode + "-" + buildNumber
+fun ProductInfo.getFullVersion() = "$productCode-$buildNumber"
 
 /**
  * Validates that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.

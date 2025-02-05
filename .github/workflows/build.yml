@@ -1,6 +1,6 @@
 name: Build
 on:
-  # Trigger the workflow on pushes to only the 'master' branch (this avoids duplicate checks being run, e.g. for dependabot pull requests)
+  # Trigger the workflow on pushes to only the 'master' branch (this avoids duplicate checks being run, e.g., for dependabot pull requests)
   push:
     branches: [ 'main' ]
     paths-ignore: [ '**.md', '.teamcity/**' ]
@@ -99,7 +99,7 @@ jobs:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
         run: ./gradlew build -x test
 
-      # Store already-built plugin as an artifact for downloading
+      # Store an already-built plugin as an artifact for downloading
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -107,7 +107,7 @@ jobs:
           path: ./build/libs/${{ steps.properties.outputs.artifact }}
 
   # Prepare a draft release for GitHub Releases page for the manual verification
-  # If accepted and published, release workflow would be triggered
+  # If accepted and published, the release workflow would be triggered
   releaseDraft:
     name: Release Draft
     if: github.event_name != 'pull_request'

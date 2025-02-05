@@ -391,6 +391,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         IntelliJPlatformDependenciesExtension.register(dependenciesHelper, target = project.dependencies)
         IntelliJPlatformRepositoriesExtension.register(project, target = project.repositories)
 
+        @Suppress("KotlinConstantConditions")
         project.tasks.matching {
             when (it) {
                 is AutoReloadAware,

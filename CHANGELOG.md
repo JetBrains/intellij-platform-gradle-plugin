@@ -34,7 +34,7 @@
 - Introduce `intellijPlatformClasspath` configuration to allow retrieving the processed IntelliJ Platform and plugins dependencies. 
 - Warn if trying to refer to a bundled plugin via `intellijPlatform.plugins` instead of required `intellijPlatform.bundledPlugin`.
 - Set `ide.native.launcher=false` for `RunnableIdeAware` tasks to prevent from showing the `The IDE seems to be launched with a script launcher` warning notification.
-- Add bundledPlugins with transitive dependencies to the tests runtime classpath.
+- Add bundledPlugins with transitive dependencies to the test runtime classpath.
 - Set `intellij.testFramework.rethrow.logged.errors=true` to make logged errors fails test immediately. JetBrains/intellij-platform-gradle-plugin#1828
 
 ### Changed
@@ -43,7 +43,7 @@
 - Make IntelliJ Platform dependencies available to `testImplementation` by default to avoid mutating tests classpath
 - For running testing, use test sandbox instead of compiled classes from `build/classes` directory 
 - Updated the `publishPlugin()` task to use IDE Services’ new `POST /api/plugins` API when configured to publish to the IDE Services plugin repository, replacing the deprecated `POST /api/ij-plugins/upload` endpoint
-- Rewrite bundled plugins/modules resolution by using IntelliJ Structure library.
+- Rewrite bundled plugins/modules resolution by using the IntelliJ Structure library.
 - Update minimal supported Gradle version to `8.5`
 
 ### Fixed
@@ -55,7 +55,7 @@
 - Generation of duplicate files in `.intellijPlatform/localPlatformArtifacts` with different version numbers.
 - Gradle's `api` & `compileOnlyApi` configurations created by its _java-library_ plugin don't work, and transitive implementation scope dependencies get exposed, when this plugin is used. JetBrains/intellij-platform-gradle-plugin#1799
 - Incorrect transitive dependencies calculation for bundled modules. JetBrains/intellij-platform-gradle-plugin#1791
-- Fixed IOOB exception while running tests from Gradle.
+- Fixed `IndexOutOfBound` exception while running tests from Gradle.
 - Building the searchable options: `Unable to create shared archive file $IDE_CACHE_DIR/pycharm243.18137.19.jsa: (No such file or directory).`
 - Compatibility with Gradle dependency verification. Previously it was failing with `Failed to create MD5 hash for file`.
 - Rework how the IDEs from Plugin Verification are resolved. JetBrains/intellij-platform-gradle-plugin#1784
@@ -90,7 +90,7 @@
 - Better resolving the JVM variant of the `io.github.pdvrieze.xmlutil` dependency JetBrains/intellij-platform-gradle-plugin#1741
 - Remove the inclusion of all IntelliJ Platform v2 bundled modules to the classpath JetBrains/intellij-platform-gradle-plugin#1761
 - Duplicate bundled template error in tests JetBrains/intellij-platform-gradle-plugin#1755
-- Fixed IDE problem when submodule jars appear as External Libraries
+- Fixed the IDE problem when submodule jars appear as External Libraries
 - Fixed `java.util.ConcurrentModificationException` on Gradle sync caused by the `pluginVerification` configuration JetBrains/intellij-platform-gradle-plugin#1714
 - Fixed Configuration Cache issues related to the `intellijPlatform.buildSearchableOptions` flag
 
@@ -118,7 +118,11 @@ _Read the [full blog post](https://blog.jetbrains.com/platform/2024/07/intellij-
 
 Version 2.0 of the IntelliJ Platform Gradle Plugin is now available! Previously called the Gradle IntelliJ Plugin, this updated plugin for the Gradle build system simplifies the configuration of environments for building, testing, verifying, and publishing plugins for IntelliJ-based IDEs. Redesigned and rewritten, it addresses community-reported issues and feature requests from previous versions.
 
-To start using version 2.0 of the IntelliJ Platform Gradle Plugin, visit the documentation pages at [IntelliJ Platform SDK | Tooling | IntelliJ Platform Gradle Plugin 2.x](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html), where you will find a proper introduction to all of the new features and changes, a [migration guide](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html), and examples of various configurations you may be interested in.
+To start using version 2.0 of the IntelliJ Platform Gradle Plugin,
+visit the documentation pages at [IntelliJ Platform SDK | Tooling | IntelliJ Platform Gradle Plugin 2.x](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html),
+where you will find a proper introduction to all the new features and changes,
+a [migration guide](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-migration.html),
+and examples of various configurations you may be interested in.
 
 For projects created with the IntelliJ Platform Plugin Template, we advise taking a look at the 2.0.0 pull request applied on top of the obsolete Gradle IntelliJ Plugin 1.x configuration: https://github.com/JetBrains/intellij-platform-plugin-template/pull/458/files
 
@@ -140,7 +144,7 @@ To submit questions or suggestions related to the [documentation](https://plugin
 - Sandbox producer of a custom task shouldn't inherit `sandboxDirectory` from the base sandbox producer.
 - Use lenient configuration when resolving JetBrains Runtime (JBR) dependencies
 - Add `exclusiveContent` to the `jetbrainsRuntime()` repository definition to resolve only JBR artifacts
-- Avoid recalculating the `IvyModule` for bundled plugin/module if already written to Ivy XML file
+- Avoid recalculating the `IvyModule` for bundled plugin/module if already written to the Ivy XML file
 
 ## [2.0.0-rc1] - 2024-07-19
 
@@ -248,7 +252,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - `VerifyPluginProjectConfigurationTask`: limit specific checks when `.module` plugin is only applied
 - `TestIdeUiTask` (`testIdeUi` task) + `CustomTestIdeUiTask` implementation
-- Dependencies extension: `platformDependency(groupId, artifactIt)` and `testPlatformDependency(groupId, artifactIt)` for adding dependencies on artifacts published to the IntelliJ Maven Repository
+- Dependency extension: `platformDependency(groupId, artifactIt)` and `testPlatformDependency(groupId, artifactIt)` for adding dependencies on artifacts published to the IntelliJ Maven Repository
 - `TestFrameworkType.Metrics` for adding metrics and benchmarking tools for Test Framework
 - More info-level logging for `ExtractorTransformer`
 
@@ -283,9 +287,9 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 ### Fixed
 
 - Add `idea.classpath.index.enabled=false` to tests system properties to avoid creating `classpath.index` file
-- Replace base archive file of the `Jar` task with `ComposedJarTask` archive file in all configuration artifact sets
+- Replace a base archive file of the `Jar` task with `ComposedJarTask` archive file in all configuration artifact sets
 - Redundant whitespace when parsing plugin dependency IDs
-- Plugin Verifier: introduce partial configuration for resolving IntelliJ Platform dependencies with same coordinates but different versions
+- Plugin Verifier: introduce partial configuration for resolving IntelliJ Platform dependencies with the same coordinates but different versions
 
 ## [2.0.0-beta5] - 2024-05-30
 
@@ -305,7 +309,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 ### Added
 
 - Support for Android Studio DMG archives
-- Introduce `VerifyPluginProjectConfigurationTask.hasModulePlugin` to exclude modules using `org.jetbrains.intellij.platform.module` subplugin from `plugin.xml` checks.
+- Introduce `VerifyPluginProjectConfigurationTask.hasModulePlugin` to exclude modules using `org.jetbrains.intellij.platform.module` sub-plugin from `plugin.xml` checks.
 - Better error handling in dependency helpers when missing values
 - Introduce `GenerateManifestTask` for generating `MANIFEST.MF` file
 - Introduce `ComposedJarTask` to compose and pick the final jar archive
@@ -317,7 +321,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Fixed custom tasks suffixing
 - Fixed: Task `:test` uses this output of task `:prepareSandbox` without declaring an explicit or implicit dependency JetBrains/intellij-platform-gradle-plugin#1609
 - ExtractorTransformer: Exclude only `Applications` symlink
-- SandboxAware: inherit sandbox directory from producer
+- SandboxAware: inherit sandbox directory from the producer
 - Add IntelliJ Platform path-based hash to Ivy files to better deal with cache (temporary workaround)
 
 ## [2.0.0-beta3] - 2024-05-18
@@ -447,9 +451,9 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Configure all tasks that extend task classes instead of just those created by the plugin
 - Make `JbrResolver` prefer Gradle `javaToolchains` by `JetBrains` vendor, if already available.
 - Support for Kotlin Coroutines debugging
-- Detect and warn if project adds an explicit dependency on Kotlin Coroutines library
+- Detect and warn if a project adds an explicit dependency on the Kotlin Coroutines library
 - `RunPluginVerifierTask`: new `runPluginVerifier.verificationReportsFormats` property to control verifier output formats
-- `RunPluginVerifierTask`: new `runPluginVerifier.ignoredProblems` property to include a file with list of problems to be ignored in a report
+- `RunPluginVerifierTask`: new `runPluginVerifier.ignoredProblems` property to include a file with a list of problems to be ignored in a report
 - `RunPluginVerifierTask`: new `runPluginVerifier.freeArgs` property to let pass to the IntelliJ Plugin Verifier custom arguments
 
 ### Fixed
@@ -473,8 +477,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Attach LSP API sources to the IDEA dependency, if available
 - Added `ListProductsReleasesTask.androidStudioProductReleasesUpdateFiles` property
 - Added `DownloadAndroidStudioProductReleasesXmlTask` task
-- Introduced `DownloadAndroidStudioProductReleasesXmlTask.releasesUrl` and `DownloadIdeaProductReleasesXmlTask.releasesUrl`
-  properties JetBrains/intellij-platform-gradle-plugin#1418
+- Introduced `DownloadAndroidStudioProductReleasesXmlTask.releasesUrl` and `DownloadIdeaProductReleasesXmlTask.releasesUrl` properties JetBrains/intellij-platform-gradle-plugin#1418
 
 ### Changed
 
@@ -492,12 +495,10 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ### Fixed
 
-- Handle the `Could not HEAD 'https://www.jetbrains.com/updates/updates.xml'` gracefully when running `downloadIdeaProductReleasesXml` with no Internet
-  connection
+- Handle the `Could not HEAD 'https://www.jetbrains.com/updates/updates.xml'` gracefully when running `downloadIdeaProductReleasesXml` with no Internet connection
 - Improved checking if `Provider` holds non-empty value
-- Fixed calculationg of JVM arguments for running tests JetBrains/intellij-platform-gradle-plugin#1360
-- Introduce CommandLineArgumentProviders for better management of JVM arguments and avoiding passing absolute paths to support Gradle Build
-  Cache JetBrains/intellij-platform-gradle-plugin#1376
+- Fixed calculation of JVM arguments for running tests JetBrains/intellij-platform-gradle-plugin#1360
+- Introduce CommandLineArgumentProviders for better management of JVM arguments and avoiding passing absolute paths to support Gradle Build Cache JetBrains/intellij-platform-gradle-plugin#1376
 - Replace deprecated `JavaPluginConvention` usages with `JavaPluginExtension` for Gradle 8.2 and 9.x compatibility JetBrains/intellij-platform-gradle-plugin#1413
 - Fix for `Cannot load this JVM TI agent twice, check your java command line for duplicate jdwp options.`
 
@@ -539,15 +540,14 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ### Fixed
 
-- Add instrumented classes (sources + tests) to the tests classpath before tests execution JetBrains/intellij-platform-gradle-plugin#1332
-- Fixed `NSDictionary` helper methods to return `null` instead of `"null"` — causing "Resource not found:
-  /idea/nullApplicationInfo.xml" JetBrains/intellij-platform-gradle-plugin#1348
+- Add instrumented classes (sources and tests) to the tests classpath before tests execution JetBrains/intellij-platform-gradle-plugin#1332
+- Fixed `NSDictionary` helper methods to return `null` instead of `"null"` — causing "Resource not found: /idea/nullApplicationInfo.xml" JetBrains/intellij-platform-gradle-plugin#1348
 
 ## [1.13.2] - 2023-03-10
 
 ### Fixed
 
-- Add instrumented classes (sources + tests) to the tests classpath JetBrains/intellij-platform-gradle-plugin#1332
+- Add instrumented classes (sources and tests) to the tests classpath JetBrains/intellij-platform-gradle-plugin#1332
 
 ## [1.13.1] - 2023-03-02
 
@@ -571,20 +571,18 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for Gradle `8.0`
 - Introduced the `initializeIntelliJPlugin` task for executing plugin initialization actions, like `checkPluginVersion`
-- `instrumentJar` task to produce independent jar file with instrumented classes
+- `instrumentJar` task to produce an independent jar file with instrumented classes
 - `instrumentedJar` configuration for multi-modules projects
-- Publish plugin marker to the Maven Snapshot Repository
+- Publish a plugin marker to the Maven Snapshot Repository
 
 ### Fixed
 
-- Don't enforce the Kotlin version of the project by using `compileOnly` instead of `api` when declaring the `org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0`
-  dependency JetBrains/intellij-platform-gradle-plugin#1276
+- Don't enforce the Kotlin version of the project by using `compileOnly` instead of `api` when declaring the `org.jetbrains.kotlin:kotlin-gradle-plugin:1.8.0` dependency JetBrains/intellij-platform-gradle-plugin#1276
 - Instrumentation: fixed configuration cache support, dropped the `postInstrumentCode` and `postInstrumentTestCode` tasks JetBrains/intellij-platform-gradle-plugin#1283
 
 ### Breaking Changes
 
-- It is required to use the `instrumentedJar` configuration when referring submodules in multi-modules project,
-  like `dependencies { implementation(project(":submodule", "instrumentedJar")) }`
+- It is required to use the `instrumentedJar` configuration when referring submodules in a multi-modules project, like `dependencies { implementation(project(":submodule", "instrumentedJar")) }`
 - Rename `IntelliJInstrumentCodeTask` to `InstrumentCodeTask`
 
 ## [1.12.0] - 2023-01-13
@@ -615,8 +613,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ### Changed
 
-- `custom(String)` helper of `intellij.pluginRepositories` configuration requires now passing a direct URL to the `updatePlugins.xml`
-  file JetBrains/intellij-platform-gradle-plugin#1252
+- `custom(String)` helper of `intellij.pluginRepositories` configuration requires now passing a direct URL to the `updatePlugins.xml` file JetBrains/intellij-platform-gradle-plugin#1252
 - `listProductsReleases` task doesn't print output anymore
 - `listBundledPlugins` task doesn't print output anymore
 - Set minimum supported Gradle version to `7.3`
@@ -630,7 +627,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ### Changed
 
-- Revert back the minimum supported Gradle version to `6.8`
+- Revert the minimum supported Gradle version to `6.8`
 
 ## [1.10.1] - 2022-12-08
 
@@ -655,11 +652,11 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 ### Fixed
 
 - Invalidate instrumented classes bound to forms if GUI changed [IDEA-298989](https://youtrack.jetbrains.com/issue/IDEA-298989/Duplicate-method-name-getFont)
-- Revert pushing project resource directories to the end of classpath in the test task context. (JetBrains/intellij-platform-gradle-plugin#1101)
-- Avoid unnecessary task configuration during Gradle configuration phase JetBrains/intellij-platform-gradle-plugin#1110 by @3flex
-- Replace internal Gradle ConventionTask with DefaultTask JetBrains/intellij-platform-gradle-plugin#1115 by @aSemy
-- Plugin Verifier cache directory now follows XDG cache standards JetBrains/intellij-platform-gradle-plugin#1119 by @aSemy
-- Migrate most of the Gradle API in `IntelliJPlugin.kt` to use the Gradle Kotlin DSL extensions JetBrains/intellij-platform-gradle-plugin#1117 by @aSemy
+- Revert pushing project resource directories to the end of the classpath in the test task context. (JetBrains/intellij-platform-gradle-plugin#1101)
+- Avoid unnecessary task configuration during the Gradle configuration phase JetBrains/intellij-platform-gradle-plugin#1110
+- Replace internal Gradle ConventionTask with DefaultTask JetBrains/intellij-platform-gradle-plugin#1115
+- Plugin Verifier cache directory now follows XDG cache standards JetBrains/intellij-platform-gradle-plugin#1119
+- Migrate most of the Gradle API in `IntelliJPlugin.kt` to use the Gradle Kotlin DSL extensions JetBrains/intellij-platform-gradle-plugin#1117
 - Support `runIde.jbrVersion` in `17.0.4.1-b653.1` format JetBrains/intellij-platform-gradle-plugin#1172
 - Plugin dependencies not resolved in multi-module project JetBrains/intellij-platform-gradle-plugin#1196
 - Finalize instrumentation with `classpathIndexCleanup` run to remove `classpath.index` file which breaks incremental build
@@ -676,8 +673,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 ### Added
 
 - Configure classpath for run-based tasks using `package-info.json` provided with IntelliJ SDK 2022.3+
-- The [`verifyPluginConfiguration`](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#tasks-verifypluginconfiguration) task for
-  validating the plugin project configuration.
+- The [`verifyPluginConfiguration`](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#tasks-verifypluginconfiguration) task for validating the plugin project configuration.
 - Make Android Studio (`AI` type) available for resolving as SDK.
 
 ### Changed
@@ -699,8 +695,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 ### Added
 
 - Add `sourceSets` output directories to the classpath of the `test` task.
-- Synchronize `OpenedPackages` list with
-  the [latest version](https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt) available.
+- Synchronize `OpenedPackages` list with the [latest version](https://raw.githubusercontent.com/JetBrains/intellij-community/master/plugins/devkit/devkit-core/src/run/OpenedPackages.txt) available.
 - Make PhpStorm (`PS` type) available for resolving as SDK.
 
 ### Changed
@@ -727,13 +722,10 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Automatically detect plugin dependency sources provided in the IDE distribution JetBrains/intellij-platform-gradle-plugin#207
 - Throw an error when `intellij.version` is missing JetBrains/intellij-platform-gradle-plugin#1010
 - Set `ResolutionStrategy.SortOrder.DEPENDENCY_FIRST` for `compileClasspath` and `testCompileClasspath` configurations JetBrains/intellij-platform-gradle-plugin#656
-- Added `useDependencyFirstResolutionStrategy` feature flag.
-  See [Feature Flags](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#build-features).
+- Added `useDependencyFirstResolutionStrategy` feature flag. See [Feature Flags](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin.html#build-features).
 - Ensure `classpath.index` is not bundled in the JAR file
-- Warn about no settings provided by the plugin when running `buildSearchableOptions` and
-  suggest [disabling the task](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-options). JetBrains/intellij-platform-gradle-plugin#1024
-- Warn about paid plugin running `buildSearchableOptions` and
-  suggest [disabling the task](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-options). JetBrains/intellij-platform-gradle-plugin#1025
+- Warn about no settings provided by the plugin when running `buildSearchableOptions` and suggest [disabling the task](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-options). JetBrains/intellij-platform-gradle-plugin#1024
+- Warn about paid plugin running `buildSearchableOptions` and suggest [disabling the task](https://plugins.jetbrains.com/docs/intellij/tools-gradle-intellij-plugin-faq.html#how-to-disable-building-searchable-options). JetBrains/intellij-platform-gradle-plugin#1025
 - IDE dependencies are added to the `compileOnly` classpath for test fixtures if the `java-test-fixtures` plugin is applied JetBrains/intellij-platform-gradle-plugin#1028
 - `classpathIndexCleanup` task is added to remove `classpath.index` files created by `PathClassLoader` JetBrains/intellij-platform-gradle-plugin#1039
 - Improve Plugin Verifier error messages JetBrains/intellij-platform-gradle-plugin#1040
@@ -743,22 +735,20 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 ### Changed
 
 - Set minimum supported Gradle version from `6.7` to `6.7.1`
-- Resolve dependencies using repositories in the following order: project custom repositories (if any), plugin custom repositories, common repositories (like
-  Maven Central)
-- Add executable flag for `Rider.Backend` native launchers
-  in `IdeaDependencyManager#resetExecutablePermissions` [RIDER-59978](https://youtrack.jetbrains.com/issue/RIDER-59978)
+- Resolve dependencies using repositories in the following order: project custom repositories (if any), plugin custom repositories, common repositories (like Maven Central)
+- Add an executable flag for `Rider.Backend` native launchers in `IdeaDependencyManager#resetExecutablePermissions` [RIDER-59978](https://youtrack.jetbrains.com/issue/RIDER-59978)
 - Remove Gradle dependencies constraints as transitive dependencies don't point to vulnerabilities anymore JetBrains/intellij-platform-gradle-plugin#999
 
 ### Fixed
 
-- Fixed broken instrumentation when custom sources directory is set JetBrains/intellij-platform-gradle-plugin#1004
+- Fixed broken instrumentation when the custom sources directory is set JetBrains/intellij-platform-gradle-plugin#1004
 - Fixed `java.nio.file.FileAlreadyExistsException` when instrumenting code JetBrains/intellij-platform-gradle-plugin#998
 - Fixed `Execution optimizations have been disabled for task ':jar' to ensure correctness` JetBrains/intellij-platform-gradle-plugin#1000
 - Fixed JaCoCo `Can't add different class with same name` exception when using code instrumentation JetBrains/intellij-platform-gradle-plugin#1020
 - Fixed failing instrumentation due to the `Class not found` exception JetBrains/intellij-platform-gradle-plugin#1029
 - Fixed `'compilerClassPathFromMaven' doesn't have a configured value` when resolving `java-compiler-ant-tasks` JetBrains/intellij-platform-gradle-plugin#1003
 - Fixed `NoClassDefFoundError` caused by the stale `classpath.index` created by the `PathClassLoader` JetBrains/intellij-platform-gradle-plugin#1032
-- Fixed issue with not updated GUI form during the incremental build JetBrains/intellij-platform-gradle-plugin#1044]
+- Fixed the issue with a not updated GUI form during the incremental build JetBrains/intellij-platform-gradle-plugin#1044
 
 ## [1.6.0] - 2022-05-23
 
@@ -768,16 +758,16 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Added `--jbr-illegal-access` and `-XX:+IgnoreUnrecognizedVMOptions` flags for tasks based on `RunIdeBase` to support `2022.2` which runs on Java 17
 - For JBR 17, `dcevm` is bundled by default. As a consequence, separated `dcevm` and `nomod` variants are no longer available.
 - `instrumentCode` task – incremental instrumentation JetBrains/intellij-platform-gradle-plugin#459
-- Add `intellijRepository` to the beginning of the repositories list when resolving dependencies JetBrains/intellij-platform-gradle-plugin#615
+- Add `intellijRepository` to the beginning of the repository list when resolving dependencies JetBrains/intellij-platform-gradle-plugin#615
 - Set `-Djdk.module.illegalAccess.silent=true` flag by default to mute `WARNING: An illegal reflective access operation has occurred`
 - Add `java.system.class.loader=com.intellij.util.lang.PathClassLoader` system property for tests run on 221+
 - Integration Tests: Cover `instrumentCode` task
 
 ### Changed
 
-- Set minimal supported Gradle version from `6.6` to `6.7`
+- Set minimal supported a Gradle version from `6.6` to `6.7`
 - Throw an exception instead of warning when both `intellij.localPath` and `intellij.version` are specified
-- Publish sources and javadocs within the release JetBrains/intellij-platform-gradle-plugin#810
+- Publish sources and Javadocs within the release JetBrains/intellij-platform-gradle-plugin#810
 
 ### Fixed
 
@@ -811,7 +801,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Initial Toolbox Enterprise integration JetBrains/intellij-platform-gradle-plugin#913
 - Make IDEA products releases cached daily JetBrains/intellij-platform-gradle-plugin#848
 - Fixed `ListProductsReleasesTask` to allow for empty `untilBuild` JetBrains/intellij-platform-gradle-plugin#909
-- Resolved closest lower java-compiler-ant-tasks version if provided isn't available JetBrains/intellij-platform-gradle-plugin#910
+- Resolved java-compiler-ant-tasks version closest lower if provided isn't available JetBrains/intellij-platform-gradle-plugin#910
 - Fixed XML parsing with JAXB - drop intermediate JDOM Document
 
 ## [1.4.0] - 2022-02-11
@@ -820,11 +810,10 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Fixed compiler resolution for long build numbers JetBrains/intellij-platform-gradle-plugin#883
 - Build number fallback when `product-info.json` is missing JetBrains/intellij-platform-gradle-plugin#880
 - Consider `sinceBuild` and `untilBuild` properties of `ListProductsReleasesTask` in task caching JetBrains/intellij-platform-gradle-plugin#891
-- Introduce `jbrVariant` property next to the `jbrVersion` property in `runIde`, `runPluginVerifier`, `buildSearchableOptions`, and `runIdeForUiTest`
-  tasks JetBrains/intellij-platform-gradle-plugin#852
+- Introduce `jbrVariant` property next to the `jbrVersion` property in `runIde`, `runPluginVerifier`, `buildSearchableOptions`, and `runIdeForUiTest` tasks JetBrains/intellij-platform-gradle-plugin#852
 - Change log level of `JbrResolver.resolveRuntime` logs from `warn` to `debug` JetBrains/intellij-platform-gradle-plugin#849
 - Update runtime classpath for `221+`
-- Fixed resolving Java Runtime for MacOSX JetBrains/intellij-platform-gradle-plugin#895
+- Fixed resolving Java Runtime for macOS JetBrains/intellij-platform-gradle-plugin#895
 - ProductInfo: parse custom properties in `product-info.json` JetBrains/intellij-platform-gradle-plugin#897
 - Make `IntelliJInstrumentCodeTask` incremental
 
@@ -835,7 +824,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Avoid querying `intellij.version` when `intellij.localPath` is set
 - Fixed `BuildSearchableOptionsTask` for `2022.1+` version of IDE [RIDER-73264](https://youtrack.jetbrains.com/issue/RIDER-73264)
 - `ListProductsReleasesTask`: rely on the `patchPluginXml.sinceBuild`/`patchPluginXml.untilBuild` properties instead of `intellij.version`
-- `ListProductsReleasesTask`: allow using IDE version along with build numbers
+- `ListProductsReleasesTask`: allow using an IDE version along with build numbers
 
 ## [1.3.0] - 2021-11-15
 
@@ -844,7 +833,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Move `intellij.ideaDependency` to the `SetupDependenciesTask.idea`
 - Postpone the initial dependencies downloading to the `setupDependencies` task which is run in the `afterSync` phase or by individual tasks
 - Provide build information within the `META-INF/MANIFEST.MF` file
-- Resolve EAP version of the Java compiler for `LATEST-EAP-SNAPSHOT`
+- Resolve an EAP version of the Java compiler for `LATEST-EAP-SNAPSHOT`
 - Allow for using `dcevm`, `fd`, and `nomod` variants of JBR JetBrains/intellij-platform-gradle-plugin#818
 - `ListProductsReleasesTask.updatesPath` changed to `ListProductsReleasesTask.updatePaths`
 - `ListProductsReleasesTask.includeEAP` changed to `ListProductsReleasesTask.releaseChannels`
@@ -853,13 +842,13 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Respect `ideaDependencyCachePath` property JetBrains/intellij-platform-gradle-plugin#794
 - Fix for providing dependencies after project evaluation JetBrains/intellij-platform-gradle-plugin#801
-- Resolve EAP version of the Java compiler for local EAP IDE instances JetBrains/intellij-platform-gradle-plugin#811
+- Resolve an EAP version of the Java compiler for local EAP IDE instances JetBrains/intellij-platform-gradle-plugin#811
 - Allow for passing an empty array for `runPluginVerifier.ideVersions` property JetBrains/intellij-platform-gradle-plugin#809
 
 ## [1.2.0] - 2021-09-30
 
-- Fixed running tests on 2021.3 platform version
-- Avoid downloading IDE dependency in configuration phase
+- Fixed running tests on the 2021.3 platform version
+- Avoid downloading IDE dependency in the configuration phase
 - Deprecate `IntelliJPluginExtension.getIdeaDependency(project: Project)`
 - Increase the default `runPluginVerifier.failureLevel` to `COMPATIBILITY_PROBLEMS`
 - Introduce `listProductsReleases` task for listing the IDE releases matching given criteria
@@ -869,7 +858,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ## [1.1.6] - 2021-09-05
 
-- Fixed returned list of paths to IDEs downloaded for Plugin Verifier JetBrains/intellij-platform-gradle-plugin#779
+- Fixedly returned a list of paths to IDEs downloaded for Plugin Verifier JetBrains/intellij-platform-gradle-plugin#779
 
 ## [1.1.5] - 2021-09-03
 
@@ -880,7 +869,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 ## [1.1.4] - 2021-07-21
 
 - Configuration cache enhancements
-- Fix `prepareTestingSandbox` not running when test task is executed JetBrains/intellij-platform-gradle-plugin#745 by @abrooksv
+- Fix `prepareTestingSandbox` not running when a test task is executed JetBrains/intellij-platform-gradle-plugin#745
 - Move signPlugin file name creation to lazy JetBrains/intellij-platform-gradle-plugin#742 by @brian-mcnamara
 - Better platform prefix resolving
 
@@ -913,111 +902,111 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Lazy Configuration support
 - Configuration Cache support
 - Task Configuration Avoidance support
-- better CI (GitHub Actions, Qodana, Dependabot)
+- Better CI (GitHub Actions, Qodana, Dependabot)
 - Rewritten in Kotlin
-- property names cleanup (`*Repo` to `*Repository`, `*Directory` to `*Dir` – for the sake of consistency with Gradle)
+- Property names cleanup (`*Repo` to `*Repository`, `*Directory` to `*Dir` – for the sake of consistency with Gradle)
 - Stepping away from Bintray and JCenter
 
 ## [0.7.3] - 2021-04-26
 
-- migrate from bintray JetBrains/intellij-platform-gradle-plugin#594
-- exclude kotlin-reflect and kotlin-text from the runtime if kotlin is used in plugin JetBrains/intellij-platform-gradle-plugin#585
-- respect overridden `build` directory JetBrains/intellij-platform-gradle-plugin#602
-- store cache of plugins from different custom repositories in different directories JetBrains/intellij-platform-gradle-plugin#579
-- rename dependency jars with the same name JetBrains/intellij-platform-gradle-plugin#497
+- Migrate from bintray JetBrains/intellij-platform-gradle-plugin#594
+- Exclude kotlin-reflect and kotlin-text from the runtime if kotlin is used in plugin JetBrains/intellij-platform-gradle-plugin#585
+- Respect overridden `build` directory JetBrains/intellij-platform-gradle-plugin#602
+- Store a cache of plugins from different custom repositories in different directories JetBrains/intellij-platform-gradle-plugin#579
+- Rename dependency jars with the same name JetBrains/intellij-platform-gradle-plugin#497
 
 ## [0.7.2] - 2021-02-23
 
-- fix classpath for IDE without `ant` inside distribution
-- fix resolving the OS architecture
+- Fix classpath for IDE without `ant` inside distribution
+- Fix resolving the OS architecture
 
 ## [0.7.1] - 2021-02-22
 
-- fix classpath for IDE 2020.2 JetBrains/intellij-platform-gradle-plugin#601
+- Fix classpath for IDE 2020.2 JetBrains/intellij-platform-gradle-plugin#601
 
 ## [0.7.0] - 2021-02-21
 
-- support GoLand as an SDK
-- fix javac2 dependency for project with implicit IntelliJ version JetBrains/intellij-platform-gradle-plugin#592
-- fix using query parameters in custom repository urls JetBrains/intellij-platform-gradle-plugin#589
-- support downloading JBR for aarch64 JetBrains/intellij-platform-gradle-plugin#600
-- added ant dependencies to testing classpath
-- fix JBR resolving after removing JavaFX from JBR in IDEA 2021.1 JetBrains/intellij-platform-gradle-plugin#599
+- Support GoLand as an SDK
+- Fix javac2 dependency for project with implicit IntelliJ version JetBrains/intellij-platform-gradle-plugin#592
+- Fix using query parameters in custom repository urls JetBrains/intellij-platform-gradle-plugin#589
+- Support downloading JBR for `aarch64` JetBrains/intellij-platform-gradle-plugin#600
+- Added ant dependencies to the testing classpath
+- Fix JBR resolving after removing JavaFX from JBR in IDEA 2021.1 JetBrains/intellij-platform-gradle-plugin#599
 
 ## [0.6.5] - 2020-11-25
 
-- fixed not found classes from plugin dependencies in tests JetBrains/intellij-platform-gradle-plugin#570
+- Fixed not found classes from plugin dependencies in tests JetBrains/intellij-platform-gradle-plugin#570
 
 ## [0.6.4] - 2020-11-19
 
-- runPluginVerifier: integrate Plugin Verifier offline mode with Gradle `offline` start parameter
-- runPluginVerifier: introduce `verifierPath` property
-- support for Rider for Unreal Engine as an SDK
+- `runPluginVerifier`: integrate Plugin Verifier offline mode with Gradle `offline` start parameter
+- `runPluginVerifier`: introduce `verifierPath` property
+- Support for Rider for Unreal Engine as an SDK
 
 ## [0.6.3] - 2020-11-09
 
-- fixed loading dependencies of builtin plugin JetBrains/intellij-platform-gradle-plugin#542
-- fixed loading file templates from plugins JetBrains/intellij-platform-gradle-plugin#554
-- yet another fix for class-loading in tests for IntelliJ Platform 203 and higher JetBrains/intellij-platform-gradle-plugin#561
+- Fixed loading dependencies of builtin plugin JetBrains/intellij-platform-gradle-plugin#542
+- Fixed loading file templates from plugins JetBrains/intellij-platform-gradle-plugin#554
+- Yet another fix for class-loading in tests for IntelliJ Platform 203 and higher JetBrains/intellij-platform-gradle-plugin#561
 
 ## [0.6.2] - 2020-11-05
 
-- runPluginVerifier: make ideVersions property mandatory
-- runPluginVerifier: better handling of the exception produced by DownloadAction JetBrains/intellij-platform-gradle-plugin#553
-- runPluginVerifier: provide URL for verifying the available IDE versions JetBrains/intellij-platform-gradle-plugin#553
-- runPluginVerifier: fix java.nio.file.FileAlreadyExistsException as ERROR in logs JetBrains/intellij-platform-gradle-plugin#552
-- add prepareTestingSandbox as an input to tests
+- `runPluginVerifier`: make ideVersions property mandatory
+- `runPluginVerifier`: better handling of the exception produced by DownloadAction JetBrains/intellij-platform-gradle-plugin#553
+- `runPluginVerifier`: provide URL for verifying the available IDE versions JetBrains/intellij-platform-gradle-plugin#553
+- `runPluginVerifier`: fix java.nio.file.FileAlreadyExistsException as ERROR in logs JetBrains/intellij-platform-gradle-plugin#552
+- Add `prepareTestingSandbox` as an input to tests
 
 ## [0.6.1] - 2020-10-29
 
-- runPluginVerifier: allow specifying `ideVersions` as comma-separated String
-- runPluginVerifier: specifying EAP build number leads to IllegalArgumentException
-- runPluginVerifier: fix for `ArrayIndexOutOfBoundsException` when destructuring `ideVersion.split`
+- `runPluginVerifier`: allow specifying `ideVersions` as comma-separated String
+- `runPluginVerifier`: specifying EAP build number leads to IllegalArgumentException
+- `runPluginVerifier`: fix for `ArrayIndexOutOfBoundsException` when destructuring `ideVersion.split`
 
 ## [0.6.0] - 2020-10-29
 
-- Introduced runPluginVerifier task that runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDE builds.
+- Introduced runPluginVerifier task that runs the IntelliJ Plugin Verifier tool to check the binary compatibility with specified IntelliJ IDEA builds.
 
 ## [0.5.1] - 2020-10-27
 
-- fix class-loading in tests for IntelliJ Platform >= 203
+- Fix class-loading in tests for IntelliJ Platform >= 203
 
 ## [0.5.0] - 2020-10-05
 
-- do not download dependencies during configuration phase JetBrains/intellij-platform-gradle-plugin#123
-- support multiple plugin repositories
-- support enterprise plugin repositories JetBrains/intellij-platform-gradle-plugin#15
+- Do not download dependencies during configuration phase JetBrains/intellij-platform-gradle-plugin#123
+- Support multiple plugin repositories
+- Support enterprise plugin repositories JetBrains/intellij-platform-gradle-plugin#15
 
 ## [0.4.26] - 2020-09-18
 
-- fix plugin-repository-rest-client dependency
+- Fix plugin-repository-rest-client dependency
 
 ## [0.4.25] - 2020-09-17
 
-- fix plugin-repository-rest-client dependency
+- Fix plugin-repository-rest-client dependency
 
 ## [0.4.24] - 2020-09-17
 
-- fix plugin-repository-rest-client dependency
+- Fix plugin-repository-rest-client dependency
 
 ## [0.4.23] - 2020-09-17
 
-- fix compatibility issue with Kotlin 1.4 serialization JetBrains/intellij-platform-gradle-plugin#532
+- Fix the compatibility issue with Kotlin 1.4 serialization JetBrains/intellij-platform-gradle-plugin#532
 
 ## [0.4.22] - 2020-09-03
 
-- add option to disable auto-reload of dynamic plugins
-- documentation improvements
+- Add an option to disable auto-reload of dynamic plugins
+- Documentation improvements
 
 ## [0.4.21] - 2020-05-12
 
-- fix adding searchable options to the distribution for Gradle > 5.1 JetBrains/intellij-platform-gradle-plugin#487
+- Fix adding searchable options to the distribution for Gradle > 5.1 JetBrains/intellij-platform-gradle-plugin#487
 
 ## [0.4.20] - 2020-05-06
 
-- fixed caching builtin plugins data
-- add annotations-19.0.0 to compile classpath by default
-- fix setting plugin name for Gradle 5.1-5.3 JetBrains/intellij-platform-gradle-plugin#481
+- Fixed caching builtin plugins data
+- Add annotations-19.0.0 to compile classpath by default
+- Fix setting plugin name for Gradle 5.1–5.3 JetBrains/intellij-platform-gradle-plugin#481
 
 ## [0.4.19] - 2020-05-02
 
@@ -1025,7 +1014,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Enable dependencies for builtin plugins automatically JetBrains/intellij-platform-gradle-plugin#474
 - Allow referring builtin plugins by their ids rather than directory name [IDEA-233841](https://youtrack.jetbrains.com/issue/IDEA-233841)
 - Require 4.9 Gradle version, dropped deprecated stuff
-- Do not add junit.jar into classpath, it may clash with junit-4.jar on certain JDKs
+- Do not add junit.jar into the classpath, it may clash with junit-4.jar on certain JDKs
 
 ## [0.4.18] - 2020-04-01
 
@@ -1043,8 +1032,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ## [0.4.16] - 2020-01-27
 
-- Fix downloading JBR if temp directory and gradle chace are on the different partitions JetBrains/intellij-platform-gradle-plugin#457
-- Build searchable options task is marked as cacheable
+- Fix downloading JBR if the temp directory and Gradle cache are on the different partitions JetBrains/intellij-platform-gradle-plugin#457
+- Build a searchable options task is marked as cacheable
 
 ## [0.4.15] - 2019-12-07
 
@@ -1079,7 +1068,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Graceful handling of 404 errors when publishing a new plugin JetBrains/intellij-platform-gradle-plugin#389
 - Support PyCharm as an SDK
-- Fail if the plugin depends on Java plugin but doesn't declare it as dependency
+- Fail if the plugin depends on Java plugin but doesn't declare it as a dependency
 
 ## [0.4.8] - 2019-04-16
 
@@ -1089,74 +1078,74 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ## [0.4.7] - 2019-03-25
 
-- add one more executable file in Rider SDK
+- Add one more executable file in Rider SDK
 
 ## [0.4.6] - 2019-03-25
 
-- support Gradle 5.3 JetBrains/intellij-platform-gradle-plugin#379
-- fixed downloading JBR 8 for IDEA 2018.3 and earlier
+- Support Gradle 5.3 JetBrains/intellij-platform-gradle-plugin#379
+- Fixed downloading JBR 8 for IDEA 2018.3 and earlier
 
 ## [0.4.5] - 2019-03-13
 
-- support JBR 11 from the new JetBrains Runtime Repository
-- support running using JBR 11 [IDEA-208692](https://youtrack.jetbrains.com/issue/IDEA-208692)
+- Support JBR 11 from the new JetBrains Runtime Repository
+- Support running using JBR 11 [IDEA-208692](https://youtrack.jetbrains.com/issue/IDEA-208692)
 
 ## [0.4.4] - 2019-02-28
 
-- support the new bintray repository for JetBrains Runtime artifacts
-- fixed downloading of old JBR builds JetBrains/intellij-platform-gradle-plugin#367
-- fix instrumentation for local IDE instances JetBrains/intellij-platform-gradle-plugin#369
+- Support the new bintray repository for JetBrains Runtime artifacts
+- Fixed downloading of old JBR builds JetBrains/intellij-platform-gradle-plugin#367
+- Fix instrumentation for local IDE instances JetBrains/intellij-platform-gradle-plugin#369
 
 ## [0.4.3] - 2019-02-19
 
-- fixed downloading instrumentation dependencies for release versions
-- fixed downloading renamed JetBrains Runtime artifacts
+- Fixed downloading instrumentation dependencies for release versions
+- Fixed downloading renamed JetBrains Runtime artifacts
 
 ## [0.4.2]
 
-- fixed removing `config/` and `system/` on running `runIde` task JetBrains/intellij-platform-gradle-plugin#359
+- Fixed removing `config/` and `system/` on running `runIde` task JetBrains/intellij-platform-gradle-plugin#359
 
 ## [0.4.1]
 
-- fixed plugin's sources attaching
+- Fixed plugin's sources attaching
 
 ## [0.4.0]
 
-- drop Gradle 2 support
-- support for CLion as a building dependency JetBrains/intellij-platform-gradle-plugin#342
-- support token-based authentication while publishing plugins JetBrains/intellij-platform-gradle-plugin#317
-- add notification about patching particular tag values and attributes in plugin.xml JetBrains/intellij-platform-gradle-plugin#284
-- fix attaching sources to bundled plugins JetBrains/intellij-platform-gradle-plugin#337
-- fix verification message in case of default value of `description`-tag
+- Drop Gradle 2 support
+- Support for CLion as a building dependency JetBrains/intellij-platform-gradle-plugin#342
+- Support token-based authentication while publishing plugins JetBrains/intellij-platform-gradle-plugin#317
+- Add notification about patching particular tag values and attributes in plugin.xml JetBrains/intellij-platform-gradle-plugin#284
+- Fix attaching sources to bundled plugins JetBrains/intellij-platform-gradle-plugin#337
+- Fix a verification message in case of default value of `description`-tag
 
 ## [0.3.12]
 
-- fixed resolving plugins from a custom channel JetBrains/intellij-platform-gradle-plugin#320
-- fixed building with Java 9
+- Fixed resolving plugins from a custom channel JetBrains/intellij-platform-gradle-plugin#320
+- Fixed building with Java 9
 
 ## [0.3.11]
 
 - ~~fixed resolving plugins from a custom channel~~
-- fixed uploading plugins JetBrains/intellij-platform-gradle-plugin#321
-- fixed caching strategy for IDEA dependency JetBrains/intellij-platform-gradle-plugin#318
+- Fixed uploading plugins JetBrains/intellij-platform-gradle-plugin#321
+- Fixed caching strategy for IDEA dependency JetBrains/intellij-platform-gradle-plugin#318
 
 ## [0.3.10]
 
-- fixed dependency on local plugin files
-- cache-redirector is used for downloading plugin dependencies JetBrains/intellij-platform-gradle-plugin#301
+- Fixed dependency on local plugin files
+- Cache-redirector is used for downloading plugin dependencies JetBrains/intellij-platform-gradle-plugin#301
 
 ## [0.3.7]
 
-- fixed missing `tools.jar` on Mac JetBrains/intellij-platform-gradle-plugin#312
+- Fixed missing `tools.jar` on Mac JetBrains/intellij-platform-gradle-plugin#312
 
 ## [0.3.6]
 
-- `runIde` task uses `tools.jar` from a JBRE java JetBrains/intellij-platform-gradle-plugin#307
+- `runIde` task uses `tools.jar` from a JBR Java JetBrains/intellij-platform-gradle-plugin#307
 
 ## [0.3.5]
 
 - Allow to override all system properties in RunIde task JetBrains/intellij-platform-gradle-plugin#304
-- Move to the new url to JBRE and Gradle distributions JetBrains/intellij-platform-gradle-plugin#301
+- Move to the new url to JBR and Gradle distributions JetBrains/intellij-platform-gradle-plugin#301
 - Fixed an encoding while writing plugin.xml JetBrains/intellij-platform-gradle-plugin#295
 
 ## [0.3.4]
@@ -1165,29 +1154,29 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ## [0.3.3]
 
-- fixed compiling JGoodies forms for IDEA version >= 182.* JetBrains/intellij-platform-gradle-plugin#290
+- Fixed compiling JGoodies forms for IDEA version >= 182.* JetBrains/intellij-platform-gradle-plugin#290
 
 ## [0.3.2]
 
-- use tools.jar from a java of `runIde` task [IDEA-192418](https://youtrack.jetbrains.com/issue/IDEA-192418)
+- Use tools.jar from java of `runIde` task [IDEA-192418](https://youtrack.jetbrains.com/issue/IDEA-192418)
 
 ## [0.3.1]
 
-- fix running for IDEA version < 2017.3 JetBrains/intellij-platform-gradle-plugin#273
+- Fix running for IDEA version < 2017.3 JetBrains/intellij-platform-gradle-plugin#273
 
 ## [0.3.0]
 
-- added plugin verification task: `verifyPlugin`
-- default values of `runIde` task are propagated to all RunIdeaTask-like tasks
-- enhanced plugins resolution: better error messages for unresolved dependencies and fixes JetBrains/intellij-platform-gradle-plugin#247
-- check build number to decide whether the unzipped distribution can be reused (fixes JetBrains/intellij-platform-gradle-plugin#234)
-- download JetBrains Java runtime and use it while running IDE (fixes JetBrains/intellij-platform-gradle-plugin#192)
-- do not include plugin's jars recursively (fixes JetBrains/intellij-platform-gradle-plugin#231)
-- allow adding custom Javac2.jar to `instrumentCode` task
+- Added plugin verification task: `verifyPlugin`
+- Default values of `runIde` task are propagated to all RunIdeaTask-like tasks
+- Enhanced plugins resolution: better error messages for unresolved dependencies and fixes JetBrains/intellij-platform-gradle-plugin#247
+- Check the build number to decide whether the unzipped distribution can be reused (fixes JetBrains/intellij-platform-gradle-plugin#234)
+- Download JetBrains Java runtime and use it while running IDE (fixes JetBrains/intellij-platform-gradle-plugin#192)
+- Do not include plugin's jars recursively (fixes JetBrains/intellij-platform-gradle-plugin#231)
+- Allow adding custom Javac2.jar to `instrumentCode` task
 
 ## [0.2.20]
 
-- recognize new kotlin stdlib files as part of IDEA dependency
+- Recognize new kotlin stdlib files as part of IDEA dependency
 
 ## [0.2.19]
 
@@ -1195,25 +1184,25 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ## [0.2.18]
 
-- update default repository url
-- support for running GoLand
+- Update default repository url
+- Support for running GoLand
 
 ## [0.2.17]
 
-- fix compatibility with Gradle 4.0 new versions of Kotlin and Scala plugins (fixes JetBrains/intellij-platform-gradle-plugin#221 and JetBrains/intellij-platform-gradle-plugin#222)
+- Fix compatibility with Gradle 4.0 new versions of Kotlin and Scala plugins (fixes JetBrains/intellij-platform-gradle-plugin#221 and JetBrains/intellij-platform-gradle-plugin#222)
 
 ## [0.2.16]
 
-- automatically set system properties for debugging Resharper
+- Automatically set system properties for debugging Resharper
 
 ## [0.2.15]
 
-- restore scripts execution permissions in Rider distribution
+- Restore scripts execution permissions in Rider distribution
 
 ## [0.2.14]
 
-- support RD prefix for Rider
-- avoid possible NPEs (fixes JetBrains/intellij-platform-gradle-plugin#208)
+- Support RD prefix for Rider
+- Avoid possible NPEs (fixes JetBrains/intellij-platform-gradle-plugin#208)
 
 ## [0.2.13]
 
@@ -1221,76 +1210,75 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ## [0.2.12]
 
-- upgrade plugin-repository-rest-client
+- Upgrade plugin-repository-rest-client
 
 ## [0.2.11]
 
-- upgrade plugin-repository-rest-client
+- Upgrade plugin-repository-rest-client
 
 ## [0.2.10]
 
-- upgrade plugin-services libraries to fix 'Invalid plugin type' exception while downloading plugins dependencies (fixes JetBrains/intellij-platform-gradle-plugin#201)
-- prefer `compile` configuration for any plugins IDEA dependencies in tests (fixes JetBrains/intellij-platform-gradle-plugin#202)
+- Upgrade plugin-services libraries to fix 'Invalid plugin type' exception while downloading plugin dependencies (fixes JetBrains/intellij-platform-gradle-plugin#201)
+- Prefer `compile` configuration for any plugins IDEA dependencies in tests (fixes JetBrains/intellij-platform-gradle-plugin#202)
 
 ## [0.2.9]
 
-- prefer `compile` configuration for bundled plugins IDEA dependencies in tests
+- Prefer `compile` configuration for bundled plugins IDEA dependencies in tests
 
 ## [0.2.8]
 
-- prefer `compile` configuration for IDEA dependencies in tests
-- prefer `compileOnly` configuration for plugins dependencies in tests
+- Prefer `compile` configuration for IDEA dependencies in tests
+- Prefer `compileOnly` configuration for plugins dependencies in tests
 
 ## [0.2.7]
 
-- avoid exception due to adding duplicated configurations
+- Avoid exception due to adding duplicated configurations
 
 ## [0.2.6]
 
-- prefer `compileOnly` configuration for IDEA dependencies
+- Prefer `compileOnly` configuration for IDEA dependencies
 
 ## [0.2.5]
 
-- set `buildDir` as a default cache for IDE dependencies in case of Rider-plugin
-- fix Kotlin instrumentation
+- Set `buildDir` as a default cache for IDE dependencies in case of Rider plugin
+- Fix Kotlin instrumentation
 
 ## [0.2.4]
 
-- fixed attaching sources for IDEA Ultimate and bundled plugins
+- Fixed attaching sources for IDEA Ultimate and bundled plugins
 
 ## [0.2.3]
 
-- fixed compilation for multi-module layout
+- Fixed compilation for multi-module layout
 
 ## [0.2.2]
 
-- added `runIde` task. `runIdea` is deprecated now (fixes JetBrains/intellij-platform-gradle-plugin#169)
-- fixed kotlin forms instrumentation (fixes JetBrains/intellij-platform-gradle-plugin#171)
-- fixed filtering out all resources of dependent plugins (fixes JetBrains/intellij-platform-gradle-plugin#172)
-- fixed intellij.systemProperties extension (fixes JetBrains/intellij-platform-gradle-plugin#173)
+- Added `runIde` task. `runIdea` is deprecated now (fixes JetBrains/intellij-platform-gradle-plugin#169)
+- Fixed kotlin forms instrumentation (fixes JetBrains/intellij-platform-gradle-plugin#171)
+- Fixed filtering out all resources of dependent plugins (fixes JetBrains/intellij-platform-gradle-plugin#172)
+- Fixed intellij.systemProperties extension (fixes JetBrains/intellij-platform-gradle-plugin#173)
 
 ## [0.2.1]
 
-- added Rider support (fixes JetBrains/intellij-platform-gradle-plugin#167)
-- fix unresolved builtin plugins on case-insensitive file systems
+- Added Rider support (fixes JetBrains/intellij-platform-gradle-plugin#167)
+- Fix unresolved builtin plugins on case-insensitive file systems
 
 ## [0.2.0]
 
-- result artifact format is changed: now it's always a ZIP archive even if plugin has no extra dependencies. *Note that this may change classloading (
-  see JetBrains/intellij-platform-gradle-plugin#170)*
-- added an ability to use local IDE installation for compiling
-- result zip archive is added to `archives` configuration, built-in `assemble` task now builds the plugin distribution
-- added JPS-type for intellij dependency (fixes JetBrains/intellij-platform-gradle-plugin#106)
-- patchXml action is reimplemented, now it's possible to freely customize input files, destination directory, since/until builds, plugin description and version
-- publishTask is reimplemented, now it's possible to set several channels to upload (fixes JetBrains/intellij-platform-gradle-plugin#117)
-- 
+- The result artifact format is changed: now it's always a ZIP archive even if the plugin has no extra dependencies. *Note that this may change classloading (see JetBrains/intellij-platform-gradle-plugin#170)*
+- Added an ability to use local IDE installation for compiling
+- Result zip archive is added to `archives` configuration, built-in `assemble` task now builds the plugin distribution
+- Added JPS-type for intellij dependency (fixes JetBrains/intellij-platform-gradle-plugin#106)
+- PatchXml action is reimplemented, now it's possible to freely customize input files, destination directory, since/until builds, plugin description, and version
+- PublishTask is reimplemented, now it's possible to set several channels to upload (fixes JetBrains/intellij-platform-gradle-plugin#117)
+-
     - it's possible to reuse reimplemented tasks in client's code
     - it's allowed to run tasks without plugin.xml
     - tasks are configured before project evaluation, `project.afterEvaluate` is not require anymore
-- fix incremental compiling after instrumenting code (fixes JetBrains/intellij-platform-gradle-plugin#116)
-- added `intellij.ideaDependencyCachePath` option (fixes JetBrains/intellij-platform-gradle-plugin#127)
+- Fix incremental compiling after instrumenting code (fixes JetBrains/intellij-platform-gradle-plugin#116)
+- Added `intellij.ideaDependencyCachePath` option (fixes JetBrains/intellij-platform-gradle-plugin#127)
 - `project()` reference can be used as a plugin-dependency (fixes JetBrains/intellij-platform-gradle-plugin#17)
-- fix attaching sources of builtin plugins (fixes JetBrains/intellij-platform-gradle-plugin#153)
+- Fix attaching sources of builtin plugins (fixes JetBrains/intellij-platform-gradle-plugin#153)
 
 ## [0.1.10]
 
@@ -1302,7 +1290,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ## [0.1.6]
 
-- External plugin directories are placed in compile classpath so IDEA code insight is better for them now (fixes JetBrains/intellij-platform-gradle-plugin#105)
+- External plugin directories are placed in the compiler classpath, so IDEA code insight is better for them now (fixes JetBrains/intellij-platform-gradle-plugin#105)
 
 ## [0.1.4]
 
@@ -1365,7 +1353,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 ## [0.0.21]
 
-- IntelliJ-specific jars are attached as compile dependency (fixes JetBrains/intellij-platform-gradle-plugin#5)
+- IntelliJ-specific jars are attached as compiler dependency (fixes JetBrains/intellij-platform-gradle-plugin#5)
 
 ## [0.0.10]
 

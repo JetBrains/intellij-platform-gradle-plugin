@@ -36,5 +36,5 @@ interface Resolver<T> {
         .firstNotNullOfOrNull { (label, block) ->
             block()?.also { log.debug("'$label' resolved as: $it") }
         }
-        .let { requireNotNull(it) { "Cannot resolve '$subject'" + subjectInput?.let { " with: '$it'" }.orEmpty() } }
+        .run { requireNotNull(this) { "Cannot resolve '$subject'" + subjectInput?.let { " with: '$it'" }.orEmpty() } }
 }
