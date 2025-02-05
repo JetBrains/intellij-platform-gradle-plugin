@@ -819,6 +819,20 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
              *
+             * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
+             * @param version The provider for the version of the IntelliJ Platform dependency.
+             * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
+             */
+            fun ide(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>) = dependenciesHelper.addIntelliJPlatformDependency(
+                typeProvider = type,
+                versionProvider = version,
+                useInstallerProvider = useInstaller,
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
+
+            /**
+             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
+             *
              * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
             fun ide(notation: String) = dependenciesHelper.addIntelliJPluginVerifierIdes(

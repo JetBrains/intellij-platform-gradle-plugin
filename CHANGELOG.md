@@ -4,6 +4,16 @@
 
 ### Added
 
+- Add `ide(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>)` overload to the `pluginVerification.ides` block.
+
+### Fixed
+
+- Fixed the broken path resolution in the `bundledLibrary` helper and the `TestFrameworkType.Bundled` test framework
+
+## [2.2.1] - 2025-01-21
+
+### Added
+
 - Introduce LSP API Test Framework entry as `TestFrameworkType.Plugin.LSP`
 
 ### Changed
@@ -1361,7 +1371,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.2.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.2.1...HEAD
+[2.2.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.1...v2.1.0
 [2.0.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.0...v2.0.1

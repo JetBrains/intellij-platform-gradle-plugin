@@ -1,6 +1,6 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
 
 fun properties(key: String) = providers.gradleProperty(key)
 fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
@@ -66,6 +66,7 @@ dependencies {
     additionalPluginClasspath(embeddedKotlin("gradle-plugin"))
 
     api(libs.okio)
+    api(libs.okhttp)
     api(libs.retrofit)
 
     testImplementation(gradleTestKit())
@@ -190,11 +191,11 @@ fun Test.configureTests() {
     outputs.dir(testGradleHome)
 }
 
-val dokkaHtml by tasks.existing(DokkaTask::class)
+val dokkaGeneratePublicationHtml by tasks.existing(DokkaGeneratePublicationTask::class)
 val javadocJar by tasks.registering(Jar::class) {
-    dependsOn(dokkaHtml)
+    dependsOn(dokkaGeneratePublicationHtml)
     archiveClassifier.set("javadoc")
-    from(dokkaHtml.map { it.outputDirectory })
+    from(dokkaGeneratePublicationHtml.map { it.outputDirectory })
     patchManifest()
 }
 
