@@ -251,37 +251,41 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             })
 
             project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
+                val kotlinPluginVersion = project.extensions.getByName("kotlin")
+                    .withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
+
                 val compileKotlinTaskProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN)
-                val kotlinOptionsProvider = compileKotlinTaskProvider.map {
-                    it.withGroovyBuilder { getProperty("kotlinOptions") }
-                        .withGroovyBuilder { getProperty("options") }
+                val compilerOptionsProvider = when {
+                    Version.parse(kotlinPluginVersion) >= Version(1, 8, 0) ->
+                        compileKotlinTaskProvider.map {
+                            it.withGroovyBuilder { getProperty("compilerOptions") }
+                        }
+
+                    else ->
+                        compileKotlinTaskProvider.map {
+                            it.withGroovyBuilder { getProperty("kotlinOptions") }
+                                .withGroovyBuilder { getProperty("options") }
+                        }
                 }
-                // TODO: Could be a better option as `kotlinOptions` is marked as deprecated
-                // val compilerOptionsProvider = compileKotlinTaskProvider.map {
-                //     it.withGroovyBuilder { getProperty("compilerOptions") }
-                // }
 
                 kotlinPluginAvailable.convention(true)
 
-                kotlinJvmTarget.convention(kotlinOptionsProvider.flatMap {
+                kotlinJvmTarget.convention(compilerOptionsProvider.flatMap {
                     it.withGroovyBuilder { getProperty("jvmTarget") as Property<*> }
                         .map { jvmTarget -> jvmTarget.withGroovyBuilder { getProperty("target") } }
                         .map { value -> value as String }
                 })
-                kotlinApiVersion.convention(kotlinOptionsProvider.flatMap {
+                kotlinApiVersion.convention(compilerOptionsProvider.flatMap {
                     it.withGroovyBuilder { getProperty("apiVersion") as Property<*> }
                         .map { apiVersion -> apiVersion.withGroovyBuilder { getProperty("version") } }
                         .map { value -> value as String }
                 })
-                kotlinLanguageVersion.convention(kotlinOptionsProvider.flatMap {
+                kotlinLanguageVersion.convention(compilerOptionsProvider.flatMap {
                     it.withGroovyBuilder { getProperty("languageVersion") as Property<*> }
                         .map { languageVersion -> languageVersion.withGroovyBuilder { getProperty("version") } }
                         .map { value -> value as String }
                 })
-                kotlinVersion.convention(
-                    project.extensions.getByName("kotlin")
-                        .withGroovyBuilder { getProperty("coreLibrariesVersion") as String }
-                )
+                kotlinVersion.convention(kotlinPluginVersion)
                 kotlinStdlibDefaultDependency.convention(
                     project.providers
                         .gradleProperty("kotlin.stdlib.default.dependency")
