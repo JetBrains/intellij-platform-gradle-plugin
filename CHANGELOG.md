@@ -5,6 +5,7 @@
 ### Added
 
 - Add `ide(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>)` overload to the `pluginVerification.ides` block.
+- Warn that since the IntelliJ Platform version `2025.1` (build `251`), the required Kotlin version is `2.0.0` or higher.
 
 ### Fixed
 
