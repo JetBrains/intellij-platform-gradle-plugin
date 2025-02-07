@@ -251,10 +251,15 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             })
 
             project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
-                val kotlinOptionsProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN).map {
+                val compileKotlinTaskProvider = project.tasks.named(Tasks.External.COMPILE_KOTLIN)
+                val kotlinOptionsProvider = compileKotlinTaskProvider.map {
                     it.withGroovyBuilder { getProperty("kotlinOptions") }
                         .withGroovyBuilder { getProperty("options") }
                 }
+                // TODO: Could be a better option as `kotlinOptions` is marked as deprecated
+                // val compilerOptionsProvider = compileKotlinTaskProvider.map {
+                //     it.withGroovyBuilder { getProperty("compilerOptions") }
+                // }
 
                 kotlinPluginAvailable.convention(true)
 
