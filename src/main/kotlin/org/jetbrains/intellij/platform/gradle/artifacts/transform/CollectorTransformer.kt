@@ -139,7 +139,6 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
         .asSequence()
         .filter { it.os == ProductInfo.Launch.OS.current }
         .flatMap { it.bootClassPathJarNames }
-        .minus("junit4.jar") // exclude `junit4.jar` from the list as JUnit shouldn't be in the classpath
         .map { "lib/$it" }
         .plus(
             when (productInfo.productCode.toIntelliJPlatformType()) {
@@ -151,6 +150,13 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
                 else -> emptyList()
             }
         )
+        .plus(
+            productInfo.layout
+                .filter { it.name == "com.intellij" }
+                .flatMap { it.classPath }
+        )
+        .minus("lib/junit4.jar") // exclude `junit4.jar` from the list as JUnit shouldn't be in the classpath
+        .minus("lib/testFramework.jar") // same for the Test Framework fat jar
         .map { intellijPlatformPath.resolve(it) }
         .mapNotNull { it.takeIf { it.exists() } }
         .toSet()
