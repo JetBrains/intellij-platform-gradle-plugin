@@ -811,9 +811,12 @@ class IntelliJPlatformDependenciesHelper(
         val id = requireNotNull(pluginId)
         val version = ide.version.toString()
 
-        return dependencies
+        val pluginWithRequiredModules =
+            sequenceOf(this) + modulesDescriptors.asSequence().filter { it.loadingRule.required }.map { it.module }
+        
+        return pluginWithRequiredModules.flatMap { it.dependencies.asSequence() }
             .mapNotNull { ide.findPluginById(it.id) }
-            .map {
+            .mapTo(ArrayList()) {
                 val name = requireNotNull(it.pluginId)
                 val group = when {
                     it is IdeModule -> Dependencies.BUNDLED_MODULE_GROUP
