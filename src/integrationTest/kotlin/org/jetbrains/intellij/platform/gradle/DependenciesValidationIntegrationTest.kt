@@ -295,17 +295,31 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 |    |              |         +--- bundledPlugin:com.intellij.java:IC-243.21565.193
                 |    |              |         |    +--- bundledPlugin:com.intellij.copyright:IC-243.21565.193 (*)
                 |    |              |         |    +--- bundledPlugin:com.intellij.platform.images:IC-243.21565.193
+                |    |              |         |    +--- bundledPlugin:training:IC-243.21565.193
+                |    |              |         |    |    +--- bundledModule:intellij.platform.tips:IC-243.21565.193
+                |    |              |         |    |    +--- bundledModule:intellij.platform.lvcs.impl:IC-243.21565.193
+                |    |              |         |    |    |    \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
+                |    |              |         |    |    +--- bundledPlugin:Git4Idea:IC-243.21565.193 (*)
+                |    |              |         |    |    +--- bundledModule:intellij.platform.ide.newUiOnboarding:IC-243.21565.193
+                |    |              |         |    |    \--- bundledModule:intellij.platform.ide.newUsersOnboarding:IC-243.21565.193
+                |    |              |         |    |         +--- bundledModule:intellij.platform.ide.newUiOnboarding:IC-243.21565.193
+                |    |              |         |    |         \--- bundledModule:intellij.platform.experiment:IC-243.21565.193
                 |    |              |         |    +--- bundledModule:intellij.performanceTesting.vcs:IC-243.21565.193
                 |    |              |         |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
                 |    |              |         |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
                 |    |              |         |    +--- bundledPlugin:com.jetbrains.performancePlugin:IC-243.21565.193 (*)
+                |    |              |         |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
                 |    |              |         |    \--- bundledPlugin:org.jetbrains.plugins.terminal:IC-243.21565.193 (*)
                 |    |              |         +--- bundledPlugin:com.intellij.modules.json:IC-243.21565.193
                 |    |              |         +--- bundledPlugin:org.intellij.plugins.markdown:IC-243.21565.193 (*)
                 |    |              |         +--- bundledPlugin:com.intellij.properties:IC-243.21565.193
                 |    |              |         |    \--- bundledPlugin:com.intellij.copyright:IC-243.21565.193 (*)
                 |    |              |         \--- bundledPlugin:org.jetbrains.plugins.yaml:IC-243.21565.193 (*)
-                |    |              \--- bundledPlugin:com.intellij.platform.images:IC-243.21565.193
+                |    |              +--- bundledPlugin:com.intellij.platform.images:IC-243.21565.193
+                |    |              \--- bundledModule:intellij.platform.compose:IC-243.21565.193
+                |    |                   +--- bundledModule:intellij.libraries.compose.desktop:IC-243.21565.193
+                |    |                   |    \--- bundledModule:intellij.libraries.skiko:IC-243.21565.193
+                |    |                   \--- bundledModule:intellij.libraries.skiko:IC-243.21565.193
                 |    \--- bundledModule:intellij.platform.coverage:IC-243.21565.193
                 |         \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
                 \--- idea:ideaIC:2024.3
@@ -340,8 +354,14 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES) {
             assertContains(
                 """
-                |    +--- bundledModule:intellij.platform.coverage:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
+                +--- bundledModule:intellij.platform.coverage:IC-243.21565.193 (*)
+                """.trimIndent(),
+                output,
+            )
+            assertContains(
+                """
+                |    |    |    |    |    \--- bundledModule:intellij.platform.coverage:IC-243.21565.193
+                |    |    |    |    |         \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
                 """.trimIndent(),
                 output,
             )
