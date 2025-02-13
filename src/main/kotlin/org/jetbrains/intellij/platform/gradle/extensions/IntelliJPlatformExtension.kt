@@ -29,7 +29,10 @@ import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
-import org.jetbrains.intellij.platform.gradle.tasks.*
+import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
+import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
+import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
@@ -454,7 +457,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                             it.runCatching { productInfo.buildNumber.toVersion() }.getOrDefault(Version())
                         }
                         sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
-                        untilBuild.convention(buildVersion.map { "${it.major}.*" })
+                        untilBuild.convention(buildVersion.flatMap { version ->
+                            if (version.major >= 243) {
+                                project.provider { null }
+                            } else {
+                                project.provider { "${version.major}.*" }
+                            }
+                        })
                     }
             }
         }

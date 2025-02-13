@@ -329,6 +329,38 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `report ignored until-build for version 243 or higher`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            sinceBuild = "243"
+                            untilBuild = "243.*"
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="243" until-build="243.*" />
+                </idea-plugin>
+                """.trimIndent()
+
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertContains(HEADER, output)
+            assertContains(
+                "- The until-build property is ignored for IntelliJ Platform version 243 or higher.", output
+            )
+        }
+    }
+
+    @Test
     fun `report invalid sinceBuild if contains wildcard`() {
         buildFile write //language=kotlin
                 """

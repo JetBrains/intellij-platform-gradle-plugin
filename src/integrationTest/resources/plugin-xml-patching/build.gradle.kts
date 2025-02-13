@@ -1,5 +1,8 @@
 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
+val languageVersionProperty = providers.gradleProperty("languageVersion").map { it.toInt() }
+val sinceBuildProperty = providers.gradleProperty("sinceBuild")
+val untilBuildProperty = providers.gradleProperty("untilBuild")
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -9,7 +12,7 @@ plugins {
 version = "1.0.0"
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain(languageVersionProperty.get())
 }
 
 repositories {
@@ -23,7 +26,6 @@ repositories {
 dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
-        instrumentationTools()
     }
 }
 
@@ -33,8 +35,8 @@ intellijPlatform {
 
     pluginConfiguration {
         ideaVersion {
-            sinceBuild = "231"
-            untilBuild = "233.*"
+            sinceBuild = sinceBuildProperty
+            untilBuild = untilBuildProperty
         }
     }
 }

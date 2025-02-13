@@ -10,9 +10,17 @@ class PluginXmlPatchingIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "plugin-xml-patching",
 ) {
 
+    override val defaultProjectProperties
+        get() = super.defaultProjectProperties + mapOf(
+            "languageVersion" to "17",
+            "sinceBuild" to "231",
+        )
+
     @Test
     fun `patch plugin_xml`() {
-        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties) {
+        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties + mapOf(
+            "untilBuild" to "233.*"
+        )) {
             assertTaskOutcome(Tasks.PATCH_PLUGIN_XML, TaskOutcome.SUCCESS)
 
             val patchedPluginXml = buildDirectory.resolve("tmp/patchPluginXml/plugin.xml")
@@ -26,6 +34,25 @@ class PluginXmlPatchingIntegrationTest : IntelliJPlatformIntegrationTestBase(
             patchedPluginXml containsText //language=xml
                     """
                     <idea-version since-build="231" until-build="233.*" />
+                    """.trimIndent()
+        }
+    }
+
+    @Test
+    fun `patch plugin_xml and set the until-build to null if targeted 243+`() {
+        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties + mapOf(
+            "intellijPlatform.version" to "2024.3",
+            "languageVersion" to "21",
+            "sinceBuild" to "243",
+        )) {
+            assertTaskOutcome(Tasks.PATCH_PLUGIN_XML, TaskOutcome.SUCCESS)
+
+            val patchedPluginXml = buildDirectory.resolve("tmp/patchPluginXml/plugin.xml")
+            assertExists(patchedPluginXml)
+
+            patchedPluginXml containsText //language=xml
+                    """
+                    <idea-version since-build="243" />
                     """.trimIndent()
         }
     }

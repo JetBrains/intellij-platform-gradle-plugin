@@ -7,6 +7,7 @@
 - Add `ide(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>)` overload to the `pluginVerification.ides` block.
 - Warn that since the IntelliJ Platform version `2025.1` (build `251`), the required Kotlin version is `2.0.0` or higher.
 - Load the `com.intellij` bundled module by default for all IntelliJ Platform types
+- Warn when the "until-build" property is specified for IntelliJ Platform version 243 or higher, as it is ignored
 
 ### Fixed
 

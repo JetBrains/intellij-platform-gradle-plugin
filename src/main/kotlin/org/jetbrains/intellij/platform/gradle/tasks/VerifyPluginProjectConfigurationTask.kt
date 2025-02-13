@@ -133,6 +133,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                         if (sinceBuild.major < platformBuild.major) {
                             yield("The since-build='$sinceBuild' is lower than the target IntelliJ Platform major version: '${platformBuild.major}'.")
                         }
+                        if (sinceBuild.major >= 243 && file.parse { ideaVersion.untilBuild != null }) {
+                            yield("The until-build property is ignored for IntelliJ Platform version 243 or higher.")
+                        }
                         if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
                             yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility='$sinceBuildJavaVersion'.")
                         }
