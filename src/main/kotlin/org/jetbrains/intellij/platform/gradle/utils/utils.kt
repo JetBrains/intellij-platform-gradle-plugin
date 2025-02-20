@@ -1,13 +1,16 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij.platform.gradle.utils
 
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import com.jetbrains.plugin.structure.intellij.problems.AnyProblemToWarningPluginCreationResultResolver
 import com.jetbrains.plugin.structure.intellij.problems.IntelliJPluginCreationResultResolver
 import com.jetbrains.plugin.structure.intellij.problems.JetBrainsPluginCreationResultResolver
 import com.jetbrains.plugin.structure.intellij.problems.PluginCreationResultResolver
+import com.jetbrains.plugin.structure.intellij.problems.remapping.JsonUrlProblemLevelRemappingManager
+import com.jetbrains.plugin.structure.intellij.problems.remapping.RemappingSet.JETBRAINS_PLUGIN_REMAPPING_SET
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -139,9 +142,12 @@ internal fun IdePluginManager.safelyCreatePlugin(path: Path, validateDescriptor:
 
 private fun getProblemResolver(suppressPluginProblems: Boolean): PluginCreationResultResolver {
     return if (suppressPluginProblems) {
-        JetBrainsPluginCreationResultResolver.fromClassPathJson(IntelliJPluginCreationResultResolver())
+        AnyProblemToWarningPluginCreationResultResolver
     } else {
-        IntelliJPluginCreationResultResolver()
+        val levelRemapping = JsonUrlProblemLevelRemappingManager
+            .fromClassPathJson()
+            .getLevelRemapping(JETBRAINS_PLUGIN_REMAPPING_SET)
+        JetBrainsPluginCreationResultResolver(IntelliJPluginCreationResultResolver(), levelRemapping)
     }
 }
 
