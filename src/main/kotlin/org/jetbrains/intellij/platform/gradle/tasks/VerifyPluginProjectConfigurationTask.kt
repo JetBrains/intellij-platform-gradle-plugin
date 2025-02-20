@@ -165,10 +165,10 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             }
 
             if (platformBuild < MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
-                yield("The minimal supported IntelliJ Platform version is `$MINIMAL_INTELLIJ_PLATFORM_VERSION` (build `$MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER`), current: '$platformVersion' ('$platformBuild')")
+                yield("The minimal supported IntelliJ Platform version is $MINIMAL_INTELLIJ_PLATFORM_VERSION ($MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER), current: $platformVersion ($platformBuild)")
             }
             if (platformBuild >= Version(251) && kotlinVersion < Version(2)) {
-                yield("Since the IntelliJ Platform version `2025.1` (build `251`), the required Kotlin version is `2.0.0` or higher, current: '$kotlinVersion'.")
+                yield("When targeting the IntelliJ Platform in version 2025.1+ (251+), the required Kotlin version is 2.0.0+, current: $kotlinVersion")
             }
             if (platformJavaVersion > sourceCompatibilityJavaVersion) {
                 yield("The Java configuration specifies sourceCompatibility='$sourceCompatibilityJavaVersion' but IntelliJ Platform '$platformVersion' requires sourceCompatibility='$platformJavaVersion'.")
