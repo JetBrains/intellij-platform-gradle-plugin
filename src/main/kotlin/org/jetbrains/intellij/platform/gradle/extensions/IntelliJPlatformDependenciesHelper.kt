@@ -231,12 +231,14 @@ class IntelliJPlatformDependenciesHelper(
         configurations[configurationName].dependencies.addLater(cachedProvider {
             val type = finalTypeProvider.orNull
             val version = finalVersionProvider.orNull
+            val useInstaller = finalUseInstallerProvider.orNull != false
+
             requireNotNull(type) { "The IntelliJ Platform dependency helper was called with no `type` value provided." }
             requireNotNull(version) { "The IntelliJ Platform dependency helper was called with no `version` value provided." }
 
             when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-                else -> when (finalUseInstallerProvider.orNull ?: true) {
+                else -> when (useInstaller) {
                     true -> dependencies.createIntelliJPlatformInstaller(type, version)
                     false -> dependencies.createIntelliJPlatform(type, version)
                 }
@@ -663,6 +665,10 @@ class IntelliJPlatformDependenciesHelper(
     private fun DependencyHandler.createIntelliJPlatformInstaller(type: IntelliJPlatformType, version: String): Dependency {
         requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
 
+        if (type == IntelliJPlatformType.Rider) {
+            log.warn("Using Rider as a target IntelliJ Platform with `useInstaller = true` is currently not supported, please set `useInstaller = false` instead. See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1852")
+        }
+
         val (extension, classifier) = with(OperatingSystem.current()) {
             val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
             when {
@@ -813,7 +819,7 @@ class IntelliJPlatformDependenciesHelper(
 
         val pluginWithRequiredModules =
             sequenceOf(this) + modulesDescriptors.asSequence().filter { it.loadingRule.required }.map { it.module }
-        
+
         return pluginWithRequiredModules.flatMap { it.dependencies.asSequence() }
             .mapNotNull { ide.findPluginById(it.id) }
             .mapTo(ArrayList()) {

@@ -57,7 +57,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 import org.jetbrains.intellij.platform.gradle.tasks.*
                 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
                 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
-                
+                   
                 version = "1.0.0"
                 
                 plugins {
@@ -80,7 +80,11 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 
                 dependencies {
                     intellijPlatform {
-                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                        val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
+                        val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
+                        val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
+                        
+                        create(type, version, useInstaller = useInstaller)
                     }
                 }
                             
