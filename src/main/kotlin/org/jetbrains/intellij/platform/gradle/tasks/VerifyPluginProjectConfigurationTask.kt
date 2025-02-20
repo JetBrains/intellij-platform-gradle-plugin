@@ -114,7 +114,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         val kotlinLanguageVersion = kotlinLanguageVersion.orNull?.toVersion()
         val kotlinPluginAvailable = kotlinPluginAvailable.get()
         val kotlinStdlibDefaultDependency = kotlinStdlibDefaultDependency.orNull != false
-        val kotlinVersion = kotlinVersion.get().toVersion()
+        val kotlinVersion = kotlinVersion.orNull?.toVersion()
         val kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get()
         val platformKotlinLanguageVersion = getPlatformKotlinVersion(platformBuild)?.run { "$major.$minor".toVersion() }
 
