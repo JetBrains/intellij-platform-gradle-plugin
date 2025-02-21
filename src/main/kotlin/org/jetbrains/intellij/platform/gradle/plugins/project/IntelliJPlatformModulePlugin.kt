@@ -76,10 +76,11 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 isCanBeConsumed = true
                 isCanBeResolved = false
 
-                applyVariantCommonAttributes {
-                    attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_API))
-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
-                }
+                // TODO: a possible fix for #1892
+                // applyVariantCommonAttributes {
+                //     attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_API))
+                //     attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
+                // }
 
                 /**
                  * A separate consumable [Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API] configuration is necessary so that we can register

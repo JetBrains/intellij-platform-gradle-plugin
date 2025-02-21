@@ -47,7 +47,8 @@ abstract class ComposedJarTask : Jar() {
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
                 val intellijPlatformComposedJarConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR]
-                val intellijPlatformComposedJarApiConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API]
+                // TODO: a possible fix for #1892
+                // val intellijPlatformComposedJarApiConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API]
 
                 val sourceTaskProvider = project.extensionProvider.flatMap {
                     it.instrumentCode.flatMap { value ->
@@ -72,8 +73,8 @@ abstract class ComposedJarTask : Jar() {
                 JarCompanion.applyPluginManifest(this)
 
                 intellijPlatformComposedJarConfiguration.outgoing.artifact(this)
-                intellijPlatformComposedJarApiConfiguration.outgoing.artifact(this)
-
+                // TODO: a possible fix for #1892
+                // intellijPlatformComposedJarApiConfiguration.outgoing.artifact(this)
                 softwareComponentFactory.adhoc(Components.INTELLIJ_PLATFORM).apply {
                     project.components.add(this)
                     addVariantsFromConfiguration(intellijPlatformComposedJarConfiguration) {
