@@ -130,7 +130,7 @@ testing {
 
         register<JvmTestSuite>("integrationTest") {
             useJUnit()
-            testType.set(TestSuiteType.INTEGRATION_TEST)
+//            testType.set(TestSuiteType.INTEGRATION_TEST)
 
             dependencies {
                 implementation(project())
