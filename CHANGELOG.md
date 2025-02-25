@@ -14,6 +14,7 @@
 
 - Fixed the broken path resolution in the `bundledLibrary` helper and the `TestFrameworkType.Bundled` test framework
 - Fixed configuring dependencies on plugins with required content modules. JetBrains/intellij-platform-gradle-plugin#1883
+- Fixed dependencies between submodules. JetBrains/intellij-platform-gradle-plugin#1854
 
 ## [2.2.1] - 2025-01-21
 
