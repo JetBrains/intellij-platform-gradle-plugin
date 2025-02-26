@@ -45,26 +45,12 @@ abstract class TestIdeUiTask : Test(), TestableAware {
         description = "Runs the IDE instance with the developed plugin and Starter framework for UI testing."
     }
 
-    /**
-     * TODO: Make sure it relies on sandbox.
-     */
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<TestIdeUiTask>(configureWithType = false) {
+            project.registerTask<TestIdeUiTask> {
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
-//                val prepareTestIdeUiSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_UI_SANDBOX)
 
-//                applySandboxFrom(prepareTestIdeUiSandboxTaskProvider)
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
-
-//                jvmArgumentProviders.add(
-//                    SandboxArgumentProvider(
-//                        sandboxConfigDirectory,
-//                        sandboxPluginsDirectory,
-//                        sandboxSystemDirectory,
-//                        sandboxLogDirectory,
-//                    )
-//                )
             }
     }
 }
