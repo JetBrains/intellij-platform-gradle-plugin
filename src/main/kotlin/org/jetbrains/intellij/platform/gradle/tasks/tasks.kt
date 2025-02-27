@@ -118,8 +118,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 javaToolchainService = project.serviceOf<JavaToolchainService>(),
             )
 
-            runtimeDirectory = layout.dir(provider {
-                // TODO: this gets invoked several times – memoize?
+            runtimeDirectory = layout.dir(cachedProvider(objects, providers) {
                 javaRuntimePathResolver.resolve().toFile()
             })
             runtimeMetadata = providers.of(JavaRuntimeMetadataValueSource::class) {

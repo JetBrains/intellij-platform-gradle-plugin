@@ -106,25 +106,13 @@ class IntelliJPlatformDependenciesHelper(
      * Helper function for creating cached [ProviderFactory.provider].
      */
     internal inline fun <reified T> cachedProvider(crossinline value: () -> T) =
-        objects
-            .property<T>()
-            .value(providers.provider { value() })
-            .apply {
-                disallowChanges()
-                finalizeValueOnRead()
-            }
+        cachedProvider(objects, providers, value)
 
     /**
      * Helper function for creating cached list [ProviderFactory.provider].
      */
     internal inline fun <reified T> cachedListProvider(crossinline value: () -> List<T>) =
-        objects
-            .listProperty<T>()
-            .value(providers.provider { value() })
-            .apply {
-                disallowChanges()
-                finalizeValueOnRead()
-            }
+        cachedListProvider(objects, providers, value)
 
     //<editor-fold desc="Configuration Accessors">
 

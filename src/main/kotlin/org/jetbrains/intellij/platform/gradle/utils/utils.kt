@@ -19,10 +19,14 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.GradleInternal
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.PluginManager
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.resources.ResourceHandler
+import org.gradle.kotlin.dsl.listProperty
+import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
@@ -41,7 +45,11 @@ val FileSystemLocation.asPath
 internal val <T : FileSystemLocation> Provider<T>.asPath
     get() = get().asFile.toPath().absolute()
 
-internal fun ConfigurationContainer.create(name: String, description: String, configuration: Configuration.() -> Unit = {}) =
+internal fun ConfigurationContainer.create(
+    name: String,
+    description: String,
+    configuration: Configuration.() -> Unit = {},
+) =
     maybeCreate(name).apply {
         isVisible = false
         isCanBeConsumed = false
@@ -129,7 +137,11 @@ internal fun Path.resolvePluginPath() = deepResolve {
     }
 }
 
-internal fun IdePluginManager.safelyCreatePlugin(path: Path, validateDescriptor: Boolean = false, suppressPluginProblems: Boolean = true) =
+internal fun IdePluginManager.safelyCreatePlugin(
+    path: Path,
+    validateDescriptor: Boolean = false,
+    suppressPluginProblems: Boolean = true,
+) =
     createPlugin(path, validateDescriptor, problemResolver = getProblemResolver(suppressPluginProblems)).runCatching {
         if (this is PluginCreationFail) {
             val details = errorsAndWarnings.joinToString(separator = "\n") { it.message }
@@ -165,3 +177,33 @@ internal val PluginManager.isModule
 
 // TODO: migrate to `project.resources.binary` whenever it's available. Ref: https://github.com/gradle/gradle/issues/25237
 internal fun ResourceHandler.resolveUrl(url: Property<String>) = text.fromUri(url).asFile("UTF-8")
+
+/**
+ * Helper function for creating cached [ProviderFactory.provider].
+ */
+internal inline fun <reified T> cachedProvider(
+    objects: ObjectFactory,
+    providers: ProviderFactory,
+    crossinline value: () -> T,
+) = objects
+    .property<T>()
+    .value(providers.provider { value() })
+    .apply {
+        disallowChanges()
+        finalizeValueOnRead()
+    }
+
+/**
+ * Helper function for creating cached list [ProviderFactory.provider].
+ */
+internal inline fun <reified T> cachedListProvider(
+    objects: ObjectFactory,
+    providers: ProviderFactory,
+    crossinline value: () -> List<T>,
+) = objects
+    .listProperty<T>()
+    .value(providers.provider { value() })
+    .apply {
+        disallowChanges()
+        finalizeValueOnRead()
+    }
