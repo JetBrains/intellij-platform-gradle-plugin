@@ -20,7 +20,6 @@ import org.gradle.api.initialization.resolve.RulesMode
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.api.resources.ResourceHandler
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.*
@@ -63,7 +62,6 @@ class IntelliJPlatformDependenciesHelper(
     private val layout: ProjectLayout,
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,
-    private val resources: ResourceHandler,
     private val rootProjectDirectory: Path,
     private val metadataRulesModeProvider: Provider<RulesMode>,
 ) {
@@ -581,8 +579,6 @@ class IntelliJPlatformDependenciesHelper(
         providers.of(ProductReleasesValueSource::class.java) {
             parameters.jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
             parameters.androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
-            parameters.jetbrainsIdes = resources.resolveUrl(parameters.jetbrainsIdesUrl)
-            parameters.androidStudio = resources.resolveUrl(parameters.androidStudioUrl)
 
             parameters(configure)
         }

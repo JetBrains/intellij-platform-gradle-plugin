@@ -9,6 +9,7 @@
 ### Fixed
 
 - Performance improvement: memoize the `JavaRuntimePathResolver` resolution.
+- Performance improvement: do not resolve JetBrains IDEs/Android Studio release URLs in the configuration phase.
 
 ## [2.3.0] - 2025-02-27
 
