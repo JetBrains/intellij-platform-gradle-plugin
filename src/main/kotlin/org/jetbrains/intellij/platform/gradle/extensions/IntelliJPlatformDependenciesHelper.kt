@@ -662,7 +662,10 @@ class IntelliJPlatformDependenciesHelper(
      * @param version IntelliJ Platform version.
      * @param type IntelliJ Platform type.
      */
-    private fun DependencyHandler.createIntelliJPlatformInstaller(type: IntelliJPlatformType, version: String): Dependency {
+    private fun DependencyHandler.createIntelliJPlatformInstaller(
+        type: IntelliJPlatformType,
+        version: String,
+    ): Dependency {
         requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
 
         if (type == IntelliJPlatformType.Rider) {
@@ -728,7 +731,11 @@ class IntelliJPlatformDependenciesHelper(
      * @param version The version of the plugin.
      * @param group The channel of the plugin. Can be null or empty for the default channel.
      */
-    private fun DependencyHandler.createIntelliJPlatformPlugin(pluginId: String, version: String, group: String): Dependency {
+    private fun DependencyHandler.createIntelliJPlatformPlugin(
+        pluginId: String,
+        version: String,
+        group: String,
+    ): Dependency {
         val groupId = group.substringBefore('@').ifEmpty { Dependencies.MARKETPLACE_GROUP }
         val channel = group.substringAfter('@', "")
 
@@ -1043,20 +1050,21 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param platformPathProvider The path to the IntelliJ Platform to be used for resolving JetBrains Runtime version.
      */
-    internal fun obtainJetBrainsRuntimeVersion(platformPathProvider: Provider<Path> = provider { platformPath }) = cachedProvider {
-        val dependencies = runCatching {
-            platformPathProvider.get().resolve("dependencies.txt").takeIf { it.exists() }
-        }.getOrNull() ?: return@cachedProvider null
+    internal fun obtainJetBrainsRuntimeVersion(platformPathProvider: Provider<Path> = provider { platformPath }) =
+        cachedProvider {
+            val dependencies = runCatching {
+                platformPathProvider.get().resolve("dependencies.txt").takeIf { it.exists() }
+            }.getOrNull() ?: return@cachedProvider null
 
-        val version = FileReader(dependencies.toFile()).use { reader ->
-            with(Properties()) {
-                load(reader)
-                getProperty("runtimeBuild") ?: getProperty("jdkBuild")
-            }
-        } ?: return@cachedProvider null
+            val version = FileReader(dependencies.toFile()).use { reader ->
+                with(Properties()) {
+                    load(reader)
+                    getProperty("runtimeBuild") ?: getProperty("jdkBuild")
+                }
+            } ?: return@cachedProvider null
 
-        buildJetBrainsRuntimeVersion(version)
-    }
+            buildJetBrainsRuntimeVersion(version)
+        }
 
     /**
      * Creates a dependency.
@@ -1118,7 +1126,13 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @see writtenIvyModules
      */
-    private fun writeIvyModule(group: String, artifact: String, version: String, artifactPath: Path?, block: () -> IvyModule): IvyModule {
+    private fun writeIvyModule(
+        group: String,
+        artifact: String,
+        version: String,
+        artifactPath: Path?,
+        block: () -> IvyModule,
+    ): IvyModule {
         val fileName = "$group-$artifact-$version.xml"
 
         // See comments on writtenIvyModules
