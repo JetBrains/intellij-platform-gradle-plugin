@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Register the `TestIdeUiTask` for Starter purposes.
+
 ### Fixed
 
 - Performance improvement: memoize the `JavaRuntimePathResolver` resolution.
