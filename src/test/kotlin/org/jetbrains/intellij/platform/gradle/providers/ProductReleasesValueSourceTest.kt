@@ -97,8 +97,6 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
                         parameters {
                             jetbrainsIdesUrl = "${resourceUrl("products-releases/idea-releases-list.xml")}"
                             androidStudioUrl = "${resourceUrl("products-releases/android-studio-releases-list.xml")}"
-                            jetbrainsIdes = resources.text.fromUri(parameters.jetbrainsIdesUrl).asFile("UTF-8")
-                            androidStudio = resources.text.fromUri(parameters.androidStudioUrl).asFile("UTF-8")
                 
                             sinceBuild = "$sinceBuild"
                             untilBuild = "$untilBuild"
