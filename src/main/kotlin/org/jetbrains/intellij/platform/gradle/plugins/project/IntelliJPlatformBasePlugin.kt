@@ -49,8 +49,19 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             apply(IdeaPlugin::class)
         }
 
-        val dependenciesHelper = with(project) {
-            IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, rootProjectPath, project.settings.dependencyResolutionManagement.rulesMode)
+        val dependenciesHelper by lazy {
+            with(project) {
+                IntelliJPlatformDependenciesHelper(
+                    configurations,
+                    dependencies,
+                    layout,
+                    objects,
+                    providers,
+                    gradle,
+                    rootProjectPath,
+                    project.settings.dependencyResolutionManagement.rulesMode
+                )
+            }
         }
 
         /**

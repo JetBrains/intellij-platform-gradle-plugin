@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import com.jetbrains.plugin.structure.ide.createIde
-import com.jetbrains.plugin.structure.ide.layout.MissingLayoutFileMode.SKIP_SILENTLY
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
@@ -17,6 +15,7 @@ import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.initialization.resolve.RulesMode
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
@@ -35,6 +34,7 @@ import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSo
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
+import org.jetbrains.intellij.platform.gradle.services.IdesManagerService
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
@@ -45,6 +45,8 @@ import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.*
+
+private const val IDES_MANAGER = "idesManager"
 
 /**
  * Helper class for managing dependencies on the IntelliJ Platform in Gradle projects.
@@ -62,12 +64,19 @@ class IntelliJPlatformDependenciesHelper(
     private val layout: ProjectLayout,
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,
+    private val gradle: Gradle,
     private val rootProjectDirectory: Path,
     private val metadataRulesModeProvider: Provider<RulesMode>,
 ) {
 
     private val log = Logger(javaClass)
     private val pluginManager = IdePluginManager.createManager()
+
+    private val idesManager = gradle.sharedServices.registerIfAbsent(IDES_MANAGER, IdesManagerService::class) {
+        parameters.intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY]
+    }
+
+    internal val ideProvider = idesManager.map { it.ide }
 
     /**
      * Key is Ivy module XML filename.
@@ -138,13 +147,6 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal val productInfo by lazy {
         platformPath.productInfo()
-    }
-
-    internal val ide by lazy {
-        createIde {
-            missingLayoutFileMode = SKIP_SILENTLY
-            path = platformPath
-        }
     }
 
     //</editor-fold>
@@ -736,7 +738,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param id The ID of the bundled plugin.
      */
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(id: String): Dependency {
-        val plugin = ide.findPluginById(id)
+        val plugin = ideProvider.get().findPluginById(id)
         requireNotNull(plugin) {
             val unresolvedPluginId = when (id) {
                 "copyright" -> "Use correct plugin ID 'com.intellij.copyright' instead of 'copyright'."
@@ -805,6 +807,7 @@ class IntelliJPlatformDependenciesHelper(
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
         // Should be the same as [createIntelliJPlatformBundledPlugin]
+        val ide = ideProvider.get()
         val id = requireNotNull(pluginId)
         val version = ide.version.toString()
 
