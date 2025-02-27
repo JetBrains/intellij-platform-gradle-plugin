@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.3.0] - 2025-02-27
+
 ### Added
 
 - Warn that using Rider as a target IntelliJ Platform with `useInstaller = true` is currently not supported, please set `useInstaller = false` instead. JetBrains/intellij-platform-gradle-plugin#1852
@@ -1277,7 +1279,7 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 - Added JPS-type for intellij dependency (fixes JetBrains/intellij-platform-gradle-plugin#106)
 - PatchXml action is reimplemented, now it's possible to freely customize input files, destination directory, since/until builds, plugin description, and version
 - PublishTask is reimplemented, now it's possible to set several channels to upload (fixes JetBrains/intellij-platform-gradle-plugin#117)
--
+- 
     - it's possible to reuse reimplemented tasks in client's code
     - it's allowed to run tasks without plugin.xml
     - tasks are configured before project evaluation, `project.afterEvaluate` is not require anymore
@@ -1365,7 +1367,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.2.1...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.2.1...v2.3.0
 [2.2.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.2.0...v2.2.1
 [2.2.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.0.1...v2.1.0
