@@ -98,7 +98,6 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
 
             val ideProvider = project.gradle.sharedServices
                 .registerIfAbsent(Services.IDES_MANAGER, IdesManagerService::class) { /* TODO: remove when Gradle 8.7+ */ }
-                .map { it.resolve(sourceTask.platformPath) }
 
             // Provide IntelliJ Platform product modules
             // TODO: relay eventually on Plugin Verifier
@@ -115,7 +114,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
 
             // Provide IntelliJ Platform bundled plugins
             // TODO: relay eventually on Plugin Verifier
-            val bundledPlugins = project.files(ideProvider.map { ide ->
+            val bundledPlugins = project.files(project.provider {
+                val ide = ideProvider.get().resolve(sourceTask.platformPath)
                 val bundledPluginIds = sourceTask.productInfo.bundledPlugins
                     // com.intellij is covered by base jars already
                     // com.intellij.openRewrite fails as it has `testServiceImplementation` and we can't find test class
