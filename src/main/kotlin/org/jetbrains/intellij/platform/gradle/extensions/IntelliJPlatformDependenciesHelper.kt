@@ -27,6 +27,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
+import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
@@ -45,8 +46,6 @@ import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.*
-
-private const val IDES_MANAGER = "idesManager"
 
 /**
  * Helper class for managing dependencies on the IntelliJ Platform in Gradle projects.
@@ -72,7 +71,7 @@ class IntelliJPlatformDependenciesHelper(
     private val log = Logger(javaClass)
     private val pluginManager = IdePluginManager.createManager()
     private val ideProvider = gradle.sharedServices
-        .registerIfAbsent(IDES_MANAGER, IdesManagerService::class)
+        .registerIfAbsent(Services.IDES_MANAGER, IdesManagerService::class)
         .map { it.resolve(platformPath) }
 
     /**

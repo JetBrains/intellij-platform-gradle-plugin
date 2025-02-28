@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.ide.IdeManager
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSet
@@ -12,14 +11,17 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.registerIfAbsent
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
+import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
+import org.jetbrains.intellij.platform.gradle.services.IdesManagerService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
@@ -94,6 +96,10 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
             val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
 
+            val ideProvider = project.gradle.sharedServices
+                .registerIfAbsent(Services.IDES_MANAGER, IdesManagerService::class)
+                .map { it.resolve(sourceTask.platformPath) }
+
             // Provide IntelliJ Platform product modules
             // TODO: relay eventually on Plugin Verifier
             val productModules = project.files(project.provider {
@@ -109,12 +115,11 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
 
             // Provide IntelliJ Platform bundled plugins
             // TODO: relay eventually on Plugin Verifier
-            val bundledPlugins = project.files(project.provider {
+            val bundledPlugins = project.files(ideProvider.map { ide ->
                 val bundledPluginIds = sourceTask.productInfo.bundledPlugins
                     // com.intellij is covered by base jars already
                     // com.intellij.openRewrite fails as it has `testServiceImplementation` and we can't find test class
                     .minus(listOf("com.intellij", "com.intellij.openRewrite"))
-                val ide = IdeManager.createManager().createIde(sourceTask.platformPath)
 
                 bundledPluginIds
                     .mapNotNull { ide.findPluginById(it) }
