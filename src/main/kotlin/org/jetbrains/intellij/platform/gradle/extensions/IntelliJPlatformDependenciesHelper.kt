@@ -71,12 +71,9 @@ class IntelliJPlatformDependenciesHelper(
 
     private val log = Logger(javaClass)
     private val pluginManager = IdePluginManager.createManager()
-
-    private val idesManager = gradle.sharedServices.registerIfAbsent(IDES_MANAGER, IdesManagerService::class) {
-        parameters.intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY]
-    }
-
-    internal val ideProvider = idesManager.map { it.ide }
+    private val ideProvider = gradle.sharedServices
+        .registerIfAbsent(IDES_MANAGER, IdesManagerService::class)
+        .map { it.resolve(platformPath) }
 
     /**
      * Key is Ivy module XML filename.
