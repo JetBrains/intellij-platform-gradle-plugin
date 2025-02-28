@@ -97,7 +97,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
 
             val ideProvider = project.gradle.sharedServices
-                .registerIfAbsent(Services.IDES_MANAGER, IdesManagerService::class)
+                .registerIfAbsent(Services.IDES_MANAGER, IdesManagerService::class) { /* TODO: remove when Gradle 8.7+ */ }
                 .map { it.resolve(sourceTask.platformPath) }
 
             // Provide IntelliJ Platform product modules

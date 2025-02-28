@@ -71,7 +71,7 @@ class IntelliJPlatformDependenciesHelper(
     private val log = Logger(javaClass)
     private val pluginManager = IdePluginManager.createManager()
     private val ideProvider = gradle.sharedServices
-        .registerIfAbsent(Services.IDES_MANAGER, IdesManagerService::class)
+        .registerIfAbsent(Services.IDES_MANAGER, IdesManagerService::class) { /* TODO: remove when Gradle 8.7+ */ }
         .map { it.resolve(platformPath) }
 
     /**
