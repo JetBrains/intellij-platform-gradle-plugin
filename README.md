@@ -16,7 +16,7 @@ https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugi
 
 ### Installation
 To install the IntelliJ Platform Gradle Plugin in your project, follow the [Usage](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html#usage) section of the plugin documentation.
-There's also a [Snapshot Release](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html#snapshot-release) available built nightly from the main branch containing the always-latest version of the plugin.
+There's also a [Snapshot Release](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html#using-snapshot-release) available built nightly from the main branch containing the always-latest version of the plugin.
 
 ## Changelog
 All releases are available in the [Releases](https://github.com/JetBrains/intellij-platform-gradle-plugin/releases) section.
