@@ -6,6 +6,10 @@
 
 - Register the `TestIdeUiTask` for Starter purposes.
 
+### Changed
+
+- Stop shadowing Gradle plugin dependencies, manually repack only JPS Module
+
 ### Fixed
 
 - Performance improvement: memoize the `JavaRuntimePathResolver` resolution.
