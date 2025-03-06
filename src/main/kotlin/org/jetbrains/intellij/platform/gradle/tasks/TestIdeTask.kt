@@ -113,7 +113,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             val currentPluginLibsProvider = getCurrentPluginLibs()
             val otherPluginsLibsProvider = getOtherPluginLibs()
             classpath = project.files(currentPluginLibsProvider, otherPluginsLibsProvider) + classpath
-            classpath += intellijPlatformTestClasspathConfiguration
+            classpath += sourceTask.intellijPlatformTestClasspathConfiguration
 
             // Since this code is getting called before the value of "project.extensionProvider.get().instrumentCode"
             // is known, we can't add "instrumentedTestCode" to the classpath only when needed.

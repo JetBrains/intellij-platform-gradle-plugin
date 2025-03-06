@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
+import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.isModule
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
@@ -156,6 +157,13 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     extendsFrom(customIntellijPlatformPluginLocalConfiguration)
                 }
 
+                val customIntellijPlatformTestClasspathConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH.withSuffix,
+                    description = "Custom IntelliJ Platform Test Classpath",
+                ) {
+                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH])
+                }
+
                 plugins {
                     intellijPlatformPluginDependencyConfigurationName = customIntellijPlatformPluginDependencyConfiguration.name
                     intellijPlatformPluginLocalConfigurationName = customIntellijPlatformPluginLocalConfiguration.name
@@ -179,6 +187,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     intelliJPlatformConfiguration = customIntelliJPlatformConfiguration
                     intelliJPlatformPluginConfiguration = customIntellijPlatformPluginConfiguration
                     jetbrainsRuntimeConfiguration = customJetBrainsRuntimeConfiguration
+
+                    if (this is TestableAware) {
+                        intellijPlatformTestClasspathConfiguration = customIntellijPlatformTestClasspathConfiguration
+                    }
 
                     applySandboxFrom(prepareSandboxTask)
                 }

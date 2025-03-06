@@ -304,6 +304,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is TestableAware) {
             val pluginName = extensionProvider.flatMap { it.projectName }
             pluginDirectory = sandboxPluginsDirectory.dir(pluginName)
+            intellijPlatformTestClasspathConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH)
         }
     }
 }

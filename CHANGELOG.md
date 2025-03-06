@@ -5,6 +5,7 @@
 ### Added
 
 - Register the `TestIdeUiTask` for Starter purposes.
+- Introduce a custom test classpath configuration for custom `TestableAware`-like tasks
 
 ### Changed
 
