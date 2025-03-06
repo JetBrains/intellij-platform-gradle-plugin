@@ -5,8 +5,12 @@ package org.jetbrains.intellij.platform.gradle.services
 import com.jetbrains.plugin.structure.ide.Ide
 import com.jetbrains.plugin.structure.ide.createIde
 import com.jetbrains.plugin.structure.ide.layout.MissingLayoutFileMode.SKIP_SILENTLY
+import org.gradle.api.invocation.Gradle
+import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import org.gradle.kotlin.dsl.registerIfAbsent
+import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
@@ -21,11 +25,17 @@ abstract class IdesManagerService : BuildService<BuildServiceParameters.None> {
 
     private val ides = ConcurrentHashMap<String, Ide>()
 
-    fun resolve(platformPath: Path)= ides.computeIfAbsent(platformPath.pathString) {
-            log.info("Creating new IDE instance from: $platformPath")
-            createIde {
-                missingLayoutFileMode = SKIP_SILENTLY
-                path = platformPath
-            }
+    fun resolve(platformPath: Path) = ides.computeIfAbsent(platformPath.pathString) {
+        log.info("Creating new IDE instance from: $platformPath")
+        createIde {
+            missingLayoutFileMode = SKIP_SILENTLY
+            path = platformPath
         }
+    }
 }
+
+internal val Gradle.idesManagerServiceProvider: Provider<IdesManagerService>
+    get() = sharedServices.registerIfAbsent(
+        Services.IDES_MANAGER,
+        IdesManagerService::class,
+    ) { /* TODO: remove when Gradle 8.7+ */ }

@@ -27,7 +27,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
-import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
@@ -35,7 +34,7 @@ import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSo
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
-import org.jetbrains.intellij.platform.gradle.services.IdesManagerService
+import org.jetbrains.intellij.platform.gradle.services.idesManagerServiceProvider
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
@@ -70,9 +69,7 @@ class IntelliJPlatformDependenciesHelper(
 
     private val log = Logger(javaClass)
     private val pluginManager = IdePluginManager.createManager()
-    private val ideProvider = gradle.sharedServices
-        .registerIfAbsent(Services.IDES_MANAGER, IdesManagerService::class) { /* TODO: remove when Gradle 8.7+ */ }
-        .map { it.resolve(platformPath) }
+    private val ideProvider = gradle.idesManagerServiceProvider.map { it.resolve(platformPath) }
 
     /**
      * Key is Ivy module XML filename.
