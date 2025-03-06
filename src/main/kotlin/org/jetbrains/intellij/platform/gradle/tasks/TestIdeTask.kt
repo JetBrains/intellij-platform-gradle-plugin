@@ -139,6 +139,22 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             include("${Sandbox.Plugin.LIB}/**/*.jar")
         }
 
+        // TODO: Check if that's a good approach of resolving dependencies from IntelliJ Platform submodules
+        // private fun Test.getCurrentPluginLibs() = project.files(
+        //     // Main plugin libraries
+        //     sourceTask.pluginDirectory.asFileTree.matching {
+        //         include("${Sandbox.Plugin.LIB}/**/*.jar")
+        //     },
+        //     // Project dependencies that are also IntelliJ Platform plugins
+        //     project.configurations
+        //         .getByName(Configurations.IMPLEMENTATION)
+        //         .allDependencies
+        //         .filterIsInstance<org.gradle.api.artifacts.ProjectDependency>()
+        //         .map { projectDep ->
+        //             projectDep.dependencyProject.tasks.named(Tasks.PREPARE_SANDBOX).get().outputs.files
+        //         }
+        // )
+
         /**
          * Load only the contents of the lib directory because some plugins have arbitrary files in their
          * distribution zip file, which break the JVM when added to the classpath.
