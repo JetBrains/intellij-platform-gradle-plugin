@@ -236,6 +236,10 @@ public abstract class org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/GradleProperties$AddDefaultIntelliJPlatformDependencies : org/jetbrains/intellij/platform/gradle/GradleProperties {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$AddDefaultIntelliJPlatformDependencies;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$DownloadSources : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$DownloadSources;
 }
