@@ -107,27 +107,22 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             //
             // So to make the test environment more like the production environment, we should put the plugin's direct
             // dependencies the first on the classpath.
-            // Removes the default runtime dependencies from the classpath because their order is unknown.
-            classpath -= runtimeDependencies
-
             val currentPluginLibsProvider = getCurrentPluginLibs()
             val otherPluginsLibsProvider = getOtherPluginLibs()
-            classpath = project.files(currentPluginLibsProvider, otherPluginsLibsProvider) + classpath
-            classpath += sourceTask.intellijPlatformTestClasspathConfiguration
 
-            // Since this code is getting called before the value of "project.extensionProvider.get().instrumentCode"
-            // is known, we can't add "instrumentedTestCode" to the classpath only when needed.
-            // Because of that, removing the original compiled test classes added by Gradle like this:
-            // classpath -= sourceSets.getByName(SourceSet.TEST_SOURCE_SET_NAME).output.classesDirs
-            // is not possible because it will break the tests when "instrumentCode" is off.
-            // Because if we remove it, there is nothing else to replace it with.
-            // So we add it to the beginning of the classpath, so that when "instrumentCode" is on and both:
-            // the instrumented test code and non-instrumented test code are present,
-            // the instrumented version will override the other because it comes first.
-            //
-            // But when "instrumentCode" was on, the classes were generated, then it was turned off, and the next build
-            // runs without a clean, the instrumented code will still be added to the classpath, as long as it exists.
-            classpath = instrumentedTestCode + classpath
+            // Build the classpath in the correct order:
+            // 1. Instrumented test code (if available)
+            // 2. Current plugin's libraries
+            // 3. Other plugins' libraries
+            // 4. Test classpath configuration
+            // 5. Original classpath without runtime dependencies
+            classpath = project.files(
+                instrumentedTestCode,
+                currentPluginLibsProvider,
+                otherPluginsLibsProvider,
+                sourceTask.intellijPlatformTestClasspathConfiguration,
+                classpath.filter { it !in runtimeDependencies.files }
+            )
 
             testClassesDirs = instrumentedTestCode + testClassesDirs
 
