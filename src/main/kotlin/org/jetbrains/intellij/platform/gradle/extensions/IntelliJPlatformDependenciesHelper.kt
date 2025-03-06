@@ -166,7 +166,7 @@ class IntelliJPlatformDependenciesHelper(
         log.warn(
             """
             Do not use `bundledLibrary()` in production, as direct access to the IntelliJ Platform libraries is not recommended.
-            
+
             It should only be used as a workaround in case the IntelliJ Platform Gradle Plugin is not aligned with the latest IntelliJ Platform classpath changes.
             """.trimIndent()
         )
@@ -224,13 +224,19 @@ class IntelliJPlatformDependenciesHelper(
                     false -> dependencies.createIntelliJPlatform(type, version)
                 }
             }.apply(action).also {
-                // TODO: shouldn't be hardcoded like that, I believe; maybe Ivy dependencies?
-                addIntelliJPlatformBundledPluginDependencies(provider {
-                    listOf("com.intellij")
+                val addDefaultDependenciesProvider = providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
+                addIntelliJPlatformBundledPluginDependencies(addDefaultDependenciesProvider.map { enabled ->
+                    when (enabled) {
+                        true -> listOf("com.intellij")
+                        false -> emptyList()
+                    }
                 })
-                addIntelliJPlatformBundledModuleDependencies(provider {
-                    when (type) {
-                        IntelliJPlatformType.Rider -> listOf("intellij.rider")
+                addIntelliJPlatformBundledModuleDependencies(addDefaultDependenciesProvider.map { enabled ->
+                    when (enabled) {
+                        true -> when (type) {
+                            IntelliJPlatformType.Rider -> listOf("intellij.rider")
+                            else -> emptyList()
+                        }
                         else -> emptyList()
                     }
                 })
@@ -1161,7 +1167,7 @@ class IntelliJPlatformDependenciesHelper(
                 """
                 Unexpected flow.                
                 Please file an issue attaching the content and exception message to: $GITHUB_REPOSITORY/issues/new
-                
+
                 File: $fileName
                 Path: $artifactPath
                 Cached value: $cachedValue

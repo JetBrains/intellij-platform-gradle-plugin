@@ -6,10 +6,7 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
-import org.jetbrains.intellij.platform.gradle.extensions.intellijPlatformCachePath
-import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsPath
+import org.jetbrains.intellij.platform.gradle.extensions.*
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
@@ -25,6 +22,16 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
  * ```
  */
 sealed class GradleProperties<T : Any>(val defaultValue: T) {
+
+    /**
+     * Controls whether default IntelliJ Platform dependencies (`com.intellij` and `intellij.rider`)
+     * should be added automatically when creating a dependency on the IntelliJ Platform.
+     *
+     * Default value: `true`
+     *
+     * @see [IntelliJPlatformDependenciesHelper.addIntelliJPlatformDependency]
+     */
+    object AddDefaultIntelliJPlatformDependencies : GradleProperties<Boolean>(true)
 
     /**
      * Instruct the IDE that sources are needed to be downloaded when working with IntelliJ Platform Gradle Plugin.

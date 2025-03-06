@@ -6,6 +6,7 @@
 
 - Register the `TestIdeUiTask` for Starter purposes.
 - Introduce a custom test classpath configuration for custom `TestableAware`-like tasks
+- Add `AddDefaultIntelliJPlatformDependencies` property to control if default dependencies (`com.intellij` and `intellij.rider`) are added automatically with IntelliJ Platform
 
 ### Changed
 
