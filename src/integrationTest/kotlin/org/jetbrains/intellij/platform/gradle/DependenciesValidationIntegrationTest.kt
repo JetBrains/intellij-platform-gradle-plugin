@@ -36,7 +36,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
@@ -80,7 +80,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
@@ -103,6 +103,11 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         create("$intellijPlatformType", "$intellijPlatformVersion")
                     }
                 }
+                """.trimIndent()
+
+        gradleProperties write //language=properties
+                """
+                org.jetbrains.intellij.platform.addDefaultIntelliJPlatformDependencies = false
                 """.trimIndent()
 
         build(DEPENDENCIES) {
@@ -136,7 +141,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
@@ -165,17 +170,17 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
                         zipSigner()
                     }
                 }
-                
+
                 intellijPlatform {
                     instrumentCode = false
-                
+
                     signing {
                         certificateChainFile = file("certificate/chain.crt")
                         privateKeyFile = file("certificate/private.pem")
@@ -208,16 +213,16 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
                     }
                 }
-                
+
                 intellijPlatform {
                     instrumentCode = false
-                
+
                     signing {
                         certificateChainFile = file("certificate/chain.crt")
                         privateKeyFile = file("certificate/private.pem")
@@ -250,14 +255,14 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "2024.3")
                         bundledPlugin("Git4Idea")
                     }
                 }
-                
+
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -268,60 +273,95 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """
                 compileClasspath - Compile classpath for 'main'.
                 +--- bundledPlugin:Git4Idea:IC-243.21565.193
-                |    +--- bundledPlugin:com.jetbrains.performancePlugin:IC-243.21565.193
-                |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193
-                |    |    |    \--- bundledModule:intellij.libraries.microba:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193
-                |    |         \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.collaborationTools:IC-243.21565.193
-                |    |    +--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-243.21565.193
-                |    |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
-                |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
+                |    \--- bundledPlugin:Git4Idea:IC-243.21565.193 (*)
+                +--- bundledPlugin:com.intellij:IC-243.21565.193
+                |    +--- bundledPlugin:com.intellij:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.coverage:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.coverage:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.xml.xmlbeans:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.xml.xmlbeans:IC-243.21565.193 (*)
                 |    +--- bundledModule:intellij.platform.ide.newUiOnboarding:IC-243.21565.193
-                |    +--- bundledPlugin:org.jetbrains.plugins.terminal:IC-243.21565.193
-                |    |    \--- bundledPlugin:com.jetbrains.sh:IC-243.21565.193
-                |    |         +--- bundledPlugin:org.jetbrains.plugins.terminal:IC-243.21565.193 (*)
-                |    |         +--- bundledPlugin:com.intellij.copyright:IC-243.21565.193
-                |    |         |    \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
-                |    |         \--- bundledPlugin:org.intellij.plugins.markdown:IC-243.21565.193
-                |    |              +--- bundledPlugin:org.intellij.intelliLang:IC-243.21565.193
-                |    |              +--- bundledPlugin:com.intellij.modules.json:IC-243.21565.193
-                |    |              +--- bundledPlugin:org.jetbrains.plugins.yaml:IC-243.21565.193
-                |    |              |    \--- bundledPlugin:com.intellij.modules.json:IC-243.21565.193
-                |    |              +--- bundledPlugin:org.toml.lang:IC-243.21565.193
-                |    |              |    +--- bundledPlugin:com.intellij.modules.json:IC-243.21565.193
-                |    |              |    \--- bundledPlugin:tanvd.grazi:IC-243.21565.193
-                |    |              |         +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
-                |    |              |         +--- bundledPlugin:com.intellij.java:IC-243.21565.193
-                |    |              |         |    +--- bundledPlugin:com.intellij.copyright:IC-243.21565.193 (*)
-                |    |              |         |    +--- bundledPlugin:com.intellij.platform.images:IC-243.21565.193
-                |    |              |         |    +--- bundledPlugin:training:IC-243.21565.193
-                |    |              |         |    |    +--- bundledModule:intellij.platform.tips:IC-243.21565.193
-                |    |              |         |    |    +--- bundledModule:intellij.platform.lvcs.impl:IC-243.21565.193
-                |    |              |         |    |    |    \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
-                |    |              |         |    |    +--- bundledPlugin:Git4Idea:IC-243.21565.193 (*)
-                |    |              |         |    |    +--- bundledModule:intellij.platform.ide.newUiOnboarding:IC-243.21565.193
-                |    |              |         |    |    \--- bundledModule:intellij.platform.ide.newUsersOnboarding:IC-243.21565.193
-                |    |              |         |    |         +--- bundledModule:intellij.platform.ide.newUiOnboarding:IC-243.21565.193
-                |    |              |         |    |         \--- bundledModule:intellij.platform.experiment:IC-243.21565.193
-                |    |              |         |    +--- bundledModule:intellij.performanceTesting.vcs:IC-243.21565.193
-                |    |              |         |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
-                |    |              |         |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
-                |    |              |         |    +--- bundledPlugin:com.jetbrains.performancePlugin:IC-243.21565.193 (*)
-                |    |              |         |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
-                |    |              |         |    \--- bundledPlugin:org.jetbrains.plugins.terminal:IC-243.21565.193 (*)
-                |    |              |         +--- bundledPlugin:com.intellij.modules.json:IC-243.21565.193
-                |    |              |         +--- bundledPlugin:org.intellij.plugins.markdown:IC-243.21565.193 (*)
-                |    |              |         +--- bundledPlugin:com.intellij.properties:IC-243.21565.193
-                |    |              |         |    \--- bundledPlugin:com.intellij.copyright:IC-243.21565.193 (*)
-                |    |              |         \--- bundledPlugin:org.jetbrains.plugins.yaml:IC-243.21565.193 (*)
-                |    |              +--- bundledPlugin:com.intellij.platform.images:IC-243.21565.193
-                |    |              \--- bundledModule:intellij.platform.compose:IC-243.21565.193
-                |    |                   +--- bundledModule:intellij.libraries.compose.desktop:IC-243.21565.193
-                |    |                   |    \--- bundledModule:intellij.libraries.skiko:IC-243.21565.193
-                |    |                   \--- bundledModule:intellij.libraries.skiko:IC-243.21565.193
-                |    \--- bundledModule:intellij.platform.coverage:IC-243.21565.193
-                |         \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.ide.newUiOnboarding:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.ide.newUsersOnboarding:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.ide.newUsersOnboarding:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.ide.startup.importSettings:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.ide.startup.importSettings:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.kotlin.onboarding-promoter:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.kotlin.onboarding-promoter:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.experiment:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.experiment:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.idea.customization.base:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.idea.customization.base:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.tips:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.tips:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.settings.local:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.settings.local:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.libraries.ktor.client:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.libraries.ktor.client:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.libraries.ktor.client.cio:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.libraries.ktor.client.cio:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.rpc.backend:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.rpc.backend:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.kernel.backend:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.kernel.backend:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.project.backend:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.project.backend:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.progress.backend:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.progress.backend:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.navbar:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.navbar:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.navbar.backend:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.navbar.backend:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.navbar.frontend:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.navbar.frontend:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.navbar.monolith:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.navbar.monolith:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.clouds:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.clouds:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.execution.dashboard:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.execution.dashboard:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.execution.serviceView:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.execution.serviceView:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.debugger.impl.frontend:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.debugger.impl.frontend:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.debugger.impl.backend:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.debugger.impl.backend:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.frontend:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.frontend:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.inline.completion:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.inline.completion:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.images.copyright:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.images.copyright:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.images.backend.svg:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.images.backend.svg:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.lvcs.impl:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.lvcs.impl:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.smRunner.vcs:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.smRunner.vcs:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.collaborationTools:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.collaborationTools:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.libraries.microba:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.libraries.microba:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.libraries.skiko:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.libraries.skiko:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.libraries.compose.desktop:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.libraries.compose.desktop:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.compose:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.compose:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.diagnostic.freezeAnalyzer:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.diagnostic.freezeAnalyzer:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.diagnostic.freezes:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.diagnostic.freezes:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-243.21565.193 (*)
+                |    \--- bundledModule:intellij.smart.update:IC-243.21565.193
+                |         \--- bundledModule:intellij.smart.update:IC-243.21565.193 (*)
                 \--- idea:ideaIC:2024.3
                 """.trimIndent(),
                 output,
@@ -338,14 +378,14 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "2024.3")
                         bundledPlugin("Coverage")
                     }
                 }
-                
+
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -354,14 +394,12 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES) {
             assertContains(
                 """
-                +--- bundledModule:intellij.platform.coverage:IC-243.21565.193 (*)
-                """.trimIndent(),
-                output,
-            )
-            assertContains(
-                """
-                |    |    |    |    |    \--- bundledModule:intellij.platform.coverage:IC-243.21565.193
-                |    |    |    |    |         \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
+                +--- bundledPlugin:Coverage:IC-243.21565.193
+                |    \--- bundledPlugin:Coverage:IC-243.21565.193 (*)
+                +--- bundledPlugin:com.intellij:IC-243.21565.193
+                |    +--- bundledPlugin:com.intellij:IC-243.21565.193 (*)
+                |    +--- bundledModule:intellij.platform.coverage:IC-243.21565.193
+                |    |    \--- bundledModule:intellij.platform.coverage:IC-243.21565.193 (*)
                 """.trimIndent(),
                 output,
             )
@@ -370,4 +408,96 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
 
     // TODO: verify missing IntelliJ Platform dependency when no repositories are added
     // TODO: use IntelliJ Platform from local
+
+    @Test
+    fun `control default IntelliJ Platform dependencies with property`() {
+        // Test with default dependencies disabled
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        create("IC", "2024.3")
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                }
+
+                ${GradleProperties.AddDefaultIntelliJPlatformDependencies} = false
+                """.trimIndent()
+
+        build(DEPENDENCIES) {
+            assertNotContains(
+                """
+                +--- bundledPlugin:com.intellij:IC-243.21565.193
+                """.trimIndent(),
+                output,
+            )
+        }
+
+        // Test with default dependencies enabled (default behavior)
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        create("IC", "2024.3")
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        build(DEPENDENCIES) {
+            assertContains(
+                """
+                +--- bundledPlugin:com.intellij:IC-243.21565.193
+                """.trimIndent(),
+                output,
+            )
+        }
+
+        // Test with Rider to verify intellij.rider dependency
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        create("RD", "2024.3")
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        build(DEPENDENCIES) {
+            assertContains(
+                """
+                +--- bundledModule:intellij.rider:RD-243.21565.193
+                """.trimIndent(),
+                output,
+            )
+        }
+    }
 }
