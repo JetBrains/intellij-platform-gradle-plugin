@@ -203,7 +203,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             sourceTask.sandboxPluginsDirectory.zip(sourceTask.pluginDirectory) { sandboxPluginsDirectory, pluginDirectory ->
                 val pluginName = pluginDirectory.asPath.name
                 sandboxPluginsDirectory.asFileTree.matching {
-                    include("*/${Sandbox.Plugin.LIB}/**/*.jar")
+                    include("*/${Sandbox.Plugin.LIB}/*.jar")
+                    include("*/${Sandbox.Plugin.LIB_MODULES}/*.jar")
                     // Exclude the libs from the current plugin because we need to put before all other libs.
                     exclude("$pluginName/**")
                 }

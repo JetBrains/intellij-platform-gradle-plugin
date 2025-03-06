@@ -15,6 +15,7 @@
 - Performance improvement: memoize the `JavaRuntimePathResolver` resolution.
 - Performance improvement: do not resolve JetBrains IDEs/Android Studio release URLs in the configuration phase.
 - Performance improvement: cache the IntelliJ Platform instances parsed with the Plugin Verifier libraries
+- Tests classpath fixes: do not blindly include all plugin's `lib/**/*.jar`
 
 ## [2.3.0] - 2025-02-27
 
