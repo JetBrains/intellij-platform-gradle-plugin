@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import org.gradle.api.Project
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
@@ -10,24 +9,19 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.registerIfAbsent
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
-import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
-import org.jetbrains.intellij.platform.gradle.models.ProductInfo
-import org.jetbrains.intellij.platform.gradle.services.IdesManagerService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.exists
-import kotlin.io.path.extension
 import kotlin.io.path.name
 
 /**
@@ -93,51 +87,9 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("intellij.testFramework.rethrow.logged.errors", "true")
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
+            val intellijPlatformTestClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH]
             val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
             val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
-
-            val ideProvider = project.gradle.sharedServices
-                .registerIfAbsent(Services.IDES_MANAGER, IdesManagerService::class) { /* TODO: remove when Gradle 8.7+ */ }
-
-            // Provide IntelliJ Platform product modules
-            // TODO: relay eventually on Plugin Verifier
-            val productModules = project.files(project.provider {
-                val intellijPlatformPath = sourceTask.platformPath
-                sourceTask.productInfo.layout
-                    .asSequence()
-                    .filter { it.kind == ProductInfo.LayoutItemKind.productModuleV2 }
-                    .flatMap { it.classPath }
-                    .map { intellijPlatformPath.resolve(it) }
-                    .mapNotNull { it.takeIf { it.exists() } }
-                    .toSet()
-            })
-
-            // Provide IntelliJ Platform bundled plugins
-            // TODO: relay eventually on Plugin Verifier
-            val bundledPlugins = project.files(project.provider {
-                val ide = ideProvider.get().resolve(sourceTask.platformPath)
-                val bundledPluginIds = sourceTask.productInfo.bundledPlugins
-                    // com.intellij is covered by base jars already
-                    // com.intellij.openRewrite fails as it has `testServiceImplementation` and we can't find test class
-                    .minus(listOf("com.intellij", "com.intellij.openRewrite"))
-
-                bundledPluginIds
-                    .mapNotNull { ide.findPluginById(it) }
-                    .flatMap { bundledPlugin ->
-                        when {
-                            bundledPlugin is IdeModule -> bundledPlugin.classpath
-                            bundledPlugin.originalFile == null -> emptyList()
-                            else -> {
-                                val file = bundledPlugin.originalFile
-                                val pluginDirectory = when {
-                                    file?.extension == "jar" -> file.parent.parent
-                                    else -> file
-                                }
-                                pluginDirectory?.let { CollectorTransformer.collectJars(it) } ?: emptyList()
-                            }
-                        }
-                    }.toSet()
-            })
 
             // The below is needed to simulate the behavior of com.intellij.ide.plugins.cl.PluginClassLoader
             // which is present in the IDE when the plugin is used in "production".
@@ -161,10 +113,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             val currentPluginLibsProvider = getCurrentPluginLibs()
             val otherPluginsLibsProvider = getOtherPluginLibs()
             classpath = project.files(currentPluginLibsProvider, otherPluginsLibsProvider) + classpath
-
-            // Add IDE modules at the end.
-            classpath += productModules
-            classpath += bundledPlugins
+            classpath += intellijPlatformTestClasspathConfiguration
 
             // Since this code is getting called before the value of "project.extensionProvider.get().instrumentCode"
             // is known, we can't add "instrumentedTestCode" to the classpath only when needed.

@@ -223,7 +223,18 @@ class IntelliJPlatformDependenciesHelper(
                     true -> dependencies.createIntelliJPlatformInstaller(type, version)
                     false -> dependencies.createIntelliJPlatform(type, version)
                 }
-            }.apply(action)
+            }.apply(action).also {
+                // TODO: shouldn't be hardcoded like that, I believe; maybe Ivy dependencies?
+                addIntelliJPlatformBundledPluginDependencies(provider {
+                    listOf("com.intellij")
+                })
+                addIntelliJPlatformBundledModuleDependencies(provider {
+                    when (type) {
+                        IntelliJPlatformType.Rider -> listOf("intellij.rider")
+                        else -> emptyList()
+                    }
+                })
+            }
         })
     }
 
@@ -805,10 +816,12 @@ class IntelliJPlatformDependenciesHelper(
         val version = ide.version.toString()
 
         val pluginWithRequiredModules =
-            sequenceOf(this) + modulesDescriptors.asSequence().filter { it.loadingRule.required }.map { it.module }
+            sequenceOf(this) + modulesDescriptors.asSequence()
+                // TODO: I believe we should include all (even optional) modules for `com.intellij` core plugin
+                .filter { it.loadingRule.required || id == "com.intellij" }
+                .mapNotNull { ide.findPluginById(it.name) }
 
-        return pluginWithRequiredModules.flatMap { it.dependencies.asSequence() }
-            .mapNotNull { ide.findPluginById(it.id) }
+        return pluginWithRequiredModules
             .mapTo(ArrayList()) {
                 val name = requireNotNull(it.pluginId)
                 val group = when {
