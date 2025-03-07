@@ -1164,7 +1164,7 @@ class IntelliJPlatformDependenciesHelper(
         artifactPath: Path?,
         block: () -> IvyModule,
     ): IvyModule {
-        val fileName = "$group-$artifact-$version.xml"
+        val fileName = "$version/$group-$artifact-$version.xml"
 
         // See comments on writtenIvyModules
         val cachedValue = writtenIvyModules[fileName]

@@ -6,6 +6,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IVY
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.get
@@ -35,7 +36,7 @@ internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Pa
     get(GradleProperties.LocalPlatformArtifacts).orNull
         .takeUnless { it.isNullOrBlank() }
         ?.let { Path(it) }
-        .run { this ?: intellijPlatformCachePath(rootProjectDirectory).resolve("localPlatformArtifacts") }
+        .run { this ?: intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IVY) }
         .createDirectories()
         .absolute()
 

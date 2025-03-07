@@ -84,7 +84,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
                  * Much more is visible in debug, but all that is private.
                  * So we have to read the Ivy XML again.
                  */
-                val ivyXmlFile = File("$absNormalizedIvyPath/${id.group}-${id.name}-${id.version}.xml")
+                val ivyXmlFile = File("$absNormalizedIvyPath/${id.version}/${id.group}-${id.name}-${id.version}.xml")
                 val ivyModule = XML.Companion.decodeFromString<IvyModule>(ivyXmlFile.readText())
 
                 // Remove all existing artifacts because they have relative paths and won't be found.
