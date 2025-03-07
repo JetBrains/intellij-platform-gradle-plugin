@@ -21,6 +21,7 @@ import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
@@ -89,7 +90,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                  * https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html#non-bundled-plugin
                  *
                  * For other plugins, we never (usually?) get into this block because their Ivy artifacts already list jars,
-                 * instead of pointing to a directory, see: [LocalIvyArtifactPathComponentMetadataRule]
+                 * instead of pointing to a directory, see: [org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule]
                  */
                 isPlugin -> {
                     plugin.originalFile?.let { pluginPath ->

@@ -17,9 +17,9 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.GradleProperties
+import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
 import org.jetbrains.intellij.platform.gradle.extensions.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
@@ -118,32 +118,31 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         """.trimIndent()
                     )
                 }
-            }
 
-            /** Registers LocalIvyArtifactPathComponentMetadataRule */
-            intellijPlatformConfiguration.incoming.afterResolve {
-                val ruleName = LocalIvyArtifactPathComponentMetadataRule::class.simpleName
-                // Intentionally delaying the check just in case if it changes somehow late in the lifecycle.
-                val rulesMode = project.settings.dependencyResolutionManagement.rulesMode.get()
+                // Registers LocalIvyArtifactPathComponentMetadataRule
+                incoming.afterResolve {
+                    val ruleName = LocalIvyArtifactPathComponentMetadataRule::class.simpleName
+                    // Intentionally delaying the check just in case if it changes somehow late in the lifecycle.
+                    val rulesMode = project.settings.dependencyResolutionManagement.rulesMode.get()
 
-                if (RulesMode.PREFER_PROJECT == rulesMode) {
-                    if (intellijPlatformConfiguration.resolvedConfiguration.hasError()) {
-                        log.warn("Configuration '$intellijPlatformConfiguration' has some resolution errors. $ruleName will not be registered.")
-                    } else if (intellijPlatformConfiguration.isEmpty) {
-                        log.warn("Configuration '$intellijPlatformConfiguration' is empty. $ruleName will not be registered.")
-                    } else {
-                        val platformPath = intellijPlatformConfiguration.platformPath()
-                        val artifactLocationPath = platformPath.absolute().normalize().invariantSeparatorsPathString
-                        val ivyLocationPath = project.providers.localPlatformArtifactsPath(project.rootProjectPath).absolute().normalize().invariantSeparatorsPathString
+                    if (RulesMode.PREFER_PROJECT == rulesMode) {
+                        if (resolvedConfiguration.hasError()) {
+                            log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' has some resolution errors. $ruleName will not be registered.")
+                        } else if (isEmpty) {
+                            log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' is empty. $ruleName will not be registered.")
+                        } else {
+                            val artifactLocationPath = platformPath().absolute().normalize().invariantSeparatorsPathString
+                            val ivyLocationPath = project.providers.localPlatformArtifactsPath(project.rootProjectPath).absolute().normalize().invariantSeparatorsPathString
 
-                        project.dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
-                            params(artifactLocationPath, ivyLocationPath)
+                            project.dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
+                                params(artifactLocationPath, ivyLocationPath)
+                            }
+
+                            log.info("$ruleName has been registered.")
                         }
-
-                        log.info("$ruleName has been registered.")
+                    } else {
+                        log.info("$ruleName can not be registered because '${rulesMode}' mode is used in settings.")
                     }
-                } else {
-                    log.info("$ruleName can not be registered because '${rulesMode}' mode is used in settings.")
                 }
             }
 

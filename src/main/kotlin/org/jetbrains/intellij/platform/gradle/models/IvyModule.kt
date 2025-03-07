@@ -141,7 +141,7 @@ internal fun Path.toAbsolutePathIvyArtifact(): IvyModule.Artifact {
  *
  * @see toAbsolutePathIvyArtifact
  * @see org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin
- * @see org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalIvyArtifactPathComponentMetadataRule
+ * @see org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
  */
 internal fun Path.toIvyArtifacts(metadataRulesModeProvider: Provider<RulesMode>, basePath: Path) =
     when (metadataRulesModeProvider.get()) {

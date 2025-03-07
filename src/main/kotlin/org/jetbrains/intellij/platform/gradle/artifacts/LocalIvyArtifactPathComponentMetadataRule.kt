@@ -1,32 +1,29 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.artifacts.transform
+package org.jetbrains.intellij.platform.gradle.artifacts
 
 import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
-import org.gradle.api.initialization.resolve.RulesMode
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
-import org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin
 import java.io.File
 import javax.inject.Inject
 
 /**
- * This comes into play only when [RulesMode.PREFER_PROJECT] (the default) is used in Gradle's settings.
+ * This comes into play only when [org.gradle.api.initialization.resolve.RulesMode.PREFER_PROJECT] (the default) is used in Gradle's settings.
  *
- * Fixes relative URLs of dependencies from the local Ivy repository [IntelliJPlatformRepositoriesHelper.createLocalIvyRepository]
+ * Fixes relative URLs of dependencies from the local Ivy repository [org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper.createLocalIvyRepository]
  * by appending the full absolute path.
- * It is necessary only for [Dependencies.BUNDLED_PLUGIN_GROUP] and [Dependencies.BUNDLED_MODULE_GROUP] dependency types.
+ * It is necessary only for [org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies.BUNDLED_PLUGIN_GROUP] and [org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies.BUNDLED_MODULE_GROUP] dependency types.
  *
- *  For [Dependencies.BUNDLED_PLUGIN_GROUP] and [Dependencies.BUNDLED_MODULE_GROUP], we expect:
+ *  For [org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies.BUNDLED_PLUGIN_GROUP] and [org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies.BUNDLED_MODULE_GROUP], we expect:
  *
- *  - "artifact" ([IvyModule.Artifact.name]) is mandatory and contains only the name of the artifact (for example, a jar archive), without the extension.
+ *  - "artifact" ([org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact.name]) is mandatory and contains only the name of the artifact (for example, a jar archive), without the extension.
  *
- *  - "url" ([IvyModule.Artifact.url]) contains a path, relative to the platformPath (IDE), without the file's name.
+ *  - "url" ([org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact.url]) contains a path, relative to the platformPath (IDE), without the file's name.
  *    According to Ivy's [documentation](https://ant.apache.org/ivy/history/latest-milestone/ivyfile/artifact.html)
  *    > an URL at which this artifact can be found if it isn’t located at the standard location in the repository
  *
@@ -41,7 +38,7 @@ import javax.inject.Inject
  *       In that case, the artifact coordinates may look very weird like: `bundledPlugin:/some/path/more/path/some.jar:123.456.789`
  *       For the same reason file extension is also stored in "ext".
  *
- *  - "ext" [IvyModule.Artifact.ext] is an optional file extension, like "jar".
+ *  - "ext" [org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact.ext] is an optional file extension, like "jar".
  *    It is optional only because files don't always have extensions.
  *    For directories, it would be "directory", but in this case, we never expect to have a directory, always only files.
  *
@@ -50,20 +47,20 @@ import javax.inject.Inject
  * If absolute paths are used, they will be mentioned in `ivy.xml` thus changing the hash on each env.
  *
  * But since our local Ivy repository has an artifact pattern `/[artifact]` relative URLs won't work.
- * See [IntelliJPlatformRepositoriesHelper.createLocalIvyRepository].
+ * See [org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper.createLocalIvyRepository].
  * That is why this class is needed.
  *
  * This is called after Ivy XML metadata is already found and parsed, so all dependencies and publications are known,
  * but not yet resolved on the file system, so we have a chance to fix the paths.
  *
- * A separate note on [CacheableRule], since there is not enough information on it in the internet.
+ * A separate note on [org.gradle.api.artifacts.CacheableRule], since there is not enough information on it in the internet.
  * First, see the comments in [org.gradle.internal.resolve.caching.CachingRuleExecutor].
  * I tried to debug it, and it seems like rule parameters are taken into account.
  * It happens in [org.gradle.internal.resolve.caching.CrossBuildCachingRuleExecutor.computeExplicitInputsSnapshot]
  * Which should mean that we can use the caching, because if the paths change, it should be re-evaluated.
  *
- * @see IvyModule
- * @see IntelliJPlatformBasePlugin.apply
+ * @see org.jetbrains.intellij.platform.gradle.models.IvyModule
+ * @see org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin.apply
  */
 @CacheableRule
 abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
@@ -71,7 +68,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
     private val absNormalizedIvyPath: String,
 ) : ComponentMetadataRule {
 
-    private val replacementGroups = listOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
+    private val replacementGroups = listOf(Constants.Configurations.Dependencies.BUNDLED_PLUGIN_GROUP, Constants.Configurations.Dependencies.BUNDLED_MODULE_GROUP)
 
     override fun execute(context: ComponentMetadataContext) {
         val id = context.details.id
@@ -88,7 +85,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
                  * So we have to read the Ivy XML again.
                  */
                 val ivyXmlFile = File("$absNormalizedIvyPath/${id.group}-${id.name}-${id.version}.xml")
-                val ivyModule = XML.decodeFromString<IvyModule>(ivyXmlFile.readText())
+                val ivyModule = XML.Companion.decodeFromString<IvyModule>(ivyXmlFile.readText())
 
                 // Remove all existing artifacts because they have relative paths and won't be found.
                 removeAllFiles()
