@@ -226,18 +226,32 @@ class IntelliJPlatformDependenciesHelper(
             }.apply(action).also {
                 val addDefaultDependenciesProvider = providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
                 addIntelliJPlatformBundledPluginDependencies(addDefaultDependenciesProvider.map { enabled ->
-                    when (enabled) {
-                        true -> listOf("com.intellij")
-                        false -> emptyList()
+                    if (enabled) {
+                        listOf("com.intellij")
+                    } else {
+                        emptyList()
                     }
                 })
                 addIntelliJPlatformBundledModuleDependencies(addDefaultDependenciesProvider.map { enabled ->
                     when (enabled) {
                         true -> when (type) {
-                            IntelliJPlatformType.Rider -> listOf("intellij.rider")
+                            IntelliJPlatformType.Rider -> {
+                                val currentVersion = version.toVersion()
+                                fun getComparativeVersion(version: Version) = when (version.major) {
+                                    in 100..999 -> Version(242)
+                                    else -> Version(2024, 2)
+                                }
+
+                                when {
+                                    currentVersion >= getComparativeVersion(currentVersion) -> listOf("intellij.rider")
+                                    else -> emptyList()
+                                }
+                            }
+
                             else -> emptyList()
                         }
-                        else -> emptyList()
+
+                        false -> emptyList()
                     }
                 })
             }
