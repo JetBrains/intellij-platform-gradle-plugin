@@ -254,6 +254,12 @@ class IntelliJPlatformDependenciesHelper(
                         false -> emptyList()
                     }
                 })
+
+                // Load `com.intellij` with its optional dependencies for tests classpath.
+                // See: https://youtrack.jetbrains.com/issue/IJPL-180516/Gradle-tests-fail-without-transitive-modules-jars-of-com.intellij-in-classpath
+                configurations[Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES].dependencies.addLater(provider {
+                    dependencies.createIntelliJPlatformBundledPlugin("com.intellij", loadOptional = true)
+                })
             }
         })
     }
@@ -760,8 +766,12 @@ class IntelliJPlatformDependenciesHelper(
      * Creates a dependency for an IntelliJ platform bundled plugin.
      *
      * @param id The ID of the bundled plugin.
+     * @param loadOptional Load optional dependencies.
      */
-    private fun DependencyHandler.createIntelliJPlatformBundledPlugin(id: String): Dependency {
+    private fun DependencyHandler.createIntelliJPlatformBundledPlugin(
+        id: String,
+        loadOptional: Boolean = false,
+    ): Dependency {
         val plugin = ideProvider.get().findPluginById(id)
         requireNotNull(plugin) {
             val unresolvedPluginId = when (id) {
@@ -786,22 +796,26 @@ class IntelliJPlatformDependenciesHelper(
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
         // Should be the same as [collectDependencies]
         val version = productInfo.getFullVersion()
+        val suffix = when (loadOptional) {
+            true -> "-withOptional"
+            else -> ""
+        }
 
-        writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version, artifactPath) {
+        writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id + suffix, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.BUNDLED_PLUGIN_GROUP,
-                    module = id,
+                    module = id + suffix,
                     revision = version,
                 ),
                 publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath),
-                dependencies = plugin.collectDependencies(),
+                dependencies = plugin.collectDependencies(loadOptional = loadOptional),
             )
         }
 
         return create(
             group = Dependencies.BUNDLED_PLUGIN_GROUP,
-            name = id,
+            name = id + suffix,
             version = version,
         )
     }
@@ -825,8 +839,12 @@ class IntelliJPlatformDependenciesHelper(
      * The [alreadyProcessedOrProcessing] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
      *
      * @param alreadyProcessedOrProcessing IDs of already traversed plugins or modules.
+     * @param loadOptional Load optional transitive dependencies.
      */
-    private fun IdePlugin.collectDependencies(alreadyProcessedOrProcessing: List<String> = emptyList()): List<IvyModule.Dependency> {
+    private fun IdePlugin.collectDependencies(
+        alreadyProcessedOrProcessing: List<String> = emptyList(),
+        loadOptional: Boolean = false,
+    ): List<IvyModule.Dependency> {
         // It is crucial to use the IDE type + build number to the version.
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
@@ -838,7 +856,7 @@ class IntelliJPlatformDependenciesHelper(
         val pluginWithRequiredModules =
             sequenceOf(this) + modulesDescriptors.asSequence()
                 // TODO: I believe we should include all (even optional) modules for `com.intellij` core plugin
-                .filter { it.loadingRule.required || id == "com.intellij" }
+                .filter { it.loadingRule.required || loadOptional }
                 .mapNotNull { ide.findPluginById(it.name) }
 
         return pluginWithRequiredModules
@@ -864,7 +882,7 @@ class IntelliJPlatformDependenciesHelper(
                         IvyModule(
                             info = IvyModule.Info(group, name, version),
                             publications = publications,
-                            dependencies = it.collectDependencies(alreadyProcessedOrProcessing + id),
+                            dependencies = it.collectDependencies(alreadyProcessedOrProcessing + id, loadOptional),
                         )
                     }
                 }
