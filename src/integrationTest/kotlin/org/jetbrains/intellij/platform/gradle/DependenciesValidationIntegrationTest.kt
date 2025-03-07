@@ -36,7 +36,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
@@ -80,7 +80,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
@@ -141,7 +141,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
@@ -170,17 +170,17 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
                         zipSigner()
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
-
+                
                     signing {
                         certificateChainFile = file("certificate/chain.crt")
                         privateKeyFile = file("certificate/private.pem")
@@ -213,16 +213,16 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
-
+                
                     signing {
                         certificateChainFile = file("certificate/chain.crt")
                         privateKeyFile = file("certificate/private.pem")
@@ -255,14 +255,14 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "2024.3")
                         bundledPlugin("Git4Idea")
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -378,14 +378,14 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "2024.3")
                         bundledPlugin("Coverage")
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -410,59 +410,29 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     // TODO: use IntelliJ Platform from local
 
     @Test
-    fun `control default IntelliJ Platform dependencies with property`() {
-        // Test with default dependencies disabled
-        buildFile write //language=kotlin
-                """
-                repositories {
-                    intellijPlatform {
-                        defaultRepositories()
-                    }
-                }
-
-                dependencies {
-                    intellijPlatform {
-                        create("IC", "2024.3")
-                    }
-                }
-
-                intellijPlatform {
-                    instrumentCode = false
-                }
-
-                ${GradleProperties.AddDefaultIntelliJPlatformDependencies} = false
-                """.trimIndent()
-
-        build(DEPENDENCIES) {
-            assertNotContains(
-                """
-                +--- bundledPlugin:com.intellij:IC-243.21565.193
-                """.trimIndent(),
-                output,
-            )
-        }
+    fun `control adding default IntelliJ Platform dependencies with addDefaultIntelliJPlatformDependencies property`() {
+        val properties = defaultProjectProperties + mapOf("intellijPlatform.version" to "2024.3")
 
         // Test with default dependencies enabled (default behavior)
         buildFile write //language=kotlin
                 """
+                val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
+                val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
+                
                 repositories {
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
-                        create("IC", "2024.3")
+                        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
                     }
-                }
-
-                intellijPlatform {
-                    instrumentCode = false
                 }
                 """.trimIndent()
 
-        build(DEPENDENCIES) {
+        build(DEPENDENCIES, projectProperties = properties) {
             assertContains(
                 """
                 +--- bundledPlugin:com.intellij:IC-243.21565.193
@@ -472,29 +442,86 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         }
 
         // Test with Rider to verify intellij.rider dependency
+        build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)) {
+            assertContains(
+                """
+                +--- bundledPlugin:com.intellij:RD-243.21565.191
+                """.trimIndent(),
+                output,
+            )
+
+            assertContains(
+                """
+                +--- bundledModule:intellij.rider:RD-243.21565.191
+                """.trimIndent(),
+                output,
+            )
+        }
+
+        // Test with default dependencies disabled
+        gradleProperties write //language=properties
+                """
+                org.jetbrains.intellij.platform.addDefaultIntelliJPlatformDependencies = false
+                """.trimIndent()
+
+        build(DEPENDENCIES, projectProperties = properties) {
+            assertNotContains(
+                """
+                +--- bundledPlugin:com.intellij:IC-243.21565.193
+                """.trimIndent(),
+                output,
+            )
+        }
+    }
+
+    @Test
+    fun `do not fail when default IntelliJ Platform dependencies are absent in old IntelliJ Platform releases`() {
+        val properties = defaultProjectProperties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)
+
+        // Test with default dependencies enabled (default behavior)
         buildFile write //language=kotlin
                 """
+                val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
+                val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
+                
                 repositories {
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
-                        create("RD", "2024.3")
+                        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
                     }
-                }
-
-                intellijPlatform {
-                    instrumentCode = false
                 }
                 """.trimIndent()
 
-        build(DEPENDENCIES) {
+        build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.1.7")) {
             assertContains(
                 """
-                +--- bundledModule:intellij.rider:RD-243.21565.193
+                +--- bundledPlugin:com.intellij:RD-241.19072.30
+                """.trimIndent(),
+                output,
+            )
+            assertNotContains(
+                """
+                +--- bundledModule:intellij.rider
+                """.trimIndent(),
+                output,
+            )
+        }
+
+        build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.2.8")) {
+            assertContains(
+                """
+                +--- bundledPlugin:com.intellij:RD-242.23726.225
+                """.trimIndent(),
+                output,
+            )
+            assertContains(
+                """
+                +--- bundledModule:intellij.rider:RD-242.23726.225
                 """.trimIndent(),
                 output,
             )
