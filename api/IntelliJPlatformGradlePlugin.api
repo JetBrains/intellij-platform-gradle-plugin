@@ -414,6 +414,12 @@ public final class org/jetbrains/intellij/platform/gradle/argumentProviders/Spli
 	public final fun getSplitMode ()Lorg/gradle/api/provider/Provider;
 }
 
+public abstract class org/jetbrains/intellij/platform/gradle/artifacts/LocalIvyArtifactPathComponentMetadataRule : org/gradle/api/artifacts/ComponentMetadataRule {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun execute (Ljava/lang/Object;)V
+	public fun execute (Lorg/gradle/api/artifacts/ComponentMetadataContext;)V
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/artifacts/repositories/BaseArtifactRepository : org/gradle/api/artifacts/repositories/ArtifactRepository, org/gradle/api/artifacts/repositories/UrlArtifactRepository {
 	public fun <init> (Ljava/lang/String;Ljava/net/URI;Z)V
 	public fun content (Lorg/gradle/api/Action;)Ljava/lang/Void;
@@ -468,12 +474,6 @@ public abstract class org/jetbrains/intellij/platform/gradle/artifacts/transform
 }
 
 public final class org/jetbrains/intellij/platform/gradle/artifacts/transform/ExtractorTransformer$Companion {
-}
-
-public abstract class org/jetbrains/intellij/platform/gradle/artifacts/transform/LocalIvyArtifactPathComponentMetadataRule : org/gradle/api/artifacts/ComponentMetadataRule {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public synthetic fun execute (Ljava/lang/Object;)V
-	public fun execute (Lorg/gradle/api/artifacts/ComponentMetadataContext;)V
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/artifacts/transform/LocalPluginsNormalizationTransformers : org/gradle/api/artifacts/transform/TransformAction {
