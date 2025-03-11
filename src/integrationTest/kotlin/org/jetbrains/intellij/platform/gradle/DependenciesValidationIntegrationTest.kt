@@ -273,95 +273,13 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """
                 compileClasspath - Compile classpath for 'main'.
                 +--- bundledPlugin:Git4Idea:IC-243.21565.193
-                |    \--- bundledPlugin:Git4Idea:IC-243.21565.193 (*)
+                |    \--- bundledModule:intellij.platform.collaborationTools:IC-243.21565.193
+                |         +--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-243.21565.193
+                |         |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193
+                |         |         \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193
+                |         |              \--- bundledModule:intellij.libraries.microba:IC-243.21565.193
+                |         \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
                 +--- bundledPlugin:com.intellij:IC-243.21565.193
-                |    +--- bundledPlugin:com.intellij:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.coverage:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.coverage:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.xml.xmlbeans:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.xml.xmlbeans:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.ide.newUiOnboarding:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.ide.newUiOnboarding:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.ide.newUsersOnboarding:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.ide.newUsersOnboarding:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.ide.startup.importSettings:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.ide.startup.importSettings:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.kotlin.onboarding-promoter:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.kotlin.onboarding-promoter:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.experiment:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.experiment:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.idea.customization.base:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.idea.customization.base:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.tips:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.tips:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.settings.local:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.settings.local:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.libraries.ktor.client:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.libraries.ktor.client:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.libraries.ktor.client.cio:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.libraries.ktor.client.cio:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.rpc.backend:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.rpc.backend:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.kernel.backend:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.kernel.backend:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.project.backend:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.project.backend:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.progress.backend:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.progress.backend:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.navbar:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.navbar:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.navbar.backend:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.navbar.backend:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.navbar.frontend:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.navbar.frontend:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.navbar.monolith:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.navbar.monolith:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.clouds:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.clouds:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.execution.dashboard:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.execution.dashboard:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.execution.serviceView:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.execution.serviceView:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.debugger.impl.frontend:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.debugger.impl.frontend:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.debugger.impl.backend:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.debugger.impl.backend:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.frontend:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.frontend:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.inline.completion:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.inline.completion:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.images.copyright:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.images.copyright:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.images.backend.svg:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.images.backend.svg:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.lvcs.impl:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.lvcs.impl:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.smRunner.vcs:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.smRunner.vcs:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.collaborationTools:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.collaborationTools:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.libraries.microba:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.libraries.microba:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.libraries.skiko:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.libraries.skiko:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.libraries.compose.desktop:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.libraries.compose.desktop:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.compose:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.compose:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.diagnostic.freezeAnalyzer:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.diagnostic.freezeAnalyzer:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.diagnostic.freezes:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.diagnostic.freezes:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
-                |    +--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-243.21565.193 (*)
-                |    \--- bundledModule:intellij.smart.update:IC-243.21565.193
-                |         \--- bundledModule:intellij.smart.update:IC-243.21565.193 (*)
                 \--- idea:ideaIC:2024.3
                 """.trimIndent(),
                 output,
@@ -394,12 +312,13 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES) {
             assertContains(
                 """
+                compileClasspath - Compile classpath for 'main'.
                 +--- bundledPlugin:Coverage:IC-243.21565.193
-                |    \--- bundledPlugin:Coverage:IC-243.21565.193 (*)
-                +--- bundledPlugin:com.intellij:IC-243.21565.193
-                |    +--- bundledPlugin:com.intellij:IC-243.21565.193 (*)
                 |    +--- bundledModule:intellij.platform.coverage:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.coverage:IC-243.21565.193 (*)
+                |    |    \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
+                |    \--- bundledPlugin:com.intellij.java:IC-243.21565.193
+                +--- bundledPlugin:com.intellij:IC-243.21565.193
+                \--- idea:ideaIC:2024.3
                 """.trimIndent(),
                 output,
             )

@@ -257,8 +257,11 @@ class IntelliJPlatformDependenciesHelper(
 
                 // Load `com.intellij` with its optional dependencies for tests classpath.
                 // See: https://youtrack.jetbrains.com/issue/IJPL-180516/Gradle-tests-fail-without-transitive-modules-jars-of-com.intellij-in-classpath
-                configurations[Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES].dependencies.addLater(provider {
-                    dependencies.createIntelliJPlatformBundledPlugin("com.intellij", loadOptional = true)
+                configurations[Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES].dependencies.addAllLater(addDefaultDependenciesProvider.map { enabled ->
+                    when (enabled) {
+                        true -> dependencies.createIntelliJPlatformBundledPlugin("com.intellij", loadOptional = true)
+                        false -> null
+                    }.let { listOfNotNull(it) }
                 })
             }
         })
@@ -853,13 +856,11 @@ class IntelliJPlatformDependenciesHelper(
         val id = requireNotNull(pluginId)
         val version = ide.version.toString()
 
-        val pluginWithRequiredModules =
-            sequenceOf(this) + modulesDescriptors.asSequence()
-                // TODO: I believe we should include all (even optional) modules for `com.intellij` core plugin
-                .filter { it.loadingRule.required || loadOptional }
-                .mapNotNull { ide.findPluginById(it.name) }
+        val modulesIds = modulesDescriptors.asSequence().filter { it.loadingRule.required || loadOptional }.map { it.name }
+        val dependenciesIds = dependencies.asSequence().filter { !it.isOptional || loadOptional }.map { it.id }
+        val ids = (modulesIds + dependenciesIds).mapNotNull { ide.findPluginById(it) }
 
-        return pluginWithRequiredModules
+        return ids
             .mapTo(ArrayList()) {
                 val name = requireNotNull(it.pluginId)
                 val group = when {
