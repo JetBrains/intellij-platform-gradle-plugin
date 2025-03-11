@@ -234,11 +234,11 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
                 module.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap { it.module })
 
-                project.tasks.withType(JavaCompile::class).configureEach {
+                project.tasks.withType<JavaCompile>().configureEach {
                     dependsOn(this@registerTask)
                 }
 
-                project.tasks.withType(PatchPluginXmlTask::class).configureEach {
+                project.tasks.withType<PatchPluginXmlTask>().configureEach {
                     pluginXml.convention(outputFile)
                 }
             }

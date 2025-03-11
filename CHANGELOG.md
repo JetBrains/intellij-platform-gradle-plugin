@@ -23,6 +23,7 @@
 - Tests classpath: do not blindly include all plugin's `lib/**/*.jar`
 - Tests classpath: do not load all bundled plugins and modules into the classpath
 - Classpath: correctly resolve all necessary modules for bundled plugins and modules
+- Avoid creating tasks eagerly and use `configureEach(configuration)` instead. JetBrains/intellij-platform-gradle-plugin#1901
 
 ## [2.3.0] - 2025-02-27
 

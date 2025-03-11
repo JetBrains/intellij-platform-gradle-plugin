@@ -57,7 +57,7 @@ internal inline fun <reified T : Task> Project.registerTask(
     }
 
     when (configureWithType) {
-        true -> tasks.withType<T>(configuration)
+        true -> tasks.withType<T>().configureEach(configuration)
         false -> names.forEach { tasks.named<T>(it).configure(configuration) }
     }
 }
