@@ -100,8 +100,19 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [PluginAware] resolves and parses the `plugin.xml` file for easy access in other tasks.
          */
         if (this is PluginAware) {
-            val patchPluginXmlTaskProvider = tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-            pluginXml.convention(patchPluginXmlTaskProvider.flatMap { it.outputFile })
+            val initializeIntelliJPlatformPluginTaskProvider =
+                tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
+            val moduleProvider = initializeIntelliJPlatformPluginTaskProvider.flatMap { it.module }
+
+            pluginXml.convention(moduleProvider.flatMap { isModule ->
+                when {
+                    isModule -> provider { null }
+                    else -> {
+                        val patchPluginXmlTaskProvider = tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
+                        patchPluginXmlTaskProvider.flatMap { it.outputFile }
+                    }
+                }
+            })
         }
 
         /**

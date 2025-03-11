@@ -17,6 +17,8 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         log.info("Configuring plugin: $ID")
 
+        PatchPluginXmlTask.register(project)
+
         with(project.plugins) {
             apply(IntelliJPlatformBasePlugin::class)
             apply(IntelliJPlatformModulePlugin::class)

@@ -23,14 +23,15 @@ abstract class PrepareTestTask : DefaultTask(), TestableAware {
     }
 
     companion object : Registrable {
-        override fun register(project: Project) =
+        override fun register(project: Project) {
             project.registerTask<PrepareTestTask>(Tasks.PREPARE_TEST) {
                 val prepareTestSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_SANDBOX)
                 applySandboxFrom(prepareTestSandboxTaskProvider)
-
-                project.tasks.named<Test>(Tasks.External.TEST) {
-                    dependsOn(this@registerTask)
-                }
             }
+
+            project.tasks.named<Test>(Tasks.External.TEST) {
+                dependsOn(project.tasks.named<PrepareTestTask>(Tasks.PREPARE_TEST))
+            }
+        }
     }
 }

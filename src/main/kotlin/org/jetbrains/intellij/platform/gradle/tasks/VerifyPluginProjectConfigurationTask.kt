@@ -11,7 +11,6 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
@@ -19,10 +18,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.KotlinMetadataAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
+import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import kotlin.io.path.exists
@@ -43,21 +39,13 @@ import kotlin.io.path.writeText
  */
 // TODO: Use Reporting for handling verification report output? https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
 @CacheableTask
-abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, KotlinMetadataAware, RuntimeAware {
+abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, KotlinMetadataAware, RuntimeAware, PluginAware {
 
     /**
      * Report the directory where the verification result will be stored.
      */
     @get:OutputDirectory
     abstract val reportDirectory: DirectoryProperty
-
-    /**
-     * Holds the path to the patched `plugin.xml` file.
-     */
-    @get:InputFile
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    @get:Optional
-    abstract val pluginXml: RegularFileProperty
 
     /**
      * Root project path.
@@ -233,14 +221,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
                 targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
                 module.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap { it.module })
-
-                project.tasks.withType<JavaCompile>().configureEach {
-                    dependsOn(this@registerTask)
-                }
-
-                project.tasks.withType<PatchPluginXmlTask>().configureEach {
-                    pluginXml.convention(outputFile)
-                }
             }
     }
 }
