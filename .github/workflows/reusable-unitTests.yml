@@ -39,3 +39,5 @@ jobs:
         exclude:
           - os: ubuntu-latest
             gradleVersion: "8.13"
+          - os: windows-latest
+            gradleVersion: "8.5"
