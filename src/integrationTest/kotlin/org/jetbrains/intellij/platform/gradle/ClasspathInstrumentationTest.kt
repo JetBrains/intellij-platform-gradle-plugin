@@ -22,7 +22,6 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
             output containsText """
                 compileClasspath - Compile classpath for 'main'.
                 +--- bundledPlugin:com.intellij:IC-223.8836.41
-                |    \--- bundledPlugin:com.intellij:IC-223.8836.41 (*)
                 +--- idea:ideaIC:$intellijPlatformVersion
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
