@@ -696,6 +696,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
+    @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
     fun writerside(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
         typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Writerside },
         versionProvider = dependenciesHelper.provider { version },
@@ -709,6 +710,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     @JvmOverloads
+    @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
     fun writerside(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
         typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Writerside },
         versionProvider = version,

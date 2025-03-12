@@ -111,6 +111,7 @@ enum class IntelliJPlatformType(
         maven = Coordinates("com.jetbrains.intellij.webstorm", "webstorm"),
         installer = Coordinates("webstorm", "WebStorm"),
     ),
+    @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
     Writerside(
         code = "WRS",
         maven = Coordinates("com.jetbrains.intellij.idea", "writerside"),

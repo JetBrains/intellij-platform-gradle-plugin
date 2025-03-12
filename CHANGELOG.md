@@ -14,6 +14,7 @@
 - Load the `com.intellij` module by default when creating the IntelliJ Platform dependency
 - Load the `com.intellij` module with its optional dependencies for tests classpath as a cleaner fix for [IJPL-180516](https://youtrack.jetbrains.com/issue/IJPL-180516/Gradle-tests-fail-without-transitive-modules-jars-of-com.intellij-in-classpath)
 - Store `localPlatformArtifacts` Ivy XML files within the version-based subdirectory
+- Deprecate Writerside (WRS) as a target IntelliJ Platform.
 
 ### Fixed
 
