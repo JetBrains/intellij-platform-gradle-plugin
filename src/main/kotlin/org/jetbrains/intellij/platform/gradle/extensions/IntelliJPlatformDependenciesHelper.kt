@@ -1021,7 +1021,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version Java Compiler dependency version
      */
     internal fun createJavaCompiler(version: String = Constraints.CLOSEST_VERSION) =
-        dependencies.createDependency(
+        dependencies.createPlatformDependency(
             coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
             version = version,
         )
@@ -1238,7 +1238,12 @@ class IntelliJPlatformDependenciesHelper(
     private fun DependencyHandler.createPlatformDependency(
         coordinates: Coordinates,
         version: String,
-    ) = createDependency(coordinates, version).apply {
+    ): org.gradle.api.artifacts.ExternalModuleDependency = createDependency(
+        coordinates, when {
+            version == Constraints.CLOSEST_VERSION && isNightly -> Constraints.PLATFORM_VERSION
+            else -> version
+        }
+    ).apply {
         val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
             parameters {
                 intellijPlatformPath = layout.dir(provider { platformPath.toFile() })
@@ -1314,6 +1319,15 @@ class IntelliJPlatformDependenciesHelper(
         is Directory -> path.asPath.pathString
         else -> throw IllegalArgumentException("Invalid argument type: '${path.javaClass}'. Supported types: String, File, or Directory.")
     }.let { Path(it) }
+
+    /**
+     * Indicates whether the current IntelliJ Platform is a nightly build.
+     *
+     * This variable checks if the base version matches a specific pattern
+     * commonly used for nightly or snapshot builds, such as "123-SNAPSHOT" or "*-TRUNK-SNAPSHOT".
+     */
+    private val isNightly
+        get() = "(^|-)\\d{3}-SNAPSHOT|.*TRUNK-SNAPSHOT$".toRegex().matches(baseVersion.get())
 
     //</editor-fold>
 }
