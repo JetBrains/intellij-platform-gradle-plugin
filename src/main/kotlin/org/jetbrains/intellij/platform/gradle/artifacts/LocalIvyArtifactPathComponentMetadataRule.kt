@@ -7,7 +7,7 @@ import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.internal.os.OperatingSystem
-import org.jetbrains.intellij.platform.gradle.Constants
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import java.io.File
 import javax.inject.Inject
@@ -17,9 +17,9 @@ import javax.inject.Inject
  *
  * Fixes relative URLs of dependencies from the local Ivy repository [org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesHelper.createLocalIvyRepository]
  * by appending the full absolute path.
- * It is necessary only for [org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies.BUNDLED_PLUGIN_GROUP] and [org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies.BUNDLED_MODULE_GROUP] dependency types.
+ * It is necessary only for [Dependencies.BUNDLED_PLUGIN_GROUP] and [Dependencies.BUNDLED_MODULE_GROUP] dependency types.
  *
- *  For [org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies.BUNDLED_PLUGIN_GROUP] and [org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies.BUNDLED_MODULE_GROUP], we expect:
+ *  For [Dependencies.BUNDLED_PLUGIN_GROUP] and [Dependencies.BUNDLED_MODULE_GROUP], we expect:
  *
  *  - "artifact" ([org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact.name]) is mandatory and contains only the name of the artifact (for example, a jar archive), without the extension.
  *
@@ -68,7 +68,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
     private val absNormalizedIvyPath: String,
 ) : ComponentMetadataRule {
 
-    private val replacementGroups = listOf(Constants.Configurations.Dependencies.BUNDLED_PLUGIN_GROUP, Constants.Configurations.Dependencies.BUNDLED_MODULE_GROUP)
+    private val replacementGroups = listOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
 
     override fun execute(context: ComponentMetadataContext) {
         val id = context.details.id

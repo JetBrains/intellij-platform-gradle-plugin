@@ -9,9 +9,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -87,7 +85,6 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("intellij.testFramework.rethrow.logged.errors", "true")
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-            val intellijPlatformTestClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH]
             val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
             val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
 
