@@ -303,6 +303,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Platform Test Classpath resolvable configuration"
             )
             create(
+                name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH,
+                description = "IntelliJ Platform Test Runtime Classpath resolvable configuration"
+            )
+            create(
                 name = Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
                 description = "IntelliJ Platform Runtime Classpath resolvable configuration"
             ) {
@@ -365,6 +369,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 project.configurations[Configurations.External.TEST_RUNTIME_CLASSPATH],
                 project.configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH],
                 project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH],
+                project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH],
             ).forEach {
                 it.attributes
                     .attribute(Attributes.extracted, true)

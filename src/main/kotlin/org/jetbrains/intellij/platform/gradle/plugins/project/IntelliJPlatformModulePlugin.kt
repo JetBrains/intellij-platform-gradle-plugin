@@ -149,6 +149,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
             listOf(
                 Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
+                Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
                 Configurations.External.COMPILE_CLASSPATH,
                 Configurations.External.TEST_COMPILE_CLASSPATH,

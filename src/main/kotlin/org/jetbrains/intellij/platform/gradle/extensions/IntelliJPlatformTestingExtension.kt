@@ -163,6 +163,12 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                 ) {
                     extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH])
                 }
+                val customIntellijPlatformTestRuntimeClasspathConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH.withSuffix,
+                    description = "Custom IntelliJ Platform Test Runtime Classpath",
+                ) {
+                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH])
+                }
 
                 plugins {
                     intellijPlatformPluginDependencyConfigurationName = customIntellijPlatformPluginDependencyConfiguration.name
@@ -190,6 +196,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
 
                     if (this is TestableAware) {
                         intellijPlatformTestClasspathConfiguration = customIntellijPlatformTestClasspathConfiguration
+                        intellijPlatformTestRuntimeClasspathConfiguration = customIntellijPlatformTestRuntimeClasspathConfiguration
                     }
 
                     applySandboxFrom(prepareSandboxTask)

@@ -81,6 +81,7 @@ object Constants {
         const val INTELLIJ_PLATFORM_JAVA_COMPILER = "intellijPlatformJavaCompiler"
         const val INTELLIJ_PLATFORM_TEST_DEPENDENCIES = "intellijPlatformTestDependencies"
         const val INTELLIJ_PLATFORM_TEST_CLASSPATH = "intellijPlatformTestClasspath"
+        const val INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH = "intellijPlatformTestRuntimeClasspath"
         const val INTELLIJ_PLATFORM_RUNTIME_CLASSPATH = "intellijPlatformRuntimeClasspath"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES = "intellijPluginVerifierIdes"

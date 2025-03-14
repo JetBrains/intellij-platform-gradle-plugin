@@ -316,6 +316,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             val pluginName = extensionProvider.flatMap { it.projectName }
             pluginDirectory = sandboxPluginsDirectory.dir(pluginName)
             intellijPlatformTestClasspathConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH)
+            intellijPlatformTestRuntimeClasspathConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH)
         }
     }
 }

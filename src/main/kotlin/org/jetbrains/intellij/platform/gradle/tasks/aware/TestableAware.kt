@@ -29,6 +29,13 @@ interface TestableAware : CoroutinesJavaAgentAware, RuntimeAware, SandboxAware {
     val intellijPlatformTestClasspathConfiguration: ConfigurableFileCollection
 
     /**
+     * Holds the [Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH] configuration.
+     */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    val intellijPlatformTestRuntimeClasspathConfiguration: ConfigurableFileCollection
+
+    /**
      * Specifies the directory where the plugin artifacts are to be placed.
      *
      * Default value: [sandboxPluginsDirectory]/[IntelliJPlatformExtension.projectName]

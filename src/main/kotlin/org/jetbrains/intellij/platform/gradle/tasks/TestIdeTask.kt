@@ -113,12 +113,14 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // 3. Other plugins' libraries
             // 4. Test classpath configuration
             // 5. Original classpath without runtime dependencies
+            // 6. Test runtime classpath configuration
             classpath = project.files(
                 instrumentedTestCode,
                 currentPluginLibsProvider,
                 otherPluginsLibsProvider,
                 sourceTask.intellijPlatformTestClasspathConfiguration,
-                classpath.filter { it !in runtimeDependencies.files }
+                classpath.filter { it !in runtimeDependencies.files },
+                sourceTask.intellijPlatformTestRuntimeClasspathConfiguration,
             )
 
             testClassesDirs = instrumentedTestCode + testClassesDirs
