@@ -1000,7 +1000,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version Java Compiler dependency version
      */
     internal fun createJavaCompiler(version: String = Constraints.CLOSEST_VERSION) =
-        dependencies.createPlatformDependency(
+        dependencies.createDependency(
             coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
             version = version,
         )
@@ -1096,6 +1096,11 @@ class IntelliJPlatformDependenciesHelper(
         classifier = classifier,
         ext = extension,
     ).apply {
+        val version = when {
+            version == Constraints.CLOSEST_VERSION && isNightly -> Constraints.PLATFORM_VERSION
+            else -> version
+        }
+
         when (version) {
             Constraints.PLATFORM_VERSION ->
                 version {
@@ -1217,12 +1222,7 @@ class IntelliJPlatformDependenciesHelper(
     private fun DependencyHandler.createPlatformDependency(
         coordinates: Coordinates,
         version: String,
-    ): org.gradle.api.artifacts.ExternalModuleDependency = createDependency(
-        coordinates, when {
-            version == Constraints.CLOSEST_VERSION && isNightly -> Constraints.PLATFORM_VERSION
-            else -> version
-        }
-    ).apply {
+    ) = createDependency(coordinates, version).apply {
         val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
             parameters {
                 intellijPlatformPath = layout.dir(provider { platformPath.toFile() })
