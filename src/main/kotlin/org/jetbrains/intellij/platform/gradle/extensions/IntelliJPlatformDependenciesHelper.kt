@@ -812,11 +812,11 @@ class IntelliJPlatformDependenciesHelper(
      * @param id The ID of the bundled module.
      */
     private fun DependencyHandler.createIntelliJPlatformBundledModule(id: String): Dependency {
-        val bundledModule = productInfo.layout
-            .find { layout -> layout.name == id }
+        val bundledModule = ideProvider.get().findPluginById(id)
             .let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
+        val classpath = bundledModule.classpath.paths.map { it.pathString }
 
-        val (group, name, version) = writeBundledModuleDependency(id, bundledModule.classPath)
+        val (group, name, version) = writeBundledModuleDependency(id, classpath)
         return create(group, name, version)
     }
 
