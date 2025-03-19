@@ -306,7 +306,13 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH,
                 description = "IntelliJ Platform Test Runtime Classpath resolvable configuration"
-            )
+            ) {
+              defaultDependencies {
+                addLater(project.provider {
+                  dependenciesHelper.createIntelliJPlatformTestRuntime()
+                })
+              }
+            }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
                 description = "IntelliJ Platform Runtime Classpath resolvable configuration"

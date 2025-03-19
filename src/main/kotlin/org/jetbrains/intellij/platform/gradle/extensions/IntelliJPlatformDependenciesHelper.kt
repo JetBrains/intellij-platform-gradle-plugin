@@ -876,9 +876,12 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param name The name of the module.
      * @param classPath A list of class path entries for the module.
-     * @return A [Triple] containing dependency group, name, and version
+     * @return A [Triple] containing a dependency group, name, and version
      */
-    private fun writeBundledModuleDependency(name: String, classPath: List<String>): Triple<String, String, String> {
+    private fun writeBundledModuleDependency(
+        name: String,
+        classPath: Collection<String>,
+    ): Triple<String, String, String> {
         val group = Dependencies.BUNDLED_MODULE_GROUP
         // It is crucial to use the IDE type + build number to the version.
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
@@ -1076,6 +1079,25 @@ class IntelliJPlatformDependenciesHelper(
 
             buildJetBrainsRuntimeVersion(version)
         }
+
+    /**
+     * Collects all required jars into a single artificial dependency to satisfy the test runtime.
+     * Due to the tests classpath loader, it is required to provide explicitly all dependencies on
+     * bundled plugins and modules so tests can run with all runtime elements loaded.
+     *
+     * See https://youtrack.jetbrains.com/issue/IJPL-180516/Gradle-tests-fail-without-transitive-modules-jars-of-com.intellij-in-classpath
+     */
+    internal fun createIntelliJPlatformTestRuntime(): Dependency {
+        val id = "intellij-platform-test-runtime"
+        val ide = ideProvider.get()
+
+        val classpath = ide.findPluginById ("com.intellij")?.let {
+            it.classpath.paths.map { it.pathString }.toSet()
+        } ?: emptyList()
+
+        val (group, name, version) = writeBundledModuleDependency(id, classpath)
+        return dependencies.create(group, name, version)
+    }
 
     /**
      * Creates a dependency.
