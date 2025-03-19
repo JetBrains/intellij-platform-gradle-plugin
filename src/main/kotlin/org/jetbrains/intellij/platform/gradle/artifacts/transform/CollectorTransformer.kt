@@ -148,6 +148,11 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
                         .filter { it.name == "intellij.rider" }
                         .flatMap { it.classPath }
 
+                IntelliJPlatformType.CLion ->
+                    productInfo.layout
+                        .filter { it.name == "com.intellij.clion" }
+                        .flatMap { it.classPath }
+
                 else -> emptyList()
             }
         )
