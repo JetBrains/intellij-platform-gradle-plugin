@@ -362,7 +362,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginConfiguration {
                         ideaVersion {
-                            untilBuild.set(null)
+                            untilBuild = null
                         }
                     }
                 }
