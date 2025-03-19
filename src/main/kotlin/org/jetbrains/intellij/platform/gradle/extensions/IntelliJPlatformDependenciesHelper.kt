@@ -1328,7 +1328,7 @@ class IntelliJPlatformDependenciesHelper(
      * commonly used for nightly or snapshot builds, such as "123-SNAPSHOT" or "*-TRUNK-SNAPSHOT".
      */
     private val isNightly
-        get() = "(^|-)\\d{3}-SNAPSHOT|.*TRUNK-SNAPSHOT$".toRegex().matches(baseVersion.get())
+        get() = baseVersion.orNull?.let { "(^|-)\\d{3}-SNAPSHOT|.*TRUNK-SNAPSHOT$".toRegex().matches(it) } == true
 
     //</editor-fold>
 }

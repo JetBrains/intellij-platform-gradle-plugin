@@ -132,8 +132,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         } else if (isEmpty) {
                             log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' is empty. $ruleName will not be registered.")
                         } else {
-                            val artifactLocationPath = platformPath().absolute().normalize().invariantSeparatorsPathString
-                            val ivyLocationPath = project.providers.localPlatformArtifactsPath(project.rootProjectPath).absolute().normalize().invariantSeparatorsPathString
+                            val artifactLocationPath = platformPath()
+                                .absolute().normalize().invariantSeparatorsPathString
+                            val ivyLocationPath = project.providers.localPlatformArtifactsPath(project.rootProjectPath)
+                                .absolute().normalize().invariantSeparatorsPathString
 
                             project.dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
                                 params(artifactLocationPath, ivyLocationPath)
@@ -307,11 +309,16 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH,
                 description = "IntelliJ Platform Test Runtime Classpath resolvable configuration"
             ) {
-              defaultDependencies {
-                addLater(project.provider {
-                  dependenciesHelper.createIntelliJPlatformTestRuntime()
-                })
-              }
+                defaultDependencies {
+                    addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
+                        val intelliJPlatformAvailable = runCatching { dependenciesHelper.platformPath }.getOrNull() != null
+
+                        when (enabled && intelliJPlatformAvailable) {
+                            true -> dependenciesHelper.createIntelliJPlatformTestRuntime()
+                            false -> null
+                        }.let { listOfNotNull(it) }
+                    })
+                }
             }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
@@ -403,7 +410,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
 
             PluginVerification.register(project, target = intelliJPlatform).let { pluginVerification ->
-                PluginVerification.Ides.register(dependenciesHelper, project.extensionProvider, target = pluginVerification)
+                PluginVerification.Ides.register(
+                    dependenciesHelper = dependenciesHelper,
+                    extensionProvider = project.extensionProvider,
+                    target = pluginVerification,
+                )
             }
 
             Signing.register(project, target = intelliJPlatform)
