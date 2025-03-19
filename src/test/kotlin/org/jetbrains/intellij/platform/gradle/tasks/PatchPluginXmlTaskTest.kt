@@ -298,7 +298,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginConfiguration {
                         ideaVersion {
-                            untilBuild = provider { null }
+                            untilBuild.set(provider { null })
                         }
                     }
                 }
@@ -330,7 +330,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 """
                 tasks {
                     patchPluginXml {
-                        untilBuild = provider { null }
+                        untilBuild.set(provider { null })
                     }
                 }
                 """.trimIndent()
@@ -362,7 +362,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginConfiguration {
                         ideaVersion {
-                            untilBuild = null
+                            untilBuild.set(null)
                         }
                     }
                 }
