@@ -189,6 +189,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox$Plug
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Services {
+	public static final field EXTRACTOR Ljava/lang/String;
 	public static final field IDES_MANAGER Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Services;
 }
@@ -470,12 +471,16 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/artifacts
 
 public abstract class org/jetbrains/intellij/platform/gradle/artifacts/transform/ExtractorTransformer : org/gradle/api/artifacts/transform/TransformAction {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/artifacts/transform/ExtractorTransformer$Companion;
-	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/process/ExecOperations;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/file/FileSystemOperations;)V
+	public fun <init> ()V
 	public abstract fun getInputArtifact ()Lorg/gradle/api/provider/Provider;
 	public fun transform (Lorg/gradle/api/artifacts/transform/TransformOutputs;)V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/artifacts/transform/ExtractorTransformer$Companion {
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/artifacts/transform/ExtractorTransformer$Parameters : org/gradle/api/artifacts/transform/TransformParameters {
+	public abstract fun getExtractorService ()Lorg/gradle/api/provider/Property;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/artifacts/transform/LocalPluginsNormalizationTransformers : org/gradle/api/artifacts/transform/TransformAction {
@@ -2383,6 +2388,15 @@ public final class org/jetbrains/intellij/platform/gradle/resolvers/path/Product
 	public fun getSubject ()Ljava/lang/String;
 	public synthetic fun getSubjectInput ()Ljava/lang/Object;
 	public fun getSubjectInput ()Ljava/nio/file/Path;
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/services/ExtractorService : org/gradle/api/services/BuildService {
+	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/process/ExecOperations;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/file/FileSystemOperations;)V
+	public final fun extract (Ljava/nio/file/Path;Ljava/nio/file/Path;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/services/ExtractorServiceKt {
+	public static final fun getExtractorServiceProvider (Lorg/gradle/api/invocation/Gradle;)Lorg/gradle/api/provider/Provider;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/services/IdesManagerService : org/gradle/api/services/BuildService {

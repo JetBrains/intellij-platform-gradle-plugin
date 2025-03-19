@@ -148,6 +148,7 @@ object Constants {
 
     object Services {
         const val IDES_MANAGER = "idesManager"
+        const val EXTRACTOR = "extractor"
     }
 
     object Tasks {

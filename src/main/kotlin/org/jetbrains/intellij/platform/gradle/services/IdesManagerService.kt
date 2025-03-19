@@ -35,7 +35,7 @@ abstract class IdesManagerService : BuildService<BuildServiceParameters.None> {
 }
 
 internal val Gradle.idesManagerServiceProvider: Provider<IdesManagerService>
-    get() = sharedServices.registerIfAbsent(
+        get() = sharedServices.registerIfAbsent(
         Services.IDES_MANAGER,
         IdesManagerService::class,
     ) { /* TODO: remove when Gradle 8.7+ */ }

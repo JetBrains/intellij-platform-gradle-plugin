@@ -10,6 +10,7 @@
 - Use the exact IntelliJ Platform version to resolve platform dependencies when targeting IntelliJ Platform from the nightly channel.
 - Introduce the `intellijPlatformTestRuntimeClasspath` configuration
 - Automatically load the `com.intellij.clion` into the CLion classpath
+- Introduce the `ExtractorService` as a reusable tool for custom IntelliJ Platform extraction flow cases 
 
 ### Changed
 
