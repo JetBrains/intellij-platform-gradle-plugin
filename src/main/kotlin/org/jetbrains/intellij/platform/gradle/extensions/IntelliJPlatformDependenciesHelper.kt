@@ -847,7 +847,7 @@ class IntelliJPlatformDependenciesHelper(
                     else -> Dependencies.BUNDLED_PLUGIN_GROUP
                 }
                 val publications = when {
-                    it is IdeModule -> it.classpath.flatMap { path ->
+                    it is IdeModule -> it.classpath.paths.flatMap { path ->
                         path.toIvyArtifacts(metadataRulesModeProvider, platformPath)
                     }
 
