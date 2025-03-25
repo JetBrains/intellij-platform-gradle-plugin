@@ -125,27 +125,26 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     }
                 }
 
-                val customIntellijPlatformPluginDependencyConfiguration = project.configurations.create(
-                    name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY.withSuffix,
-                    description = "Custom IntelliJ Platform plugin dependencies",
+                val customIntellijPlatformTestPluginDependencyConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY.withSuffix,
+                    description = "Custom IntelliJ Platform test plugin dependencies",
                 ) {
-                    project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR].extendsFrom(this)
-                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY])
+                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY])
                 }
 
-                val customIntellijPlatformPluginLocalConfiguration = project.configurations.create(
-                    name = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL.withSuffix,
-                    description = "Custom IntelliJ Platform plugin local",
+                val customIntellijPlatformTestPluginLocalConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL.withSuffix,
+                    description = "Custom IntelliJ Platform test plugin local",
                 ) {
                     attributes {
                         attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
                     }
 
-                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL])
+                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL])
                 }
 
-                val customIntellijPlatformPluginConfiguration = project.configurations.create(
-                    name = Configurations.INTELLIJ_PLATFORM_PLUGIN.withSuffix,
+                val customIntellijPlatformTestPluginConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN.withSuffix,
                     description = "Custom IntelliJ Platform plugins",
                 ) {
                     attributes {
@@ -153,8 +152,32 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                         attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
                     }
 
-                    extendsFrom(customIntellijPlatformPluginDependencyConfiguration)
-                    extendsFrom(customIntellijPlatformPluginLocalConfiguration)
+                    extendsFrom(customIntellijPlatformTestPluginDependencyConfiguration)
+                    extendsFrom(customIntellijPlatformTestPluginLocalConfiguration)
+                }
+
+                val customIntellijPlatformTestBundledPluginsConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS.withSuffix,
+                    description = "Custom IntelliJ Platform test bundled plugins",
+                ) {
+                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS])
+                }
+                val customIntellijPlatformTestBundledModulesConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES.withSuffix,
+                    description = "Custom IntelliJ Platform test bundled modules",
+                ) {
+                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES])
+                }
+
+                val customIntellijPlatformTestDependenciesConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES.withSuffix,
+                    description = "Custom IntelliJ Platform Test Dependencies"
+                ) {
+                    extendsFrom(
+                        customIntellijPlatformTestPluginConfiguration,
+                        customIntellijPlatformTestBundledPluginsConfiguration,
+                        customIntellijPlatformTestBundledModulesConfiguration,
+                    )
                 }
 
                 val customIntellijPlatformTestClasspathConfiguration = project.configurations.create(
@@ -162,24 +185,28 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     description = "Custom IntelliJ Platform Test Classpath",
                 ) {
                     extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH])
+                    extendsFrom(customIntellijPlatformTestDependenciesConfiguration)
                 }
                 val customIntellijPlatformTestRuntimeClasspathConfiguration = project.configurations.create(
                     name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH.withSuffix,
                     description = "Custom IntelliJ Platform Test Runtime Classpath",
                 ) {
                     extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH])
+                    extendsFrom(customIntellijPlatformTestDependenciesConfiguration)
                 }
 
                 plugins {
-                    intellijPlatformPluginDependencyConfigurationName = customIntellijPlatformPluginDependencyConfiguration.name
-                    intellijPlatformPluginLocalConfigurationName = customIntellijPlatformPluginLocalConfiguration.name
+                    intellijPlatformPluginDependencyConfigurationName = customIntellijPlatformTestPluginDependencyConfiguration.name
+                    intellijPlatformPluginLocalConfigurationName = customIntellijPlatformTestPluginLocalConfiguration.name
+                    intellijPlatformTestBundledPluginsConfiguration = customIntellijPlatformTestBundledPluginsConfiguration.name
+                    intellijPlatformTestBundledModulesConfiguration = customIntellijPlatformTestBundledModulesConfiguration.name
                 }
 
                 val prepareSandboxTask = project.tasks.register<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX.withSuffix) {
                     group = Plugin.GROUP_NAME
 
                     intelliJPlatformConfiguration = customIntelliJPlatformConfiguration
-                    intelliJPlatformPluginConfiguration = customIntellijPlatformPluginConfiguration
+                    intelliJPlatformPluginConfiguration = customIntellijPlatformTestPluginConfiguration
 
                     sandboxDirectory = this@all.sandboxDirectory.orElse(basePrepareSandboxTask.flatMap { it.sandboxDirectory })
                     splitMode = this@all.splitMode.orElse(basePrepareSandboxTask.flatMap { it.splitMode })
@@ -191,7 +218,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     group = Plugin.GROUP_NAME
 
                     intelliJPlatformConfiguration = customIntelliJPlatformConfiguration
-                    intelliJPlatformPluginConfiguration = customIntellijPlatformPluginConfiguration
+                    intelliJPlatformPluginConfiguration = customIntellijPlatformTestPluginConfiguration
                     jetbrainsRuntimeConfiguration = customJetBrainsRuntimeConfiguration
 
                     if (this is TestableAware) {

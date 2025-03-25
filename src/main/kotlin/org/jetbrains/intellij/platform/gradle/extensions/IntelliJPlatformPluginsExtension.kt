@@ -29,6 +29,8 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
 
     internal val intellijPlatformPluginDependencyConfigurationName = objects.property<String>()
     internal val intellijPlatformPluginLocalConfigurationName = objects.property<String>()
+    internal val intellijPlatformTestBundledPluginsConfiguration = objects.property<String>()
+    internal val intellijPlatformTestBundledModulesConfiguration = objects.property<String>()
 
     /**
      * Contains a list of plugins to be disabled.
@@ -117,6 +119,96 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun plugins(notations: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
         pluginsProvider = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } },
         configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+    )
+
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform plugin.
+     *
+     * @param id The provider of the bundled plugin identifier.
+     */
+    fun bundledPlugin(id: Provider<String>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = id.map { listOf(it) },
+        configurationName = intellijPlatformTestBundledPluginsConfiguration.get(),
+    )
+
+    /**
+     * Adds dependencies on bundled IntelliJ Platform plugins.
+     *
+     * @param ids The bundled plugin identifiers.
+     */
+    fun bundledPlugins(vararg ids: String) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = dependenciesHelper.provider { ids.asList() },
+        configurationName = intellijPlatformTestBundledPluginsConfiguration.get(),
+    )
+
+    /**
+     * Adds dependencies on bundled IntelliJ Platform plugins.
+     *
+     * @param ids The bundled plugin identifiers.
+     */
+    fun bundledPlugins(ids: List<String>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = dependenciesHelper.provider { ids },
+        configurationName = intellijPlatformTestBundledPluginsConfiguration.get(),
+    )
+
+    /**
+     * Adds dependencies on bundled IntelliJ Platform plugins.
+     *
+     * @param ids The bundled plugin identifiers.
+     */
+    fun bundledPlugins(ids: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = ids,
+        configurationName = intellijPlatformTestBundledPluginsConfiguration.get(),
+    )
+
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform module.
+     *
+     * @param id The bundled module identifier.
+     */
+    fun bundledModule(id: String) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = dependenciesHelper.provider { listOf(id) },
+        configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
+    )
+
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform module.
+     *
+     * @param id The provider of the bundled module identifier.
+     */
+    fun bundledModule(id: Provider<String>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = id.map { listOf(it) },
+        configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
+    )
+
+    /**
+     * Adds dependencies on bundled IntelliJ Platform modules.
+     *
+     * @param ids The bundled module identifiers.
+     */
+    fun bundledModules(vararg ids: String) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = dependenciesHelper.provider { ids.asList() },
+        configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
+    )
+
+    /**
+     * Adds dependencies on bundled IntelliJ Platform modules.
+     *
+     * @param ids The bundled module identifiers.
+     */
+    fun bundledModules(ids: List<String>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = dependenciesHelper.provider { ids },
+        configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
+    )
+
+    /**
+     * Adds dependencies on bundled IntelliJ Platform modules.
+     *
+     * @param ids The bundled module identifiers.
+     */
+    fun bundledModules(ids: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = ids,
+        configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
     )
 
     /**

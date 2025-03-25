@@ -33,8 +33,13 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 	public static final field INTELLIJ_PLATFORM_PLUGIN_LOCAL Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN_MODULE Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_RUNTIME_CLASSPATH Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_TEST_CLASSPATH Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_TEST_DEPENDENCIES Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_TEST_PLUGIN Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH Ljava/lang/String;
 	public static final field INTELLIJ_PLUGIN_VERIFIER Ljava/lang/String;
 	public static final field INTELLIJ_PLUGIN_VERIFIER_IDES Ljava/lang/String;
@@ -695,18 +700,42 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun rustRover (Lorg/gradle/api/provider/Provider;Z)V
 	public static synthetic fun rustRover$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZILjava/lang/Object;)V
 	public static synthetic fun rustRover$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZILjava/lang/Object;)V
+	public final fun testBundledModule (Ljava/lang/String;)V
+	public final fun testBundledModule (Lorg/gradle/api/provider/Provider;)V
+	public final fun testBundledModules (Ljava/util/List;)V
+	public final fun testBundledModules (Lorg/gradle/api/provider/Provider;)V
+	public final fun testBundledModules ([Ljava/lang/String;)V
+	public final fun testBundledPlugin (Ljava/lang/String;)V
+	public final fun testBundledPlugin (Lorg/gradle/api/provider/Provider;)V
+	public final fun testBundledPlugins (Ljava/util/List;)V
+	public final fun testBundledPlugins (Lorg/gradle/api/provider/Provider;)V
+	public final fun testBundledPlugins ([Ljava/lang/String;)V
 	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;)V
 	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Ljava/lang/String;)V
 	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Lorg/gradle/api/provider/Provider;Ljava/lang/String;)V
 	public static synthetic fun testFramework$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun testFramework$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Lorg/gradle/api/provider/Provider;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun testLocalPlugin (Ljava/io/File;)V
+	public final fun testLocalPlugin (Ljava/lang/String;)V
+	public final fun testLocalPlugin (Lorg/gradle/api/artifacts/ProjectDependency;)Z
+	public final fun testLocalPlugin (Lorg/gradle/api/file/Directory;)V
+	public final fun testLocalPlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun testPlatformDependency (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;)V
 	public final fun testPlatformDependency (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;)V
 	public final fun testPlatformDependency (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;Ljava/lang/String;)V
 	public final fun testPlatformDependency (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Lorg/gradle/api/provider/Provider;Ljava/lang/String;)V
 	public static synthetic fun testPlatformDependency$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun testPlatformDependency$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Lorg/gradle/api/provider/Provider;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun testPlugin (Ljava/lang/String;)V
+	public final fun testPlugin (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun testPlugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun testPlugin (Lorg/gradle/api/provider/Provider;)V
+	public final fun testPlugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
+	public static synthetic fun testPlugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun testPlugins (Ljava/util/List;)V
+	public final fun testPlugins (Lorg/gradle/api/provider/Provider;)V
+	public final fun testPlugins ([Ljava/lang/String;)V
 	public final fun webstorm (Ljava/lang/String;)V
 	public final fun webstorm (Ljava/lang/String;Z)V
 	public final fun webstorm (Lorg/gradle/api/provider/Provider;)V
@@ -921,6 +950,15 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/extension
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension : org/gradle/api/plugins/ExtensionAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension$Companion;
 	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun bundledModule (Ljava/lang/String;)V
+	public final fun bundledModule (Lorg/gradle/api/provider/Provider;)V
+	public final fun bundledModules (Ljava/util/List;)V
+	public final fun bundledModules (Lorg/gradle/api/provider/Provider;)V
+	public final fun bundledModules ([Ljava/lang/String;)V
+	public final fun bundledPlugin (Lorg/gradle/api/provider/Provider;)V
+	public final fun bundledPlugins (Ljava/util/List;)V
+	public final fun bundledPlugins (Lorg/gradle/api/provider/Provider;)V
+	public final fun bundledPlugins ([Ljava/lang/String;)V
 	public final fun disablePlugin (Ljava/lang/String;)V
 	public final fun disablePlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun disablePlugins (Ljava/util/List;)V

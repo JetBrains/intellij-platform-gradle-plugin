@@ -78,10 +78,17 @@ object Constants {
         const val INTELLIJ_PLATFORM_BUNDLED_MODULES = "intellijPlatformBundledModules"
         const val INTELLIJ_PLATFORM_CLASSPATH = "intellijPlatformClasspath"
         const val INTELLIJ_PLATFORM_DEPENDENCIES = "intellijPlatformDependencies"
-        const val INTELLIJ_PLATFORM_JAVA_COMPILER = "intellijPlatformJavaCompiler"
+
         const val INTELLIJ_PLATFORM_TEST_DEPENDENCIES = "intellijPlatformTestDependencies"
         const val INTELLIJ_PLATFORM_TEST_CLASSPATH = "intellijPlatformTestClasspath"
+        const val INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY = "intellijPlatformTestPluginDependency"
+        const val INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL = "intellijPlatformTestPluginLocal"
+        const val INTELLIJ_PLATFORM_TEST_PLUGIN = "intellijPlatformTestPlugin"
         const val INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH = "intellijPlatformTestRuntimeClasspath"
+        const val INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS = "intellijPlatformTestBundledPlugins"
+        const val INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES = "intellijPlatformTestBundledModules"
+
+        const val INTELLIJ_PLATFORM_JAVA_COMPILER = "intellijPlatformJavaCompiler"
         const val INTELLIJ_PLATFORM_RUNTIME_CLASSPATH = "intellijPlatformRuntimeClasspath"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES = "intellijPluginVerifierIdes"

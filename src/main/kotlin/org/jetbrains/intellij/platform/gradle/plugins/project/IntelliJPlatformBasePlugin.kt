@@ -161,13 +161,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     attribute(Attributes.extracted, false)
                 }
             }
-            create(
-                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR,
-                description = "IntelliJ Platform plugin dependencies internal collector",
-            ) {
-                extendsFrom(intellijPlatformPluginDependenciesConfiguration)
-                extendsFrom(intellijPlatformPluginLocalConfiguration)
-            }
             val intellijPlatformPluginConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN,
                 description = "IntelliJ Platform plugins",
@@ -181,14 +174,55 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 extendsFrom(intellijPlatformPluginLocalConfiguration)
             }
 
+            val intellijPlatformTestPluginDependenciesConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+                description = "IntelliJ Platform test plugin dependencies",
+            ) {
+                extendsFrom(intellijPlatformPluginDependenciesConfiguration)
+            }
+            val intellijPlatformTestPluginLocalConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL,
+                description = "IntelliJ Platform test plugin local",
+            ) {
+                attributes {
+                    attribute(Attributes.extracted, false)
+                }
+
+                extendsFrom(intellijPlatformPluginLocalConfiguration)
+            }
+            val intellijPlatformTestPluginConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN,
+                description = "IntelliJ Platform plugins",
+            ) {
+                attributes {
+                    attribute(Attributes.extracted, true)
+                    attribute(Attributes.localPluginsNormalized, true)
+                }
+
+                extendsFrom(intellijPlatformTestPluginDependenciesConfiguration)
+                extendsFrom(intellijPlatformTestPluginLocalConfiguration)
+            }
+
             val intellijPlatformBundledPluginsConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
                 description = "IntelliJ Platform bundled plugins",
             )
+            val intellijPlatformTestBundledPluginsConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS,
+                description = "IntelliJ Platform test bundled plugins",
+            ) {
+                extendsFrom(intellijPlatformBundledPluginsConfiguration)
+            }
             val intellijPlatformBundledModulesConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES,
                 description = "IntelliJ Platform bundled modules",
             )
+            val intellijPlatformTestBundledModulesConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES,
+                description = "IntelliJ Platform test bundled modules",
+            ) {
+                extendsFrom(intellijPlatformBundledModulesConfiguration)
+            }
 
             val jetbrainsRuntimeDependencyConfiguration = create(
                 name = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
@@ -296,7 +330,13 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             val intellijPlatformTestDependenciesConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
                 description = "IntelliJ Platform Test Dependencies"
-            )
+            ) {
+                extendsFrom(
+                    intellijPlatformTestPluginConfiguration,
+                    intellijPlatformTestBundledPluginsConfiguration,
+                    intellijPlatformTestBundledModulesConfiguration,
+                )
+            }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_CLASSPATH,
                 description = "IntelliJ Platform Classpath resolvable configuration"

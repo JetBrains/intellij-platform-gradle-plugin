@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Introduce configurations for IntelliJ Platform test plugins, dependencies, and bundled modules along with `testPlugin`, `testBundledPlugin`, and `testBundledModule` dependency helpers
+
 ## [2.4.0] - 2025-03-20
 
 ### Added

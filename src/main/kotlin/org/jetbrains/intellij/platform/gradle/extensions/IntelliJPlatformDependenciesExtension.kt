@@ -929,6 +929,91 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a test dependency on a plugin for IntelliJ Platform.
+     *
+     * @param id The plugin identifier.
+     * @param version The plugin version.
+     * @param group The plugin distribution channel.
+     */
+    @JvmOverloads
+    fun testPlugin(id: String, version: String, group: String = Dependencies.MARKETPLACE_GROUP) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOf(Triple(id, version, group)) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+    )
+
+    /**
+     * Adds a test dependency on a plugin for IntelliJ Platform.
+     *
+     * @param id The provider of the plugin identifier.
+     * @param version The provider of the plugin version.
+     * @param group The provider of the plugin distribution channel.
+     */
+    fun testPlugin(id: Provider<String>, version: Provider<String>, group: Provider<String>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOf(Triple(id.get(), version.get(), group.get())) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+    )
+
+    /**
+     * Adds a test dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
+     * - `pluginId:version`
+     * - `pluginId:version@channel`
+     *
+     * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
+     */
+    fun testPlugin(notation: Provider<String>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+    )
+
+    /**
+     * Adds a test dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
+     * - `pluginId:version`
+     * - `pluginId:version@channel`
+     *
+     * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
+     */
+    fun testPlugin(notation: String) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOfNotNull(notation.parsePluginNotation()) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+    )
+
+    /**
+     * Adds test dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
+     * - `pluginId:version`
+     * - `pluginId:version@channel`
+     *
+     * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
+     */
+    fun testPlugins(vararg notations: String) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { notations.mapNotNull { it.parsePluginNotation() } },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+    )
+
+    /**
+     * Adds test dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
+     * - `pluginId:version`
+     * - `pluginId:version@channel`
+     *
+     * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
+     */
+    fun testPlugins(notations: List<String>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { notations.mapNotNull { it.parsePluginNotation() } },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+    )
+
+    /**
+     * Adds test dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
+     * - `pluginId:version`
+     * - `pluginId:version@channel`
+     *
+     * @param notations The plugin notations list in `pluginId:version` or `pluginId:version@channel` format.
+     */
+    fun testPlugins(notations: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = notations.map { it.mapNotNull { notation -> notation.parsePluginNotation() } },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+    )
+
+    /**
      * Adds a dependency on a bundled IntelliJ Platform plugin.
      *
      * @param id The bundled plugin identifier.
@@ -974,6 +1059,56 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a test dependency on a bundled IntelliJ Platform plugin.
+     *
+     * @param id The bundled plugin identifier.
+     */
+    fun testBundledPlugin(id: String) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = dependenciesHelper.provider { listOf(id) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS,
+    )
+
+    /**
+     * Adds a test dependency on a bundled IntelliJ Platform plugin.
+     *
+     * @param id The provider of the bundled plugin identifier.
+     */
+    fun testBundledPlugin(id: Provider<String>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = id.map { listOf(it) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS,
+    )
+
+    /**
+     * Adds test dependencies on bundled IntelliJ Platform plugins.
+     *
+     * @param ids The bundled plugin identifiers.
+     */
+    fun testBundledPlugins(vararg ids: String) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = dependenciesHelper.provider { ids.asList() },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS,
+    )
+
+    /**
+     * Adds test dependencies on bundled IntelliJ Platform plugins.
+     *
+     * @param ids The bundled plugin identifiers.
+     */
+    fun testBundledPlugins(ids: List<String>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = dependenciesHelper.provider { ids },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS,
+    )
+
+    /**
+     * test Adds dependencies on bundled IntelliJ Platform plugins.
+     *
+     * @param ids The bundled plugin identifiers.
+     */
+    fun testBundledPlugins(ids: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = ids,
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS,
+    )
+
+    /**
      * Adds a dependency on a bundled IntelliJ Platform module.
      *
      * @param id The bundled module identifier.
@@ -992,7 +1127,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
-     * Adds a dependency on a bundled IntelliJ Platform modules.
+     * Adds dependencies on bundled IntelliJ Platform modules.
      *
      * @param ids The bundled module identifiers.
      */
@@ -1001,7 +1136,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
-     * Adds a dependency on a bundled IntelliJ Platform modules.
+     * Adds dependencies on bundled IntelliJ Platform modules.
      *
      * @param ids The bundled module identifiers.
      */
@@ -1010,12 +1145,62 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
-     * Adds a dependency on a bundled IntelliJ Platform modules.
+     * Adds dependencies on bundled IntelliJ Platform modules.
      *
      * @param ids The bundled module identifiers.
      */
     fun bundledModules(ids: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
         bundledModulesProvider = ids,
+    )
+
+    /**
+     * Adds a test dependency on a bundled IntelliJ Platform module.
+     *
+     * @param id The bundled module identifier.
+     */
+    fun testBundledModule(id: String) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = dependenciesHelper.provider { listOf(id) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES,
+    )
+
+    /**
+     * Adds a test dependency on a bundled IntelliJ Platform module.
+     *
+     * @param id The provider of the bundled module identifier.
+     */
+    fun testBundledModule(id: Provider<String>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = id.map { listOf(it) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES,
+    )
+
+    /**
+     * Adds test dependencies on bundled IntelliJ Platform modules.
+     *
+     * @param ids The bundled module identifiers.
+     */
+    fun testBundledModules(vararg ids: String) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = dependenciesHelper.provider { ids.asList() },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES,
+    )
+
+    /**
+     * Adds test dependencies on bundled IntelliJ Platform modules.
+     *
+     * @param ids The bundled module identifiers.
+     */
+    fun testBundledModules(ids: List<String>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = dependenciesHelper.provider { ids },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES,
+    )
+
+    /**
+     * Adds test dependencies on bundled IntelliJ Platform modules.
+     *
+     * @param ids The bundled module identifiers.
+     */
+    fun testBundledModules(ids: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
+        bundledModulesProvider = ids,
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES,
     )
 
     /**
@@ -1061,6 +1246,56 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      */
     fun localPlugin(dependency: ProjectDependency) = dependenciesHelper.addIntelliJPlatformLocalPluginProjectDependency(
         dependency = dependency,
+    )
+
+    /**
+     * Adds a test dependency on a local IntelliJ Platform plugin.
+     *
+     * @param localPath Path to the local plugin.
+     */
+    fun testLocalPlugin(localPath: File) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL,
+    )
+
+    /**
+     * Adds a test dependency on a local IntelliJ Platform plugin.
+     *
+     * @param localPath Path to the local plugin.
+     */
+    fun testLocalPlugin(localPath: String) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL,
+    )
+
+    /**
+     * Adds a test dependency on a local IntelliJ Platform plugin.
+     *
+     * @param localPath Path to the local plugin.
+     */
+    fun testLocalPlugin(localPath: Directory) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = dependenciesHelper.provider { localPath },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL,
+    )
+
+    /**
+     * Adds a test dependency on a local IntelliJ Platform plugin.
+     *
+     * @param localPath Path to the local plugin.
+     */
+    fun testLocalPlugin(localPath: Provider<*>) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
+        localPathProvider = localPath,
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL,
+    )
+
+    /**
+     * Adds a test dependency on a local IntelliJ Platform plugin.
+     *
+     * @param dependency Project dependency.
+     */
+    fun testLocalPlugin(dependency: ProjectDependency) = dependenciesHelper.addIntelliJPlatformLocalPluginProjectDependency(
+        dependency = dependency,
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL,
     )
 
     /**
