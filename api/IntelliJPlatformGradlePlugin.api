@@ -29,7 +29,6 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 	public static final field INTELLIJ_PLATFORM_LOCAL Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY Ljava/lang/String;
-	public static final field INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY_COLLECTOR Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN_LOCAL Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN_MODULE Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_RUNTIME_CLASSPATH Ljava/lang/String;
@@ -2530,6 +2529,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/InitializeInt
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask$Companion;
 	public fun <init> ()V
 	public abstract fun getCoroutinesJavaAgent ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getCoroutinesJavaAgentLock ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getCoroutinesJavaAgentPremainClass ()Lorg/gradle/api/provider/Property;
 	public abstract fun getLatestPluginVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getModule ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;

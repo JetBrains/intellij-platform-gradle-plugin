@@ -23,10 +23,14 @@ import org.jetbrains.intellij.platform.gradle.providers.LatestPluginVersionValue
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.utils.*
+import java.net.URLClassLoader
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
-import kotlin.io.path.*
+import kotlin.io.path.createDirectories
+import kotlin.io.path.outputStream
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
 private const val CLEAN = "clean"
 
@@ -75,6 +79,19 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
      */
     @get:OutputFile
     abstract val coroutinesJavaAgent: RegularFileProperty
+
+    /**
+     * Represents the main class name used as an entry point before the standard application initialization.
+     */
+    @get:Internal
+    abstract val coroutinesJavaAgentPremainClass: Property<String>
+
+    /**
+     * Represents a lock file used to store the IntelliJ Platform build number.
+     * If the build number is the same, the creation of the coroutines Java agent file is skipped.
+     */
+    @get:Internal
+    abstract val coroutinesJavaAgentLock: RegularFileProperty
 
     /**
      * Represents the current version of the plugin.
@@ -136,16 +153,21 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
 
     /**
      * Creates the Java Agent file for the Coroutines library required to enable coroutines debugging.
+     * If the current IntelliJ Platform build number matches the one stored in the lock file,
+     * the creation of the coroutines Java agent file is skipped.
      */
     private fun createCoroutinesJavaAgentFile() {
-        if (coroutinesJavaAgent.asPath.exists()) {
+        val storedBuildNumber = runCatching {
+            coroutinesJavaAgentLock.asPath.readText().trim()
+        }.getOrNull()
+        if (productInfo.buildNumber == storedBuildNumber) {
             return
         }
 
         val manifest = Manifest(
             """
             Manifest-Version: 1.0
-            Premain-Class: kotlinx.coroutines.debug.AgentPremain
+            Premain-Class: ${coroutinesJavaAgentPremainClass.get()}
             Can-Retransform-Classes: true
             Multi-Release: true
             
@@ -153,6 +175,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
         )
 
         JarOutputStream(coroutinesJavaAgent.asPath.outputStream(), manifest).close()
+        coroutinesJavaAgentLock.asPath.writeText(productInfo.buildNumber)
     }
 
     init {
@@ -172,10 +195,22 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                         it.createDirectories().resolve("self-update.lock").toFile()
                     })
                 )
+                coroutinesJavaAgentLock.convention(
+                    project.layout.file(cachePathProvider.map {
+                        it.createDirectories().resolve("coroutines-javaagent.lock").toFile()
+                    })
+                )
                 coroutinesJavaAgent.convention(project.layout.buildDirectory.file("coroutines-javaagent.jar"))
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
                 latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {})
                 module.convention(project.provider { project.pluginManager.isModule })
+                coroutinesJavaAgentPremainClass.convention(project.provider {
+                    val jarUrl = platformPath.resolve("lib/util-8.jar").toUri().toURL()
+                    URLClassLoader(arrayOf(jarUrl)).use {
+                        listOf("kotlinx.coroutines.debug.AgentPremain", "kotlinx.coroutines.debug.internal.AgentPremain")
+                            .firstNotNullOfOrNull {fqn -> it.runCatching { loadClass(fqn) }.getOrNull() }
+                    }?.name
+                })
 
                 mustRunAfter(CLEAN)
             }
