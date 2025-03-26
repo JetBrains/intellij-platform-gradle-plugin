@@ -5,14 +5,15 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.StartParameter
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.OutputFile
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.UntrackedTask
+import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.of
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -27,10 +28,7 @@ import java.net.URLClassLoader
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
 import java.util.jar.Manifest
-import kotlin.io.path.createDirectories
-import kotlin.io.path.outputStream
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
+import kotlin.io.path.*
 
 private const val CLEAN = "clean"
 
@@ -46,6 +44,13 @@ private const val CLEAN = "clean"
  */
 @UntrackedTask(because = "Should always run")
 abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPlatformVersionAware {
+
+    /**
+     * Holds the [Configurations.INTELLIJ_PLATFORM_CLASSPATH] configuration with the IntelliJ Platform classpath.
+     */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val intelliJPlatformClasspathConfiguration: ConfigurableFileCollection
 
     /**
      * Determines if the operation is running in offline mode and depends on Gradle start parameters.
@@ -157,10 +162,13 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
      * the creation of the coroutines Java agent file is skipped.
      */
     private fun createCoroutinesJavaAgentFile() {
-        val storedBuildNumber = runCatching {
-            coroutinesJavaAgentLock.asPath.readText().trim()
-        }.getOrNull()
-        if (productInfo.buildNumber == storedBuildNumber) {
+        val storedBuildNumber by lazy {
+            runCatching {
+                coroutinesJavaAgentLock.asPath.readText().trim()
+            }.getOrNull()
+        }
+
+        if (coroutinesJavaAgent.asPath.exists() && productInfo.buildNumber == storedBuildNumber) {
             return
         }
 
@@ -188,6 +196,8 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
             project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
                 val cachePathProvider = project.extensionProvider.map { it.cachePath }
 
+                intelliJPlatformClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH]
+
                 offline.convention(project.gradle.startParameter.isOffline)
                 selfUpdateCheck.convention(project.providers[GradleProperties.SelfUpdateCheck])
                 selfUpdateLock.convention(
@@ -205,10 +215,12 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                 latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {})
                 module.convention(project.provider { project.pluginManager.isModule })
                 coroutinesJavaAgentPremainClass.convention(project.provider {
-                    val jarUrl = platformPath.resolve("lib/util-8.jar").toUri().toURL()
-                    URLClassLoader(arrayOf(jarUrl)).use {
-                        listOf("kotlinx.coroutines.debug.AgentPremain", "kotlinx.coroutines.debug.internal.AgentPremain")
-                            .firstNotNullOfOrNull {fqn -> it.runCatching { loadClass(fqn) }.getOrNull() }
+                    val urls = intelliJPlatformClasspathConfiguration.files.map { it.toURI().toURL() }.toTypedArray()
+                    URLClassLoader(urls).use {
+                        listOf(
+                            "kotlinx.coroutines.debug.AgentPremain",
+                            "kotlinx.coroutines.debug.internal.AgentPremain"
+                        ).firstNotNullOfOrNull { fqn -> it.runCatching { loadClass(fqn) }.getOrNull() }
                     }?.name
                 })
 

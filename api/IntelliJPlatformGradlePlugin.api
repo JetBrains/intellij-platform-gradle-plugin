@@ -2531,6 +2531,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/InitializeInt
 	public abstract fun getCoroutinesJavaAgent ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getCoroutinesJavaAgentLock ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getCoroutinesJavaAgentPremainClass ()Lorg/gradle/api/provider/Property;
+	public abstract fun getIntelliJPlatformClasspathConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getLatestPluginVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getModule ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
