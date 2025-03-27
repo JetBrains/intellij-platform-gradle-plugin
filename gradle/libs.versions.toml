@@ -2,7 +2,7 @@
 # libraries
 annotations = "26.0.2"
 intellijStructure = "3.300"
-intellijPluginRepositoryRestClient = "2.0.45"
+intellijPluginRepositoryRestClient = "2.0.46"
 jpsModel = "213.7172.53"
 kotlinxSerializationJson = "1.6.3"
 okio = "1.17.6"
