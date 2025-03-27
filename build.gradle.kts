@@ -63,7 +63,6 @@ dependencies {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")
         exclude("org.slf4j")
-        exclude("org.yaml", "snakeyaml")
     }
 
     implementation(libs.xmlutil.core)

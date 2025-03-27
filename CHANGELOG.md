@@ -7,10 +7,6 @@
 - Introduce configurations for IntelliJ Platform test plugins, dependencies, and bundled modules along with `testPlugin`, `testBundledPlugin`, and `testBundledModule` dependency helpers
 - Support different `kotlinx.coroutines` JavaAgent FQNs by checking for the class presence in the IntelliJ Platform classpath
 
-### Fixed
-
-- Exclude unused `org.yaml:snakeyaml` transitive dependency as it introduces only unnecessary constraint JetBrains/intellij-platform-gradle-plugin#1910
-
 ## [2.4.0] - 2025-03-20
 
 ### Added
