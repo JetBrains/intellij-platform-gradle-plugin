@@ -1308,7 +1308,7 @@ class IntelliJPlatformDependenciesHelper(
      * Resolves the provided path into [Path].
      *
      * The method accepts a local path and converts it into a standardized Path object.
-     * The local path can be of type String, File, or Directory.
+     * The local path can be of type String, File, Path, or Directory.
      *
      * @param path The local path to be resolved. Accepts either [String], [File], or [Directory].
      * @throws IllegalArgumentException
@@ -1318,7 +1318,8 @@ class IntelliJPlatformDependenciesHelper(
         is String -> path
         is File -> path.absolutePath
         is Directory -> path.asPath.pathString
-        else -> throw IllegalArgumentException("Invalid argument type: '${path.javaClass}'. Supported types: String, File, or Directory.")
+        is Path -> path.pathString
+        else -> throw IllegalArgumentException("Invalid argument type: '${path.javaClass}'. Supported types: String, File, Path, or Directory.")
     }.let { Path(it) }
 
     /**
