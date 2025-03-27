@@ -120,7 +120,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * This configuration picks relevant Java Runtime using the [JavaRuntimePathResolver] and [RuntimeAware.runtimeMetadata].
          */
         if (this is RuntimeAware) {
-            jetbrainsRuntimeConfiguration = configurations.maybeCreate(Configurations.JETBRAINS_RUNTIME)
+            jetbrainsRuntimeConfiguration = configurations.maybeCreate(Configurations.JETBRAINS_RUNTIME).asLenient
 
             val javaRuntimePathResolver = JavaRuntimePathResolver(
                 jetbrainsRuntime = jetbrainsRuntimeConfiguration,
