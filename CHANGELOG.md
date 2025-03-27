@@ -10,6 +10,7 @@
 ### Fixed
 
 - Do not fail when JBR dependency cannot be resolved, and proceed with JRE resolution using other available predictions
+- Performance improvement: memoize the `ProductInfoPathResolver` resolution.
 
 ## [2.4.0] - 2025-03-20
 

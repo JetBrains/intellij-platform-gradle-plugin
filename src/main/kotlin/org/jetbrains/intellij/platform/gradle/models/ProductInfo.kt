@@ -192,6 +192,8 @@ internal fun String.resolveIdeHomeVariable(platformPath: Path) =
             }
     }
 
+private val productInfoCache = mutableMapOf<Path, ProductInfo>()
+
 /**
  * Retrieves the [ProductInfo] for the IntelliJ Platform from the root directory.
  *
@@ -200,10 +202,11 @@ internal fun String.resolveIdeHomeVariable(platformPath: Path) =
  * @throws IllegalArgumentException
  */
 @Throws(IllegalArgumentException::class)
-fun Path.productInfo() =
+fun Path.productInfo() = productInfoCache.getOrPut(this) {
     ProductInfoPathResolver(this)
         .resolve()
         .let { decode<ProductInfo>(it) }
+}
 
 /**
  * Retrieves the [ProductInfo] for the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration.
