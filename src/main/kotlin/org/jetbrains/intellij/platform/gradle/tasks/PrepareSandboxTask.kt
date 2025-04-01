@@ -126,6 +126,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         log.info("sandboxPluginsDirectory = ${sandboxPluginsDirectory.asPath}")
         log.info("sandboxLogDirectory = ${sandboxLogDirectory.asPath}")
         log.info("sandboxSystemDirectory = ${sandboxSystemDirectory.asPath}")
+        log.info("testSandbox = ${testSandbox.get()}")
 
         disableIdeUpdate(sandboxConfigDirectory)
         disabledPlugins(sandboxConfigDirectory)
@@ -248,8 +249,6 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX,
             ) {
                 val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
-                val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
-                val intellijPlatformRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH]
 
                 sandboxSuffix.convention(
                     name
@@ -264,6 +263,16 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                         .trimEnd('_')
                 )
 
+                val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
+                val intellijPlatformRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH]
+                val intellijPlatformTestRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH]
+                val runtimeConfiguration = project.files(testSandbox.map {
+                    when (it) {
+                        true -> intellijPlatformTestRuntimeClasspathConfiguration
+                        false -> intellijPlatformRuntimeClasspathConfiguration
+                    }
+                })
+
                 sandboxDirectory.convention(project.extensionProvider.flatMap {
                     it.sandboxContainer.map { container ->
                         container.dir("${productInfo.productCode}-${productInfo.version}")
@@ -274,6 +283,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 sandboxPluginsDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.PLUGINS)
                 sandboxSystemDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.SYSTEM)
                 sandboxLogDirectory.configureSandbox(sandboxDirectory, sandboxSuffix, Sandbox.LOG)
+                testSandbox.convention(name.contains("Test"))
 
                 sandboxConfigFrontendDirectory.convention(sandboxConfigDirectory.map { it.dir("frontend") })
                 sandboxPluginsFrontendDirectory.convention(sandboxPluginsDirectory.map { it.dir("frontend") })
@@ -290,7 +300,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 pluginName.convention(project.extensionProvider.flatMap { it.projectName })
                 pluginDirectory.convention(defaultDestinationDirectory.dir(pluginName))
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
-                runtimeClasspath.from(intellijPlatformRuntimeClasspathConfiguration - intellijPlatformPluginModuleConfiguration)
+                runtimeClasspath.from(runtimeConfiguration - intellijPlatformPluginModuleConfiguration)
 
                 splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })

@@ -37,6 +37,10 @@ interface SandboxAware : SandboxStructure {
             .convention(sandboxProducerTaskProvider.flatMap { it.sandboxLogDirectory })
             .finalizeValueOnRead()
 
+        testSandbox
+            .convention(sandboxProducerTaskProvider.flatMap { it.testSandbox })
+            .finalizeValueOnRead()
+
         if (this is SplitModeAware) {
             splitMode
                 .convention(sandboxProducerTaskProvider.flatMap { it.splitMode })

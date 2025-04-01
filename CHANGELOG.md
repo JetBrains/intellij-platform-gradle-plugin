@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Add test-related sandbox configurations and runtime fixes
+
 ## [2.5.0] - 2025-04-01
 
 ### Added

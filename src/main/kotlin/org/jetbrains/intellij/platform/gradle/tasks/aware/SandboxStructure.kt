@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks.aware
 
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.jetbrains.intellij.platform.gradle.Constants
 
@@ -47,4 +48,10 @@ interface SandboxStructure {
      */
     @get:Internal
     val sandboxLogDirectory: DirectoryProperty
+
+    /**
+     * Defines if the current sandbox is related to testing.
+     */
+    @get:Internal
+    val testSandbox: Property<Boolean>
 }

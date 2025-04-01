@@ -340,14 +340,37 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             create(
                 name = Configurations.INTELLIJ_PLATFORM_CLASSPATH,
                 description = "IntelliJ Platform Classpath resolvable configuration"
-            )
+            ) {
+                extendsFrom(
+                    intellijPlatformConfiguration,
+                    intellijPlatformDependenciesConfiguration,
+                )
+            }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
                 description = "IntelliJ Platform Test Classpath resolvable configuration"
-            )
+            ) {
+                extendsFrom(
+                    intellijPlatformConfiguration,
+                    intellijPlatformDependenciesConfiguration,
+                    intellijPlatformTestDependenciesConfiguration,
+                )
+            }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH,
                 description = "IntelliJ Platform Test Runtime Classpath resolvable configuration"
+            ) {
+                attributes {
+                    attributes.attribute(Attributes.kotlinJPlatformType, "jvm")
+                }
+
+                extendsFrom(
+                    this@configurations[Configurations.External.TEST_RUNTIME_CLASSPATH],
+                )
+            }
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH,
+                description = "IntelliJ Platform Test Runtime fix Classpath resolvable configuration"
             ) {
                 defaultDependencies {
                     addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
@@ -367,28 +390,20 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attributes {
                     attributes.attribute(Attributes.kotlinJPlatformType, "jvm")
                 }
+
+                extendsFrom(
+                    this@configurations[Configurations.External.RUNTIME_CLASSPATH],
+                )
             }
 
             this@configurations[Configurations.External.COMPILE_ONLY].extendsFrom(
                 intellijPlatformConfiguration,
                 intellijPlatformDependenciesConfiguration,
             )
-            this@configurations[Configurations.External.TEST_IMPLEMENTATION].extendsFrom(
+            this@configurations[Configurations.External.TEST_COMPILE_ONLY].extendsFrom(
                 intellijPlatformConfiguration,
                 intellijPlatformDependenciesConfiguration,
                 intellijPlatformTestDependenciesConfiguration,
-            )
-            this@configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH].extendsFrom(
-                intellijPlatformConfiguration,
-                intellijPlatformDependenciesConfiguration,
-            )
-            this@configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH].extendsFrom(
-                intellijPlatformConfiguration,
-                intellijPlatformDependenciesConfiguration,
-                intellijPlatformTestDependenciesConfiguration,
-            )
-            this@configurations[Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH].extendsFrom(
-                this@configurations[Configurations.External.RUNTIME_CLASSPATH],
             )
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {
                 this@configurations[Configurations.External.TEST_FIXTURES_COMPILE_ONLY].extendsFrom(
