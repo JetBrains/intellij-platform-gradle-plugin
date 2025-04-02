@@ -5,6 +5,7 @@
 ### Fixed
 
 - Add test-related sandbox configurations and runtime fixes
+- Set the required `extracted` and `collected` attributes for custom test classpath configurations
 
 ## [2.5.0] - 2025-04-01
 

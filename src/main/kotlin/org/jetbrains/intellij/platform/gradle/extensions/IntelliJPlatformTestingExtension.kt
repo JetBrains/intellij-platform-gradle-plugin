@@ -184,6 +184,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     name = Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH.withSuffix,
                     description = "Custom IntelliJ Platform Test Classpath",
                 ) {
+                    attributes
+                        .attribute(Attributes.extracted, true)
+                        .attribute(Attributes.collected, true)
+
                     extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH])
                     extendsFrom(customIntellijPlatformTestDependenciesConfiguration)
                 }
@@ -191,6 +195,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH.withSuffix,
                     description = "Custom IntelliJ Platform Test Runtime Classpath",
                 ) {
+                    attributes
+                        .attribute(Attributes.extracted, true)
+                        .attribute(Attributes.collected, true)
+
                     extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH])
                     extendsFrom(customIntellijPlatformTestDependenciesConfiguration)
                 }
