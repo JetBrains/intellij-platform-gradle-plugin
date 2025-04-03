@@ -77,7 +77,7 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
         buildAndFail(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertContains(
-                "Invalid plugin descriptor 'description'. The plugin description is shorter than 40 characters and/or the plugin description contains non-Latin characters.",
+                "Invalid plugin descriptor 'description'. The plugin description must start with Latin characters and have at least 40 characters.",
                 output,
             )
         }
@@ -105,7 +105,7 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertContains(
-                "Invalid plugin descriptor 'description'. The plugin description is shorter than 40 characters and/or the plugin description contains non-Latin characters.",
+                "Invalid plugin descriptor 'description'. The plugin description must start with Latin characters and have at least 40 characters.",
                 output,
             )
         }
@@ -189,7 +189,7 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.VERIFY_PLUGIN_STRUCTURE) {
             assertContains(
-                "Invalid plugin descriptor 'description'. The plugin description is shorter than 40 characters and/or the plugin description contains non-Latin characters.",
+                "Invalid plugin descriptor 'description'. The plugin description must start with Latin characters and have at least 40 characters.",
                 output,
             )
         }
