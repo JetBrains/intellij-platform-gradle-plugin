@@ -352,7 +352,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES, projectProperties = properties) {
             assertContains(
                 """
-                intellijPlatformTestRuntimeClasspath - IntelliJ Platform Test Runtime Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
                 \--- bundledModule:intellij-platform-test-runtime:IC-243.21565.193
                 """.trimIndent(),
                 output,
@@ -363,7 +363,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)) {
             assertContains(
                 """
-                intellijPlatformTestRuntimeClasspath - IntelliJ Platform Test Runtime Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
                 \--- bundledModule:intellij-platform-test-runtime:RD-243.21565.191
                 """.trimIndent(),
                 output,
@@ -371,7 +371,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
 
             assertContains(
                 """
-                intellijPlatformTestRuntimeClasspath - IntelliJ Platform Test Runtime Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
                 \--- bundledModule:intellij-platform-test-runtime:RD-243.21565.191
                 """.trimIndent(),
                 output,
@@ -420,7 +420,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.1.7")) {
             assertContains(
                 """
-                intellijPlatformTestRuntimeClasspath - IntelliJ Platform Test Runtime Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
                 \--- bundledModule:intellij-platform-test-runtime:RD-241.19072.30
                 """.trimIndent(),
                 output,
@@ -436,7 +436,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.2.8")) {
             assertContains(
                 """
-                intellijPlatformTestRuntimeClasspath - IntelliJ Platform Test Runtime Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
                 \--- bundledModule:intellij-platform-test-runtime:RD-242.23726.225
                 """.trimIndent(),
                 output,

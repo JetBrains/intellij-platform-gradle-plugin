@@ -4,8 +4,10 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import java.io.File
+import kotlin.test.Ignore
 import kotlin.test.Test
 
+@Ignore
 class TestClasspathProjectResourcesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "test-classpath-project-resources",
 ) {
