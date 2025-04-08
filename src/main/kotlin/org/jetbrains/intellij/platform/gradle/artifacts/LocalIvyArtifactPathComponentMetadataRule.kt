@@ -25,7 +25,7 @@ import javax.inject.Inject
  *
  *  - "url" ([org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact.url]) contains a path, relative to the platformPath (IDE), without the file's name.
  *    According to Ivy's [documentation](https://ant.apache.org/ivy/history/latest-milestone/ivyfile/artifact.html)
- *    > an URL at which this artifact can be found if it isn’t located at the standard location in the repository
+ *    > a URL at which this artifact can be found if it isn’t located at the standard location in the repository
  *
  *    It may be not the best to field to put this into, but there is no alternative.
  *

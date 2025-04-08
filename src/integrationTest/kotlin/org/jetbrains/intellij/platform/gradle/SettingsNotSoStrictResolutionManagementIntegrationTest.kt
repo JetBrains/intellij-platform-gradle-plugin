@@ -9,8 +9,8 @@ import kotlin.test.Test
  * This is something we must support since a few big corporations requested such a feature, because they use similar
  * configuration in very big projects. [Link](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html#configuration.dependencyResolutionManagement)
  */
-class SettingsStrictResolutionManagementntegrationTest : IntelliJPlatformIntegrationTestBase(
-    resourceName = "settings-strict-resolution-management",
+class SettingsNotSoStrictResolutionManagementIntegrationTest : IntelliJPlatformIntegrationTestBase(
+    resourceName = "settings-not-so-strict-resolution-management",
 ) {
 
     @Test

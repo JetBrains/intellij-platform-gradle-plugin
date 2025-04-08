@@ -50,7 +50,7 @@ private const val LOADER_REF = "java2.loader"
 abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
 
     /**
-     * Specifies the compile classpath of the project's source set.
+     * Specifies compile classpath of the project's source set.
      */
     @get:Internal
     abstract val sourceSetCompileClasspath: ConfigurableFileCollection

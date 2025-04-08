@@ -222,7 +222,6 @@ artifacts {
     archives(sourcesJar)
 }
 
-@Suppress("UnstableApiUsage")
 gradlePlugin {
     website.set(properties("website"))
     vcsUrl.set(properties("vcsUrl"))
