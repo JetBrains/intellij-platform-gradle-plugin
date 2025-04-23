@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Deprecate Aqua (QA) as a target IntelliJ Platform
+
 ### Fixed
 
 - Add test-related sandbox configurations and runtime fixes

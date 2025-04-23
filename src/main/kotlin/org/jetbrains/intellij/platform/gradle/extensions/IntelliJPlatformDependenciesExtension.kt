@@ -254,6 +254,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The version of Aqua.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
+    @Deprecated("Aqua (QA) is no longer available as a target IntelliJ Platform")
     @JvmOverloads
     fun aqua(version: String, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
         typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Aqua },
@@ -267,6 +268,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider for the version of Aqua.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
+    @Deprecated("Aqua (QA) is no longer available as a target IntelliJ Platform")
     @JvmOverloads
     fun aqua(version: Provider<String>, useInstaller: Boolean = true) = dependenciesHelper.addIntelliJPlatformDependency(
         typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Aqua },

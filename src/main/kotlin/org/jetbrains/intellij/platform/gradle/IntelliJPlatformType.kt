@@ -26,6 +26,7 @@ enum class IntelliJPlatformType(
         maven = null,
         installer = Coordinates("com.google.android.studio", "android-studio"),
     ),
+    @Deprecated("Aqua (QA) is no longer available as a target IntelliJ Platform")
     Aqua(
         code = "QA",
         maven = null,
