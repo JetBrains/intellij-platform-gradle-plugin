@@ -931,6 +931,51 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a dependency on a plugin in a version compatible with the current IntelliJ Platform.
+     *
+     * @param id The plugin identifier.
+     */
+    fun compatiblePlugin(id: String) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOf(id) },
+    )
+
+    /**
+     * Adds a dependency on a plugin in a version compatible with the current IntelliJ Platform.
+     *
+     * @param id The provider of the plugin identifier.
+     */
+    fun compatiblePlugin(id: Provider<String>) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = id.map { listOf(it) },
+    )
+
+    /**
+     * Adds a dependency on plugins in versions compatible with the current IntelliJ Platform.
+     *
+     * @param ids The plugin identifiers.
+     */
+    fun compatiblePlugins(ids: List<String>) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { ids },
+    )
+
+    /**
+     * Adds a dependency on plugins in versions compatible with the current IntelliJ Platform.
+     *
+     * @param ids The plugin identifiers.
+     */
+    fun compatiblePlugins(vararg ids: String) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { ids.asList() },
+    )
+
+    /**
+     * Adds a dependency on plugins in versions compatible with the current IntelliJ Platform.
+     *
+     * @param ids The provider of the plugin identifiers.
+     */
+    fun compatiblePlugins(ids: Provider<List<String>>) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = ids.map { it },
+    )
+
+    /**
      * Adds a test dependency on a plugin for IntelliJ Platform.
      *
      * @param id The plugin identifier.

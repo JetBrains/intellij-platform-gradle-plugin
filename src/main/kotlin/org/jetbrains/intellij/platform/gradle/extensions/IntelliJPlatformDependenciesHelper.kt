@@ -26,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
@@ -39,6 +40,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
 import org.jetbrains.intellij.platform.gradle.utils.*
+import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import java.io.File
 import java.io.FileReader
 import java.nio.file.Path
@@ -68,7 +70,8 @@ class IntelliJPlatformDependenciesHelper(
 ) {
 
     private val log = Logger(javaClass)
-    private val pluginManager = IdePluginManager.createManager()
+    private val pluginManager by lazy { IdePluginManager.createManager() }
+    private val pluginRepository by lazy { PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE) }
     private val ideProvider = gradle.idesManagerServiceProvider.map { it.resolve(platformPath) }
 
     /**
@@ -328,6 +331,40 @@ class IntelliJPlatformDependenciesHelper(
                 """.trimIndent()
             }
             dependencies.createIntelliJPlatformPlugin(id, version, group).apply(action)
+        }
+    })
+
+    /**
+     * A base method for adding a dependency on plugins compatible with the current IntelliJ Platform version.
+     * Each plugin ID is used to resolve the latest available version of the plugin using JetBrains Marketplace API.
+     *
+     * @param pluginsProvider The provider of the list containing plugin identifiers.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider: Provider<List<String>>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
+        val plugins = pluginsProvider.orNull
+        requireNotNull(plugins) { "The `intellijPlatform.compatiblePlugins` dependency helper was called with no `plugins` value provided." }
+
+        plugins.map { pluginId ->
+            val platformType = productInfo.productCode
+            val platformVersion = productInfo.buildNumber
+
+            val plugin = pluginRepository.pluginManager.searchCompatibleUpdates(
+                build = "$platformType-$platformVersion",
+                xmlIds = listOf(pluginId),
+            ).firstOrNull()
+                ?: throw GradleException("No plugin update with id='$pluginId' compatible with '$platformType-$platformVersion' found in JetBrains Marketplace")
+
+            dependencies.createIntelliJPlatformPlugin(
+                plugin.pluginXmlId,
+                plugin.version,
+                Dependencies.MARKETPLACE_GROUP,
+            ).apply(action)
         }
     })
 

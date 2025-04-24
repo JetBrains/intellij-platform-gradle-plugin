@@ -4,7 +4,8 @@
 
 ### Added
 
-- Added `TestFrameworkType.Plugin.CSS` and `TestFrameworkType.Plugin.XML` to support test development requiring XML or CSS language.
+- Add `compatiblePlugin(id)`/`compatiblePlugins(ids)` dependency helper for resolving plugins from JetBrains Marketplace in the latest compatible versions.
+- Add `TestFrameworkType.Plugin.CSS` and `TestFrameworkType.Plugin.XML` to support test development requiring XML or CSS language.
 
 ### Changed
 
