@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Added `TestFrameworkType.Plugin.CSS` and `TestFrameworkType.Plugin.XML` to support test development requiring XML or CSS language.
+
 ### Changed
 
 - Deprecate Aqua (QA) as a target IntelliJ Platform

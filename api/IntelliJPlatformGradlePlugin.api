@@ -349,6 +349,10 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$CSS : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$CSS;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Go : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Go;
 }
@@ -375,6 +379,10 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Ruby : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Ruby;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$XML : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$XML;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Starter : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
