@@ -551,6 +551,11 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun clion (Lorg/gradle/api/provider/Provider;Z)V
 	public static synthetic fun clion$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZILjava/lang/Object;)V
 	public static synthetic fun clion$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZILjava/lang/Object;)V
+	public final fun compatiblePlugin (Ljava/lang/String;)V
+	public final fun compatiblePlugin (Lorg/gradle/api/provider/Provider;)V
+	public final fun compatiblePlugins (Ljava/util/List;)V
+	public final fun compatiblePlugins (Lorg/gradle/api/provider/Provider;)V
+	public final fun compatiblePlugins ([Ljava/lang/String;)V
 	public final fun create (Ljava/lang/String;)V
 	public final fun create (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun create (Ljava/lang/String;Ljava/lang/String;Z)V
