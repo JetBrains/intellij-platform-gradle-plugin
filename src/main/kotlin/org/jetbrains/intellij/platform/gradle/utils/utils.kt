@@ -71,14 +71,15 @@ fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
 /**
  * Retrieves the [Path] of the IntelliJ Platform with [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration.
  *
+ * @param requestedPlatform The requested platform name.
  * @receiver The [Configuration] to retrieve the product information from.
  * @return The [Path] of the IntelliJ Platform
  * @throws GradleException
  */
 @Throws(GradleException::class)
-fun FileCollection.platformPath() = with(toList()) {
+fun FileCollection.platformPath(requestedPlatform: String? = null) = with(toList()) {
     val message = when (size) {
-        0 -> "No IntelliJ Platform dependency found."
+        0 -> "No IntelliJ Platform dependency found" + requestedPlatform?.let { " with '$it'" }.orEmpty() + "."
         1 -> null
         else -> "More than one IntelliJ Platform dependencies found."
     } ?: return@with single().toPath().absolute().resolvePlatformPath()

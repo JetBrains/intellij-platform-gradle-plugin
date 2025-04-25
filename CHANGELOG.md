@@ -10,6 +10,7 @@
 ### Changed
 
 - Deprecate Aqua (QA) as a target IntelliJ Platform
+- Print requested IntelliJ Platform when throwing exception about unresolved dependency.
 
 ### Fixed
 

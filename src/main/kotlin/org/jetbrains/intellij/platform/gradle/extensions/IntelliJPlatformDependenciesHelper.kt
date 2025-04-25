@@ -135,7 +135,8 @@ class IntelliJPlatformDependenciesHelper(
      * Provides access to the current IntelliJ Platform path.
      */
     internal val platformPath by lazy {
-        intelliJPlatformConfiguration.platformPath()
+        val requestedPlatform = "${baseType.get()}-${baseVersion.get()}"
+        intelliJPlatformConfiguration.platformPath(requestedPlatform)
     }
 
     /**
