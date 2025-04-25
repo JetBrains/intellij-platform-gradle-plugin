@@ -3067,7 +3067,8 @@ public final class org/jetbrains/intellij/platform/gradle/utils/UtilsKt {
 	public static final fun getRootProjectPath (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
 	public static final fun getSettings (Lorg/gradle/api/Project;)Lorg/gradle/api/internal/SettingsInternal;
 	public static final fun isSpecified (Lorg/gradle/api/provider/Property;)Z
-	public static final fun platformPath (Lorg/gradle/api/file/FileCollection;)Ljava/nio/file/Path;
+	public static final fun platformPath (Lorg/gradle/api/file/FileCollection;Ljava/lang/String;)Ljava/nio/file/Path;
+	public static synthetic fun platformPath$default (Lorg/gradle/api/file/FileCollection;Ljava/lang/String;ILjava/lang/Object;)Ljava/nio/file/Path;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/utils/Version : java/lang/Comparable {
