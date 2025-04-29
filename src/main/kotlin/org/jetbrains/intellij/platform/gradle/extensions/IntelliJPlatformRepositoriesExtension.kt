@@ -124,8 +124,17 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
 
     @JvmOverloads
     fun customPluginRepository(url: String, type: CustomPluginRepositoryType = CustomPluginRepositoryType.PLUGIN_REPOSITORY, action: IvyRepositoryAction = {}) =
+        this.customPluginRepository(
+            name = "IntelliJ Platform Custom Plugin Repository ($url)",
+            url = url,
+            type = type,
+            action = action,
+        )
+
+    @JvmOverloads
+    fun customPluginRepository(name: String, url: String, type: CustomPluginRepositoryType = CustomPluginRepositoryType.PLUGIN_REPOSITORY, action: IvyRepositoryAction = {}) =
         delegate.createCustomPluginRepository(
-            repositoryName = "IntelliJ Platform Custom Plugin Repository ($url)",
+            repositoryName = name,
             repositoryUrl = url,
             repositoryType = type,
             action = action,
