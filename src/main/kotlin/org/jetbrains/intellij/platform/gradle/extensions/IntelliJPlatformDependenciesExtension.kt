@@ -195,15 +195,21 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider for the version of the IntelliJ Platform dependency.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      */
-    internal fun customCreate(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true, configurationName: String) =
-        dependenciesHelper.addIntelliJPlatformDependency(
-            typeProvider = type,
-            versionProvider = version,
-            useInstallerProvider = dependenciesHelper.provider { useInstaller },
-            configurationName = configurationName,
-            fallbackToBase = true,
-        )
+    internal fun customCreate(
+        type: Provider<*>,
+        version: Provider<String>,
+        useInstaller: Boolean = true,
+        configurationName: String,
+        intellijPlatformConfigurationName: String,
+    ) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = type,
+        versionProvider = version,
+        useInstallerProvider = dependenciesHelper.provider { useInstaller },
+        configurationName = configurationName,
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName,
+    )
 
     /**
      * Adds a dependency on the custom IntelliJ Platform with a fallback to the base IntelliJ Platform.
@@ -212,15 +218,21 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param version The provider for the version of the IntelliJ Platform dependency.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      */
-    internal fun customCreate(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>, configurationName: String) =
-        dependenciesHelper.addIntelliJPlatformDependency(
-            typeProvider = type,
-            versionProvider = version,
-            useInstallerProvider = useInstaller,
-            configurationName = configurationName,
-            fallbackToBase = true,
-        )
+    internal fun customCreate(
+        type: Provider<*>,
+        version: Provider<String>,
+        useInstaller: Provider<Boolean>,
+        configurationName: String,
+        intellijPlatformConfigurationName: String,
+    ) = dependenciesHelper.addIntelliJPlatformDependency(
+        typeProvider = type,
+        versionProvider = version,
+        useInstallerProvider = useInstaller,
+        configurationName = configurationName,
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName,
+    )
 
     /**
      * Adds a dependency on Android Studio.

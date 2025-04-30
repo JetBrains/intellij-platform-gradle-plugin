@@ -72,18 +72,17 @@ class IntelliJPlatformDependenciesHelper(
     private val log = Logger(javaClass)
     private val pluginManager by lazy { IdePluginManager.createManager() }
     private val pluginRepository by lazy { PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE) }
-    private val ideProvider = gradle.idesManagerServiceProvider.map { it.resolve(platformPath) }
 
     /**
-     * Key is Ivy module XML filename.
+     * Key is an Ivy module XML filename.
      * Value is either:
-     * 1. The Ivy Module, representing the contents of XML file.
+     * 1. The Ivy Module, representing the contents of the XML file.
      *    In the case if we didn't have a path for the module.
      * 2. Otherwise, it is a pair of:
-     *    - The Ivy Module, representing the contents of XML file.
+     *    - The Ivy Module, representing the contents of an XML file.
      *    - The path from which this module was created.
      *
-     * Since we store Ivy XML files into the same directory, but create them from completely unrelated paths.
+     * Since we store Ivy XML files in the same directory, but create them from completely unrelated paths.
      * This structure is being used to validate that we don't try to create duplicate XML files with the same name from
      * different paths (which would either a bug in this plugin, or duplicated dependency on the file system).
      *
@@ -94,9 +93,15 @@ class IntelliJPlatformDependenciesHelper(
      */
     private val writtenIvyModules = ConcurrentHashMap<String, Any>()
 
-    private val baseType = objects.property<IntelliJPlatformType>()
-    private val baseVersion = objects.property<String>()
-    private val baseUseInstaller = objects.property<Boolean>()
+    /**
+     * A thread-safe map that holds the list of all requested IntelliJ Platform variants within the project.
+     */
+    private val requestedIntelliJPlatforms = ConcurrentHashMap<String, RequestedIntelliJPlatform>()
+
+    /**
+     * A thread-safe map that holds the paths associated with requested IntelliJ platform configurations.
+     */
+    private val requestedIntelliJPlatformPaths = ConcurrentHashMap<String, Path>()
 
     /**
      * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
@@ -117,34 +122,23 @@ class IntelliJPlatformDependenciesHelper(
     internal inline fun <reified T> cachedListProvider(crossinline value: () -> List<T>) =
         cachedListProvider(objects, providers, value)
 
-    //<editor-fold desc="Configuration Accessors">
-
-    /**
-     * Retrieves the [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration to access information about the main IntelliJ Platform added to the project.
-     * Used with [productInfo] and [platformPath] accessors.
-     */
-    private val intelliJPlatformConfiguration by lazy {
-        configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].asLenient
-    }
-
-    //</editor-fold>
-
     //<editor-fold desc="Metadata Accessors">
 
     /**
      * Provides access to the current IntelliJ Platform path.
+     *
+     * @param configurationName The IntelliJ Platform configuration name.
      */
-    internal val platformPath by lazy {
-        val requestedPlatform = "${baseType.get()}-${baseVersion.get()}"
-        intelliJPlatformConfiguration.platformPath(requestedPlatform)
-    }
+    internal fun platformPath(configurationName: String) =
+        requestedIntelliJPlatformPaths.computeIfAbsent(configurationName) {
+            val configuration = configurations[configurationName].asLenient
+            val requestedPlatform = requestedIntelliJPlatforms.get(configurationName)
+            configuration.platformPath(requestedPlatform)
+        }
 
-    /**
-     * Provides access to the [ProductInfo] of the current IntelliJ Platform.
-     */
-    internal val productInfo by lazy {
-        platformPath.productInfo()
-    }
+    internal fun ide(platformPath: Path) = gradle.idesManagerServiceProvider
+        .map { it.resolve(platformPath) }
+        .get()
 
     //</editor-fold>
 
@@ -155,17 +149,20 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param pathProvider Path to the bundled Jar file, like `lib/testFramework.jar`.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addBundledLibrary(
         pathProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(cachedProvider {
         val path = pathProvider.orNull
+        val platformPath = platformPath(intellijPlatformConfigurationName)
         requireNotNull(path) { "The `intellijPlatform.bundledLibrary` dependency helper was called with no `path` value provided." }
 
-        dependencies.createBundledLibrary(path).apply(action)
+        dependencies.createBundledLibrary(path, platformPath).apply(action)
     }).also {
         log.warn(
             """
@@ -177,11 +174,13 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
-     * A base method for adding a dependency on IntelliJ Platform.
+     * A base method for adding a dependency on the IntelliJ Platform.
      *
      * @param typeProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
      * @param versionProvider The provider for the version of the IntelliJ Platform dependency.
+     * @param useInstallerProvider Switches between the IDE installer and archive from the IntelliJ Maven repository.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action An optional action to be performed on the created dependency.
      * @throws GradleException
      */
@@ -191,36 +190,24 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
-        fallbackToBase: Boolean = false,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) {
-        val finalTypeProvider = with(typeProvider.map { it.toIntelliJPlatformType() }) {
-            when (fallbackToBase) {
-                true -> orElse(baseType)
-                false -> also { baseType = this }
-            }
-        }
-        val finalVersionProvider = with(versionProvider) {
-            when (fallbackToBase) {
-                true -> orElse(baseVersion)
-                false -> also { baseVersion = this }
-            }
-        }
-        val finalUseInstallerProvider = with(useInstallerProvider) {
-            when (fallbackToBase) {
-                true -> orElse(baseUseInstaller)
-                false -> also { baseUseInstaller = this }
-            }
-        }
+        val base = requestedIntelliJPlatforms.base
+        val type = typeProvider.map { it.toIntelliJPlatformType() }.orNull ?: base?.type
+        val version = versionProvider.orNull ?: base?.version
+        val useInstaller = (useInstallerProvider.orNull ?: base?.installer) != false
+
+        requireNotNull(type) { "The IntelliJ Platform dependency helper was called with no `type` value provided." }
+        requireNotNull(version) { "The IntelliJ Platform dependency helper was called with no `version` value provided." }
+
+        requestedIntelliJPlatforms[intellijPlatformConfigurationName] = RequestedIntelliJPlatform(
+            type = type,
+            version = version,
+            installer = useInstaller,
+        )
 
         configurations[configurationName].dependencies.addLater(cachedProvider {
-            val type = finalTypeProvider.orNull
-            val version = finalVersionProvider.orNull
-            val useInstaller = finalUseInstallerProvider.orNull != false
-
-            requireNotNull(type) { "The IntelliJ Platform dependency helper was called with no `type` value provided." }
-            requireNotNull(version) { "The IntelliJ Platform dependency helper was called with no `version` value provided." }
-
             when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
                 else -> when (useInstaller) {
@@ -228,42 +215,42 @@ class IntelliJPlatformDependenciesHelper(
                     false -> dependencies.createIntelliJPlatform(type, version)
                 }
             }.apply(action).also {
-//                val addDefaultDependenciesProvider = providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
-//                addIntelliJPlatformBundledPluginDependencies(addDefaultDependenciesProvider.map { enabled ->
-//                    if (enabled) {
-//                        listOf("com.intellij")
-//                    } else {
-//                        emptyList()
-//                    }
-//                })
-//                addIntelliJPlatformBundledModuleDependencies(addDefaultDependenciesProvider.map { enabled ->
-//                    when (enabled) {
-//                        true -> when (type) {
-//                            IntelliJPlatformType.Rider -> {
-//                                val currentVersion = version.toVersion()
-//                                fun getComparativeVersion(version: Version) = when (version.major) {
-//                                    in 100..999 -> Version(242)
-//                                    else -> Version(2024, 2)
-//                                }
-//
-//                                when {
-//                                    currentVersion >= getComparativeVersion(currentVersion) -> listOf("intellij.rider")
-//                                    else -> emptyList()
-//                                }
-//                            }
-//
-//                            else -> emptyList()
-//                        }
-//
-//                        false -> emptyList()
-//                    }
-//                })
+                //                val addDefaultDependenciesProvider = providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
+                //                addIntelliJPlatformBundledPluginDependencies(addDefaultDependenciesProvider.map { enabled ->
+                //                    if (enabled) {
+                //                        listOf("com.intellij")
+                //                    } else {
+                //                        emptyList()
+                //                    }
+                //                })
+                //                addIntelliJPlatformBundledModuleDependencies(addDefaultDependenciesProvider.map { enabled ->
+                //                    when (enabled) {
+                //                        true -> when (type) {
+                //                            IntelliJPlatformType.Rider -> {
+                //                                val currentVersion = version.toVersion()
+                //                                fun getComparativeVersion(version: Version) = when (version.major) {
+                //                                    in 100..999 -> Version(242)
+                //                                    else -> Version(2024, 2)
+                //                                }
+                //
+                //                                when {
+                //                                    currentVersion >= getComparativeVersion(currentVersion) -> listOf("intellij.rider")
+                //                                    else -> emptyList()
+                //                                }
+                //                            }
+                //
+                //                            else -> emptyList()
+                //                        }
+                //
+                //                        false -> emptyList()
+                //                    }
+                //                })
             }
         })
     }
 
     /**
-     * A base method for adding a dependency on IntelliJ Platform.
+     * A base method for adding a dependency on the IntelliJ Platform.
      *
      * @param notationsProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
      * @param configurationName The name of the configuration to add the dependency to.
@@ -290,6 +277,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param localPathProvider The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action An optional action to be performed on the created dependency.
      * @throws GradleException
      */
@@ -297,13 +285,20 @@ class IntelliJPlatformDependenciesHelper(
     internal fun addIntelliJPlatformLocalDependency(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(cachedProvider {
         val localPath = localPathProvider.orNull ?: return@cachedProvider null
+        val platformPath = resolveArtifactPath(localPath)
+        val productInfo = platformPath.productInfo()
 
-        resolveArtifactPath(localPath)
-            .let { dependencies.createIntelliJPlatformLocal(it) }
-            .apply(action)
+        requestedIntelliJPlatforms[intellijPlatformConfigurationName] = RequestedIntelliJPlatform(
+            type = productInfo.productCode.toIntelliJPlatformType(),
+            version = productInfo.version,
+            installer = true,
+        )
+
+        dependencies.createIntelliJPlatformLocal(platformPath).apply(action)
     })
 
     /**
@@ -341,15 +336,20 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param pluginsProvider The provider of the list containing plugin identifiers.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addCompatibleIntelliJPlatformPluginDependencies(
         pluginsProvider: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
         val plugins = pluginsProvider.orNull
         requireNotNull(plugins) { "The `intellijPlatform.compatiblePlugins` dependency helper was called with no `plugins` value provided." }
+
+        val platformPath = platformPath(intellijPlatformConfigurationName)
+        val productInfo = platformPath.productInfo()
 
         plugins.map { pluginId ->
             val platformType = productInfo.productCode
@@ -374,20 +374,23 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param bundledPluginsProvider The provider of the list containing bundled plugin identifiers.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addIntelliJPlatformBundledPluginDependencies(
         bundledPluginsProvider: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
         val bundledPlugins = bundledPluginsProvider.orNull
+        val platformPath = platformPath(intellijPlatformConfigurationName)
         requireNotNull(bundledPlugins) { "The `intellijPlatform.bundledPlugins` dependency helper was called with no `bundledPlugins` value provided." }
 
         bundledPlugins
             .map(String::trim)
             .filter(String::isNotEmpty)
-            .map { dependencies.createIntelliJPlatformBundledPlugin(it) }
+            .map { dependencies.createIntelliJPlatformBundledPlugin(platformPath, it) }
             .onEach(action)
     })
 
@@ -396,20 +399,24 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param bundledModulesProvider The provider of the list containing bundled module identifiers.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addIntelliJPlatformBundledModuleDependencies(
         bundledModulesProvider: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
         val bundledModules = bundledModulesProvider.orNull
         requireNotNull(bundledModules) { "The `intellijPlatform.bundledModules` dependency helper was called with no `bundledModules` value provided." }
 
+        val platformPath = platformPath(intellijPlatformConfigurationName)
+
         bundledModules
             .map(String::trim)
             .filter(String::isNotEmpty)
-            .map { dependencies.createIntelliJPlatformBundledModule(it) }
+            .map { dependencies.createIntelliJPlatformBundledModule(it, platformPath) }
             .onEach(action)
     })
 
@@ -418,17 +425,20 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param localPathProvider The provider of the path to the local plugin.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addIntelliJPlatformLocalPluginDependency(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(cachedProvider {
         val localPath = localPathProvider.orNull
+        val platformPath = platformPath(intellijPlatformConfigurationName)
         requireNotNull(localPath) { "The `intellijPlatform.localPlugin` dependency helper was called with no `localPath` value provided." }
 
-        dependencies.createIntelliJPlatformLocalPlugin(localPath).apply(action)
+        dependencies.createIntelliJPlatformLocalPlugin(localPath, platformPath).apply(action)
     })
 
     /**
@@ -497,14 +507,17 @@ class IntelliJPlatformDependenciesHelper(
      * A base method for adding a dependency on JetBrains Runtime.
      *
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addJetBrainsRuntimeObtainedDependency(
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(obtainJetBrainsRuntimeVersion().map { version ->
-        createJetBrainsRuntime(version).apply(action)
-    })
+    ) = configurations[configurationName].dependencies.addLater(
+        obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName).map { version ->
+            createJetBrainsRuntime(version).apply(action)
+        })
 
     /**
      * A base method for adding a dependency on JetBrains Runtime.
@@ -557,17 +570,21 @@ class IntelliJPlatformDependenciesHelper(
      * @param type The TestFramework type provider.
      * @param versionProvider The version of the TestFramework.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addTestFrameworkDependency(
         type: TestFrameworkType,
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
+        val platformPath = platformPath(intellijPlatformConfigurationName)
+
         when (type) {
             TestFrameworkType.Bundled -> type.coordinates.map {
-                dependencies.createBundledLibrary(it.artifactId)
+                dependencies.createBundledLibrary(it.artifactId, platformPath)
             }
 
             else -> {
@@ -575,7 +592,7 @@ class IntelliJPlatformDependenciesHelper(
                 requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
 
                 type.coordinates.map {
-                    dependencies.createPlatformDependency(it, version)
+                    dependencies.createPlatformDependency(it, version, platformPath)
                 }
             }
         }.onEach(action)
@@ -589,18 +606,22 @@ class IntelliJPlatformDependenciesHelper(
      * @param coordinates The coordinates of the IntelliJ Platform dependency.
      * @param versionProvider The version of the IntelliJ Platform dependency.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addPlatformDependency(
         coordinates: Coordinates,
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(cachedProvider {
         val version = versionProvider.get()
         requireNotNull(version) { "The `intellijPlatform.platformDependency`/`intellijPlatform.testPlatformDependency` dependency helper was called with no `version` value provided." }
 
-        dependencies.createPlatformDependency(coordinates, version).apply(action)
+        val platformPath = platformPath(intellijPlatformConfigurationName)
+
+        dependencies.createPlatformDependency(coordinates, version, platformPath).apply(action)
     })
 
     /**
@@ -683,8 +704,9 @@ class IntelliJPlatformDependenciesHelper(
      * Creates a [Dependency] using a Jar file resolved in [platformPath] with [path].
      *
      * @param path Relative path to the library, like: `lib/testFramework.jar`.
+     * @param platformPath Path to the current IntelliJ Platform.
      */
-    private fun DependencyHandler.createBundledLibrary(path: String) = create(
+    private fun DependencyHandler.createBundledLibrary(path: String, platformPath: Path) = create(
         objects.fileCollection().from(platformPath.resolve(path))
     )
 
@@ -799,8 +821,10 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param id The ID of the bundled plugin.
      */
-    private fun DependencyHandler.createIntelliJPlatformBundledPlugin(id: String): Dependency {
-        val plugin = ideProvider.get().findPluginById(id)
+    private fun DependencyHandler.createIntelliJPlatformBundledPlugin(platformPath: Path, id: String): Dependency {
+        val productInfo = platformPath.productInfo()
+        val plugin = ide(platformPath).findPluginById(id)
+
         requireNotNull(plugin) {
             val unresolvedPluginId = when (id) {
                 "copyright" -> "Use correct plugin ID 'com.intellij.copyright' instead of 'copyright'."
@@ -833,7 +857,7 @@ class IntelliJPlatformDependenciesHelper(
                     revision = version,
                 ),
                 publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath),
-                dependencies = plugin.collectDependencies(),
+                dependencies = plugin.collectDependencies(platformPath),
             )
         }
 
@@ -848,13 +872,15 @@ class IntelliJPlatformDependenciesHelper(
      * Creates a dependency for an IntelliJ platform bundled module.
      *
      * @param id The ID of the bundled module.
+     * @param platformPath The path to the current IntelliJ Platform.
      */
-    private fun DependencyHandler.createIntelliJPlatformBundledModule(id: String): Dependency {
-        val bundledModule = ideProvider.get().findPluginById(id)
-            .let { requireNotNull(it) { "Specified bundledModule '$id' doesn't exist." } }
+    private fun DependencyHandler.createIntelliJPlatformBundledModule(id: String, platformPath: Path): Dependency {
+        val bundledModule = ide(platformPath).findPluginById(id)
+        requireNotNull(bundledModule) { "Specified bundledModule '$id' doesn't exist." }
+
         val classpath = bundledModule.classpath.paths.map { it.pathString }
 
-        val (group, name, version) = writeBundledModuleDependency(id, classpath)
+        val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
         return create(group, name, version)
     }
 
@@ -862,14 +888,18 @@ class IntelliJPlatformDependenciesHelper(
      * Collects all dependencies on plugins or modules of the current [IdePlugin].
      * The [alreadyProcessedOrProcessing] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
      *
+     * @param platformPath The path to the current IntelliJ Platform.
      * @param alreadyProcessedOrProcessing IDs of already traversed plugins or modules.
      */
-    private fun IdePlugin.collectDependencies(alreadyProcessedOrProcessing: List<String> = emptyList()): List<IvyModule.Dependency> {
+    private fun IdePlugin.collectDependencies(
+        platformPath: Path,
+        alreadyProcessedOrProcessing: List<String> = emptyList(),
+    ): List<IvyModule.Dependency> {
         // It is crucial to use the IDE type + build number to the version.
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
         // Should be the same as [createIntelliJPlatformBundledPlugin]
-        val ide = ideProvider.get()
+        val ide = ide(platformPath)
         val id = requireNotNull(pluginId)
         val version = ide.version.toString()
 
@@ -900,7 +930,7 @@ class IntelliJPlatformDependenciesHelper(
                         IvyModule(
                             info = IvyModule.Info(group, name, version),
                             publications = publications,
-                            dependencies = it.collectDependencies(alreadyProcessedOrProcessing + id),
+                            dependencies = it.collectDependencies(platformPath, alreadyProcessedOrProcessing + id),
                         )
                     }
                 }
@@ -914,18 +944,20 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param name The name of the module.
      * @param classPath A list of class path entries for the module.
+     * @param platformPath The path to the current IntelliJ Platform.
      * @return A [Triple] containing a dependency group, name, and version
      */
     private fun writeBundledModuleDependency(
         name: String,
         classPath: Collection<String>,
+        platformPath: Path,
     ): Triple<String, String, String> {
         val group = Dependencies.BUNDLED_MODULE_GROUP
         // It is crucial to use the IDE type + build number to the version.
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
+        val productInfo = platformPath.productInfo()
         val version = productInfo.getFullVersion()
-        val platformPath = platformPath
         val artifacts = classPath.flatMap {
             platformPath.resolve(it).toIvyArtifacts(metadataRulesModeProvider, platformPath)
         }
@@ -948,8 +980,10 @@ class IntelliJPlatformDependenciesHelper(
      * Creates a dependency on a local IntelliJ Platform plugin.
      *
      * @param localPath Path to the local plugin.
+     * @param platformPath The path to the current IntelliJ Platform.
      */
-    private fun DependencyHandler.createIntelliJPlatformLocalPlugin(localPath: Any): Dependency {
+    private fun DependencyHandler.createIntelliJPlatformLocalPlugin(localPath: Any, platformPath: Path): Dependency {
+        val productInfo = platformPath.productInfo()
         val artifactPath = resolvePath(localPath)
             .takeIf { it.exists() }
             .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
@@ -1100,12 +1134,13 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a [Provider] that holds a JetBrains Runtime version obtained using the currently used IntelliJ Platform.
      *
-     * @param platformPathProvider The path to the IntelliJ Platform to be used for resolving JetBrains Runtime version.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      */
-    internal fun obtainJetBrainsRuntimeVersion(platformPathProvider: Provider<Path> = provider { platformPath }) =
+    internal fun obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) =
         cachedProvider {
+            val platformPath = platformPath(intellijPlatformConfigurationName)
             val dependencies = runCatching {
-                platformPathProvider.get().resolve("dependencies.txt").takeIf { it.exists() }
+                platformPath.resolve("dependencies.txt").takeIf { it.exists() }
             }.getOrNull() ?: return@cachedProvider null
 
             val version = FileReader(dependencies.toFile()).use { reader ->
@@ -1124,16 +1159,18 @@ class IntelliJPlatformDependenciesHelper(
      * bundled plugins and modules so tests can run with all runtime elements loaded.
      *
      * See https://youtrack.jetbrains.com/issue/IJPL-180516/Gradle-tests-fail-without-transitive-modules-jars-of-com.intellij-in-classpath
+     *
+     * @param platformPath The path to the current IntelliJ Platform.
      */
-    internal fun createIntelliJPlatformTestRuntime(): Dependency {
+    internal fun createIntelliJPlatformTestRuntime(platformPath: Path): Dependency {
         val id = "intellij-platform-test-runtime"
-        val ide = ideProvider.get()
+        val ide = ide(platformPath)
 
-        val classpath = ide.findPluginById ("com.intellij")?.let {
+        val classpath = ide.findPluginById("com.intellij")?.let {
             it.classpath.paths.map { it.pathString }.toSet()
         } ?: emptyList()
 
-        val (group, name, version) = writeBundledModuleDependency(id, classpath)
+        val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
         return dependencies.create(group, name, version)
     }
 
@@ -1144,18 +1181,23 @@ class IntelliJPlatformDependenciesHelper(
      * @param version Dependency version.
      * @param classifier Optional dependency classifier.
      * @param extension Optional dependency extension.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      */
     private fun DependencyHandler.createDependency(
         coordinates: Coordinates,
         version: String,
         classifier: String? = null,
         extension: String? = null,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
     ) = create(
         group = coordinates.groupId,
         name = coordinates.artifactId,
         classifier = classifier,
         ext = extension,
     ).apply {
+        val requestedIntelliJPlatform = requestedIntelliJPlatforms[intellijPlatformConfigurationName]
+        val isNightly by lazy { requestedIntelliJPlatform?.isNightly ?: false }
+
         val version = when {
             version == Constraints.CLOSEST_VERSION && isNightly -> Constraints.PLATFORM_VERSION
             else -> version
@@ -1164,14 +1206,18 @@ class IntelliJPlatformDependenciesHelper(
         when (version) {
             Constraints.PLATFORM_VERSION ->
                 version {
-                    prefer(baseVersion.get())
+                    requireNotNull(requestedIntelliJPlatform)
+                    prefer(requestedIntelliJPlatform.version)
                 }
 
             Constraints.CLOSEST_VERSION ->
                 version {
                     val buildNumber by lazy {
                         runCatching {
+                            val platformPath = platformPath(intellijPlatformConfigurationName)
+                            val productInfo = platformPath.productInfo()
                             productInfo.buildNumber.toVersion()
+
                         }.getOrDefault(Version()) // fallback to 0.0.0 if IntelliJ Platform is missing
                     }
 
@@ -1278,10 +1324,12 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param coordinates Dependency coordinates.
      * @param version Dependency version.
+     * @param platformPath The path to the current IntelliJ Platform.
      */
     private fun DependencyHandler.createPlatformDependency(
         coordinates: Coordinates,
         version: String,
+        platformPath: Path,
     ) = createDependency(coordinates, version).apply {
         val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
             parameters {
@@ -1360,16 +1408,32 @@ class IntelliJPlatformDependenciesHelper(
         else -> throw IllegalArgumentException("Invalid argument type: '${path.javaClass}'. Supported types: String, File, Path, or Directory.")
     }.let { Path(it) }
 
+    private val ConcurrentHashMap<String, RequestedIntelliJPlatform>.base
+        get() = get(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
+
+    //</editor-fold>
+}
+
+internal typealias DependencyAction = (Dependency.() -> Unit)
+
+data class RequestedIntelliJPlatform(
+    val type: IntelliJPlatformType,
+    val version: String,
+    val installer: Boolean,
+) {
+    private val installerLabel = when (installer) {
+        true -> "installer"
+        else -> "non-installer"
+    }
+
     /**
      * Indicates whether the current IntelliJ Platform is a nightly build.
      *
      * This variable checks if the base version matches a specific pattern
      * commonly used for nightly or snapshot builds, such as "123-SNAPSHOT" or "*-TRUNK-SNAPSHOT".
      */
-    private val isNightly
-        get() = baseVersion.orNull?.let { "(^|-)\\d{3}-SNAPSHOT|.*TRUNK-SNAPSHOT$".toRegex().matches(it) } == true
+    val isNightly
+        get() = "(^|-)\\d{3}-SNAPSHOT|.*TRUNK-SNAPSHOT$".toRegex().matches(version)
 
-    //</editor-fold>
+    override fun toString() = "$type-$version ($installerLabel)"
 }
-
-internal typealias DependencyAction = (Dependency.() -> Unit)

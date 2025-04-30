@@ -32,6 +32,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.extensions.RequestedIntelliJPlatform
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory
@@ -77,7 +78,7 @@ fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
  * @throws GradleException
  */
 @Throws(GradleException::class)
-fun FileCollection.platformPath(requestedPlatform: String? = null) = with(toList()) {
+fun FileCollection.platformPath(requestedPlatform: RequestedIntelliJPlatform? = null) = with(toList()) {
     val message = when (size) {
         0 -> "No IntelliJ Platform dependency found" + requestedPlatform?.let { " with '$it'" }.orEmpty() + "."
         1 -> null

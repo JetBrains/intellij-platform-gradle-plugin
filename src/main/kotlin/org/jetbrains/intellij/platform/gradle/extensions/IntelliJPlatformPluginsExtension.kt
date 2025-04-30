@@ -27,6 +27,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     objects: ObjectFactory,
 ) : ExtensionAware {
 
+    internal val intellijPlatformConfigurationName = objects.property<String>()
     internal val intellijPlatformPluginDependencyConfigurationName = objects.property<String>()
     internal val intellijPlatformPluginLocalConfigurationName = objects.property<String>()
     internal val intellijPlatformTestBundledPluginsConfiguration = objects.property<String>()
@@ -122,6 +123,61 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     )
 
     /**
+     * Adds a dependency on a plugin in a version compatible with the current IntelliJ Platform.
+     *
+     * @param id The plugin identifier.
+     */
+    fun compatiblePlugin(id: String) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOf(id) },
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
+    )
+
+    /**
+     * Adds a dependency on a plugin in a version compatible with the current IntelliJ Platform.
+     *
+     * @param id The provider of the plugin identifier.
+     */
+    fun compatiblePlugin(id: Provider<String>) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = id.map { listOf(it) },
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
+    )
+
+    /**
+     * Adds a dependency on plugins in versions compatible with the current IntelliJ Platform.
+     *
+     * @param ids The plugin identifiers.
+     */
+    fun compatiblePlugins(ids: List<String>) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { ids },
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
+    )
+
+    /**
+     * Adds a dependency on plugins in versions compatible with the current IntelliJ Platform.
+     *
+     * @param ids The plugin identifiers.
+     */
+    fun compatiblePlugins(vararg ids: String) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { ids.asList() },
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
+    )
+
+    /**
+     * Adds a dependency on plugins in versions compatible with the current IntelliJ Platform.
+     *
+     * @param ids The provider of the plugin identifiers.
+     */
+    fun compatiblePlugins(ids: Provider<List<String>>) = dependenciesHelper.addCompatibleIntelliJPlatformPluginDependencies(
+        pluginsProvider = ids.map { it },
+        configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
+    )
+
+    /**
      * Adds a dependency on a bundled IntelliJ Platform plugin.
      *
      * @param id The provider of the bundled plugin identifier.
@@ -129,6 +185,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun bundledPlugin(id: Provider<String>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
         bundledPluginsProvider = id.map { listOf(it) },
         configurationName = intellijPlatformTestBundledPluginsConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -139,6 +196,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun bundledPlugins(vararg ids: String) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
         bundledPluginsProvider = dependenciesHelper.provider { ids.asList() },
         configurationName = intellijPlatformTestBundledPluginsConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -149,6 +207,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun bundledPlugins(ids: List<String>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
         bundledPluginsProvider = dependenciesHelper.provider { ids },
         configurationName = intellijPlatformTestBundledPluginsConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -159,6 +218,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun bundledPlugins(ids: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
         bundledPluginsProvider = ids,
         configurationName = intellijPlatformTestBundledPluginsConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -169,6 +229,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun bundledModule(id: String) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
         bundledModulesProvider = dependenciesHelper.provider { listOf(id) },
         configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -179,6 +240,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun bundledModule(id: Provider<String>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
         bundledModulesProvider = id.map { listOf(it) },
         configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -189,6 +251,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun bundledModules(vararg ids: String) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
         bundledModulesProvider = dependenciesHelper.provider { ids.asList() },
         configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -199,6 +262,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun bundledModules(ids: List<String>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
         bundledModulesProvider = dependenciesHelper.provider { ids },
         configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -209,6 +273,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun bundledModules(ids: Provider<List<String>>) = dependenciesHelper.addIntelliJPlatformBundledModuleDependencies(
         bundledModulesProvider = ids,
         configurationName = intellijPlatformTestBundledModulesConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -229,6 +294,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun localPlugin(localPath: String) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
         localPathProvider = dependenciesHelper.provider { localPath },
         configurationName = intellijPlatformPluginLocalConfigurationName.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -239,6 +305,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun localPlugin(localPath: Directory) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
         localPathProvider = dependenciesHelper.provider { localPath },
         configurationName = intellijPlatformPluginLocalConfigurationName.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**
@@ -249,6 +316,7 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     fun localPlugin(localPath: Provider<*>) = dependenciesHelper.addIntelliJPlatformLocalPluginDependency(
         localPathProvider = localPath,
         configurationName = intellijPlatformPluginLocalConfigurationName.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
     )
 
     /**

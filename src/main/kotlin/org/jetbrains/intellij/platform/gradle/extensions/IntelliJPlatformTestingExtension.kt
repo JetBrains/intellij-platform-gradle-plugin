@@ -25,7 +25,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitMo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.isModule
-import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import javax.inject.Inject
 
 @IntelliJPlatform
@@ -79,8 +78,9 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     dependenciesExtension.customCreate(
                         type = type,
                         version = version,
-                        configurationName = this@create.name,
                         useInstaller = useInstaller,
+                        configurationName = this@create.name,
+                        intellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix,
                     )
                 }
 
@@ -116,12 +116,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     }
 
                     defaultDependencies {
-                        val customPlatformPath = project.provider {
-                            customIntelliJPlatformConfiguration.platformPath()
-                        }
-                        addLater(dependenciesHelper.obtainJetBrainsRuntimeVersion(customPlatformPath).map { version ->
-                            dependenciesHelper.createJetBrainsRuntime(version)
-                        })
+                        addLater(
+                            dependenciesHelper.obtainJetBrainsRuntimeVersion(customIntelliJPlatformConfiguration.name)
+                                .map { version -> dependenciesHelper.createJetBrainsRuntime(version) }
+                        )
                     }
                 }
 
@@ -204,6 +202,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                 }
 
                 plugins {
+                    intellijPlatformConfigurationName = customIntelliJPlatformConfiguration.name
                     intellijPlatformPluginDependencyConfigurationName = customIntellijPlatformTestPluginDependencyConfiguration.name
                     intellijPlatformPluginLocalConfigurationName = customIntellijPlatformTestPluginLocalConfiguration.name
                     intellijPlatformTestBundledPluginsConfiguration = customIntellijPlatformTestBundledPluginsConfiguration.name

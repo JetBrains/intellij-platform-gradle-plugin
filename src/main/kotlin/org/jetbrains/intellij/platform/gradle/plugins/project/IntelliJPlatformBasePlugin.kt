@@ -374,10 +374,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             ) {
                 defaultDependencies {
                     addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
-                        val intelliJPlatformAvailable = runCatching { dependenciesHelper.platformPath }.getOrNull() != null
-
-                        when (enabled && intelliJPlatformAvailable) {
-                            true -> dependenciesHelper.createIntelliJPlatformTestRuntime()
+                        val platformPath = runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
+                        when (enabled && platformPath != null) {
+                            true -> dependenciesHelper.createIntelliJPlatformTestRuntime(platformPath)
                             false -> null
                         }.let { listOfNotNull(it) }
                     })

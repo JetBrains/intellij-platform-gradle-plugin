@@ -14,7 +14,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.nio.file.Path
-import kotlin.Throws
 
 private const val JETBRAINS_RUNTIME_VENDOR = "JetBrains"
 
@@ -46,7 +45,7 @@ class JavaRuntimePathResolver(
          * the [IntelliJPlatformDependenciesExtension.jetbrainsRuntime] dependencies extensions.
          */
         "JetBrains Runtime specified with dependencies" to {
-            jetbrainsRuntime.runCatching {
+                jetbrainsRuntime.runCatching {
                 singleOrNull()?.toPath()
                     .resolveRuntimeDirectory()
                     .ensureExecutableExists()
