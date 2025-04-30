@@ -105,6 +105,7 @@ class IntelliJPlatformRepositoriesHelper(
         }
 
         repositories.ivy {
+            name = repositoryName
             url = shimServer.url
             isAllowInsecureProtocol = true
 
@@ -141,8 +142,8 @@ class IntelliJPlatformRepositoriesHelper(
                     }
                 }
             }
-        }.apply(action)
-
+            action()
+        }
         return repository
     }
 
