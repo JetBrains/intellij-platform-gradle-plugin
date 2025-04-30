@@ -972,6 +972,11 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun bundledPlugins (Ljava/util/List;)V
 	public final fun bundledPlugins (Lorg/gradle/api/provider/Provider;)V
 	public final fun bundledPlugins ([Ljava/lang/String;)V
+	public final fun compatiblePlugin (Ljava/lang/String;)V
+	public final fun compatiblePlugin (Lorg/gradle/api/provider/Provider;)V
+	public final fun compatiblePlugins (Ljava/util/List;)V
+	public final fun compatiblePlugins (Lorg/gradle/api/provider/Provider;)V
+	public final fun compatiblePlugins ([Ljava/lang/String;)V
 	public final fun disablePlugin (Ljava/lang/String;)V
 	public final fun disablePlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun disablePlugins (Ljava/util/List;)V
@@ -1101,6 +1106,22 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$register$2$1$inlined$sam$i$org_gradle_api_Action$0 : org/gradle/api/Action {
 	public fun <init> (Lkotlin/jvm/functions/Function1;)V
 	public final synthetic fun execute (Ljava/lang/Object;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/extensions/RequestedIntelliJPlatform {
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;Z)V
+	public final fun component1 ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Z
+	public final fun copy (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;Z)Lorg/jetbrains/intellij/platform/gradle/extensions/RequestedIntelliJPlatform;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/extensions/RequestedIntelliJPlatform;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/RequestedIntelliJPlatform;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getInstaller ()Z
+	public final fun getType ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public final fun isNightly ()Z
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/flow/StopShimServerAction : org/gradle/api/flow/FlowAction {
@@ -3067,8 +3088,8 @@ public final class org/jetbrains/intellij/platform/gradle/utils/UtilsKt {
 	public static final fun getRootProjectPath (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
 	public static final fun getSettings (Lorg/gradle/api/Project;)Lorg/gradle/api/internal/SettingsInternal;
 	public static final fun isSpecified (Lorg/gradle/api/provider/Property;)Z
-	public static final fun platformPath (Lorg/gradle/api/file/FileCollection;Ljava/lang/String;)Ljava/nio/file/Path;
-	public static synthetic fun platformPath$default (Lorg/gradle/api/file/FileCollection;Ljava/lang/String;ILjava/lang/Object;)Ljava/nio/file/Path;
+	public static final fun platformPath (Lorg/gradle/api/file/FileCollection;Lorg/jetbrains/intellij/platform/gradle/extensions/RequestedIntelliJPlatform;)Ljava/nio/file/Path;
+	public static synthetic fun platformPath$default (Lorg/gradle/api/file/FileCollection;Lorg/jetbrains/intellij/platform/gradle/extensions/RequestedIntelliJPlatform;ILjava/lang/Object;)Ljava/nio/file/Path;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/utils/Version : java/lang/Comparable {
