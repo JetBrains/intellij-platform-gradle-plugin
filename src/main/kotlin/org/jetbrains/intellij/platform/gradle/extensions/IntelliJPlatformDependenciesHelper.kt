@@ -132,7 +132,7 @@ class IntelliJPlatformDependenciesHelper(
     internal fun platformPath(configurationName: String) =
         requestedIntelliJPlatformPaths.computeIfAbsent(configurationName) {
             val configuration = configurations[configurationName].asLenient
-            val requestedPlatform = requestedIntelliJPlatforms.get(configurationName)
+            val requestedPlatform = requestedIntelliJPlatforms[configurationName]
             configuration.platformPath(requestedPlatform)
         }
 
@@ -1198,12 +1198,12 @@ class IntelliJPlatformDependenciesHelper(
         val requestedIntelliJPlatform = requestedIntelliJPlatforms[intellijPlatformConfigurationName]
         val isNightly by lazy { requestedIntelliJPlatform?.isNightly ?: false }
 
-        val version = when {
+        val resolvedVersion = when {
             version == Constraints.CLOSEST_VERSION && isNightly -> Constraints.PLATFORM_VERSION
             else -> version
         }
 
-        when (version) {
+        when (resolvedVersion) {
             Constraints.PLATFORM_VERSION ->
                 version {
                     requireNotNull(requestedIntelliJPlatform)
@@ -1232,7 +1232,7 @@ class IntelliJPlatformDependenciesHelper(
 
             else ->
                 version {
-                    prefer(version)
+                    prefer(resolvedVersion)
                 }
         }
     }
