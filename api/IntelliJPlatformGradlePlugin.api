@@ -193,12 +193,6 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox$Plug
 	public static final field MODULES Ljava/lang/String;
 }
 
-public final class org/jetbrains/intellij/platform/gradle/Constants$Services {
-	public static final field EXTRACTOR Ljava/lang/String;
-	public static final field IDES_MANAGER Ljava/lang/String;
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Services;
-}
-
 public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field BUILD_PLUGIN Ljava/lang/String;
 	public static final field BUILD_SEARCHABLE_OPTIONS Ljava/lang/String;
@@ -2465,10 +2459,6 @@ public final class org/jetbrains/intellij/platform/gradle/resolvers/path/Product
 public abstract class org/jetbrains/intellij/platform/gradle/services/ExtractorService : org/gradle/api/services/BuildService {
 	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/process/ExecOperations;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/file/FileSystemOperations;)V
 	public final fun extract (Ljava/nio/file/Path;Ljava/nio/file/Path;)V
-}
-
-public final class org/jetbrains/intellij/platform/gradle/services/ExtractorServiceKt {
-	public static final fun getExtractorServiceProvider (Lorg/gradle/api/invocation/Gradle;)Lorg/gradle/api/provider/Provider;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/services/IdesManagerService : org/gradle/api/services/BuildService {

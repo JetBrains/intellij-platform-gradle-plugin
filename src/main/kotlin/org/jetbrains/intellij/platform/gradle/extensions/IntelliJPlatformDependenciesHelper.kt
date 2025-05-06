@@ -35,7 +35,8 @@ import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSo
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
-import org.jetbrains.intellij.platform.gradle.services.idesManagerServiceProvider
+import org.jetbrains.intellij.platform.gradle.services.IdesManagerService
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
@@ -136,7 +137,7 @@ class IntelliJPlatformDependenciesHelper(
             configuration.platformPath(requestedPlatform)
         }
 
-    internal fun ide(platformPath: Path) = gradle.idesManagerServiceProvider
+    internal fun ide(platformPath: Path) = gradle.registerClassLoaderScopedBuildService(IdesManagerService::class)
         .map { it.resolve(platformPath) }
         .get()
 

@@ -20,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtif
 import org.jetbrains.intellij.platform.gradle.flow.StopShimServerAction
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import java.net.URI
 import java.nio.file.Path
 import kotlin.io.path.pathString
@@ -37,7 +38,7 @@ class IntelliJPlatformRepositoriesHelper(
     private val rootProjectDirectory: Path,
 ) {
 
-    private val shimManager = gradle.sharedServices.registerIfAbsent(SHIM_MANAGER, ShimManagerService::class) {
+    private val shimManager = gradle.registerClassLoaderScopedBuildService(ShimManagerService::class) {
         parameters.port = providers[GradleProperties.ShimServerPort]
     }
 

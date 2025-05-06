@@ -5,15 +5,11 @@ package org.jetbrains.intellij.platform.gradle.services
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.FileTree
-import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
-import org.gradle.kotlin.dsl.registerIfAbsent
 import org.gradle.process.ExecOperations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.Constants.Services
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.resolvePlatformPath
 import java.io.ByteArrayOutputStream
@@ -150,9 +146,3 @@ abstract class ExtractorService @Inject constructor(
             }
     }
 }
-
-val Gradle.extractorServiceProvider: Provider<ExtractorService>
-    get() = sharedServices.registerIfAbsent(
-        Services.EXTRACTOR,
-        ExtractorService::class,
-    ) { /* TODO: remove when Gradle 8.7+ */ }

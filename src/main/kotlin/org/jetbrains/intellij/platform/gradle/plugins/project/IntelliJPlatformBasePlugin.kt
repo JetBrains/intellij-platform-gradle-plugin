@@ -26,7 +26,8 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
-import org.jetbrains.intellij.platform.gradle.services.extractorServiceProvider
+import org.jetbrains.intellij.platform.gradle.services.ExtractorService
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
@@ -444,7 +445,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     .attribute(Attributes.collected, true)
             }
 
-            ExtractorTransformer.register(this, project.gradle.extractorServiceProvider)
+            ExtractorTransformer.register(this, project.gradle.registerClassLoaderScopedBuildService(ExtractorService::class))
             CollectorTransformer.register(this, project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY])
             LocalPluginsNormalizationTransformers.register(this)
 

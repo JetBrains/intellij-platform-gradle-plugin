@@ -153,11 +153,6 @@ object Constants {
         }
     }
 
-    object Services {
-        const val IDES_MANAGER = "idesManager"
-        const val EXTRACTOR = "extractor"
-    }
-
     object Tasks {
         const val BUILD_PLUGIN = "buildPlugin"
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
