@@ -188,6 +188,7 @@ fun Test.configureTests() {
     systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
 
     jvmArgs(
+        "-Xmx4G",
         "--add-opens=java.base/java.lang=ALL-UNNAMED",
         "--add-opens=java.base/java.util=ALL-UNNAMED",
         "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
