@@ -1139,8 +1139,8 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) =
         cachedProvider {
-            val platformPath = platformPath(intellijPlatformConfigurationName)
             val dependencies = runCatching {
+                val platformPath = platformPath(intellijPlatformConfigurationName)
                 platformPath.resolve("dependencies.txt").takeIf { it.exists() }
             }.getOrNull() ?: return@cachedProvider null
 
