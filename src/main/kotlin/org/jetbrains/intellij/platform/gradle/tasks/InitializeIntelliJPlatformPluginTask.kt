@@ -205,11 +205,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                         it.createDirectories().resolve("self-update.lock").toFile()
                     })
                 )
-                coroutinesJavaAgentLock.convention(
-                    project.layout.file(cachePathProvider.map {
-                        it.createDirectories().resolve("coroutines-javaagent.lock").toFile()
-                    })
-                )
+                coroutinesJavaAgentLock.convention(project.layout.buildDirectory.file("coroutines-javaagent.lock"))
                 coroutinesJavaAgent.convention(project.layout.buildDirectory.file("coroutines-javaagent.jar"))
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
                 latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {})
