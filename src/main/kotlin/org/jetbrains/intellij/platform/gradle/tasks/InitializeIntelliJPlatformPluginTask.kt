@@ -162,6 +162,10 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
      * the creation of the coroutines Java agent file is skipped.
      */
     private fun createCoroutinesJavaAgentFile() {
+        if (module.get()) {
+            return
+        }
+
         val storedBuildNumber by lazy {
             runCatching {
                 coroutinesJavaAgentLock.asPath.readText().trim()

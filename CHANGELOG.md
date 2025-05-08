@@ -13,6 +13,7 @@
 - Print requested IntelliJ Platform when throwing exception about unresolved dependency.
 - Make `IntelliJPlatformDependenciesHelper` aware of custom IntelliJ Platform when used within custom tasks.
 - Move the Coroutines JavaAgent lock file into module's build directory
+- Skip creating the Coroutines JavaAgent for modules
 
 ### Fixed
 
