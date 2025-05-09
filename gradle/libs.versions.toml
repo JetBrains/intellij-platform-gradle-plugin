@@ -4,7 +4,6 @@ intellijStructure = "3.304"
 intellijPluginRepositoryRestClient = "2.0.46"
 jpsModel = "213.7172.53"
 kotlinxSerializationJson = "1.6.3"
-okio = "1.17.6"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 undertow = "2.3.18.Final"
@@ -26,7 +25,6 @@ jps-model-impl = { group = "com.jetbrains.intellij.platform", name = "jps-model-
 jps-model-serialization = { group = "com.jetbrains.intellij.platform", name = "jps-model-serialization", version.ref = "jpsModel" }
 jps-util = { group = "com.jetbrains.intellij.platform", name = "util", version.ref = "jpsModel" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
-okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 undertow = { group = "io.undertow", name = "undertow-core", version.ref = "undertow" }

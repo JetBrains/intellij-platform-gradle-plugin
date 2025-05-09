@@ -73,7 +73,6 @@ dependencies {
     compileOnly(embeddedKotlin("gradle-plugin"))
     additionalPluginClasspath(embeddedKotlin("gradle-plugin"))
 
-    api(libs.okio)
     api(libs.okhttp)
     api(libs.retrofit)
 
