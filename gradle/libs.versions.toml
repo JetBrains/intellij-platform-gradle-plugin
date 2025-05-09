@@ -2,7 +2,7 @@
 # libraries
 intellijStructure = "3.305"
 intellijPluginRepositoryRestClient = "2.0.46"
-kotlinxSerializationJson = "1.6.3"
+kotlinxSerialization = "1.6.3"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 undertow = "2.3.18.Final"
@@ -19,7 +19,8 @@ intellij-pluginRepositoryRestClient = { group = "org.jetbrains.intellij", name =
 intellij-structure-base = { group = "org.jetbrains.intellij.plugins", name = "structure-base", version.ref = "intellijStructure" }
 intellij-structure-ide = { group = "org.jetbrains.intellij.plugins", name = "structure-ide", version.ref = "intellijStructure" }
 intellij-structure-intellij = { group = "org.jetbrains.intellij.plugins", name = "structure-intellij", version.ref = "intellijStructure" }
-kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinxSerialization" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 undertow = { group = "io.undertow", name = "undertow-core", version.ref = "undertow" }

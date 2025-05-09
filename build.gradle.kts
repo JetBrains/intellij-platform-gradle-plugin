@@ -33,29 +33,30 @@ repositories {
 val additionalPluginClasspath: Configuration by configurations.creating
 
 dependencies {
-    implementation(libs.undertow)
+    api(libs.undertow)
 
     implementation(libs.intellij.structure.base) {
         exclude("org.jetbrains.kotlin")
     }
-    implementation(libs.intellij.structure.ide) {
+    api(libs.intellij.structure.ide) {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")
     }
-    implementation(libs.intellij.structure.intellij) {
+    api(libs.intellij.structure.intellij) {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")
     }
-    implementation(libs.intellij.pluginRepositoryRestClient) {
+    api(libs.intellij.pluginRepositoryRestClient) {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")
         exclude("org.slf4j")
     }
 
-    implementation(libs.xmlutil.core)
-    implementation(libs.xmlutil.serialization) {
+    runtimeOnly(libs.xmlutil.core)
+    api(libs.xmlutil.serialization) {
         exclude("io.github.pdvrieze.xmlutil", "core")
     }
+    implementation(libs.kotlinx.serialization.core)
     implementation(libs.kotlinx.serialization.json)
 
     compileOnly(embeddedKotlin("gradle-plugin"))
