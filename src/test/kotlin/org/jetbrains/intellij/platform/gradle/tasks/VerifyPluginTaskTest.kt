@@ -332,6 +332,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         }
     }
 
+    @Ignore("Since we drop the until-build, the recommended() list grows fast and we can't run it on CI")
     @Test
     fun `pass on recommended ides`() {
         writeJavaFile()

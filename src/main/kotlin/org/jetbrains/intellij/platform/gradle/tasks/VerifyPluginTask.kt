@@ -12,6 +12,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -305,11 +306,17 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 val pluginVerificationProvider = project.extensionProvider.map { it.pluginVerification }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 
-                ides.from(project.provider {
-                    intellijPluginVerifierIdesConfiguration.incoming.dependencies.flatMap {
-                        project.configurations.detachedConfiguration(it).apply {
-                            attributes { attribute(Attributes.extracted, true) }
-                        }.resolve()
+                ides = project.files(project.provider {
+                    with(intellijPluginVerifierIdesConfiguration.incoming.dependencies) {
+                        if (size > 5) {
+                            val ideList = joinToString(", ") { "${it.group}:${it.name}:${it.version}" }
+                            log.warn("The ${Tasks.VERIFY_PLUGIN} task is about to resolve $size IDEs: $ideList")
+                        }
+                        flatMap {
+                            project.configurations.detachedConfiguration(it).apply {
+                                attributes { attribute(Attributes.extracted, true) }
+                            }.resolve()
+                        }
                     }
                 })
 
