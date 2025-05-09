@@ -14,6 +14,7 @@
 - Make `IntelliJPlatformDependenciesHelper` aware of custom IntelliJ Platform when used within custom tasks.
 - Move the Coroutines JavaAgent lock file into module's build directory
 - Skip creating the Coroutines JavaAgent for modules
+- Remove the default `untilBuild` value
 
 ### Fixed
 

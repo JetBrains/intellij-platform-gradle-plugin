@@ -27,7 +27,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
             outputPluginXml,
             """
             <idea-plugin>
-              <idea-version since-build="223.8836" until-build="223.*" />
+              <idea-version since-build="223.8836" />
               <version>1.0.0</version>
             </idea-plugin>
             """.trimIndent()
@@ -75,7 +75,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
                 outputPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="Oh" until-build="223.*" />
+                  <idea-version since-build="Oh" />
                   <version>1.0.0</version>
                 </idea-plugin>
                 """.trimIndent()

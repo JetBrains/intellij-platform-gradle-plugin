@@ -24,7 +24,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
                 </idea-plugin>
                 """.trimIndent(),
@@ -55,7 +55,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <description><![CDATA[<p>Plugin pluginDescription</p>]]></description>
                   <version>1.0.0</version>
                 </idea-plugin>
@@ -78,7 +78,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin someattr="\u2202">
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
                 </idea-plugin>
                 """.trimIndent(),
@@ -109,7 +109,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <change-notes><![CDATA[change notes]]></change-notes>
                   <version>1.0.0</version>
                 </idea-plugin>
@@ -141,7 +141,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
                   <id>my.plugin.id</id>
                 </idea-plugin>
@@ -167,7 +167,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
                   <id>my.plugin.id</id>
                   <vendor>JetBrains</vendor>
@@ -194,7 +194,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
                   <id>org.jetbrains.erlang</id>
                   <vendor>JetBrains</vendor>
@@ -223,13 +223,12 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 """
                 <idea-plugin>
                   <version>1.0.0</version>
-                  <idea-version since-build="223.8836" until-build="223.*">my_version</idea-version>
+                  <idea-version since-build="223.8836">my_version</idea-version>
                   <vendor>JetBrains</vendor>
                 </idea-plugin>
                 """.trimIndent(),
             )
 
-            assertContains("Patching plugin.xml: attribute 'until-build=[2]' of 'idea-version' tag will be set to '223.*'", output)
             assertContains("Patching plugin.xml: attribute 'since-build=[1]' of 'idea-version' tag will be set to '223.8836'", output)
             assertContains("Patching plugin.xml: value of 'version[my_version]' tag will be set to '1.0.0'", output)
         }
@@ -254,7 +253,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>0.10.0</version>
                 </idea-plugin>
                 """.trimIndent(),
@@ -278,7 +277,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
                 </idea-plugin>
                 """.trimIndent(),
@@ -373,7 +372,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
                 </idea-plugin>
                 """.trimIndent(),
@@ -406,7 +405,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 patchedPluginXml,
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
                   <description><![CDATA[Bar]]></description>
                 </idea-plugin>

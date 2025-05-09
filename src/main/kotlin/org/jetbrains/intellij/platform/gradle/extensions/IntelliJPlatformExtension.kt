@@ -457,13 +457,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                             it.runCatching { productInfo.buildNumber.toVersion() }.getOrDefault(Version())
                         }
                         sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
-                        untilBuild.convention(buildVersion.flatMap { version ->
-                            if (version.major >= 243) {
-                                project.provider { null }
-                            } else {
-                                project.provider { "${version.major}.*" }
-                            }
-                        })
                     }
             }
         }

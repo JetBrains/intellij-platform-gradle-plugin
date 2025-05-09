@@ -310,7 +310,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 "META-INF/plugin.xml",
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" until-build="223.*" />
+                  <idea-version since-build="223.8836" />
                   <version>1.0.0</version>
                   <name>myPluginName</name>
                   <depends config-file="other.xml" />
