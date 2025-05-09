@@ -15,6 +15,7 @@
 - Move the Coroutines JavaAgent lock file into module's build directory
 - Skip creating the Coroutines JavaAgent for modules
 - Remove the default `untilBuild` value
+- Drop JPS dependencies shadowing
 
 ### Fixed
 

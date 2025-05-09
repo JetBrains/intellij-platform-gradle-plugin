@@ -28,31 +28,19 @@ description = properties("description").get()
 
 repositories {
     mavenCentral()
-    maven("https://cache-redirector.jetbrains.com/intellij-dependencies")
-    maven("https://cache-redirector.jetbrains.com/intellij-repository/releases")
 }
 
 val additionalPluginClasspath: Configuration by configurations.creating
-val jpsModule: Configuration by configurations.creating
 
 dependencies {
     implementation(libs.undertow)
 
-    compileOnly(libs.bundles.jps) {
-        exclude("org.jetbrains.kotlin")
-        exclude("org.jetbrains.kotlinx")
-        jpsModule(this)
-    }
     implementation(libs.intellij.structure.base) {
         exclude("org.jetbrains.kotlin")
     }
     implementation(libs.intellij.structure.ide) {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")
-
-        libs.bundles.jps.get().forEach {
-            exclude(it.group, it.name)
-        }
     }
     implementation(libs.intellij.structure.intellij) {
         exclude("org.jetbrains.kotlin")
@@ -105,13 +93,6 @@ tasks {
 
     jar {
         patchManifest()
-
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        jpsModule.files.forEach {
-            from(zipTree(it)) {
-                exclude("META-INF/**", "messages/**", "misc/**", "module-info.class")
-            }
-        }
     }
 
     validatePlugins {
