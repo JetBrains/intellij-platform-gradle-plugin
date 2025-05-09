@@ -36,7 +36,6 @@ val additionalPluginClasspath: Configuration by configurations.creating
 val jpsModule: Configuration by configurations.creating
 
 dependencies {
-    implementation(libs.annotations)
     implementation(libs.undertow)
 
     compileOnly(libs.bundles.jps) {
@@ -85,7 +84,6 @@ dependencies {
     testFixturesImplementation(gradleTestKit())
     testFixturesImplementation(embeddedKotlin("test"))
     testFixturesImplementation(embeddedKotlin("test-junit"))
-    testFixturesImplementation(libs.annotations)
 }
 
 kotlin {
