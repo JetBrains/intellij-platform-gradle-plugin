@@ -89,7 +89,6 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
 
             val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
             val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
-            val testRuntimeFixConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH]
 
             // The below is needed to simulate the behavior of com.intellij.ide.plugins.cl.PluginClassLoader
             // which is present in the IDE when the plugin is used in "production".
@@ -125,7 +124,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 sourceTask.intellijPlatformTestClasspathConfiguration,
                 classpath.filter { it !in runtimeDependencies.files },
                 sourceTask.intellijPlatformTestRuntimeClasspathConfiguration,
-                testRuntimeFixConfiguration,
+                sourceTask.intelliJPlatformTestRuntimeFixClasspathConfiguration,
             )
 
             testClassesDirs = instrumentedTestCode + testClassesDirs

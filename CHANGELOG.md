@@ -24,6 +24,7 @@
 - Set the required `extracted` and `collected` attributes for custom test classpath configurations
 - Set the repository name and fix the `action` application in `createCustomPluginRepository`
 - Refactor build service registration to use `registerClassLoaderScopedBuildService` to avoid issues caused because of different classpath in the project. JetBrains/intellij-platform-gradle-plugin#1919
+- Use proper IntelliJ Platform when setting up custom tests runtime
 
 ## [2.5.0] - 2025-04-01
 

@@ -317,6 +317,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             pluginDirectory = sandboxPluginsDirectory.dir(pluginName)
             intellijPlatformTestClasspathConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH)
             intellijPlatformTestRuntimeClasspathConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH)
+            intelliJPlatformTestRuntimeFixClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH]
         }
     }
 }

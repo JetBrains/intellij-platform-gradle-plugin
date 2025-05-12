@@ -195,11 +195,12 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     name = Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH.withSuffix,
                     description = "Custom IntelliJ Platform Test Classpath",
                 ) {
-                    attributes
-                        .attribute(Attributes.extracted, true)
-                        .attribute(Attributes.collected, true)
+                    attributes {
+                        attribute(Attributes.extracted, true)
+                        attribute(Attributes.collected, true)
+                    }
 
-                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH])
+                    extendsFrom(customIntelliJPlatformConfiguration)
                     extendsFrom(customIntellijPlatformTestDependenciesConfiguration)
                 }
                 val customIntellijPlatformTestRuntimeClasspathConfiguration = project.configurations.create(
@@ -212,6 +213,21 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
 
                     extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH])
                     extendsFrom(customIntellijPlatformTestDependenciesConfiguration)
+                }
+
+                val customIntelliJPlatformTestRuntimeFixClasspathConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH.withSuffix,
+                    description = "Custom IntelliJ Platform Test Runtime Fix Classpath",
+                ) {
+                    defaultDependencies {
+                        addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
+                            val platformPath = runCatching { dependenciesHelper.platformPath(customIntelliJPlatformConfiguration.name) }.getOrNull()
+                            when (enabled && platformPath != null) {
+                                true -> dependenciesHelper.createIntelliJPlatformTestRuntime(platformPath)
+                                false -> null
+                            }.let { listOfNotNull(it) }
+                        })
+                    }
                 }
 
                 plugins {
@@ -244,6 +260,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     if (this is TestableAware) {
                         intellijPlatformTestClasspathConfiguration = customIntellijPlatformTestClasspathConfiguration
                         intellijPlatformTestRuntimeClasspathConfiguration = customIntellijPlatformTestRuntimeClasspathConfiguration
+                        intelliJPlatformTestRuntimeFixClasspathConfiguration = customIntelliJPlatformTestRuntimeFixClasspathConfiguration
                     }
 
                     applySandboxFrom(prepareSandboxTask)
