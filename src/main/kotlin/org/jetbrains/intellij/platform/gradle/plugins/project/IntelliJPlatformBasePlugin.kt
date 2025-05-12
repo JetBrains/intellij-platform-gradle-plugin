@@ -5,9 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.initialization.resolve.RulesMode
 import org.gradle.api.plugins.JavaLibraryPlugin
-import org.gradle.kotlin.dsl.all
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
 import org.gradle.plugins.ide.idea.IdeaPlugin
@@ -31,8 +29,6 @@ import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScoped
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
-import kotlin.io.path.absolute
-import kotlin.io.path.invariantSeparatorsPathString
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
@@ -121,33 +117,13 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     )
                 }
 
-                // Registers LocalIvyArtifactPathComponentMetadataRule
-                incoming.afterResolve {
-                    val ruleName = LocalIvyArtifactPathComponentMetadataRule::class.simpleName
-                    // Intentionally delaying the check just in case if it changes somehow late in the lifecycle.
-                    val rulesMode = project.settings.dependencyResolutionManagement.rulesMode.get()
-
-                    if (RulesMode.PREFER_PROJECT == rulesMode) {
-                        if (resolvedConfiguration.hasError()) {
-                            log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' has some resolution errors. $ruleName will not be registered.")
-                        } else if (isEmpty) {
-                            log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' is empty. $ruleName will not be registered.")
-                        } else {
-                            val artifactLocationPath = platformPath()
-                                .absolute().normalize().invariantSeparatorsPathString
-                            val ivyLocationPath = project.providers.localPlatformArtifactsPath(project.rootProjectPath)
-                                .absolute().normalize().invariantSeparatorsPathString
-
-                            project.dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
-                                params(artifactLocationPath, ivyLocationPath)
-                            }
-
-                            log.info("$ruleName has been registered.")
-                        }
-                    } else {
-                        log.info("$ruleName can not be registered because '${rulesMode}' mode is used in settings.")
-                    }
-                }
+                LocalIvyArtifactPathComponentMetadataRule.register(
+                    configuration = this,
+                    dependencies = project.dependencies,
+                    providers = project.providers,
+                    settings = project.settings,
+                    rootProjectDirectory = project.rootProjectPath,
+                )
             }
 
             val intellijPlatformPluginDependenciesConfiguration = create(

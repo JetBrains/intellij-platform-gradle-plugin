@@ -14,8 +14,11 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
@@ -25,6 +28,8 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitMo
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.isModule
+import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
+import org.jetbrains.intellij.platform.gradle.utils.settings
 import javax.inject.Inject
 
 @IntelliJPlatform
@@ -106,6 +111,14 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                             customIntelliJPlatformDependencyConfiguration.dependencies
                         })
                     }
+
+                    LocalIvyArtifactPathComponentMetadataRule.register(
+                        configuration = this,
+                        dependencies = project.dependencies,
+                        providers = project.providers,
+                        settings = project.settings,
+                        rootProjectDirectory = project.rootProjectPath,
+                    )
                 }
                 val customJetBrainsRuntimeConfiguration = project.configurations.create(
                     name = Configurations.JETBRAINS_RUNTIME.withSuffix,

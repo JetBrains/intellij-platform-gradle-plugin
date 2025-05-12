@@ -6,11 +6,24 @@ import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
+import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.initialization.resolve.RulesMode
+import org.gradle.api.internal.SettingsInternal
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.all
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
+import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
+import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import java.io.File
+import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.absolute
+import kotlin.io.path.invariantSeparatorsPathString
 
 /**
  * This comes into play only when [org.gradle.api.initialization.resolve.RulesMode.PREFER_PROJECT] (the default) is used in Gradle's settings.
@@ -117,6 +130,48 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
                          */
                         addFile(fileName, absPathString)
                     }
+                }
+            }
+        }
+    }
+
+    companion object {
+        internal fun register(
+            configuration: Configuration,
+            dependencies: DependencyHandler,
+            providers: ProviderFactory,
+            settings: SettingsInternal,
+            rootProjectDirectory: Path
+        ) {
+            configuration.incoming.afterResolve {
+                val log = Logger(javaClass)
+                val ruleName = LocalIvyArtifactPathComponentMetadataRule::class.simpleName
+                // Intentionally delaying the check just in case if it changes somehow late in the lifecycle.
+                val rulesMode = settings.dependencyResolutionManagement.rulesMode.get()
+
+                if (RulesMode.PREFER_PROJECT == rulesMode) {
+                    if (configuration.resolvedConfiguration.hasError()) {
+                        log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' has some resolution errors. $ruleName will not be registered.")
+                    } else if (configuration.isEmpty) {
+                        log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' is empty. $ruleName will not be registered.")
+                    } else {
+                        val artifactLocationPath = configuration.platformPath()
+                            .absolute()
+                            .normalize()
+                            .invariantSeparatorsPathString
+                        val ivyLocationPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
+                            .absolute()
+                            .normalize()
+                            .invariantSeparatorsPathString
+
+                        dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
+                            params(artifactLocationPath, ivyLocationPath)
+                        }
+
+                        log.info("$ruleName has been registered.")
+                    }
+                } else {
+                    log.info("$ruleName can not be registered because '${rulesMode}' mode is used in settings.")
                 }
             }
         }
