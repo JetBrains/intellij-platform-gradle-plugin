@@ -446,7 +446,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
 
             ExtractorTransformer.register(this, project.gradle.registerClassLoaderScopedBuildService(ExtractorService::class))
-            CollectorTransformer.register(this, project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY])
+            CollectorTransformer.register(this)
             LocalPluginsNormalizationTransformers.register(this)
 
             project.pluginManager.withPlugin(Plugins.External.JAVA_TEST_FIXTURES) {

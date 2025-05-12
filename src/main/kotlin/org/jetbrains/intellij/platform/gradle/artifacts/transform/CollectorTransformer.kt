@@ -37,16 +37,7 @@ import kotlin.io.path.listDirectoryEntries
  * @see LocalIvyArtifactPathComponentMetadataRule
  */
 @DisableCachingByDefault(because = "Not worth caching")
-abstract class CollectorTransformer : TransformAction<CollectorTransformer.Parameters> {
-
-    interface Parameters : TransformParameters {
-
-        /**
-         * The current IntelliJ Platform.
-         */
-        @get:Internal
-        val intellijPlatform: ConfigurableFileCollection
-    }
+abstract class CollectorTransformer : TransformAction<TransformParameters.None> {
 
     /**
      * The input artifact provided for transformation.
@@ -61,27 +52,24 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
     /**
      * The transform action determines if the [inputArtifact] is the currently used IntelliJ Platform or a plugin.
      *
-     * To check it is the IntelliJ Platform, artifact is compared to the file collection available with the provided [Parameters.intellijPlatform].
-     * Otherwise, it parses the artifact with [IdePluginManager].
-     *
      * @throws GradleException
      */
     @Throws(GradleException::class)
     override fun transform(outputs: TransformOutputs) {
         runCatching {
             val path = inputArtifact.asPath
-            val productInfo = parameters.intellijPlatform.platformPath().productInfo()
             val plugin by lazy {
                 val pluginPath = path.resolvePluginPath()
                 manager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
             }
 
-            val isIntelliJPlatform = path == parameters.intellijPlatform.platformPath()
+            val productInfo = runCatching { path.resolvePlatformPath().productInfo() }.getOrNull()
+            val isIntelliJPlatform = productInfo != null
             val isPlugin = !isIntelliJPlatform && runCatching { plugin }.isSuccess
 
             when {
                 isIntelliJPlatform -> {
-                    collectIntelliJPlatformJars(productInfo, path)
+                    collectIntelliJPlatformJars(requireNotNull(productInfo), path)
                         .forEach { outputs.file(it) }
                 }
 
@@ -118,7 +106,7 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                 .flatMap { it.listDirectoryEntries("*.jar") }
         }
 
-        internal fun register(dependencies: DependencyHandler, intellijPlatformConfiguration: Configuration) {
+        internal fun register(dependencies: DependencyHandler) {
             dependencies.registerTransform(CollectorTransformer::class) {
                 from
                     .attribute(Attributes.extracted, true)
@@ -126,10 +114,6 @@ abstract class CollectorTransformer : TransformAction<CollectorTransformer.Param
                 to
                     .attribute(Attributes.extracted, true)
                     .attribute(Attributes.collected, true)
-
-                parameters {
-                    intellijPlatform = intellijPlatformConfiguration
-                }
             }
         }
     }
