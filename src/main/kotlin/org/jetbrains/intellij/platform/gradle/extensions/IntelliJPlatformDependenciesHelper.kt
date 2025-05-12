@@ -194,21 +194,21 @@ class IntelliJPlatformDependenciesHelper(
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) {
-        val base = requestedIntelliJPlatforms.base
-        val type = typeProvider.map { it.toIntelliJPlatformType() }.orNull ?: base?.type
-        val version = versionProvider.orNull ?: base?.version
-        val useInstaller = (useInstallerProvider.orNull ?: base?.installer) != false
-
-        requireNotNull(type) { "The IntelliJ Platform dependency helper was called with no `type` value provided." }
-        requireNotNull(version) { "The IntelliJ Platform dependency helper was called with no `version` value provided." }
-
-        requestedIntelliJPlatforms[intellijPlatformConfigurationName] = RequestedIntelliJPlatform(
-            type = type,
-            version = version,
-            installer = useInstaller,
-        )
-
         configurations[configurationName].dependencies.addLater(cachedProvider {
+            val base = requestedIntelliJPlatforms.base
+            val type = typeProvider.map { it.toIntelliJPlatformType() }.orNull ?: base?.type
+            val version = versionProvider.orNull ?: base?.version
+            val useInstaller = (useInstallerProvider.orNull ?: base?.installer) != false
+
+            requireNotNull(type) { "The IntelliJ Platform dependency helper was called with no `type` value provided." }
+            requireNotNull(version) { "The IntelliJ Platform dependency helper was called with no `version` value provided." }
+
+            requestedIntelliJPlatforms[intellijPlatformConfigurationName] = RequestedIntelliJPlatform(
+                type = type,
+                version = version,
+                installer = useInstaller,
+            )
+
             when (type) {
                 IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
                 else -> when (useInstaller) {
@@ -1167,9 +1167,11 @@ class IntelliJPlatformDependenciesHelper(
         val id = "intellij-platform-test-runtime"
         val ide = ide(platformPath)
 
-        val classpath = ide.findPluginById("com.intellij")?.let {
-            it.classpath.paths.map { it.pathString }.toSet()
-        } ?: emptyList()
+        val classpath = ide.findPluginById("com.intellij")
+            ?.classpath
+            ?.paths
+            .orEmpty()
+            .map { it.pathString }.toSet()
 
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
         return dependencies.create(group, name, version)
