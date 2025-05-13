@@ -1,0 +1,8 @@
+<idea-plugin>
+    <id>plugin2</id>
+    <name>Plugin 2</name>
+    <description>Plugin 2</description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+</idea-plugin>
