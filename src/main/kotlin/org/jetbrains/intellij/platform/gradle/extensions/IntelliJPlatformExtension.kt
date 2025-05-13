@@ -830,6 +830,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     versionProvider = dependenciesHelper.provider { version },
                     useInstallerProvider = dependenciesHelper.provider { useInstaller },
                     configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                    intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
                 )
 
             /**

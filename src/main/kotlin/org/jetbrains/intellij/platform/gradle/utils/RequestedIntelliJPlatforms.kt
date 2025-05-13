@@ -47,12 +47,12 @@ class RequestedIntelliJPlatforms(private val providers: ProviderFactory, objects
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>
     ) = requireNotNull(map.compute(configurationName) { key, previous ->
-        check(previous == null) {
-            "The '$key' configuration already contains the following IntelliJ Platform dependency: ${previous?.get()}"
-        }
-
         when (key) {
             baseConfigurationName -> base.apply {
+                check(previous == null) {
+                    "The '$key' configuration already contains the following IntelliJ Platform dependency: ${previous?.get()}"
+                }
+
                 set(
                     RequestedIntelliJPlatform(
                         type = typeProvider.map { it.toIntelliJPlatformType() }.get(),
