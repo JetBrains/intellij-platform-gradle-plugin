@@ -47,6 +47,8 @@ import java.io.FileReader
 import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import kotlin.io.path.*
 
 /**
@@ -93,6 +95,10 @@ class IntelliJPlatformDependenciesHelper(
      * @see writeIvyModule
      */
     private val writtenIvyModules = ConcurrentHashMap<String, Any>()
+
+    private companion object {
+        val IVY_MODULE_WRITE_LOCK = ReentrantLock()
+    }
 
     /**
      * A thread-safe map that holds the list of all requested IntelliJ Platform variants within the project.
@@ -1293,13 +1299,15 @@ class IntelliJPlatformDependenciesHelper(
             .resolve(fileName)
 
         val newIvyModule = block()
-        ivyFile
-            .apply { parent.createDirectories() }
-            .apply { deleteIfExists() }
-            .createFile()
-            .writeText(XML {
-                indentString = "  "
-            }.encodeToString(newIvyModule))
+        IVY_MODULE_WRITE_LOCK.withLock {
+            ivyFile
+                .apply { parent.createDirectories() }
+                .apply { deleteIfExists() }
+                .createFile()
+                .writeText(XML {
+                    indentString = "  "
+                }.encodeToString(newIvyModule))
+        }
 
         writtenIvyModules[fileName] = when (artifactPath) {
             null -> newIvyModule
