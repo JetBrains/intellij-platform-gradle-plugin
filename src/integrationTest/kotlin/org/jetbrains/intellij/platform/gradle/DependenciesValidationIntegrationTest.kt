@@ -90,7 +90,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent()
 
         buildAndFail(DEPENDENCIES) {
-            assertContains("More than one IntelliJ Platform dependencies found.", output)
+            assertContains("The 'intellijPlatformDependency' configuration already contains the following IntelliJ Platform dependency: $intellijPlatformType-$intellijPlatformVersion (installer)", output)
         }
     }
 

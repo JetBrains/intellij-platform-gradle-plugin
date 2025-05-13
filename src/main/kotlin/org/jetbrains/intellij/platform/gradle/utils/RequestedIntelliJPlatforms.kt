@@ -46,7 +46,11 @@ class RequestedIntelliJPlatforms(private val providers: ProviderFactory, objects
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>
-    ) = map.computeIfAbsent(configurationName) { key ->
+    ) = requireNotNull(map.compute(configurationName) { key, previous ->
+        check(previous == null) {
+            "The '$key' configuration already contains the following IntelliJ Platform dependency: ${previous?.get()}"
+        }
+
         when (key) {
             baseConfigurationName -> base.apply {
                 set(
@@ -66,7 +70,7 @@ class RequestedIntelliJPlatforms(private val providers: ProviderFactory, objects
                 )
             }
         }
-    }
+    })
 
     /**
      * Retrieves the value associated with the given configuration name.
