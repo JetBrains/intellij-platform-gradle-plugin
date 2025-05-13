@@ -19,9 +19,12 @@ import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComp
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
-import org.jetbrains.intellij.platform.gradle.extensions.*
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
@@ -300,7 +303,13 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "Java Compiler used by Ant tasks",
             ) {
                 defaultDependencies {
-                    add(dependenciesHelper.createJavaCompiler())
+                    addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
+                        val platformPath = runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
+                        when (enabled && platformPath != null) {
+                            true -> dependenciesHelper.createJavaCompiler()
+                            false -> null
+                        }.let { listOfNotNull(it) }
+                    })
                 }
             }
 

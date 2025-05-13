@@ -1184,18 +1184,19 @@ class IntelliJPlatformDependenciesHelper(
         classifier = classifier,
         ext = extension,
     ).apply {
-        val requestedIntelliJPlatform = requestedIntelliJPlatforms[intellijPlatformConfigurationName]
-        val isNightly = requestedIntelliJPlatform.map { it.isNightly }.orElse(false)
+        val requestedIntelliJPlatform by lazy {
+            requestedIntelliJPlatforms[intellijPlatformConfigurationName].get()
+        }
 
         val resolvedVersion = when {
-            version == Constraints.CLOSEST_VERSION && isNightly.get() -> Constraints.PLATFORM_VERSION
+            version == Constraints.CLOSEST_VERSION && requestedIntelliJPlatform.isNightly -> Constraints.PLATFORM_VERSION
             else -> version
         }
 
         when (resolvedVersion) {
             Constraints.PLATFORM_VERSION ->
                 version {
-                    prefer(requestedIntelliJPlatform.get().version)
+                    prefer(requestedIntelliJPlatform.version)
                 }
 
             Constraints.CLOSEST_VERSION ->
