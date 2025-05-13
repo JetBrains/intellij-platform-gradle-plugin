@@ -97,7 +97,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * A thread-safe map that holds the list of all requested IntelliJ Platform variants within the project.
      */
-    private val requestedIntelliJPlatforms = ConcurrentHashMap<String, RequestedIntelliJPlatform>()
+    private val requestedIntelliJPlatforms = RequestedIntelliJPlatforms(providers, objects)
 
     /**
      * A thread-safe map that holds the paths associated with requested IntelliJ platform configurations.
@@ -133,7 +133,7 @@ class IntelliJPlatformDependenciesHelper(
     internal fun platformPath(configurationName: String) =
         requestedIntelliJPlatformPaths.computeIfAbsent(configurationName) {
             val configuration = configurations[configurationName].asLenient
-            val requestedPlatform = requestedIntelliJPlatforms[configurationName]
+            val requestedPlatform = requestedIntelliJPlatforms[configurationName].get()
             configuration.platformPath(requestedPlatform)
         }
 
@@ -193,27 +193,13 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) {
-        configurations[configurationName].dependencies.addLater(cachedProvider {
-            val base = requestedIntelliJPlatforms.base
-            val type = typeProvider.map { it.toIntelliJPlatformType() }.orNull ?: base?.type
-            val version = versionProvider.orNull ?: base?.version
-            val useInstaller = (useInstallerProvider.orNull ?: base?.installer) != false
-
-            requireNotNull(type) { "The IntelliJ Platform dependency helper was called with no `type` value provided." }
-            requireNotNull(version) { "The IntelliJ Platform dependency helper was called with no `version` value provided." }
-
-            requestedIntelliJPlatforms[intellijPlatformConfigurationName] = RequestedIntelliJPlatform(
-                type = type,
-                version = version,
-                installer = useInstaller,
-            )
-
-            when (type) {
-                IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-                else -> when (useInstaller) {
-                    true -> dependencies.createIntelliJPlatformInstaller(type, version)
-                    false -> dependencies.createIntelliJPlatform(type, version)
+    ) = configurations[configurationName].dependencies.addLater(
+        requestedIntelliJPlatforms.set(intellijPlatformConfigurationName, typeProvider, versionProvider, useInstallerProvider).map {
+            when (it.type) {
+                IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(it.version)
+                else -> when (it.installer) {
+                    true -> dependencies.createIntelliJPlatformInstaller(it.type, it.version)
+                    false -> dependencies.createIntelliJPlatform(it.type, it.version)
                 }
             }.apply(action).also {
                 //                val addDefaultDependenciesProvider = providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
@@ -248,7 +234,6 @@ class IntelliJPlatformDependenciesHelper(
                 //                })
             }
         })
-    }
 
     /**
      * A base method for adding a dependency on the IntelliJ Platform.
@@ -293,10 +278,11 @@ class IntelliJPlatformDependenciesHelper(
         val platformPath = resolveArtifactPath(localPath)
         val productInfo = platformPath.productInfo()
 
-        requestedIntelliJPlatforms[intellijPlatformConfigurationName] = RequestedIntelliJPlatform(
-            type = productInfo.productCode.toIntelliJPlatformType(),
-            version = productInfo.version,
-            installer = true,
+        requestedIntelliJPlatforms.set(
+            configurationName = intellijPlatformConfigurationName,
+            typeProvider = provider { productInfo.productCode.toIntelliJPlatformType() },
+            versionProvider = provider { productInfo.version },
+            useInstallerProvider = provider { true },
         )
 
         dependencies.createIntelliJPlatformLocal(platformPath).apply(action)
@@ -1199,18 +1185,17 @@ class IntelliJPlatformDependenciesHelper(
         ext = extension,
     ).apply {
         val requestedIntelliJPlatform = requestedIntelliJPlatforms[intellijPlatformConfigurationName]
-        val isNightly by lazy { requestedIntelliJPlatform?.isNightly ?: false }
+        val isNightly = requestedIntelliJPlatform.map { it.isNightly }.orElse(false)
 
         val resolvedVersion = when {
-            version == Constraints.CLOSEST_VERSION && isNightly -> Constraints.PLATFORM_VERSION
+            version == Constraints.CLOSEST_VERSION && isNightly.get() -> Constraints.PLATFORM_VERSION
             else -> version
         }
 
         when (resolvedVersion) {
             Constraints.PLATFORM_VERSION ->
                 version {
-                    requireNotNull(requestedIntelliJPlatform)
-                    prefer(requestedIntelliJPlatform.version)
+                    prefer(requestedIntelliJPlatform.get().version)
                 }
 
             Constraints.CLOSEST_VERSION ->
@@ -1411,32 +1396,7 @@ class IntelliJPlatformDependenciesHelper(
         else -> throw IllegalArgumentException("Invalid argument type: '${path.javaClass}'. Supported types: String, File, Path, or Directory.")
     }.let { Path(it) }
 
-    private val ConcurrentHashMap<String, RequestedIntelliJPlatform>.base
-        get() = get(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
-
     //</editor-fold>
 }
 
 internal typealias DependencyAction = (Dependency.() -> Unit)
-
-data class RequestedIntelliJPlatform(
-    val type: IntelliJPlatformType,
-    val version: String,
-    val installer: Boolean,
-) {
-    private val installerLabel = when (installer) {
-        true -> "installer"
-        else -> "non-installer"
-    }
-
-    /**
-     * Indicates whether the current IntelliJ Platform is a nightly build.
-     *
-     * This variable checks if the base version matches a specific pattern
-     * commonly used for nightly or snapshot builds, such as "123-SNAPSHOT" or "*-TRUNK-SNAPSHOT".
-     */
-    val isNightly
-        get() = "(^|-)\\d{3}-SNAPSHOT|.*TRUNK-SNAPSHOT$".toRegex().matches(version)
-
-    override fun toString() = "$type-$version ($installerLabel)"
-}
