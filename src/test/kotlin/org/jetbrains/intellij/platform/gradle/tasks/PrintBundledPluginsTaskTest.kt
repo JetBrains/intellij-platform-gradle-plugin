@@ -16,74 +16,74 @@ class PrintBundledPluginsTaskTest : IntelliJPluginTestBase() {
                 """
                 > Task :${Tasks.PRINT_BUNDLED_PLUGINS}
                 Bundled plugins for IntelliJ IDEA 2022.3.3 (223.8836.41):
-                AntSupport
-                ByteCodeViewer
-                Coverage
-                DevKit
-                Git4Idea
-                JUnit
-                Lombook Plugin
-                PerforceDirectPlugin
-                Subversion
-                TestNG-J
-                XPathView
-                XSLT-Debugger
-                com.android.tools.design
-                com.android.tools.idea.smali
-                com.intellij
-                com.intellij.completion.ml.ranking
-                com.intellij.configurationScript
-                com.intellij.copyright
+                AntSupport (Ant)
+                ByteCodeViewer (Bytecode Viewer)
+                Coverage (Code Coverage for Java)
+                DevKit (Plugin DevKit)
+                Git4Idea (Git)
+                JUnit (JUnit)
+                Lombook Plugin (Lombok)
+                PerforceDirectPlugin (Perforce Helix Core)
+                Subversion (Subversion)
+                TestNG-J (TestNG)
+                XPathView (XPathView + XSLT)
+                XSLT-Debugger (XSLT Debugger)
+                com.android.tools.design (Android Design Tools)
+                com.android.tools.idea.smali (Smali Support)
+                com.intellij (IDEA CORE)
+                com.intellij.completion.ml.ranking (Machine Learning Code Completion)
+                com.intellij.configurationScript (Configuration Script)
+                com.intellij.copyright (Copyright)
                 com.intellij.dev
-                com.intellij.gradle
-                com.intellij.java
-                com.intellij.java-i18n
-                com.intellij.java.ide
-                com.intellij.marketplace
-                com.intellij.platform.images
-                com.intellij.plugins.eclipsekeymap
-                com.intellij.plugins.netbeanskeymap
-                com.intellij.plugins.visualstudiokeymap
-                com.intellij.properties
-                com.intellij.searcheverywhere.ml
-                com.intellij.settingsSync
-                com.intellij.tasks
+                com.intellij.gradle (Gradle)
+                com.intellij.java (Java)
+                com.intellij.java-i18n (Java Internationalization)
+                com.intellij.java.ide (Java IDE Customization)
+                com.intellij.marketplace (JetBrains Marketplace Licensing Support)
+                com.intellij.platform.images (Images)
+                com.intellij.plugins.eclipsekeymap (Eclipse Keymap)
+                com.intellij.plugins.netbeanskeymap (NetBeans Keymap)
+                com.intellij.plugins.visualstudiokeymap (Visual Studio Keymap)
+                com.intellij.properties (Properties)
+                com.intellij.searcheverywhere.ml (Machine Learning in Search Everywhere)
+                com.intellij.settingsSync (Settings Sync)
+                com.intellij.tasks (Task Management)
                 com.intellij.tracing.ide
-                com.intellij.uiDesigner
-                com.jetbrains.codeWithMe
-                com.jetbrains.packagesearch.intellij-plugin
-                com.jetbrains.projector.libs
-                com.jetbrains.sh
-                com.jetbrains.space
-                hg4idea
-                intellij.indexing.shared.core
-                intellij.webp
-                org.editorconfig.editorconfigjetbrains
-                org.intellij.groovy
-                org.intellij.intelliLang
-                org.intellij.plugins.markdown
-                org.intellij.qodana
-                org.jetbrains.android
-                org.jetbrains.debugger.streams
-                org.jetbrains.idea.eclipse
-                org.jetbrains.idea.gradle.dsl
-                org.jetbrains.idea.maven
-                org.jetbrains.idea.maven.model
-                org.jetbrains.idea.maven.server.api
-                org.jetbrains.idea.reposearch
-                org.jetbrains.java.decompiler
-                org.jetbrains.kotlin
-                org.jetbrains.plugins.github
-                org.jetbrains.plugins.gradle
-                org.jetbrains.plugins.gradle.dependency.updater
-                org.jetbrains.plugins.gradle.maven
-                org.jetbrains.plugins.javaFX
-                org.jetbrains.plugins.terminal
-                org.jetbrains.plugins.textmate
-                org.jetbrains.plugins.yaml
-                org.toml.lang
-                tanvd.grazi
-                training
+                com.intellij.uiDesigner (UI Designer)
+                com.jetbrains.codeWithMe (Code With Me)
+                com.jetbrains.packagesearch.intellij-plugin (Package Search)
+                com.jetbrains.projector.libs (Projector Libraries for Code With Me and Remote Development)
+                com.jetbrains.sh (Shell Script)
+                com.jetbrains.space (Space)
+                hg4idea (Mercurial)
+                intellij.indexing.shared.core (Shared Indexes)
+                intellij.webp (WebP Support)
+                org.editorconfig.editorconfigjetbrains (EditorConfig)
+                org.intellij.groovy (Groovy)
+                org.intellij.intelliLang (IntelliLang)
+                org.intellij.plugins.markdown (Markdown)
+                org.intellij.qodana (Qodana)
+                org.jetbrains.android (Android)
+                org.jetbrains.debugger.streams (Java Stream Debugger)
+                org.jetbrains.idea.eclipse (Eclipse Interoperability)
+                org.jetbrains.idea.gradle.dsl (Gradle DSL API)
+                org.jetbrains.idea.maven (Maven)
+                org.jetbrains.idea.maven.model (JetBrains maven model api classes)
+                org.jetbrains.idea.maven.server.api (Maven server api classes)
+                org.jetbrains.idea.reposearch (JetBrains Repository Search)
+                org.jetbrains.java.decompiler (Java Bytecode Decompiler)
+                org.jetbrains.kotlin (Kotlin)
+                org.jetbrains.plugins.github (GitHub)
+                org.jetbrains.plugins.gradle (Gradle-Java)
+                org.jetbrains.plugins.gradle.dependency.updater (Gradle Dependency Updater Implementation)
+                org.jetbrains.plugins.gradle.maven (Gradle-Maven)
+                org.jetbrains.plugins.javaFX (JavaFX)
+                org.jetbrains.plugins.terminal (Terminal)
+                org.jetbrains.plugins.textmate (TextMate Bundles)
+                org.jetbrains.plugins.yaml (YAML)
+                org.toml.lang (Toml)
+                tanvd.grazi (Grazie)
+                training (IDE Features Trainer)
                 """.trimIndent(),
                 output,
             )

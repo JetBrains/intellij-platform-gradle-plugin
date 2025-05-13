@@ -4,10 +4,14 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.services.IdesManagerService
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 
 /**
@@ -16,12 +20,18 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 @UntrackedTask(because = "Prints output")
 abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionAware {
 
+    @get:Internal
+    abstract val idesManager: Property<IdesManagerService>
+
     @TaskAction
     fun printBundledPlugins() {
         println("Bundled plugins for ${productInfo.name} ${productInfo.version} (${productInfo.buildNumber}):")
-        productInfo.bundledPlugins.forEach {
-            println(it)
-        }
+        val ide = idesManager.get().resolve(platformPath)
+
+        productInfo.bundledPlugins.asSequence()
+            .mapNotNull { ide.findPluginById(it) }
+            .map { "${it.pluginId}" + it.pluginName?.run { " ($this)" }.orEmpty() }
+            .forEach { println(it) }
     }
 
     init {
@@ -31,6 +41,8 @@ abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionA
 
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<PrintBundledPluginsTask>(Tasks.PRINT_BUNDLED_PLUGINS)
+            project.registerTask<PrintBundledPluginsTask>(Tasks.PRINT_BUNDLED_PLUGINS) {
+                idesManager.convention(project.gradle.registerClassLoaderScopedBuildService(IdesManagerService::class))
+            }
     }
 }

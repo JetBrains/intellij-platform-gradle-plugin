@@ -7,6 +7,7 @@
 - Add `compatiblePlugin(id)`/`compatiblePlugins(ids)` dependency helper for resolving plugins from JetBrains Marketplace in the latest compatible versions.
 - Add `TestFrameworkType.Plugin.CSS` and `TestFrameworkType.Plugin.XML` to support test development requiring XML or CSS language.
 - Warn when Plugin Verifier is about to run verification against more than five IDEs.
+- Make the `printBundledPlugins` task print bundled plugin names next to IDs. JetBrains/intellij-platform-gradle-plugin#1674
 
 ### Changed
 
