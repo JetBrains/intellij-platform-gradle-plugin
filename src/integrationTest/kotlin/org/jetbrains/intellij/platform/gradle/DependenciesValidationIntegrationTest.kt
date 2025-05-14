@@ -6,7 +6,6 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 private const val DEPENDENCIES = "dependencies"
@@ -395,7 +394,6 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         }
     }
 
-    @Ignore("Using RD most likely results in OOM on CI")
     @Test
     fun `do not fail when default IntelliJ Platform dependencies are absent in old IntelliJ Platform releases`() {
         val properties = defaultProjectProperties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)
