@@ -810,7 +810,8 @@ class IntelliJPlatformDependenciesHelper(
      */
     private fun DependencyHandler.createIntelliJPlatformBundledPlugin(platformPath: Path, id: String): Dependency {
         val productInfo = platformPath.productInfo()
-        val plugin = ide(platformPath).findPluginById(id)
+        val ide = ide(platformPath)
+        val plugin = ide.findPluginById(id) ?: ide.findPluginByModule(id)
 
         requireNotNull(plugin) {
             val unresolvedPluginId = when (id) {

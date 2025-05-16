@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Search for a bundled plugin using module alias if not resolved by ID
+
 ## [2.6.0] - 2025-05-14
 
 ### Added
