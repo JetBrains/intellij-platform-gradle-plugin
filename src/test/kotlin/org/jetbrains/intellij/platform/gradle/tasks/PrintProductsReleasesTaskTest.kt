@@ -15,6 +15,7 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
             assertContains(
                 """
                 > Task :${Tasks.PRINT_PRODUCTS_RELEASES}
+                IC-252.13776.59
                 IC-2025.1.1
                 IC-2024.3.5
                 IC-2024.2.6
