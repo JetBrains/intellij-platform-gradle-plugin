@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.6.0] - 2025-05-14
+
 ### Added
 
 - Add `compatiblePlugin(id)`/`compatiblePlugins(ids)` dependency helper for resolving plugins from JetBrains Marketplace in the latest compatible versions.
