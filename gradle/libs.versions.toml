@@ -4,7 +4,7 @@ intellijStructure = "3.305"
 intellijPluginRepositoryRestClient = "2.0.46"
 kotlinxSerialization = "1.6.3"
 okhttp = "4.12.0"
-retrofit = "2.11.0"
+retrofit = "3.0.0"
 undertow = "2.3.18.Final"
 xmlutil = "0.86.3"
 
