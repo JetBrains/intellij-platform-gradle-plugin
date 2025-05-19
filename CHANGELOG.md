@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add missing `org.jetbrains.kotlin.platform.type=jvm` for custom test runtime classpath configuration
+
 ### Changed
 
 - Search for a bundled plugin using module alias if not resolved by ID

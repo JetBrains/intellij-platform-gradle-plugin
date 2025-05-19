@@ -212,6 +212,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                         .attribute(Attributes.extracted, true)
                         .attribute(Attributes.collected, true)
 
+                    attributes {
+                        attributes.attribute(Attributes.kotlinJPlatformType, "jvm")
+                    }
+
                     extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH])
                     extendsFrom(customIntellijPlatformTestDependenciesConfiguration)
                 }
