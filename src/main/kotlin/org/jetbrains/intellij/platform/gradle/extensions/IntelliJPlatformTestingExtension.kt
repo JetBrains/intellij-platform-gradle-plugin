@@ -185,6 +185,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     description = "Custom IntelliJ Platform Test Dependencies"
                 ) {
                     extendsFrom(
+                        project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES],
                         customIntellijPlatformTestPluginConfiguration,
                         customIntellijPlatformTestBundledPluginsConfiguration,
                         customIntellijPlatformTestBundledModulesConfiguration,

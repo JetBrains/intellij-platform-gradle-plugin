@@ -6,6 +6,10 @@
 
 - Search for a bundled plugin using module alias if not resolved by ID
 
+### Fixed
+
+- Test framework dependency is not provided to a custom `testIde` task JetBrains/intellij-platform-gradle-plugin#1945
+
 ## [2.6.0] - 2025-05-14
 
 ### Added
