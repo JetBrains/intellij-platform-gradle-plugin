@@ -779,6 +779,23 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     )
 
     /**
+     * Adds a local dependency on a local IntelliJ Platform instance.
+     *
+     * @param localPath The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
+     */
+    internal fun customLocal(
+        localPath: Provider<*>,
+        configurationName: String,
+        intellijPlatformConfigurationName: String,
+    ) = dependenciesHelper.addIntelliJPlatformLocalDependency(
+        localPathProvider = localPath,
+        configurationName = configurationName,
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName,
+    )
+
+    /**
      * Adds a dependency on JetBrains Runtime.
      * The version is calculated using the current IntelliJ Platform.
      */

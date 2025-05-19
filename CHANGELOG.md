@@ -13,6 +13,7 @@
 ### Fixed
 
 - Test framework dependency is not provided to a custom `testIde` task JetBrains/intellij-platform-gradle-plugin#1945
+- Respect the custom IntelliJ Platform configuration name when creating a custom task using the local IntelliJ Platform path
 
 ## [2.6.0] - 2025-05-14
 

@@ -70,9 +70,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     attributes {
                         attribute(Attributes.extracted, true)
                     }
-                    dependenciesExtension.local(
+                    dependenciesExtension.customLocal(
                         localPath = localPath,
                         configurationName = this@create.name,
+                        intellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix,
                     )
                 }
 
