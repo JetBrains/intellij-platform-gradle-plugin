@@ -36,6 +36,7 @@ import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSour
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.services.IdesManagerService
+import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatformsService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
@@ -75,6 +76,7 @@ class IntelliJPlatformDependenciesHelper(
     private val log = Logger(javaClass)
     private val pluginManager by lazy { IdePluginManager.createManager() }
     private val pluginRepository by lazy { PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE) }
+    private val requestedIntelliJPlatforms by lazy { gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class).get() }
 
     /**
      * Key is an Ivy module XML filename.
@@ -99,11 +101,6 @@ class IntelliJPlatformDependenciesHelper(
     private companion object {
         val IVY_MODULE_WRITE_LOCK = ReentrantLock()
     }
-
-    /**
-     * A thread-safe map that holds the list of all requested IntelliJ Platform variants within the project.
-     */
-    private val requestedIntelliJPlatforms = RequestedIntelliJPlatforms(providers, objects)
 
     /**
      * A thread-safe map that holds the paths associated with requested IntelliJ platform configurations.

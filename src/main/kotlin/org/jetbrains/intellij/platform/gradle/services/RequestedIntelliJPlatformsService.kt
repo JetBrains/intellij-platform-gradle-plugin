@@ -1,40 +1,33 @@
 // Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.utils
+package org.jetbrains.intellij.platform.gradle.services
 
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
 private const val baseConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY
 
-/**
- * Manages requested IntelliJ Platform configurations by mapping configuration names
-to corresponding platform definitions.
- *
- * This class allows dynamic creation and retrieval of `RequestedIntelliJPlatform` instances
- * based on configuration names, platform types, versions, and installer settings.
- *
- * @constructor Initializes the manager with the required provider and object factories
- * to support configuration and property management.
- *
- * @param providers An instance of `ProviderFactory` to create lazy-evaluated providers.
- * @param objects An instance of `ObjectFactory` to create property objects.
- */
-class RequestedIntelliJPlatforms(private val providers: ProviderFactory, objects: ObjectFactory) {
+abstract class RequestedIntelliJPlatformsService @Inject constructor(
+    private val objectFactory: ObjectFactory,
+    private val providerFactory: ProviderFactory,
+) : BuildService<BuildServiceParameters.None> {
 
     private val map = ConcurrentHashMap<String, Provider<RequestedIntelliJPlatform>>()
-    private val base = objects.property<RequestedIntelliJPlatform>()
+    private val base = objectFactory.property<RequestedIntelliJPlatform>()
 
     /**
      * Sets the configuration for a requested IntelliJ Platform by associating the provided configuration name
      * with the corresponding platform parameters, including type, version, and installer settings.
-     * If some of the parameters are not specified, the [base] configuration is used.
+     * If some parameters are not specified, the [base] configuration is used.
      *
      * @param configurationName The name of the configuration to set.
      * @param typeProvider A provider that supplies the IntelliJ Platform type for the given configuration.
@@ -62,7 +55,7 @@ class RequestedIntelliJPlatforms(private val providers: ProviderFactory, objects
                 )
             }
 
-            else -> providers.provider {
+            else -> providerFactory.provider {
                 RequestedIntelliJPlatform(
                     type = typeProvider.map { it.toIntelliJPlatformType() }.orElse(base.map { it.type }).get(),
                     version = versionProvider.orElse(base.map { it.version }).get(),
