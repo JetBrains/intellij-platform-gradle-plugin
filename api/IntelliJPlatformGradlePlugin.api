@@ -2307,6 +2307,149 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfoKt {
 	public static final fun validateSupportedVersion (Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;)V
 }
 
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$Companion;
+	public fun <init> ()V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;)V
+	public synthetic fun <init> (Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;
+	public final fun component2 ()Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;
+	public final fun copy (Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/ProductModules;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBundledPlugins ()Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;
+	public final fun getInclude ()Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getModules ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getFromModules ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/models/ProductRelease {
 	public fun <init> (Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Ljava/lang/String;)V
 	public final fun component1 ()Ljava/lang/String;

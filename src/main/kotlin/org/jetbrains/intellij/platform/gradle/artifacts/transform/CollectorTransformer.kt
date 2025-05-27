@@ -170,15 +170,18 @@ internal fun collectModuleDescriptorJars(
 ): List<Path> = runCatching {
     val moduleDescriptorsFile = ModuleDescriptorsPathResolver(platformPath).resolve()
     val jarFile = JarFile(moduleDescriptorsFile.toFile())
+
     val rootModuleName = productInfo.run {
-        when {
-            architecture == null -> launch.first()
+        when (architecture) {
+            null -> launch.first()
             else -> launchFor(architecture)
         }
-    }.additionalJvmArguments.run {
+    }.additionalJvmArguments.let { args ->
         val prefix = "-Dintellij.platform.root.module="
-        val name = find { it.startsWith(prefix) }?.removePrefix(prefix)
-        requireNotNull(name)
+        args
+            .find { it.startsWith(prefix) }
+            ?.removePrefix(prefix)
+            .let { requireNotNull(it) }
     }
 
     val modules = jarFile
@@ -187,25 +190,34 @@ internal fun collectModuleDescriptorJars(
         .filter { it.name.endsWith(".xml") }
         .map { jarFile.getInputStream(it) }
         .mapNotNull { decode<ModuleDescriptor>(it) }
-        .map { it.name to it }
-        .toMap()
+        .associateBy { it.name }
 
     val visitedModules = mutableSetOf<String>()
-    fun collectResourcesFromModule(moduleName: String): List<Path> {
+
+    fun collectResourcesFromModule(moduleName: String): Collection<Path> {
         if (moduleName in visitedModules) {
             return emptyList()
         }
 
         visitedModules += moduleName
-
         val module = modules[moduleName] ?: return emptyList()
         val moduleResources = module.path?.let { platformPath.resolve(it).takeIfExists() }
         val dependencyResources = module.dependencies
             .map { it.name }
             .flatMap { collectResourcesFromModule(it) }
 
-        return listOfNotNull(moduleResources) + dependencyResources
+        return (listOfNotNull(moduleResources) + dependencyResources).toSet()
     }
 
-    return collectResourcesFromModule(rootModuleName)
+    val rootModule = requireNotNull(modules[rootModuleName]?.path)
+    val rootModuleJar = JarFile(platformPath.resolve(rootModule).toFile())
+
+    val productModules = rootModuleJar.getEntry("META-INF/$rootModuleName/product-modules.xml")
+        ?.let { rootModuleJar.getInputStream(it) }
+        ?.let { decode<ProductModules>(it) }
+
+    val productModuleJars = productModules?.include?.fromModules.orEmpty()
+        .flatMap { collectResourcesFromModule(it.value) }
+
+    collectResourcesFromModule(rootModuleName) + productModuleJars
 }.getOrDefault(emptyList())

@@ -33,6 +33,7 @@ private inline fun <reified T> obtainStringFormat(): StringFormat {
         JetBrainsIdesReleases::class,
         MavenMetadata::class,
         ModuleDescriptor::class,
+        ProductModules::class,
         -> xml
 
         ProductInfo::class,
