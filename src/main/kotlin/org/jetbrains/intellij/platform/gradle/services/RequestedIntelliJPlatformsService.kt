@@ -10,6 +10,7 @@ import org.gradle.api.services.BuildServiceParameters
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.ProductMode
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -33,12 +34,14 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
      * @param typeProvider A provider that supplies the IntelliJ Platform type for the given configuration.
      * @param versionProvider A provider that supplies the version of the IntelliJ Platform for the given configuration.
      * @param useInstallerProvider A provider that specifies whether to use the installer for the given configuration.
+     * @param productModeProvider A provider that specifies the product mode for the given configuration.
      */
     fun set(
         configurationName: String,
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
-        useInstallerProvider: Provider<Boolean>
+        useInstallerProvider: Provider<Boolean>,
+        productModeProvider: Provider<ProductMode>,
     ) = requireNotNull(map.compute(configurationName) { key, previous ->
         when (key) {
             baseConfigurationName -> base.apply {
@@ -51,6 +54,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                         type = typeProvider.map { it.toIntelliJPlatformType() }.get(),
                         version = versionProvider.get(),
                         installer = useInstallerProvider.get(),
+                        productMode = productModeProvider.get(),
                     )
                 )
             }
@@ -60,6 +64,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                     type = typeProvider.map { it.toIntelliJPlatformType() }.orElse(base.map { it.type }).get(),
                     version = versionProvider.orElse(base.map { it.version }).get(),
                     installer = useInstallerProvider.orElse(base.map { it.installer }).get(),
+                    productMode = productModeProvider.orElse(base.map { it.productMode }).get(),
                 )
             }
         }
@@ -86,11 +91,13 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
  * @property type Defines the IntelliJ Platform type, such as IntelliJ IDEA, PyCharm, or other JetBrains IDEs.
  * @property version Specifies the version of the IntelliJ Platform to be used.
  * @property installer Indicates if the platform should include an installer.
+ * @property productMode Indicates the mode in which the platform is being used.
  */
 data class RequestedIntelliJPlatform(
     val type: IntelliJPlatformType,
     val version: String,
     val installer: Boolean,
+    val productMode: ProductMode,
 ) {
     private val installerLabel = when (installer) {
         true -> "installer"

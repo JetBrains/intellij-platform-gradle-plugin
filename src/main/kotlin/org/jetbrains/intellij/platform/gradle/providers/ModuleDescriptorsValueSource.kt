@@ -8,10 +8,7 @@ import org.gradle.api.provider.ValueSourceParameters
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectBundledPluginsJars
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectIntelliJPlatformJars
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
-import org.jetbrains.intellij.platform.gradle.models.Coordinates
-import org.jetbrains.intellij.platform.gradle.models.ModuleDescriptor
-import org.jetbrains.intellij.platform.gradle.models.decode
-import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.util.jar.JarFile
@@ -57,7 +54,7 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             .filter { it.name.endsWith(".xml") }
             .map { jarFile.getInputStream(it) }
             .mapNotNull { decode<ModuleDescriptor>(it) }
-            .map { it.key to Coordinates(it.groupId, it.artifactId) }
+            .map { it.path to Coordinates(it.groupId, it.artifactId) }
             .groupBy(keySelector = { it.first }, valueTransform = { it.second })
             .filterKeys { collectedJars.contains(it) }
             .values
@@ -65,9 +62,6 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             .toSet()
             .plus(explicitExclusions)
     }
-
-    private inline val ModuleDescriptor.key
-        get() = resources?.resourceRoot?.path?.removePrefix("../")
 
     private inline val ModuleDescriptor.groupId
         get() = name.split('.').take(2).joinToString(".", prefix = "com.jetbrains.")

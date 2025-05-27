@@ -30,3 +30,6 @@ data class ModuleDescriptor(
         )
     }
 }
+
+internal inline val ModuleDescriptor.path
+    get() = resources?.resourceRoot?.path?.removePrefix("../")

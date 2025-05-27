@@ -29,10 +29,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.models.*
-import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
-import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
-import org.jetbrains.intellij.platform.gradle.providers.ModuleDescriptorsValueSource
-import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
+import org.jetbrains.intellij.platform.gradle.providers.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.services.IdesManagerService
@@ -76,7 +73,11 @@ class IntelliJPlatformDependenciesHelper(
     private val log = Logger(javaClass)
     private val pluginManager by lazy { IdePluginManager.createManager() }
     private val pluginRepository by lazy { PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE) }
-    private val requestedIntelliJPlatforms by lazy { gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class).get() }
+    private val requestedIntelliJPlatforms by lazy {
+        gradle.registerClassLoaderScopedBuildService(
+            RequestedIntelliJPlatformsService::class
+        ).get()
+    }
 
     /**
      * Key is an Ivy module XML filename.
@@ -193,16 +194,24 @@ class IntelliJPlatformDependenciesHelper(
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>,
+        productModeProvider: Provider<ProductMode>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
-        requestedIntelliJPlatforms.set(intellijPlatformConfigurationName, typeProvider, versionProvider, useInstallerProvider).map {
-            when (it.type) {
-                IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(it.version)
-                else -> when (it.installer) {
-                    true -> dependencies.createIntelliJPlatformInstaller(it.type, it.version)
-                    false -> dependencies.createIntelliJPlatform(it.type, it.version)
+        requestedIntelliJPlatforms.set(
+            intellijPlatformConfigurationName,
+            typeProvider,
+            versionProvider,
+            useInstallerProvider,
+            productModeProvider,
+        ).map {
+            when {
+                it.productMode == ProductMode.FRONTEND -> dependencies.createJetBrainsClient(it.type, it.version)
+                it.type == IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(it.version)
+                else -> when {
+                    it.installer -> dependencies.createIntelliJPlatformInstaller(it.type, it.version)
+                    else -> dependencies.createIntelliJPlatform(it.type, it.version)
                 }
             }.apply(action).also {
                 //                val addDefaultDependenciesProvider = providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
@@ -283,9 +292,10 @@ class IntelliJPlatformDependenciesHelper(
 
         requestedIntelliJPlatforms.set(
             configurationName = intellijPlatformConfigurationName,
-            typeProvider = provider { productInfo.productCode.toIntelliJPlatformType() },
+            typeProvider = provider { productInfo.type },
             versionProvider = provider { productInfo.version },
             useInstallerProvider = provider { true },
+            productModeProvider = provider { ProductMode.MONOLITH },
         )
 
         dependencies.createIntelliJPlatformLocal(platformPath).apply(action)
@@ -651,7 +661,7 @@ class IntelliJPlatformDependenciesHelper(
     })
 
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
-        providers.of(ProductReleasesValueSource::class.java) {
+        providers.of(ProductReleasesValueSource::class) {
             parameters.jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
             parameters.androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
 
@@ -687,6 +697,42 @@ class IntelliJPlatformDependenciesHelper(
             classifier = classifier,
             ext = extension,
             version = version,
+        )
+    }
+
+    /**
+     * Creates JetBrains Client dependency.
+     *
+     * @param version JetBrains Client version.
+     */
+    private fun DependencyHandler.createJetBrainsClient(type: IntelliJPlatformType, version: String): Dependency {
+        val jetBrainsClientType = requireNotNull(IntelliJPlatformType.JetBrainsClient.installer)
+
+        val buildNumber = providers.of(ProductReleaseBuildValueSource::class) {
+            parameters.productsReleasesCdnBuildsUrl = providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
+            parameters.version = version
+            parameters.type = type
+        }.get()
+
+        val (extension, classifier) = with(OperatingSystem.current()) {
+            val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
+            when {
+                isLinux -> ArtifactType.TAR_GZ to arch
+                isWindows -> ArtifactType.ZIP to when {
+                    arch == null -> "jbr.win"
+                    else -> "$arch.jbr.win"
+                }
+                isMacOsX -> ArtifactType.SIT to arch
+                else -> throw GradleException("Unsupported operating system: $name")
+            }
+        }.let { (type, classifier) -> type.toString() to classifier }
+
+        return create(
+            group = jetBrainsClientType.groupId,
+            name = jetBrainsClientType.artifactId,
+            version = buildNumber,
+            ext = extension,
+            classifier = classifier,
         )
     }
 
@@ -760,11 +806,11 @@ class IntelliJPlatformDependenciesHelper(
         val localProductInfo = artifactPath.productInfo()
         localProductInfo.validateSupportedVersion()
 
-        val type = localProductInfo.productCode.toIntelliJPlatformType()
+        val type = localProductInfo.type
         // It is crucial to use the IDE type + build number to the version.
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
-        val version = localProductInfo.getFullVersion()
+        val version = localProductInfo.fullVersion
 
         writeIvyModule(Dependencies.LOCAL_IDE_GROUP, type.code, version, artifactPath) {
             IvyModule(
@@ -838,7 +884,7 @@ class IntelliJPlatformDependenciesHelper(
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
         // Should be the same as [collectDependencies]
-        val version = productInfo.getFullVersion()
+        val version = productInfo.fullVersion
 
         writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version, artifactPath) {
             IvyModule(
@@ -948,7 +994,7 @@ class IntelliJPlatformDependenciesHelper(
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
         val productInfo = platformPath.productInfo()
-        val version = productInfo.getFullVersion()
+        val version = productInfo.fullVersion
         val artifacts = classPath.flatMap {
             platformPath.resolve(it).toIvyArtifacts(metadataRulesModeProvider, platformPath)
         }
@@ -990,7 +1036,7 @@ class IntelliJPlatformDependenciesHelper(
         // It is crucial to use the IDE type + build number to the version.
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
-        val version = productInfo.getFullVersion() + "-" + (plugin.pluginVersion ?: "0.0.0")
+        val version = productInfo.fullVersion + "-" + (plugin.pluginVersion ?: "0.0.0")
         val name = plugin.pluginId ?: artifactPath.name
 
         writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version, artifactPath) {

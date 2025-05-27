@@ -10,6 +10,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
+import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
@@ -26,6 +27,7 @@ import kotlin.io.path.pathString
  * @property versionSuffix The suffix of the version, like "EAP".
  * @property buildNumber The build number of the product, like "232.8660.185".
  * @property productCode The product code, like "IU".
+ * @property envVarBaseName The base name for environment variables.
  * @property dataDirectoryName The directory name of the product data.
  * @property svgIconPath The path to the SVG icon of the product.
  * @property productVendor The vendor of the product.
@@ -42,6 +44,7 @@ data class ProductInfo(
     val versionSuffix: String? = null,
     val buildNumber: String = "",
     val productCode: String = "",
+    val envVarBaseName: String? = null,
     val dataDirectoryName: String? = null,
     val svgIconPath: String? = null,
     val productVendor: String? = null,
@@ -64,6 +67,10 @@ data class ProductInfo(
      * @property startupWmClass The startup window class (WM_CLASS) for the application.
      * @property bootClassPathJarNames The names of the JAR files to be included in the boot classpath.
      * @property additionalJvmArguments Additional JVM arguments.
+     * @property mainClass The main class to be executed.
+     * @property envVarBaseName The base name for environment variables.
+     * @property dataDirectoryName The directory name for data storage.
+     * @property customCommands The list of custom command configurations.
      */
     @Serializable
     data class Launch(
@@ -75,7 +82,33 @@ data class ProductInfo(
         val startupWmClass: String? = null,
         val bootClassPathJarNames: List<String> = mutableListOf(),
         val additionalJvmArguments: List<String> = mutableListOf(),
+        val mainClass: String? = null,
+        val envVarBaseName: String? = null,
+        val dataDirectoryName: String? = null,
+        val customCommands: List<CustomCommand> = mutableListOf(),
     ) : java.io.Serializable {
+
+        /**
+         * Represents a custom command configuration.
+         *
+         * @property commands The list of command names.
+         * @property vmOptionsFilePath The path to the file containing VM options.
+         * @property bootClassPathJarNames The names of the JAR files to be included in the boot classpath.
+         * @property additionalJvmArguments Additional JVM arguments.
+         * @property mainClass The main class to be executed.
+         * @property envVarBaseName The base name for environment variables.
+         * @property dataDirectoryName The directory name for data storage.
+         */
+        @Serializable
+        data class CustomCommand(
+            val commands: List<String> = mutableListOf(),
+            val vmOptionsFilePath: String? = null,
+            val bootClassPathJarNames: List<String> = mutableListOf(),
+            val additionalJvmArguments: List<String> = mutableListOf(),
+            val mainClass: String? = null,
+            val envVarBaseName: String? = null,
+            val dataDirectoryName: String? = null,
+        ) : java.io.Serializable
 
         /**
          * Represents the different operating systems.
@@ -111,6 +144,13 @@ data class ProductInfo(
         val value: String? = null,
     ) : java.io.Serializable
 
+    /**
+     * Represents a layout item in the product structure.
+     *
+     * @property name The name of the layout item.
+     * @property kind The kind of the layout item.
+     * @property classPath The list of class paths associated with the layout item.
+     */
     @Serializable
     data class LayoutItem(
         val name: String,
@@ -118,6 +158,14 @@ data class ProductInfo(
         val classPath: List<String> = mutableListOf(),
     ) : java.io.Serializable
 
+    /**
+     * Represents the different kinds of layout items.
+     *
+     * - plugin: A regular plugin.
+     * - pluginAlias: An alias for a plugin.
+     * - productModuleV2: A product module (version 2).
+     * - moduleV2: A regular module (version 2).
+     */
     @Suppress("EnumEntryName", "unused")
     @Serializable
     enum class LayoutItemKind {
@@ -126,7 +174,11 @@ data class ProductInfo(
 }
 
 /** [ProductInfo.productCode] + "-" + [ProductInfo.buildNumber] */
-fun ProductInfo.getFullVersion() = "$productCode-$buildNumber"
+val ProductInfo.fullVersion
+    get() = "$productCode-$buildNumber"
+
+val ProductInfo.type
+    get() = productCode.toIntelliJPlatformType()
 
 /**
  * Validates that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.

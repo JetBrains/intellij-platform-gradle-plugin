@@ -10,11 +10,7 @@ import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.models.ProductInfo
-import org.jetbrains.intellij.platform.gradle.models.launchFor
-import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.models.resolveIdeHomeVariable
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import kotlin.io.path.exists
@@ -83,7 +79,7 @@ class IntelliJPlatformArgumentProvider(
         get() = coroutinesJavaAgentFile.orNull
             ?.takeIf { it.asPath.exists() }
             ?.takeIf {
-                productInfo.productCode.toIntelliJPlatformType() in listOf(
+                productInfo.type in listOf(
                     IntelliJPlatformType.IntellijIdeaCommunity,
                     IntelliJPlatformType.IntellijIdeaUltimate,
                 )

@@ -4,30 +4,26 @@ package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
-import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
 import org.gradle.api.artifacts.transform.TransformAction
 import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
-import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Classpath
-import org.gradle.api.tasks.Internal
-import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
-import org.jetbrains.intellij.platform.gradle.models.ProductInfo
-import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.models.*
+import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.nio.file.Path
+import java.util.jar.JarFile
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
@@ -69,8 +65,14 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
 
             when {
                 isIntelliJPlatform -> {
-                    collectIntelliJPlatformJars(requireNotNull(productInfo), path)
-                        .forEach { outputs.file(it) }
+                    requireNotNull(productInfo)
+
+                    when (productInfo.type) {
+                        IntelliJPlatformType.JetBrainsClient -> collectModuleDescriptorJars(productInfo, path)
+                        else -> collectIntelliJPlatformJars(productInfo, path)
+                    }.forEach {
+                        outputs.file(it)
+                    }
                 }
 
                 /**
@@ -126,7 +128,7 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
         .flatMap { it.bootClassPathJarNames }
         .map { "lib/$it" }
         .plus(
-            when (productInfo.productCode.toIntelliJPlatformType()) {
+            when (productInfo.type) {
                 IntelliJPlatformType.Rider ->
                     productInfo.layout
                         .filter { it.name == "intellij.rider" }
@@ -151,8 +153,8 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
         .mapNotNull { it.takeIf { it.exists() } }
         .toSet()
 
-internal fun collectBundledPluginsJars(intellijPlatformPath: Path) =
-    intellijPlatformPath
+internal fun collectBundledPluginsJars(platformPath: Path) =
+    platformPath
         .resolve("plugins")
         .listDirectoryEntries()
         .asSequence()
@@ -160,3 +162,50 @@ internal fun collectBundledPluginsJars(intellijPlatformPath: Path) =
         .mapNotNull { it.takeIf { it.exists() } }
         .flatMap { it.listDirectoryEntries("*.jar") }
         .toSet()
+
+internal fun collectModuleDescriptorJars(
+    productInfo: ProductInfo,
+    platformPath: Path,
+    architecture: String? = null,
+): List<Path> = runCatching {
+    val moduleDescriptorsFile = ModuleDescriptorsPathResolver(platformPath).resolve()
+    val jarFile = JarFile(moduleDescriptorsFile.toFile())
+    val rootModuleName = productInfo.run {
+        when {
+            architecture == null -> launch.first()
+            else -> launchFor(architecture)
+        }
+    }.additionalJvmArguments.run {
+        val prefix = "-Dintellij.platform.root.module="
+        val name = find { it.startsWith(prefix) }?.removePrefix(prefix)
+        requireNotNull(name)
+    }
+
+    val modules = jarFile
+        .entries()
+        .asSequence()
+        .filter { it.name.endsWith(".xml") }
+        .map { jarFile.getInputStream(it) }
+        .mapNotNull { decode<ModuleDescriptor>(it) }
+        .map { it.name to it }
+        .toMap()
+
+    val visitedModules = mutableSetOf<String>()
+    fun collectResourcesFromModule(moduleName: String): List<Path> {
+        if (moduleName in visitedModules) {
+            return emptyList()
+        }
+
+        visitedModules += moduleName
+
+        val module = modules[moduleName] ?: return emptyList()
+        val moduleResources = module.path?.let { platformPath.resolve(it).takeIfExists() }
+        val dependencyResources = module.dependencies
+            .map { it.name }
+            .flatMap { collectResourcesFromModule(it) }
+
+        return listOfNotNull(moduleResources) + dependencyResources
+    }
+
+    return collectResourcesFromModule(rootModuleName)
+}.getOrDefault(emptyList())

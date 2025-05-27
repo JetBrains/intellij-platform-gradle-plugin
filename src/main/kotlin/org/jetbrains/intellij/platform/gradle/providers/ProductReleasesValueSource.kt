@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.providers
 
-import kotlinx.serialization.Serializable
-import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ValueSource
@@ -86,7 +84,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
     private val log = Logger(javaClass)
 
     override fun obtain() = with(parameters) {
-        val jetbrainsIdesContent = parameters.jetbrainsIdesUrl.orNull?.let { URI(it).toURL().readText() }
+        val jetbrainsIdesContent = jetbrainsIdesUrl.orNull?.let { URI(it).toURL().readText() }
         val jetbrainsIdesReleases = jetbrainsIdesContent
             ?.also { log.info("Reading JetBrains IDEs releases from URL: ${jetbrainsIdesUrl.orNull}") }
             ?.let { decode<JetBrainsIdesReleases>(it) }
@@ -124,7 +122,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .orEmpty()
             .toList()
 
-        val androidStudioContent = parameters.androidStudioUrl.orNull?.let { URI(it).toURL().readText() }
+        val androidStudioContent = androidStudioUrl.orNull?.let { URI(it).toURL().readText() }
         val androidStudioReleases = androidStudioContent
             ?.also { log.info("Reading Android Studio releases from: ${androidStudioUrl.orNull} (androidStudioUrl=$androidStudioUrl)") }
             ?.let { decode<AndroidStudioReleases>(it) }
@@ -169,13 +167,4 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             .map { "${it.type.code}-${it.id}" }
             .also { log.info("Resolved values: ${it.joinToString(",")}") }
     }
-}
-
-@Serializable
-data class Data(
-    @XmlSerialName("item")
-    val items: List<Item>,
-) {
-    @Serializable
-    data class Item(val name: String)
 }

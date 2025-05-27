@@ -5,6 +5,7 @@
 ### Added
 
 - Add missing `org.jetbrains.kotlin.platform.type=jvm` for custom test runtime classpath configuration
+- Add support for JetBrains Client and resolving the IntelliJ Platform in frontend mode
 
 ### Changed
 

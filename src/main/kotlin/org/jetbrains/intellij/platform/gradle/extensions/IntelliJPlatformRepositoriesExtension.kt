@@ -163,6 +163,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
             "[organization]/[module]-[revision](.[classifier]).[ext]",
             "[organization]/[revision]/[module]-[revision](-[classifier]).[ext]",
             "[organization]/[revision]/[module]-[revision](.[classifier]).[ext]",
+            "[organization]/[module]-[revision].tar.gz",
         ),
         action = {
             content {

@@ -72,6 +72,16 @@ enum class IntelliJPlatformType(
         maven = Coordinates("com.jetbrains.intellij.idea", "ideaIU"),
         installer = Coordinates("idea", "ideaIU"),
     ),
+    JetBrainsClient(
+        code = "JBC",
+        maven = null,
+        installer = Coordinates("idea/code-with-me", "JetBrainsClient"),
+
+        // https://download.jetbrains.com/idea/ideaIC-2025.1.1.1.tar.gz
+        // https://download.jetbrains.com/idea/code-with-me/JetBrainsClient-251.25410.129.tar.gz
+
+        // https://download.jetbrains.com/idea/code-with-me/JetBrainsClient-251.25410.129.aarch64.dmg
+    ),
     MPS(
         code = "MPS",
         maven = null,

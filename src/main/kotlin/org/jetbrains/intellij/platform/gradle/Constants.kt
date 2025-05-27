@@ -11,6 +11,7 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
 object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
     const val CACHE_DIRECTORY_IVY = "localPlatformArtifacts"
+    const val DEFAULT_MAIN_CLASS = "com.intellij.idea.Main"
 
     object Plugin {
         const val ID = "org.jetbrains.intellij.platform"
@@ -228,5 +229,6 @@ object Constants {
         const val JETBRAINS_IDES_INSTALLERS = "https://download.jetbrains.com"
         const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"
         const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
+        const val PRODUCTS_RELEASES_CDN_BUILDS = "https://data.services.jetbrains.com/products?code={type}&fields=code,releases.type,releases.version,releases.build"
     }
 }
