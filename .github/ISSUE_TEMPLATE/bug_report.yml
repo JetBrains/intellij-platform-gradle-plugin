@@ -43,7 +43,7 @@ body:
     id: gradle
     attributes:
       label: Gradle version
-      placeholder: "8.14"
+      placeholder: "8.14.1"
     validations:
       required: true
 
