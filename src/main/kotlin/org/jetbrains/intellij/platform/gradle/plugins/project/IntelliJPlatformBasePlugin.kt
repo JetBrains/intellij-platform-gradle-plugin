@@ -58,6 +58,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     layout,
                     objects,
                     providers,
+                    project.path,
                     gradle,
                     rootProjectPath,
                     project.settings.dependencyResolutionManagement.rulesMode

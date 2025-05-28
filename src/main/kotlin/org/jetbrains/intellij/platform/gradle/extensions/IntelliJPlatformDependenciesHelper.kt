@@ -57,7 +57,10 @@ import kotlin.io.path.*
  * @param layout The Gradle [ProjectLayout] to manage layout providers.
  * @param objects The Gradle [ObjectFactory] used for creating objects.
  * @param providers The Gradle [ProviderFactory] used for creating providers.
+ * @param projectPath The path (name) of the project.
+ * @param gradle The Gradle [Gradle] instance.
  * @param rootProjectDirectory The root directory of the Gradle project.
+ * @param metadataRulesModeProvider The [RulesMode] provider.
  */
 class IntelliJPlatformDependenciesHelper(
     private val configurations: ConfigurationContainer,
@@ -65,6 +68,7 @@ class IntelliJPlatformDependenciesHelper(
     private val layout: ProjectLayout,
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,
+    private val projectPath: String,
     private val gradle: Gradle,
     private val rootProjectDirectory: Path,
     private val metadataRulesModeProvider: Provider<RulesMode>,
@@ -74,9 +78,7 @@ class IntelliJPlatformDependenciesHelper(
     private val pluginManager by lazy { IdePluginManager.createManager() }
     private val pluginRepository by lazy { PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE) }
     private val requestedIntelliJPlatforms by lazy {
-        gradle.registerClassLoaderScopedBuildService(
-            RequestedIntelliJPlatformsService::class
-        ).get()
+        gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class, projectPath).get()
     }
 
     /**

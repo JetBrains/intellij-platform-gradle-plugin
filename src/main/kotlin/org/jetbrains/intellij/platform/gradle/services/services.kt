@@ -22,8 +22,11 @@ import kotlin.reflect.KClass
  */
 internal fun <T : BuildService<P>, P : BuildServiceParameters> Gradle.registerClassLoaderScopedBuildService(
     serviceClass: KClass<T>,
+    projectPath: String? = null,
     configureAction: Action<BuildServiceSpec<P>> = Action { },
 ): Provider<T> {
-    val serviceName = "${serviceClass.simpleName}_${serviceClass.java.classLoader.hashCode()}"
+
+    val serviceName = "${serviceClass.simpleName}_${serviceClass.java.classLoader.hashCode()}" +
+            projectPath?.let { "_${it.replace(":", "_")}" }.orEmpty()
     return sharedServices.registerIfAbsent(serviceName, serviceClass.java, configureAction)
 }
