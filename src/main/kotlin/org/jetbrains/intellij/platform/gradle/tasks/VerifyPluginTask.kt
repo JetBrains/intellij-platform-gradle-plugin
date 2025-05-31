@@ -468,7 +468,7 @@ internal abstract class VerifyPluginWorkAction @Inject constructor(
     }
 }
 
-interface VerifyPluginWorkParameters : WorkParameters {
+internal interface VerifyPluginWorkParameters : WorkParameters {
     val getArgs: ListProperty<String>
     val getPluginVerifierPath: Property<String>
     val getFailureLevel: ListProperty<FailureLevel>
