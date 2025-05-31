@@ -49,7 +49,7 @@ import kotlin.io.path.pathString
 // TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
 // TODO: Parallel run? https://docs.gradle.org/current/userguide/worker_api.html#converting_to_worker_api
 @UntrackedTask(because = "Should always run")
-abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware {
+abstract class VerifyPluginTask : DefaultTask(), RuntimeAware, PluginVerifierAware {
 
     /**
      * Holds a reference to IntelliJ Platform IDEs which will be used by the IntelliJ Plugin Verifier CLI tool for verification.
@@ -183,7 +183,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      * Runs the IntelliJ Plugin Verifier against the plugin artifact.
      */
     @TaskAction
-    override fun exec() {
+    fun verifyPlugin() {
         val file = archiveFile.orNull?.asPath
         if (file == null || !file.exists()) {
             throw IllegalStateException("Plugin file does not exist: $file")
@@ -203,7 +203,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
         log.debug("Verifier path: $executable")
 
-        classpath = objectFactory.fileCollection().from(executable)
+        /*classpath = objectFactory.fileCollection().from(executable)
 
         with(ides) {
             if (isEmpty) {
@@ -303,8 +303,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     init {
         group = Plugin.GROUP_NAME
         description = "Runs the IntelliJ Plugin Verifier CLI tool to check the binary compatibility with specified IDE builds."
-
-        mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")
     }
 
     companion object : Registrable {
