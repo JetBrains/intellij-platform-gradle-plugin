@@ -177,6 +177,12 @@ abstract class VerifyPluginTask : DefaultTask(), RuntimeAware, PluginVerifierAwa
     @get:Optional
     abstract val verificationReportsFormats: ListProperty<VerificationReportsFormats>
 
+    /**
+     * Allows work to be executed in parallel using the Gradle Worker API.
+     */
+    @get:Inject
+    abstract val workerExecutor: WorkerExecutor
+
     private val log = Logger(javaClass)
 
     /**
@@ -203,8 +209,6 @@ abstract class VerifyPluginTask : DefaultTask(), RuntimeAware, PluginVerifierAwa
 
         log.debug("Verifier path: $executable")
 
-        /*classpath = objectFactory.fileCollection().from(executable)
-
         with(ides) {
             if (isEmpty) {
                 throw GradleException(
@@ -215,18 +219,25 @@ abstract class VerifyPluginTask : DefaultTask(), RuntimeAware, PluginVerifierAwa
                     """.trimIndent()
                 )
             }
-            args(listOf("check-plugin") + getOptions() + file.pathString + map {
-                when {
-                    it.isDirectory -> it.absolutePath
-                    else -> it.readText()
-                }
-            })
-        }
 
-        ByteArrayOutputStream().use { os ->
-            standardOutput = TeeOutputStream(System.out, os)
-            super.exec()
-            verifyOutput(os.toString())
+            for (ide in this) {
+                log.debug("IDE for verification: $ide")
+
+                workerExecutor.noIsolation().submit(
+                    VerifyPluginWorkAction::class.java
+                ) {
+                    val idePath = when {
+                        ide.isDirectory -> ide.absolutePath
+                        else -> ide.readText()
+                    }
+
+                    val arguments = listOf("check-plugin") + getOptions() + file.pathString + idePath
+
+                    this.getPluginVerifierPath = executable.pathString
+                    this.getArgs = arguments
+                    this.getFailureLevel = failureLevel.get()
+                }
+            }
         }
     }
 
@@ -270,34 +281,6 @@ abstract class VerifyPluginTask : DefaultTask(), RuntimeAware, PluginVerifierAwa
         }
 
         return args
-    }
-
-    /**
-     * @throws GradleException
-     */
-    @Throws(GradleException::class)
-    private fun verifyOutput(output: String) {
-        log.debug("Current failure levels: ${FailureLevel.values().joinToString(", ")}")
-
-        val invalidFilesMessage = "The following files specified for the verification are not valid plugins:"
-        if (output.contains(invalidFilesMessage)) {
-            val errorMessage = output.lines()
-                .dropWhile { it != invalidFilesMessage }
-                .dropLastWhile { !it.startsWith(" ") }
-                .joinToString("\n")
-
-            throw GradleException(errorMessage)
-        }
-
-        FailureLevel.values().forEach { level ->
-            if (failureLevel.get().contains(level) && output.contains(level.sectionHeading)) {
-                log.debug("Failing task on '$failureLevel' failure level")
-                throw GradleException(
-                    "$level: ${level.message} Check Plugin Verifier report for more details.\n" +
-                            "Incompatible API Changes: https://jb.gg/intellij-api-changes"
-                )
-            }
-        }
     }
 
     init {
