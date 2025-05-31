@@ -220,10 +220,12 @@ abstract class VerifyPluginTask : DefaultTask(), RuntimeAware, PluginVerifierAwa
                 )
             }
 
+            val workQueue = workerExecutor.noIsolation()
+
             for (ide in this) {
                 log.debug("IDE for verification: $ide")
 
-                workerExecutor.noIsolation().submit(
+               workQueue.submit(
                     VerifyPluginWorkAction::class.java
                 ) {
                     val idePath = when {
