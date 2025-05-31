@@ -18,9 +18,8 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
+import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.tasks.aware.KotlinMetadataAware
-import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import kotlin.io.path.writeText
@@ -75,7 +74,7 @@ abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
             Build-OS: ${OperatingSystem.current()}
             Build-Plugin: ${Plugin.NAME}
             Build-Plugin-Version: ${pluginVersion.get()}
-            Platform-Type: ${productInfo.map { it.productCode.toIntelliJPlatformType() }.get()}
+            Platform-Type: ${productInfo.map { it.type }.get()}
             Platform-Version: ${productInfo.map { it.version }.get()}
             Platform-Build: ${productInfo.map { it.buildNumber }.get()}
             Kotlin-Available: ${kotlinPluginAvailable.get()}

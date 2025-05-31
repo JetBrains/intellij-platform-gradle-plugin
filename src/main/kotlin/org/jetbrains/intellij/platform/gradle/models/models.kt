@@ -19,8 +19,8 @@ import java.nio.file.Path
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
-private val json = Json { ignoreUnknownKeys = true }
-private val xml = XML
+internal val json = Json { ignoreUnknownKeys = true }
+internal val xml = XML
 
 /**
  * @throws GradleException
@@ -33,6 +33,7 @@ private inline fun <reified T> obtainStringFormat(): StringFormat {
         JetBrainsIdesReleases::class,
         MavenMetadata::class,
         ModuleDescriptor::class,
+        ProductModules::class,
         -> xml
 
         ProductInfo::class,

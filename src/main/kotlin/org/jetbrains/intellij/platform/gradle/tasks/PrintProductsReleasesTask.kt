@@ -9,14 +9,15 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.of
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
+import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 /**
@@ -53,7 +54,7 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
                 val ideaVersionProvider = project.extensionProvider.map { it.pluginConfiguration.ideaVersion }
 
                 productsReleases.convention(
-                    project.providers.of(ProductReleasesValueSource::class.java) {
+                    project.providers.of(ProductReleasesValueSource::class) {
                         parameters.jetbrainsIdesUrl = project.providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
                         parameters.androidStudioUrl = project.providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
 
@@ -65,9 +66,7 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
                 )
 
                 channels.convention(project.provider { ProductRelease.Channel.values().toList() })
-                types.convention(project.extensionProvider.map {
-                    listOf(it.productInfo.productCode.toIntelliJPlatformType())
-                })
+                types.convention(project.extensionProvider.map { listOf(it.productInfo.type) })
                 sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
                 untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
             }

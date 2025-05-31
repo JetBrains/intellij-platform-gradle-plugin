@@ -32,6 +32,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.isDirectory

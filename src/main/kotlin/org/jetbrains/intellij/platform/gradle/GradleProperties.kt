@@ -100,6 +100,14 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
     object ProductsReleasesJetBrainsIdesUrl : GradleProperties<String>(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES)
 
     /**
+     * Specifies the URL from which the list of all JetBrains IDEs CDN release builds is fetched.
+     * This listing is used for mapping IDE releases to build numbers to download the corresponding JetBrains Client archive.
+     *
+     * Default value: [Locations.PRODUCTS_RELEASES_CDN_BUILDS]
+     */
+    object ProductsReleasesCdnBuildsUrl : GradleProperties<String>(Locations.PRODUCTS_RELEASES_CDN_BUILDS)
+
+    /**
      * Checks whether the currently used Gradle IntelliJ Plugin is outdated and if a new release is available.
      * The plugin performs an update check on every run asking the GitHub Releases page for the redirection URL
      * to the latest version with `HEAD` HTTP request: `https://github.com/JetBrains/intellij-platform-gradle-plugin/releases/latest`.

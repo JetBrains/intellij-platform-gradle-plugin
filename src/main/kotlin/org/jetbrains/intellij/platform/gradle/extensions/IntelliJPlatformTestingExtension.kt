@@ -227,9 +227,13 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                 ) {
                     defaultDependencies {
                         addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
-                            val platformPath = runCatching { dependenciesHelper.platformPath(customIntelliJPlatformConfiguration.name) }.getOrNull()
-                            when (enabled && platformPath != null) {
-                                true -> dependenciesHelper.createIntelliJPlatformTestRuntime(platformPath)
+                            when (enabled) {
+                                true -> runCatching {
+                                    dependenciesHelper.createIntelliJPlatformTestRuntime(
+                                        dependenciesHelper.platformPath(customIntelliJPlatformConfiguration.name)
+                                    )
+                                }.getOrNull()
+
                                 false -> null
                             }.let { listOfNotNull(it) }
                         })

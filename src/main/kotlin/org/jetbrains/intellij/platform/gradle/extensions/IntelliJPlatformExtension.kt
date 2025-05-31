@@ -24,9 +24,11 @@ import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.ProductMode
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
@@ -37,7 +39,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Path
@@ -806,16 +807,22 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param type The IntelliJ Platform dependency.
              * @param version The version of the IntelliJ Platform dependency.
              * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
+             * @param productMode Describes a mode in which a product may be started.
              */
             @JvmOverloads
-            fun ide(type: IntelliJPlatformType, version: String, useInstaller: Boolean = true) =
-                dependenciesHelper.addIntelliJPlatformDependency(
-                    typeProvider = dependenciesHelper.provider { type },
-                    versionProvider = dependenciesHelper.provider { version },
-                    useInstallerProvider = dependenciesHelper.provider { useInstaller },
-                    configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                    intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                )
+            fun ide(
+                type: IntelliJPlatformType,
+                version: String,
+                useInstaller: Boolean = true,
+                productMode: ProductMode = ProductMode.MONOLITH,
+            ) = dependenciesHelper.addIntelliJPlatformDependency(
+                typeProvider = dependenciesHelper.provider { type },
+                versionProvider = dependenciesHelper.provider { version },
+                useInstallerProvider = dependenciesHelper.provider { useInstaller },
+                productModeProvider = dependenciesHelper.provider { productMode },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -823,16 +830,22 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param type The IntelliJ Platform dependency.
              * @param version The version of the IntelliJ Platform dependency.
              * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
+             * @param productMode Describes a mode in which a product may be started.
              */
             @JvmOverloads
-            fun ide(type: String, version: String, useInstaller: Boolean = true) =
-                dependenciesHelper.addIntelliJPlatformDependency(
-                    typeProvider = dependenciesHelper.provider { type },
-                    versionProvider = dependenciesHelper.provider { version },
-                    useInstallerProvider = dependenciesHelper.provider { useInstaller },
-                    configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                    intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                )
+            fun ide(
+                type: String,
+                version: String,
+                useInstaller: Boolean = true,
+                productMode: ProductMode = ProductMode.MONOLITH,
+            ) = dependenciesHelper.addIntelliJPlatformDependency(
+                typeProvider = dependenciesHelper.provider { type },
+                versionProvider = dependenciesHelper.provider { version },
+                useInstallerProvider = dependenciesHelper.provider { useInstaller },
+                productModeProvider = dependenciesHelper.provider { productMode },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -840,16 +853,22 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
              * @param version The provider for the version of the IntelliJ Platform dependency.
              * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
+             * @param productMode Describes a mode in which a product may be started.
              */
             @JvmOverloads
-            fun ide(type: Provider<*>, version: Provider<String>, useInstaller: Boolean = true) =
-                dependenciesHelper.addIntelliJPlatformDependency(
-                    typeProvider = type,
-                    versionProvider = version,
-                    useInstallerProvider = dependenciesHelper.provider { useInstaller },
-                    configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                    intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                )
+            fun ide(
+                type: Provider<*>,
+                version: Provider<String>,
+                useInstaller: Boolean = true,
+                productMode: ProductMode = ProductMode.MONOLITH,
+            ) = dependenciesHelper.addIntelliJPlatformDependency(
+                typeProvider = type,
+                versionProvider = version,
+                useInstallerProvider = dependenciesHelper.provider { useInstaller },
+                productModeProvider = dependenciesHelper.provider { productMode },
+                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+            )
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -857,11 +876,18 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
              * @param version The provider for the version of the IntelliJ Platform dependency.
              * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
+             * @param productMode Describes a mode in which a product may be started.
              */
-            fun ide(type: Provider<*>, version: Provider<String>, useInstaller: Provider<Boolean>) = dependenciesHelper.addIntelliJPlatformDependency(
+            fun ide(
+                type: Provider<*>,
+                version: Provider<String>,
+                useInstaller: Provider<Boolean>,
+                productMode: Provider<ProductMode>,
+            ) = dependenciesHelper.addIntelliJPlatformDependency(
                 typeProvider = type,
                 versionProvider = version,
                 useInstallerProvider = useInstaller,
+                productModeProvider = productMode,
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
                 intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
             )
@@ -972,9 +998,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
 
                     channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
-                    types.convention(extensionProvider.map {
-                        listOf(it.productInfo.productCode.toIntelliJPlatformType())
-                    })
+                    types.convention(extensionProvider.map { listOf(it.productInfo.type) })
                     sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
                     untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
 

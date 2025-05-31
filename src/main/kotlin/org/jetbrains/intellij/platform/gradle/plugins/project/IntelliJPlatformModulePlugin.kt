@@ -189,7 +189,17 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
         // TODO: share with Base plugin?
         val dependenciesHelper = with(project) {
-            IntelliJPlatformDependenciesHelper(configurations, dependencies, layout, objects, providers, gradle, rootProjectPath, project.settings.dependencyResolutionManagement.rulesMode)
+            IntelliJPlatformDependenciesHelper(
+                configurations,
+                dependencies,
+                layout,
+                objects,
+                providers,
+                project.path,
+                gradle,
+                rootProjectPath,
+                project.settings.dependencyResolutionManagement.rulesMode,
+            )
         }
 
         IntelliJPlatformTestingExtension.register(project, dependenciesHelper, target = project)

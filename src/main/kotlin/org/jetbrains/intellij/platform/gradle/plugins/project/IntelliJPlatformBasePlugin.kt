@@ -58,6 +58,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     layout,
                     objects,
                     providers,
+                    project.path,
                     gradle,
                     rootProjectPath,
                     project.settings.dependencyResolutionManagement.rulesMode
@@ -361,8 +362,12 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 defaultDependencies {
                     addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
                         val platformPath = runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
-                        when (enabled && platformPath != null) {
-                            true -> dependenciesHelper.createIntelliJPlatformTestRuntime(platformPath)
+                        when (enabled) {
+                            true -> when (platformPath) {
+                                null -> null
+                                else -> dependenciesHelper.createIntelliJPlatformTestRuntime(platformPath)
+                            }
+
                             false -> null
                         }.let { listOfNotNull(it) }
                     })

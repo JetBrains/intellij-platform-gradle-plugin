@@ -14,16 +14,20 @@ import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.JavaForkOptions
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.PluginArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectModuleDescriptorJars
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
+import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
@@ -223,7 +227,10 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             systemProperty("ide.native.launcher", "false")
 
             if (this is JavaExec) {
-                mainClass = "com.intellij.idea.Main"
+                mainClass = runtimeArchitecture.map { architecture ->
+                    productInfo.launchFor(architecture).mainClass ?: Constants.DEFAULT_MAIN_CLASS
+                }
+
                 javaLauncher = runtimeDirectory.zip(runtimeMetadata) { directory, metadata ->
                     IntelliJPlatformJavaLauncher(directory, metadata)
                 }
@@ -234,6 +241,15 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                             .launchFor(architecture)
                             .bootClassPathJarNames
                             .map { platformPath.resolve("lib/$it") }
+                    }
+                )
+
+                classpath += files(
+                    runtimeArchitecture.map { architecture ->
+                        when (productInfo.type) {
+                            IntelliJPlatformType.JetBrainsClient -> collectModuleDescriptorJars(productInfo, platformPath, architecture)
+                            else -> emptyList()
+                        }
                     }
                 )
 
@@ -315,9 +331,12 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is TestableAware) {
             val pluginName = extensionProvider.flatMap { it.projectName }
             pluginDirectory = sandboxPluginsDirectory.dir(pluginName)
-            intellijPlatformTestClasspathConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH)
-            intellijPlatformTestRuntimeClasspathConfiguration = configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH)
-            intelliJPlatformTestRuntimeFixClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH]
+            intellijPlatformTestClasspathConfiguration =
+                configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH)
+            intellijPlatformTestRuntimeClasspathConfiguration =
+                configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH)
+            intelliJPlatformTestRuntimeFixClasspathConfiguration =
+                project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH]
         }
     }
 }

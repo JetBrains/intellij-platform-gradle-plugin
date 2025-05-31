@@ -1,51 +1,47 @@
 // Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.utils
+package org.jetbrains.intellij.platform.gradle.services
 
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.ProductMode
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
 
 private const val baseConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY
 
-/**
- * Manages requested IntelliJ Platform configurations by mapping configuration names
-to corresponding platform definitions.
- *
- * This class allows dynamic creation and retrieval of `RequestedIntelliJPlatform` instances
- * based on configuration names, platform types, versions, and installer settings.
- *
- * @constructor Initializes the manager with the required provider and object factories
- * to support configuration and property management.
- *
- * @param providers An instance of `ProviderFactory` to create lazy-evaluated providers.
- * @param objects An instance of `ObjectFactory` to create property objects.
- */
-class RequestedIntelliJPlatforms(private val providers: ProviderFactory, objects: ObjectFactory) {
+abstract class RequestedIntelliJPlatformsService @Inject constructor(
+    private val objectFactory: ObjectFactory,
+    private val providerFactory: ProviderFactory,
+) : BuildService<BuildServiceParameters.None> {
 
     private val map = ConcurrentHashMap<String, Provider<RequestedIntelliJPlatform>>()
-    private val base = objects.property<RequestedIntelliJPlatform>()
+    private val base = objectFactory.property<RequestedIntelliJPlatform>()
 
     /**
      * Sets the configuration for a requested IntelliJ Platform by associating the provided configuration name
      * with the corresponding platform parameters, including type, version, and installer settings.
-     * If some of the parameters are not specified, the [base] configuration is used.
+     * If some parameters are not specified, the [base] configuration is used.
      *
      * @param configurationName The name of the configuration to set.
      * @param typeProvider A provider that supplies the IntelliJ Platform type for the given configuration.
      * @param versionProvider A provider that supplies the version of the IntelliJ Platform for the given configuration.
      * @param useInstallerProvider A provider that specifies whether to use the installer for the given configuration.
+     * @param productModeProvider A provider that specifies the product mode for the given configuration.
      */
     fun set(
         configurationName: String,
         typeProvider: Provider<*>,
         versionProvider: Provider<String>,
-        useInstallerProvider: Provider<Boolean>
+        useInstallerProvider: Provider<Boolean>,
+        productModeProvider: Provider<ProductMode>,
     ) = requireNotNull(map.compute(configurationName) { key, previous ->
         when (key) {
             baseConfigurationName -> base.apply {
@@ -58,15 +54,17 @@ class RequestedIntelliJPlatforms(private val providers: ProviderFactory, objects
                         type = typeProvider.map { it.toIntelliJPlatformType() }.get(),
                         version = versionProvider.get(),
                         installer = useInstallerProvider.get(),
+                        productMode = productModeProvider.get(),
                     )
                 )
             }
 
-            else -> providers.provider {
+            else -> providerFactory.provider {
                 RequestedIntelliJPlatform(
                     type = typeProvider.map { it.toIntelliJPlatformType() }.orElse(base.map { it.type }).get(),
                     version = versionProvider.orElse(base.map { it.version }).get(),
                     installer = useInstallerProvider.orElse(base.map { it.installer }).get(),
+                    productMode = productModeProvider.orElse(base.map { it.productMode }).get(),
                 )
             }
         }
@@ -93,11 +91,13 @@ class RequestedIntelliJPlatforms(private val providers: ProviderFactory, objects
  * @property type Defines the IntelliJ Platform type, such as IntelliJ IDEA, PyCharm, or other JetBrains IDEs.
  * @property version Specifies the version of the IntelliJ Platform to be used.
  * @property installer Indicates if the platform should include an installer.
+ * @property productMode Indicates the mode in which the platform is being used.
  */
 data class RequestedIntelliJPlatform(
     val type: IntelliJPlatformType,
     val version: String,
     val installer: Boolean,
+    val productMode: ProductMode,
 ) {
     private val installerLabel = when (installer) {
         true -> "installer"

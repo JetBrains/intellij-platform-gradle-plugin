@@ -35,22 +35,15 @@ val additionalPluginClasspath: Configuration by configurations.creating
 dependencies {
     api(libs.undertow)
 
-    implementation(libs.intellij.structure.base) {
-        exclude("org.jetbrains.kotlin")
-    }
-    api(libs.intellij.structure.ide) {
-        exclude("org.jetbrains.kotlin")
-        exclude("org.jetbrains.kotlinx")
-    }
-    api(libs.intellij.structure.intellij) {
-        exclude("org.jetbrains.kotlin")
-        exclude("org.jetbrains.kotlinx")
-    }
-    api(libs.intellij.pluginRepositoryRestClient) {
+    val commonExclusions: Action<ExternalModuleDependency> = Action {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")
         exclude("org.slf4j")
     }
+    implementation(libs.intellij.structure.base, commonExclusions)
+    api(libs.intellij.structure.ide, commonExclusions)
+    api(libs.intellij.structure.intellij, commonExclusions)
+    api(libs.intellij.pluginRepositoryRestClient, commonExclusions)
 
     runtimeOnly(libs.xmlutil.core)
     api(libs.xmlutil.serialization) {
