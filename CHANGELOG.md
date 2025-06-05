@@ -10,6 +10,7 @@
 ### Changed
 
 - Search for a bundled plugin using module alias if not resolved by ID
+- Stop including the `intellijPlatformPluginModule` configuration in the `intellijPlatformClasspath` as it's already bundled within the composed jar.
 
 ### Fixed
 
