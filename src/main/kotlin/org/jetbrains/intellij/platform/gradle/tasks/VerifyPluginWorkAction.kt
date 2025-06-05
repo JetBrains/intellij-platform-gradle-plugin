@@ -15,6 +15,16 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
 
+/**
+ * A `WorkAction` provided by the Gradle Worker API that executes the Plugin Verifier
+ * tool to check the compatibility of a plugin against specified IDE builds.
+ *
+ * @param execOperations The Gradle `ExecOperations` service for executing external processes.
+ * @param objectFactory The Gradle `ObjectFactory` service for creating domain objects.
+ * @see WorkAction
+ * @see VerifyPluginWorkParameters
+ * @see VerifyPluginTask
+ */
 internal abstract class VerifyPluginWorkAction @Inject constructor(
     private val execOperations: ExecOperations,
     private val objectFactory: ObjectFactory
@@ -71,13 +81,31 @@ internal abstract class VerifyPluginWorkAction @Inject constructor(
         }
     }
 
+    /**
+     * Defines the parameters for the [VerifyPluginWorkAction].
+     *
+     * This interface is used provide the necessary inputs to the work action
+     *
+     * @see WorkParameters
+     */
     interface VerifyPluginWorkParameters : WorkParameters {
+        /**
+         * The command-line arguments to be passed to the Plugin Verifier.
+         *
+         * These arguments control the verification process, such as specifying which IDE versions to check against.
+         */
         val getArgs: ListProperty<String>
+
+        /**
+         * The path to the Plugin Verifier executable
+         */
         val getPluginVerifierPath: Property<String>
+
+        /**
+         * The list of failure levels that will cause the verification task to fail the build.
+         *
+         * @see FailureLevel
+         */
         val getFailureLevel: ListProperty<FailureLevel>
     }
 }
-
-
-
-
