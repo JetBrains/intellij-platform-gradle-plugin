@@ -228,9 +228,9 @@ abstract class VerifyPluginTask : DefaultTask(), RuntimeAware, PluginVerifierAwa
 
                     val arguments = listOf("check-plugin") + getOptions() + file.pathString + idePath
 
-                    this.getPluginVerifierPath = executable.pathString
-                    this.getArgs = arguments
-                    this.getFailureLevel = failureLevel.get()
+                    getPluginVerifierPath = executable.pathString
+                    getArgs = arguments
+                    getFailureLevel = failureLevel.get()
                 }
             }
         }
