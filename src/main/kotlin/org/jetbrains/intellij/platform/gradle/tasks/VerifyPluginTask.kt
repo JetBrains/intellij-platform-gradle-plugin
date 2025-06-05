@@ -215,7 +215,7 @@ abstract class VerifyPluginTask : DefaultTask(), RuntimeAware, PluginVerifierAwa
 
             val workQueue = workerExecutor.noIsolation()
 
-            for (ide in this) {
+            forEach { ide ->
                 log.debug("IDE for verification: $ide")
 
                workQueue.submit(
