@@ -7,6 +7,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
@@ -17,7 +18,9 @@ import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTE
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
@@ -87,6 +90,13 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     @get:Internal
     abstract val module: Property<Boolean>
 
+    /**
+     * List of message patterns to be muted.
+     * Each pattern is matched against the message text using a [String.contains] check (case-sensitive).
+     */
+    @get:Internal
+    abstract val mutedMessages: ListProperty<String>
+
     private val log = Logger(javaClass)
 
     @TaskAction
@@ -105,6 +115,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         val kotlinVersion = kotlinVersion.orNull?.toVersion()
         val kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get()
         val platformKotlinLanguageVersion = getPlatformKotlinVersion(platformBuild)?.run { "$major.$minor".toVersion() }
+
+        // Get muted message patterns from the property
+        val mutedMessagePatterns = mutedMessages.getOrElse(emptyList())
 
         sequence {
             if (!isModule) {
@@ -180,6 +193,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 yield("The currently selected Java Runtime is not JetBrains Runtime (JBR). This may lead to unexpected IDE behaviors. Please use IntelliJ Platform binary release with bundled JBR or define it explicitly with project dependencies or JVM Toolchain, see: https://jb.gg/intellij-platform-with-jbr")
             }
         }
+            .filter { mutedMessagePatterns.none { pattern -> it.contains(pattern) } }
             .joinToString("\n") { "- $it" }
             .takeIf { it.isNotEmpty() }
             ?.also { log.warn("The following plugin configuration issues were found:\n$it") }
@@ -221,6 +235,10 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
                 targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
                 module.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap { it.module })
+                mutedMessages.convention(
+                    project.providers[GradleProperties.VerifyPluginProjectConfigurationMutedMessages]
+                        .map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
+                )
             }
     }
 }

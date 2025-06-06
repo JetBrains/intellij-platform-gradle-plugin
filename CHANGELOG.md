@@ -6,6 +6,7 @@
 
 - Add missing `org.jetbrains.kotlin.platform.type=jvm` for custom test runtime classpath configuration
 - Add support for JetBrains Client and resolving the IntelliJ Platform in frontend mode
+- Add `VerifyPluginProjectConfigurationMutedMessages` Gradle property to mute specific messages reported by the `verifyPluginProjectConfiguration` task JetBrains/intellij-platform-gradle-plugin#1958
 
 ### Changed
 

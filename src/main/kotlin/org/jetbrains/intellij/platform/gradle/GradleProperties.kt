@@ -10,6 +10,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.*
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginProjectConfigurationTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
@@ -133,6 +134,20 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      * It is possible to refer to the direct location (whenever it is possible) by switching off JetBrains Cache Redirector globally.
      */
     object UseCacheRedirector : GradleProperties<Boolean>(true)
+
+    /**
+     * Allows muting specific messages reported by the [VerifyPluginProjectConfigurationTask] task.
+     * The property accepts a comma-separated list of message patterns to be muted.
+     * Each pattern is matched against the message text using a [String.contains] check (case-sensitive).
+     *
+     * For example, to mute warnings about Kotlin Standard Library and JetBrains Runtime:
+     * ```
+     * org.jetbrains.intellij.platform.verifyPluginProjectConfigurationMutedMessages=Kotlin Standard Library,Java Runtime is not JetBrains Runtime
+     * ```
+     *
+     * Default value: empty string (no messages are muted)
+     */
+    object VerifyPluginProjectConfigurationMutedMessages : GradleProperties<String>("")
 
     override fun toString() =
         requireNotNull(this::class.simpleName)

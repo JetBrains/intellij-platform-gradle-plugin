@@ -390,4 +390,49 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
             )
         }
     }
+
+    @Test
+    fun `mute specific messages`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            sinceBuild = "211.*"
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="211.*" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
+
+        // First run without muting - should show the warning
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertContains(HEADER, output)
+            assertContains(
+                "- The since-build='211.*' should not contain wildcard.", output
+            )
+        }
+
+        // Now add the muted message pattern to gradle.properties
+        gradleProperties write //language=properties
+                """
+                org.jetbrains.intellij.platform.verifyPluginProjectConfigurationMutedMessages=should not contain wildcard
+                """.trimIndent()
+
+        // Run again with muting - should not show the warning
+        build(CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertNotContains(
+                "- The since-build='211.*' should not contain wildcard.", output
+            )
+        }
+    }
 }
