@@ -26,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.workers.VerifyPluginWorkAction
 import java.util.*
 import javax.inject.Inject
 import kotlin.io.path.exists
@@ -218,20 +219,18 @@ abstract class VerifyPluginTask : DefaultTask(), RuntimeAware, PluginVerifierAwa
             forEach { ide ->
                 log.debug("IDE for verification: $ide")
 
-               workQueue.submit(
-                    VerifyPluginWorkAction::class.java
-                ) {
-                    val idePath = when {
-                        ide.isDirectory -> ide.absolutePath
-                        else -> ide.readText()
-                    }
+               workQueue.submit(VerifyPluginWorkAction::class.java) {
+                   val idePath = when {
+                       ide.isDirectory -> ide.absolutePath
+                       else -> ide.readText()
+                   }
 
-                    val arguments = listOf("check-plugin") + getOptions() + file.pathString + idePath
+                   val arguments = listOf("check-plugin") + getOptions() + file.pathString + idePath
 
-                    getPluginVerifierPath = executable.pathString
-                    getArgs = arguments
-                    getFailureLevel = failureLevel.get()
-                }
+                   getPluginVerifierPath = executable.pathString
+                   getArgs = arguments
+                   getFailureLevel = failureLevel.get()
+               }
             }
         }
     }

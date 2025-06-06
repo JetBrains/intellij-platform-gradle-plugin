@@ -1,6 +1,6 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
-package org.jetbrains.intellij.platform.gradle.tasks
+package org.jetbrains.intellij.platform.gradle.workers
 
 import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
@@ -10,7 +10,7 @@ import org.gradle.api.provider.Property
 import org.gradle.process.ExecOperations
 import org.gradle.workers.WorkAction
 import org.gradle.workers.WorkParameters
-import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
+import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.io.ByteArrayOutputStream
 import javax.inject.Inject
@@ -21,19 +21,46 @@ import javax.inject.Inject
  *
  * @param execOperations The Gradle `ExecOperations` service for executing external processes.
  * @param objectFactory The Gradle `ObjectFactory` service for creating domain objects.
- * @see WorkAction
+ * @see org.gradle.workers.WorkAction
  * @see VerifyPluginWorkParameters
- * @see VerifyPluginTask
+ * @see org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
  */
 internal abstract class VerifyPluginWorkAction @Inject constructor(
     private val execOperations: ExecOperations,
     private val objectFactory: ObjectFactory
-) :  WorkAction<VerifyPluginWorkAction.VerifyPluginWorkParameters> {
+) : WorkAction<VerifyPluginWorkAction.VerifyPluginWorkParameters> {
+
+    /**
+     * Defines the parameters for the [VerifyPluginWorkAction].
+     *
+     * This interface is used to provide the necessary inputs to the work action
+     *
+     * @see org.gradle.workers.WorkParameters
+     */
+    interface VerifyPluginWorkParameters : WorkParameters {
+        /**
+         * The command-line arguments to be passed to the Plugin Verifier.
+         *
+         * These arguments control the verification process, such as specifying which IDE versions to check against.
+         */
+        val getArgs: ListProperty<String>
+
+        /**
+         * The path to the Plugin Verifier executable
+         */
+        val getPluginVerifierPath: Property<String>
+
+        /**
+         * The list of failure levels that will cause the verification task to fail the build.
+         *
+         * @see org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.FailureLevel
+         */
+        val getFailureLevel: ListProperty<VerifyPluginTask.FailureLevel>
+    }
 
     private val log = Logger(javaClass)
 
     override fun execute() {
-
         ByteArrayOutputStream().use { os ->
             val outputStream = TeeOutputStream(System.out, os)
 
@@ -54,11 +81,11 @@ internal abstract class VerifyPluginWorkAction @Inject constructor(
     }
 
     /**
-     * @throws GradleException
+     * @throws org.gradle.api.GradleException
      */
     @Throws(GradleException::class)
-    private fun verifyOutput(output: String, failureLevel: ListProperty<FailureLevel>, ) {
-        log.debug("Current failure levels: ${FailureLevel.values().joinToString(", ")}")
+    private fun verifyOutput(output: String, failureLevel: ListProperty<VerifyPluginTask.FailureLevel>, ) {
+        log.debug("Current failure levels: ${VerifyPluginTask.FailureLevel.values().joinToString(", ")}")
 
         val invalidFilesMessage = "The following files specified for the verification are not valid plugins:"
         if (output.contains(invalidFilesMessage)) {
@@ -70,7 +97,7 @@ internal abstract class VerifyPluginWorkAction @Inject constructor(
             throw GradleException(errorMessage)
         }
 
-        FailureLevel.values().forEach { level ->
+        VerifyPluginTask.FailureLevel.values().forEach { level ->
             if (failureLevel.get().contains(level) && output.contains(level.sectionHeading)) {
                 log.debug("Failing task on '$failureLevel' failure level")
                 throw GradleException(
@@ -79,33 +106,5 @@ internal abstract class VerifyPluginWorkAction @Inject constructor(
                 )
             }
         }
-    }
-
-    /**
-     * Defines the parameters for the [VerifyPluginWorkAction].
-     *
-     * This interface is used provide the necessary inputs to the work action
-     *
-     * @see WorkParameters
-     */
-    interface VerifyPluginWorkParameters : WorkParameters {
-        /**
-         * The command-line arguments to be passed to the Plugin Verifier.
-         *
-         * These arguments control the verification process, such as specifying which IDE versions to check against.
-         */
-        val getArgs: ListProperty<String>
-
-        /**
-         * The path to the Plugin Verifier executable
-         */
-        val getPluginVerifierPath: Property<String>
-
-        /**
-         * The list of failure levels that will cause the verification task to fail the build.
-         *
-         * @see FailureLevel
-         */
-        val getFailureLevel: ListProperty<FailureLevel>
     }
 }
