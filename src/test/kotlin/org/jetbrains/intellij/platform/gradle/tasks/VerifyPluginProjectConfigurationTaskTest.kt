@@ -329,7 +329,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `report ignored until-build for version 243 or higher`() {
+    fun `report used until-build`() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
@@ -355,7 +355,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The until-build property is ignored for IntelliJ Platform version 243 or higher.", output
+                "- The until-build property is not recommended for use. Consider using empty until-build for future plugin versions, so users can use your plugin when they update IDE to the latest version.", output
             )
         }
     }
