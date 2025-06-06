@@ -126,12 +126,14 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is RuntimeAware) {
             jetbrainsRuntimeConfiguration = configurations.maybeCreate(Configurations.JETBRAINS_RUNTIME).asLenient
 
-            val javaRuntimePathResolver = JavaRuntimePathResolver(
-                jetbrainsRuntime = jetbrainsRuntimeConfiguration,
-                intellijPlatform = intelliJPlatformConfiguration,
-                javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
-                javaToolchainService = project.serviceOf<JavaToolchainService>(),
-            )
+            val javaRuntimePathResolver by lazy {
+                JavaRuntimePathResolver(
+                    jetbrainsRuntime = jetbrainsRuntimeConfiguration,
+                    intellijPlatform = intelliJPlatformConfiguration,
+                    javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
+                    javaToolchainService = project.serviceOf<JavaToolchainService>(),
+                )
+            }
 
             runtimeDirectory = layout.dir(cachedProvider(objects, providers) {
                 javaRuntimePathResolver.resolve().toFile()

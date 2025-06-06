@@ -138,14 +138,10 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 }
             }
 
-            val intellijPlatformPluginModuleConfiguration = create(
+            create(
                 name = Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
                 description = "IntelliJ Platform plugin module",
             ) { isTransitive = false }
-
-            named(Configurations.INTELLIJ_PLATFORM_DEPENDENCIES) {
-                extendsFrom(intellijPlatformPluginModuleConfiguration)
-            }
 
             listOf(
                 Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
