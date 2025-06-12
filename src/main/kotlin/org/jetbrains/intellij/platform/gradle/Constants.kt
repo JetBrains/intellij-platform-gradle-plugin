@@ -12,6 +12,7 @@ object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
     const val CACHE_DIRECTORY_IVY = "localPlatformArtifacts"
     const val DEFAULT_MAIN_CLASS = "com.intellij.idea.Main"
+    const val TOOLBOX_IGNORE = ".toolbox-ignore"
 
     object Plugin {
         const val ID = "org.jetbrains.intellij.platform"
