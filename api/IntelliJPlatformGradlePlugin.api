@@ -8,6 +8,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants {
 	public static final field CACHE_DIRECTORY_IVY Ljava/lang/String;
 	public static final field DEFAULT_MAIN_CLASS Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants;
+	public static final field TOOLBOX_IGNORE Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Components {
