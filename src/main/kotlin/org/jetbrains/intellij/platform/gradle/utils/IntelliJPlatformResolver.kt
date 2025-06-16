@@ -20,8 +20,33 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformResolver.Parameters
 import java.nio.file.Path
 import java.util.*
+
+@Incubating
+fun Project.intelliJPlatformResolver(
+    configuration: Parameters.() -> Unit = {},
+): IntelliJPlatformResolver {
+    val parameters = project.objects.newInstance<Parameters>().apply {
+        cacheDirectory.convention(
+            project.layout.dir(
+                project.extensionProvider.map { it.cachePath.resolve("ides").toFile() }
+            )
+        )
+        name.convention({
+            "${it.type}-${it.version}"
+        })
+    }.apply(configuration)
+
+    return IntelliJPlatformResolver(
+        parameters = parameters,
+        configurations = project.configurations,
+        dependenciesHelperProvider = project.provider { project.dependenciesHelper },
+        extractorService = project.gradle.sharedServices.registerIfAbsent("extractorService", ExtractorService::class),
+        providerFactory = project.providers,
+    )
+}
 
 /**
  * Resolves IntelliJ Platform dependencies from configured repositories and extracts them to a shared cache directory.
@@ -34,7 +59,7 @@ import java.util.*
  * This class is marked as incubating and may undergo changes in future versions.
  */
 @Incubating
-class IntelliJPlatformResolver private constructor(
+class IntelliJPlatformResolver internal constructor(
     private val parameters: Parameters,
     private val configurations: ConfigurationContainer,
     private val dependenciesHelperProvider: Provider<IntelliJPlatformDependenciesHelper>,
@@ -56,38 +81,6 @@ class IntelliJPlatformResolver private constructor(
          * Constructs the name for the specified IntelliJ Platform extracted directory.
          */
         val name: Property<(RequestedIntelliJPlatform) -> String>
-    }
-
-    companion object {
-        @Incubating
-        fun Project.intelliJPlatformResolver() = intelliJPlatformResolver {}
-
-        @Incubating
-        fun Project.intelliJPlatformResolver(
-            configuration: Parameters.() -> Unit,
-        ): IntelliJPlatformResolver {
-            val parameters = project.objects.newInstance<Parameters>().apply {
-                cacheDirectory.convention(
-                    project.layout.dir(
-                        project.extensionProvider.map { it.cachePath.resolve("ides").toFile() }
-                    )
-                )
-                name.convention({
-                    "${it.type}-${it.version}"
-                })
-            }.apply(configuration)
-
-            return IntelliJPlatformResolver(
-                parameters = parameters,
-                configurations = project.configurations,
-                dependenciesHelperProvider = project.provider { project.dependenciesHelper },
-                extractorService = project.gradle.sharedServices.registerIfAbsent(
-                    "extractorService",
-                    ExtractorService::class,
-                ),
-                providerFactory = project.providers,
-            )
-        }
     }
 
     /**
