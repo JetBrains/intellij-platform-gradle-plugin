@@ -31,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import java.nio.file.Path
@@ -172,6 +173,19 @@ val Project.rootProjectPath
 
 val Project.extensionProvider
     get() = provider { the<IntelliJPlatformExtension>() }
+
+internal val Project.dependenciesHelper
+    get() = IntelliJPlatformDependenciesHelper(
+        configurations,
+        dependencies,
+        layout,
+        objects,
+        providers,
+        project.path,
+        gradle,
+        rootProjectPath,
+        project.settings.dependencyResolutionManagement.rulesMode,
+    )
 
 internal val PluginManager.isModule
     get() = hasPlugin(Plugins.MODULE) && !hasPlugin(Plugin.ID)

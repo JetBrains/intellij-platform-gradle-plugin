@@ -33,6 +33,7 @@ import org.jetbrains.intellij.platform.gradle.providers.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.services.IdesManagerService
+import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatformsService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
@@ -181,11 +182,35 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
+     * Creates a request for the IntelliJ Platform with the specified configuration details.
+     *
+     * @param typeProvider provider for the IntelliJ Platform type.
+     * @param versionProvider provider for the IntelliJ Platform version.
+     * @param useInstallerProvider provider indicating whether to use the installer.
+     * @param productModeProvider provider for the product mode of the IntelliJ Platform.
+     * @param intellijPlatformConfigurationName name of the IntelliJ Platform configuration, defaulting to [Configurations.INTELLIJ_PLATFORM_DEPENDENCY].
+     */
+    internal fun createIntelliJPlatformRequest(
+        typeProvider: Provider<*>,
+        versionProvider: Provider<String>,
+        useInstallerProvider: Provider<Boolean>,
+        productModeProvider: Provider<ProductMode>,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+    ) = requestedIntelliJPlatforms.set(
+        configurationName = intellijPlatformConfigurationName,
+        typeProvider = typeProvider,
+        versionProvider = versionProvider,
+        useInstallerProvider = useInstallerProvider,
+        productModeProvider = productModeProvider
+    )
+
+    /**
      * A base method for adding a dependency on the IntelliJ Platform.
      *
      * @param typeProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
      * @param versionProvider The provider for the version of the IntelliJ Platform dependency.
      * @param useInstallerProvider Switches between the IDE installer and archive from the IntelliJ Maven repository.
+     * @param productModeProvider The provider for a mode in which a product may be started.
      * @param configurationName The name of the configuration to add the dependency to.
      * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action An optional action to be performed on the created dependency.
@@ -200,14 +225,33 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
+    ) = addIntelliJPlatformDependency(
+        requestedIntelliJPlatformProvider = createIntelliJPlatformRequest(
+            typeProvider = typeProvider,
+            versionProvider = versionProvider,
+            useInstallerProvider = useInstallerProvider,
+            productModeProvider = productModeProvider,
+            intellijPlatformConfigurationName = intellijPlatformConfigurationName,
+        ),
+        configurationName = configurationName,
+        action = action,
+    )
+
+    /**
+     * A base method for adding a dependency on the IntelliJ Platform.
+     *
+     * @param requestedIntelliJPlatformProvider The provider for the requested IntelliJ Platform.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action An optional action to be performed on the created dependency.
+     * @throws GradleException
+     */
+    @Throws(GradleException::class)
+    internal fun addIntelliJPlatformDependency(
+        requestedIntelliJPlatformProvider: Provider<RequestedIntelliJPlatform>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
+        action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
-        requestedIntelliJPlatforms.set(
-            intellijPlatformConfigurationName,
-            typeProvider,
-            versionProvider,
-            useInstallerProvider,
-            productModeProvider,
-        ).map {
+        requestedIntelliJPlatformProvider.map {
             when {
                 it.productMode == ProductMode.FRONTEND -> dependencies.createJetBrainsClient(it.type, it.version)
                 it.type == IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(it.version)

@@ -1053,6 +1053,16 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param localPath The local path of the IntelliJ Platform dependency.
      */
+    fun local(localPath: Path) =
+        dependenciesHelper.addIntelliJPlatformLocalDependency(
+            localPathProvider = dependenciesHelper.provider { localPath },
+        )
+
+    /**
+     * Adds a local dependency on a local IntelliJ Platform instance.
+     *
+     * @param localPath The local path of the IntelliJ Platform dependency.
+     */
     fun local(localPath: Directory) =
         dependenciesHelper.addIntelliJPlatformLocalDependency(
             localPathProvider = dependenciesHelper.provider { localPath },

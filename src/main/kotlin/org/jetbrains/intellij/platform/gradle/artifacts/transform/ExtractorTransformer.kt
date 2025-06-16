@@ -15,13 +15,10 @@ import org.gradle.api.tasks.Internal
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
-import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.createFile
 import kotlin.io.path.nameWithoutExtension
 
 /**
@@ -52,12 +49,6 @@ abstract class ExtractorTransformer : TransformAction<ExtractorTransformer.Param
             val targetDirectory = outputs.dir(name).toPath()
 
             parameters.extractorService.get().extract(path, targetDirectory)
-
-            // Create .toolbox-ignore marker file next to product-info.json
-            runCatching {
-                val productInfo = ProductInfoPathResolver(targetDirectory).resolve()
-                productInfo.parent.resolve(Constants.TOOLBOX_IGNORE).createFile()
-            }
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
         }

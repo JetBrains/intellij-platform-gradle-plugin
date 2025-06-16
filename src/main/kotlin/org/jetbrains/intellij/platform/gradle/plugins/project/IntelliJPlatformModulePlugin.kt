@@ -14,15 +14,13 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.attributes.ComposedJarRule
 import org.jetbrains.intellij.platform.gradle.attributes.DistributionRule
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
 import org.jetbrains.intellij.platform.gradle.tasks.companion.TestCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.create
-import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
-import org.jetbrains.intellij.platform.gradle.utils.settings
+import org.jetbrains.intellij.platform.gradle.utils.dependenciesHelper
 
 abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
@@ -183,22 +181,11 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             }
         }
 
-        // TODO: share with Base plugin?
-        val dependenciesHelper = with(project) {
-            IntelliJPlatformDependenciesHelper(
-                configurations,
-                dependencies,
-                layout,
-                objects,
-                providers,
-                project.path,
-                gradle,
-                rootProjectPath,
-                project.settings.dependencyResolutionManagement.rulesMode,
-            )
-        }
-
-        IntelliJPlatformTestingExtension.register(project, dependenciesHelper, target = project)
+        IntelliJPlatformTestingExtension.register(
+            project = project,
+            dependenciesHelper = project.dependenciesHelper,
+            target = project,
+        )
 
         listOf(
             // Build Module

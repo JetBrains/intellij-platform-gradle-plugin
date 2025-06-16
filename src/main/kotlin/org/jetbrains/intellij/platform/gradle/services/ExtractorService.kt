@@ -9,7 +9,9 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.process.ExecOperations
+import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.resolvePlatformPath
 import java.io.ByteArrayOutputStream
@@ -60,6 +62,12 @@ abstract class ExtractorService @Inject constructor(
         // This approach helps eliminate `/Application Name.app/Contents/...` macOS directories or nested directory from the `tar.gz` archive.
         log.info("Resolving the content directory in '$targetDirectory'.")
         val platformPath = targetDirectory.resolvePlatformPath()
+
+        // Create .toolbox-ignore marker file next to product-info.json
+        runCatching {
+            val productInfo = ProductInfoPathResolver(platformPath).resolve()
+            productInfo.parent.resolve(Constants.TOOLBOX_IGNORE).createFile()
+        }
 
         log.info("The content directory is '$platformPath'.")
 

@@ -20,7 +20,6 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTrans
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
@@ -51,19 +50,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }
 
         val dependenciesHelper by lazy {
-            with(project) {
-                IntelliJPlatformDependenciesHelper(
-                    configurations,
-                    dependencies,
-                    layout,
-                    objects,
-                    providers,
-                    project.path,
-                    gradle,
-                    rootProjectPath,
-                    project.settings.dependencyResolutionManagement.rulesMode
-                )
-            }
+            project.dependenciesHelper
         }
 
         /**
