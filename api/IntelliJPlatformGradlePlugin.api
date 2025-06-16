@@ -3344,8 +3344,6 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/utils/Ide
 }
 
 public final class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver {
-	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver$Companion;
-	public synthetic fun <init> (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver$Parameters;Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/ProviderFactory;Lkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun resolve (Ljava/lang/String;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Ljava/nio/file/Path;
 	public final fun resolve (Ljava/lang/String;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Ljava/nio/file/Path;
 	public final fun resolve (Lorg/gradle/api/provider/Provider;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Ljava/nio/file/Path;
@@ -3362,14 +3360,14 @@ public final class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatform
 	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Ljava/nio/file/Path;
 }
 
-public final class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver$Companion {
-	public final fun intelliJPlatformResolver (Lorg/gradle/api/Project;)Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;
-	public final fun intelliJPlatformResolver (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;
-}
-
 public abstract interface class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver$Parameters {
 	public abstract fun getCacheDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getName ()Lorg/gradle/api/provider/Property;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolverKt {
+	public static final fun intelliJPlatformResolver (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;
+	public static synthetic fun intelliJPlatformResolver$default (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/utils/Logger {
