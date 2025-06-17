@@ -1137,6 +1137,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public abstract fun getLocalPath ()Lorg/gradle/api/file/DirectoryProperty;
 	public fun getName ()Ljava/lang/String;
 	public final fun getPrepareSandboxTask ()Lorg/gradle/api/tasks/TaskProvider;
+	public abstract fun getProductMode ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSandboxDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSplitMode ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSplitModeTarget ()Lorg/gradle/api/provider/Property;

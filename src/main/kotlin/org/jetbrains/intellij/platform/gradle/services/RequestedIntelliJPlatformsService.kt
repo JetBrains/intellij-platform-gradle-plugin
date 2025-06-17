@@ -60,11 +60,30 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
             }
 
             else -> providerFactory.provider {
+                val errorProvider = { type: String ->
+                    providerFactory.provider {
+                        error("The '$key' configuration does not specify the $type of the IntelliJ Platform dependency nor can be resolved from the base configuration.")
+                    }
+                }
+
                 RequestedIntelliJPlatform(
-                    type = typeProvider.map { it.toIntelliJPlatformType() }.orElse(base.map { it.type }).get(),
-                    version = versionProvider.orElse(base.map { it.version }).get(),
-                    installer = useInstallerProvider.orElse(base.map { it.installer }).get(),
-                    productMode = productModeProvider.orElse(base.map { it.productMode }).get(),
+                    type = typeProvider
+                        .map { it.toIntelliJPlatformType() }
+                        .orElse(base.map { it.type })
+                        .orElse(errorProvider("type"))
+                        .get(),
+                    version = versionProvider
+                        .orElse(base.map { it.version })
+                        .orElse(errorProvider("version")).
+                        get(),
+                    installer = useInstallerProvider
+                        .orElse(base.map { it.installer })
+                        .orElse(errorProvider("useInstaller"))
+                        .get(),
+                    productMode = productModeProvider
+                        .orElse(base.map { it.productMode })
+                        .orElse(errorProvider("productMode"))
+                        .get(),
                 )
             }
         }

@@ -256,48 +256,22 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
      * @param version The provider for the version of the IntelliJ Platform dependency.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
+     * @param productMode Describes a mode in which a product may be started.
      * @param configurationName The name of the configuration to add the dependency to.
      * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
-     * @param productMode Describes a mode in which a product may be started.
-     */
-    internal fun customCreate(
-        type: Provider<*>,
-        version: Provider<String>,
-        useInstaller: Boolean = true,
-        configurationName: String,
-        intellijPlatformConfigurationName: String,
-        productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = type,
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-        configurationName = configurationName,
-        intellijPlatformConfigurationName = intellijPlatformConfigurationName,
-    )
-
-    /**
-     * Adds a dependency on the custom IntelliJ Platform with a fallback to the base IntelliJ Platform.
-     *
-     * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
-     * @param version The provider for the version of the IntelliJ Platform dependency.
-     * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
-     * @param configurationName The name of the configuration to add the dependency to.
-     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
-     * @param productMode Describes a mode in which a product may be started.
      */
     internal fun customCreate(
         type: Provider<*>,
         version: Provider<String>,
         useInstaller: Provider<Boolean>,
+        productMode: Provider<ProductMode>,
         configurationName: String,
         intellijPlatformConfigurationName: String,
-        productMode: ProductMode = ProductMode.MONOLITH,
     ) = dependenciesHelper.addIntelliJPlatformDependency(
         typeProvider = type,
         versionProvider = version,
         useInstallerProvider = useInstaller,
-        productModeProvider = dependenciesHelper.provider { productMode },
+        productModeProvider = productMode,
         configurationName = configurationName,
         intellijPlatformConfigurationName = intellijPlatformConfigurationName,
     )

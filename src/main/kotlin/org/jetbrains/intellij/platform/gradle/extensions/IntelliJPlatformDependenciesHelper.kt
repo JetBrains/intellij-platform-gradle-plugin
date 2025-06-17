@@ -259,38 +259,7 @@ class IntelliJPlatformDependenciesHelper(
                     it.installer -> dependencies.createIntelliJPlatformInstaller(it.type, it.version)
                     else -> dependencies.createIntelliJPlatform(it.type, it.version)
                 }
-            }.apply(action).also {
-                //                val addDefaultDependenciesProvider = providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
-                //                addIntelliJPlatformBundledPluginDependencies(addDefaultDependenciesProvider.map { enabled ->
-                //                    if (enabled) {
-                //                        listOf("com.intellij")
-                //                    } else {
-                //                        emptyList()
-                //                    }
-                //                })
-                //                addIntelliJPlatformBundledModuleDependencies(addDefaultDependenciesProvider.map { enabled ->
-                //                    when (enabled) {
-                //                        true -> when (type) {
-                //                            IntelliJPlatformType.Rider -> {
-                //                                val currentVersion = version.toVersion()
-                //                                fun getComparativeVersion(version: Version) = when (version.major) {
-                //                                    in 100..999 -> Version(242)
-                //                                    else -> Version(2024, 2)
-                //                                }
-                //
-                //                                when {
-                //                                    currentVersion >= getComparativeVersion(currentVersion) -> listOf("intellij.rider")
-                //                                    else -> emptyList()
-                //                                }
-                //                            }
-                //
-                //                            else -> emptyList()
-                //                        }
-                //
-                //                        false -> emptyList()
-                //                    }
-                //                })
-            }
+            }.apply(action)
         })
 
     /**

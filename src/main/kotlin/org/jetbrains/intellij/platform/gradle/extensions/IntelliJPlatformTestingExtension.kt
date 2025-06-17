@@ -9,16 +9,13 @@ import org.gradle.api.internal.tasks.DefaultTaskDependency
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.*
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.GradleProperties
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
-import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
@@ -85,6 +82,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                         type = type,
                         version = version,
                         useInstaller = useInstaller,
+                        productMode = productMode,
                         configurationName = this@create.name,
                         intellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix,
                     )
@@ -101,10 +99,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     defaultDependencies {
                         addAllLater(project.provider {
                             listOf(
-                                customIntelliJPlatformLocalConfiguration,
-                                customIntelliJPlatformDependencyConfiguration,
                                 baseIntelliJPlatformLocalConfiguration,
-                            ).flatMap { it.dependencies }.take(1)
+                                customIntelliJPlatformDependencyConfiguration,
+                                customIntelliJPlatformLocalConfiguration,
+                            ).flatMap { it.dependencies }.takeLast(1)
                         })
                     }
                     defaultDependencies {
@@ -297,6 +295,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         abstract val version: Property<String>
         abstract val localPath: DirectoryProperty
         abstract val useInstaller: Property<Boolean>
+        abstract val productMode: Property<ProductMode>
 
         abstract val sandboxDirectory: DirectoryProperty
 
