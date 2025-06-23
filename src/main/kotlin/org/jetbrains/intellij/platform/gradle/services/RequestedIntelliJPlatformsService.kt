@@ -74,8 +74,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                         .get(),
                     version = versionProvider
                         .orElse(base.map { it.version })
-                        .orElse(errorProvider("version")).
-                        get(),
+                        .orElse(errorProvider("version")).get(),
                     installer = useInstallerProvider
                         .orElse(base.map { it.installer })
                         .orElse(errorProvider("useInstaller"))
@@ -97,8 +96,11 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
      * @return The value corresponding to the provided configuration name.
      * @throws IllegalStateException if the configuration name is not found in the map.
      */
-    operator fun get(configurationName: String) = map[configurationName]
-        ?: error("Unknown configuration: $configurationName")
+    operator fun get(configurationName: String) =
+        when (configurationName) {
+            baseConfigurationName -> base
+            else -> map[configurationName] ?: error("Unknown configuration: $configurationName")
+        }
 }
 
 /**

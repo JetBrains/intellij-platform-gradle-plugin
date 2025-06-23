@@ -109,7 +109,7 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * A thread-safe map that holds the paths associated with requested IntelliJ platform configurations.
      */
-    private val requestedIntelliJPlatformPaths = ConcurrentHashMap<String, Path>()
+    private val requestedIntelliJPlatformPaths = ConcurrentHashMap<String, Provider<Path>>()
 
     /**
      * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
@@ -137,12 +137,19 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param configurationName The IntelliJ Platform configuration name.
      */
-    internal fun platformPath(configurationName: String) =
+    internal fun platformPathProvider(configurationName: String) =
         requestedIntelliJPlatformPaths.computeIfAbsent(configurationName) {
             val configuration = configurations[configurationName].asLenient
-            val requestedPlatform = requestedIntelliJPlatforms[configurationName].get()
-            configuration.platformPath(requestedPlatform)
+            val requestedPlatform = requestedIntelliJPlatforms[configurationName]
+            requestedPlatform.map { configuration.platformPath(it) }
         }
+
+    /**
+     * Provides access to the current IntelliJ Platform path.
+     *
+     * @param configurationName The IntelliJ Platform configuration name.
+     */
+    internal fun platformPath(configurationName: String) = platformPathProvider(configurationName).get()
 
     internal fun ide(platformPath: Path) = gradle.registerClassLoaderScopedBuildService(IdesManagerService::class)
         .map { it.resolve(platformPath) }
@@ -305,12 +312,12 @@ class IntelliJPlatformDependenciesHelper(
         val platformPath = resolveArtifactPath(localPath)
         val productInfo = platformPath.productInfo()
 
-        requestedIntelliJPlatforms.set(
-            configurationName = intellijPlatformConfigurationName,
+        createIntelliJPlatformRequest(
             typeProvider = provider { productInfo.type },
             versionProvider = provider { productInfo.version },
             useInstallerProvider = provider { true },
             productModeProvider = provider { ProductMode.MONOLITH },
+            intellijPlatformConfigurationName = intellijPlatformConfigurationName,
         )
 
         dependencies.createIntelliJPlatformLocal(platformPath).apply(action)
@@ -594,24 +601,23 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(cachedListProvider {
-        val platformPath = platformPath(intellijPlatformConfigurationName)
-
-        when (type) {
-            TestFrameworkType.Bundled -> type.coordinates.map {
-                dependencies.createBundledLibrary(it.artifactId, platformPath)
-            }
-
-            else -> {
-                val version = versionProvider.orNull
-                requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
-
-                type.coordinates.map {
-                    dependencies.createPlatformDependency(it, version, platformPath)
+    ) = configurations[configurationName].dependencies.addAllLater(
+        platformPathProvider(intellijPlatformConfigurationName).map { platformPath ->
+            when (type) {
+                TestFrameworkType.Bundled -> type.coordinates.map {
+                    dependencies.createBundledLibrary(it.artifactId, platformPath)
                 }
-            }
-        }.onEach(action)
-    })
+
+                else -> {
+                    val version = versionProvider.orNull
+                    requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
+
+                    type.coordinates.map {
+                        dependencies.createPlatformDependency(it, version, platformPath)
+                    }
+                }
+            }.onEach(action)
+        })
 
     /**
      * Adds a dependency on the IntelliJ Platform dependency.
