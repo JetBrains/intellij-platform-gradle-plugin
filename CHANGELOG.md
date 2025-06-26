@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Breaking Changes
+
+- `pluginModule(Dependency)` dependency helper no longer bundles module into the main plugin jar, use `pluginComposedModule(Dependency)` instead.
+
 ### Added
 
 - Add missing `org.jetbrains.kotlin.platform.type=jvm` for custom test runtime classpath configuration
@@ -10,9 +14,11 @@
 - Create the `.toolbox-ignore` marker file next to the `product-info.json` file to avoid the Toolbox App from indexing it [TBX-14798](https://youtrack.jetbrains.com/issue/TBX-14798)
 - Introduce `IntelliJPlatformResolver` for improved IDE dependency resolution and caching JetBrains/intellij-platform-gradle-plugin#1601
 - `ModuleAware` to handle information if the current project represents an IntelliJ Platform plugin module
+- `pluginComposedModule(Dependency)` helper for bundling (composing) the module dependency into the main plugin jar
 
 ### Changed
 
+- `pluginModule(Dependency)` helper now moves the module dependency into the `lib/modules` directory of the plugin jar.
 - Search for a bundled plugin using module alias if not resolved by ID
 - Stop including the `intellijPlatformPluginModule` configuration in the `intellijPlatformClasspath` as it's already bundled within the composed jar.
 

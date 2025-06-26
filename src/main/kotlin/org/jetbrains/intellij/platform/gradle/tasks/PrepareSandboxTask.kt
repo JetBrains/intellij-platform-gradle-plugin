@@ -264,6 +264,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 )
 
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
+                val intellijPlatformPluginComposedModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
                 val intellijPlatformRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH]
                 val intellijPlatformTestRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH]
                 val runtimeConfiguration = project.files(testSandbox.map {
@@ -300,7 +301,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 pluginName.convention(project.extensionProvider.flatMap { it.projectName })
                 pluginDirectory.convention(defaultDestinationDirectory.dir(pluginName))
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
-                runtimeClasspath.from(runtimeConfiguration - intellijPlatformPluginModuleConfiguration)
+                runtimeClasspath.from(runtimeConfiguration - intellijPlatformPluginModuleConfiguration - intellijPlatformPluginComposedModuleConfiguration)
 
                 splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })
@@ -319,6 +320,10 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
                         content.add(relativePath.pathString)
                     }
+
+                intoChild(pluginName.map { "$it/${Sandbox.Plugin.LIB_MODULES}" })
+                    .from(intellijPlatformPluginModuleConfiguration)
+
                 from(pluginsClasspath)
 
                 inputs.property("instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })

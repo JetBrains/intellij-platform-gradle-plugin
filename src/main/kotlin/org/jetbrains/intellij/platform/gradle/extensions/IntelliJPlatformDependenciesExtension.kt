@@ -16,6 +16,7 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
@@ -1719,12 +1720,23 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         )
 
     /**
-     * Adds dependency on a module to be merged into the main plugin Jar archive by [ComposedJarTask].
+     * A base method for adding a project dependency on a module to be moved into `lib/modules` by [PrepareSandboxTask].
      *
      * @param dependency Plugin module dependency.
      */
     fun pluginModule(dependency: Dependency?) = dependency?.run {
         dependenciesHelper.addIntelliJPlatformPluginModuleDependency(
+            dependency = dependency,
+        )
+    }
+
+    /**
+     * Adds dependency on a module to be merged into the main plugin Jar archive by [ComposedJarTask].
+     *
+     * @param dependency Plugin composed module dependency.
+     */
+    fun pluginComposedModule(dependency: Dependency?) = dependency?.run {
+        dependenciesHelper.addIntelliJPlatformPluginComposedModuleDependency(
             dependency = dependency,
         )
     }

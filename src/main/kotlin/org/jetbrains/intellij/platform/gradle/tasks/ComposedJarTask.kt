@@ -16,6 +16,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.tasks.aware.ModuleAware
 import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
@@ -32,7 +33,7 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  * - [Variant-aware sharing of artifacts between projects](https://docs.gradle.org/current/userguide/cross_project_publications.html#sec:variant-aware-sharing)
  */
 @CacheableTask
-abstract class ComposedJarTask : Jar() {
+abstract class ComposedJarTask : Jar(), ModuleAware {
 
     init {
         group = Plugin.GROUP_NAME
@@ -42,10 +43,23 @@ abstract class ComposedJarTask : Jar() {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<ComposedJarTask>(Tasks.COMPOSED_JAR) {
+                archiveBaseName.convention(module.map {
+                    when (it) {
+                        true -> "${project.rootProject.name}.${project.name}"
+                        false -> project.name
+                    }
+                })
+                archiveVersion.convention(module.flatMap {
+                    when (it) {
+                        true -> project.provider { "" }
+                        false -> project.extensionProvider.flatMap { extension -> extension.pluginConfiguration.version }
+                    }
+                })
+
                 val softwareComponentFactory = project.serviceOf<SoftwareComponentFactory>()
                 val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
-                val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
+                val intellijPlatformPluginComposedModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE]
                 val intellijPlatformComposedJarConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR]
                 // TODO: a possible fix for #1892
                 // val intellijPlatformComposedJarApiConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API]
@@ -61,13 +75,13 @@ abstract class ComposedJarTask : Jar() {
 
                 from(project.zipTree(sourceTaskProvider.flatMap { it.archiveFile }))
                 from(project.provider {
-                    intellijPlatformPluginModuleConfiguration.map {
+                    intellijPlatformPluginComposedModuleConfiguration.map {
                         project.zipTree(it)
                     }
                 })
 
                 dependsOn(sourceTaskProvider)
-                dependsOn(intellijPlatformPluginModuleConfiguration)
+                dependsOn(intellijPlatformPluginComposedModuleConfiguration)
 
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
                 JarCompanion.applyPluginManifest(this)

@@ -30,6 +30,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 	public static final field INTELLIJ_PLATFORM_JAVA_COMPILER Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_LOCAL Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN_LOCAL Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN_MODULE Ljava/lang/String;
@@ -724,6 +725,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun plugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun plugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
 	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun pluginComposedModule (Lorg/gradle/api/artifacts/Dependency;)Ljava/lang/Boolean;
 	public final fun pluginModule (Lorg/gradle/api/artifacts/Dependency;)Ljava/lang/Boolean;
 	public final fun pluginVerifier ()V
 	public final fun pluginVerifier (Ljava/lang/String;)V
@@ -2821,7 +2823,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/BuildSearchableO
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/ComposedJarTask : org/gradle/jvm/tasks/Jar {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/ComposedJarTask : org/gradle/jvm/tasks/Jar, org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/ComposedJarTask$Companion;
 	public fun <init> ()V
 }

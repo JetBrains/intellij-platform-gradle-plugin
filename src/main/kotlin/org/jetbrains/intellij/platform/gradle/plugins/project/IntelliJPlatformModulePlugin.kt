@@ -141,6 +141,11 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 description = "IntelliJ Platform plugin module",
             ) { isTransitive = false }
 
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE,
+                description = "IntelliJ Platform plugin composed module",
+            ) { isTransitive = false }
+
             listOf(
                 Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH,

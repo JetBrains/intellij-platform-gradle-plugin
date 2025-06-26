@@ -37,6 +37,7 @@ import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatformsService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
+import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
 import org.jetbrains.intellij.platform.gradle.utils.*
@@ -477,7 +478,7 @@ class IntelliJPlatformDependenciesHelper(
     ) = configurations[configurationName].dependencies.add(dependency.apply(action))
 
     /**
-     * A base method for adding a project dependency on a module to be merged into the main plugin Jar archive by [ComposedJarTask].
+     * A base method for adding a project dependency on a module to be moved into `lib/modules` by [PrepareSandboxTask].
      *
      * @param dependency Plugin module dependency.
      * @param configurationName The name of the configuration to add the dependency to.
@@ -486,6 +487,19 @@ class IntelliJPlatformDependenciesHelper(
     internal fun addIntelliJPlatformPluginModuleDependency(
         dependency: Dependency,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.add(dependency.apply(action))
+
+    /**
+     * A base method for adding a project dependency on a module to be merged into the main plugin Jar archive by [ComposedJarTask].
+     *
+     * @param dependency Plugin composed module dependency.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addIntelliJPlatformPluginComposedModuleDependency(
+        dependency: Dependency,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.add(dependency.apply(action))
 
