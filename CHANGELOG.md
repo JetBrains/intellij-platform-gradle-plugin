@@ -21,6 +21,7 @@
 - `pluginModule(Dependency)` helper now moves the module dependency into the `lib/modules` directory of the plugin jar.
 - Search for a bundled plugin using module alias if not resolved by ID
 - Stop including the `intellijPlatformPluginModule` configuration in the `intellijPlatformClasspath` as it's already bundled within the composed jar.
+- Refactor `PrepareJarSearchableOptionsTask` to handle plugin modules and improve file filtering logic.
 
 ### Fixed
 

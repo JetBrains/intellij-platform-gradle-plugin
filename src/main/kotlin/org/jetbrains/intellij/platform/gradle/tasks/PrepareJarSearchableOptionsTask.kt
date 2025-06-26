@@ -72,10 +72,11 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
 
     @TaskAction
     fun prepareJarSearchableOptions() {
-        val pluginId = FileSystems
+        val pluginXml = FileSystems
             .newFileSystem(composedJarFile.asPath, null as ClassLoader?)
             .getPath("META-INF", "plugin.xml")
-            .parse { id }
+        val pluginId = pluginXml.parse { id }
+        val modules = pluginXml.parse { pluginContent.flatMap { it.modules.map { module -> module.moduleName } } }
 
         fileSystemOperations.sync {
             from(inputDirectory)
@@ -84,6 +85,7 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
                 when {
                     it.isDirectory -> true
                     it.name.endsWith(pluginId + SEARCHABLE_OPTIONS_SUFFIX_JSON) -> true
+                    it.name.substringAfter('-').removeSuffix(SEARCHABLE_OPTIONS_SUFFIX_JSON) in modules -> true
                     it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_JSON) -> false
                     !it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_XML) -> false
                     else -> libContainer.asPath.resolve(it.name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX_XML)).exists()
