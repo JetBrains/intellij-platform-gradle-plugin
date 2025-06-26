@@ -9,6 +9,7 @@
 - Add `VerifyPluginProjectConfigurationMutedMessages` Gradle property to mute specific messages reported by the `verifyPluginProjectConfiguration` task JetBrains/intellij-platform-gradle-plugin#1958
 - Create the `.toolbox-ignore` marker file next to the `product-info.json` file to avoid the Toolbox App from indexing it [TBX-14798](https://youtrack.jetbrains.com/issue/TBX-14798)
 - Introduce `IntelliJPlatformResolver` for improved IDE dependency resolution and caching JetBrains/intellij-platform-gradle-plugin#1601
+- `ModuleAware` to handle information if the current project represents an IntelliJ Platform plugin module
 
 ### Changed
 

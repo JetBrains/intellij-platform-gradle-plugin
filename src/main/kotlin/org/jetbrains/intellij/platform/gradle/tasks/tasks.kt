@@ -7,6 +7,7 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.plugins.PluginManager
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.JavaExec
@@ -76,6 +77,13 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         }
 
         /**
+         * The [ModuleAware] resolves and provides the [PluginManager.isModule] flag.
+         */
+        if (this is ModuleAware) {
+            module = project.provider { project.pluginManager.isModule }
+        }
+
+        /**
          * Applies the base [Configurations.INTELLIJ_PLATFORM_DEPENDENCY] configuration to [IntelliJPlatformVersionAware] tasks so they can access details of the used IntelliJ
          * Platform, such as [ProductInfo] or its root directory location.
          *
@@ -104,16 +112,12 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [PluginAware] resolves and parses the `plugin.xml` file for easy access in other tasks.
          */
         if (this is PluginAware) {
-            val initializeIntelliJPlatformPluginTaskProvider =
-                tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-            val moduleProvider = initializeIntelliJPlatformPluginTaskProvider.flatMap { it.module }
-
-            pluginXml.convention(moduleProvider.flatMap { isModule ->
-                when {
-                    isModule -> provider { null }
-                    else -> {
+            pluginXml.convention(module.flatMap {
+                when (it) {
+                    true -> provider { null }
+                    false -> {
                         val patchPluginXmlTaskProvider = tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-                        patchPluginXmlTaskProvider.flatMap { it.outputFile }
+                        patchPluginXmlTaskProvider.flatMap { task -> task.outputFile }
                     }
                 }
             })

@@ -15,7 +15,6 @@ import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.of
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.get
@@ -23,7 +22,11 @@ import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValu
 import org.jetbrains.intellij.platform.gradle.providers.LatestPluginVersionValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.aware.CoroutinesJavaAgentAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.utils.*
+import org.jetbrains.intellij.platform.gradle.tasks.aware.ModuleAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.net.URLClassLoader
 import java.time.LocalDate
 import java.util.jar.JarOutputStream
@@ -43,7 +46,7 @@ private const val CLEAN = "clean"
  * To make the Coroutines Java Agent available for the task, inherit from [CoroutinesJavaAgentAware].
  */
 @UntrackedTask(because = "Should always run")
-abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPlatformVersionAware {
+abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPlatformVersionAware, ModuleAware {
 
     /**
      * Holds the [Configurations.INTELLIJ_PLATFORM_CLASSPATH] configuration with the IntelliJ Platform classpath.
@@ -109,12 +112,6 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
      */
     @get:Internal
     abstract val latestPluginVersion: Property<String>
-
-    /**
-     * Defines that the current project has only the [Plugins.MODULE] applied but no [Plugin.ID].
-     */
-    @get:Internal
-    abstract val module: Property<Boolean>
 
     private val log = Logger(javaClass)
 
@@ -213,7 +210,6 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
                 coroutinesJavaAgent.convention(project.layout.buildDirectory.file("coroutines-javaagent.jar"))
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
                 latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {})
-                module.convention(project.provider { project.pluginManager.isModule })
                 coroutinesJavaAgentPremainClass.convention(project.provider {
                     val urls = intelliJPlatformClasspathConfiguration.files.map { it.toURI().toURL() }.toTypedArray()
                     URLClassLoader(urls).use {

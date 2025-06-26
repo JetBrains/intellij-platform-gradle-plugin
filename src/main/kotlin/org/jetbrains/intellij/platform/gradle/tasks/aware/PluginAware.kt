@@ -20,7 +20,7 @@ import kotlin.io.path.inputStream
  * This interface provides information about the currently built plugin.
  * It resolves and parses the final `plugin.xml` descriptor file, making its details easily accessible.
  */
-interface PluginAware {
+interface PluginAware : ModuleAware {
 
     /**
      * Holds the path to the patched `plugin.xml` file.

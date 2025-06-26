@@ -2845,7 +2845,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/GenerateManifest
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask$Companion;
 	public fun <init> ()V
 	public abstract fun getCoroutinesJavaAgent ()Lorg/gradle/api/file/RegularFileProperty;
@@ -2853,7 +2853,6 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/InitializeInt
 	public abstract fun getCoroutinesJavaAgentPremainClass ()Lorg/gradle/api/provider/Property;
 	public abstract fun getIntelliJPlatformClasspathConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getLatestPluginVersion ()Lorg/gradle/api/provider/Property;
-	public abstract fun getModule ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPluginVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSelfUpdateCheck ()Lorg/gradle/api/provider/Property;
@@ -3097,12 +3096,11 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/TestIdeUiTask$Co
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginProjectConfigurationTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/KotlinMetadataAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginProjectConfigurationTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/KotlinMetadataAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginProjectConfigurationTask$Companion;
 	public fun <init> ()V
 	public abstract fun getGitignoreFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getIntellijPlatformCache ()Lorg/gradle/api/provider/Property;
-	public abstract fun getModule ()Lorg/gradle/api/provider/Property;
 	public abstract fun getMutedMessages ()Lorg/gradle/api/provider/ListProperty;
 	public abstract fun getReportDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getRootDirectory ()Lorg/gradle/api/provider/Property;
@@ -3243,7 +3241,11 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public abstract fun getKotlinxCoroutinesLibraryPresent ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
+	public abstract fun getModule ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware : org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
 	public abstract fun getPluginXml ()Lorg/gradle/api/file/RegularFileProperty;
 }
 

@@ -16,7 +16,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -42,7 +41,8 @@ import kotlin.io.path.writeText
  */
 // TODO: Use Reporting for handling verification report output? https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
 @CacheableTask
-abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, KotlinMetadataAware, RuntimeAware, PluginAware {
+abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, KotlinMetadataAware,
+    RuntimeAware, PluginAware, ModuleAware {
 
     /**
      * Report the directory where the verification result will be stored.
@@ -83,12 +83,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
      */
     @get:Internal
     abstract val targetCompatibility: Property<String>
-
-    /**
-     * Defines that the current project has only the [Plugins.MODULE] applied but no [Plugin.ID].
-     */
-    @get:Internal
-    abstract val module: Property<Boolean>
 
     /**
      * List of message patterns to be muted.
@@ -234,7 +228,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 }))
                 sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
                 targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
-                module.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap { it.module })
                 mutedMessages.convention(
                     project.providers[GradleProperties.VerifyPluginProjectConfigurationMutedMessages]
                         .map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
