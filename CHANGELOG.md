@@ -28,6 +28,7 @@
 - Test framework dependency is not provided to a custom `testIde` task JetBrains/intellij-platform-gradle-plugin#1945
 - Respect the custom IntelliJ Platform configuration name when creating a custom task using the local IntelliJ Platform path
 - Properly share the requested IntelliJ Platform between internal Gradle plugin components
+- Refactor `CollectorTransformer` to exclude tests-related jars using `filterNot` as `minus` doesn't remove duplicates
 
 ## [2.6.0] - 2025-05-14
 
