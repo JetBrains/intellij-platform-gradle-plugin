@@ -156,6 +156,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 // TODO: required for test fixtures?
                 //       Configurations.External.TEST_FIXTURES_COMPILE_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
+                Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE,
             ).forEach {
                 named(it) {
                     attributes {
