@@ -4,15 +4,23 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.ProviderFactory
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IVY
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.extensions.*
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginProjectConfigurationTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
+import java.nio.file.Path
+import kotlin.io.path.Path
+import kotlin.io.path.absolute
+import kotlin.io.path.createDirectories
 
 /**
  * The IntelliJ Platform Gradle Plugin introduces custom Gradle properties to control some of the low-level Gradle plugin behaviors.
@@ -168,3 +176,29 @@ inline operator fun <reified T : Any> ProviderFactory.get(property: GradleProper
             } as T
         }
         .orElse(property.defaultValue)
+
+// TODO: simplify those methods
+
+/**
+ * Returns the IntelliJ Platform Gradle Plugin cache directory for the current project.
+ */
+internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
+    get(GradleProperties.IntellijPlatformCache).orNull
+        .takeUnless { it.isNullOrBlank() }
+        ?.let { Path(it) }
+        .run { this ?: rootProjectDirectory.resolve(CACHE_DIRECTORY) }
+        .createDirectories()
+        .absolute()
+
+/**
+ * Represents the local platform artifacts directory path which contains Ivy XML files.
+ *
+ * @see [GradleProperties.LocalPlatformArtifacts]
+ */
+internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
+    get(GradleProperties.LocalPlatformArtifacts).orNull
+        .takeUnless { it.isNullOrBlank() }
+        ?.let { Path(it) }
+        .run { this ?: intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IVY) }
+        .createDirectories()
+        .absolute()

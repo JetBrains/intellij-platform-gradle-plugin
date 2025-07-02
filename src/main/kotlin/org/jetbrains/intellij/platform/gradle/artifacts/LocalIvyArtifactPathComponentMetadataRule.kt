@@ -15,7 +15,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.all
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
-import org.jetbrains.intellij.platform.gradle.extensions.localPlatformArtifactsPath
+import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.platformPath

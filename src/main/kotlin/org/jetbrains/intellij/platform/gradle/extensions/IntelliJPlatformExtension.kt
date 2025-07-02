@@ -25,6 +25,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.ProductMode
+import org.jetbrains.intellij.platform.gradle.intellijPlatformCachePath
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.models.productInfo
@@ -150,7 +151,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         @DelegatesTo(
             value = PluginConfiguration::class,
             strategy = Closure.DELEGATE_FIRST
-        ) action: Closure<*>
+        ) action: Closure<*>,
     ) {
         action.delegate = pluginConfiguration
         action.resolveStrategy = Closure.DELEGATE_FIRST
@@ -200,7 +201,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         @DelegatesTo(
             value = PluginVerification::class,
             strategy = Closure.DELEGATE_FIRST
-        ) action: Closure<*>
+        ) action: Closure<*>,
     ) {
         action.delegate = pluginVerification
         action.resolveStrategy = Closure.DELEGATE_FIRST
@@ -222,7 +223,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         @DelegatesTo(
             value = PluginVerification::class,
             strategy = Closure.DELEGATE_FIRST
-        ) action: Closure<*>
+        ) action: Closure<*>,
     ) {
         action.delegate = pluginVerification
         action.resolveStrategy = Closure.DELEGATE_FIRST
@@ -246,7 +247,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             @DelegatesTo(
                 value = ProductDescriptor::class,
                 strategy = Closure.DELEGATE_FIRST
-            ) action: Closure<*>
+            ) action: Closure<*>,
         ) {
             action.delegate = productDescriptor
             action.resolveStrategy = Closure.DELEGATE_FIRST
@@ -265,7 +266,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             @DelegatesTo(
                 value = IdeaVersion::class,
                 strategy = Closure.DELEGATE_FIRST
-            ) action: Closure<*>
+            ) action: Closure<*>,
         ) {
             action.delegate = ideaVersion
             action.resolveStrategy = Closure.DELEGATE_FIRST
@@ -1009,7 +1010,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 fun register(
                     dependenciesHelper: IntelliJPlatformDependenciesHelper,
                     extensionProvider: Provider<IntelliJPlatformExtension>,
-                    target: Any
+                    target: Any,
                 ) =
                     target.configureExtension<Ides>(
                         Extensions.IDES,

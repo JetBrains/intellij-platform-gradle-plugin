@@ -4,41 +4,8 @@ package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionContainer
-import org.gradle.api.provider.ProviderFactory
-import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
-import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IVY
-import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import java.nio.file.Path
-import kotlin.io.path.Path
-import kotlin.io.path.absolute
-import kotlin.io.path.createDirectories
-
-/**
- * Returns the IntelliJ Platform Gradle Plugin cache directory for the current project.
- */
-internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
-    get(GradleProperties.IntellijPlatformCache).orNull
-        .takeUnless { it.isNullOrBlank() }
-        ?.let { Path(it) }
-        .run { this ?: rootProjectDirectory.resolve(CACHE_DIRECTORY) }
-        .createDirectories()
-        .absolute()
-
-/**
- * Represents the local platform artifacts directory path which contains Ivy XML files.
- *
- * @see [GradleProperties.LocalPlatformArtifacts]
- */
-internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
-    get(GradleProperties.LocalPlatformArtifacts).orNull
-        .takeUnless { it.isNullOrBlank() }
-        ?.let { Path(it) }
-        .run { this ?: intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IVY) }
-        .createDirectories()
-        .absolute()
 
 /**
  * Parses a string representation of an IntelliJ Platform type and version, such as `IU-2024.2`.

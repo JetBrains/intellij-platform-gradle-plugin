@@ -19,6 +19,7 @@ import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.flow.StopShimServerAction
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import java.net.URI
