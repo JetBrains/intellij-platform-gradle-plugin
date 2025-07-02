@@ -18,7 +18,6 @@ import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
-
 /**
  * Creates a JAR file with searchable options to be distributed with the plugin.
  */
@@ -65,7 +64,8 @@ abstract class JarSearchableOptionsTask : Jar() {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
-                val prepareJarSearchableOptionsTask = project.tasks.named<PrepareJarSearchableOptionsTask>(Tasks.PREPARE_JAR_SEARCHABLE_OPTIONS)
+                val prepareJarSearchableOptionsTask =
+                    project.tasks.named<PrepareJarSearchableOptionsTask>(Tasks.PREPARE_JAR_SEARCHABLE_OPTIONS)
                 val buildSearchableOptionsEnabledProvider = project.extensionProvider.flatMap { it.buildSearchableOptions }
                 val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
 
@@ -79,7 +79,12 @@ abstract class JarSearchableOptionsTask : Jar() {
                     buildSearchableOptionsEnabledProvider.get()
                 }
 
-                project.artifacts.add(runtimeElementsConfiguration.name, archiveFile)
+                runtimeElementsConfiguration.outgoing.artifacts(buildSearchableOptionsEnabledProvider.map { enabled ->
+                    when {
+                        enabled -> listOf(archiveFile.get())
+                        else -> emptyList()
+                    }
+                }) { builtBy(this@registerTask) }
             }
     }
 }
