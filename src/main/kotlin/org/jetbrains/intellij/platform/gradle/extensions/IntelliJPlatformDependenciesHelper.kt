@@ -199,7 +199,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param intellijPlatformConfigurationName name of the IntelliJ Platform configuration, defaulting to [Configurations.INTELLIJ_PLATFORM_DEPENDENCY].
      */
     internal fun createIntelliJPlatformRequest(
-        typeProvider: Provider<*>,
+        typeProvider: Provider<IntelliJPlatformType>,
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>,
         productModeProvider: Provider<ProductMode>,
@@ -226,7 +226,7 @@ class IntelliJPlatformDependenciesHelper(
      */
     @Throws(GradleException::class)
     internal fun addIntelliJPlatformDependency(
-        typeProvider: Provider<*>,
+        typeProvider: Provider<IntelliJPlatformType>,
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>,
         productModeProvider: Provider<ProductMode>,

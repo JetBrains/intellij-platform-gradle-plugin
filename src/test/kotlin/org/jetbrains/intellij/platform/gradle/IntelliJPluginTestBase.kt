@@ -84,7 +84,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                         val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                         val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
                         
-                        create(type, version, useInstaller = useInstaller)
+                        create(type, version) { this.useInstaller.set(useInstaller) }
                     }
                 }
                             

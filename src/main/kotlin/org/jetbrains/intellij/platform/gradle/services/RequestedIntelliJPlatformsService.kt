@@ -11,7 +11,6 @@ import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.ProductMode
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
@@ -38,7 +37,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
      */
     fun set(
         configurationName: String,
-        typeProvider: Provider<*>,
+        typeProvider: Provider<IntelliJPlatformType>,
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>,
         productModeProvider: Provider<ProductMode>,
@@ -51,7 +50,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
 
                 set(
                     RequestedIntelliJPlatform(
-                        type = typeProvider.map { it.toIntelliJPlatformType() }.get(),
+                        type = typeProvider.get(),
                         version = versionProvider.get(),
                         installer = useInstallerProvider.get(),
                         productMode = productModeProvider.get(),
@@ -68,7 +67,6 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
 
                 RequestedIntelliJPlatform(
                     type = typeProvider
-                        .map { it.toIntelliJPlatformType() }
                         .orElse(base.map { it.type })
                         .orElse(errorProvider("type"))
                         .get(),

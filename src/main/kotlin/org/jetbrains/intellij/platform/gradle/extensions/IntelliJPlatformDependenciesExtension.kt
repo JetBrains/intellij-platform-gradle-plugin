@@ -6,7 +6,10 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
@@ -37,7 +40,546 @@ import javax.inject.Inject
 @IntelliJPlatform
 abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private val dependenciesHelper: IntelliJPlatformDependenciesHelper,
+    private val objects: ObjectFactory,
 ) {
+
+    /**
+     * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
+     * adds an IntelliJ Platform dependency based on the provided configuration.
+     *
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) {
+        val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
+
+        with(configuration) {
+            dependenciesHelper.addIntelliJPlatformDependency(
+                typeProvider = type,
+                versionProvider = version,
+                useInstallerProvider = useInstaller,
+                productModeProvider = productMode,
+//                useCustomCacheProvider = useCustomCache,
+                configurationName = configurationName.orNull
+                    ?: Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
+                intellijPlatformConfigurationName = intellijPlatformConfigurationName.orNull
+                    ?: Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+            )
+        }
+    }
+
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param type The type of the IntelliJ Platform dependency.
+     * @param version The version of the IntelliJ Platform dependency.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun create(
+        type: Any,
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create {
+        this.type = type.toIntelliJPlatformType()
+        this.version = version
+        configure()
+    }
+
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param type The type of the IntelliJ Platform dependency.
+     * @param version The version of the IntelliJ Platform dependency.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun create(
+        type: Any,
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create {
+        this.type = type.toIntelliJPlatformType()
+        this.version = version
+        configure()
+    }
+
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param type The type of the IntelliJ Platform dependency.
+     * @param version The version of the IntelliJ Platform dependency.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun create(
+        type: Provider<*>,
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create {
+        this.type = type.toIntelliJPlatformType()
+        this.version = version
+        configure()
+    }
+
+    /**
+     * Adds a dependency on Android Studio.
+     *
+     * @param version The version of Android Studio.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun androidStudio(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.AndroidStudio, version, configure)
+
+    /**
+     * Adds a dependency on Android Studio.
+     *
+     * @param version The version of Android Studio.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun androidStudio(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.AndroidStudio, version, configure)
+
+    /**
+     * Adds a dependency on Aqua.
+     *
+     * @param version The version of Aqua.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    @Deprecated("Aqua (QA) is no longer available as a target IntelliJ Platform")
+    fun aqua(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.Aqua, version, configure)
+
+    /**
+     * Adds a dependency on Aqua.
+     *
+     * @param version The provider for the version of Aqua.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    @Deprecated("Aqua (QA) is no longer available as a target IntelliJ Platform")
+    fun aqua(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.Aqua, version, configure)
+
+    /**
+     * Adds a dependency on DataGrip.
+     *
+     * @param version The version of DataGrip.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun datagrip(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.DataGrip, version, configure)
+
+    /**
+     * Adds a dependency on DataGrip.
+     *
+     * @param version The version of DataGrip.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun datagrip(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.DataGrip, version, configure)
+
+    /**
+     * Adds a dependency on DataSpell.
+     *
+     * @param version The version of DataSpell.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun dataspell(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.DataSpell, version, configure)
+
+    /**
+     * Adds a dependency on DataSpell.
+     *
+     * @param version The version of DataSpell.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun dataspell(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.DataSpell, version, configure)
+
+    /**
+     * Adds a dependency on CLion.
+     *
+     * @param version The version of CLion.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun clion(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.CLion, version, configure)
+
+    /**
+     * Adds a dependency on CLion.
+     *
+     * @param version The version of CLion.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun clion(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.CLion, version, configure)
+
+    /**
+     * Adds a dependency on Fleet Backend.
+     *
+     * @param version The version of Fleet Backend.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun fleetBackend(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.FleetBackend, version, configure)
+
+    /**
+     * Adds a dependency on Fleet Backend.
+     *
+     * @param version The version of Fleet Backend.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun fleetBackend(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.FleetBackend, version, configure)
+
+    /**
+     * Adds a dependency on Gateway.
+     *
+     * @param version The version of Gateway.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun gateway(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.Gateway, version, configure)
+
+    /**
+     * Adds a dependency on Gateway.
+     *
+     * @param version The version of Gateway.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun gateway(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.Gateway, version, configure)
+
+    /**
+     * Adds a dependency on GoLand.
+     *
+     * @param version The version of GoLand.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun goland(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.GoLand, version, configure)
+
+    /**
+     * Adds a dependency on GoLand.
+     *
+     * @param version The version of GoLand.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun goland(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.GoLand, version, configure)
+
+    /**
+     * Adds a dependency on IntelliJ IDEA Community.
+     *
+     * @param version The version of IntelliJ IDEA Community.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun intellijIdeaCommunity(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.IntellijIdeaCommunity, version, configure)
+
+    /**
+     * Adds a dependency on IntelliJ IDEA Community.
+     *
+     * @param version The version of IntelliJ IDEA Community.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun intellijIdeaCommunity(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.IntellijIdeaCommunity, version, configure)
+
+    /**
+     * Adds a dependency on IntelliJ IDEA Ultimate.
+     *
+     * @param version The version of IntelliJ IDEA Ultimate.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun intellijIdeaUltimate(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.IntellijIdeaUltimate, version, configure)
+
+    /**
+     * Adds a dependency on IntelliJ IDEA Ultimate.
+     *
+     * @param version The version of IntelliJ IDEA Ultimate.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun intellijIdeaUltimate(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.IntellijIdeaUltimate, version, configure)
+
+    /**
+     * Adds a dependency on MPS.
+     *
+     * @param version The version of MPS.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun mps(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.MPS, version, configure)
+
+    /**
+     * Adds a dependency on MPS.
+     *
+     * @param version The version of MPS.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun mps(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.MPS, version, configure)
+
+    /**
+     * Adds a dependency on PhpStorm.
+     *
+     * @param version The version of PhpStorm.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun phpstorm(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.PhpStorm, version, configure)
+
+    /**
+     * Adds a dependency on PhpStorm.
+     *
+     * @param version The version of PhpStorm.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun phpstorm(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.PhpStorm, version, configure)
+
+    /**
+     * Adds a dependency on PyCharm Community.
+     *
+     * @param version The version of PyCharm Community.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun pycharmCommunity(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.PyCharmCommunity, version, configure)
+
+    /**
+     * Adds a dependency on PyCharm Community.
+     *
+     * @param version The version of PyCharm Community.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun pycharmCommunity(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.PyCharmCommunity, version, configure)
+
+    /**
+     * Adds a dependency on PyCharm Professional.
+     *
+     * @param version The version of PyCharm Professional.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun pycharmProfessional(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.PyCharmProfessional, version, configure)
+
+    /**
+     * Adds a dependency on PyCharm Professional.
+     *
+     * @param version The version of PyCharm Professional.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun pycharmProfessional(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.PyCharmProfessional, version, configure)
+
+    /**
+     * Adds a dependency on Rider.
+     *
+     * @param version The version of Rider.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun rider(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.Rider, version, configure)
+
+    /**
+     * Adds a dependency on Rider.
+     *
+     * @param version The version of Rider.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun rider(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.Rider, version, configure)
+
+    /**
+     * Adds a dependency on RubyMine.
+     *
+     * @param version The version of RubyMine.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun rubymine(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.RubyMine, version, configure)
+
+    /**
+     * Adds a dependency on RubyMine.
+     *
+     * @param version The version of RubyMine.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun rubymine(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.RubyMine, version, configure)
+
+    /**
+     * Adds a dependency on Rust Rover.
+     *
+     * @param version The version of Rust Rover.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun rustRover(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.RustRover, version, configure)
+
+    /**
+     * Adds a dependency on Rust Rover.
+     *
+     * @param version The version of Rust Rover.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun rustRover(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.RustRover, version, configure)
+
+    /**
+     * Adds a dependency on WebStorm.
+     *
+     * @param version The version of WebStorm.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun webstorm(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.WebStorm, version, configure)
+
+    /**
+     * Adds a dependency on WebStorm.
+     *
+     * @param version The version of WebStorm.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun webstorm(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.WebStorm, version, configure)
+
+    /**
+     * Adds a dependency on Writerside.
+     *
+     * @param version The version of Writerside.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
+    fun writerside(
+        version: String,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.Writerside, version, configure)
+
+    /**
+     * Adds a dependency on Writerside.
+     *
+     * @param version The version of Writerside.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
+    fun writerside(
+        version: Provider<String>,
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = create(IntelliJPlatformType.Writerside, version, configure)
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -48,17 +590,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
     fun create(
         type: String,
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { type.toIntelliJPlatformType() },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = create(type, version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -69,17 +613,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
     fun create(
         type: Provider<*>,
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = type,
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = create(type, version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -90,17 +636,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
     fun create(
         type: IntelliJPlatformType,
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { type },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = create(type, version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -111,17 +659,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
     fun create(
         type: String,
         version: Provider<String>,
         useInstaller: Boolean = true,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { type.toIntelliJPlatformType() },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = create(type, version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -132,17 +682,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
     fun create(
         type: IntelliJPlatformType,
         version: Provider<String>,
         useInstaller: Boolean = true,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { type },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = create(type, version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -154,19 +706,21 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
     fun create(
         type: Provider<*>,
         version: Provider<String>,
         useInstaller: Boolean = true,
         configurationName: String,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = type,
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-        configurationName = configurationName,
-    )
+    ) = create(type, version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+        this.configurationName = configurationName
+    }
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -177,17 +731,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
     fun create(
         type: Provider<*>,
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = type,
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = create(type, version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -197,35 +753,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      * @param productMode Describes a mode in which a product may be started.
      */
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
     fun create(
         type: Provider<*>,
         version: Provider<String>,
         useInstaller: Provider<Boolean>,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = type,
-        versionProvider = version,
-        useInstallerProvider = useInstaller,
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
-
-    /**
-     * Adds a dependency on the IntelliJ Platform.
-     *
-     * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
-     * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
-     * @param productMode Describes a mode in which a product may be started.
-     */
-    @JvmOverloads
-    fun create(notation: String, useInstaller: Boolean = true, productMode: ProductMode = ProductMode.MONOLITH) {
-        val (type, version) = notation.parseIdeNotation()
-
-        dependenciesHelper.addIntelliJPlatformDependency(
-            typeProvider = dependenciesHelper.provider { type },
-            versionProvider = dependenciesHelper.provider { version },
-            useInstallerProvider = dependenciesHelper.provider { useInstaller },
-            productModeProvider = dependenciesHelper.provider { productMode },
-        )
+    ) = create(type, version) {
+        this.useInstaller = useInstaller.get()
+        this.productMode = productMode
     }
 
     /**
@@ -236,46 +775,45 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
+    fun create(
+        notation: String,
+        useInstaller: Boolean = true,
+        productMode: ProductMode = ProductMode.MONOLITH,
+    ) = create {
+        val (type, version) = notation.parseIdeNotation()
+        this.type = type.toIntelliJPlatformType()
+        this.version = version
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
+
+    /**
+     * Adds a dependency on the IntelliJ Platform.
+     *
+     * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
+     * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
+     * @param productMode Describes a mode in which a product may be started.
+     */
+    @JvmOverloads
+    @Deprecated(
+        message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+    )
     fun create(
         notation: Provider<String>,
         useInstaller: Boolean = true,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) {
+    ) = create {
         val parsedNotationProvider = notation.map { it.parseIdeNotation() }
-
-        dependenciesHelper.addIntelliJPlatformDependency(
-            typeProvider = parsedNotationProvider.map { it.first },
-            versionProvider = parsedNotationProvider.map { it.second },
-            useInstallerProvider = dependenciesHelper.provider { useInstaller },
-            productModeProvider = dependenciesHelper.provider { productMode },
-        )
+        this.type = parsedNotationProvider.map { it.first }.toIntelliJPlatformType()
+        this.version = parsedNotationProvider.map { it.second }
+        this.useInstaller = useInstaller
+        this.productMode = productMode
     }
-
-    /**
-     * Adds a dependency on the custom IntelliJ Platform with a fallback to the base IntelliJ Platform.
-     *
-     * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
-     * @param version The provider for the version of the IntelliJ Platform dependency.
-     * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
-     * @param productMode Describes a mode in which a product may be started.
-     * @param configurationName The name of the configuration to add the dependency to.
-     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
-     */
-    internal fun customCreate(
-        type: Provider<*>,
-        version: Provider<String>,
-        useInstaller: Provider<Boolean>,
-        productMode: Provider<ProductMode>,
-        configurationName: String,
-        intellijPlatformConfigurationName: String,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = type,
-        versionProvider = version,
-        useInstallerProvider = useInstaller,
-        productModeProvider = productMode,
-        configurationName = configurationName,
-        intellijPlatformConfigurationName = intellijPlatformConfigurationName,
-    )
 
     /**
      * Adds a dependency on Android Studio.
@@ -285,16 +823,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the androidStudio(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("androidStudio(version) { this.useInstaller = useInstaller }"),
+    )
     fun androidStudio(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.AndroidStudio },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = androidStudio(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Android Studio.
@@ -304,16 +844,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the androidStudio(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("androidStudio(version) { this.useInstaller = useInstaller }"),
+    )
     fun androidStudio(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.AndroidStudio },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = androidStudio(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Aqua.
@@ -326,14 +868,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun aqua(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Aqua },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = aqua(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Aqua.
@@ -346,14 +886,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun aqua(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Aqua },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = aqua(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on DataGrip.
@@ -363,16 +901,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the datagrip(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("datagrip(version) { this.useInstaller = useInstaller }"),
+    )
     fun datagrip(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.DataGrip },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = datagrip(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on DataGrip.
@@ -382,16 +922,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the datagrip(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("datagrip(version) { this.useInstaller = useInstaller }"),
+    )
     fun datagrip(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.DataGrip },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = datagrip(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on DataSpell.
@@ -401,16 +943,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the dataspell(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("dataspell(version) { this.useInstaller = useInstaller }"),
+    )
     fun dataspell(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.DataSpell },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = dataspell(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on DataSpell.
@@ -420,16 +964,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the dataspell(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("dataspell(version) { this.useInstaller = useInstaller }"),
+    )
     fun dataspell(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.DataSpell },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = dataspell(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on CLion.
@@ -439,16 +985,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the clion(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("clion(version) { this.useInstaller = useInstaller }"),
+    )
     fun clion(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.CLion },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = clion(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on CLion.
@@ -458,16 +1006,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the clion(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("clion(version) { this.useInstaller = useInstaller }"),
+    )
     fun clion(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.CLion },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = clion(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Fleet Backend.
@@ -477,16 +1027,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the fleetBackend(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("fleetBackend(version) { this.useInstaller = useInstaller }"),
+    )
     fun fleetBackend(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.FleetBackend },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = fleetBackend(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Fleet Backend.
@@ -496,16 +1048,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the fleetBackend(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("fleetBackend(version) { this.useInstaller = useInstaller }"),
+    )
     fun fleetBackend(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.FleetBackend },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = fleetBackend(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Gateway.
@@ -515,16 +1069,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the gateway(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("gateway(version) { this.useInstaller = useInstaller }"),
+    )
     fun gateway(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Gateway },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = gateway(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Gateway.
@@ -534,16 +1090,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the gateway(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("gateway(version) { this.useInstaller = useInstaller }"),
+    )
     fun gateway(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Gateway },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = gateway(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on GoLand.
@@ -553,16 +1111,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the goland(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("goland(version) { this.useInstaller = useInstaller }"),
+    )
     fun goland(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.GoLand },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = goland(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on GoLand.
@@ -572,16 +1132,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the goland(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("goland(version) { this.useInstaller = useInstaller }"),
+    )
     fun goland(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.GoLand },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = goland(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on IntelliJ IDEA Community.
@@ -591,16 +1153,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the intellijIdeaCommunity(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("intellijIdeaCommunity(version) { this.useInstaller = useInstaller }"),
+    )
     fun intellijIdeaCommunity(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.IntellijIdeaCommunity },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = intellijIdeaCommunity(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on IntelliJ IDEA Community.
@@ -610,16 +1174,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the intellijIdeaCommunity(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("intellijIdeaCommunity(version) { this.useInstaller = useInstaller }"),
+    )
     fun intellijIdeaCommunity(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.IntellijIdeaCommunity },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = intellijIdeaCommunity(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on IntelliJ IDEA Ultimate.
@@ -629,16 +1195,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the intellijIdeaUltimate(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("intellijIdeaUltimate(version) { this.useInstaller = useInstaller }"),
+    )
     fun intellijIdeaUltimate(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.IntellijIdeaUltimate },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = intellijIdeaUltimate(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on IntelliJ IDEA Ultimate.
@@ -648,16 +1216,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the intellijIdeaUltimate(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("intellijIdeaUltimate(version) { this.useInstaller = useInstaller }"),
+    )
     fun intellijIdeaUltimate(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.IntellijIdeaUltimate },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = intellijIdeaUltimate(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on MPS.
@@ -667,16 +1237,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the mps(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("mps(version) { this.useInstaller = useInstaller }"),
+    )
     fun mps(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.MPS },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = mps(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on MPS.
@@ -686,16 +1258,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the mps(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("mps(version) { this.useInstaller = useInstaller }"),
+    )
     fun mps(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.MPS },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = mps(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on PhpStorm.
@@ -705,16 +1279,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the phpstorm(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("phpstorm(version) { this.useInstaller = useInstaller }"),
+    )
     fun phpstorm(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PhpStorm },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = phpstorm(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on PhpStorm.
@@ -724,16 +1300,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the phpstorm(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("phpstorm(version) { this.useInstaller = useInstaller }"),
+    )
     fun phpstorm(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PhpStorm },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = phpstorm(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on PyCharm Community.
@@ -743,16 +1321,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the pycharmCommunity(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("pycharmCommunity(version) { this.useInstaller = useInstaller }"),
+    )
     fun pycharmCommunity(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PyCharmCommunity },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = pycharmCommunity(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on PyCharm Community.
@@ -762,16 +1342,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the pycharmCommunity(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("pycharmCommunity(version) { this.useInstaller = useInstaller }"),
+    )
     fun pycharmCommunity(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PyCharmCommunity },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = pycharmCommunity(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on PyCharm Professional.
@@ -781,16 +1363,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the pycharmProfessional(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("pycharmProfessional(version) { this.useInstaller = useInstaller }"),
+    )
     fun pycharmProfessional(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PyCharmProfessional },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = pycharmProfessional(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on PyCharm Professional.
@@ -800,16 +1384,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the pycharmProfessional(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("pycharmProfessional(version) { this.useInstaller = useInstaller }"),
+    )
     fun pycharmProfessional(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.PyCharmProfessional },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = pycharmProfessional(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Rider.
@@ -819,16 +1405,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the rider(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("rider(version) { this.useInstaller = useInstaller }"),
+    )
     fun rider(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Rider },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = rider(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Rider.
@@ -838,16 +1426,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the rider(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("rider(version) { this.useInstaller = useInstaller }"),
+    )
     fun rider(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Rider },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = rider(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on RubyMine.
@@ -857,16 +1447,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the rubymine(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("rubymine(version) { this.useInstaller = useInstaller }"),
+    )
     fun rubymine(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.RubyMine },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = rubymine(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on RubyMine.
@@ -876,16 +1468,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the rubymine(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("rubymine(version) { this.useInstaller = useInstaller }"),
+    )
     fun rubymine(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.RubyMine },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = rubymine(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Rust Rover.
@@ -895,16 +1489,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the rustRover(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("rustRover(version) { this.useInstaller = useInstaller }"),
+    )
     fun rustRover(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.RustRover },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = rustRover(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Rust Rover.
@@ -914,16 +1510,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the rustRover(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("rustRover(version) { this.useInstaller = useInstaller }"),
+    )
     fun rustRover(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.RustRover },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = rustRover(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on WebStorm.
@@ -933,16 +1531,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the webstorm(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("webstorm(version) { this.useInstaller = useInstaller }"),
+    )
     fun webstorm(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.WebStorm },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = webstorm(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on WebStorm.
@@ -952,16 +1552,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param productMode Describes a mode in which a product may be started.
      */
     @JvmOverloads
+    @Deprecated(
+        message = "Please use the webstorm(version, configure) method with a configuration lambda instead.",
+        replaceWith = ReplaceWith("webstorm(version) { this.useInstaller = useInstaller }"),
+    )
     fun webstorm(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.WebStorm },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = webstorm(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Writerside.
@@ -974,14 +1576,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
     fun writerside(
         version: String,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Writerside },
-        versionProvider = dependenciesHelper.provider { version },
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = writerside(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a dependency on Writerside.
@@ -994,14 +1594,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
     fun writerside(
         version: Provider<String>,
-        useInstaller: Boolean = true,
+        useInstaller: Boolean,
         productMode: ProductMode = ProductMode.MONOLITH,
-    ) = dependenciesHelper.addIntelliJPlatformDependency(
-        typeProvider = dependenciesHelper.provider { IntelliJPlatformType.Writerside },
-        versionProvider = version,
-        useInstallerProvider = dependenciesHelper.provider { useInstaller },
-        productModeProvider = dependenciesHelper.provider { productMode },
-    )
+    ) = writerside(version) {
+        this.useInstaller = useInstaller
+        this.productMode = productMode
+    }
 
     /**
      * Adds a local dependency on a local IntelliJ Platform instance.
@@ -1963,10 +2561,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         )
 
     companion object {
-        fun register(dependenciesHelper: IntelliJPlatformDependenciesHelper, target: Any) =
+        fun register(dependenciesHelper: IntelliJPlatformDependenciesHelper, objects: ObjectFactory, target: Any) =
             target.configureExtension<IntelliJPlatformDependenciesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 dependenciesHelper,
+                objects,
             )
     }
 }

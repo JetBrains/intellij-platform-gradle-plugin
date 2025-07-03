@@ -18,14 +18,11 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByName
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatform
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.ProductMode
-import org.jetbrains.intellij.platform.gradle.intellijPlatformCachePath
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.models.productInfo
@@ -840,7 +837,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 useInstaller: Boolean = true,
                 productMode: ProductMode = ProductMode.MONOLITH,
             ) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = dependenciesHelper.provider { type },
+                typeProvider = dependenciesHelper.provider { type.toIntelliJPlatformType() },
                 versionProvider = dependenciesHelper.provider { version },
                 useInstallerProvider = dependenciesHelper.provider { useInstaller },
                 productModeProvider = dependenciesHelper.provider { productMode },
@@ -863,7 +860,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 useInstaller: Boolean = true,
                 productMode: ProductMode = ProductMode.MONOLITH,
             ) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = type,
+                typeProvider = type.toIntelliJPlatformType(),
                 versionProvider = version,
                 useInstallerProvider = dependenciesHelper.provider { useInstaller },
                 productModeProvider = dependenciesHelper.provider { productMode },
@@ -885,7 +882,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 useInstaller: Provider<Boolean>,
                 productMode: Provider<ProductMode>,
             ) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = type,
+                typeProvider = type.toIntelliJPlatformType(),
                 versionProvider = version,
                 useInstallerProvider = useInstaller,
                 productModeProvider = productMode,

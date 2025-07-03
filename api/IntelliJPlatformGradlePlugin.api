@@ -331,6 +331,11 @@ public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformType$C
 	public final fun fromCode (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformTypeKt {
+	public static final fun toIntelliJPlatformType (Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public static final fun toIntelliJPlatformType (Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/ProductMode : java/lang/Enum {
 	public static final field BACKEND Lorg/jetbrains/intellij/platform/gradle/ProductMode;
 	public static final field FRONTEND Lorg/jetbrains/intellij/platform/gradle/ProductMode;
@@ -535,22 +540,30 @@ public abstract class org/jetbrains/intellij/platform/gradle/attributes/Distribu
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension$Companion;
-	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;)V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun androidStudio (Ljava/lang/String;)V
+	public final fun androidStudio (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun androidStudio (Ljava/lang/String;Z)V
 	public final fun androidStudio (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun androidStudio (Lorg/gradle/api/provider/Provider;)V
+	public final fun androidStudio (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun androidStudio (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun androidStudio (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun androidStudio$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun androidStudio$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun androidStudio$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun androidStudio$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun aqua (Ljava/lang/String;)V
+	public final fun aqua (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun aqua (Ljava/lang/String;Z)V
 	public final fun aqua (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun aqua (Lorg/gradle/api/provider/Provider;)V
+	public final fun aqua (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun aqua (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun aqua (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun aqua$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun aqua$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun aqua$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun aqua$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun bundledLibrary (Ljava/lang/String;)V
 	public final fun bundledLibrary (Lorg/gradle/api/provider/Provider;)V
@@ -565,20 +578,27 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun bundledPlugins (Lorg/gradle/api/provider/Provider;)V
 	public final fun bundledPlugins ([Ljava/lang/String;)V
 	public final fun clion (Ljava/lang/String;)V
+	public final fun clion (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun clion (Ljava/lang/String;Z)V
 	public final fun clion (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun clion (Lorg/gradle/api/provider/Provider;)V
+	public final fun clion (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun clion (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun clion (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun clion$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun clion$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun clion$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun clion$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun compatiblePlugin (Ljava/lang/String;)V
 	public final fun compatiblePlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun compatiblePlugins (Ljava/util/List;)V
 	public final fun compatiblePlugins (Lorg/gradle/api/provider/Provider;)V
 	public final fun compatiblePlugins ([Ljava/lang/String;)V
+	public final fun create (Ljava/lang/Object;Ljava/lang/String;)V
+	public final fun create (Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun create (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;)V
+	public final fun create (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun create (Ljava/lang/String;)V
-	public final fun create (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun create (Ljava/lang/String;Ljava/lang/String;Z)V
 	public final fun create (Ljava/lang/String;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun create (Ljava/lang/String;Lorg/gradle/api/provider/Provider;)V
@@ -586,12 +606,13 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun create (Ljava/lang/String;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun create (Ljava/lang/String;Z)V
 	public final fun create (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public final fun create (Lkotlin/jvm/functions/Function1;)V
 	public final fun create (Lorg/gradle/api/provider/Provider;)V
-	public final fun create (Lorg/gradle/api/provider/Provider;Ljava/lang/String;)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Ljava/lang/String;Z)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Ljava/lang/String;)V
+	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Z)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;ZLjava/lang/String;)V
@@ -599,16 +620,18 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun create (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
-	public final fun create (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;)V
 	public final fun create (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;Z)V
 	public final fun create (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun create (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;)V
 	public final fun create (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;Z)V
 	public final fun create (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/Object;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;ZLjava/lang/String;Lorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
@@ -616,61 +639,89 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun datagrip (Ljava/lang/String;)V
+	public final fun datagrip (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun datagrip (Ljava/lang/String;Z)V
 	public final fun datagrip (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun datagrip (Lorg/gradle/api/provider/Provider;)V
+	public final fun datagrip (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun datagrip (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun datagrip (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun datagrip$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun datagrip$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun datagrip$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun datagrip$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun dataspell (Ljava/lang/String;)V
+	public final fun dataspell (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun dataspell (Ljava/lang/String;Z)V
 	public final fun dataspell (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun dataspell (Lorg/gradle/api/provider/Provider;)V
+	public final fun dataspell (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun dataspell (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun dataspell (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun dataspell$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun dataspell$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun dataspell$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun dataspell$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun fleetBackend (Ljava/lang/String;)V
+	public final fun fleetBackend (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun fleetBackend (Ljava/lang/String;Z)V
 	public final fun fleetBackend (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun fleetBackend (Lorg/gradle/api/provider/Provider;)V
+	public final fun fleetBackend (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun fleetBackend (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun fleetBackend (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun fleetBackend$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun fleetBackend$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun fleetBackend$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun fleetBackend$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun gateway (Ljava/lang/String;)V
+	public final fun gateway (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun gateway (Ljava/lang/String;Z)V
 	public final fun gateway (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun gateway (Lorg/gradle/api/provider/Provider;)V
+	public final fun gateway (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun gateway (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun gateway (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun gateway$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun gateway$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun gateway$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun gateway$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun goland (Ljava/lang/String;)V
+	public final fun goland (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun goland (Ljava/lang/String;Z)V
 	public final fun goland (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun goland (Lorg/gradle/api/provider/Provider;)V
+	public final fun goland (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun goland (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun goland (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun goland$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun goland$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun goland$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun goland$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun instrumentationTools ()V
 	public final fun intellijIdeaCommunity (Ljava/lang/String;)V
+	public final fun intellijIdeaCommunity (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun intellijIdeaCommunity (Ljava/lang/String;Z)V
 	public final fun intellijIdeaCommunity (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun intellijIdeaCommunity (Lorg/gradle/api/provider/Provider;)V
+	public final fun intellijIdeaCommunity (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun intellijIdeaCommunity (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun intellijIdeaCommunity (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun intellijIdeaCommunity$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun intellijIdeaCommunity$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun intellijIdeaCommunity$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun intellijIdeaCommunity$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun intellijIdeaUltimate (Ljava/lang/String;)V
+	public final fun intellijIdeaUltimate (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun intellijIdeaUltimate (Ljava/lang/String;Z)V
 	public final fun intellijIdeaUltimate (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun intellijIdeaUltimate (Lorg/gradle/api/provider/Provider;)V
+	public final fun intellijIdeaUltimate (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun intellijIdeaUltimate (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun intellijIdeaUltimate (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun intellijIdeaUltimate$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun intellijIdeaUltimate$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun intellijIdeaUltimate$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun intellijIdeaUltimate$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun javaCompiler ()V
 	public final fun javaCompiler (Ljava/lang/String;)V
@@ -698,20 +749,28 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun localPlugin (Lorg/gradle/api/file/Directory;)V
 	public final fun localPlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun mps (Ljava/lang/String;)V
+	public final fun mps (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun mps (Ljava/lang/String;Z)V
 	public final fun mps (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun mps (Lorg/gradle/api/provider/Provider;)V
+	public final fun mps (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun mps (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun mps (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun mps$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun mps$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun mps$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun mps$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun phpstorm (Ljava/lang/String;)V
+	public final fun phpstorm (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun phpstorm (Ljava/lang/String;Z)V
 	public final fun phpstorm (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun phpstorm (Lorg/gradle/api/provider/Provider;)V
+	public final fun phpstorm (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun phpstorm (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun phpstorm (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun phpstorm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun phpstorm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun phpstorm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun phpstorm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun platformDependency (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;)V
 	public final fun platformDependency (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;)V
@@ -735,44 +794,64 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun plugins (Lorg/gradle/api/provider/Provider;)V
 	public final fun plugins ([Ljava/lang/String;)V
 	public final fun pycharmCommunity (Ljava/lang/String;)V
+	public final fun pycharmCommunity (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun pycharmCommunity (Ljava/lang/String;Z)V
 	public final fun pycharmCommunity (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun pycharmCommunity (Lorg/gradle/api/provider/Provider;)V
+	public final fun pycharmCommunity (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun pycharmCommunity (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun pycharmCommunity (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun pycharmCommunity$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun pycharmCommunity$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun pycharmCommunity$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun pycharmCommunity$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun pycharmProfessional (Ljava/lang/String;)V
+	public final fun pycharmProfessional (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun pycharmProfessional (Ljava/lang/String;Z)V
 	public final fun pycharmProfessional (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun pycharmProfessional (Lorg/gradle/api/provider/Provider;)V
+	public final fun pycharmProfessional (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun pycharmProfessional (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun pycharmProfessional (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun pycharmProfessional$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun pycharmProfessional$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun pycharmProfessional$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun pycharmProfessional$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun rider (Ljava/lang/String;)V
+	public final fun rider (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun rider (Ljava/lang/String;Z)V
 	public final fun rider (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun rider (Lorg/gradle/api/provider/Provider;)V
+	public final fun rider (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun rider (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun rider (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun rider$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun rider$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun rider$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun rider$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun rubymine (Ljava/lang/String;)V
+	public final fun rubymine (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun rubymine (Ljava/lang/String;Z)V
 	public final fun rubymine (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun rubymine (Lorg/gradle/api/provider/Provider;)V
+	public final fun rubymine (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun rubymine (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun rubymine (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun rubymine$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun rubymine$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun rubymine$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun rubymine$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun rustRover (Ljava/lang/String;)V
+	public final fun rustRover (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun rustRover (Ljava/lang/String;Z)V
 	public final fun rustRover (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun rustRover (Lorg/gradle/api/provider/Provider;)V
+	public final fun rustRover (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun rustRover (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun rustRover (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun rustRover$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun rustRover$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun rustRover$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun rustRover$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun testBundledModule (Ljava/lang/String;)V
 	public final fun testBundledModule (Lorg/gradle/api/provider/Provider;)V
@@ -811,20 +890,28 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun testPlugins (Lorg/gradle/api/provider/Provider;)V
 	public final fun testPlugins ([Ljava/lang/String;)V
 	public final fun webstorm (Ljava/lang/String;)V
+	public final fun webstorm (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun webstorm (Ljava/lang/String;Z)V
 	public final fun webstorm (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun webstorm (Lorg/gradle/api/provider/Provider;)V
+	public final fun webstorm (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun webstorm (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun webstorm (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun webstorm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun webstorm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun webstorm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun webstorm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun writerside (Ljava/lang/String;)V
+	public final fun writerside (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun writerside (Ljava/lang/String;Z)V
 	public final fun writerside (Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun writerside (Lorg/gradle/api/provider/Provider;)V
+	public final fun writerside (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun writerside (Lorg/gradle/api/provider/Provider;Z)V
 	public final fun writerside (Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public static synthetic fun writerside$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun writerside$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
+	public static synthetic fun writerside$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun writerside$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun zipSigner ()V
 	public final fun zipSigner (Ljava/lang/String;)V
@@ -833,11 +920,21 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension$Companion {
-	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;
+	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/model/ObjectFactory;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper {
 	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/lang/String;Lorg/gradle/api/invocation/Gradle;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun getConfigurationName ()Lorg/gradle/api/provider/Property;
+	public final fun getProductMode ()Lorg/gradle/api/provider/Property;
+	public final fun getType ()Lorg/gradle/api/provider/Property;
+	public final fun getUseCustomCache ()Lorg/gradle/api/provider/Property;
+	public final fun getUseInstaller ()Lorg/gradle/api/provider/Property;
+	public final fun getVersion ()Lorg/gradle/api/provider/Property;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension : org/gradle/api/plugins/ExtensionAware {

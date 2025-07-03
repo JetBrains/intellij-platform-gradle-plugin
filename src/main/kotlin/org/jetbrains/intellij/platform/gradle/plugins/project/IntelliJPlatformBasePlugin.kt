@@ -453,7 +453,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             Publishing.register(project, target = intelliJPlatform)
         }
 
-        IntelliJPlatformDependenciesExtension.register(dependenciesHelper, target = project.dependencies)
+        IntelliJPlatformDependenciesExtension.register(dependenciesHelper, project.objects, target = project.dependencies)
         IntelliJPlatformRepositoriesExtension.register(project, target = project.repositories)
 
         @Suppress("KotlinConstantConditions")

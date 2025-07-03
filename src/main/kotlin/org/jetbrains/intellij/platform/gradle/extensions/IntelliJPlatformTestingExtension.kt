@@ -78,14 +78,14 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE.withSuffix,
                     description = "Custom IntelliJ Platform dependency archive",
                 ) {
-                    dependenciesExtension.customCreate(
-                        type = type,
-                        version = version,
-                        useInstaller = useInstaller,
-                        productMode = productMode,
-                        configurationName = this@create.name,
-                        intellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix,
-                    )
+                    dependenciesExtension.create {
+                        type = this@all.type
+                        version = this@all.version
+                        useInstaller = this@all.useInstaller
+                        productMode = this@all.productMode
+                        configurationName = name
+                        intellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix
+                    }
                 }
 
                 val customIntelliJPlatformConfiguration = project.configurations.create(

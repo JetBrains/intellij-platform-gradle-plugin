@@ -124,7 +124,7 @@ class IntelliJPlatformResolver internal constructor(
         useInstaller: Boolean = true,
         productMode: ProductMode = ProductMode.MONOLITH,
     ) = resolve(
-        type = type,
+        type = type.toIntelliJPlatformType(),
         version = providerFactory.provider { version },
         useInstaller = providerFactory.provider { useInstaller },
         productMode = providerFactory.provider { productMode },
@@ -194,7 +194,7 @@ class IntelliJPlatformResolver internal constructor(
         useInstaller: Boolean = true,
         productMode: ProductMode = ProductMode.MONOLITH,
     ) = resolve(
-        type = type,
+        type = type.toIntelliJPlatformType(),
         version = version,
         useInstaller = providerFactory.provider { useInstaller },
         productMode = providerFactory.provider { productMode },
@@ -236,7 +236,7 @@ class IntelliJPlatformResolver internal constructor(
      * @return The path to the resolved IntelliJ Platform
      */
     fun resolve(
-        type: Provider<*>,
+        type: Provider<IntelliJPlatformType>,
         version: Provider<String>,
         useInstaller: Provider<Boolean>,
         productMode: Provider<ProductMode> = providerFactory.provider { ProductMode.MONOLITH },
