@@ -15,6 +15,7 @@
 - Introduce `IntelliJPlatformResolver` for improved IDE dependency resolution and caching JetBrains/intellij-platform-gradle-plugin#1601
 - `ModuleAware` to handle information if the current project represents an IntelliJ Platform plugin module
 - `pluginComposedModule(Dependency)` helper for bundling (composing) the module dependency into the main plugin jar
+- Make `Any.toIntelliJPlatformType()` publicly available and introduce `Provider<*>.toIntelliJPlatformType()`
 
 ### Changed
 

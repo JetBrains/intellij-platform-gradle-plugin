@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.api.provider.Provider
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 
 // TODO any changes must be synchronized with
@@ -146,10 +147,29 @@ enum class IntelliJPlatformType(
 }
 
 /**
- * @throws IllegalArgumentException
+ * Maps the value held by this [Provider] to an [IntelliJPlatformType].
+ *
+ * This extension function transforms a [Provider] containing a value that can be converted
+ * to an [IntelliJPlatformType] into a [Provider] of [IntelliJPlatformType].
+
+ * @receiver A [Provider] containing a value that can be converted to [IntelliJPlatformType]
+ * @return A [Provider] of [IntelliJPlatformType] for the given provider value
+ * @throws IllegalArgumentException if the provider value cannot be converted to [IntelliJPlatformType]
  */
 @Throws(IllegalArgumentException::class)
-internal fun Any.toIntelliJPlatformType() = when (this) {
+fun Provider<*>.toIntelliJPlatformType() = map { it.toIntelliJPlatformType() }
+
+/**
+ * Maps the value to an [IntelliJPlatformType].
+ *
+ * This extension function transforms [Any] value that can be converted into [IntelliJPlatformType].
+ *
+ * @receiver [Any] value that can be converted to [IntelliJPlatformType]
+ * @return [IntelliJPlatformType] instance
+ * @throws IllegalArgumentException if the value cannot be converted to [IntelliJPlatformType]
+ */
+@Throws(IllegalArgumentException::class)
+fun Any.toIntelliJPlatformType(): IntelliJPlatformType = when (this) {
     is IntelliJPlatformType -> this
     is String -> IntelliJPlatformType.fromCode(this)
     else -> throw IllegalArgumentException("Invalid argument type: '$javaClass'. Supported types: String or ${IntelliJPlatformType::class.java}")
