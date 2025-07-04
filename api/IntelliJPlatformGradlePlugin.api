@@ -927,7 +927,7 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/lang/String;Lorg/gradle/api/invocation/Gradle;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;)V
 }
 
-public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration {
+public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun getConfigurationName ()Lorg/gradle/api/provider/Property;
 	public final fun getProductMode ()Lorg/gradle/api/provider/Property;
