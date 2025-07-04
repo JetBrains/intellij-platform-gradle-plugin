@@ -178,7 +178,7 @@ class IntelliJPlatformDependenciesHelper(
         val platformPath = platformPath(intellijPlatformConfigurationName)
         requireNotNull(path) { "The `intellijPlatform.bundledLibrary` dependency helper was called with no `path` value provided." }
 
-        dependencies.createBundledLibrary(path, platformPath).apply(action)
+        createBundledLibrary(path, platformPath).apply(action)
     }).also {
         log.warn(
             """
@@ -283,8 +283,8 @@ class IntelliJPlatformDependenciesHelper(
             .map { it.parseIdeNotation() }
             .map { (type, version) ->
                 when (type) {
-                    IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
-                    else -> dependencies.createIntelliJPlatformInstaller(type, version)
+                    IntelliJPlatformType.AndroidStudio -> createAndroidStudio(version)
+                    else -> createIntelliJPlatformInstaller(type, version)
                 }.apply(action)
             }
     })
@@ -317,7 +317,7 @@ class IntelliJPlatformDependenciesHelper(
             intellijPlatformConfigurationName = intellijPlatformConfigurationName,
         )
 
-        dependencies.createIntelliJPlatformLocal(platformPath).apply(action)
+        createIntelliJPlatformLocal(platformPath).apply(action)
     })
 
     /**
@@ -345,7 +345,7 @@ class IntelliJPlatformDependenciesHelper(
                 If you expect to add a dependency on a bundled plugin, use `intellijPlatform.bundledPlugin` or `intellijPlatform.bundledPlugins` instead.
                 """.trimIndent()
             }
-            dependencies.createIntelliJPlatformPlugin(id, version, group).apply(action)
+            createIntelliJPlatformPlugin(id, version, group).apply(action)
         }
     })
 
@@ -380,7 +380,7 @@ class IntelliJPlatformDependenciesHelper(
             ).firstOrNull()
                 ?: throw GradleException("No plugin update with id='$pluginId' compatible with '$platformType-$platformVersion' found in JetBrains Marketplace")
 
-            dependencies.createIntelliJPlatformPlugin(
+            createIntelliJPlatformPlugin(
                 plugin.pluginXmlId,
                 plugin.version,
                 Dependencies.MARKETPLACE_GROUP,
@@ -409,7 +409,7 @@ class IntelliJPlatformDependenciesHelper(
         bundledPlugins
             .map(String::trim)
             .filter(String::isNotEmpty)
-            .map { dependencies.createIntelliJPlatformBundledPlugin(platformPath, it) }
+            .map { createIntelliJPlatformBundledPlugin(platformPath, it) }
             .onEach(action)
     })
 
@@ -435,7 +435,7 @@ class IntelliJPlatformDependenciesHelper(
         bundledModules
             .map(String::trim)
             .filter(String::isNotEmpty)
-            .map { dependencies.createIntelliJPlatformBundledModule(it, platformPath) }
+            .map { createIntelliJPlatformBundledModule(it, platformPath) }
             .onEach(action)
     })
 
@@ -457,7 +457,7 @@ class IntelliJPlatformDependenciesHelper(
         val platformPath = platformPath(intellijPlatformConfigurationName)
         requireNotNull(localPath) { "The `intellijPlatform.localPlugin` dependency helper was called with no `localPath` value provided." }
 
-        dependencies.createIntelliJPlatformLocalPlugin(localPath, platformPath).apply(action)
+        createIntelliJPlatformLocalPlugin(localPath, platformPath).apply(action)
     })
 
     /**
@@ -570,7 +570,7 @@ class IntelliJPlatformDependenciesHelper(
             ?.resolveJavaRuntimeDirectory()
             .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
 
-        dependencies.createJetBrainsRuntimeLocal(artifactPath).apply(action)
+        createJetBrainsRuntimeLocal(artifactPath).apply(action)
     })
 
     /**
@@ -615,7 +615,7 @@ class IntelliJPlatformDependenciesHelper(
         platformPathProvider(intellijPlatformConfigurationName).map { platformPath ->
             when (type) {
                 TestFrameworkType.Bundled -> type.coordinates.map {
-                    dependencies.createBundledLibrary(it.artifactId, platformPath)
+                    createBundledLibrary(it.artifactId, platformPath)
                 }
 
                 else -> {
@@ -623,7 +623,7 @@ class IntelliJPlatformDependenciesHelper(
                     requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
 
                     type.coordinates.map {
-                        dependencies.createPlatformDependency(it, version, platformPath)
+                        createPlatformDependency(it, version, platformPath)
                     }
                 }
             }.onEach(action)
@@ -652,7 +652,7 @@ class IntelliJPlatformDependenciesHelper(
 
         val platformPath = platformPath(intellijPlatformConfigurationName)
 
-        dependencies.createPlatformDependency(coordinates, version, platformPath).apply(action)
+        createPlatformDependency(coordinates, version, platformPath).apply(action)
     })
 
     /**
@@ -711,11 +711,11 @@ class IntelliJPlatformDependenciesHelper(
     private fun createIntelliJPlatformDependency(requestedIntelliJPlatform: RequestedIntelliJPlatform) =
         with (requestedIntelliJPlatform) {
             when {
-                productMode == ProductMode.FRONTEND -> dependencies.createJetBrainsClient(type, version)
-                type == IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
+                productMode == ProductMode.FRONTEND -> createJetBrainsClient(type, version)
+                type == IntelliJPlatformType.AndroidStudio -> createAndroidStudio(version)
                 else -> when {
-                    installer -> dependencies.createIntelliJPlatformInstaller(type, version)
-                    else -> dependencies.createIntelliJPlatform(type, version)
+                    installer -> createIntelliJPlatformInstaller(type, version)
+                    else -> createIntelliJPlatform(type, version)
                 }
             }
         }
@@ -725,7 +725,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param version Android Studio version.
      */
-    private fun DependencyHandler.createAndroidStudio(version: String): Dependency {
+    private fun createAndroidStudio(version: String): Dependency {
         val type = IntelliJPlatformType.AndroidStudio
         val downloadLink = providers.of(AndroidStudioDownloadLinkValueSource::class) {
             parameters {
@@ -739,7 +739,7 @@ class IntelliJPlatformDependenciesHelper(
 
         val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
 
-        return create(
+        return dependencies.create(
             group = type.installer.groupId,
             name = type.installer.artifactId,
             classifier = classifier,
@@ -753,7 +753,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param version JetBrains Client version.
      */
-    private fun DependencyHandler.createJetBrainsClient(type: IntelliJPlatformType, version: String): Dependency {
+    private fun createJetBrainsClient(type: IntelliJPlatformType, version: String): Dependency {
         val jetBrainsClientType = requireNotNull(IntelliJPlatformType.JetBrainsClient.installer)
 
         val buildNumber = providers.of(ProductReleaseBuildValueSource::class) {
@@ -775,7 +775,7 @@ class IntelliJPlatformDependenciesHelper(
             }
         }.let { (type, classifier) -> type.toString() to classifier }
 
-        return create(
+        return dependencies.create(
             group = jetBrainsClientType.groupId,
             name = jetBrainsClientType.artifactId,
             version = buildNumber,
@@ -790,7 +790,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param path Relative path to the library, like: `lib/testFramework.jar`.
      * @param platformPath Path to the current IntelliJ Platform.
      */
-    private fun DependencyHandler.createBundledLibrary(path: String, platformPath: Path) = create(
+    private fun createBundledLibrary(path: String, platformPath: Path) = dependencies.create(
         objects.fileCollection().from(platformPath.resolve(path))
     )
 
@@ -800,10 +800,10 @@ class IntelliJPlatformDependenciesHelper(
      * @param version IntelliJ Platform version.
      * @param type IntelliJ Platform type.
      */
-    private fun DependencyHandler.createIntelliJPlatform(type: IntelliJPlatformType, version: String): Dependency {
+    private fun createIntelliJPlatform(type: IntelliJPlatformType, version: String): Dependency {
         requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
 
-        return create(
+        return dependencies.create(
             group = type.maven.groupId,
             name = type.maven.artifactId,
             version = version,
@@ -816,7 +816,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version IntelliJ Platform version.
      * @param type IntelliJ Platform type.
      */
-    private fun DependencyHandler.createIntelliJPlatformInstaller(
+    private fun createIntelliJPlatformInstaller(
         type: IntelliJPlatformType,
         version: String,
     ): Dependency {
@@ -836,7 +836,7 @@ class IntelliJPlatformDependenciesHelper(
             }
         }.let { (type, classifier) -> type.toString() to classifier }
 
-        return create(
+        return dependencies.create(
             group = type.installer.groupId,
             name = type.installer.artifactId,
             version = version,
@@ -850,7 +850,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param artifactPath Path to the local IntelliJ Platform.
      */
-    private fun DependencyHandler.createIntelliJPlatformLocal(artifactPath: Path): Dependency {
+    private fun createIntelliJPlatformLocal(artifactPath: Path): Dependency {
         val localProductInfo = artifactPath.productInfo()
         localProductInfo.validateSupportedVersion()
 
@@ -871,7 +871,7 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
-        return create(
+        return dependencies.create(
             group = Dependencies.LOCAL_IDE_GROUP,
             name = type.code,
             version = version,
@@ -885,7 +885,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version The version of the plugin.
      * @param group The channel of the plugin. Can be null or empty for the default channel.
      */
-    private fun DependencyHandler.createIntelliJPlatformPlugin(
+    private fun createIntelliJPlatformPlugin(
         pluginId: String,
         version: String,
         group: String,
@@ -893,7 +893,7 @@ class IntelliJPlatformDependenciesHelper(
         val groupId = group.substringBefore('@').ifEmpty { Dependencies.MARKETPLACE_GROUP }
         val channel = group.substringAfter('@', "")
 
-        return create(
+        return dependencies.create(
             group = "$channel.$groupId".trim('.'),
             name = pluginId.trim(),
             version = version,
@@ -905,7 +905,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param id The ID of the bundled plugin.
      */
-    private fun DependencyHandler.createIntelliJPlatformBundledPlugin(platformPath: Path, id: String): Dependency {
+    private fun createIntelliJPlatformBundledPlugin(platformPath: Path, id: String): Dependency {
         val productInfo = platformPath.productInfo()
         val ide = ide(platformPath)
         val plugin = ide.findPluginById(id) ?: ide.findPluginByModule(id)
@@ -946,7 +946,7 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
-        return create(
+        return dependencies.create(
             group = Dependencies.BUNDLED_PLUGIN_GROUP,
             name = id,
             version = version,
@@ -959,14 +959,14 @@ class IntelliJPlatformDependenciesHelper(
      * @param id The ID of the bundled module.
      * @param platformPath The path to the current IntelliJ Platform.
      */
-    private fun DependencyHandler.createIntelliJPlatformBundledModule(id: String, platformPath: Path): Dependency {
+    private fun createIntelliJPlatformBundledModule(id: String, platformPath: Path): Dependency {
         val bundledModule = ide(platformPath).findPluginById(id)
         requireNotNull(bundledModule) { "Specified bundledModule '$id' doesn't exist." }
 
         val classpath = bundledModule.classpath.paths.map { it.pathString }
 
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
-        return create(group, name, version)
+        return dependencies.create(group, name, version)
     }
 
     /**
@@ -1067,7 +1067,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param localPath Path to the local plugin.
      * @param platformPath The path to the current IntelliJ Platform.
      */
-    private fun DependencyHandler.createIntelliJPlatformLocalPlugin(localPath: Any, platformPath: Path): Dependency {
+    private fun createIntelliJPlatformLocalPlugin(localPath: Any, platformPath: Path): Dependency {
         val productInfo = platformPath.productInfo()
         val artifactPath = resolvePath(localPath)
             .takeIf { it.exists() }
@@ -1098,7 +1098,7 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
-        return create(
+        return dependencies.create(
             group = Dependencies.LOCAL_PLUGIN_GROUP,
             name = name,
             version = version,
@@ -1110,7 +1110,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param artifactPath Path to the local JetBrains Runtime.
      */
-    private fun DependencyHandler.createJetBrainsRuntimeLocal(artifactPath: Path): Dependency {
+    private fun createJetBrainsRuntimeLocal(artifactPath: Path): Dependency {
         val runtimeMetadata = providers.of(JavaRuntimeMetadataValueSource::class) {
             parameters {
                 executable = layout.file(provider {
@@ -1147,7 +1147,7 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
-        return create(
+        return dependencies.create(
             group = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
             name = name,
             version = version,
@@ -1160,7 +1160,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version Java Compiler dependency version
      */
     internal fun createJavaCompiler(version: String = Constraints.CLOSEST_VERSION) =
-        dependencies.createDependency(
+        createDependency(
             coordinates = Coordinates("com.jetbrains.intellij.java", "java-compiler-ant-tasks"),
             version = version,
         )
@@ -1184,7 +1184,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version IntelliJ Plugin Verifier CLI tool dependency version
      */
     internal fun createPluginVerifier(version: String = Constraints.LATEST_VERSION) =
-        dependencies.createDependency(
+        createDependency(
             coordinates = Coordinates("org.jetbrains.intellij.plugins", "verifier-cli"),
             version = version,
             classifier = "all",
@@ -1197,7 +1197,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version Marketplace ZIP Signer version.
      */
     internal fun createMarketplaceZipSigner(version: String = Constraints.LATEST_VERSION) =
-        dependencies.createDependency(
+        createDependency(
             coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
             version = version,
             classifier = "cli",
@@ -1210,7 +1210,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version Robot Server Plugin version.
      */
     internal fun createRobotServerPlugin(version: String) =
-        dependencies.createDependency(
+        createDependency(
             coordinates = Coordinates("com.intellij.remoterobot", "robot-server-plugin"),
             version = version,
             extension = "zip",
@@ -1270,13 +1270,13 @@ class IntelliJPlatformDependenciesHelper(
      * @param extension Optional dependency extension.
      * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      */
-    private fun DependencyHandler.createDependency(
+    private fun createDependency(
         coordinates: Coordinates,
         version: String,
         classifier: String? = null,
         extension: String? = null,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
-    ) = create(
+    ) = dependencies.create(
         group = coordinates.groupId,
         name = coordinates.artifactId,
         classifier = classifier,
@@ -1415,7 +1415,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version Dependency version.
      * @param platformPath The path to the current IntelliJ Platform.
      */
-    private fun DependencyHandler.createPlatformDependency(
+    private fun createPlatformDependency(
         coordinates: Coordinates,
         version: String,
         platformPath: Path,
