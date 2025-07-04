@@ -263,14 +263,7 @@ class IntelliJPlatformDependenciesHelper(
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
         requestedIntelliJPlatformProvider.map {
-            when {
-                it.productMode == ProductMode.FRONTEND -> dependencies.createJetBrainsClient(it.type, it.version)
-                it.type == IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(it.version)
-                else -> when {
-                    it.installer -> dependencies.createIntelliJPlatformInstaller(it.type, it.version)
-                    else -> dependencies.createIntelliJPlatform(it.type, it.version)
-                }
-            }.apply(action)
+            createIntelliJPlatformDependency(it).apply(action)
         })
 
     /**
@@ -654,7 +647,7 @@ class IntelliJPlatformDependenciesHelper(
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(cachedProvider {
-        val version = versionProvider.get()
+        val version = versionProvider.orNull
         requireNotNull(version) { "The `intellijPlatform.platformDependency`/`intellijPlatform.testPlatformDependency` dependency helper was called with no `version` value provided." }
 
         val platformPath = platformPath(intellijPlatformConfigurationName)
@@ -709,6 +702,23 @@ class IntelliJPlatformDependenciesHelper(
     //</editor-fold>
 
     //<editor-fold desc="DependencyHelper Extensions">
+
+    /**
+     * Creates IntelliJ Platform dependency.
+     *
+     * @param requestedIntelliJPlatform requested IntelliJ Platform.
+     */
+    private fun createIntelliJPlatformDependency(requestedIntelliJPlatform: RequestedIntelliJPlatform) =
+        with (requestedIntelliJPlatform) {
+            when {
+                productMode == ProductMode.FRONTEND -> dependencies.createJetBrainsClient(type, version)
+                type == IntelliJPlatformType.AndroidStudio -> dependencies.createAndroidStudio(version)
+                else -> when {
+                    installer -> dependencies.createIntelliJPlatformInstaller(type, version)
+                    else -> dependencies.createIntelliJPlatform(type, version)
+                }
+            }
+        }
 
     /**
      * Creates Android Studio dependency.
