@@ -445,6 +445,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 PluginVerification.Ides.register(
                     dependenciesHelper = dependenciesHelper,
                     extensionProvider = project.extensionProvider,
+                    objects = project.objects,
                     target = pluginVerification,
                 )
             }

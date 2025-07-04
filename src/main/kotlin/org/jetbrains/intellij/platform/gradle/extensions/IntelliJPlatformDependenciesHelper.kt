@@ -229,6 +229,7 @@ class IntelliJPlatformDependenciesHelper(
         typeProvider: Provider<IntelliJPlatformType>,
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>,
+//        useCustomCacheProvider: Provider<Boolean>,
         productModeProvider: Provider<ProductMode>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
@@ -241,6 +242,7 @@ class IntelliJPlatformDependenciesHelper(
             productModeProvider = productModeProvider,
             intellijPlatformConfigurationName = intellijPlatformConfigurationName,
         ),
+//        useCustomCacheProvider = useCustomCacheProvider,
         configurationName = configurationName,
         action = action,
     )
@@ -256,6 +258,7 @@ class IntelliJPlatformDependenciesHelper(
     @Throws(GradleException::class)
     internal fun addIntelliJPlatformDependency(
         requestedIntelliJPlatformProvider: Provider<RequestedIntelliJPlatform>,
+//        useCustomCacheProvider: Provider<Boolean>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(

@@ -25,14 +25,14 @@ abstract class IntelliJPlatformDependencyConfiguration @Inject constructor(objec
     val version = objects.property<String>()
 
     /**
-     * Switches between the IDE installer and archive from the IntelliJ Maven repository.
-     */
-    val useInstaller = objects.property<Boolean>().convention(true)
-
-    /**
      * Describes a mode in which a product may be started.
      */
     val productMode = objects.property<ProductMode>().convention(ProductMode.MONOLITH)
+
+    /**
+     * Switches between the IDE installer and archive from the IntelliJ Maven repository.
+     */
+    val useInstaller = objects.property<Boolean>().convention(true)
 
     /**
      * The name of the configuration to add the dependency to.

@@ -1055,9 +1055,19 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion;
-	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;)V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun ProductReleasesValueSource (Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
 	public static synthetic fun ProductReleasesValueSource$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/gradle/api/provider/Provider;
+	public final fun create (Ljava/lang/Object;Ljava/lang/String;)V
+	public final fun create (Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
+	public final fun create (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;)V
+	public final fun create (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
+	public final fun create (Lkotlin/jvm/functions/Function1;)V
+	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
+	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Ljava/lang/Object;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun ide (Ljava/lang/String;)V
 	public final fun ide (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun ide (Ljava/lang/String;Ljava/lang/String;Z)V
@@ -1085,7 +1095,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion {
-	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;
+	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Publishing {

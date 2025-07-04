@@ -763,7 +763,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         useInstaller: Provider<Boolean>,
         productMode: ProductMode = ProductMode.MONOLITH,
     ) = create(type, version) {
-        this.useInstaller = useInstaller.get()
+        this.useInstaller = useInstaller
         this.productMode = productMode
     }
 

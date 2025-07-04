@@ -320,7 +320,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginVerification {
                         ides {
-                            ide("foo")
+                            create("foo")
                         }
                     }
                 }
@@ -489,7 +489,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginVerification {
                         ides {
-                            ide("$type", "$version")
+                            create("$type", "$version")
                         }
                     }
                 }

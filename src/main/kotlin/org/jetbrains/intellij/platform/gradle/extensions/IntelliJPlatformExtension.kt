@@ -11,13 +11,16 @@ import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
@@ -797,7 +800,85 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         abstract class Ides @Inject constructor(
             private val dependenciesHelper: IntelliJPlatformDependenciesHelper,
             private val extensionProvider: Provider<IntelliJPlatformExtension>,
+            private val objects: ObjectFactory,
         ) {
+
+            /**
+             * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
+             * adds an IntelliJ Platform dependency based on the provided configuration.
+             *
+             * @param configure IntelliJ Platform dependency configuration.
+             */
+            fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) {
+                val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
+
+                with(configuration) {
+                    dependenciesHelper.addIntelliJPlatformDependency(
+                        typeProvider = type,
+                        versionProvider = version,
+                        useInstallerProvider = useInstaller,
+                        productModeProvider = productMode,
+                        configurationName = configurationName.orNull
+                            ?: Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                        intellijPlatformConfigurationName = intellijPlatformConfigurationName.orNull
+                            ?: Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                    )
+                }
+            }
+
+            /**
+             * Adds a dependency on the IntelliJ Platform.
+             *
+             * @param type The type of the IntelliJ Platform dependency.
+             * @param version The version of the IntelliJ Platform dependency.
+             * @param configure IntelliJ Platform dependency configuration.
+             */
+            @JvmOverloads
+            fun create(
+                type: Any,
+                version: String,
+                configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+            ) = create {
+                this.type = type.toIntelliJPlatformType()
+                this.version = version
+                configure()
+            }
+
+            /**
+             * Adds a dependency on the IntelliJ Platform.
+             *
+             * @param type The type of the IntelliJ Platform dependency.
+             * @param version The version of the IntelliJ Platform dependency.
+             * @param configure IntelliJ Platform dependency configuration.
+             */
+            @JvmOverloads
+            fun create(
+                type: Any,
+                version: Provider<String>,
+                configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+            ) = create {
+                this.type = type.toIntelliJPlatformType()
+                this.version = version
+                configure()
+            }
+
+            /**
+             * Adds a dependency on the IntelliJ Platform.
+             *
+             * @param type The type of the IntelliJ Platform dependency.
+             * @param version The version of the IntelliJ Platform dependency.
+             * @param configure IntelliJ Platform dependency configuration.
+             */
+            @JvmOverloads
+            fun create(
+                type: Provider<*>,
+                version: Provider<String>,
+                configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+            ) = create {
+                this.type = type.toIntelliJPlatformType()
+                this.version = version
+                configure()
+            }
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -808,6 +889,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param productMode Describes a mode in which a product may be started.
              */
             @JvmOverloads
+            @Deprecated(
+                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+            )
             fun ide(
                 type: IntelliJPlatformType,
                 version: String,
@@ -831,6 +916,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param productMode Describes a mode in which a product may be started.
              */
             @JvmOverloads
+            @Deprecated(
+                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+            )
             fun ide(
                 type: String,
                 version: String,
@@ -854,6 +943,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param productMode Describes a mode in which a product may be started.
              */
             @JvmOverloads
+            @Deprecated(
+                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+            )
             fun ide(
                 type: Provider<*>,
                 version: Provider<String>,
@@ -876,6 +969,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
              * @param productMode Describes a mode in which a product may be started.
              */
+            @Deprecated(
+                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+            )
             fun ide(
                 type: Provider<*>,
                 version: Provider<String>,
@@ -895,6 +992,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
+            @Deprecated(
+                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+            )
             fun ide(notation: String) = dependenciesHelper.addIntelliJPluginVerifierIdes(
                 notationsProvider = dependenciesHelper.provider { listOf(notation) },
             )
@@ -904,6 +1005,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
+            @Deprecated(
+                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+            )
             fun ide(notation: Provider<String>) = dependenciesHelper.addIntelliJPluginVerifierIdes(
                 notationsProvider = notation.map { listOf(it) },
             )
@@ -913,6 +1018,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param notations The IntelliJ Platform dependencies. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
+            @Deprecated(
+                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+            )
             fun ides(notations: List<String>) = dependenciesHelper.addIntelliJPluginVerifierIdes(
                 notationsProvider = dependenciesHelper.provider { notations },
             )
@@ -922,6 +1031,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * @param notations The IntelliJ Platform dependencies. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
              */
+            @Deprecated(
+                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
+                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
+            )
             fun ides(notations: Provider<List<String>>) = dependenciesHelper.addIntelliJPluginVerifierIdes(
                 notationsProvider = notations,
             )
@@ -1007,12 +1120,14 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 fun register(
                     dependenciesHelper: IntelliJPlatformDependenciesHelper,
                     extensionProvider: Provider<IntelliJPlatformExtension>,
+                    objects: ObjectFactory,
                     target: Any,
                 ) =
                     target.configureExtension<Ides>(
                         Extensions.IDES,
                         dependenciesHelper,
                         extensionProvider,
+                        objects,
                     )
             }
         }
