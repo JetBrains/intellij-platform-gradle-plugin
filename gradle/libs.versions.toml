@@ -10,7 +10,7 @@ xmlutil = "0.86.3"
 
 # plugins
 dokka = "2.0.0"
-bcv = "0.17.0"
+bcv = "0.18.0"
 gradlePluginPublish = "1.3.1"
 gradleChangelogPlugin = "2.2.1"
 
