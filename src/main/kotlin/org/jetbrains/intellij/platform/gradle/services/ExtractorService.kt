@@ -4,58 +4,59 @@ package org.jetbrains.intellij.platform.gradle.services
 
 import org.gradle.api.file.ArchiveOperations
 import org.gradle.api.file.FileSystemOperations
-import org.gradle.api.file.FileTree
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
-import org.gradle.process.ExecOperations
+import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.of
 import org.jetbrains.intellij.platform.gradle.Constants
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
+import org.jetbrains.intellij.platform.gradle.providers.DmgExtractorValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.resolvePlatformPath
-import java.io.ByteArrayOutputStream
-import java.nio.file.Files
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.*
 
 abstract class ExtractorService @Inject constructor(
     private val archiveOperations: ArchiveOperations,
-    private val execOperations: ExecOperations,
-    private val objectFactory: ObjectFactory,
+    private val providerFactory: ProviderFactory,
     private val fileSystemOperations: FileSystemOperations,
 ) : BuildService<BuildServiceParameters.None> {
 
     private val log = Logger(javaClass)
 
-    private val tempDirectory = createTempDirectory()
-
     fun extract(path: Path, targetDirectory: Path) {
+        log.info("Extracting archive '$path' to directory '$targetDirectory'.")
+
         val name = path.nameWithoutExtension.removeSuffix(".tar")
         val extension = path.name.removePrefix("$name.")
 
-        val artifactType = Attributes.ArtifactType.from(extension)
-        val archiveOperator = when (artifactType) {
-            Attributes.ArtifactType.ZIP,
-            Attributes.ArtifactType.SIT,
-                -> archiveOperations::zipTree
 
-            Attributes.ArtifactType.TAR_GZ,
-                -> archiveOperations::tarTree
+        when (ArtifactType.from(extension)) {
+            ArtifactType.ZIP, ArtifactType.SIT ->
+                fileSystemOperations.copy {
+                    includeEmptyDirs = false
+                    from(archiveOperations.zipTree(path))
+                    into(targetDirectory)
+                }
 
-            Attributes.ArtifactType.DMG,
-                -> ::dmgTree
+            ArtifactType.TAR_GZ ->
+                fileSystemOperations.copy {
+                    includeEmptyDirs = false
+                    from(archiveOperations.tarTree(path))
+                    into(targetDirectory)
+                }
+
+            ArtifactType.DMG ->
+                providerFactory.of(DmgExtractorValueSource::class) {
+                    parameters.path = path.toFile()
+                    parameters.target = targetDirectory.toFile()
+                }.get()
 
             else
                 -> throw IllegalArgumentException("Unknown type archive type '$extension' for '$path'")
-        }
-
-        log.info("Extracting archive '$path' to directory '$targetDirectory'.")
-        fileSystemOperations.copy {
-            includeEmptyDirs = false
-            from(archiveOperator(path))
-            into(targetDirectory)
         }
 
         // Resolve the first directory that contains more than a single directory.
@@ -86,71 +87,6 @@ abstract class ExtractorService @Inject constructor(
                 .forEach { it.deleteExisting() }
         }
 
-        when (artifactType) {
-            Attributes.ArtifactType.DMG -> {
-                log.info("Unmounting DMG volume '$tempDirectory'.")
-                execOperations.exec {
-                    commandLine("hdiutil", "detach", "-force", "-quiet", tempDirectory)
-                }
-            }
-
-            else -> {}
-        }
-
         log.info("Extracting to '$targetDirectory' completed.")
-    }
-
-    private fun dmgTree(path: Path): FileTree {
-        log.info("Extracting DMG archive '$path' to temporary directory.")
-
-        val hdiutilInfo = ByteArrayOutputStream().use { os ->
-            execOperations.exec {
-                commandLine("hdiutil", "info")
-                standardOutput = os
-            }
-            os.toString()
-        }
-
-        val resources = hdiutilInfo
-            .split("================================================")
-            .drop(1).associate {
-                with(it.trim().lines()) {
-                    first().split(" : ").last() to last().split("\t").last()
-                }
-            }
-
-        resources[path.pathString]?.let { volume ->
-            execOperations.exec {
-                commandLine("hdiutil", "detach", "-force", "-quiet", volume)
-            }
-        }
-
-        execOperations.exec {
-            commandLine(
-                "hdiutil",
-                "attach",
-                "-readonly",
-                "-noautoopen",
-                "-noautofsck",
-                "-noverify",
-                "-nobrowse",
-                "-mountpoint",
-                "-quiet",
-                tempDirectory,
-                path.pathString,
-            )
-        }
-
-        return objectFactory.fileTree()
-            .from(tempDirectory)
-            .matching {
-                exclude {
-                    // DMG archives contain a symbolic link to the Applications directory and dot-directories located in the root of the archive,
-                    // such as `.background` meta-directory we have to exclude.
-                    it.file.run {
-                        (name == "Applications" && Files.isSymbolicLink(toPath())) || it.relativePath.startsWith('.')
-                    }
-                }
-            }
     }
 }

@@ -8,17 +8,18 @@ import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ProviderFactory
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.newInstance
-import org.gradle.kotlin.dsl.registerIfAbsent
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.ProductMode
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformResolver.Parameters
 import java.nio.file.Path
@@ -31,20 +32,18 @@ fun Project.intelliJPlatformResolver(
     val parameters = project.objects.newInstance<Parameters>().apply {
         cacheDirectory.convention(
             project.layout.dir(
-                project.extensionProvider.map { it.cachePath.resolve("ides").toFile() }
-            )
+                project.extensionProvider.map { it.cachePath.resolve("ides").toFile() },
+            ),
         )
-        name.convention({
-            "${it.type}-${it.version}"
-        })
+        name.convention({ "${it.type}-${it.version}" })
     }.apply(configuration)
 
     return IntelliJPlatformResolver(
         parameters = parameters,
         configurations = project.configurations,
         dependenciesHelperProvider = project.provider { project.dependenciesHelper },
-        extractorService = project.gradle.sharedServices.registerIfAbsent("extractorService", ExtractorService::class),
-        providerFactory = project.providers,
+        extractorService = project.gradle.registerClassLoaderScopedBuildService(ExtractorService::class),
+        objects = project.objects,
     )
 }
 
@@ -64,7 +63,7 @@ class IntelliJPlatformResolver internal constructor(
     private val configurations: ConfigurationContainer,
     private val dependenciesHelperProvider: Provider<IntelliJPlatformDependenciesHelper>,
     private val extractorService: Provider<ExtractorService>,
-    private val providerFactory: ProviderFactory,
+    private val objects: ObjectFactory,
 ) {
 
     interface Parameters {
@@ -91,137 +90,63 @@ class IntelliJPlatformResolver internal constructor(
      *
      * @param type The IntelliJ Platform type as a string (e.g., "IC", "IU", "CL", etc.)
      * @param version The version of the IntelliJ Platform to resolve
-     * @param useInstaller Whether to use the installer version instead of the archive version
-     * @param productMode The mode in which the product should be resolved (default: [ProductMode.MONOLITH])
+     * @param configure IntelliJ Platform dependency configuration.
      * @return The path to the resolved IntelliJ Platform
      */
+    @JvmOverloads
     fun resolve(
-        type: String,
+        type: Any,
         version: String,
-        useInstaller: Boolean = true,
-        productMode: ProductMode = ProductMode.MONOLITH,
-    ) = resolve(
-        type = providerFactory.provider { type.toIntelliJPlatformType() },
-        version = providerFactory.provider { version },
-        useInstaller = providerFactory.provider { useInstaller },
-        productMode = providerFactory.provider { productMode },
-    )
-
-    /**
-     * Resolves an IntelliJ Platform dependency based on the specified type provider, version, and installation preferences.
-     *
-     * This method creates providers for version and useInstaller parameters before delegating to the main resolve implementation.
-     *
-     * @param type The provider for the IntelliJ Platform type
-     * @param version The version of the IntelliJ Platform to resolve
-     * @param useInstaller Whether to use the installer version instead of the archive version
-     * @param productMode The mode in which the product should be resolved (default: [ProductMode.MONOLITH])
-     * @return The path to the resolved IntelliJ Platform
-     */
-    fun resolve(
-        type: Provider<*>,
-        version: String,
-        useInstaller: Boolean = true,
-        productMode: ProductMode = ProductMode.MONOLITH,
-    ) = resolve(
-        type = type.toIntelliJPlatformType(),
-        version = providerFactory.provider { version },
-        useInstaller = providerFactory.provider { useInstaller },
-        productMode = providerFactory.provider { productMode },
-    )
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = resolve {
+        this.type = type.toIntelliJPlatformType()
+        this.version = version
+        configure()
+    }
 
     /**
      * Resolves an IntelliJ Platform dependency based on the specified type, version, and installation preferences.
      *
-     * This method creates providers for all parameters before delegating to the main resolve implementation.
-     *
-     * @param type The IntelliJ Platform type
-     * @param version The version of the IntelliJ Platform to resolve
-     * @param useInstaller Whether to use the installer version instead of the archive version
-     * @param productMode The mode in which the product should be resolved (default: [ProductMode.MONOLITH])
-     * @return The path to the resolved IntelliJ Platform
-     */
-    fun resolve(
-        type: IntelliJPlatformType,
-        version: String,
-        useInstaller: Boolean = true,
-        productMode: ProductMode = ProductMode.MONOLITH,
-    ) = resolve(
-        type = providerFactory.provider { type },
-        version = providerFactory.provider { version },
-        useInstaller = providerFactory.provider { useInstaller },
-        productMode = providerFactory.provider { productMode },
-    )
-
-    /**
-     * Resolves an IntelliJ Platform dependency based on the specified type, version provider, and installation preferences.
-     *
-     * This method converts the string type to an [IntelliJPlatformType] and creates providers for type and useInstaller
+     * This method converts the string type to an [IntelliJPlatformType] and creates providers for all parameters
      * before delegating to the main resolve implementation.
      *
      * @param type The IntelliJ Platform type as a string (e.g., "IC", "IU", "CL", etc.)
-     * @param version The provider for the version of the IntelliJ Platform to resolve
-     * @param useInstaller Whether to use the installer version instead of the archive version
-     * @param productMode The mode in which the product should be resolved (default: [ProductMode.MONOLITH])
+     * @param version The version of the IntelliJ Platform to resolve
+     * @param configure IntelliJ Platform dependency configuration.
      * @return The path to the resolved IntelliJ Platform
      */
+    @JvmOverloads
     fun resolve(
-        type: String,
+        type: Any,
         version: Provider<String>,
-        useInstaller: Boolean = true,
-        productMode: ProductMode = ProductMode.MONOLITH,
-    ) = resolve(
-        type = providerFactory.provider { type.toIntelliJPlatformType() },
-        version = version,
-        useInstaller = providerFactory.provider { useInstaller },
-        productMode = providerFactory.provider { productMode },
-    )
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = resolve {
+        this.type = type.toIntelliJPlatformType()
+        this.version = version
+        configure()
+    }
 
     /**
-     * Resolves an IntelliJ Platform dependency based on the specified type provider, version provider, and installation preferences.
+     * Resolves an IntelliJ Platform dependency based on the specified type, version, and installation preferences.
      *
-     * This method creates a provider for useInstaller before delegating to the main resolve implementation.
+     * This method converts the string type to an [IntelliJPlatformType] and creates providers for all parameters
+     * before delegating to the main resolve implementation.
      *
-     * @param type The provider for the IntelliJ Platform type
-     * @param version The provider for the version of the IntelliJ Platform to resolve
-     * @param useInstaller Whether to use the installer version instead of the archive version
-     * @param productMode The mode in which the product should be resolved (default: [ProductMode.MONOLITH])
+     * @param type The IntelliJ Platform type as a string (e.g., "IC", "IU", "CL", etc.)
+     * @param version The version of the IntelliJ Platform to resolve
+     * @param configure IntelliJ Platform dependency configuration.
      * @return The path to the resolved IntelliJ Platform
      */
+    @JvmOverloads
     fun resolve(
         type: Provider<*>,
         version: Provider<String>,
-        useInstaller: Boolean = true,
-        productMode: ProductMode = ProductMode.MONOLITH,
-    ) = resolve(
-        type = type.toIntelliJPlatformType(),
-        version = version,
-        useInstaller = providerFactory.provider { useInstaller },
-        productMode = providerFactory.provider { productMode },
-    )
-
-    /**
-     * Resolves an IntelliJ Platform dependency based on the specified type, version provider, and installation preferences.
-     *
-     * This method creates providers for type and useInstaller before delegating to the main resolve implementation.
-     *
-     * @param type The IntelliJ Platform type
-     * @param version The provider for the version of the IntelliJ Platform to resolve
-     * @param useInstaller Whether to use the installer version instead of the archive version
-     * @param productMode The mode in which the product should be resolved (default: [ProductMode.MONOLITH])
-     * @return The path to the resolved IntelliJ Platform
-     */
-    fun resolve(
-        type: IntelliJPlatformType,
-        version: Provider<String>,
-        useInstaller: Boolean = true,
-        productMode: ProductMode = ProductMode.MONOLITH,
-    ) = resolve(
-        type = providerFactory.provider { type },
-        version = version,
-        useInstaller = providerFactory.provider { useInstaller },
-        productMode = providerFactory.provider { productMode },
-    )
+        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+    ) = resolve {
+        this.type = type.toIntelliJPlatformType()
+        this.version = version
+        configure()
+    }
 
     /**
      * Resolves an IntelliJ Platform dependency based on the specified type provider, version provider, and installation preferences provider.
@@ -229,36 +154,35 @@ class IntelliJPlatformResolver internal constructor(
      * This is the main implementation method that all other resolve methods delegate to. It creates a unique configuration name,
      * gets the [IntelliJPlatformDependenciesHelper], and creates a request for the IntelliJ Platform with the specified parameters.
      *
-     * @param type The provider for the IntelliJ Platform type
-     * @param version The provider for the version of the IntelliJ Platform to resolve
-     * @param useInstaller The provider for whether to use the installer version instead of the archive version
-     * @param productMode The provider for the mode in which the product should be resolved (default: [ProductMode.MONOLITH])
+     * @param configure IntelliJ Platform dependency configuration.
      * @return The path to the resolved IntelliJ Platform
      */
-    fun resolve(
-        type: Provider<IntelliJPlatformType>,
-        version: Provider<String>,
-        useInstaller: Provider<Boolean>,
-        productMode: Provider<ProductMode> = providerFactory.provider { ProductMode.MONOLITH },
-    ): Path {
-        val configurationName = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_${UUID.randomUUID()}"
+    fun resolve(configure: IntelliJPlatformDependencyConfiguration.() -> Unit): Path {
+        val dependencyConfiguration =
+            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
         val dependenciesHelper = dependenciesHelperProvider.get()
-        val requestedProvider = dependenciesHelper.createIntelliJPlatformRequest(
-            typeProvider = type,
-            versionProvider = version,
-            useInstallerProvider = useInstaller,
-            productModeProvider = productMode,
-            intellijPlatformConfigurationName = configurationName,
-        )
 
-        val targetDirectory = parameters.cacheDirectory.dir(requestedProvider.map {
-            parameters.name.get().invoke(it)
-        }).asPath
+        val configurationName = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_${UUID.randomUUID()}"
+        val configuration = configurations.create(configurationName)
+
+        val requestedProvider = with(dependencyConfiguration) {
+            dependenciesHelper.createIntelliJPlatformRequest(
+                typeProvider = type,
+                versionProvider = version,
+                useInstallerProvider = useInstaller,
+                productModeProvider = productMode,
+                intellijPlatformConfigurationName = configurationName,
+            )
+        }
+
+        val targetDirectory = parameters.cacheDirectory.dir(
+            requestedProvider.map {
+                parameters.name.get().invoke(it)
+            },
+        ).asPath
         if (targetDirectory.exists() && targetDirectory.listFiles().isNotEmpty()) {
             return targetDirectory
         }
-
-        val configuration = configurations.create(configurationName)
 
         dependenciesHelper.addIntelliJPlatformDependency(
             requestedIntelliJPlatformProvider = requestedProvider,

@@ -2724,6 +2724,18 @@ public abstract class org/jetbrains/intellij/platform/gradle/providers/CurrentPl
 	public fun obtain ()Ljava/lang/String;
 }
 
+public abstract class org/jetbrains/intellij/platform/gradle/providers/DmgExtractorValueSource : org/gradle/api/provider/ValueSource {
+	public fun <init> ()V
+	public abstract fun getExecOperations ()Lorg/gradle/process/ExecOperations;
+	public synthetic fun obtain ()Ljava/lang/Object;
+	public fun obtain ()Ljava/nio/file/Path;
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/providers/DmgExtractorValueSource$Parameters : org/gradle/api/provider/ValueSourceParameters {
+	public abstract fun getPath ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getTarget ()Lorg/gradle/api/file/DirectoryProperty;
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/providers/JavaRuntimeMetadataValueSource : org/gradle/api/provider/ValueSource {
 	public fun <init> ()V
 	public abstract fun getExecOperations ()Lorg/gradle/process/ExecOperations;
@@ -2837,7 +2849,7 @@ public final class org/jetbrains/intellij/platform/gradle/resolvers/path/Product
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/services/ExtractorService : org/gradle/api/services/BuildService {
-	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/process/ExecOperations;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/file/FileSystemOperations;)V
+	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/file/FileSystemOperations;)V
 	public final fun extract (Ljava/nio/file/Path;Ljava/nio/file/Path;)V
 }
 
@@ -3456,20 +3468,16 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/utils/Ide
 }
 
 public final class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver {
-	public final fun resolve (Ljava/lang/String;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Ljava/nio/file/Path;
-	public final fun resolve (Ljava/lang/String;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Ljava/nio/file/Path;
-	public final fun resolve (Lorg/gradle/api/provider/Provider;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Ljava/nio/file/Path;
-	public final fun resolve (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)Ljava/nio/file/Path;
-	public final fun resolve (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Ljava/nio/file/Path;
-	public final fun resolve (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Ljava/nio/file/Path;
-	public final fun resolve (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Ljava/nio/file/Path;
-	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Ljava/lang/String;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Ljava/nio/file/Path;
-	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Ljava/lang/String;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Ljava/nio/file/Path;
-	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Lorg/gradle/api/provider/Provider;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Ljava/nio/file/Path;
-	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;ILjava/lang/Object;)Ljava/nio/file/Path;
-	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Ljava/nio/file/Path;
-	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Ljava/nio/file/Path;
-	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Ljava/nio/file/Path;
+	public final fun resolve (Ljava/lang/Object;Ljava/lang/String;)Ljava/nio/file/Path;
+	public final fun resolve (Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)Ljava/nio/file/Path;
+	public final fun resolve (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;)Ljava/nio/file/Path;
+	public final fun resolve (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)Ljava/nio/file/Path;
+	public final fun resolve (Lkotlin/jvm/functions/Function1;)Ljava/nio/file/Path;
+	public final fun resolve (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)Ljava/nio/file/Path;
+	public final fun resolve (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)Ljava/nio/file/Path;
+	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/nio/file/Path;
+	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Ljava/lang/Object;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/nio/file/Path;
+	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Ljava/nio/file/Path;
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformResolver$Parameters {
