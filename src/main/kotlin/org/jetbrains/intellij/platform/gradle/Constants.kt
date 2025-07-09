@@ -54,6 +54,7 @@ object Constants {
         const val PUBLISHING = "publishing"
         const val SIGNING = "signing"
         const val VENDOR = "vendor"
+        const val REPORTING = "reporting"
     }
 
     object Components {

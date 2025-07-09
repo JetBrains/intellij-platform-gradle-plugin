@@ -447,6 +447,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     extensionProvider = project.extensionProvider,
                     target = pluginVerification,
                 )
+
+                PluginVerification.Reporting.register(project, target = pluginVerification)
             }
 
             Signing.register(project, target = intelliJPlatform)

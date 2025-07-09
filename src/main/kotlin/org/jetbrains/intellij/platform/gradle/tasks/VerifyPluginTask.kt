@@ -14,6 +14,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.reporting.Reporting
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
+import org.gradle.internal.Describables
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
@@ -43,7 +44,7 @@ import kotlin.io.path.pathString
  */
 // TODO: Parallel run? https://docs.gradle.org/current/userguide/worker_api.html#converting_to_worker_api
 @UntrackedTask(because = "Should always run")
-abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware , Reporting<VerifyReportContainer> {
+abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware , Reporting<VerifyReports> {
 
     /**
      * Holds a reference to IntelliJ Platform IDEs which will be used by the IntelliJ Plugin Verifier CLI tool for verification.
@@ -163,7 +164,10 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      * @see IntelliJPlatformExtension.PluginVerification.verificationReportsFormats
      */
     @Internal
-    private val reports: VerifyReportContainer = project.objects.newInstance(VerifyReportContainer::class.java)
+    private val reports: VerifyReports = objectFactory.newInstance(
+        VerifyReportsImpl::class.java,
+        Describables.quoted("Task", identityPath)
+    )
 
     private val log = Logger(javaClass)
 
@@ -225,7 +229,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      */
     private fun getOptions(): List<String> {
         val args = mutableListOf(
-            "-verification-reports-dir", reports.report.outputLocation.asPath.pathString,
             "-runtime-dir", runtimeDirectory.asPath.pathString,
         )
 
@@ -245,8 +248,21 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         }
 
         // TODO check PV version
-        args.add("-verification-reports-formats")
-        args.add(reports.formats.get().joinToString(","))
+
+        if (reports.plain.required.get()) {
+            args.add("-plain-verification-reports-dir")
+            args.add(reports.plain.outputLocation.asPath.pathString)
+        }
+
+        if (reports.markdown.required.get()) {
+            args.add("-markdown-verification-reports-dir")
+            args.add(reports.markdown.outputLocation.asPath.pathString)
+        }
+
+        if (reports.html.required.get()) {
+            args.add("-html-verification-reports-dir")
+            args.add(reports.html.outputLocation.asPath.pathString)
+        }
 
         if (ignoredProblemsFile.orNull != null) {
             args.add("-ignored-problems")
@@ -288,13 +304,13 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         }
     }
 
-    override fun getReports(): VerifyReportContainer = reports
+    override fun getReports(): VerifyReports = reports
 
-    override fun reports(closure: Closure<*>): VerifyReportContainer {
+    override fun reports(closure: Closure<*>): VerifyReports {
         return reports(ClosureBackedAction(closure))
     }
 
-    override fun reports(configureAction: Action<in VerifyReportContainer>): VerifyReportContainer {
+    override fun reports(configureAction: Action<in VerifyReports>): VerifyReports {
         configureAction.execute(reports)
         return reports
     }
@@ -314,7 +330,18 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 val pluginVerificationProvider = project.extensionProvider.map { it.pluginVerification }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 
-                ides = project.files(project.provider {
+                reports{
+                    html.required.convention(pluginVerificationProvider.flatMap { it.reporting.htmlRequired })
+                    html.outputLocation.convention(pluginVerificationProvider.flatMap { it.reporting.htmlOutputLocation })
+
+                    markdown.required.convention(pluginVerificationProvider.flatMap { it.reporting.markdownRequired })
+                    markdown.outputLocation.convention(pluginVerificationProvider.flatMap { it.reporting.markdownOutputLocation })
+
+                    plain.required.convention(pluginVerificationProvider.flatMap { it.reporting.plainRequired })
+                    plain.outputLocation.convention(pluginVerificationProvider.flatMap { it.reporting.plainOutputLocation })
+                }
+
+                ides = project.files(project.project.provider {
                     with(intellijPluginVerifierIdesConfiguration.incoming.dependencies) {
                         if (size > 5) {
                             val ideList = joinToString(", ") { "${it.group}:${it.name}:${it.version}" }
@@ -330,12 +357,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
                 freeArgs.convention(pluginVerificationProvider.flatMap { it.freeArgs })
                 failureLevel.convention(pluginVerificationProvider.flatMap { it.failureLevel })
-
-                reports {
-                    report.required.convention(true)
-                    report.outputLocation.convention(pluginVerificationProvider.flatMap { it.verificationReportsDirectory })
-                    formats.convention(pluginVerificationProvider.flatMap { it.verificationReportsFormats })
-                }
 
                 externalPrefixes.convention(pluginVerificationProvider.flatMap { it.externalPrefixes })
                 teamCityOutputFormat.convention(pluginVerificationProvider.flatMap { it.teamCityOutputFormat })
@@ -405,23 +426,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             @JvmField
             val NONE: EnumSet<FailureLevel> = EnumSet.noneOf(FailureLevel::class.java)
         }
-    }
-
-    @Suppress("unused")
-    enum class VerificationReportsFormats {
-        PLAIN,
-        HTML,
-        MARKDOWN;
-
-        companion object {
-            @JvmField
-            val ALL: EnumSet<VerificationReportsFormats> = EnumSet.allOf(VerificationReportsFormats::class.java)
-
-            @JvmField
-            val NONE: EnumSet<VerificationReportsFormats> = EnumSet.noneOf(VerificationReportsFormats::class.java)
-        }
-
-        override fun toString() = name.lowercase()
     }
 
     @Suppress("unused")

@@ -707,6 +707,20 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             action.call()
         }
 
+        /**
+         * The extension to configure reporting options for plugin verification.
+         *
+         * Provides access to settings for enabling and customizing the output of verification reports
+         * in various formats (plain text, HTML, Markdown).
+         *
+         * @see Reporting
+         */
+        val reporting
+            get() = extensions.getByName<Reporting>(Extensions.REPORTING)
+
+        fun report(action: Action<in Reporting>) {
+            action.execute(reporting)
+        }
 
         /**
          * A path to the local IntelliJ Plugin Verifier CLI tool to be used.
@@ -767,25 +781,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * @see PluginVerification.teamCityOutputFormat
          */
         val teamCityOutputFormat: Property<Boolean>
-
-        /**
-         * The path to the directory where verification reports will be saved.
-         *
-         * Default value: [ProjectLayout.getBuildDirectory]/reports/pluginVerifier
-         *
-         * @see PluginVerification.verificationReportsDirectory
-         */
-        val verificationReportsDirectory: DirectoryProperty
-
-        /**
-         * The output formats of the verification reports.
-         *
-         * Default value: ([VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML])
-         *
-         * @see VerificationReportsFormats
-         * @see PluginVerification.verificationReportsFormats
-         */
-        val verificationReportsFormats: ListProperty<VerificationReportsFormats>
 
         /**
          * The extension to define the IDEs to be used along with the IntelliJ Plugin Verifier CLI tool for the binary plugin verification.
@@ -1019,17 +1014,67 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             }
         }
 
+        /**
+         * Configures the reporting options for plugin verification.
+         *
+         * This extension allows you to specify which report formats should be generated
+         * (plain text, HTML, Markdown) and where those reports should be written.
+         *
+         */
+        @IntelliJPlatform
+        interface Reporting {
+
+            /**
+             * The output location for the plain text verification report.
+             * The specified directory will contain the generated plain text report.
+             */
+            val plainOutputLocation: DirectoryProperty
+
+            /**
+             * The output location for the HTML verification report.
+             * The specified directory will contain the generated HTML report.
+             */
+            val htmlOutputLocation: DirectoryProperty
+
+            /**
+             * The output location for the Markdown verification report.
+             * The specified directory will contain the generated Markdown report.
+             */
+            val markdownOutputLocation: DirectoryProperty
+
+            /**
+             * Indicates whether the plain text report should be generated.
+             * If set to `true`, a plain text report will be produced in [plainOutputLocation].
+             *
+             * Default value: `false`.
+             */
+            val plainRequired: Property<Boolean>
+
+            /**
+             * Indicates whether the HTML report should be generated.
+             * If set to `true`, an HTML report will be produced in [htmlOutputLocation].
+             *
+             * Default value: `false`.
+             */
+            val htmlRequired: Property<Boolean>
+
+            /**
+             * Indicates whether the Markdown report should be generated.
+             * If set to `true`, a Markdown report will be produced in [markdownOutputLocation].
+             *
+             * Default value: `false`.
+             */
+            val markdownRequired: Property<Boolean>
+
+            companion object : Registrable<Reporting> {
+                override fun register(project: Project, target: Any) =
+                    target.configureExtension<Reporting>(Extensions.REPORTING)
+            }
+        }
         companion object : Registrable<PluginVerification> {
             override fun register(project: Project, target: Any) =
                 target.configureExtension<PluginVerification>(Extensions.PLUGIN_VERIFICATION) {
                     failureLevel.convention(listOf(FailureLevel.COMPATIBILITY_PROBLEMS))
-                    verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
-                    verificationReportsFormats.convention(
-                        listOf(
-                            VerificationReportsFormats.PLAIN,
-                            VerificationReportsFormats.HTML,
-                        )
-                    )
                     teamCityOutputFormat.convention(false)
                     subsystemsToCheck.convention(Subsystems.ALL)
                 }
