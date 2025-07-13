@@ -12,14 +12,15 @@
 - Add support for JetBrains Client and resolving the IntelliJ Platform in frontend mode
 - Add `VerifyPluginProjectConfigurationMutedMessages` Gradle property to mute specific messages reported by the `verifyPluginProjectConfiguration` task JetBrains/intellij-platform-gradle-plugin#1958
 - Create the `.toolbox-ignore` marker file next to the `product-info.json` file to avoid the Toolbox App from indexing it [TBX-14798](https://youtrack.jetbrains.com/issue/TBX-14798)
-- Introduce `IntelliJPlatformResolver` for improved IDE dependency resolution and caching JetBrains/intellij-platform-gradle-plugin#1601
+- Introduce `IntelliJPlatformCacheResolver` for improved IDE dependency resolution and caching JetBrains/intellij-platform-gradle-plugin#1601
+- Introduce `useCustomCache` dependency configuration property to utilize the `IntelliJPlatformCacheResolver` custom caching mechanism.
 - `ModuleAware` to handle information if the current project represents an IntelliJ Platform plugin module
 - `pluginComposedModule(Dependency)` helper for bundling (composing) the module dependency into the main plugin jar
 - Make `Any.toIntelliJPlatformType()` publicly available and introduce `Provider<*>.toIntelliJPlatformType()`
 
 ### Changed
 
-- Introduce a new set of dependency helpers to configure the IntelliJ Platform dependency with a lambda function instead of regular parameters, marking other helpers deprecated.te
+- Introduce a new set of dependency helpers to configure the IntelliJ Platform dependency with a lambda function instead of regular parameters, marking other helpers deprecated.
 - `pluginModule(Dependency)` helper now moves the module dependency into the `lib/modules` directory of the plugin jar.
 - Search for a bundled plugin using module alias if not resolved by ID
 - Stop including the `intellijPlatformPluginModule` configuration in the `intellijPlatformClasspath` as it's already bundled within the composed jar.

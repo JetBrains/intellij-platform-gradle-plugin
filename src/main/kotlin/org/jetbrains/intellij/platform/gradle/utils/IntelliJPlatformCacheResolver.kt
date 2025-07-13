@@ -21,14 +21,14 @@ import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformResolver.Parameters
+import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformCacheResolver.Parameters
 import java.nio.file.Path
 import java.util.*
 
 @Incubating
 fun Project.intelliJPlatformResolver(
     configuration: Parameters.() -> Unit = {},
-): IntelliJPlatformResolver {
+): IntelliJPlatformCacheResolver {
     val parameters = project.objects.newInstance<Parameters>().apply {
         cacheDirectory.convention(
             project.layout.dir(
@@ -38,7 +38,7 @@ fun Project.intelliJPlatformResolver(
         name.convention({ "${it.type}-${it.version}" })
     }.apply(configuration)
 
-    return IntelliJPlatformResolver(
+    return IntelliJPlatformCacheResolver(
         parameters = parameters,
         configurations = project.configurations,
         dependenciesHelperProvider = project.provider { project.dependenciesHelper },
@@ -58,7 +58,7 @@ fun Project.intelliJPlatformResolver(
  * This class is marked as incubating and may undergo changes in future versions.
  */
 @Incubating
-class IntelliJPlatformResolver internal constructor(
+class IntelliJPlatformCacheResolver internal constructor(
     private val parameters: Parameters,
     private val configurations: ConfigurationContainer,
     private val dependenciesHelperProvider: Provider<IntelliJPlatformDependenciesHelper>,

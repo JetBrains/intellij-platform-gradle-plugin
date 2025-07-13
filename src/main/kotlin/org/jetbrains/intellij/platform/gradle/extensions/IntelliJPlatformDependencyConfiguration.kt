@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.model.ObjectFactory
 import org.gradle.kotlin.dsl.property
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.ProductMode
 import javax.inject.Inject
@@ -33,6 +34,13 @@ abstract class IntelliJPlatformDependencyConfiguration @Inject constructor(objec
      * Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
     val useInstaller = objects.property<Boolean>().convention(true)
+
+    /**
+     * Switches between the Gradle cache and the custom cache directory.
+     *
+     * @see [GradleProperties.IntellijPlatformIdesCache]
+     */
+    val useCustomCache = objects.property<Boolean>().convention(false)
 
     /**
      * The name of the configuration to add the dependency to.

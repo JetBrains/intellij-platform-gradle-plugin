@@ -9,7 +9,6 @@ import org.gradle.api.file.Directory
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
@@ -50,21 +49,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configure IntelliJ Platform dependency configuration.
      */
     fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) {
-        val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
-
-        with(configuration) {
-            dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = type,
-                versionProvider = version,
-                useInstallerProvider = useInstaller,
-                productModeProvider = productMode,
-//                useCustomCacheProvider = useCustomCache,
-                configurationName = configurationName.orNull
-                    ?: Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
-                intellijPlatformConfigurationName = intellijPlatformConfigurationName.orNull
-                    ?: Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
-            )
-        }
+        dependenciesHelper.addIntelliJPlatformCacheableDependency(configure)
     }
 
     /**

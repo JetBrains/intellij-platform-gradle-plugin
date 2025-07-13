@@ -11,6 +11,7 @@ import org.jetbrains.intellij.platform.gradle.utils.toVersion
 object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
     const val CACHE_DIRECTORY_IVY = "localPlatformArtifacts"
+    const val CACHE_DIRECTORY_IDES = "ides"
     const val DEFAULT_MAIN_CLASS = "com.intellij.idea.Main"
     const val TOOLBOX_IGNORE = ".toolbox-ignore"
 
