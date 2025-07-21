@@ -95,7 +95,7 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
             }
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
-        }
+        }.getOrThrow()
     }
 
     companion object {

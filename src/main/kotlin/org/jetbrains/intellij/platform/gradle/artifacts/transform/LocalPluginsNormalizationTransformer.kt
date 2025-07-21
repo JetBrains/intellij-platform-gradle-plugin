@@ -63,7 +63,7 @@ abstract class LocalPluginsNormalizationTransformers @Inject constructor(
             }
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
-        }
+        }.getOrThrow()
     }
 
     companion object {
