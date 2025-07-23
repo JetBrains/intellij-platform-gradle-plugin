@@ -635,7 +635,7 @@ class IntelliJPlatformDependenciesHelper(
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
         obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName).map { version ->
-            createJetBrainsRuntime(version).apply(action)
+            createJetBrainsRuntime(requireNotNull(version)).apply(action)
         },
     )
 
@@ -813,7 +813,7 @@ class IntelliJPlatformDependenciesHelper(
                 productMode == ProductMode.FRONTEND -> createJetBrainsClient(type, version)
                 type == IntelliJPlatformType.AndroidStudio -> createAndroidStudio(version)
                 else -> when {
-                    installer -> createIntelliJPlatformInstaller(type, version)
+                    useInstaller -> createIntelliJPlatformInstaller(type, version)
                     else -> createIntelliJPlatform(type, version)
                 }
             }

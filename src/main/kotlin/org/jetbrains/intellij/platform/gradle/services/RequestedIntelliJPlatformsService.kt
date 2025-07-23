@@ -52,7 +52,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                     RequestedIntelliJPlatform(
                         type = typeProvider.get(),
                         version = versionProvider.get(),
-                        installer = useInstallerProvider.get(),
+                        useInstaller = useInstallerProvider.get(),
                         productMode = productModeProvider.get(),
                     )
                 )
@@ -73,8 +73,8 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                     version = versionProvider
                         .orElse(base.map { it.version })
                         .orElse(errorProvider("version")).get(),
-                    installer = useInstallerProvider
-                        .orElse(base.map { it.installer })
+                    useInstaller = useInstallerProvider
+                        .orElse(base.map { it.useInstaller })
                         .orElse(errorProvider("useInstaller"))
                         .get(),
                     productMode = productModeProvider
@@ -109,16 +109,16 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
  *
  * @property type Defines the IntelliJ Platform type, such as IntelliJ IDEA, PyCharm, or other JetBrains IDEs.
  * @property version Specifies the version of the IntelliJ Platform to be used.
- * @property installer Indicates if the platform should include an installer.
+ * @property useInstaller Indicates if the platform should include an installer.
  * @property productMode Indicates the mode in which the platform is being used.
  */
 data class RequestedIntelliJPlatform(
     val type: IntelliJPlatformType,
     val version: String,
-    val installer: Boolean,
+    val useInstaller: Boolean,
     val productMode: ProductMode,
 ) {
-    private val installerLabel = when (installer) {
+    private val installerLabel = when (useInstaller) {
         true -> "installer"
         else -> "non-installer"
     }
