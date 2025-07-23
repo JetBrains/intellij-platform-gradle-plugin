@@ -2872,9 +2872,9 @@ public final class org/jetbrains/intellij/platform/gradle/services/RequestedInte
 	public final fun copy (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;
 	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getInstaller ()Z
 	public final fun getProductMode ()Lorg/jetbrains/intellij/platform/gradle/ProductMode;
 	public final fun getType ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public final fun getUseInstaller ()Z
 	public final fun getVersion ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun isNightly ()Z
