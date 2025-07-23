@@ -82,6 +82,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                         type = this@all.type
                         version = this@all.version
                         useInstaller = this@all.useInstaller
+                        useCustomCache = this@all.useCustomCache
                         productMode = this@all.productMode
                         configurationName = name
                         intellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix
@@ -130,7 +131,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     defaultDependencies {
                         addLater(
                             dependenciesHelper.obtainJetBrainsRuntimeVersion(customIntelliJPlatformConfiguration.name)
-                                .map { version -> dependenciesHelper.createJetBrainsRuntime(version) }
+                                .map { version -> dependenciesHelper.createJetBrainsRuntime(requireNotNull(version)) },
                         )
                     }
                 }
@@ -295,6 +296,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         abstract val version: Property<String>
         abstract val localPath: DirectoryProperty
         abstract val useInstaller: Property<Boolean>
+        abstract val useCustomCache: Property<Boolean>
         abstract val productMode: Property<ProductMode>
 
         abstract val sandboxDirectory: DirectoryProperty

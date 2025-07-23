@@ -29,62 +29,74 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
      * with the corresponding platform parameters, including type, version, and installer settings.
      * If some parameters are not specified, the [base] configuration is used.
      *
-     * @param configurationName The name of the configuration to set.
      * @param typeProvider A provider that supplies the IntelliJ Platform type for the given configuration.
      * @param versionProvider A provider that supplies the version of the IntelliJ Platform for the given configuration.
      * @param useInstallerProvider A provider that specifies whether to use the installer for the given configuration.
+     * @param useCustomCacheProvider A provider that specifies whether to use a custom cache for the given configuration.
      * @param productModeProvider A provider that specifies the product mode for the given configuration.
+     * @param configurationNameProvider A provider that supplies the name of the configuration to set.
      */
     fun set(
-        configurationName: String,
         typeProvider: Provider<IntelliJPlatformType>,
         versionProvider: Provider<String>,
         useInstallerProvider: Provider<Boolean>,
+        useCustomCacheProvider: Provider<Boolean>,
         productModeProvider: Provider<ProductMode>,
-    ) = requireNotNull(map.compute(configurationName) { key, previous ->
-        when (key) {
-            baseConfigurationName -> base.apply {
-                check(previous == null) {
-                    "The '$key' configuration already contains the following IntelliJ Platform dependency: ${previous?.get()}"
-                }
+        configurationNameProvider: Provider<String>,
+    ): Provider<RequestedIntelliJPlatform> {
+        val configurationName = configurationNameProvider.orElse(Configurations.INTELLIJ_PLATFORM_DEPENDENCY).get()
+        return requireNotNull(
+            map.compute(configurationName) { key, previous ->
+                when (key) {
+                    baseConfigurationName -> base.apply {
+                        check(previous == null) {
+                            "The '$key' configuration already contains the following IntelliJ Platform dependency: ${previous?.get()}"
+                        }
 
-                set(
-                    RequestedIntelliJPlatform(
-                        type = typeProvider.get(),
-                        version = versionProvider.get(),
-                        useInstaller = useInstallerProvider.get(),
-                        productMode = productModeProvider.get(),
-                    )
-                )
-            }
+                        set(
+                            RequestedIntelliJPlatform(
+                                type = typeProvider.get(),
+                                version = versionProvider.get(),
+                                useInstaller = useInstallerProvider.get(),
+                                useCustomCache = useCustomCacheProvider.get(),
+                                productMode = productModeProvider.get(),
+                            ),
+                        )
+                    }
 
-            else -> providerFactory.provider {
-                val errorProvider = { type: String ->
-                    providerFactory.provider {
-                        error("The '$key' configuration does not specify the $type of the IntelliJ Platform dependency nor can be resolved from the base configuration.")
+                    else -> providerFactory.provider {
+                        val errorProvider = { type: String ->
+                            providerFactory.provider {
+                                error("The '$key' configuration does not specify the $type of the IntelliJ Platform dependency nor can be resolved from the base configuration.")
+                            }
+                        }
+
+                        RequestedIntelliJPlatform(
+                            type = typeProvider
+                                .orElse(base.map { it.type })
+                                .orElse(errorProvider("type"))
+                                .get(),
+                            version = versionProvider
+                                .orElse(base.map { it.version })
+                                .orElse(errorProvider("version")).get(),
+                            useInstaller = useInstallerProvider
+                                .orElse(base.map { it.useInstaller })
+                                .orElse(errorProvider("useInstaller"))
+                                .get(),
+                            useCustomCache = useCustomCacheProvider
+                                .orElse(base.map { it.useCustomCache })
+                                .orElse(errorProvider("useCustomCache"))
+                                .get(),
+                            productMode = productModeProvider
+                                .orElse(base.map { it.productMode })
+                                .orElse(errorProvider("productMode"))
+                                .get(),
+                        )
                     }
                 }
-
-                RequestedIntelliJPlatform(
-                    type = typeProvider
-                        .orElse(base.map { it.type })
-                        .orElse(errorProvider("type"))
-                        .get(),
-                    version = versionProvider
-                        .orElse(base.map { it.version })
-                        .orElse(errorProvider("version")).get(),
-                    useInstaller = useInstallerProvider
-                        .orElse(base.map { it.useInstaller })
-                        .orElse(errorProvider("useInstaller"))
-                        .get(),
-                    productMode = productModeProvider
-                        .orElse(base.map { it.productMode })
-                        .orElse(errorProvider("productMode"))
-                        .get(),
-                )
-            }
-        }
-    })
+            },
+        )
+    }
 
     /**
      * Retrieves the value associated with the given configuration name.
@@ -116,6 +128,7 @@ data class RequestedIntelliJPlatform(
     val type: IntelliJPlatformType,
     val version: String,
     val useInstaller: Boolean,
+    val useCustomCache: Boolean,
     val productMode: ProductMode,
 ) {
     private val installerLabel = when (useInstaller) {

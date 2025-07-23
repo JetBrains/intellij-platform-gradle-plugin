@@ -817,11 +817,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         typeProvider = type,
                         versionProvider = version,
                         useInstallerProvider = useInstaller,
+                        useCustomCacheProvider = useCustomCache,
                         productModeProvider = productMode,
-                        configurationName = configurationName.orNull
-                            ?: Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                        intellijPlatformConfigurationName = intellijPlatformConfigurationName.orNull
-                            ?: Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                        configurationNameProvider = configurationName.orElse(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
+                        intellijPlatformConfigurationNameProvider = intellijPlatformConfigurationName.orElse(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY)
                     )
                 }
             }
@@ -902,9 +901,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 typeProvider = dependenciesHelper.provider { type },
                 versionProvider = dependenciesHelper.provider { version },
                 useInstallerProvider = dependenciesHelper.provider { useInstaller },
+                useCustomCacheProvider = dependenciesHelper.provider { false },
                 productModeProvider = dependenciesHelper.provider { productMode },
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                configurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
+                intellijPlatformConfigurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
             )
 
             /**
@@ -929,9 +929,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 typeProvider = dependenciesHelper.provider { type.toIntelliJPlatformType() },
                 versionProvider = dependenciesHelper.provider { version },
                 useInstallerProvider = dependenciesHelper.provider { useInstaller },
+                useCustomCacheProvider = dependenciesHelper.provider { false },
                 productModeProvider = dependenciesHelper.provider { productMode },
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                configurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
+                intellijPlatformConfigurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
             )
 
             /**
@@ -956,9 +957,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 typeProvider = type.toIntelliJPlatformType(),
                 versionProvider = version,
                 useInstallerProvider = dependenciesHelper.provider { useInstaller },
+                useCustomCacheProvider = dependenciesHelper.provider { false },
                 productModeProvider = dependenciesHelper.provider { productMode },
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                configurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
+                intellijPlatformConfigurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
             )
 
             /**
@@ -982,9 +984,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 typeProvider = type.toIntelliJPlatformType(),
                 versionProvider = version,
                 useInstallerProvider = useInstaller,
+                useCustomCacheProvider = dependenciesHelper.provider { false },
                 productModeProvider = productMode,
-                configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                configurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
+                intellijPlatformConfigurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
             )
 
             /**

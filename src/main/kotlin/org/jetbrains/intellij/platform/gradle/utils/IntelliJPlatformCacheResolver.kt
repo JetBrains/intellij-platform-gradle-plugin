@@ -170,8 +170,9 @@ class IntelliJPlatformCacheResolver internal constructor(
                 typeProvider = type,
                 versionProvider = version,
                 useInstallerProvider = useInstaller,
+                useCustomCacheProvider = useCustomCache,
                 productModeProvider = productMode,
-                intellijPlatformConfigurationName = configurationName,
+                intellijPlatformConfigurationNameProvider = intellijPlatformConfigurationName,
             )
         }
 
