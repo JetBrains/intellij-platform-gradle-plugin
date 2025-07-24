@@ -202,7 +202,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                 defaultDependencies {
                     addLater(dependenciesHelper.obtainJetBrainsRuntimeVersion().map { version ->
-                        dependenciesHelper.createJetBrainsRuntime(version)
+                        dependenciesHelper.createJetBrainsRuntime(requireNotNull(version))
                     })
                 }
             }
@@ -291,13 +291,21 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "Java Compiler used by Ant tasks",
             ) {
                 defaultDependencies {
-                    addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
-                        val platformPath = runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
-                        when (enabled && platformPath != null) {
-                            true -> dependenciesHelper.createJavaCompiler()
-                            false -> null
-                        }.let { listOfNotNull(it) }
-                    })
+                    val addDefaultDependenciesProvider = project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
+                    val instrumentCodeProvider = project.extensionProvider.flatMap { it.instrumentCode }
+
+                    addAllLater(
+                        addDefaultDependenciesProvider.zip(instrumentCodeProvider) { addDefaultDependencies, instrumentCode ->
+                            val instrumentCode = project.extensionProvider.flatMap { it.instrumentCode }.get()
+                            val platformPath by lazy {
+                                runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
+                            }
+                            when (addDefaultDependencies && instrumentCode && platformPath != null && instrumentCode) {
+                                true -> dependenciesHelper.createJavaCompiler()
+                                false -> null
+                            }.let { listOfNotNull(it) }
+                        },
+                    )
                 }
             }
 
