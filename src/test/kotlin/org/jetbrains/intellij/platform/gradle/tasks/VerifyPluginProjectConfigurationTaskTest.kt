@@ -99,9 +99,9 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     fun `report too high Kotlin jvmTarget`() {
         buildFile write //language=kotlin
                 """
-                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                    kotlinOptions {
-                        jvmTarget = "19"
+                kotlin {
+                    compilerOptions {
+                        jvmTarget = JvmTarget.JVM_19
                     }
                 }
                 """.trimIndent()
@@ -128,9 +128,9 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
         buildFile write //language=kotlin
                 """
-                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                    kotlinOptions {
-                        apiVersion = "1.6"
+                kotlin {
+                    compilerOptions {
+                        apiVersion = KotlinVersion.KOTLIN_1_6
                     }
                 }
                 """.trimIndent()
@@ -154,9 +154,9 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
         buildFile write //language=kotlin
                 """
-                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                    kotlinOptions {
-                        apiVersion = "1.9"
+                kotlin {
+                    compilerOptions {
+                        apiVersion = KotlinVersion.KOTLIN_1_9
                     }
                 }
                 """.trimIndent()
@@ -183,9 +183,9 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
         buildFile write //language=kotlin
                 """
-                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                    kotlinOptions {
-                        languageVersion = "1.7"
+                kotlin {
+                    compilerOptions {
+                        languageVersion = KotlinVersion.KOTLIN_1_7
                     }
                 }
                 """.trimIndent()
@@ -199,9 +199,9 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     fun `report too low Kotlin languageVersion`() {
         buildFile write //language=kotlin
                 """
-                tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
-                    kotlinOptions {
-                        languageVersion = "1.3"
+                kotlin {
+                    compilerOptions {
+                        languageVersion = KotlinVersion.KOTLIN_1_5
                     }
                 }
                 """.trimIndent()
@@ -209,7 +209,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Kotlin configuration specifies languageVersion='1.3' but IntelliJ Platform '2022.3.3' requires languageVersion='1.7'.", output
+                "- The Kotlin configuration specifies languageVersion='1.5' but IntelliJ Platform '2022.3.3' requires languageVersion='1.7'.", output
             )
         }
     }

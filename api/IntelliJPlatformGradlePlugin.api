@@ -2820,7 +2820,6 @@ public final class org/jetbrains/intellij/platform/gradle/resolvers/path/JavaRun
 	public fun getSubject ()Ljava/lang/String;
 	public synthetic fun getSubjectInput ()Ljava/lang/Object;
 	public fun getSubjectInput ()Ljava/lang/String;
-	public final fun resolveExecutable ()Ljava/nio/file/Path;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/resolvers/path/MarketplaceZipSignerPathResolver : org/jetbrains/intellij/platform/gradle/resolvers/path/PathResolver {
@@ -2923,7 +2922,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/shim/Shim
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/shim/Shim$ShimProxyClient : io/undertow/server/handlers/proxy/ProxyClient {
-	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/shim/Shim;Ljava/net/URI;)V
+	public fun <init> (Ljava/net/URI;)V
 	public fun findTarget (Lio/undertow/server/HttpServerExchange;)Lio/undertow/server/handlers/proxy/ProxyClient$ProxyTarget;
 	public fun getConnection (Lio/undertow/server/handlers/proxy/ProxyClient$ProxyTarget;Lio/undertow/server/HttpServerExchange;Lio/undertow/server/handlers/proxy/ProxyCallback;JLjava/util/concurrent/TimeUnit;)V
 	public abstract fun resolveUrl (Lio/undertow/server/HttpServerExchange;)Ljava/lang/String;
@@ -3491,11 +3490,6 @@ public final class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatform
 public abstract interface class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformCacheResolver$Parameters {
 	public abstract fun getCacheDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getName ()Lorg/gradle/api/provider/Property;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformCacheResolverKt {
-	public static final fun intelliJPlatformResolver (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function1;)Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformCacheResolver;
-	public static synthetic fun intelliJPlatformResolver$default (Lorg/gradle/api/Project;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformCacheResolver;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/utils/Logger {
