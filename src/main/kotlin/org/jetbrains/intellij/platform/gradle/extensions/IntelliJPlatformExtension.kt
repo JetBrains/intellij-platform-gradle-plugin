@@ -819,8 +819,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         useInstallerProvider = useInstaller,
                         useCustomCacheProvider = useCustomCache,
                         productModeProvider = productMode,
-                        configurationNameProvider = configurationName.orElse(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
-                        intellijPlatformConfigurationNameProvider = intellijPlatformConfigurationName.orElse(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY)
+                        configurationNameProvider = configurationName.convention(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
+                        intellijPlatformConfigurationNameProvider = intellijPlatformConfigurationName.convention(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
                     )
                 }
             }
