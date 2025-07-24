@@ -299,10 +299,12 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                             val platformPath by lazy {
                                 runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
                             }
-                            when (addDefaultDependencies && instrumentCode && platformPath != null) {
-                                true -> dependenciesHelper.createJavaCompiler()
-                                false -> null
-                            }.let { listOfNotNull(it) }
+
+                            buildList {
+                                if (addDefaultDependencies && instrumentCode && platformPath != null) {
+                                    add(dependenciesHelper.createJavaCompiler())
+                                }
+                            }
                         },
                     )
                 }
@@ -354,17 +356,16 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Platform Test Runtime fix Classpath resolvable configuration"
             ) {
                 defaultDependencies {
-                    addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
-                        val platformPath = runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
-                        when (enabled) {
-                            true -> when (platformPath) {
-                                null -> null
-                                else -> dependenciesHelper.createIntelliJPlatformTestRuntime(platformPath)
+                    addAllLater(
+                        project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
+                            buildList {
+                                if (enabled) {
+                                    runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }
+                                        .onSuccess { add(dependenciesHelper.createIntelliJPlatformTestRuntime(it)) }
+                                }
                             }
-
-                            false -> null
-                        }.let { listOfNotNull(it) }
-                    })
+                        },
+                    )
                 }
             }
             create(

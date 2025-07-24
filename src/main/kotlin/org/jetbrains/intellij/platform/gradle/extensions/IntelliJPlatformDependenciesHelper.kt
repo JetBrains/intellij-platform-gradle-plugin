@@ -257,10 +257,9 @@ class IntelliJPlatformDependenciesHelper(
 
         configurations[localConfigurationName].dependencies.addAllLater(
             cachedListProvider {
-                val request = requestProvider.get()
-
-                when (request.useCustomCache) {
-                    true -> {
+                buildList {
+                    val request = requestProvider.get()
+                    if (request.useCustomCache) {
                         val localPath = cacheResolver.resolve {
                             type = request.type
                             version = request.version
@@ -268,26 +267,24 @@ class IntelliJPlatformDependenciesHelper(
                             useInstaller = request.useInstaller
                             useCustomCache = true
                             configurationName = configuration.configurationName
-                            intellijPlatformConfigurationName = configuration.intellijPlatformConfigurationName.map { "$it#local" }
+                            intellijPlatformConfigurationName =
+                                configuration.intellijPlatformConfigurationName.map { "$it#local" }
                         }
                         val platformPath = resolveArtifactPath(localPath)
-                        createIntelliJPlatformLocal(platformPath)
+                        add(createIntelliJPlatformLocal(platformPath))
                     }
-
-                    false -> null
-                }.let { listOfNotNull(it) }
+                }
             },
         )
 
         configurations[dependencyArchiveConfigurationName].dependencies.addAllLater(
             cachedListProvider {
-                val request = requestProvider.get()
-
-                when (request.useCustomCache) {
-                    true -> null
-
-                    false -> createIntelliJPlatformDependency(request)
-                }.let { listOfNotNull(it) }
+                buildList {
+                    val request = requestProvider.get()
+                    if (!request.useCustomCache) {
+                        add(createIntelliJPlatformDependency(request))
+                    }
+                }
             },
         )
     }

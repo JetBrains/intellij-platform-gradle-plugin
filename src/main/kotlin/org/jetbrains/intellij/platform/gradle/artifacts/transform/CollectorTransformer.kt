@@ -206,7 +206,7 @@ internal fun collectModuleDescriptorJars(
             .map { it.name }
             .flatMap { collectResourcesFromModule(it) }
 
-        return (listOfNotNull(moduleResources) + dependencyResources).toSet()
+        return setOfNotNull(moduleResources) + dependencyResources
     }
 
     val rootModule = requireNotNull(modules[rootModuleName]?.path)
