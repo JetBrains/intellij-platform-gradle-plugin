@@ -45,6 +45,7 @@ import kotlin.io.path.*
  * Tasks based on the [PrepareSandboxTask] are _sandbox producers_ and can be associated with _sandbox consumers_.
  * To define the consumer task, make it extend from [SandboxAware] and apply the `consumer.applySandboxFrom(producer)` function.
  */
+@Suppress("KDocUnresolvedReference")
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, SandboxStructure, SplitModeAware {
 

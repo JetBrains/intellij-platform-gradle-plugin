@@ -99,18 +99,6 @@ class JavaRuntimePathResolver(
     )
 
     /**
-     * Resolves an exact Java Runtime executable.
-     *
-     * @see resolve
-     * @return Java Runtime executable
-     * @throws IllegalArgumentException
-     */
-    @Throws(IllegalArgumentException::class)
-    fun resolveExecutable() = requireNotNull(resolve().resolveJavaRuntimeExecutable()) {
-        "No Java Runtime executable found"
-    }
-
-    /**
      * Resolves the Java Runtime directory for the given [Path].
      *
      * @return The resolved Java Runtime directory, or null if it does not exist.

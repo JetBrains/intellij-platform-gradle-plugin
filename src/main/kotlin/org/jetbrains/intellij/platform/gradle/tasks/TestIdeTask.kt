@@ -175,7 +175,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
          * Unfortunately, this is possible only during the execution phase, when all the directories in the build dir
          * are already created.
          *
-         * To do this in advance, during the configuration phase, we need to know names of the directories for other
+         * To do this in advance, during the configuration phase, we need to know the names of the directories for other
          * plugins in the sandbox.
          * Which can be done only if they're named using plugin id.
          * But even then it may not work if the plugin defines an alias for its ID.

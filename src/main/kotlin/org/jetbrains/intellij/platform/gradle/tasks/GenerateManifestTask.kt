@@ -27,7 +27,7 @@ import kotlin.io.path.writeText
 /**
  * Generates the `MANIFEST.MF` file with all relevant information about the project configuration.
  *
- * To apply the produced manifest file, [JarCompanion.applyPluginManifest] method should be called on a task extending [Jar].
+ * To apply the produced manifest file, [org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion.applyPluginManifest] method should be called on a task extending [Jar].
  *
  * This file is bundled into the output jar files produced by [ComposedJarTask], [InstrumentedJarTask], and [Jar] tasks.
  */

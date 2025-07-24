@@ -81,7 +81,7 @@ abstract class Shim(
             .setRewriteHostHeader(true)
             .build()
 
-    abstract inner class ShimProxyClient(url: URI) : ProxyClient {
+    abstract class ShimProxyClient(url: URI) : ProxyClient {
 
         private val host = URI(url.scheme, url.userInfo, url.host, url.port, null, null, null)
 

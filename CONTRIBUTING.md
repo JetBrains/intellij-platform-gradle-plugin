@@ -6,7 +6,7 @@ Every submitted feedback, issue, or pull request is highly appreciated.
 ## Issue Tracker
 
 Before reporting an issue, please update your configuration to use always
-the [latest release](https://github.com/JetBrains/intellij-platform-gradle-plugin/releases), or try with
+the [latest release](https://github.com/JetBrains/intellij-platform-gradle-plugin/releases) or try with
 the [snapshot release](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html#snapshot-release), which contains not-yet publicly
 available changes.
 
@@ -50,4 +50,4 @@ To correctly prepare the pull requests, make sure to provide the following infor
 - relevant entry in the [`CHANGELOG.md`](https://github.com/JetBrains/intellij-platform-gradle-plugin/blob/main/CHANGELOG.md) file
 - unit tests (if necessary)
 - integration tests (if necessary)
-- documentation (if necessary, available in [JetBrains/intellij-sdk-docs](https://github.com/JetBrains/intellij-sdk-docs/tree/main/topics/appendix/tools/intellij_platform_gradle_plugin) repository)
+- documentation (if necessary, available in the [JetBrains/intellij-sdk-docs](https://github.com/JetBrains/intellij-sdk-docs/tree/main/topics/appendix/tools/intellij_platform_gradle_plugin) repository)

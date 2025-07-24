@@ -75,6 +75,7 @@ import kotlin.io.path.invariantSeparatorsPathString
  * @see org.jetbrains.intellij.platform.gradle.models.IvyModule
  * @see org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin.apply
  */
+@Suppress("KDocUnresolvedReference")
 @CacheableRule
 abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
     private val absNormalizedPlatformPath: String,
@@ -98,7 +99,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
                  * So we have to read the Ivy XML again.
                  */
                 val ivyXmlFile = File("$absNormalizedIvyPath/${id.version}/${id.group}-${id.name}-${id.version}.xml")
-                val ivyModule = XML.Companion.decodeFromString<IvyModule>(ivyXmlFile.readText())
+                val ivyModule = XML.decodeFromString<IvyModule>(ivyXmlFile.readText())
 
                 // Remove all existing artifacts because they have relative paths and won't be found.
                 removeAllFiles()

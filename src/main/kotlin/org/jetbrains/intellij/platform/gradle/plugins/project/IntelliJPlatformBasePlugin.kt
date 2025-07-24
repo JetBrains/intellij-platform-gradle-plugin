@@ -299,7 +299,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                             val platformPath by lazy {
                                 runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
                             }
-                            when (addDefaultDependencies && instrumentCode && platformPath != null && instrumentCode) {
+                            when (addDefaultDependencies && instrumentCode && platformPath != null) {
                                 true -> dependenciesHelper.createJavaCompiler()
                                 false -> null
                             }.let { listOfNotNull(it) }

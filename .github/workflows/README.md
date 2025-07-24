@@ -10,5 +10,4 @@ Gradle versions:
 - latest GA (e.g., `8.14.1`)
 - RC of next GA (potentially)
 
-When updating _latest GA_ version, adjust `exclude` section 
-and adjust `single-unitTest.yml`.
+When updating the _latest GA_ version, adjust `exclude` section and adjust `single-unitTest.yml`.

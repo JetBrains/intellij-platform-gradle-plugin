@@ -122,7 +122,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     }
 
     /**
-     * Checks if the plugin is up-to-date.
+     * Checks if the plugin is up to date.
      */
     private fun checkPluginVersion() {
         if (module.get() || !selfUpdateCheck.get() || offline.get()) {

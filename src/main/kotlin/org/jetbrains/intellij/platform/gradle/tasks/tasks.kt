@@ -53,7 +53,7 @@ internal inline fun <reified T : Task> Project.registerTask(
     configureWithType: Boolean = true,
     noinline configuration: T.() -> Unit = {},
 ) {
-    // Register new tasks of T type if it does not exist yet
+    // Register new tasks of the T type if it does not exist yet
     val log = Logger(javaClass)
 
     names.forEach { name ->
@@ -67,7 +67,7 @@ internal inline fun <reified T : Task> Project.registerTask(
     }
 }
 
-// Preconfigure all tasks of T type if they inherit from *Aware interfaces
+// Preconfigure all tasks of the T type if they inherit from *Aware interfaces
 internal fun <T : Task> Project.preconfigureTask(task: T) {
     val log = Logger(javaClass)
 

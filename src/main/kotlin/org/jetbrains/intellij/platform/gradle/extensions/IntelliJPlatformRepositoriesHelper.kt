@@ -26,9 +26,7 @@ import java.net.URI
 import java.nio.file.Path
 import kotlin.io.path.pathString
 
-private const val SHIM_MANAGER = "shimManager"
-
-@Suppress("UnstableApiUsage")
+@Suppress("KDocUnresolvedReference", "UnstableApiUsage")
 class IntelliJPlatformRepositoriesHelper(
     private val repositories: RepositoryHandler,
     private val providers: ProviderFactory,

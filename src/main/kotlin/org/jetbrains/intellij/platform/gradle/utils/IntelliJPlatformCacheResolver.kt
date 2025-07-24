@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.utils
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.api.Incubating
-import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.model.ObjectFactory
@@ -19,33 +18,9 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
-import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformCacheResolver.Parameters
 import java.nio.file.Path
 import java.util.*
-
-@Incubating
-fun Project.intelliJPlatformResolver(
-    configuration: Parameters.() -> Unit = {},
-): IntelliJPlatformCacheResolver {
-    val parameters = project.objects.newInstance<Parameters>().apply {
-        cacheDirectory.convention(
-            project.layout.dir(
-                project.extensionProvider.map { it.cachePath.resolve("ides").toFile() },
-            ),
-        )
-        name.convention({ "${it.type}-${it.version}" })
-    }.apply(configuration)
-
-    return IntelliJPlatformCacheResolver(
-        parameters = parameters,
-        configurations = project.configurations,
-        dependenciesHelperProvider = project.provider { project.dependenciesHelper },
-        extractorService = project.gradle.registerClassLoaderScopedBuildService(ExtractorService::class),
-        objects = project.objects,
-    )
-}
 
 /**
  * Resolves IntelliJ Platform dependencies from configured repositories and extracts them to a shared cache directory.
