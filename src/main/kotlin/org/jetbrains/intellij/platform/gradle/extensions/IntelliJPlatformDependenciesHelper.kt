@@ -246,17 +246,19 @@ class IntelliJPlatformDependenciesHelper(
         val suffix = configuration.intellijPlatformConfigurationName.get().removePrefix(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
         val localConfigurationName = Configurations.INTELLIJ_PLATFORM_LOCAL + suffix
 
-        val request = createIntelliJPlatformRequest(
+        val requestProvider = createIntelliJPlatformRequest(
             typeProvider = configuration.type,
             versionProvider = configuration.version,
             useInstallerProvider = configuration.useInstaller,
             useCustomCacheProvider = configuration.useCustomCache,
             productModeProvider = configuration.productMode,
             intellijPlatformConfigurationNameProvider = configuration.intellijPlatformConfigurationName,
-        ).get()
+        )
 
         configurations[localConfigurationName].dependencies.addAllLater(
             cachedListProvider {
+                val request = requestProvider.get()
+
                 when (request.useCustomCache) {
                     true -> {
                         val localPath = cacheResolver.resolve {
@@ -279,6 +281,8 @@ class IntelliJPlatformDependenciesHelper(
 
         configurations[dependencyArchiveConfigurationName].dependencies.addAllLater(
             cachedListProvider {
+                val request = requestProvider.get()
+
                 when (request.useCustomCache) {
                     true -> null
 
@@ -286,8 +290,6 @@ class IntelliJPlatformDependenciesHelper(
                 }.let { listOfNotNull(it) }
             },
         )
-
-
     }
 
     /**
