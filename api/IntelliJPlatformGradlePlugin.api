@@ -2724,6 +2724,17 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/providers
 	public abstract fun getAndroidStudioVersion ()Lorg/gradle/api/provider/Property;
 }
 
+public abstract class org/jetbrains/intellij/platform/gradle/providers/CoroutinesJavaAgentValueSource : org/gradle/api/provider/ValueSource {
+	public fun <init> ()V
+	public fun obtain ()Ljava/io/File;
+	public synthetic fun obtain ()Ljava/lang/Object;
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/providers/CoroutinesJavaAgentValueSource$Parameters : org/gradle/api/provider/ValueSourceParameters {
+	public abstract fun getIntelliJPlatformConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getTargetDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/providers/CurrentPluginVersionValueSource : org/gradle/api/provider/ValueSource {
 	public fun <init> ()V
 	public synthetic fun obtain ()Ljava/lang/Object;
@@ -2976,10 +2987,6 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/GenerateManifest
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask$Companion;
 	public fun <init> ()V
-	public abstract fun getCoroutinesJavaAgent ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getCoroutinesJavaAgentLock ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getCoroutinesJavaAgentPremainClass ()Lorg/gradle/api/provider/Property;
-	public abstract fun getIntelliJPlatformClasspathConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getLatestPluginVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPluginVersion ()Lorg/gradle/api/provider/Property;
@@ -3342,7 +3349,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public abstract fun getAutoReload ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
 	public abstract fun getCoroutinesJavaAgentFile ()Lorg/gradle/api/file/RegularFileProperty;
 }
 
