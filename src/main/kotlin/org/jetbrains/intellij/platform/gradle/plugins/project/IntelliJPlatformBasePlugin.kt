@@ -296,7 +296,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                     addAllLater(
                         addDefaultDependenciesProvider.zip(instrumentCodeProvider) { addDefaultDependencies, instrumentCode ->
-                            val instrumentCode = project.extensionProvider.flatMap { it.instrumentCode }.get()
                             val platformPath by lazy {
                                 runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
                             }
