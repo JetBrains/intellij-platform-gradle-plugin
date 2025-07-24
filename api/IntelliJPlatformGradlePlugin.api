@@ -1257,6 +1257,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public abstract fun getSplitModeTarget ()Lorg/gradle/api/provider/Property;
 	public final fun getTask ()Lorg/gradle/api/tasks/TaskProvider;
 	public abstract fun getType ()Lorg/gradle/api/provider/Property;
+	public abstract fun getUseCustomCache ()Lorg/gradle/api/provider/Property;
 	public abstract fun getUseInstaller ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
 	public final fun plugins (Lorg/gradle/api/Action;)V
@@ -2864,16 +2865,18 @@ public abstract class org/jetbrains/intellij/platform/gradle/services/IdesManage
 }
 
 public final class org/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform {
-	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
 	public final fun component1 ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Z
-	public final fun component4 ()Lorg/jetbrains/intellij/platform/gradle/ProductMode;
-	public final fun copy (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;
+	public final fun component4 ()Z
+	public final fun component5 ()Lorg/jetbrains/intellij/platform/gradle/ProductMode;
+	public final fun copy (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZZLorg/jetbrains/intellij/platform/gradle/ProductMode;)Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;ZZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getProductMode ()Lorg/jetbrains/intellij/platform/gradle/ProductMode;
 	public final fun getType ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public final fun getUseCustomCache ()Z
 	public final fun getUseInstaller ()Z
 	public final fun getVersion ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -2884,7 +2887,7 @@ public final class org/jetbrains/intellij/platform/gradle/services/RequestedInte
 public abstract class org/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatformsService : org/gradle/api/services/BuildService {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;)V
 	public final fun get (Ljava/lang/String;)Lorg/gradle/api/provider/Provider;
-	public final fun set (Ljava/lang/String;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
+	public final fun set (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/services/ShimManagerService : java/lang/AutoCloseable, org/gradle/api/services/BuildService {
