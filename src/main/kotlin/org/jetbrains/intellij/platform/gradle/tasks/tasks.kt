@@ -29,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectModuleD
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.models.type
+import org.jetbrains.intellij.platform.gradle.providers.CoroutinesJavaAgentValueSource
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
@@ -100,11 +101,11 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * @see CoroutinesJavaAgentAware
          */
         if (this is CoroutinesJavaAgentAware) {
-            val initializeIntelliJPlatformPluginTaskProvider =
-                tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-
-            coroutinesJavaAgentFile.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap {
-                it.coroutinesJavaAgent
+            coroutinesJavaAgentFile.fileProvider(providers.of(CoroutinesJavaAgentValueSource::class) {
+                parameters {
+                    intelliJPlatformConfiguration = this@task.intelliJPlatformConfiguration
+                    targetDirectory = extensionProvider.map { it.cachePath.toFile() }
+                }
             })
         }
 

@@ -11,10 +11,8 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
 import java.time.LocalDate
 import kotlin.io.path.createFile
-import kotlin.io.path.exists
 import kotlin.io.path.name
 import kotlin.test.Test
-import kotlin.test.assertFalse
 
 class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
 
@@ -86,25 +84,5 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
         build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
             assertNotContains("${Plugin.NAME} is outdated: 0.0.0.", output)
         }
-    }
-
-    @Test
-    fun `creates coroutines-javaagent file`() {
-        val file = dir.resolve("coroutines-javaagent.jar")
-
-        buildFile write //language=kotlin
-                """
-                tasks {
-                    ${Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN} {
-                        coroutinesJavaAgent = file("${file.name}")
-                    }
-                }
-                """.trimIndent()
-
-        assertFalse(file.exists())
-
-        build(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-
-        assertExists(file)
     }
 }

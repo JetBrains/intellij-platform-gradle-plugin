@@ -35,6 +35,7 @@
 - Refactor `CollectorTransformer` to exclude tests-related jars using `filterNot` as `minus` doesn't remove duplicates
 - Refactor `JarSearchableOptionsTask` to improve the `searchableOption` outgoing artifact registration JetBrains/intellij-platform-gradle-plugin#1968
 - Do not add default dependencies related to the code instrumentation if disabled JetBrains/intellij-platform-gradle-plugin#1983
+- Introduce `CoroutinesJavaAgentValueSource` for dynamic coroutines debug agent creation JetBrains/intellij-platform-gradle-plugin#1977
 
 ## [2.6.0] - 2025-05-14
 
