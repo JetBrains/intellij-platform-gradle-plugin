@@ -630,6 +630,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun create (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;)V
 	public final fun create (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;Z)V
 	public final fun create (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;)V
+	public final fun create (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/Object;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Ljava/lang/String;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
@@ -1244,22 +1245,17 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun getTestIdeUi ()Lorg/gradle/api/NamedDomainObjectContainer;
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters : org/gradle/api/Buildable, org/gradle/api/Named, org/gradle/api/plugins/ExtensionAware {
+public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration, org/gradle/api/Buildable, org/gradle/api/Named, org/gradle/api/plugins/ExtensionAware {
 	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;Ljava/lang/Class;)V
 	public fun getBuildDependencies ()Lorg/gradle/api/internal/tasks/DefaultTaskDependency;
 	public synthetic fun getBuildDependencies ()Lorg/gradle/api/tasks/TaskDependency;
 	public abstract fun getLocalPath ()Lorg/gradle/api/file/DirectoryProperty;
 	public fun getName ()Ljava/lang/String;
 	public final fun getPrepareSandboxTask ()Lorg/gradle/api/tasks/TaskProvider;
-	public abstract fun getProductMode ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSandboxDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSplitMode ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSplitModeTarget ()Lorg/gradle/api/provider/Property;
 	public final fun getTask ()Lorg/gradle/api/tasks/TaskProvider;
-	public abstract fun getType ()Lorg/gradle/api/provider/Property;
-	public abstract fun getUseCustomCache ()Lorg/gradle/api/provider/Property;
-	public abstract fun getUseInstaller ()Lorg/gradle/api/provider/Property;
-	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
 	public final fun plugins (Lorg/gradle/api/Action;)V
 	public final fun prepareSandboxTask (Lorg/gradle/api/Action;)V
 	public final fun task (Lorg/gradle/api/Action;)V
@@ -2892,7 +2888,7 @@ public final class org/jetbrains/intellij/platform/gradle/services/RequestedInte
 public abstract class org/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatformsService : org/gradle/api/services/BuildService {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;)V
 	public final fun get (Ljava/lang/String;)Lorg/gradle/api/provider/Provider;
-	public final fun set (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
+	public final fun set (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration;)Lorg/gradle/api/provider/Provider;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/services/ShimManagerService : java/lang/AutoCloseable, org/gradle/api/services/BuildService {

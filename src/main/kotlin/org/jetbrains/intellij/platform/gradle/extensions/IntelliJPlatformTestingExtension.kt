@@ -60,6 +60,8 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                 val basePrepareSandboxTask = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val plugins = IntelliJPlatformPluginsExtension.register(dependenciesHelper, project.objects, target = this)
 
+                val customIntellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix
+
                 val customIntelliJPlatformLocalConfiguration = project.configurations.create(
                     name = Configurations.INTELLIJ_PLATFORM_LOCAL.withSuffix,
                     description = "Custom IntelliJ Platform local",
@@ -70,27 +72,22 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     dependenciesExtension.customLocal(
                         localPath = localPath,
                         configurationName = this@create.name,
-                        intellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix,
+                        intellijPlatformConfigurationName = customIntellijPlatformConfigurationName,
                     )
                 }
 
                 val customIntelliJPlatformDependencyConfiguration = project.configurations.create(
                     name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE.withSuffix,
                     description = "Custom IntelliJ Platform dependency archive",
-                ) {
-                    dependenciesExtension.create {
-                        type = this@all.type
-                        version = this@all.version
-                        useInstaller = this@all.useInstaller
-                        useCustomCache = this@all.useCustomCache
-                        productMode = this@all.productMode
-                        configurationName = name
-                        intellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix
-                    }
-                }
+                )
+
+                dependenciesExtension.create(this@all.apply {
+                    configurationName = customIntelliJPlatformDependencyConfiguration.name
+                    intellijPlatformConfigurationName = customIntellijPlatformConfigurationName
+                })
 
                 val customIntelliJPlatformConfiguration = project.configurations.create(
-                    name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix,
+                    name = customIntellijPlatformConfigurationName,
                     description = "Custom IntelliJ Platform",
                 ) {
                     attributes {
@@ -292,17 +289,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         private val name: String,
         private val project: Project,
         private val taskClass: Class<T>,
-    ) : Named, ExtensionAware, Buildable {
-
-        abstract val type: Property<IntelliJPlatformType>
-        abstract val version: Property<String>
-        abstract val localPath: DirectoryProperty
-        abstract val useInstaller: Property<Boolean>
-        abstract val useCustomCache: Property<Boolean>
-        abstract val productMode: Property<ProductMode>
+    ) : IntelliJPlatformDependencyConfiguration(project.objects), Named, ExtensionAware, Buildable {
 
         abstract val sandboxDirectory: DirectoryProperty
-
+        abstract val localPath: DirectoryProperty
         abstract val splitMode: Property<Boolean>
         abstract val splitModeTarget: Property<SplitModeTarget>
 

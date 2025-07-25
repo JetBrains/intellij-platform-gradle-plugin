@@ -133,23 +133,12 @@ class IntelliJPlatformCacheResolver internal constructor(
      * @return The path to the resolved IntelliJ Platform
      */
     fun resolve(configure: IntelliJPlatformDependencyConfiguration.() -> Unit): Path {
-        val dependencyConfiguration =
-            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
         val dependenciesHelper = dependenciesHelperProvider.get()
-
         val configurationName = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_${UUID.randomUUID()}"
         val configuration = configurations.create(configurationName)
-
-        val requestedProvider = with(dependencyConfiguration) {
-            dependenciesHelper.createIntelliJPlatformRequest(
-                typeProvider = type,
-                versionProvider = version,
-                useInstallerProvider = useInstaller,
-                useCustomCacheProvider = useCustomCache,
-                productModeProvider = productMode,
-                intellijPlatformConfigurationNameProvider = intellijPlatformConfigurationName,
-            )
-        }
+        val requestedProvider = dependenciesHelper.requestedIntelliJPlatforms.set(
+            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
+        )
 
         val targetDirectory = parameters.cacheDirectory.dir(
             requestedProvider.map {

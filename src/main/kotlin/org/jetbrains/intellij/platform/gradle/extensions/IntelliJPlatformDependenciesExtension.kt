@@ -9,6 +9,8 @@ import org.gradle.api.file.Directory
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
@@ -46,11 +48,21 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
      * adds an IntelliJ Platform dependency based on the provided configuration.
      *
+     * @param configure IntelliJ Platform dependency configuration lambda.
+     */
+    fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) =
+        dependenciesHelper.addIntelliJPlatformCacheableDependency(
+            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
+        )
+
+    /**
+     * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
+     * adds an IntelliJ Platform dependency based on the provided configuration.
+     *
      * @param configure IntelliJ Platform dependency configuration.
      */
-    fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) {
-        dependenciesHelper.addIntelliJPlatformCacheableDependency(configure)
-    }
+    fun create(configuration: IntelliJPlatformDependencyConfiguration) =
+        dependenciesHelper.addIntelliJPlatformCacheableDependency(configuration)
 
     /**
      * Adds a dependency on the IntelliJ Platform.

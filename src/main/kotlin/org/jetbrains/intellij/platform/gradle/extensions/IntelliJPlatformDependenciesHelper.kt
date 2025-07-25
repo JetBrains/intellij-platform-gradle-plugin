@@ -77,7 +77,7 @@ class IntelliJPlatformDependenciesHelper(
     private val log = Logger(javaClass)
     private val pluginManager by lazy { IdePluginManager.createManager() }
     private val pluginRepository by lazy { PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE) }
-    private val requestedIntelliJPlatforms by lazy {
+    internal val requestedIntelliJPlatforms by lazy {
         gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class, projectPath).get()
     }
     private val extractorServiceProvider by lazy {
@@ -212,48 +212,16 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a request for the IntelliJ Platform with the specified configuration details.
      *
-     * @param typeProvider provider for the IntelliJ Platform type.
-     * @param versionProvider provider for the IntelliJ Platform version.
-     * @param useInstallerProvider provider indicating whether to use the installer.
-     * @param productModeProvider provider for the product mode of the IntelliJ Platform.
-     * @param intellijPlatformConfigurationNameProvider name of the IntelliJ Platform configuration, defaulting to [Configurations.INTELLIJ_PLATFORM_DEPENDENCY].
+     * @param configure IntelliJ Platform dependency configuration.
      */
-    internal fun createIntelliJPlatformRequest(
-        typeProvider: Provider<IntelliJPlatformType>,
-        versionProvider: Provider<String>,
-        useInstallerProvider: Provider<Boolean>,
-        useCustomCacheProvider: Provider<Boolean>,
-        productModeProvider: Provider<ProductMode>,
-        intellijPlatformConfigurationNameProvider: Provider<String>,
-    ) = requestedIntelliJPlatforms.set(
-        typeProvider = typeProvider,
-        versionProvider = versionProvider,
-        useInstallerProvider = useInstallerProvider,
-        useCustomCacheProvider = useCustomCacheProvider,
-        productModeProvider = productModeProvider,
-        configurationNameProvider = intellijPlatformConfigurationNameProvider,
-    )
-
-    internal fun addIntelliJPlatformCacheableDependency(
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit,
-    ) {
-        val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
-
+    internal fun addIntelliJPlatformCacheableDependency(configuration: IntelliJPlatformDependencyConfiguration) {
         val dependencyArchiveConfigurationName = configuration.configurationName.get()
 
         // TODO: This is hacky but we need to add a cached artifact to the [Configurations.INTELLIJ_PLATFORM_LOCAL] configuration,
         //       still respecting suffix, and passing that name from elsewhere would be too messy.
         val suffix = configuration.intellijPlatformConfigurationName.get().removePrefix(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
         val localConfigurationName = Configurations.INTELLIJ_PLATFORM_LOCAL + suffix
-
-        val requestProvider = createIntelliJPlatformRequest(
-            typeProvider = configuration.type,
-            versionProvider = configuration.version,
-            useInstallerProvider = configuration.useInstaller,
-            useCustomCacheProvider = configuration.useCustomCache,
-            productModeProvider = configuration.productMode,
-            intellijPlatformConfigurationNameProvider = configuration.intellijPlatformConfigurationName,
-        )
+        val requestProvider = requestedIntelliJPlatforms.set(configuration)
 
         configurations[localConfigurationName].dependencies.addAllLater(
             cachedListProvider {
@@ -292,35 +260,17 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * A base method for adding a dependency on the IntelliJ Platform.
      *
-     * @param typeProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
-     * @param versionProvider The provider for the version of the IntelliJ Platform dependency.
-     * @param useInstallerProvider Switches between the IDE installer and archive from the IntelliJ Maven repository.
-     * @param productModeProvider The provider for a mode in which a product may be started.
-     * @param configurationNameProvider The name of the configuration to add the dependency to.
-     * @param intellijPlatformConfigurationNameProvider The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
+     * @param configuration The IntelliJ Platform dependency configuration.
      * @param action An optional action to be performed on the created dependency.
      * @throws GradleException
      */
     @Throws(GradleException::class)
     internal fun addIntelliJPlatformDependency(
-        typeProvider: Provider<IntelliJPlatformType>,
-        versionProvider: Provider<String>,
-        useInstallerProvider: Provider<Boolean>,
-        useCustomCacheProvider: Provider<Boolean>,
-        productModeProvider: Provider<ProductMode>,
-        configurationNameProvider: Provider<String>,
-        intellijPlatformConfigurationNameProvider: Provider<String>,
+        configuration: IntelliJPlatformDependencyConfiguration,
         action: DependencyAction = {},
     ) = addIntelliJPlatformDependency(
-        requestedIntelliJPlatformProvider = createIntelliJPlatformRequest(
-            typeProvider = typeProvider,
-            versionProvider = versionProvider,
-            useInstallerProvider = useInstallerProvider,
-            useCustomCacheProvider = useCustomCacheProvider,
-            productModeProvider = productModeProvider,
-            intellijPlatformConfigurationNameProvider = intellijPlatformConfigurationNameProvider,
-        ),
-        configurationName = configurationNameProvider.orElse(Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE).get(),
+        requestedIntelliJPlatformProvider = requestedIntelliJPlatforms.set(configuration),
+        configurationName = configuration.configurationName.get(),
         action = action,
     )
 
@@ -389,14 +339,15 @@ class IntelliJPlatformDependenciesHelper(
             val platformPath = resolveArtifactPath(localPath)
             val productInfo = platformPath.productInfo()
 
-            createIntelliJPlatformRequest(
-                typeProvider = provider { productInfo.type },
-                versionProvider = provider { productInfo.version },
-                useInstallerProvider = provider { true },
-                useCustomCacheProvider = provider { false },
-                productModeProvider = provider { ProductMode.MONOLITH },
-                intellijPlatformConfigurationNameProvider = intellijPlatformConfigurationNameProvider,
-            )
+            val dependencyConfiguration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply {
+                type = productInfo.type
+                version = productInfo.version
+                useInstaller = true
+                useCustomCache = false
+                productMode = ProductMode.MONOLITH
+                this.intellijPlatformConfigurationName = intellijPlatformConfigurationNameProvider
+            }
+            requestedIntelliJPlatforms.set(dependencyConfiguration)
 
             createIntelliJPlatformLocal(platformPath).apply(action)
         },

@@ -11,6 +11,7 @@ import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.ProductMode
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
@@ -24,27 +25,8 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
     private val map = ConcurrentHashMap<String, Provider<RequestedIntelliJPlatform>>()
     private val base = objectFactory.property<RequestedIntelliJPlatform>()
 
-    /**
-     * Sets the configuration for a requested IntelliJ Platform by associating the provided configuration name
-     * with the corresponding platform parameters, including type, version, and installer settings.
-     * If some parameters are not specified, the [base] configuration is used.
-     *
-     * @param typeProvider A provider that supplies the IntelliJ Platform type for the given configuration.
-     * @param versionProvider A provider that supplies the version of the IntelliJ Platform for the given configuration.
-     * @param useInstallerProvider A provider that specifies whether to use the installer for the given configuration.
-     * @param useCustomCacheProvider A provider that specifies whether to use a custom cache for the given configuration.
-     * @param productModeProvider A provider that specifies the product mode for the given configuration.
-     * @param configurationNameProvider A provider that supplies the name of the configuration to set.
-     */
-    fun set(
-        typeProvider: Provider<IntelliJPlatformType>,
-        versionProvider: Provider<String>,
-        useInstallerProvider: Provider<Boolean>,
-        useCustomCacheProvider: Provider<Boolean>,
-        productModeProvider: Provider<ProductMode>,
-        configurationNameProvider: Provider<String>,
-    ): Provider<RequestedIntelliJPlatform> {
-        val configurationName = configurationNameProvider.orElse(Configurations.INTELLIJ_PLATFORM_DEPENDENCY).get()
+    fun set(configuration: IntelliJPlatformDependencyConfiguration): Provider<RequestedIntelliJPlatform> {
+        val configurationName = configuration.intellijPlatformConfigurationName.orElse(Configurations.INTELLIJ_PLATFORM_DEPENDENCY).get()
         return requireNotNull(
             map.compute(configurationName) { key, previous ->
                 when (key) {
@@ -55,11 +37,11 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
 
                         set(
                             RequestedIntelliJPlatform(
-                                type = typeProvider.get(),
-                                version = versionProvider.get(),
-                                useInstaller = useInstallerProvider.get(),
-                                useCustomCache = useCustomCacheProvider.get(),
-                                productMode = productModeProvider.get(),
+                                type = configuration.type.get(),
+                                version = configuration.version.get(),
+                                useInstaller = configuration.useInstaller.get(),
+                                useCustomCache = configuration.useCustomCache.get(),
+                                productMode = configuration.productMode.get(),
                             ),
                         )
                     }
@@ -72,22 +54,22 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                         }
 
                         RequestedIntelliJPlatform(
-                            type = typeProvider
+                            type = configuration.type
                                 .orElse(base.map { it.type })
                                 .orElse(errorProvider("type"))
                                 .get(),
-                            version = versionProvider
+                            version = configuration.version
                                 .orElse(base.map { it.version })
                                 .orElse(errorProvider("version")).get(),
-                            useInstaller = useInstallerProvider
+                            useInstaller = configuration.useInstaller
                                 .orElse(base.map { it.useInstaller })
                                 .orElse(errorProvider("useInstaller"))
                                 .get(),
-                            useCustomCache = useCustomCacheProvider
+                            useCustomCache = configuration.useCustomCache
                                 .orElse(base.map { it.useCustomCache })
                                 .orElse(errorProvider("useCustomCache"))
                                 .get(),
-                            productMode = productModeProvider
+                            productMode = configuration.productMode
                                 .orElse(base.map { it.productMode })
                                 .orElse(errorProvider("productMode"))
                                 .get(),

@@ -810,19 +810,14 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param configure IntelliJ Platform dependency configuration.
              */
             fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) {
-                val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
+                val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects)
+                    .apply {
+                        configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY
+                        intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY
+                    }
+                    .apply(configure)
 
-                with(configuration) {
-                    dependenciesHelper.addIntelliJPlatformDependency(
-                        typeProvider = type,
-                        versionProvider = version,
-                        useInstallerProvider = useInstaller,
-                        useCustomCacheProvider = useCustomCache,
-                        productModeProvider = productMode,
-                        configurationNameProvider = configurationName.convention(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
-                        intellijPlatformConfigurationNameProvider = intellijPlatformConfigurationName.convention(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY),
-                    )
-                }
+                dependenciesHelper.addIntelliJPlatformDependency(configuration)
             }
 
             /**
@@ -897,15 +892,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 version: String,
                 useInstaller: Boolean = true,
                 productMode: ProductMode = ProductMode.MONOLITH,
-            ) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = dependenciesHelper.provider { type },
-                versionProvider = dependenciesHelper.provider { version },
-                useInstallerProvider = dependenciesHelper.provider { useInstaller },
-                useCustomCacheProvider = dependenciesHelper.provider { false },
-                productModeProvider = dependenciesHelper.provider { productMode },
-                configurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
-                intellijPlatformConfigurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
-            )
+            ) = create(type, version) {
+                this.useInstaller = useInstaller
+                this.productMode = productMode
+            }
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -925,15 +915,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 version: String,
                 useInstaller: Boolean = true,
                 productMode: ProductMode = ProductMode.MONOLITH,
-            ) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = dependenciesHelper.provider { type.toIntelliJPlatformType() },
-                versionProvider = dependenciesHelper.provider { version },
-                useInstallerProvider = dependenciesHelper.provider { useInstaller },
-                useCustomCacheProvider = dependenciesHelper.provider { false },
-                productModeProvider = dependenciesHelper.provider { productMode },
-                configurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
-                intellijPlatformConfigurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
-            )
+            ) = create(type, version) {
+                this.useInstaller = useInstaller
+                this.productMode = productMode
+            }
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -953,15 +938,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 version: Provider<String>,
                 useInstaller: Boolean = true,
                 productMode: ProductMode = ProductMode.MONOLITH,
-            ) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = type.toIntelliJPlatformType(),
-                versionProvider = version,
-                useInstallerProvider = dependenciesHelper.provider { useInstaller },
-                useCustomCacheProvider = dependenciesHelper.provider { false },
-                productModeProvider = dependenciesHelper.provider { productMode },
-                configurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
-                intellijPlatformConfigurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
-            )
+            ) = create(type, version) {
+                this.useInstaller = useInstaller
+                this.productMode = productMode
+            }
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -980,15 +960,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 version: Provider<String>,
                 useInstaller: Provider<Boolean>,
                 productMode: Provider<ProductMode>,
-            ) = dependenciesHelper.addIntelliJPlatformDependency(
-                typeProvider = type.toIntelliJPlatformType(),
-                versionProvider = version,
-                useInstallerProvider = useInstaller,
-                useCustomCacheProvider = dependenciesHelper.provider { false },
-                productModeProvider = productMode,
-                configurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
-                intellijPlatformConfigurationNameProvider = dependenciesHelper.provider { Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY },
-            )
+            ) = create(type, version) {
+                this.useInstaller = useInstaller
+                this.productMode = productMode
+            }
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
