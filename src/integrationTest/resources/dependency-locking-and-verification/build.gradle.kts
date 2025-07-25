@@ -22,6 +22,7 @@ kotlin {
 // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1779#issuecomment-2384461002
 configurations {
     listOf(
+        "compileClasspath",
         "compileOnlyDependenciesMetadata",
         "intellijPlatformClasspath",
         "intellijPlatformDependency",
