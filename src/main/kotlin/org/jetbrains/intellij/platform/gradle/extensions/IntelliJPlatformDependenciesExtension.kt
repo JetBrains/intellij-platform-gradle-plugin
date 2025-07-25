@@ -1674,7 +1674,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = dependenciesHelper.addIntelliJPlatformLocalDependency(
         localPathProvider = localPath,
         configurationName = configurationName,
-        intellijPlatformConfigurationNameProvider = dependenciesHelper.provider { intellijPlatformConfigurationName },
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName,
     )
 
     /**

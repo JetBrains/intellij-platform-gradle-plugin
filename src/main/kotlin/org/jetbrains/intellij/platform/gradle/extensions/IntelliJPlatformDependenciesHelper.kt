@@ -323,7 +323,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param localPathProvider The provider for the local path of the IntelliJ Platform dependency. Accepts either [String], [File], or [Directory].
      * @param configurationName The name of the configuration to add the dependency to.
-     * @param intellijPlatformConfigurationNameProvider The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action An optional action to be performed on the created dependency.
      * @throws GradleException
      */
@@ -331,7 +331,7 @@ class IntelliJPlatformDependenciesHelper(
     internal fun addIntelliJPlatformLocalDependency(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
-        intellijPlatformConfigurationNameProvider: Provider<String> = localPathProvider.map { "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}#${it.hashCode()}" },
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addLater(
         cachedProvider {
@@ -345,7 +345,7 @@ class IntelliJPlatformDependenciesHelper(
                 useInstaller = true
                 useCustomCache = false
                 productMode = ProductMode.MONOLITH
-                this.intellijPlatformConfigurationName = intellijPlatformConfigurationNameProvider
+                this.intellijPlatformConfigurationName = intellijPlatformConfigurationName
             }
             requestedIntelliJPlatforms.set(dependencyConfiguration)
 
