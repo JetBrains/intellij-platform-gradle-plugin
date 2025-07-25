@@ -324,10 +324,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_CLASSPATH,
                 description = "IntelliJ Platform Classpath resolvable configuration"
             ) {
-                extendsFrom(
-                    intellijPlatformConfiguration,
-                    intellijPlatformDependenciesConfiguration,
-                )
+                extendsFrom(intellijPlatformConfiguration)
             }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,

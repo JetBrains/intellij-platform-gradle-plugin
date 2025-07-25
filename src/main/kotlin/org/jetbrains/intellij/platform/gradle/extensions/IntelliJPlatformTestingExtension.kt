@@ -189,6 +189,18 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     )
                 }
 
+                val customIntellijPlatformClasspathConfiguration = project.configurations.create(
+                    name = Configurations.INTELLIJ_PLATFORM_CLASSPATH.withSuffix,
+                    description = "Custom IntelliJ Platform Classpath",
+                ) {
+                    attributes {
+                        attribute(Attributes.extracted, true)
+                        attribute(Attributes.collected, true)
+                    }
+
+                    extendsFrom(customIntelliJPlatformConfiguration)
+                }
+
                 val customIntellijPlatformTestClasspathConfiguration = project.configurations.create(
                     name = Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH.withSuffix,
                     description = "Custom IntelliJ Platform Test Classpath",
@@ -266,6 +278,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     jetbrainsRuntimeConfiguration = customJetBrainsRuntimeConfiguration
 
                     if (this is TestableAware) {
+                        intellijPlatformClasspathConfiguration = customIntellijPlatformClasspathConfiguration
                         intellijPlatformTestClasspathConfiguration = customIntellijPlatformTestClasspathConfiguration
                         intellijPlatformTestRuntimeClasspathConfiguration = customIntellijPlatformTestRuntimeClasspathConfiguration
                         intelliJPlatformTestRuntimeFixClasspathConfiguration = customIntelliJPlatformTestRuntimeFixClasspathConfiguration

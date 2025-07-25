@@ -111,15 +111,17 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // 1. Instrumented test code (if available)
             // 2. Current plugin's libraries
             // 3. Other plugins' libraries
-            // 4. Test classpath configuration
-            // 5. Original classpath without runtime dependencies
-            // 6. Test runtime classpath configuration
-            // 7. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
+            // 4. Test classpath configuration without IntelliJ Platform base classpath
+            // 5. IntelliJ Platform base classpath
+            // 6. Original classpath without runtime dependencies
+            // 7. Test runtime classpath configuration
+            // 8. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
             classpath = project.files(
                 instrumentedTestCode,
                 currentPluginLibsProvider,
                 otherPluginsLibsProvider,
-                sourceTask.intellijPlatformTestClasspathConfiguration,
+                sourceTask.intellijPlatformTestClasspathConfiguration - sourceTask.intellijPlatformClasspathConfiguration,
+                sourceTask.intellijPlatformClasspathConfiguration,
                 classpath.filter { it !in runtimeDependencies.files },
                 sourceTask.intellijPlatformTestRuntimeClasspathConfiguration,
                 sourceTask.intelliJPlatformTestRuntimeFixClasspathConfiguration,
