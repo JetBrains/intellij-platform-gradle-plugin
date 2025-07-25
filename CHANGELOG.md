@@ -5,6 +5,7 @@
 ### Breaking Changes
 
 - `pluginModule(Dependency)` dependency helper no longer bundles module into the main plugin jar, use `pluginComposedModule(Dependency)` instead.
+- Replace `IdeServicesPluginRepositoryService.uploadByStringId` with `IdeServicesPluginRepositoryService.uploadByStringIdAndFamily`
 
 ### Added
 

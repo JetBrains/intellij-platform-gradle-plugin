@@ -3459,7 +3459,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/companion/TestCo
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/utils/IdeServicesPluginRepositoryService : org/jetbrains/intellij/pluginRepository/internal/api/PluginRepositoryService {
 	public abstract fun uploadById (ILokhttp3/RequestBody;Lokhttp3/RequestBody;ZLokhttp3/MultipartBody$Part;)Lretrofit2/Call;
-	public abstract fun uploadByStringId (Lokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/RequestBody;ZLokhttp3/MultipartBody$Part;)Lretrofit2/Call;
+	public abstract fun uploadByStringIdAndFamily (Lokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/RequestBody;ZLokhttp3/MultipartBody$Part;)Lretrofit2/Call;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/utils/IntelliJPlatformCacheResolver {
