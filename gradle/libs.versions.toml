@@ -1,7 +1,7 @@
 [versions]
 # libraries
 intellijStructure = "3.313"
-intellijPluginRepositoryRestClient = "2.0.46"
+intellijPluginRepositoryRestClient = "2.0.47"
 kotlinxSerialization = "1.6.3"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
