@@ -1,8 +1,7 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
 
-fun properties(key: String) = providers.gradleProperty(key)
 fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 
 plugins {
@@ -18,13 +17,13 @@ plugins {
     alias(libs.plugins.buildLogic)
 }
 
-val isSnapshot = properties("snapshot").get().toBoolean()
+val isSnapshot = providers.gradleProperty("snapshot").get().toBoolean()
 version = when (isSnapshot) {
-    true -> properties("snapshotVersion").map { "$it-SNAPSHOT" }
-    false -> properties("version")
+    true -> providers.gradleProperty("snapshotVersion").map { "$it-SNAPSHOT" }
+    false -> providers.gradleProperty("version")
 }.get()
-group = properties("group").get()
-description = properties("description").get()
+group = providers.gradleProperty("group").get()
+description = providers.gradleProperty("description").get()
 
 repositories {
     mavenCentral()
@@ -73,7 +72,7 @@ kotlin {
 
 tasks {
     wrapper {
-        gradleVersion = properties("gradleVersion").get()
+        gradleVersion = providers.gradleProperty("gradleVersion").get()
         distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
     }
 
@@ -90,7 +89,7 @@ tasks {
     }
 
     validatePlugins {
-        enableStricterValidation.set(true)
+        enableStricterValidation = true
     }
 
 //    @Suppress("UnstableApiUsage")
@@ -114,7 +113,7 @@ testing {
 
         register<JvmTestSuite>("integrationTest") {
             useJUnit()
-//            testType.set(TestSuiteType.INTEGRATION_TEST)
+//            testType = TestSuiteType.INTEGRATION_TEST
 
             dependencies {
                 implementation(project())
@@ -136,7 +135,7 @@ testing {
 }
 
 fun Test.configureTests() {
-    val testGradleHome = properties("testGradleUserHome")
+    val testGradleHome = providers.gradleProperty("testGradleUserHome")
         .map { File(it) }
         .getOrElse(
             layout.buildDirectory.asFile
@@ -146,18 +145,18 @@ fun Test.configureTests() {
 
     systemProperties["test.gradle.home"] = testGradleHome
     systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
-    systemProperties["test.gradle.default"] = properties("gradleVersion").get()
-    systemProperties["test.gradle.version"] = properties("testGradleVersion").map { gradleVersion ->
+    systemProperties["test.gradle.default"] = providers.gradleProperty("gradleVersion").get()
+    systemProperties["test.gradle.version"] = providers.gradleProperty("testGradleVersion").map { gradleVersion ->
         when (gradleVersion) {
             "nightly" -> gradleNightlyVersion()
             else -> gradleVersion
         }
     }.get()
-    systemProperties["test.gradle.arguments"] = properties("testGradleArguments").get()
-    systemProperties["test.intellijPlatform.type"] = properties("testIntellijPlatformType").get()
-    systemProperties["test.intellijPlatform.version"] = properties("testIntellijPlatformVersion").get()
-    systemProperties["test.kotlin.version"] = properties("testKotlinVersion").get()
-    systemProperties["test.markdownPlugin.version"] = properties("testMarkdownPluginVersion").get()
+    systemProperties["test.gradle.arguments"] = providers.gradleProperty("testGradleArguments").get()
+    systemProperties["test.intellijPlatform.type"] = providers.gradleProperty("testIntellijPlatformType").get()
+    systemProperties["test.intellijPlatform.version"] = providers.gradleProperty("testIntellijPlatformVersion").get()
+    systemProperties["test.kotlin.version"] = providers.gradleProperty("testKotlinVersion").get()
+    systemProperties["test.markdownPlugin.version"] = providers.gradleProperty("testMarkdownPluginVersion").get()
 
     jvmArgs(
         "-Xmx4G",
@@ -179,13 +178,13 @@ fun Test.configureTests() {
 val dokkaGeneratePublicationHtml by tasks.existing(DokkaGeneratePublicationTask::class)
 val javadocJar by tasks.registering(Jar::class) {
     dependsOn(dokkaGeneratePublicationHtml)
-    archiveClassifier.set("javadoc")
+    archiveClassifier = "javadoc"
     from(dokkaGeneratePublicationHtml.map { it.outputDirectory })
     patchManifest()
 }
 
 val sourcesJar by tasks.registering(Jar::class) {
-    archiveClassifier.set("sources")
+    archiveClassifier = "sources"
     from(sourceSets.main.get().allSource)
     patchManifest()
 }
@@ -196,8 +195,8 @@ artifacts {
 }
 
 gradlePlugin {
-    website.set(properties("website"))
-    vcsUrl.set(properties("vcsUrl"))
+    website = providers.gradleProperty("website")
+    vcsUrl = providers.gradleProperty("vcsUrl")
 
     mapOf(
         // main plugins
@@ -212,7 +211,7 @@ gradlePlugin {
             displayName = "IntelliJ Platform Gradle Plugin" + " ($pluginId)".takeIf { pluginId.isNotBlank() }.orEmpty()
             implementationClass = "org.jetbrains.intellij.platform.gradle.plugins.$pluginClass"
             description = project.description
-            tags.set(properties("tags").map { it.split(',') })
+            tags = providers.gradleProperty("tags").map { it.split(',') }
         }
     }
 
@@ -223,66 +222,24 @@ publishing {
     repositories {
         maven {
             name = "snapshot"
-            url = uri(properties("snapshotUrl").get())
+            url = uri(providers.gradleProperty("snapshotUrl").get())
             credentials {
-                username = properties("ossrhUsername").get()
-                password = properties("ossrhPassword").get()
+                username = providers.gradleProperty("ossrhUsername").get()
+                password = providers.gradleProperty("ossrhPassword").get()
             }
         }
     }
     publications {
         create<MavenPublication>("pluginMaven") {
-            groupId = properties("group").get()
-            artifactId = properties("artifactId").get()
+            groupId = providers.gradleProperty("group").get()
+            artifactId = providers.gradleProperty("artifactId").get()
             version = version.toString()
         }
-
-//        create<MavenPublication>("snapshot") {
-//            groupId = properties("group").get()
-//            artifactId = properties("artifactId").get()
-//            version = version.toString()
-//
-//            from(components["java"])
-//
-//            pom {
-//                name.set("IntelliJ Platform Gradle Plugin")
-//                description.set(project.description)
-//                url.set(properties("website"))
-//
-//                packaging = "jar"
-//
-//                scm {
-//                    connection.set(properties("scmUrl"))
-//                    developerConnection.set(properties("scmUrl"))
-//                    url.set(properties("vcsUrl"))
-//                }
-//
-//                licenses {
-//                    license {
-//                        name.set("The Apache License, Version 2.0")
-//                        url.set("https://github.com/JetBrains/intellij-platform-gradle-plugin/blob/master/LICENSE")
-//                    }
-//                }
-//
-//                developers {
-//                    developer {
-//                        id.set("zolotov")
-//                        name.set("Alexander Zolotov")
-//                        email.set("zolotov@jetbrains.com")
-//                    }
-//                    developer {
-//                        id.set("hsz")
-//                        name.set("Jakub Chrzanowski")
-//                        email.set("jakub.chrzanowski@jetbrains.com")
-//                    }
-//                }
-//            }
-//        }
     }
 }
 
 changelog {
-    unreleasedTerm.set("next")
+    unreleasedTerm = "next"
     groups.empty()
-    repositoryUrl.set("https://github.com/JetBrains/intellij-platform-gradle-plugin")
+    repositoryUrl = "https://github.com/JetBrains/intellij-platform-gradle-plugin"
 }
