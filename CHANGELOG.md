@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.7.0] - 2025-07-26
+
 ### Breaking Changes
 
 - `pluginModule(Dependency)` dependency helper no longer bundles module into the main plugin jar, use `pluginComposedModule(Dependency)` instead.
@@ -1473,7 +1475,9 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.5.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.6.0...v2.7.0
+[2.6.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.2.1...v2.3.0
