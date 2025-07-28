@@ -74,22 +74,25 @@ abstract class CoroutinesJavaAgentValueSource : ValueSource<File, CoroutinesJava
             fqns.values.firstNotNullOfOrNull { fqn -> it.runCatching { loadClass(fqn) }.getOrNull() }
         }?.name
 
-        val manifest = Manifest(
-            """
+        val targetFile = parameters.targetDirectory.map {
+            val filename = fqns.entries.first { entry -> entry.value == fqn }.key
+            it.file(filename).asFile
+        }.get()
+
+        if (!targetFile.exists()) {
+            val manifest = Manifest(
+                """
             Manifest-Version: 1.0
             Premain-Class: $fqn
             Can-Retransform-Classes: true
             Multi-Release: true
             
             """.trimIndent().byteInputStream(),
-        )
+            )
 
-        val targetFile = parameters.targetDirectory.map {
-            val filename = fqns.entries.first { entry -> entry.value == fqn }.key
-            it.file(filename).asFile
-        }.get()
-
-        JarOutputStream(targetFile.outputStream(), manifest).close()
+            targetFile.createNewFile()
+            JarOutputStream(targetFile.outputStream(), manifest).close()
+        }
 
         return targetFile
     }
