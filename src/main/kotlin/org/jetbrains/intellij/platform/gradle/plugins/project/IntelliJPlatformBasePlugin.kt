@@ -201,9 +201,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 }
 
                 defaultDependencies {
-                    addLater(dependenciesHelper.obtainJetBrainsRuntimeVersion().map { version ->
-                        dependenciesHelper.createJetBrainsRuntime(requireNotNull(version))
-                    })
+                    addAllLater(dependenciesHelper.createJetBrainsRuntimeObtainedDependency())
                 }
             }
 

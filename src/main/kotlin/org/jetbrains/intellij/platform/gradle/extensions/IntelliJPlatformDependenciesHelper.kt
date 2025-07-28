@@ -17,6 +17,7 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.initialization.resolve.RulesMode
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
@@ -593,10 +594,8 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName).map { version ->
-            createJetBrainsRuntime(requireNotNull(version)).apply(action)
-        },
+    ) = configurations[configurationName].dependencies.addAllLater(
+        createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName)
     )
 
     /**
@@ -1280,25 +1279,39 @@ class IntelliJPlatformDependenciesHelper(
         )
 
     /**
-     * Creates a [Provider] that holds a JetBrains Runtime version obtained using the currently used IntelliJ Platform.
+     * Returns JetBrains Runtime version obtained using the currently used IntelliJ Platform.
      *
      * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      */
-    internal fun obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) =
-        cachedProvider {
-            val dependencies = runCatching {
-                val platformPath = platformPath(intellijPlatformConfigurationName)
-                platformPath.resolve("dependencies.txt").takeIf { it.exists() }
-            }.getOrNull() ?: return@cachedProvider null
+    internal fun obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY): String? {
+        val dependencies = runCatching {
+            val platformPath = platformPath(intellijPlatformConfigurationName)
+            platformPath.resolve("dependencies.txt").takeIf { it.exists() }
+        }.getOrNull() ?: return null
 
-            val version = FileReader(dependencies.toFile()).use { reader ->
-                with(Properties()) {
-                    load(reader)
-                    getProperty("runtimeBuild") ?: getProperty("jdkBuild")
-                }
-            } ?: return@cachedProvider null
+        val version = FileReader(dependencies.toFile()).use { reader ->
+            with(Properties()) {
+                load(reader)
+                getProperty("runtimeBuild") ?: getProperty("jdkBuild")
+            }
+        } ?: return null
 
-            buildJetBrainsRuntimeVersion(version)
+        return buildJetBrainsRuntimeVersion(version)
+    }
+
+    /**
+     * Creates a list property of dependencies containing the JetBrains Runtime dependency.
+     * The runtime version is obtained from the IntelliJ Platform configuration.
+     *
+     * @param intellijPlatformConfigurationName Configuration name for IntelliJ Platform dependency, defaults to "intellijPlatformDependency"
+     * @return List property containing JetBrains Runtime dependency if version could be obtained, empty list otherwise
+     */
+    internal fun createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY): ListProperty<Dependency> =
+        cachedListProvider {
+            buildList {
+                obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName)
+                    ?.let { add(createJetBrainsRuntime(it)) }
+            }
         }
 
     /**

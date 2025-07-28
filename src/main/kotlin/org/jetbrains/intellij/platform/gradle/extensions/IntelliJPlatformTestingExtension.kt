@@ -126,9 +126,10 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     }
 
                     defaultDependencies {
-                        addLater(
-                            dependenciesHelper.obtainJetBrainsRuntimeVersion(customIntelliJPlatformConfiguration.name)
-                                .map { version -> dependenciesHelper.createJetBrainsRuntime(requireNotNull(version)) },
+                        addAllLater(
+                            dependenciesHelper.createJetBrainsRuntimeObtainedDependency(
+                                customIntelliJPlatformConfiguration.name,
+                            ),
                         )
                     }
                 }
