@@ -3082,7 +3082,6 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandbo
 	public abstract fun getPluginsClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getSandboxSuffix ()Lorg/gradle/api/provider/Property;
-	public final fun intoChild (Ljava/lang/Object;)Lorg/gradle/api/file/CopySpec;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandboxTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
