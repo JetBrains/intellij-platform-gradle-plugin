@@ -28,29 +28,29 @@ interface KotlinMetadataAware {
      * The `apiVersion` property value of `compileKotlin.kotlinOptions` defined in the build script.
      */
     @get:Internal
-    val kotlinApiVersion: Property<String?>
+    val kotlinApiVersion: Property<String>
 
     /**
      * The `languageVersion` property value of `compileKotlin.kotlinOptions` defined in the build script.
      */
     @get:Internal
-    val kotlinLanguageVersion: Property<String?>
+    val kotlinLanguageVersion: Property<String>
 
     /**
      * The version of Kotlin used in the project.
      */
     @get:Internal
-    val kotlinVersion: Property<String?>
+    val kotlinVersion: Property<String>
 
     /**
      * The `jvmTarget` property value of `compileKotlin.kotlinOptions` defined in the build script.
      */
     @get:Internal
-    val kotlinJvmTarget: Property<String?>
+    val kotlinJvmTarget: Property<String>
 
     /**
      * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
      */
     @get:Internal
-    val kotlinStdlibDefaultDependency: Property<Boolean?>
+    val kotlinStdlibDefaultDependency: Property<Boolean>
 }

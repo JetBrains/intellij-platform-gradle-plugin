@@ -63,7 +63,7 @@ internal fun ConfigurationContainer.create(
 internal val Configuration.asLenient
     get() = incoming.artifactView { lenient(true) }.files
 
-fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
+fun <T : Any> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
     null -> false
     is String -> value.isNotEmpty()
     is RegularFile -> value.asFile.exists()
@@ -193,7 +193,7 @@ internal val PluginManager.isModule
 /**
  * Helper function for creating cached [ProviderFactory.provider].
  */
-internal inline fun <reified T> cachedProvider(
+internal inline fun <reified T : Any> cachedProvider(
     objects: ObjectFactory,
     providers: ProviderFactory,
     crossinline value: () -> T,
@@ -208,7 +208,7 @@ internal inline fun <reified T> cachedProvider(
 /**
  * Helper function for creating cached list [ProviderFactory.provider].
  */
-internal inline fun <reified T> cachedListProvider(
+internal inline fun <reified T : Any> cachedListProvider(
     objects: ObjectFactory,
     providers: ProviderFactory,
     crossinline value: () -> List<T>,

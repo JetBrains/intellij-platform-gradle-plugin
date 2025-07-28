@@ -124,13 +124,13 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Helper function for creating cached [ProviderFactory.provider].
      */
-    internal inline fun <reified T> cachedProvider(crossinline value: () -> T) =
+    internal inline fun <reified T : Any> cachedProvider(crossinline value: () -> T) =
         cachedProvider(objects, providers, value)
 
     /**
      * Helper function for creating cached list [ProviderFactory.provider].
      */
-    internal inline fun <reified T> cachedListProvider(crossinline value: () -> List<T>) =
+    internal inline fun <reified T : Any> cachedListProvider(crossinline value: () -> List<T>) =
         cachedListProvider(objects, providers, value)
 
     internal val cacheResolver by lazy {
@@ -220,7 +220,8 @@ class IntelliJPlatformDependenciesHelper(
 
         // TODO: This is hacky but we need to add a cached artifact to the [Configurations.INTELLIJ_PLATFORM_LOCAL] configuration,
         //       still respecting suffix, and passing that name from elsewhere would be too messy.
-        val suffix = configuration.intellijPlatformConfigurationName.get().removePrefix(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
+        val suffix = configuration.intellijPlatformConfigurationName.get()
+            .removePrefix(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
         val localConfigurationName = Configurations.INTELLIJ_PLATFORM_LOCAL + suffix
         val requestProvider = requestedIntelliJPlatforms.set(configuration)
 
@@ -334,23 +335,26 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        cachedProvider {
-            val localPath = localPathProvider.orNull ?: return@cachedProvider null
-            val platformPath = resolveArtifactPath(localPath)
-            val productInfo = platformPath.productInfo()
+    ) = configurations[configurationName].dependencies.addAllLater(
+        cachedListProvider {
+            buildList {
+                val localPath = localPathProvider.orNull ?: return@buildList
+                val platformPath = resolveArtifactPath(localPath)
+                val productInfo = platformPath.productInfo()
 
-            val dependencyConfiguration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply {
-                type = productInfo.type
-                version = productInfo.version
-                useInstaller = true
-                useCustomCache = false
-                productMode = ProductMode.MONOLITH
-                this.intellijPlatformConfigurationName = intellijPlatformConfigurationName
+                val dependencyConfiguration =
+                    objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply {
+                        type = productInfo.type
+                        version = productInfo.version
+                        useInstaller = true
+                        useCustomCache = false
+                        productMode = ProductMode.MONOLITH
+                        this.intellijPlatformConfigurationName = intellijPlatformConfigurationName
+                    }
+                requestedIntelliJPlatforms.set(dependencyConfiguration)
+
+                createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
             }
-            requestedIntelliJPlatforms.set(dependencyConfiguration)
-
-            createIntelliJPlatformLocal(platformPath).apply(action)
         },
     )
 

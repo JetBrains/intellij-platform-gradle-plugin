@@ -68,7 +68,7 @@ abstract class PluginArtifactRepository @Inject constructor(
      * @param credentialsType The class of the credentials type to instantiate.
      * @param action The action used to configure the credentials.
      */
-    override fun <T : Credentials?> credentials(credentialsType: Class<T>, action: Action<in T>) {
+    override fun <T : Credentials> credentials(credentialsType: Class<T>, action: Action<in T>) {
         val credentialsValue = requireNotNull(instantiateCredentials(credentialsType))
         action.execute(credentialsValue)
         credentials = credentialsValue
@@ -87,7 +87,7 @@ abstract class PluginArtifactRepository @Inject constructor(
      * @return An instance of the requested credential type.
      */
     @Throws(IllegalArgumentException::class)
-    private fun <T : Credentials?> instantiateCredentials(credentialType: Class<T>) = when {
+    private fun <T : Credentials> instantiateCredentials(credentialType: Class<T>) = when {
         PasswordCredentials::class.java.isAssignableFrom(credentialType) -> credentialType.cast(instantiator.newInstance(PasswordCredentials::class.java))
         HttpHeaderCredentials::class.java.isAssignableFrom(credentialType) -> credentialType.cast(instantiator.newInstance(HttpHeaderCredentials::class.java))
         else -> throw IllegalArgumentException("Unrecognized credential type: ${credentialType.getName()}")
@@ -105,6 +105,6 @@ abstract class PluginArtifactRepository @Inject constructor(
  * @param T The type of `Credentials` being configured.
  * @param action The action used to configure the credentials.
  */
-inline fun <reified T : Credentials?> PluginArtifactRepository.credentials(action: Action<in T>) {
+inline fun <reified T : Credentials> PluginArtifactRepository.credentials(action: Action<in T>) {
     credentials(T::class.java, action)
 }
