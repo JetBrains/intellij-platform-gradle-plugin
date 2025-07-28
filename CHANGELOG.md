@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Add a check for target file existence before creating and writing to `JarOutputStream`. JetBrains/intellij-platform-gradle-plugin#1988
+
 ## [2.7.0] - 2025-07-26
 
 ### Breaking Changes
