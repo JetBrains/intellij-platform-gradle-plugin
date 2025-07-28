@@ -4,12 +4,10 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.*
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -150,8 +148,6 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
         super.copy()
     }
-
-    fun intoChild(destinationDir: Any) = mainSpec.addChild().into(destinationDir)
 
     override fun getDestinationDir() = defaultDestinationDirectory.asFile.get()
 
@@ -307,23 +303,33 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })
 
-                intoChild(pluginName.map { "$it/${Sandbox.Plugin.LIB}" })
-                    .from(runtimeClasspath)
-                    .from(pluginJar)
-                    .eachFile {
-                        val originalName = file.toPath().nameWithoutExtension
-                        val extension = file.toPath().extension
-                        var i = 0
+                val lib = pluginName.map { "$it/${Sandbox.Plugin.LIB}" }
+                val libModules = pluginName.map { "$it/${Sandbox.Plugin.LIB_MODULES}" }
+                val nameCollisionHelper = Action<FileCopyDetails> {
+                    val originalName = file.toPath().nameWithoutExtension
+                    val extension = file.toPath().extension
+                    var i = 0
 
-                        while (content.contains(relativePath.pathString)) {
-                            name = "${originalName}_${++i}.$extension"
-                        }
-
-                        content.add(relativePath.pathString)
+                    while (content.contains(relativePath.pathString)) {
+                        name = "${originalName}_${++i}.$extension"
                     }
 
-                intoChild(pluginName.map { "$it/${Sandbox.Plugin.LIB_MODULES}" })
-                    .from(intellijPlatformPluginModuleConfiguration)
+                    content.add(relativePath.pathString)
+                }
+
+                from(runtimeClasspath) {
+                    eachFile(nameCollisionHelper)
+                    into(lib)
+                }
+
+                from(pluginJar) {
+                    eachFile(nameCollisionHelper)
+                    into(lib)
+                }
+
+                from(intellijPlatformPluginModuleConfiguration) {
+                    into(libModules)
+                }
 
                 from(pluginsClasspath)
 
