@@ -95,7 +95,7 @@ abstract class DmgExtractorValueSource : ValueSource<Path, DmgExtractorValueSour
                 "-av",
                 "--quiet",
                 "--exclude=Applications",
-                "--exclude=.*",
+                "--exclude=/.*",
                 "$tempDirectory/",
                 targetDirectory,
             )
