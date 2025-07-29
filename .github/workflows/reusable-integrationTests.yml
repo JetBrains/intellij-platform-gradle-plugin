@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         gradleVersion:
-          - "8.5"
+          - "8.6"
           - "8.14.3"
           - "9.0.0-rc-4"
           - "nightly"

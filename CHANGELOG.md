@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Update minimal supported Gradle version to `8.6`
+
 ### Fixed
 
 - Add a check for target file existence before creating and writing to `JarOutputStream`. JetBrains/intellij-platform-gradle-plugin#1988
