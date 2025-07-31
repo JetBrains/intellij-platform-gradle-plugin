@@ -235,13 +235,6 @@ internal fun String.resolveIdeHomeVariable(platformPath: Path) =
             .replace("\$IDE_HOME", it)
             .replace("%IDE_HOME%", it)
             .replace("Contents/Contents", "Contents")
-            .let { entry ->
-                val value = entry.split("=").getOrNull(1) ?: entry
-                when {
-                    runCatching { Path(value).exists() }.getOrElse { false } -> entry
-                    else -> entry.replace("/Contents", "")
-                }
-            }
     }
 
 private val productInfoCache = mutableMapOf<Path, ProductInfo>()
