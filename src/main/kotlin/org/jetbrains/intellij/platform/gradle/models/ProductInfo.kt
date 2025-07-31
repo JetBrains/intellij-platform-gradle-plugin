@@ -15,7 +15,6 @@ import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlin.io.path.exists
 import kotlin.io.path.pathString
 
 /**
@@ -230,18 +229,17 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
  */
 internal fun String.resolveIdeHomeVariable(platformPath: Path) =
     platformPath.pathString.let {
-        this
+        this.run {
+            if (OperatingSystem.current().isMacOsX) {
+                replace("\$IDE_HOME/Contents", "\$IDE_HOME")
+                    .replace("\$APP_PACKAGE/Contents", "\$APP_PACKAGE")
+            } else {
+                this
+            }
+        }
             .replace("\$APP_PACKAGE", it)
             .replace("\$IDE_HOME", it)
             .replace("%IDE_HOME%", it)
-            .replace("Contents/Contents", "Contents")
-            .let { entry ->
-                val value = entry.split("=").getOrNull(1) ?: entry
-                when {
-                    runCatching { Path(value).exists() }.getOrElse { false } -> entry
-                    else -> entry.replace("/Contents", "")
-                }
-            }
     }
 
 private val productInfoCache = mutableMapOf<Path, ProductInfo>()

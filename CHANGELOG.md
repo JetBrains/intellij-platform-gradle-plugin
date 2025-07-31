@@ -10,6 +10,7 @@
 
 - Add a check for target file existence before creating and writing to `JarOutputStream`. JetBrains/intellij-platform-gradle-plugin#1988
 - Fix the incorrect rsync exclusion pattern in `DmgExtractorValueSource`
+- Fix macOS missing nio-fs.jar on bootclasspath when runIde. JetBrains/intellij-platform-gradle-plugin#1994
 
 ## [2.7.0] - 2025-07-26
 
