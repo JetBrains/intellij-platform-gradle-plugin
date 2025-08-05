@@ -111,15 +111,17 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // 1. Instrumented test code (if available)
             // 2. Current plugin's libraries
             // 3. Other plugins' libraries
-            // 4. Test classpath configuration
-            // 5. Original classpath without runtime dependencies
-            // 6. Test runtime classpath configuration
-            // 7. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
+            // 4. Test classpath configuration without IntelliJ Platform base classpath
+            // 5. IntelliJ Platform base classpath
+            // 6. Original classpath without runtime dependencies
+            // 7. Test runtime classpath configuration
+            // 8. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
             classpath = project.files(
                 instrumentedTestCode,
                 currentPluginLibsProvider,
                 otherPluginsLibsProvider,
-                sourceTask.intellijPlatformTestClasspathConfiguration,
+                sourceTask.intellijPlatformTestClasspathConfiguration - sourceTask.intellijPlatformClasspathConfiguration,
+                sourceTask.intellijPlatformClasspathConfiguration,
                 classpath.filter { it !in runtimeDependencies.files },
                 sourceTask.intellijPlatformTestRuntimeClasspathConfiguration,
                 sourceTask.intelliJPlatformTestRuntimeFixClasspathConfiguration,
@@ -175,7 +177,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
          * Unfortunately, this is possible only during the execution phase, when all the directories in the build dir
          * are already created.
          *
-         * To do this in advance, during the configuration phase, we need to know names of the directories for other
+         * To do this in advance, during the configuration phase, we need to know the names of the directories for other
          * plugins in the sandbox.
          * Which can be done only if they're named using plugin id.
          * But even then it may not work if the plugin defines an alias for its ID.

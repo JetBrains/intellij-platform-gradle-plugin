@@ -16,6 +16,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.utils.*
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
+import org.jetbrains.intellij.pluginRepository.model.ProductFamily
 import org.jetbrains.intellij.pluginRepository.model.StringPluginId
 
 /**
@@ -115,8 +116,9 @@ abstract class PublishPluginTask : DefaultTask() {
 
                     false -> PluginRepositoryFactory.create(host.get(), token.get())
                 }
-                repositoryClient.uploader.upload(
+                repositoryClient.uploader.uploadUpdateByXmlIdAndFamily(
                     id = pluginId as StringPluginId,
+                    family = ProductFamily.INTELLIJ,
                     file = path.toFile(),
                     channel = channel.takeIf { it != "default" },
                     notes = null,

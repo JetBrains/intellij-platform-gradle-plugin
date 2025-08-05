@@ -5,6 +5,7 @@ import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
 val markdownPluginNotationProperty = providers.gradleProperty("markdownPlugin.version").map { "org.intellij.plugins.markdown:$it" }
+val instrumentCodeProperty = providers.gradleProperty("instrumentCode").map { it.toBoolean() }
 
 plugins {
     id("org.jetbrains.kotlin.jvm")
@@ -28,7 +29,6 @@ dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
         plugin(markdownPluginNotationProperty)
-        instrumentationTools()
         testFramework(TestFrameworkType.Platform)
     }
 
@@ -37,6 +37,7 @@ dependencies {
 
 intellijPlatform {
     buildSearchableOptions = false
+    instrumentCode = instrumentCodeProperty
 }
 
 tasks {

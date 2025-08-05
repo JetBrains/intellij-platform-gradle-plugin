@@ -77,7 +77,7 @@ data class IvyModule(
 private val log = Logger(IvyModule::class.java)
 
 /**
- * Create a publication artifact element for Ivy XML file, like:
+ * Create a publication artifact element for the Ivy XML file, like:
  *
  * ```XML
  * <ivy-module version="2.0">

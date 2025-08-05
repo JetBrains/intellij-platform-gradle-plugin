@@ -29,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectModuleD
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.models.type
+import org.jetbrains.intellij.platform.gradle.providers.CoroutinesJavaAgentValueSource
 import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerifierPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
@@ -53,7 +54,7 @@ internal inline fun <reified T : Task> Project.registerTask(
     configureWithType: Boolean = true,
     noinline configuration: T.() -> Unit = {},
 ) {
-    // Register new tasks of T type if it does not exist yet
+    // Register new tasks of the T type if it does not exist yet
     val log = Logger(javaClass)
 
     names.forEach { name ->
@@ -67,7 +68,7 @@ internal inline fun <reified T : Task> Project.registerTask(
     }
 }
 
-// Preconfigure all tasks of T type if they inherit from *Aware interfaces
+// Preconfigure all tasks of the T type if they inherit from *Aware interfaces
 internal fun <T : Task> Project.preconfigureTask(task: T) {
     val log = Logger(javaClass)
 
@@ -100,11 +101,11 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * @see CoroutinesJavaAgentAware
          */
         if (this is CoroutinesJavaAgentAware) {
-            val initializeIntelliJPlatformPluginTaskProvider =
-                tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-
-            coroutinesJavaAgentFile.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap {
-                it.coroutinesJavaAgent
+            coroutinesJavaAgentFile.fileProvider(providers.of(CoroutinesJavaAgentValueSource::class) {
+                parameters {
+                    intelliJPlatformConfiguration = this@task.intelliJPlatformConfiguration
+                    targetDirectory = extensionProvider.map { it.cachePath.toFile() }
+                }
             })
         }
 
@@ -337,6 +338,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is TestableAware) {
             val pluginName = extensionProvider.flatMap { it.projectName }
             pluginDirectory = sandboxPluginsDirectory.dir(pluginName)
+            intellijPlatformClasspathConfiguration =
+                configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_CLASSPATH)
             intellijPlatformTestClasspathConfiguration =
                 configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH)
             intellijPlatformTestRuntimeClasspathConfiguration =

@@ -3,6 +3,8 @@
 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
 
+version = "1.0.0"
+
 plugins {
     id("org.jetbrains.kotlin.jvm")
     id("org.jetbrains.intellij.platform.module")

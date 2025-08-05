@@ -258,7 +258,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
      * Sets the [provider] value for the given [tagName] or [attributeName] of [tagName].
      */
     private fun Document.patch(
-        provider: Provider<String?>?,
+        provider: Provider<String>?,
         tagName: String,
         attributeName: String? = null,
         isCDATA: Boolean = false,

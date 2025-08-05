@@ -320,7 +320,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginVerification {
                         ides {
-                            ide("foo")
+                            create("IC", "foo")
                         }
                     }
                 }
@@ -329,6 +329,28 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Could not find", output)
             assertContains("idea:ideaIC:foo", output)
+        }
+    }
+
+    @Test
+    fun `fail on incorrect ide type`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        ides {
+                            create("foo", "bar")
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            assertContains("Specified type 'foo' is unknown.", output)
         }
     }
 
@@ -489,7 +511,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginVerification {
                         ides {
-                            ide("$type", "$version")
+                            create("$type", "$version")
                         }
                     }
                 }

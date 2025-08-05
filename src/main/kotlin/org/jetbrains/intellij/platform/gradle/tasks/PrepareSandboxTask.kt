@@ -4,12 +4,10 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
+import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.file.ConfigurableFileCollection
-import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.file.DuplicatesStrategy
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.*
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
@@ -33,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.kotlin.gradle.utils.named
 import kotlin.io.path.*
 
@@ -45,6 +44,7 @@ import kotlin.io.path.*
  * Tasks based on the [PrepareSandboxTask] are _sandbox producers_ and can be associated with _sandbox consumers_.
  * To define the consumer task, make it extend from [SandboxAware] and apply the `consumer.applySandboxFrom(producer)` function.
  */
+@Suppress("KDocUnresolvedReference")
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, SandboxStructure, SplitModeAware {
 
@@ -150,8 +150,6 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         super.copy()
     }
 
-    fun intoChild(destinationDir: Any) = mainSpec.addChild().into(destinationDir)
-
     override fun getDestinationDir() = defaultDestinationDirectory.asFile.get()
 
     override fun configure(closure: Closure<*>) = super.configure(closure)
@@ -227,10 +225,10 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
         splitModeFrontendProperties.asPath.writeText(
             """
-            idea.config.path=${sandboxConfigFrontendDirectory.asPath}
-            idea.system.path=${sandboxSystemFrontendDirectory.asPath}
-            idea.log.path=${sandboxLogFrontendDirectory.asPath}
-            idea.plugins.path=${pluginsDirectory.asPath}
+            idea.config.path=${sandboxConfigFrontendDirectory.asPath.safePathString}
+            idea.system.path=${sandboxSystemFrontendDirectory.asPath.safePathString}
+            idea.log.path=${sandboxLogFrontendDirectory.asPath.safePathString}
+            idea.plugins.path=${pluginsDirectory.asPath.safePathString}
             """.trimIndent()
         )
     }
@@ -264,7 +262,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 )
 
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
-                val intellijPlatformPluginComposedModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
+                val intellijPlatformPluginComposedModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE]
                 val intellijPlatformRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH]
                 val intellijPlatformTestRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH]
                 val runtimeConfiguration = project.files(testSandbox.map {
@@ -306,23 +304,33 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 splitModeTarget.convention(project.extensionProvider.flatMap { it.splitModeTarget })
 
-                intoChild(pluginName.map { "$it/${Sandbox.Plugin.LIB}" })
-                    .from(runtimeClasspath)
-                    .from(pluginJar)
-                    .eachFile {
-                        val originalName = file.toPath().nameWithoutExtension
-                        val extension = file.toPath().extension
-                        var i = 0
+                val lib = pluginName.map { "$it/${Sandbox.Plugin.LIB}" }
+                val libModules = pluginName.map { "$it/${Sandbox.Plugin.LIB_MODULES}" }
+                val nameCollisionHelper = Action<FileCopyDetails> {
+                    val originalName = file.toPath().nameWithoutExtension
+                    val extension = file.toPath().extension
+                    var i = 0
 
-                        while (content.contains(relativePath.pathString)) {
-                            name = "${originalName}_${++i}.$extension"
-                        }
-
-                        content.add(relativePath.pathString)
+                    while (content.contains(relativePath.pathString)) {
+                        name = "${originalName}_${++i}.$extension"
                     }
 
-                intoChild(pluginName.map { "$it/${Sandbox.Plugin.LIB_MODULES}" })
-                    .from(intellijPlatformPluginModuleConfiguration)
+                    content.add(relativePath.pathString)
+                }
+
+                from(runtimeClasspath) {
+                    eachFile(nameCollisionHelper)
+                    into(lib)
+                }
+
+                from(pluginJar) {
+                    eachFile(nameCollisionHelper)
+                    into(lib)
+                }
+
+                from(intellijPlatformPluginModuleConfiguration) {
+                    into(libModules)
+                }
 
                 from(pluginsClasspath)
 

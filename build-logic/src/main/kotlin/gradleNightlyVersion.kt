@@ -23,7 +23,9 @@ private data class GradleRelease(
     val wrapperChecksumUrl: String
 )
 
+private val json = Json { ignoreUnknownKeys = true }
+
 fun gradleNightlyVersion() =
     URL(GRADLE_NIGHTLY_JSON).readText().let {
-        Json.decodeFromString<GradleRelease>(it)
+        json.decodeFromString<GradleRelease>(it)
     }.version

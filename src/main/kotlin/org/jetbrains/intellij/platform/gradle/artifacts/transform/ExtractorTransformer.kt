@@ -51,7 +51,7 @@ abstract class ExtractorTransformer : TransformAction<ExtractorTransformer.Param
             parameters.extractorService.get().extract(path, targetDirectory)
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
-        }
+        }.getOrThrow()
     }
 
     companion object {

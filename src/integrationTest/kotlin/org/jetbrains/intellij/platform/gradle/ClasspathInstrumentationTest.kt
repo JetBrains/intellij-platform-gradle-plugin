@@ -14,6 +14,7 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     override val defaultProjectProperties
         get() = super.defaultProjectProperties + mapOf(
             "markdownPlugin.version" to markdownPluginVersion,
+            "instrumentCode" to true,
         )
 
     @Test
@@ -130,6 +131,19 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
         build(Tasks.External.TEST, projectProperties = defaultProjectProperties) {
             output containsText "testFramework.jar"
+        }
+    }
+
+    @Test
+    fun `dependencies should not contain Java Compiler if instrumentation is disabled`() {
+        disableDebug()
+
+        build(DEPENDENCIES, projectProperties = defaultProjectProperties + mapOf("instrumentCode" to false)) {
+            output containsText
+                    """
+                    intellijPlatformJavaCompiler - Java Compiler used by Ant tasks
+                    No dependencies
+                    """.trimIndent()
         }
     }
 }

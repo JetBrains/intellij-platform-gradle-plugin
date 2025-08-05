@@ -201,9 +201,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 }
 
                 defaultDependencies {
-                    addLater(dependenciesHelper.obtainJetBrainsRuntimeVersion().map { version ->
-                        dependenciesHelper.createJetBrainsRuntime(version)
-                    })
+                    addAllLater(dependenciesHelper.createJetBrainsRuntimeObtainedDependency())
                 }
             }
 
@@ -291,13 +289,22 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "Java Compiler used by Ant tasks",
             ) {
                 defaultDependencies {
-                    addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
-                        val platformPath = runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
-                        when (enabled && platformPath != null) {
-                            true -> dependenciesHelper.createJavaCompiler()
-                            false -> null
-                        }.let { listOfNotNull(it) }
-                    })
+                    val addDefaultDependenciesProvider = project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
+                    val instrumentCodeProvider = project.extensionProvider.flatMap { it.instrumentCode }
+
+                    addAllLater(
+                        addDefaultDependenciesProvider.zip(instrumentCodeProvider) { addDefaultDependencies, instrumentCode ->
+                            val platformPath by lazy {
+                                runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
+                            }
+
+                            buildList {
+                                if (addDefaultDependencies && instrumentCode && platformPath != null) {
+                                    add(dependenciesHelper.createJavaCompiler())
+                                }
+                            }
+                        },
+                    )
                 }
             }
 
@@ -315,10 +322,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLATFORM_CLASSPATH,
                 description = "IntelliJ Platform Classpath resolvable configuration"
             ) {
-                extendsFrom(
-                    intellijPlatformConfiguration,
-                    intellijPlatformDependenciesConfiguration,
-                )
+                extendsFrom(intellijPlatformConfiguration)
             }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
@@ -347,17 +351,16 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 description = "IntelliJ Platform Test Runtime fix Classpath resolvable configuration"
             ) {
                 defaultDependencies {
-                    addAllLater(project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
-                        val platformPath = runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
-                        when (enabled) {
-                            true -> when (platformPath) {
-                                null -> null
-                                else -> dependenciesHelper.createIntelliJPlatformTestRuntime(platformPath)
+                    addAllLater(
+                        project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
+                            buildList {
+                                if (enabled) {
+                                    runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }
+                                        .onSuccess { add(dependenciesHelper.createIntelliJPlatformTestRuntime(it)) }
+                                }
                             }
-
-                            false -> null
-                        }.let { listOfNotNull(it) }
-                    })
+                        },
+                    )
                 }
             }
             create(
@@ -445,6 +448,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 PluginVerification.Ides.register(
                     dependenciesHelper = dependenciesHelper,
                     extensionProvider = project.extensionProvider,
+                    objects = project.objects,
                     target = pluginVerification,
                 )
 
@@ -455,7 +459,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             Publishing.register(project, target = intelliJPlatform)
         }
 
-        IntelliJPlatformDependenciesExtension.register(dependenciesHelper, target = project.dependencies)
+        IntelliJPlatformDependenciesExtension.register(dependenciesHelper, project.objects, target = project.dependencies)
         IntelliJPlatformRepositoriesExtension.register(project, target = project.repositories)
 
         @Suppress("KotlinConstantConditions")

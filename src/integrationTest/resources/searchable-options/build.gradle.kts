@@ -25,9 +25,8 @@ repositories {
 dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
+        pluginComposedModule(implementation(project(":submodule")))
     }
-
-    implementation(project(":submodule"))
 }
 
 intellijPlatform {

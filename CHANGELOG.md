@@ -2,9 +2,22 @@
 
 ## [next]
 
+### Changed
+
+- Update minimal supported Gradle version to `8.6`
+
+### Fixed
+
+- Add a check for target file existence before creating and writing to `JarOutputStream`. JetBrains/intellij-platform-gradle-plugin#1988
+- Fix the incorrect rsync exclusion pattern in `DmgExtractorValueSource`
+- Pass sandbox properties path with invariant separators.
+
+## [2.7.0] - 2025-07-26
+
 ### Breaking Changes
 
 - `pluginModule(Dependency)` dependency helper no longer bundles module into the main plugin jar, use `pluginComposedModule(Dependency)` instead.
+- Replace `IdeServicesPluginRepositoryService.uploadByStringId` with `IdeServicesPluginRepositoryService.uploadByStringIdAndFamily`
 
 ### Added
 
@@ -12,22 +25,30 @@
 - Add support for JetBrains Client and resolving the IntelliJ Platform in frontend mode
 - Add `VerifyPluginProjectConfigurationMutedMessages` Gradle property to mute specific messages reported by the `verifyPluginProjectConfiguration` task JetBrains/intellij-platform-gradle-plugin#1958
 - Create the `.toolbox-ignore` marker file next to the `product-info.json` file to avoid the Toolbox App from indexing it [TBX-14798](https://youtrack.jetbrains.com/issue/TBX-14798)
-- Introduce `IntelliJPlatformResolver` for improved IDE dependency resolution and caching JetBrains/intellij-platform-gradle-plugin#1601
+- Introduce `IntelliJPlatformCacheResolver` for improved IDE dependency resolution and caching JetBrains/intellij-platform-gradle-plugin#1601
+- Introduce `useCustomCache` dependency configuration property to utilize the `IntelliJPlatformCacheResolver` custom caching mechanism.
 - `ModuleAware` to handle information if the current project represents an IntelliJ Platform plugin module
 - `pluginComposedModule(Dependency)` helper for bundling (composing) the module dependency into the main plugin jar
+- Make `Any.toIntelliJPlatformType()` publicly available and introduce `Provider<*>.toIntelliJPlatformType()`
 
 ### Changed
 
+- Introduce a new set of dependency helpers to configure the IntelliJ Platform dependency with a lambda function instead of regular parameters, marking other helpers deprecated.
 - `pluginModule(Dependency)` helper now moves the module dependency into the `lib/modules` directory of the plugin jar.
 - Search for a bundled plugin using module alias if not resolved by ID
 - Stop including the `intellijPlatformPluginModule` configuration in the `intellijPlatformClasspath` as it's already bundled within the composed jar.
 - Refactor `PrepareJarSearchableOptionsTask` to handle plugin modules and improve file filtering logic.
+- Refactor `PluginVerification.Ides` to introduce configurable `create` dependency creation helpers; deprecate legacy `ide` and `ides` methods in favor of a lambda-based approach.
 
 ### Fixed
 
 - Test framework dependency is not provided to a custom `testIde` task JetBrains/intellij-platform-gradle-plugin#1945
 - Respect the custom IntelliJ Platform configuration name when creating a custom task using the local IntelliJ Platform path
 - Properly share the requested IntelliJ Platform between internal Gradle plugin components
+- Refactor `CollectorTransformer` to exclude tests-related jars using `filterNot` as `minus` doesn't remove duplicates
+- Refactor `JarSearchableOptionsTask` to improve the `searchableOption` outgoing artifact registration JetBrains/intellij-platform-gradle-plugin#1968
+- Do not add default dependencies related to the code instrumentation if disabled JetBrains/intellij-platform-gradle-plugin#1983
+- Introduce `CoroutinesJavaAgentValueSource` for dynamic coroutines debug agent creation JetBrains/intellij-platform-gradle-plugin#1977
 
 ## [2.6.0] - 2025-05-14
 
@@ -1464,7 +1485,9 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.5.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.0...HEAD
+[2.7.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.6.0...v2.7.0
+[2.6.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.4.0...v2.5.0
 [2.4.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.3.0...v2.4.0
 [2.3.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.2.1...v2.3.0

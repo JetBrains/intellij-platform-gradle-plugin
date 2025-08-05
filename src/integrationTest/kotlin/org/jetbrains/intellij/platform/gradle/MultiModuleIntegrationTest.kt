@@ -43,7 +43,7 @@ class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(":ext:customRunIde", projectProperties = defaultProjectProperties) {
             assert(pluginsDirectory.resolve("base-base.jar").notExists())
-            assert(pluginsDirectory.resolve("base/lib/base.jar").exists())
+            assert(pluginsDirectory.resolve("base/lib/base-1.0.0.jar").exists())
         }
     }
 }

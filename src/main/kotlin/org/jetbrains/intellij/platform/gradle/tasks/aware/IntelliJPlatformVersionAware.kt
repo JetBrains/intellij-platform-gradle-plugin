@@ -47,7 +47,7 @@ interface IntelliJPlatformVersionAware {
     val intelliJPlatformPluginConfiguration: ConfigurableFileCollection
 
     /**
-     * Holds the [Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH] configuration with the custom IntelliJ Platform core dependency required for running tests..
+     * Holds the [Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH] configuration with the custom IntelliJ Platform core dependency required for running tests.
      * It should not be directly accessed.
      */
     @get:InputFiles

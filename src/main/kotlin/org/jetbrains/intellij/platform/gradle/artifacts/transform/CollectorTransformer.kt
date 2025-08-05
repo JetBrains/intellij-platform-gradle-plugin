@@ -95,7 +95,7 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
             }
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
-        }
+        }.getOrThrow()
     }
 
     companion object {
@@ -147,8 +147,8 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
                 .filter { it.name == "com.intellij" }
                 .flatMap { it.classPath }
         )
-        .minus("lib/junit4.jar") // exclude `junit4.jar` from the list as JUnit shouldn't be in the classpath
-        .minus("lib/testFramework.jar") // same for the Test Framework fat jar
+        // exclude tests-related jars from the list as JUnit and Test Framework shouldn't be in the classpath
+        .filterNot { it in listOf("lib/junit4.jar", "lib/junit.jar", "lib/testFramework.jar") }
         .map { intellijPlatformPath.resolve(it) }
         .mapNotNull { it.takeIf { it.exists() } }
         .toSet()
@@ -206,7 +206,7 @@ internal fun collectModuleDescriptorJars(
             .map { it.name }
             .flatMap { collectResourcesFromModule(it) }
 
-        return (listOfNotNull(moduleResources) + dependencyResources).toSet()
+        return setOfNotNull(moduleResources) + dependencyResources
     }
 
     val rootModule = requireNotNull(modules[rootModuleName]?.path)

@@ -21,14 +21,17 @@ kotlin {
 // https://github.com/gradle/gradle/issues?q=%22Invalid+UTF-8+input%22
 // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1779#issuecomment-2384461002
 configurations {
-    named("jetbrainsRuntimeLocalInstance") {
-        resolutionStrategy.disableDependencyVerification()
-    }
-    named("jetbrainsRuntimeDependency") {
-        resolutionStrategy.disableDependencyVerification()
-    }
-    named("jetbrainsRuntime") {
-        resolutionStrategy.disableDependencyVerification()
+    listOf(
+        "compileClasspath",
+        "compileOnlyDependenciesMetadata",
+        "intellijPlatformClasspath",
+        "intellijPlatformDependency",
+        "intellijPlatformDependencyArchive",
+        "testCompileOnlyDependenciesMetadata",
+    ).forEach {
+        named(it) {
+            resolutionStrategy.disableDependencyVerification()
+        }
     }
 }
 

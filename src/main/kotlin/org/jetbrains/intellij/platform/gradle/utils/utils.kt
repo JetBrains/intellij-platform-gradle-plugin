@@ -35,10 +35,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import java.nio.file.Path
-import kotlin.io.path.absolute
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
+import kotlin.io.path.*
 
 val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()
@@ -63,7 +60,7 @@ internal fun ConfigurationContainer.create(
 internal val Configuration.asLenient
     get() = incoming.artifactView { lenient(true) }.files
 
-fun <T> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
+fun <T : Any> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
     null -> false
     is String -> value.isNotEmpty()
     is RegularFile -> value.asFile.exists()
@@ -193,7 +190,7 @@ internal val PluginManager.isModule
 /**
  * Helper function for creating cached [ProviderFactory.provider].
  */
-internal inline fun <reified T> cachedProvider(
+internal inline fun <reified T : Any> cachedProvider(
     objects: ObjectFactory,
     providers: ProviderFactory,
     crossinline value: () -> T,
@@ -208,7 +205,7 @@ internal inline fun <reified T> cachedProvider(
 /**
  * Helper function for creating cached list [ProviderFactory.provider].
  */
-internal inline fun <reified T> cachedListProvider(
+internal inline fun <reified T : Any> cachedListProvider(
     objects: ObjectFactory,
     providers: ProviderFactory,
     crossinline value: () -> List<T>,
@@ -219,3 +216,9 @@ internal inline fun <reified T> cachedListProvider(
         disallowChanges()
         finalizeValueOnRead()
     }
+
+/**
+ * Shorthand for an absolute and normalized path with invariant separators.
+ */
+internal val Path.safePathString
+    get() = absolute().normalize().invariantSeparatorsPathString

@@ -45,7 +45,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 rootProject.name = "projectName"
                 
                 plugins {
-                    id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
+                    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
                 }
                 """.trimIndent()
 
@@ -57,7 +57,8 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 import org.jetbrains.intellij.platform.gradle.tasks.*
                 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
                 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
-                   
+                import org.jetbrains.kotlin.gradle.dsl.*
+                
                 version = "1.0.0"
                 
                 plugins {
@@ -84,7 +85,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                         val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                         val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
                         
-                        create(type, version, useInstaller = useInstaller)
+                        create(type, version) { this.useInstaller.set(useInstaller) }
                     }
                 }
                             

@@ -20,6 +20,13 @@ import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
 interface TestableAware : CoroutinesJavaAgentAware, RuntimeAware, SandboxAware {
 
     /**
+     * Holds the [Configurations.INTELLIJ_PLATFORM_CLASSPATH] configuration.
+     */
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    val intellijPlatformClasspathConfiguration: ConfigurableFileCollection
+
+    /**
      * Holds the [Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH] configuration, which by default contains
      * [Configurations.INTELLIJ_PLATFORM_DEPENDENCY], [Configurations.INTELLIJ_PLATFORM_DEPENDENCIES],
      * and [Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES] configurations.

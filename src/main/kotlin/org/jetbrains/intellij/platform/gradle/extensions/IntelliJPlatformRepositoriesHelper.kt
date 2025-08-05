@@ -19,15 +19,14 @@ import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.flow.StopShimServerAction
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import java.net.URI
 import java.nio.file.Path
 import kotlin.io.path.pathString
 
-private const val SHIM_MANAGER = "shimManager"
-
-@Suppress("UnstableApiUsage")
+@Suppress("KDocUnresolvedReference", "UnstableApiUsage")
 class IntelliJPlatformRepositoriesHelper(
     private val repositories: RepositoryHandler,
     private val providers: ProviderFactory,

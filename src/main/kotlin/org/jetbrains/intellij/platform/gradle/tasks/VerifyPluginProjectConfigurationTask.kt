@@ -215,9 +215,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 log.info("Configuring plugin configuration verification task")
 
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(Tasks.External.COMPILE_JAVA)
-                val initializeIntelliJPlatformPluginTaskProvider =
-                    project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
-
                 val rootDirectoryProvider = project.provider { project.rootProject.rootDir }
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
