@@ -132,6 +132,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Extensions {
 	public static final field PLUGIN_VERIFICATION Ljava/lang/String;
 	public static final field PRODUCT_DESCRIPTOR Ljava/lang/String;
 	public static final field PUBLISHING Ljava/lang/String;
+	public static final field REPORTING Ljava/lang/String;
 	public static final field SIGNING Ljava/lang/String;
 	public static final field VENDOR Ljava/lang/String;
 }
@@ -1046,12 +1047,12 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/extension
 	public abstract fun getFreeArgs ()Lorg/gradle/api/provider/ListProperty;
 	public fun getIdes ()Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;
 	public abstract fun getIgnoredProblemsFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public fun getReporting ()Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Reporting;
 	public abstract fun getSubsystemsToCheck ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTeamCityOutputFormat ()Lorg/gradle/api/provider/Property;
-	public abstract fun getVerificationReportsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getVerificationReportsFormats ()Lorg/gradle/api/provider/ListProperty;
 	public fun ides (Lgroovy/lang/Closure;)V
 	public fun ides (Lorg/gradle/api/Action;)V
+	public fun report (Lorg/gradle/api/Action;)V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
@@ -1102,6 +1103,21 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion {
 	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Reporting {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Reporting$Companion;
+	public abstract fun getHtmlOutputLocation ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getHtmlRequired ()Lorg/gradle/api/provider/Property;
+	public abstract fun getMarkdownOutputLocation ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getMarkdownRequired ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPlainOutputLocation ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getPlainRequired ()Lorg/gradle/api/provider/Property;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Reporting$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
+	public synthetic fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Reporting;
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Publishing {
@@ -3255,7 +3271,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginStru
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginVerifierAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask : org/gradle/api/tasks/JavaExec, org/gradle/api/reporting/Reporting, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginVerifierAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$Companion;
 	public fun <init> ()V
 	public fun exec ()V
@@ -3266,10 +3282,14 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginT
 	public abstract fun getIdes ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getIgnoredProblemsFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
+	public synthetic fun getReports ()Lorg/gradle/api/reporting/ReportContainer;
+	public fun getReports ()Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyReports;
 	public abstract fun getSubsystemsToCheck ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTeamCityOutputFormat ()Lorg/gradle/api/provider/Property;
-	public abstract fun getVerificationReportsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
-	public abstract fun getVerificationReportsFormats ()Lorg/gradle/api/provider/ListProperty;
+	public synthetic fun reports (Lgroovy/lang/Closure;)Lorg/gradle/api/reporting/ReportContainer;
+	public fun reports (Lgroovy/lang/Closure;)Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyReports;
+	public synthetic fun reports (Lorg/gradle/api/Action;)Lorg/gradle/api/reporting/ReportContainer;
+	public fun reports (Lorg/gradle/api/Action;)Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyReports;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3310,19 +3330,23 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask
 	public static fun values ()[Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$Subsystems;
 }
 
-public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats : java/lang/Enum {
-	public static final field ALL Ljava/util/EnumSet;
-	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats$Companion;
-	public static final field HTML Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats;
-	public static final field MARKDOWN Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats;
-	public static final field NONE Ljava/util/EnumSet;
-	public static final field PLAIN Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats;
-	public fun toString ()Ljava/lang/String;
-	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats;
-	public static fun values ()[Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats;
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/VerifyReports : org/gradle/api/reporting/ReportContainer {
+	public abstract fun getHtml ()Lorg/gradle/api/reporting/DirectoryReport;
+	public abstract fun getMarkdown ()Lorg/gradle/api/reporting/DirectoryReport;
+	public abstract fun getPlain ()Lorg/gradle/api/reporting/DirectoryReport;
 }
 
-public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats$Companion {
+public class org/jetbrains/intellij/platform/gradle/tasks/VerifyReportsImpl : org/gradle/api/reporting/internal/DelegatingReportContainer, org/jetbrains/intellij/platform/gradle/tasks/VerifyReports {
+	public fun <init> (Lorg/gradle/api/Describable;Lorg/gradle/api/model/ObjectFactory;)V
+	public final fun contains (Ljava/lang/Object;)Z
+	public fun contains (Lorg/gradle/api/reporting/DirectoryReport;)Z
+	public fun getHtml ()Lorg/gradle/api/reporting/DirectoryReport;
+	public fun getMarkdown ()Lorg/gradle/api/reporting/DirectoryReport;
+	public fun getPlain ()Lorg/gradle/api/reporting/DirectoryReport;
+	public fun getSize ()I
+	public final fun remove (Ljava/lang/Object;)Z
+	public fun remove (Lorg/gradle/api/reporting/DirectoryReport;)Z
+	public final fun size ()I
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/AutoReloadAware {

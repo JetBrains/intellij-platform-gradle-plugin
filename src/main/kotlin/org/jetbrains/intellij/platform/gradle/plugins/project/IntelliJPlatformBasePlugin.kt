@@ -451,6 +451,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     objects = project.objects,
                     target = pluginVerification,
                 )
+
+                PluginVerification.Reporting.register(project, target = pluginVerification)
             }
 
             Signing.register(project, target = intelliJPlatform)
