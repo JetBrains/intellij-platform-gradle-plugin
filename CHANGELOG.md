@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add RubyMine `com.jetbrains.intellij.rubymine:rubymine` Maven coordinates to the `IntelliJPlatformType`
+
 ### Changed
 
 - Update minimal supported Gradle version to `8.6`
