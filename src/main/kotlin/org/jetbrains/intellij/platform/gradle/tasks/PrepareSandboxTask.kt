@@ -31,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.kotlin.gradle.utils.named
 import kotlin.io.path.*
 
@@ -224,10 +225,10 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
         splitModeFrontendProperties.asPath.writeText(
             """
-            idea.config.path=${sandboxConfigFrontendDirectory.asPath}
-            idea.system.path=${sandboxSystemFrontendDirectory.asPath}
-            idea.log.path=${sandboxLogFrontendDirectory.asPath}
-            idea.plugins.path=${pluginsDirectory.asPath}
+            idea.config.path=${sandboxConfigFrontendDirectory.asPath.safePathString}
+            idea.system.path=${sandboxSystemFrontendDirectory.asPath.safePathString}
+            idea.log.path=${sandboxLogFrontendDirectory.asPath.safePathString}
+            idea.plugins.path=${pluginsDirectory.asPath.safePathString}
             """.trimIndent()
         )
     }

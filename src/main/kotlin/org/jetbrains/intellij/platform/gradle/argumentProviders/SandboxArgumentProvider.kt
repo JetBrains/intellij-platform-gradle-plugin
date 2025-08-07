@@ -6,6 +6,7 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.Internal
 import org.gradle.process.CommandLineArgumentProvider
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.File
 import java.nio.file.Path
 import kotlin.io.path.exists
@@ -38,7 +39,7 @@ class SandboxArgumentProvider(
      */
     private val pluginPath
         get() = sandboxPluginsDirectory.ifExists {
-            it.listDirectoryEntries().joinToString("${File.pathSeparator},")
+            it.listDirectoryEntries().joinToString("${File.pathSeparator},") { file -> file.safePathString }
         }
 
     /**
@@ -47,14 +48,14 @@ class SandboxArgumentProvider(
      * @return A list of JVM arguments specifying the plugin paths if the relevant directories or paths exist.
      */
     private fun computePluginPathProperties() = listOfNotNull(
-        sandboxPluginsDirectory.ifExists { "-Didea.plugins.path=$it" },
+        sandboxPluginsDirectory.ifExists { "-Didea.plugins.path=" + it.safePathString },
         pluginPath?.let { "-Dplugin.path=$it" },
     )
 
     override fun asArguments() = listOfNotNull(
-        sandboxConfigDirectory.ifExists { "-Didea.config.path=$it" },
-        sandboxSystemDirectory.ifExists { "-Didea.system.path=$it" },
-        sandboxLogDirectory.ifExists { "-Didea.log.path=$it" }
+        sandboxConfigDirectory.ifExists { "-Didea.config.path=" + it.safePathString },
+        sandboxSystemDirectory.ifExists { "-Didea.system.path=" + it.safePathString },
+        sandboxLogDirectory.ifExists { "-Didea.log.path=" + it.safePathString },
     ) + computePluginPathProperties()
 
     /**

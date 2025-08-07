@@ -1436,8 +1436,8 @@ class IntelliJPlatformDependenciesHelper(
             val cachedModulePath = cachedValue.second
 
             if (cachedIvyModule is IvyModule && cachedModulePath is Path) {
-                val cachedModulePathString = cachedModulePath.absolute().normalize().invariantSeparatorsPathString
-                val newModulePathString = artifactPath.absolute().normalize().invariantSeparatorsPathString
+                val cachedModulePathString = cachedModulePath.safePathString
+                val newModulePathString = artifactPath.safePathString
 
                 if (cachedModulePathString == newModulePathString) {
                     log.info("Rewriting Ivy module '$fileName' detected. Paths match '$cachedModulePathString', the cached value will used.")

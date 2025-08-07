@@ -35,10 +35,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import java.nio.file.Path
-import kotlin.io.path.absolute
-import kotlin.io.path.isDirectory
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.name
+import kotlin.io.path.*
 
 val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()
@@ -219,3 +216,9 @@ internal inline fun <reified T : Any> cachedListProvider(
         disallowChanges()
         finalizeValueOnRead()
     }
+
+/**
+ * Shorthand for an absolute and normalized path with invariant separators.
+ */
+internal val Path.safePathString
+    get() = absolute().normalize().invariantSeparatorsPathString
