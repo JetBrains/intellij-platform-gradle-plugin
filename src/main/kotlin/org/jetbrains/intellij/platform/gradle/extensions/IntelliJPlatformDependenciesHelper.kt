@@ -1027,7 +1027,7 @@ class IntelliJPlatformDependenciesHelper(
         val bundledModule = ide(platformPath).findPluginById(id)
         requireNotNull(bundledModule) { "Specified bundledModule '$id' doesn't exist." }
 
-        val classpath = bundledModule.classpath.paths.map { it.pathString }
+        val classpath = bundledModule.classpath.paths.map { it.safePathString }
 
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
         return dependencies.create(group, name, version)
@@ -1335,7 +1335,7 @@ class IntelliJPlatformDependenciesHelper(
             ?.classpath
             ?.paths
             .orEmpty()
-            .map { it.pathString }.toSet()
+            .map { it.safePathString }.toSet()
 
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
         return dependencies.create(group, name, version)
@@ -1571,9 +1571,9 @@ class IntelliJPlatformDependenciesHelper(
     @Throws(IllegalArgumentException::class)
     internal fun resolvePath(path: Any) = when (path) {
         is String -> path
-        is File -> path.absolutePath
-        is Directory -> path.asPath.pathString
-        is Path -> path.pathString
+        is File -> path.toPath().safePathString
+        is Directory -> path.asPath.safePathString
+        is Path -> path.safePathString
         else -> throw IllegalArgumentException("Invalid argument type: '${path.javaClass}'. Supported types: String, File, Path, or Directory.")
     }.let { Path(it) }
 

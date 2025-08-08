@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.pathString
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 
 /**
  * Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded.
@@ -40,8 +40,8 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
         workingDir = platformPath.toFile()
 
         if (splitMode.get()) {
-            environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.pathString)
-            environment("JETBRAINS_CLIENT_PROPERTIES", splitModeFrontendProperties.asPath.pathString)
+            environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.safePathString)
+            environment("JETBRAINS_CLIENT_PROPERTIES", splitModeFrontendProperties.asPath.safePathString)
 
             if (args.isNotEmpty()) {
                 throw InvalidUserDataException("Passing arguments directly is not supported in Split Mode. Use `argumentProviders` instead.")

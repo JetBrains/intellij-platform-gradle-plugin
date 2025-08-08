@@ -19,7 +19,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import kotlin.io.path.pathString
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 
 /**
  * Builds the index of UI components (searchable options) for the plugin.
@@ -70,7 +70,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
         validateIntelliJPlatformVersion()
 
         workingDir = platformPath.toFile()
-        args = args + listOf("traverseUI", outputDirectory.asPath.pathString, "true")
+        args = args + listOf("traverseUI", outputDirectory.asPath.safePathString, "true")
 
         super.exec()
     }

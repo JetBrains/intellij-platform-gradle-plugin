@@ -14,15 +14,11 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
-import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import org.jetbrains.intellij.platform.gradle.utils.isSpecified
+import org.jetbrains.intellij.platform.gradle.utils.*
 import java.util.*
 import kotlin.io.path.exists
 import kotlin.io.path.extension
 import kotlin.io.path.nameWithoutExtension
-import kotlin.io.path.pathString
 
 /**
  * Signs the ZIP archive with the provided key using the [Marketplace ZIP Signer](https://github.com/JetBrains/marketplace-zip-signer) library.
@@ -205,17 +201,17 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
         log.debug("Distribution file: $file")
 
         yield("-in")
-        yield(file.pathString)
+        yield(file.safePathString)
 
         yield("-out")
-        yield(signedArchiveFile.asPath.pathString)
+        yield(signedArchiveFile.asPath.safePathString)
 
         when {
             // Keystore-based signing: do not require explicit private key and certificate chain
             keyStore.isSpecified() -> {
                 keyStore.orNull?.let {
                     yield("-ks")
-                    yield(it.asPath.pathString)
+                    yield(it.asPath.safePathString)
                 }
                     ?: throw InvalidUserDataException("KeyStore not found. The 'keyStore' property must be provided when using keystore-based signing.")
 
@@ -246,7 +242,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
                     log.debug("Using private key passed as content")
                 } ?: privateKeyFile.orNull?.let {
                     yield("-key-file")
-                    yield(it.asPath.pathString)
+                    yield(it.asPath.safePathString)
                     log.debug("Using private key passed as file")
                 }
                 ?: throw InvalidUserDataException("Private key not found. One of the 'privateKey' or 'privateKeyFile' properties has to be provided.")
@@ -258,7 +254,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
                     log.debug("Using certificate chain passed as content")
                 } ?: certificateChainFile.orNull?.let {
                     yield("-cert-file")
-                    yield(it.asPath.pathString)
+                    yield(it.asPath.safePathString)
                     log.debug("Using certificate chain passed as file")
                 }
                 ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")
