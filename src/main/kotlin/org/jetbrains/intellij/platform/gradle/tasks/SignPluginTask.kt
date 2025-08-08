@@ -179,7 +179,7 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
                 No Marketplace ZIP Signer executable found.
                 Please ensure the `zipSigner()` entry is present in the project dependencies section or `intellijPlatform.signing.cliPath` extension property
                 See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-signing
-                """.trimIndent()
+                """.trimIndent(),
             )
 
         log.debug("Marketplace ZIP Signer CLI path: $executable")
@@ -210,53 +210,65 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
         yield("-out")
         yield(signedArchiveFile.asPath.pathString)
 
-        privateKey.orNull?.let {
-            yield("-key")
-            yield(Base64.getDecoder().runCatching { decode(it.trim()).let(::String) }.getOrDefault(it))
+        when {
+            // Keystore-based signing: do not require explicit private key and certificate chain
+            keyStore.isSpecified() -> {
+                keyStore.orNull?.let {
+                    yield("-ks")
+                    yield(it.asPath.pathString)
+                }
+                    ?: throw InvalidUserDataException("KeyStore not found. The 'keyStore' property must be provided when using keystore-based signing.")
 
-            log.debug("Using private key passed as content")
-        } ?: privateKeyFile.orNull?.let {
-            yield("-key-file")
-            yield(it.asPath.pathString)
-            log.debug("Using private key passed as file")
-        } ?: throw InvalidUserDataException("Private key not found. One of the 'privateKey' or 'privateKeyFile' properties has to be provided.")
+                keyStorePassword.orNull?.let {
+                    yield("-ks-pass")
+                    yield(it)
+                }
+                keyStoreKeyAlias.orNull?.let {
+                    yield("-ks-key-alias")
+                    yield(it)
+                }
+                keyStoreType.orNull?.let {
+                    yield("-ks-type")
+                    yield(it)
+                }
+                keyStoreProviderName.orNull?.let {
+                    yield("-ks-provider-name")
+                    yield(it)
+                }
+            }
 
-        certificateChain.orNull?.let {
-            yield("-cert")
-            yield(Base64.getDecoder().runCatching { decode(it.trim()).let(::String) }.getOrDefault(it))
+            // PEM-based signing: require private key and certificate chain and optionally password
+            else -> {
+                privateKey.orNull?.let {
+                    yield("-key")
+                    yield(Base64.getDecoder().runCatching { decode(it.trim()).let(::String) }.getOrDefault(it))
 
-            log.debug("Using certificate chain passed as content")
-        } ?: certificateChainFile.orNull?.let {
-            yield("-cert-file")
-            yield(it.asPath.pathString)
-            log.debug("Using certificate chain passed as file")
-        }
-        ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")
+                    log.debug("Using private key passed as content")
+                } ?: privateKeyFile.orNull?.let {
+                    yield("-key-file")
+                    yield(it.asPath.pathString)
+                    log.debug("Using private key passed as file")
+                }
+                ?: throw InvalidUserDataException("Private key not found. One of the 'privateKey' or 'privateKeyFile' properties has to be provided.")
 
-        password.orNull?.let {
-            yield("-key-pass")
-            yield(it)
-            log.debug("Using private key password")
-        }
-        keyStore.orNull?.let {
-            yield("-ks")
-            yield(it.asPath.pathString)
-        }
-        keyStorePassword.orNull?.let {
-            yield("-ks-pass")
-            yield(it)
-        }
-        keyStoreKeyAlias.orNull?.let {
-            yield("-ks-key-alias")
-            yield(it)
-        }
-        keyStoreType.orNull?.let {
-            yield("-ks-type")
-            yield(it)
-        }
-        keyStoreProviderName.orNull?.let {
-            yield("-ks-provider-name")
-            yield(it)
+                certificateChain.orNull?.let {
+                    yield("-cert")
+                    yield(Base64.getDecoder().runCatching { decode(it.trim()).let(::String) }.getOrDefault(it))
+
+                    log.debug("Using certificate chain passed as content")
+                } ?: certificateChainFile.orNull?.let {
+                    yield("-cert-file")
+                    yield(it.asPath.pathString)
+                    log.debug("Using certificate chain passed as file")
+                }
+                ?: throw InvalidUserDataException("Certificate chain not found. One of the 'certificateChain' or 'certificateChainFile' properties has to be provided.")
+
+                password.orNull?.let {
+                    yield("-key-pass")
+                    yield(it)
+                    log.debug("Using private key password")
+                }
+            }
         }
     }
 
@@ -275,10 +287,12 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
-                signedArchiveFile.convention(project.layout.file(
-                    archiveFile
-                        .map { it.asPath }
-                        .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() })
+                signedArchiveFile.convention(
+                    project.layout.file(
+                        archiveFile
+                            .map { it.asPath }
+                            .map { it.resolveSibling(it.nameWithoutExtension + "-signed." + it.extension).toFile() },
+                    ),
                 )
                 keyStore.convention(signingProvider.flatMap { it.keyStore })
                 keyStorePassword.convention(signingProvider.flatMap { it.keyStorePassword })
@@ -292,7 +306,16 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
                 certificateChainFile.convention(signingProvider.flatMap { it.certificateChainFile })
 
                 onlyIf {
-                    (privateKey.isSpecified() || privateKeyFile.isSpecified()) && (certificateChain.isSpecified() || certificateChainFile.isSpecified())
+                    println("keyStore.isSpecified() = ${keyStore.isSpecified()}")
+                    println(
+                        "OTHER = ${
+                            (privateKey.isSpecified() || privateKeyFile.isSpecified()) &&
+                                    (certificateChain.isSpecified() || certificateChainFile.isSpecified())
+                        }",
+                    )
+                    keyStore.isSpecified() ||
+                            ((privateKey.isSpecified() || privateKeyFile.isSpecified()) &&
+                                    (certificateChain.isSpecified() || certificateChainFile.isSpecified()))
                 }
             }
     }

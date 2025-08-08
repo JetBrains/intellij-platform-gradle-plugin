@@ -17,6 +17,7 @@
 - Fix macOS missing `nio-fs.jar` on bootclasspath when running the `runIde` task against the local IDE. JetBrains/intellij-platform-gradle-plugin#1994
 - Pass sandbox properties path with invariant separators.
 - Added missing retrofit annotations to `IdeServicesPluginRepositoryService.uploadByStringIdAndFamily`
+- Fixed: SignPluginTask keystore options are now honored; the task runs with keystore-only configuration (no PEM key/cert required). JetBrains/intellij-platform-gradle-plugin#2001
 
 ## [2.7.0] - 2025-07-26
 
