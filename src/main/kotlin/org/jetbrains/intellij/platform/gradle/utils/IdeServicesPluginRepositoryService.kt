@@ -26,11 +26,11 @@ interface IdeServicesPluginRepositoryService : PluginRepositoryService {
     @Multipart
     @POST("/api/plugins")
     override fun uploadByStringIdAndFamily(
-        pluginXmlId: RequestBody,
-        family: RequestBody,
-        channel: RequestBody?,
-        notes: RequestBody?,
-        isHidden: Boolean,
-        file: MultipartBody.Part,
+        @Part("xmlId") pluginXmlId: RequestBody,
+        @Part("family") family: RequestBody,
+        @Part("channel") channel: RequestBody?,
+        @Part("notes") notes: RequestBody?,
+        @Part("isHidden") isHidden: Boolean,
+        @Part file: MultipartBody.Part,
     ): Call<PluginUpdateBean>
 }

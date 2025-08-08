@@ -15,6 +15,7 @@
 - Add a check for target file existence before creating and writing to `JarOutputStream`. JetBrains/intellij-platform-gradle-plugin#1988
 - Fix the incorrect rsync exclusion pattern in `DmgExtractorValueSource`
 - Pass sandbox properties path with invariant separators.
+- Added missing retrofit annotations to `IdeServicesPluginRepositoryService.uploadByStringIdAndFamily`
 
 ## [2.7.0] - 2025-07-26
 
