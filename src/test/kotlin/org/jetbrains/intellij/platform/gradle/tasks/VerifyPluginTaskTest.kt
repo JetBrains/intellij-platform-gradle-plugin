@@ -78,7 +78,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `run plugin verifier in the latest version`() {
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writePluginVerifierDependency(null)
         writePluginVerifierIde()
 
         build(Tasks.VERIFY_PLUGIN) {
