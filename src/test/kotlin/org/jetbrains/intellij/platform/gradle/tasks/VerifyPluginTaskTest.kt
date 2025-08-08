@@ -494,7 +494,8 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         }
     }
 
-    private fun writePluginVerifierDependency(version: String? = null) {
+    // TODO: revert back to null as soon as PV CLI gets fixed; 1.391 causes troubles on Windows
+    private fun writePluginVerifierDependency(version: String? = "1.388") {
         buildFile write //language=kotlin
                 """
                 dependencies {
