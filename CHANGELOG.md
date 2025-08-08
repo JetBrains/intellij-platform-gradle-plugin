@@ -14,6 +14,7 @@
 
 - Add a check for target file existence before creating and writing to `JarOutputStream`. JetBrains/intellij-platform-gradle-plugin#1988
 - Fix the incorrect rsync exclusion pattern in `DmgExtractorValueSource`
+- Fix macOS missing nio-fs.jar on bootclasspath when runIde. JetBrains/intellij-platform-gradle-plugin#1994
 - Pass sandbox properties path with invariant separators.
 - Added missing retrofit annotations to `IdeServicesPluginRepositoryService.uploadByStringIdAndFamily`
 
