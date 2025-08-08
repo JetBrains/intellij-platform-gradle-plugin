@@ -229,14 +229,16 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
  */
 internal fun String.resolveIdeHomeVariable(platformPath: Path) =
     platformPath.pathString.let {
-        this.run {
-            if (OperatingSystem.current().isMacOsX) {
-                replace("\$IDE_HOME/Contents", "\$IDE_HOME")
-                    .replace("\$APP_PACKAGE/Contents", "\$APP_PACKAGE")
-            } else {
-                this
+        this
+            .run {
+                when {
+                    OperatingSystem.current().isMacOsX ->
+                        replace("\$IDE_HOME/Contents", "\$IDE_HOME")
+                            .replace("\$APP_PACKAGE/Contents", "\$APP_PACKAGE")
+
+                    else -> this
+                }
             }
-        }
             .replace("\$APP_PACKAGE", it)
             .replace("\$IDE_HOME", it)
             .replace("%IDE_HOME%", it)
