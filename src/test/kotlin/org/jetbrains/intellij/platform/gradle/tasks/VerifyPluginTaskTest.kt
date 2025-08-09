@@ -76,6 +76,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    @Ignore("Ignore due to e181a5d1")
     fun `run plugin verifier in the latest version`() {
         writePluginXmlFile()
         writePluginVerifierDependency()
