@@ -302,13 +302,6 @@ abstract class SignPluginTask : JavaExec(), SigningAware {
                 certificateChainFile.convention(signingProvider.flatMap { it.certificateChainFile })
 
                 onlyIf {
-                    println("keyStore.isSpecified() = ${keyStore.isSpecified()}")
-                    println(
-                        "OTHER = ${
-                            (privateKey.isSpecified() || privateKeyFile.isSpecified()) &&
-                                    (certificateChain.isSpecified() || certificateChainFile.isSpecified())
-                        }",
-                    )
                     keyStore.isSpecified() ||
                             ((privateKey.isSpecified() || privateKeyFile.isSpecified()) &&
                                     (certificateChain.isSpecified() || certificateChainFile.isSpecified()))
