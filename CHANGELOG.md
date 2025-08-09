@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.7.1] - 2025-08-09
+
 ### Added
 
 - Add RubyMine `com.jetbrains.intellij.rubymine:rubymine` Maven coordinates to the `IntelliJPlatformType`
@@ -1492,7 +1494,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.1...HEAD
+[2.7.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.4.0...v2.5.0
