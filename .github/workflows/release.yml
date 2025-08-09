@@ -1,5 +1,4 @@
 name: Release
-
 on:
   release:
     types: [prereleased, released]
@@ -10,7 +9,17 @@ jobs:
   release:
     name: Release to Gradle Plugins
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
+
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        uses: jlumbroso/free-disk-space@v1.3.1
+        with:
+          tool-cache: false
+          large-packages: false
 
       # Check out the current repository
       - name: Fetch Sources
@@ -18,38 +27,30 @@ jobs:
         with:
           ref: ${{ github.event.release.tag_name }}
 
+      # Set up the Java environment for the next steps
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: zulu
           java-version: 17
 
+      # Setup Gradle
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-read-only: true
 
-      # Set environment variables
-      - name: Export Properties
-        id: properties
-        shell: bash
+      # Update the Unreleased section with the current release note
+      - name: Patch Changelog
+        if: ${{ github.event.release.body != '' }}
+        env:
+          CHANGELOG: ${{ github.event.release.body }}
         run: |
-          CHANGELOG="$(cat << 'EOM' | sed -e 's/^[[:space:]]*$//g' -e '/./,$!d'
-          ${{ github.event.release.body }}
-          EOM
-          )"
-          
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          echo "$CHANGELOG" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          RELEASE_NOTE="./build/tmp/release_note.txt"
+          mkdir -p "$(dirname "$RELEASE_NOTE")"
+          echo "$CHANGELOG" > $RELEASE_NOTE
 
-#      # Update the Unreleased section with the current release note
-#      - name: Patch Changelog
-#        if: ${{ steps.properties.outputs.changelog != '' }}
-#        env:
-#          CHANGELOG: ${{ steps.properties.outputs.changelog }}
-#        run: |
-#          ./gradlew patchChangelog --release-note="$CHANGELOG"
+          ./gradlew patchChangelog --release-note-file=$RELEASE_NOTE
 
       # Publish the plugin to the Gradle Plugins
       - name: Publish Plugin
@@ -59,35 +60,36 @@ jobs:
           GRADLE_PUBLISH_SECRET: ${{ secrets.GRADLE_PUBLISH_SECRET }}
         run: ./gradlew publishPlugins -Pgradle.publish.key=$GRADLE_PUBLISH_KEY -Pgradle.publish.secret=$GRADLE_PUBLISH_SECRET
 
-      # Upload artifact as a release asset
+      # Upload an artifact as a release asset
       - name: Upload Release Asset
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.event.release.tag_name }} ./build/libs/*
 
-#      # Create pull request
-#      - name: Create Pull Request
-#        if: ${{ steps.properties.outputs.changelog != '' }}
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        run: |
-#          VERSION="${{ github.event.release.tag_name }}"
-#          BRANCH="changelog-update-$VERSION"
-#          LABEL="release changelog"
-#
-#          git config user.email "action@github.com"
-#          git config user.name "GitHub Action"
-#
-#          git checkout -b $BRANCH
-#          git commit -am "Changelog update - $VERSION"
-#          git push --set-upstream origin $BRANCH
-#
-#          gh label create "$LABEL" \
-#            --description "Pull requests with release changelog update" \
-#            || true
-#
-#          gh pr create \
-#            --title "Changelog update - \`$VERSION\`" \
-#            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
-#            --label "$LABEL" \
-#            --head $BRANCH
+      # Create a pull request
+      - name: Create Pull Request
+        if: ${{ steps.properties.outputs.changelog != '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          BRANCH="changelog-update-$VERSION"
+          LABEL="release changelog"
+
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+
+          git checkout -b $BRANCH
+          git commit -am "Changelog update - $VERSION"
+          git push --set-upstream origin $BRANCH
+          
+          gh label create "$LABEL" \
+            --description "Pull requests with release changelog update" \
+            --force \
+            || true
+
+          gh pr create \
+            --title "Changelog update - \`$VERSION\`" \
+            --body "Current pull request contains patched \`CHANGELOG.md\` file for the \`$VERSION\` version." \
+            --label "$LABEL" \
+            --head $BRANCH
