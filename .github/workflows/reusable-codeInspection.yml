@@ -14,5 +14,5 @@ jobs:
           fetch-depth: 0 # only report issues that appeared in a PR
 
       - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v2025.1.1
+        uses: JetBrains/qodana-action@v2025.2.1
         if: ${{ false }}  # disable for now
