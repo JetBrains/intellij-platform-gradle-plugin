@@ -2,16 +2,21 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import groovy.lang.Closure
+import org.gradle.api.Action
 import org.gradle.api.DefaultTask
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
-import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.reporting.Reporting
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
+import org.gradle.internal.Describables
 import org.gradle.kotlin.dsl.named
+import org.gradle.util.internal.ClosureBackedAction
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
@@ -20,9 +25,12 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.reports.VerifyPluginConfigurationReports
+import org.jetbrains.intellij.platform.gradle.reports.VerifyPluginConfigurationReportsImpl
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
+import javax.inject.Inject
 import kotlin.io.path.exists
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
@@ -39,16 +47,15 @@ import kotlin.io.path.writeText
  *
  * @see <a href="https://jb.gg/intellij-platform-versions">Build Number Ranges</a>
  */
-// TODO: Use Reporting for handling verification report output? https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
 @CacheableTask
 abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, KotlinMetadataAware,
-    RuntimeAware, PluginAware, ModuleAware {
+    RuntimeAware, PluginAware, ModuleAware, Reporting<VerifyPluginConfigurationReports> {
 
     /**
-     * Report the directory where the verification result will be stored.
+     * Service for creating custom Gradle types
      */
-    @get:OutputDirectory
-    abstract val reportDirectory: DirectoryProperty
+    @get:Inject
+    abstract val objectFactory: ObjectFactory
 
     /**
      * Root project path.
@@ -90,6 +97,19 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
      */
     @get:Internal
     abstract val mutedMessages: ListProperty<String>
+
+    /**
+     * Container for results generated from verifying the plugin's project configuration.
+     *
+     * Output location is configured using [org.gradle.api.reporting.internal.DefaultSingleFileReport.getOutputLocation].
+     * Default value: [org.gradle.api.file.ProjectLayout.getBuildDirectory]/reports/verifyPluginConfiguration/report.txt
+     */
+    private val reports: VerifyPluginConfigurationReports = objectFactory.newInstance(
+        VerifyPluginConfigurationReportsImpl::class.java,
+        Describables.quoted("Task", identityPath)
+    )
+
+    private val txtReportFile get() = if (reports.txt.required.get()) reports.txt.outputLocation else null
 
     private val log = Logger(javaClass)
 
@@ -191,8 +211,23 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             .joinToString("\n") { "- $it" }
             .takeIf { it.isNotEmpty() }
             ?.also { log.warn("The following plugin configuration issues were found:\n$it") }
-            .also { reportDirectory.file("report.txt").asPath.writeText(it.orEmpty()) }
+            ?.also {
+                txtReportFile?.asPath?.writeText(it)
+            }
     }
+
+    @Nested
+    override fun getReports(): VerifyPluginConfigurationReports = reports
+
+    override fun reports(closure: Closure<*>): VerifyPluginConfigurationReports {
+        return reports(ClosureBackedAction(closure))
+    }
+
+    override fun reports(configureAction: Action<in VerifyPluginConfigurationReports>): VerifyPluginConfigurationReports {
+        configureAction.execute(reports)
+        return reports
+    }
+
 
     private fun getPlatformJavaVersion(buildNumber: Version) =
         PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value
@@ -217,7 +252,11 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 val compileJavaTaskProvider = project.tasks.named<JavaCompile>(Tasks.External.COMPILE_JAVA)
                 val rootDirectoryProvider = project.provider { project.rootProject.rootDir }
 
-                reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
+                reports {
+                    txt.required.set(true)
+                    txt.outputLocation.convention(project.layout.buildDirectory.file("reports/verifyPluginConfiguration/report.txt"))
+                }
+
                 rootDirectory.convention(rootDirectoryProvider)
                 intellijPlatformCache.convention(project.extensionProvider.map { it.cachePath.toFile() })
                 gitignoreFile.convention(project.layout.file(project.provider {
