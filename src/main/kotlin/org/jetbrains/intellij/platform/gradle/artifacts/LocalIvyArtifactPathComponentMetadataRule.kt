@@ -23,6 +23,7 @@ import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.notExists
 
 /**
  * This comes into play only when [org.gradle.api.initialization.resolve.RulesMode.PREFER_PROJECT] (the default) is used in Gradle's settings.
@@ -81,6 +82,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
     private val absNormalizedIvyPath: String,
 ) : ComponentMetadataRule {
 
+    private val log = Logger(javaClass)
     private val replacementGroups = listOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
 
     override fun execute(context: ComponentMetadataContext) {
@@ -107,6 +109,11 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
                 ivyModule.publications.forEach { artifact ->
                     val fileName = "${artifact.name}.${artifact.ext}"
                     val absPathString = "$absNormalizedPlatformPath/${artifact.url}/$fileName"
+
+                    if (Path.of(absPathString).notExists()) {
+                        log.error("The following artifact of the $id module ${artifact.name} is not found: $absPathString")
+                        return@forEach
+                    }
 
                     /**
                      * It is important to pass in the name and absolute path as the second arg, instead of just `addFile(absPathString)`,

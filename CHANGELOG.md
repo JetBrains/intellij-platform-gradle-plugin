@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Validate artifact file existence in `LocalIvyArtifactPathComponentMetadataRule` and skip non-existent paths to prevent resolution errors.
+
 ## [2.7.1] - 2025-08-09
 
 ### Added
