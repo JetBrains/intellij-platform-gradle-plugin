@@ -9,6 +9,12 @@ import org.gradle.api.problems.Severity
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import java.lang.RuntimeException
 
+/**
+ * Contains problem groups to be used with the Problems API for the IntelliJ Platform Gradle plugin.
+ *
+ * @see org.gradle.api.problems.ProblemGroup
+ * @see org.gradle.api.problems.Problems
+ */
 internal object ProblemGroups {
     val IntelliJPlatformPlugin = ProblemGroup.create(
         "intellij-platform-plugin-group",
@@ -16,6 +22,13 @@ internal object ProblemGroups {
     )
 }
 
+/**
+ * Contains problem IDs to be used when reporting a problem with the Problems API
+ * for the IntelliJ Platform Gradle plugin.
+ *
+ * @see org.gradle.api.problems.ProblemId
+ * @see org.gradle.api.problems.Problems
+ */
 internal object ProblemIds {
 
     object VerifyPluginTaskIds {
