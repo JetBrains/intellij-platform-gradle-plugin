@@ -42,7 +42,8 @@ jobs:
 
       # Update the Unreleased section with the current release note
       - name: Patch Changelog
-        if: ${{ github.event.release.body != '' }}
+        if: false
+        #if: ${{ github.event.release.body != '' }}
         env:
           CHANGELOG: ${{ github.event.release.body }}
         run: |
@@ -68,7 +69,8 @@ jobs:
 
       # Create a pull request
       - name: Create Pull Request
-        if: ${{ steps.properties.outputs.changelog != '' }}
+        if: false
+        #if: ${{ steps.properties.outputs.changelog != '' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
