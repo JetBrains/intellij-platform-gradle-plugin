@@ -60,13 +60,31 @@ internal object ProblemIds {
 
 }
 
+/**
+ * Helper function to report an error using the Problems API.
+ *
+ * @param exception The exception to report. It is suppressed to allow a wrapper exception be thrown with an updated message.
+ * @param problemId The ID of the problem to report.
+ * @param problemsReportUrl Optional URL used to include the report file's path to the exception's message.
+ * Expected value: [org.gradle.api.file.ProjectLayout.getBuildDirectory]/reports/problems/problems-report.html
+ * @param spec An action that further configures the problem specification.
+ * @return A RuntimeException that includes the original exception and the problem details.
+ */
 internal fun ProblemReporter.reportError(
     exception: Exception,
     problemId: ProblemId,
+    problemsReportUrl: String?,
     spec: Action<ProblemSpec>
 ): RuntimeException {
-    return throwing(exception, problemId){
 
+    val message = buildString {
+        append(exception.message)
+        if (problemsReportUrl != null) {
+            append("${System.lineSeparator()}[Incubating] See full report here: $problemsReportUrl")
+        }
+    }
+
+    return throwing(RuntimeException(message).also { it.addSuppressed(exception) }, problemId){
         spec.execute(this)
 
         withException(exception)
