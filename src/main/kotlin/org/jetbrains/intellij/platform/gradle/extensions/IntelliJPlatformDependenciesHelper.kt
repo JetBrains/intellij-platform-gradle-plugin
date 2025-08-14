@@ -17,6 +17,7 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.initialization.resolve.RulesMode
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
@@ -123,13 +124,13 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Helper function for creating cached [ProviderFactory.provider].
      */
-    internal inline fun <reified T> cachedProvider(crossinline value: () -> T) =
+    internal inline fun <reified T : Any> cachedProvider(crossinline value: () -> T) =
         cachedProvider(objects, providers, value)
 
     /**
      * Helper function for creating cached list [ProviderFactory.provider].
      */
-    internal inline fun <reified T> cachedListProvider(crossinline value: () -> List<T>) =
+    internal inline fun <reified T : Any> cachedListProvider(crossinline value: () -> List<T>) =
         cachedListProvider(objects, providers, value)
 
     internal val cacheResolver by lazy {
@@ -219,7 +220,8 @@ class IntelliJPlatformDependenciesHelper(
 
         // TODO: This is hacky but we need to add a cached artifact to the [Configurations.INTELLIJ_PLATFORM_LOCAL] configuration,
         //       still respecting suffix, and passing that name from elsewhere would be too messy.
-        val suffix = configuration.intellijPlatformConfigurationName.get().removePrefix(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
+        val suffix = configuration.intellijPlatformConfigurationName.get()
+            .removePrefix(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
         val localConfigurationName = Configurations.INTELLIJ_PLATFORM_LOCAL + suffix
         val requestProvider = requestedIntelliJPlatforms.set(configuration)
 
@@ -333,23 +335,26 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        cachedProvider {
-            val localPath = localPathProvider.orNull ?: return@cachedProvider null
-            val platformPath = resolveArtifactPath(localPath)
-            val productInfo = platformPath.productInfo()
+    ) = configurations[configurationName].dependencies.addAllLater(
+        cachedListProvider {
+            buildList {
+                val localPath = localPathProvider.orNull ?: return@buildList
+                val platformPath = resolveArtifactPath(localPath)
+                val productInfo = platformPath.productInfo()
 
-            val dependencyConfiguration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply {
-                type = productInfo.type
-                version = productInfo.version
-                useInstaller = true
-                useCustomCache = false
-                productMode = ProductMode.MONOLITH
-                this.intellijPlatformConfigurationName = intellijPlatformConfigurationName
+                val dependencyConfiguration =
+                    objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply {
+                        type = productInfo.type
+                        version = productInfo.version
+                        useInstaller = true
+                        useCustomCache = false
+                        productMode = ProductMode.MONOLITH
+                        this.intellijPlatformConfigurationName = intellijPlatformConfigurationName
+                    }
+                requestedIntelliJPlatforms.set(dependencyConfiguration)
+
+                createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
             }
-            requestedIntelliJPlatforms.set(dependencyConfiguration)
-
-            createIntelliJPlatformLocal(platformPath).apply(action)
         },
     )
 
@@ -593,10 +598,8 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName).map { version ->
-            createJetBrainsRuntime(requireNotNull(version)).apply(action)
-        },
+    ) = configurations[configurationName].dependencies.addAllLater(
+        createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName)
     )
 
     /**
@@ -1024,7 +1027,7 @@ class IntelliJPlatformDependenciesHelper(
         val bundledModule = ide(platformPath).findPluginById(id)
         requireNotNull(bundledModule) { "Specified bundledModule '$id' doesn't exist." }
 
-        val classpath = bundledModule.classpath.paths.map { it.pathString }
+        val classpath = bundledModule.classpath.paths.map { it.safePathString }
 
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
         return dependencies.create(group, name, version)
@@ -1280,25 +1283,39 @@ class IntelliJPlatformDependenciesHelper(
         )
 
     /**
-     * Creates a [Provider] that holds a JetBrains Runtime version obtained using the currently used IntelliJ Platform.
+     * Returns JetBrains Runtime version obtained using the currently used IntelliJ Platform.
      *
      * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      */
-    internal fun obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) =
-        cachedProvider {
-            val dependencies = runCatching {
-                val platformPath = platformPath(intellijPlatformConfigurationName)
-                platformPath.resolve("dependencies.txt").takeIf { it.exists() }
-            }.getOrNull() ?: return@cachedProvider null
+    internal fun obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY): String? {
+        val dependencies = runCatching {
+            val platformPath = platformPath(intellijPlatformConfigurationName)
+            platformPath.resolve("dependencies.txt").takeIf { it.exists() }
+        }.getOrNull() ?: return null
 
-            val version = FileReader(dependencies.toFile()).use { reader ->
-                with(Properties()) {
-                    load(reader)
-                    getProperty("runtimeBuild") ?: getProperty("jdkBuild")
-                }
-            } ?: return@cachedProvider null
+        val version = FileReader(dependencies.toFile()).use { reader ->
+            with(Properties()) {
+                load(reader)
+                getProperty("runtimeBuild") ?: getProperty("jdkBuild")
+            }
+        } ?: return null
 
-            buildJetBrainsRuntimeVersion(version)
+        return buildJetBrainsRuntimeVersion(version)
+    }
+
+    /**
+     * Creates a list property of dependencies containing the JetBrains Runtime dependency.
+     * The runtime version is obtained from the IntelliJ Platform configuration.
+     *
+     * @param intellijPlatformConfigurationName Configuration name for IntelliJ Platform dependency, defaults to "intellijPlatformDependency"
+     * @return List property containing JetBrains Runtime dependency if version could be obtained, empty list otherwise
+     */
+    internal fun createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY): ListProperty<Dependency> =
+        cachedListProvider {
+            buildList {
+                obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName)
+                    ?.let { add(createJetBrainsRuntime(it)) }
+            }
         }
 
     /**
@@ -1318,7 +1335,7 @@ class IntelliJPlatformDependenciesHelper(
             ?.classpath
             ?.paths
             .orEmpty()
-            .map { it.pathString }.toSet()
+            .map { it.safePathString }.toSet()
 
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
         return dependencies.create(group, name, version)
@@ -1419,8 +1436,8 @@ class IntelliJPlatformDependenciesHelper(
             val cachedModulePath = cachedValue.second
 
             if (cachedIvyModule is IvyModule && cachedModulePath is Path) {
-                val cachedModulePathString = cachedModulePath.absolute().normalize().invariantSeparatorsPathString
-                val newModulePathString = artifactPath.absolute().normalize().invariantSeparatorsPathString
+                val cachedModulePathString = cachedModulePath.safePathString
+                val newModulePathString = artifactPath.safePathString
 
                 if (cachedModulePathString == newModulePathString) {
                     log.info("Rewriting Ivy module '$fileName' detected. Paths match '$cachedModulePathString', the cached value will used.")
@@ -1554,9 +1571,9 @@ class IntelliJPlatformDependenciesHelper(
     @Throws(IllegalArgumentException::class)
     internal fun resolvePath(path: Any) = when (path) {
         is String -> path
-        is File -> path.absolutePath
-        is Directory -> path.asPath.pathString
-        is Path -> path.pathString
+        is File -> path.toPath().safePathString
+        is Directory -> path.asPath.safePathString
+        is Path -> path.safePathString
         else -> throw IllegalArgumentException("Invalid argument type: '${path.javaClass}'. Supported types: String, File, Path, or Directory.")
     }.let { Path(it) }
 

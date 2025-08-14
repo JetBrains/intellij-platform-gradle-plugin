@@ -110,7 +110,7 @@ enum class IntelliJPlatformType(
     ),
     RubyMine(
         code = "RM",
-        maven = null,
+        maven = Coordinates("com.jetbrains.intellij.rubymine", "rubymine"),
         installer = Coordinates("ruby", "RubyMine"),
     ),
     RustRover(

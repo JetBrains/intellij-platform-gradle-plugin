@@ -10,6 +10,7 @@ import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.process.ExecOperations
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import javax.inject.Inject
@@ -85,7 +86,7 @@ abstract class DmgExtractorValueSource : ValueSource<Path, DmgExtractorValueSour
                 "-mountpoint",
                 "-quiet",
                 tempDirectory,
-                path.pathString,
+                path.safePathString,
             )
         }
 
@@ -95,7 +96,7 @@ abstract class DmgExtractorValueSource : ValueSource<Path, DmgExtractorValueSour
                 "-av",
                 "--quiet",
                 "--exclude=Applications",
-                "--exclude=.*",
+                "--exclude=/.*",
                 "$tempDirectory/",
                 targetDirectory,
             )

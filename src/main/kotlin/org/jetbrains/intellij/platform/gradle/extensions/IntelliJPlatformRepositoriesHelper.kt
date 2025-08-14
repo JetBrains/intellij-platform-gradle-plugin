@@ -22,9 +22,9 @@ import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.services.ShimManagerService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.net.URI
 import java.nio.file.Path
-import kotlin.io.path.pathString
 
 @Suppress("KDocUnresolvedReference", "UnstableApiUsage")
 class IntelliJPlatformRepositoriesHelper(
@@ -155,7 +155,7 @@ class IntelliJPlatformRepositoriesHelper(
 
         // Location of Ivy files generated for the current project.
         val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
-        ivyPattern("${localPlatformArtifactsPath.pathString}/[revision]/[organization]-[module]-[revision].[ext]")
+        ivyPattern("${localPlatformArtifactsPath.safePathString}/[revision]/[organization]-[module]-[revision].[ext]")
 
         // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
         artifactPattern("/[artifact]")

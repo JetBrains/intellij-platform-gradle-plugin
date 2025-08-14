@@ -12,11 +12,10 @@ import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 import kotlin.io.path.Path
-import kotlin.io.path.exists
-import kotlin.io.path.pathString
 
 /**
  * Represents information about the IntelliJ Platform product.
@@ -229,19 +228,20 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
  * @receiver JVM argument with IDE home placeholder
  */
 internal fun String.resolveIdeHomeVariable(platformPath: Path) =
-    platformPath.pathString.let {
+    platformPath.safePathString.let {
         this
+            .run {
+                when {
+                    OperatingSystem.current().isMacOsX ->
+                        replace("\$IDE_HOME/Contents", "\$IDE_HOME")
+                            .replace("\$APP_PACKAGE/Contents", "\$APP_PACKAGE")
+
+                    else -> this
+                }
+            }
             .replace("\$APP_PACKAGE", it)
             .replace("\$IDE_HOME", it)
             .replace("%IDE_HOME%", it)
-            .replace("Contents/Contents", "Contents")
-            .let { entry ->
-                val value = entry.split("=").getOrNull(1) ?: entry
-                when {
-                    runCatching { Path(value).exists() }.getOrElse { false } -> entry
-                    else -> entry.replace("/Contents", "")
-                }
-            }
     }
 
 private val productInfoCache = mutableMapOf<Path, ProductInfo>()

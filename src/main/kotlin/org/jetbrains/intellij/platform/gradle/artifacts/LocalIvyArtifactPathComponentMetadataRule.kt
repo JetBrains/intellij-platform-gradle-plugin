@@ -19,11 +19,10 @@ import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
-import kotlin.io.path.absolute
-import kotlin.io.path.invariantSeparatorsPathString
 
 /**
  * This comes into play only when [org.gradle.api.initialization.resolve.RulesMode.PREFER_PROJECT] (the default) is used in Gradle's settings.
@@ -156,14 +155,8 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
                     } else if (configuration.isEmpty) {
                         log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' is empty. $ruleName will not be registered.")
                     } else {
-                        val artifactLocationPath = configuration.platformPath()
-                            .absolute()
-                            .normalize()
-                            .invariantSeparatorsPathString
-                        val ivyLocationPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
-                            .absolute()
-                            .normalize()
-                            .invariantSeparatorsPathString
+                        val artifactLocationPath = configuration.platformPath().safePathString
+                        val ivyLocationPath = providers.localPlatformArtifactsPath(rootProjectDirectory).safePathString
 
                         dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
                             params(artifactLocationPath, ivyLocationPath)

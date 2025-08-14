@@ -130,7 +130,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 """
                 kotlin {
                     compilerOptions {
-                        apiVersion = KotlinVersion.KOTLIN_1_6
+                        apiVersion = KotlinVersion.fromVersion("1.6")
                     }
                 }
                 """.trimIndent()
@@ -156,7 +156,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 """
                 kotlin {
                     compilerOptions {
-                        apiVersion = KotlinVersion.KOTLIN_1_9
+                        apiVersion = KotlinVersion.fromVersion("1.9")
                     }
                 }
                 """.trimIndent()
@@ -185,7 +185,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 """
                 kotlin {
                     compilerOptions {
-                        languageVersion = KotlinVersion.KOTLIN_1_7
+                        languageVersion = KotlinVersion.fromVersion("1.7")
                     }
                 }
                 """.trimIndent()
@@ -201,7 +201,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 """
                 kotlin {
                     compilerOptions {
-                        languageVersion = KotlinVersion.KOTLIN_1_5
+                        languageVersion = KotlinVersion.fromVersion("1.5")
                     }
                 }
                 """.trimIndent()

@@ -10,7 +10,6 @@ import org.jetbrains.intellij.platform.gradle.providers.JavaRuntimeMetadataValue
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
-import kotlin.io.path.pathString
 
 /**
  * A custom implementation of [JavaLauncher] to make it possible to use custom Java Runtime, such as JBR bundled with IntelliJ Platform.
@@ -38,5 +37,5 @@ internal class IntelliJPlatformJavaLauncher(
         override fun isCurrentJvm() = false
     }
 
-    override fun getExecutablePath() = dir.file(dir.asPath.resolveJavaRuntimeExecutable().pathString)
+    override fun getExecutablePath() = dir.file(dir.asPath.resolveJavaRuntimeExecutable().safePathString)
 }

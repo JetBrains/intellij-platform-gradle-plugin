@@ -326,10 +326,10 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertFileContent(
             sandbox.resolve("frontend.properties"),
             """
-            idea.config.path=${sandbox.resolve("config/frontend")}
-            idea.system.path=${sandbox.resolve("system/frontend")}
-            idea.log.path=${sandbox.resolve("log/frontend")}
-            idea.plugins.path=${sandbox.resolve("plugins/frontend")}
+            idea.config.path=${sandbox.resolve("config/frontend").invariantSeparatorsPathString}
+            idea.system.path=${sandbox.resolve("system/frontend").invariantSeparatorsPathString}
+            idea.log.path=${sandbox.resolve("log/frontend").invariantSeparatorsPathString}
+            idea.plugins.path=${sandbox.resolve("plugins/frontend").invariantSeparatorsPathString}
             """.trimIndent()
         )
     }
@@ -340,10 +340,10 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertFileContent(
             sandbox.resolve("frontend.properties"),
             """
-            idea.config.path=${sandbox.resolve("config/frontend")}
-            idea.system.path=${sandbox.resolve("system/frontend")}
-            idea.log.path=${sandbox.resolve("log/frontend")}
-            idea.plugins.path=${sandbox.resolve("plugins/frontend")}
+            idea.config.path=${sandbox.resolve("config/frontend").invariantSeparatorsPathString}
+            idea.system.path=${sandbox.resolve("system/frontend").invariantSeparatorsPathString}
+            idea.log.path=${sandbox.resolve("log/frontend").invariantSeparatorsPathString}
+            idea.plugins.path=${sandbox.resolve("plugins/frontend").invariantSeparatorsPathString}
             """.trimIndent()
         )
     }
@@ -354,10 +354,10 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertFileContent(
             sandbox.resolve("frontend.properties"),
             """
-            idea.config.path=${sandbox.resolve("config/frontend")}
-            idea.system.path=${sandbox.resolve("system/frontend")}
-            idea.log.path=${sandbox.resolve("log/frontend")}
-            idea.plugins.path=${sandbox.resolve("plugins")}
+            idea.config.path=${sandbox.resolve("config/frontend").invariantSeparatorsPathString}
+            idea.system.path=${sandbox.resolve("system/frontend").invariantSeparatorsPathString}
+            idea.log.path=${sandbox.resolve("log/frontend").invariantSeparatorsPathString}
+            idea.plugins.path=${sandbox.resolve("plugins").invariantSeparatorsPathString}
             """.trimIndent()
         )
     }

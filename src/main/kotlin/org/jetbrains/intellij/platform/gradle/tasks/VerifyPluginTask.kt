@@ -30,11 +30,11 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 import java.util.*
 import kotlin.io.path.exists
 import javax.inject.Inject
-import kotlin.io.path.pathString
 
 /**
  * Runs the IntelliJ Plugin Verifier CLI tool to check compatibility with specified IDE builds.
@@ -257,7 +257,7 @@ abstract class VerifyPluginTask: JavaExec(), RuntimeAware, PluginVerifierAware {
                     solution("Please ensure the `intellijPlatform.pluginVerification.ides` extension block is configured along with the `defaultRepositories()` (or at least `localPlatformArtifacts()`) entry in the repositories section")
                 }
             }
-            args(listOf("check-plugin") + getOptions() + file.pathString + map {
+            args(listOf("check-plugin") + getOptions() + file.safePathString + map {
                 when {
                     it.isDirectory -> it.absolutePath
                     else -> it.readText()
@@ -279,8 +279,8 @@ abstract class VerifyPluginTask: JavaExec(), RuntimeAware, PluginVerifierAware {
      */
     private fun getOptions(): List<String> {
         val args = mutableListOf(
-            "-verification-reports-dir", verificationReportsDirectory.asPath.pathString,
-            "-runtime-dir", runtimeDirectory.asPath.pathString,
+            "-verification-reports-dir", verificationReportsDirectory.asPath.safePathString,
+            "-runtime-dir", runtimeDirectory.asPath.safePathString,
         )
 
         externalPrefixes.get().takeIf { it.isNotEmpty() }?.let {
@@ -304,7 +304,7 @@ abstract class VerifyPluginTask: JavaExec(), RuntimeAware, PluginVerifierAware {
 
         if (ignoredProblemsFile.orNull != null) {
             args.add("-ignored-problems")
-            args.add(ignoredProblemsFile.asPath.pathString)
+            args.add(ignoredProblemsFile.asPath.safePathString)
         }
 
         freeArgs.orNull?.let {

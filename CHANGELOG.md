@@ -2,6 +2,25 @@
 
 ## [next]
 
+## [2.7.1] - 2025-08-09
+
+### Added
+
+- Add RubyMine `com.jetbrains.intellij.rubymine:rubymine` Maven coordinates to the `IntelliJPlatformType`
+
+### Changed
+
+- Update minimal supported Gradle version to `8.6`
+
+### Fixed
+
+- Add a check for target file existence before creating and writing to `JarOutputStream`. JetBrains/intellij-platform-gradle-plugin#1988
+- Fix the incorrect rsync exclusion pattern in `DmgExtractorValueSource`
+- Fix macOS missing `nio-fs.jar` on bootclasspath when running the `runIde` task against the local IDE. JetBrains/intellij-platform-gradle-plugin#1994
+- Pass sandbox properties path with invariant separators.
+- Added missing retrofit annotations to `IdeServicesPluginRepositoryService.uploadByStringIdAndFamily`
+- Fixed: SignPluginTask keystore options are now honored; the task runs with keystore-only configuration (no PEM key/cert required). JetBrains/intellij-platform-gradle-plugin#2001
+
 ## [2.7.0] - 2025-07-26
 
 ### Breaking Changes
@@ -1475,7 +1494,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.1...HEAD
+[2.7.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.5.0...v2.6.0
 [2.5.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.4.0...v2.5.0
