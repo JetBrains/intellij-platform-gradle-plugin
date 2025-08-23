@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.file.ProjectLayout
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IDES
@@ -186,18 +187,15 @@ inline operator fun <reified T : Any> ProviderFactory.get(property: GradleProper
         }
         .orElse(property.defaultValue)
 
-// TODO: simplify those methods
 
 /**
  * Returns the IntelliJ Platform Gradle Plugin cache directory for the current project.
  */
 internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
-    get(GradleProperties.IntellijPlatformCache).orNull
-        .takeUnless { it.isNullOrBlank() }
-        ?.let { Path(it) }
-        .run { this ?: rootProjectDirectory.resolve(CACHE_DIRECTORY) }
-        .createDirectories()
-        .absolute()
+    resolveDir(
+        get(GradleProperties.IntellijPlatformCache),
+        rootProjectDirectory.resolve(CACHE_DIRECTORY)
+    )
 
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
@@ -205,12 +203,10 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
  * @see [GradleProperties.LocalPlatformArtifacts]
  */
 internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
-    get(GradleProperties.LocalPlatformArtifacts).orNull
-        .takeUnless { it.isNullOrBlank() }
-        ?.let { Path(it) }
-        .run { this ?: intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IVY) }
-        .createDirectories()
-        .absolute()
+    resolveDir(
+        get(GradleProperties.LocalPlatformArtifacts),
+        intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IVY)
+    )
 
 /**
  *
@@ -218,9 +214,15 @@ internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Pa
  * @see [GradleProperties.IntellijPlatformIdesCache]
  */
 internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory: Path) =
-    get(GradleProperties.IntellijPlatformIdesCache).orNull
+    resolveDir(
+        get(GradleProperties.IntellijPlatformIdesCache),
+        intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IDES)
+    )
+
+fun ProviderFactory.resolveDir(prop: Provider<String>, defaultDir: Path) =
+    prop.orNull
         .takeUnless { it.isNullOrBlank() }
-        ?.let { Path(it) }
-        .run { this ?: intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IDES) }
+        ?.let { Path(it.replaceFirst("^~".toRegex(), System.getProperty("user.home"))) }
+        .run { this ?: defaultDir }
         .createDirectories()
         .absolute()
