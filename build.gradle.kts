@@ -243,6 +243,15 @@ publishing {
             groupId = providers.gradleProperty("group").get()
             artifactId = providers.gradleProperty("artifactId").get()
             version = version.toString()
+
+            pom {
+                licenses {
+                    license {
+                        name.set(providers.gradleProperty("licenseName").get())
+                        url.set(providers.gradleProperty("licenseUrl").get())
+                    }
+                }
+            }
         }
     }
 }

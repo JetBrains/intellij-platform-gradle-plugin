@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add license information into published POM file
+
 ### Fixed
 
 - Validate artifact file existence in `LocalIvyArtifactPathComponentMetadataRule` and skip non-existent paths to prevent resolution errors.
