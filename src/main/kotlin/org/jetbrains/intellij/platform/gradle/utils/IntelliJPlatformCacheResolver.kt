@@ -134,8 +134,6 @@ class IntelliJPlatformCacheResolver internal constructor(
      */
     fun resolve(configure: IntelliJPlatformDependencyConfiguration.() -> Unit): Path {
         val dependenciesHelper = dependenciesHelperProvider.get()
-        val configurationName = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_${UUID.randomUUID()}"
-        val configuration = configurations.create(configurationName)
         val requestedProvider = dependenciesHelper.requestedIntelliJPlatforms.set(
             objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
         )
@@ -148,6 +146,9 @@ class IntelliJPlatformCacheResolver internal constructor(
         if (targetDirectory.exists() && targetDirectory.listFiles().isNotEmpty()) {
             return targetDirectory
         }
+
+        val configurationName = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_${UUID.randomUUID()}"
+        val configuration = configurations.create(configurationName)
 
         dependenciesHelper.addIntelliJPlatformDependency(
             requestedIntelliJPlatformProvider = requestedProvider,
