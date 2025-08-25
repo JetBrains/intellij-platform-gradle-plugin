@@ -1,63 +1,58 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.Action
-import org.gradle.api.problems.ProblemGroup
-import org.gradle.api.problems.ProblemId
-import org.gradle.api.problems.ProblemReporter
-import org.gradle.api.problems.ProblemSpec
-import org.gradle.api.problems.Severity
+import org.gradle.api.problems.*
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin.ID
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
-import java.lang.RuntimeException
-
-/**
- * Contains problem groups to be used with the Problems API for the IntelliJ Platform Gradle plugin.
- *
- * @see org.gradle.api.problems.ProblemGroup
- * @see org.gradle.api.problems.Problems
- */
-internal object ProblemGroups {
-    val IntelliJPlatformPlugin = ProblemGroup.create(
-        "intellij-platform-plugin-group",
-        "IntelliJ Platform Plugin Problems"
-    )
-}
 
 /**
  * Contains problem IDs to be used when reporting a problem with the Problems API
- * for the IntelliJ Platform Gradle plugin.
+ * for the IntelliJ Platform Gradle Plugin.
  *
  * @see org.gradle.api.problems.ProblemId
  * @see org.gradle.api.problems.Problems
  */
-internal object ProblemIds {
+@Suppress("UnstableApiUsage")
+internal object Problems {
 
-    object VerifyPluginTaskIds {
-        val InvalidPlugin = intelliJPlatformPluginId(
+    /**
+     * Contains [ProblemGroup]s to be used with the Problems API for the IntelliJ Platform Gradle Plugin.
+     */
+    private object Groups {
+        val IntelliJPlatformPlugin = ProblemGroup.create(
+            "intellij-platform-plugin-group",
+            "IntelliJ Platform Plugin Problems"
+        )
+
+        val VerifyPlugin = ProblemGroup.create("$ID.verify-plugin", "Verify Plugin")
+    }
+
+    object VerifyPlugin {
+        val InvalidPlugin = ProblemId.create(
             "invalid-plugin",
-            "Invalid Plugin"
+            "Invalid Plugin",
+            Groups.VerifyPlugin,
         )
-        val InvalidPluginVerifier = intelliJPlatformPluginId(
+        val InvalidPluginVerifier = ProblemId.create(
             "invalid-plugin-verifier",
-            "Invalid Plugin Verifer"
+            "Invalid Plugin Verifer",
+            Groups.VerifyPlugin,
         )
 
-        val InvalidIDEs = intelliJPlatformPluginId(
+        val InvalidIDEs = ProblemId.create(
             "no-ides-found",
-            "No IDEs Found"
+            "No IDEs Found",
+            Groups.VerifyPlugin,
         )
 
-        val FailingTaskOnFailureLevel = { level: VerifyPluginTask.FailureLevel ->
-            intelliJPlatformPluginId(
-                "failing-task-on-${level}",
-                level.sectionHeading
+        val VerificationFailure = { level: VerifyPluginTask.FailureLevel ->
+            ProblemId.create(
+                "verification-failure-${level}",
+                level.sectionHeading,
+                Groups.VerifyPlugin,
             )
         }
     }
-
-    private fun intelliJPlatformPluginId(name: String, displayName: String): ProblemId {
-        return ProblemId.create(name, displayName, ProblemGroups.IntelliJPlatformPlugin)
-    }
-
 }
 
 /**
