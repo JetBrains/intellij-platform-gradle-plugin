@@ -42,6 +42,27 @@ The Gradle project needs to be refreshed to apply changes.
 > }
 > ```
 
+> [!NOTE]
+> 
+> If you load the IntelliJ Platform Gradle Plugin through a composite build, having the dependency on the plugin declared in the `buildSrc/build.gradle.kts` file like:
+> 
+> ```kotlin
+> dependencies {
+>    implementation("org.jetbrains.intellij.platform:intellij-platform-gradle-plugin:...")
+> }
+> ```
+> 
+> it is required to add the following substitution rule to the `buildSrc/settings.gradle.kts` file:
+> 
+> ```kotlin
+> includeBuild("/Users/hsz/Projects/JetBrains/intellij-platform-gradle-plugin") {
+>   dependencySubstitution {
+>     substitute(module("org.jetbrains.intellij.platform:intellij-platform-gradle-plugin"))
+>       .using(project(":"))
+>   }
+> }
+> ```
+
 ## Pull Requests
 
 To correctly prepare the pull requests, make sure to provide the following information:

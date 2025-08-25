@@ -18,11 +18,31 @@ https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugi
 To install the IntelliJ Platform Gradle Plugin in your project, follow the [Usage](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html#usage) section of the plugin documentation.
 There's also a [Snapshot Release](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html#using-snapshot-release) available built nightly from the main branch containing the always-latest version of the plugin.
 
+### Latest Release
+
+The latest available version is:
+ 
+[![Gradle Plugin Portal][gradle-plugin-badge]][gradle-plugin-page]
+
+### Snapshot Releases
+
+To use snapshot releases, in `settings.gradle.kts` enable the Maven Snapshots repository:
+
+```kotlin
+pluginManagement {
+  repositories {
+    maven("https://central.sonatype.com/repository/maven-snapshots/")
+    gradlePluginPortal()
+  }
+}
+```
+
+The latest snapshot version is:
+
+![Maven Snapshots](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Fcentral.sonatype.com%2Frepository%2Fmaven-snapshots%2Forg%2Fjetbrains%2Fintellij%2Fplatform%2Fintellij-platform-gradle-plugin%2Fmaven-metadata.xml&label=Maven%20Snapshots)
+
 ## Changelog
 All releases are available in the [Releases](https://github.com/JetBrains/intellij-platform-gradle-plugin/releases) section.
-The latest available version is:
-
-[![Gradle Plugin Portal][gradle-plugin-badge]][gradle-plugin-page]
 
 ## Contributing
 Please see [CONTRIBUTING](./CONTRIBUTING.md) on how to submit feedback and contribute to this project.
