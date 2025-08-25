@@ -247,8 +247,8 @@ publishing {
             pom {
                 licenses {
                     license {
-                        name.set(providers.gradleProperty("licenseName").get())
-                        url.set(providers.gradleProperty("licenseUrl").get())
+                        name = providers.gradleProperty("licenseName")
+                        url = providers.gradleProperty("licenseUrl")
                     }
                 }
             }
