@@ -6,6 +6,7 @@
 
 - Validate artifact file existence in `LocalIvyArtifactPathComponentMetadataRule` and skip non-existent paths to prevent resolution errors.
 - Reorder configuration creation to avoid `ConcurrentModificationException` when using the custom cache.
+- Correctly resolve `~` in `GradleProperties` to the users home directory.
 
 ## [2.7.1] - 2025-08-09
 
