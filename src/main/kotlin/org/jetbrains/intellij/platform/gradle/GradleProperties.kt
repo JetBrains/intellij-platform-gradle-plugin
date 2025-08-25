@@ -187,14 +187,13 @@ inline operator fun <reified T : Any> ProviderFactory.get(property: GradleProper
         }
         .orElse(property.defaultValue)
 
-
 /**
  * Returns the IntelliJ Platform Gradle Plugin cache directory for the current project.
  */
 internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
     resolveDir(
         get(GradleProperties.IntellijPlatformCache),
-        rootProjectDirectory.resolve(CACHE_DIRECTORY)
+        rootProjectDirectory.resolve(CACHE_DIRECTORY),
     )
 
 /**
@@ -205,7 +204,7 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
 internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
     resolveDir(
         get(GradleProperties.LocalPlatformArtifacts),
-        intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IVY)
+        intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IVY),
     )
 
 /**
@@ -216,11 +215,21 @@ internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Pa
 internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory: Path) =
     resolveDir(
         get(GradleProperties.IntellijPlatformIdesCache),
-        intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IDES)
+        intellijPlatformCachePath(rootProjectDirectory).resolve(CACHE_DIRECTORY_IDES),
     )
 
-fun ProviderFactory.resolveDir(prop: Provider<String>, defaultDir: Path) =
-    prop.orNull
+/**
+ * Resolves a directory path based on a provided [Provider] or a default [Path].
+ * If the [Provider] contains a valid non-blank path, it processes and resolves it.
+ * If the path starts with `~`, it replaces it with the user's home directory.
+ * If the [Provider] value is null or blank, the default directory is used.
+ * Ensures that the resolved directory is created and returns its absolute path.
+ *
+ * @param propertyProvider the provider of the directory path as a [Provider] of [String].
+ * @param defaultDir the default directory [Path] to use when the provider's value is null or blank.
+ */
+internal fun ProviderFactory.resolveDir(propertyProvider: Provider<String>, defaultDir: Path) =
+    propertyProvider.orNull
         .takeUnless { it.isNullOrBlank() }
         ?.let { Path(it.replaceFirst("^~".toRegex(), System.getProperty("user.home"))) }
         .run { this ?: defaultDir }
