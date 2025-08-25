@@ -76,7 +76,6 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    @Ignore("Ignore due to e181a5d1")
     fun `run plugin verifier in the latest version`() {
         writePluginXmlFile()
         writePluginVerifierDependency()
@@ -496,7 +495,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     // TODO: revert back to null as soon as PV CLI gets fixed; 1.391 causes troubles on Windows
-    private fun writePluginVerifierDependency(version: String? = "1.388") {
+    private fun writePluginVerifierDependency(version: String? = null) {
         buildFile write //language=kotlin
                 """
                 dependencies {
