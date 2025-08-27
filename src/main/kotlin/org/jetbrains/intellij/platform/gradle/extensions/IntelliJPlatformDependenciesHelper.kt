@@ -8,6 +8,7 @@ import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.GradleException
+import org.gradle.api.Incubating
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
@@ -398,6 +399,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
+    @Incubating
     internal fun addCompatibleIntelliJPlatformPluginDependencies(
         pluginsProvider: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
