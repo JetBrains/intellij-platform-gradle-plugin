@@ -181,6 +181,7 @@ internal val Project.dependenciesHelper
         project.path,
         gradle,
         rootProjectPath,
+        extensionProvider,
         project.settings.dependencyResolutionManagement.rulesMode,
     )
 

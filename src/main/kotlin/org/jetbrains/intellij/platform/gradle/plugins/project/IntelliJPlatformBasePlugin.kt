@@ -438,7 +438,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }
 
         IntelliJPlatformExtension.register(project, target = project).let { intelliJPlatform ->
-            Caching.register(project, target = intelliJPlatform)
+            Caching.register(project, target = intelliJPlatform).let { caching ->
+                Caching.Ides.register(project, target = caching)
+            }
             PluginConfiguration.register(project, target = intelliJPlatform).let { pluginConfiguration ->
                 ProductDescriptor.register(project, target = pluginConfiguration)
                 IdeaVersion.register(project, target = pluginConfiguration)

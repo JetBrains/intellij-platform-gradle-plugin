@@ -73,6 +73,7 @@ class IntelliJPlatformDependenciesHelper(
     private val projectPath: String,
     private val gradle: Gradle,
     private val rootProjectDirectory: Path,
+    private val extensionProvider: Provider<IntelliJPlatformExtension>,
     private val metadataRulesModeProvider: Provider<RulesMode>,
 ) {
 
@@ -135,11 +136,9 @@ class IntelliJPlatformDependenciesHelper(
         cachedListProvider(objects, providers, value)
 
     internal val cacheResolver by lazy {
-        // TODO: Make it configurable from i.e. extension.
-        //       Maybe dependencies.intellijPlatform.cache?
         val parameters = objects.newInstance<Parameters>().apply {
-            cacheDirectory = providers.intellijPlatformIdesCachePath(rootProjectDirectory).toFile()
-            name = { "${it.type}-${it.version}" }
+            cacheDirectory = extensionProvider.flatMap { it.caching.ides.path }
+            name = extensionProvider.flatMap { it.caching.ides.name }
         }
 
         IntelliJPlatformCacheResolver(

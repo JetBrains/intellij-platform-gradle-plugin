@@ -247,21 +247,71 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     }
 
     @IntelliJPlatform
-    abstract class Caching @Inject constructor(
-        providers: ProviderFactory,
-        rootProjectDirectory: Path,
-    ) : ExtensionAware {
+    interface Caching : ExtensionAware {
+
+        /**
+         * The extension to define caching related to resolving IntelliJ Platform dependencies.
+         *
+         * @see Ides
+         */
+        val ides
+            get() = extensions.getByName<Ides>(Extensions.IDES)
+
+        fun ides(action: Action<in Ides>) {
+            action.execute(ides)
+        }
+
+        fun ides(@DelegatesTo(value = Ides::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+            action.delegate = ides
+            action.resolveStrategy = Closure.DELEGATE_FIRST
+            action.call()
+        }
+
 
         /**
          * Provides read-only access to the IntelliJ Platform project cache location.
          *
          * @see GradleProperties.IntellijPlatformCache
          */
-        abstract val path: DirectoryProperty
+        val path: DirectoryProperty
+
+        /**
+         * Represents the configuration for caching IntelliJ Platform IDEs.
+         */
+        @IntelliJPlatform
+        interface Ides {
+
+            /**
+             * The IntelliJ Platform Gradle Plugin cache root directory for the current project for storing content
+             * produced by the plugin, such as local artifact details, Java Agent file, extracted IDEs, etc.
+             *
+             * @see GradleProperties.IntellijPlatformIdesCache
+             */
+            val path: DirectoryProperty
+
+            /**
+             * Function that returns a cache directory name for a given IntelliJ Platform artifact.
+             *
+             * By default, set to [RequestedIntelliJPlatform.type]-[RequestedIntelliJPlatform.version].
+             */
+            val name: Property<(RequestedIntelliJPlatform) -> String>
+
+            companion object : Registrable<Ides> {
+                override fun register(project: Project, target: Any) =
+                    target.configureExtension<Ides>(Extensions.IDES) {
+                        path.convention(
+                            project.layout.dir(
+                                project.providers.intellijPlatformIdesCachePath(project.rootProjectPath).map { it.toFile() }
+                            )
+                        )
+                        name.convention { "${it.type}-${it.version}" }
+                    }
+            }
+        }
 
         companion object : Registrable<Caching> {
             override fun register(project: Project, target: Any) =
-                target.configureExtension<Caching>(Extensions.CACHING, project.rootProjectPath) {
+                target.configureExtension<Caching>(Extensions.CACHING) {
                     path.convention(
                         project.layout.dir(
                             project.providers.intellijPlatformCachePath(project.rootProjectPath).map { it.toFile() }
