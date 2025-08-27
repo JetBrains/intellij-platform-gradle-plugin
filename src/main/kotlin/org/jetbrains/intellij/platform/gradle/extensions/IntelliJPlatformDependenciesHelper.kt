@@ -145,6 +145,7 @@ class IntelliJPlatformDependenciesHelper(
             parameters = parameters,
             configurations = configurations,
             dependenciesHelperProvider = provider { this@IntelliJPlatformDependenciesHelper },
+            extensionProvider = extensionProvider,
             extractorService = extractorServiceProvider,
             objects = objects,
         )
@@ -343,7 +344,7 @@ class IntelliJPlatformDependenciesHelper(
                 val productInfo = platformPath.productInfo()
 
                 val dependencyConfiguration =
-                    objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply {
+                    objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply {
                         type = productInfo.type
                         version = productInfo.version
                         useInstaller = true

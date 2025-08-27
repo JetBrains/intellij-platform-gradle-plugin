@@ -16,6 +16,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
@@ -37,6 +38,7 @@ class IntelliJPlatformCacheResolver internal constructor(
     private val parameters: Parameters,
     private val configurations: ConfigurationContainer,
     private val dependenciesHelperProvider: Provider<IntelliJPlatformDependenciesHelper>,
+    private val extensionProvider: Provider<IntelliJPlatformExtension>,
     private val extractorService: Provider<ExtractorService>,
     private val objects: ObjectFactory,
 ) {
@@ -135,7 +137,7 @@ class IntelliJPlatformCacheResolver internal constructor(
     fun resolve(configure: IntelliJPlatformDependencyConfiguration.() -> Unit): Path {
         val dependenciesHelper = dependenciesHelperProvider.get()
         val requestedProvider = dependenciesHelper.requestedIntelliJPlatforms.set(
-            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
+            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply(configure)
         )
 
         val targetDirectory = parameters.cacheDirectory.dir(

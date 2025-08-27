@@ -41,6 +41,7 @@ import javax.inject.Inject
 @IntelliJPlatform
 abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     private val dependenciesHelper: IntelliJPlatformDependenciesHelper,
+    private val extensionProvider: Provider<IntelliJPlatformExtension>,
     private val objects: ObjectFactory,
 ) {
 
@@ -52,7 +53,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      */
     fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) =
         dependenciesHelper.addIntelliJPlatformCacheableDependency(
-            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects).apply(configure)
+            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply(configure)
         )
 
     /**
@@ -2558,10 +2559,16 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         )
 
     companion object {
-        fun register(dependenciesHelper: IntelliJPlatformDependenciesHelper, objects: ObjectFactory, target: Any) =
+        fun register(
+            dependenciesHelper: IntelliJPlatformDependenciesHelper,
+            extensionProvider: Provider<IntelliJPlatformExtension>,
+            objects: ObjectFactory,
+            target: Any,
+        ) =
             target.configureExtension<IntelliJPlatformDependenciesExtension>(
                 Extensions.INTELLIJ_PLATFORM,
                 dependenciesHelper,
+                extensionProvider,
                 objects,
             )
     }

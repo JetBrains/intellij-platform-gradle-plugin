@@ -122,6 +122,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Constraints 
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Extensions {
+	public static final field CACHING Ljava/lang/String;
 	public static final field IDEA_VERSION Ljava/lang/String;
 	public static final field IDES Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Extensions;
@@ -545,7 +546,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/attributes/Distribu
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension$Companion;
-	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/model/ObjectFactory;)V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;)V
 	public final fun androidStudio (Ljava/lang/String;)V
 	public final fun androidStudio (Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun androidStudio (Ljava/lang/String;Z)V
@@ -926,18 +927,19 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension$Companion {
-	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/model/ObjectFactory;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;
+	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper {
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/lang/String;Lorg/gradle/api/invocation/Gradle;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;)V
+	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyHandler;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/lang/String;Lorg/gradle/api/invocation/Gradle;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration {
-	public fun <init> (Lorg/gradle/api/model/ObjectFactory;)V
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/Provider;)V
 	public final fun getConfigurationName ()Lorg/gradle/api/provider/Property;
 	public final fun getProductMode ()Lorg/gradle/api/provider/Property;
 	public final fun getType ()Lorg/gradle/api/provider/Property;
+	public final fun getUseCache ()Lorg/gradle/api/provider/Property;
 	public final fun getUseCustomCache ()Lorg/gradle/api/provider/Property;
 	public final fun getUseInstaller ()Lorg/gradle/api/provider/Property;
 	public final fun getVersion ()Lorg/gradle/api/provider/Property;
@@ -946,9 +948,12 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension : org/gradle/api/plugins/ExtensionAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Companion;
 	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/provider/ProviderFactory;Ljava/nio/file/Path;)V
+	public final fun caching (Lgroovy/lang/Closure;)V
+	public final fun caching (Lorg/gradle/api/Action;)V
 	public abstract fun getAutoReload ()Lorg/gradle/api/provider/Property;
 	public abstract fun getBuildSearchableOptions ()Lorg/gradle/api/provider/Property;
-	public final fun getCachePath ()Ljava/nio/file/Path;
+	public final fun getCachePath ()Lorg/gradle/api/provider/Provider;
+	public final fun getCaching ()Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching;
 	public abstract fun getInstrumentCode ()Lorg/gradle/api/provider/Property;
 	public final fun getPlatformPath ()Ljava/nio/file/Path;
 	public final fun getPluginConfiguration ()Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;
@@ -971,6 +976,31 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun signing (Lorg/gradle/api/Action;)V
 	public final fun verifyPlugin (Lgroovy/lang/Closure;)V
 	public final fun verifyPlugin (Lorg/gradle/api/Action;)V
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching : org/gradle/api/plugins/ExtensionAware {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching$Companion;
+	public fun getIdes ()Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching$Ides;
+	public abstract fun getPath ()Lorg/gradle/api/file/DirectoryProperty;
+	public fun ides (Lgroovy/lang/Closure;)V
+	public fun ides (Lorg/gradle/api/Action;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
+	public synthetic fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching;
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching$Ides {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching$Ides$Companion;
+	public abstract fun getEnabled ()Lorg/gradle/api/provider/Property;
+	public abstract fun getName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPath ()Lorg/gradle/api/file/DirectoryProperty;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching$Ides$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
+	public synthetic fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Ljava/lang/Object;
+	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Caching$Ides;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
@@ -2877,7 +2907,7 @@ public final class org/jetbrains/intellij/platform/gradle/services/RequestedInte
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getProductMode ()Lorg/jetbrains/intellij/platform/gradle/ProductMode;
 	public final fun getType ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
-	public final fun getUseCustomCache ()Z
+	public final fun getUseCache ()Z
 	public final fun getUseInstaller ()Z
 	public final fun getVersion ()Ljava/lang/String;
 	public fun hashCode ()I
@@ -3215,7 +3245,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginP
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginProjectConfigurationTask$Companion;
 	public fun <init> ()V
 	public abstract fun getGitignoreFile ()Lorg/gradle/api/file/RegularFileProperty;
-	public abstract fun getIntellijPlatformCache ()Lorg/gradle/api/provider/Property;
+	public abstract fun getIntellijPlatformCache ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getMutedMessages ()Lorg/gradle/api/provider/ListProperty;
 	public abstract fun getReportDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getRootDirectory ()Lorg/gradle/api/provider/Property;

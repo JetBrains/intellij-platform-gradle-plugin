@@ -7,6 +7,7 @@
 - Add license information into a published POM file
 - Introduce `intellijPlatform.caching` extension
 - Allow for customizing the cached IntelliJ Platform directory name with `intellijPlatform.caching.ides.name`
+- Introduce `intellijPlatform.caching.ides.enabled` to control IntelliJ Platform caching globally
 
 ### Changed
 

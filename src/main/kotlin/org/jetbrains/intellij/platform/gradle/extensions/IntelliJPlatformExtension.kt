@@ -282,6 +282,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         interface Ides {
 
             /**
+             * Indicates whether caching for IntelliJ Platform IDEs is enabled globally.
+             *
+             * This property can still be overwritten locally with [IntelliJPlatformDependencyConfiguration.useCache].
+             */
+            val enabled: Property<Boolean>
+
+            /**
              * The IntelliJ Platform Gradle Plugin cache root directory for the current project for storing content
              * produced by the plugin, such as local artifact details, Java Agent file, extracted IDEs, etc.
              *
@@ -299,6 +306,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             companion object : Registrable<Ides> {
                 override fun register(project: Project, target: Any) =
                     target.configureExtension<Ides>(Extensions.IDES) {
+                        enabled.convention(false)
                         path.convention(
                             project.layout.dir(
                                 project.providers.intellijPlatformIdesCachePath(project.rootProjectPath).map { it.toFile() }
@@ -901,7 +909,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @param configure IntelliJ Platform dependency configuration.
              */
             fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) {
-                val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects)
+                val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider)
                     .apply {
                         configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY
                         intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY

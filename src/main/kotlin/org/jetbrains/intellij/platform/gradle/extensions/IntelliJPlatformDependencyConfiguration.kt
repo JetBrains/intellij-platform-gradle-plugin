@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.GradleProperties
@@ -14,7 +15,10 @@ import javax.inject.Inject
  * Configuration class for IntelliJ Platform dependencies using DSL syntax.
  * Supports assignment of both direct values and Provider instances.
  */
-abstract class IntelliJPlatformDependencyConfiguration @Inject constructor(objects: ObjectFactory) {
+abstract class IntelliJPlatformDependencyConfiguration @Inject constructor(
+    objects: ObjectFactory,
+    extensionProvider: Provider<IntelliJPlatformExtension>,
+) {
 
     /**
      * The type of the IntelliJ Platform dependency.
@@ -41,7 +45,9 @@ abstract class IntelliJPlatformDependencyConfiguration @Inject constructor(objec
      *
      * @see [GradleProperties.IntellijPlatformIdesCache]
      */
-    val useCache = objects.property<Boolean>().convention(false)
+    val useCache = objects.property<Boolean>().convention(
+        extensionProvider.flatMap { it.caching.ides.enabled },
+    )
 
     /**
      * Switches between the Gradle cache and the custom cache directory.

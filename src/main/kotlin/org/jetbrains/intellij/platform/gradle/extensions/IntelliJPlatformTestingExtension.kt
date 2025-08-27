@@ -23,10 +23,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
-import org.jetbrains.intellij.platform.gradle.utils.create
-import org.jetbrains.intellij.platform.gradle.utils.isModule
-import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
-import org.jetbrains.intellij.platform.gradle.utils.settings
+import org.jetbrains.intellij.platform.gradle.utils.*
 import javax.inject.Inject
 
 @IntelliJPlatform
@@ -303,7 +300,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         private val name: String,
         private val project: Project,
         private val taskClass: Class<T>,
-    ) : IntelliJPlatformDependencyConfiguration(project.objects), Named, ExtensionAware, Buildable {
+    ) : IntelliJPlatformDependencyConfiguration(project.objects, project.extensionProvider), Named, ExtensionAware, Buildable {
 
         abstract val sandboxDirectory: DirectoryProperty
         abstract val localPath: DirectoryProperty
