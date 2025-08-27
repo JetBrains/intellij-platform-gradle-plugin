@@ -11,6 +11,7 @@
 ### Changed
 
 - Deprecate `intellijPlatform.cache` in favor of `intellijPlatform.caching.path`
+- Deprecate `useCustomCache` in favor of `useCache` when defining a dependency on the IntelliJ Platform
 
 ### Fixed
 

@@ -229,13 +229,13 @@ class IntelliJPlatformDependenciesHelper(
             cachedListProvider {
                 buildList {
                     val request = requestProvider.get()
-                    if (request.useCustomCache) {
+                    if (request.useCache) {
                         val localPath = cacheResolver.resolve {
                             type = request.type
                             version = request.version
                             productMode = request.productMode
                             useInstaller = request.useInstaller
-                            useCustomCache = true
+                            useCache = true
                             configurationName = configuration.configurationName
                             intellijPlatformConfigurationName =
                                 configuration.intellijPlatformConfigurationName.map { "$it#local" }
@@ -251,7 +251,7 @@ class IntelliJPlatformDependenciesHelper(
             cachedListProvider {
                 buildList {
                     val request = requestProvider.get()
-                    if (!request.useCustomCache) {
+                    if (!request.useCache) {
                         add(createIntelliJPlatformDependency(request))
                     }
                 }
@@ -347,7 +347,7 @@ class IntelliJPlatformDependenciesHelper(
                         type = productInfo.type
                         version = productInfo.version
                         useInstaller = true
-                        useCustomCache = false
+                        useCache = false
                         productMode = ProductMode.MONOLITH
                         this.intellijPlatformConfigurationName = intellijPlatformConfigurationName
                     }

@@ -41,7 +41,15 @@ abstract class IntelliJPlatformDependencyConfiguration @Inject constructor(objec
      *
      * @see [GradleProperties.IntellijPlatformIdesCache]
      */
-    val useCustomCache = objects.property<Boolean>().convention(false)
+    val useCache = objects.property<Boolean>().convention(false)
+
+    /**
+     * Switches between the Gradle cache and the custom cache directory.
+     *
+     * @see [GradleProperties.IntellijPlatformIdesCache]
+     */
+    @Deprecated("Use 'useCache' instead.", replaceWith = ReplaceWith("this.useCache"))
+    val useCustomCache = useCache
 
     /**
      * The name of the configuration to add the dependency to.

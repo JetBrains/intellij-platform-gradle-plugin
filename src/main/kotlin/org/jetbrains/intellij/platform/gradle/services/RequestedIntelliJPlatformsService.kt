@@ -40,7 +40,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                                 type = configuration.type.get(),
                                 version = configuration.version.get(),
                                 useInstaller = configuration.useInstaller.get(),
-                                useCustomCache = configuration.useCustomCache.get(),
+                                useCache = configuration.useCache.get(),
                                 productMode = configuration.productMode.get(),
                             ),
                         )
@@ -65,9 +65,9 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                                 .orElse(base.map { it.useInstaller })
                                 .orElse(errorProvider("useInstaller"))
                                 .get(),
-                            useCustomCache = configuration.useCustomCache
-                                .orElse(base.map { it.useCustomCache })
-                                .orElse(errorProvider("useCustomCache"))
+                            useCache = configuration.useCache
+                                .orElse(base.map { it.useCache })
+                                .orElse(errorProvider("useCache"))
                                 .get(),
                             productMode = configuration.productMode
                                 .orElse(base.map { it.productMode })
@@ -104,13 +104,14 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
  * @property type Defines the IntelliJ Platform type, such as IntelliJ IDEA, PyCharm, or other JetBrains IDEs.
  * @property version Specifies the version of the IntelliJ Platform to be used.
  * @property useInstaller Indicates if the platform should include an installer.
+ * @property useCache Indicates if the platform should use a custom cache directory.
  * @property productMode Indicates the mode in which the platform is being used.
  */
 data class RequestedIntelliJPlatform(
     val type: IntelliJPlatformType,
     val version: String,
     val useInstaller: Boolean,
-    val useCustomCache: Boolean,
+    val useCache: Boolean,
     val productMode: ProductMode,
 ) {
     private val installerLabel = when (useInstaller) {
