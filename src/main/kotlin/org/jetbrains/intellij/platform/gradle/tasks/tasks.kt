@@ -104,7 +104,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             coroutinesJavaAgentFile.fileProvider(providers.of(CoroutinesJavaAgentValueSource::class) {
                 parameters {
                     intelliJPlatformConfiguration = this@task.intelliJPlatformConfiguration
-                    targetDirectory = extensionProvider.map { it.cachePath.toFile() }
+                    targetDirectory = extensionProvider.flatMap { it.caching.path }
                 }
             })
         }

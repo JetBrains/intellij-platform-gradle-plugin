@@ -32,6 +32,7 @@ import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
+import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
 import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
@@ -61,6 +62,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     /**
      * Provides read-only access to the IntelliJ Platform project cache location.
      */
+    @Deprecated(replaceWith = ReplaceWith("caching.path"), message = "Use intelliJPlatform.caching.path instead")
     val cachePath by lazy {
         providers.intellijPlatformCachePath(rootProjectDirectory)
     }
@@ -159,6 +161,20 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     }
 
 
+    val caching
+        get() = extensions.getByName<Caching>(Extensions.CACHING)
+
+    fun caching(action: Action<in Caching>) {
+        action.execute(caching)
+    }
+
+    fun caching(@DelegatesTo(value = Caching::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+        action.delegate = caching
+        action.resolveStrategy = Closure.DELEGATE_FIRST
+        action.call()
+    }
+
+
     val publishing
         get() = extensions.getByName<Publishing>(Extensions.PUBLISHING)
 
@@ -228,6 +244,31 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         action.delegate = pluginVerification
         action.resolveStrategy = Closure.DELEGATE_FIRST
         action.call()
+    }
+
+    @IntelliJPlatform
+    abstract class Caching @Inject constructor(
+        providers: ProviderFactory,
+        rootProjectDirectory: Path,
+    ) : ExtensionAware {
+
+        /**
+         * Provides read-only access to the IntelliJ Platform project cache location.
+         *
+         * @see GradleProperties.IntellijPlatformCache
+         */
+        abstract val path: DirectoryProperty
+
+        companion object : Registrable<Caching> {
+            override fun register(project: Project, target: Any) =
+                target.configureExtension<Caching>(Extensions.CACHING, project.rootProjectPath) {
+                    path.convention(
+                        project.layout.dir(
+                            project.providers.intellijPlatformCachePath(project.rootProjectPath).map { it.toFile() }
+                        )
+                    ).finalizeValue()
+                }
+        }
     }
 
     /**

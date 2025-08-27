@@ -24,7 +24,6 @@ import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.time.LocalDate
-import kotlin.io.path.createDirectories
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
@@ -123,13 +122,13 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
-                val cachePathProvider = project.extensionProvider.map { it.cachePath }
+                val cachePathProvider = project.extensionProvider.flatMap { it.caching.path }
 
                 offline.convention(project.gradle.startParameter.isOffline)
                 selfUpdateCheck.convention(project.providers[GradleProperties.SelfUpdateCheck])
                 selfUpdateLock.convention(
                     project.layout.file(cachePathProvider.map {
-                        it.createDirectories().resolve("self-update.lock").toFile()
+                        it.file("self-update.lock").asFile
                     })
                 )
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})

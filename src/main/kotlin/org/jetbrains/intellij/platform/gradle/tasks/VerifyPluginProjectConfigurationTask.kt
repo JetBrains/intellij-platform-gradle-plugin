@@ -62,7 +62,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
      * Default value: [IntelliJPlatformExtension.cachePath]
      */
     @get:Internal
-    abstract val intellijPlatformCache: Property<File>
+    abstract val intellijPlatformCache: DirectoryProperty
 
     /**
      * The `.gitignore` file located in the [rootDirectory], tracked for content change.
@@ -145,7 +145,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
                 run {
                     val gitignore = gitignoreFile.orNull?.asPath ?: return@run
-                    val cache = intellijPlatformCache.orNull?.toPath()?.takeIf { it.exists() } ?: return@run
+                    val cache = intellijPlatformCache.asPath.takeIf { it.exists() } ?: return@run
                     val root = rootDirectory.get().toPath()
 
                     if (cache != root.resolve(CACHE_DIRECTORY)) {
@@ -219,7 +219,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
                 reportDirectory.convention(project.layout.buildDirectory.dir("reports/verifyPluginConfiguration"))
                 rootDirectory.convention(rootDirectoryProvider)
-                intellijPlatformCache.convention(project.extensionProvider.map { it.cachePath.toFile() })
+                intellijPlatformCache.convention(project.extensionProvider.flatMap { it.caching.path } )
                 gitignoreFile.convention(project.layout.file(project.provider {
                     project.rootProject.rootDir.resolve(".gitignore").takeIf { it.exists() }
                 }))

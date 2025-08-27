@@ -4,7 +4,12 @@
 
 ### Added
 
-- Add license information into published POM file
+- Add license information into a published POM file
+- Introduce `intellijPlatform.caching` extension
+
+### Changed
+
+- Deprecate `intellijPlatform.cache` in favor of `intellijPlatform.caching.path`
 
 ### Fixed
 

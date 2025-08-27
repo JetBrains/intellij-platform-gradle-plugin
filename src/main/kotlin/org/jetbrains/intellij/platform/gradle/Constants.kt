@@ -44,6 +44,7 @@ object Constants {
     }
 
     object Extensions {
+        const val CACHING = "caching"
         const val IDES = "ides"
         const val IDEA_VERSION = "ideaVersion"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
