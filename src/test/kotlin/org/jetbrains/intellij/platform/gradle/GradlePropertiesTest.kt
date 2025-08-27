@@ -29,7 +29,7 @@ class GradlePropertiesTest {
         // Create a provider that has no value
         val emptyProvider = providers.provider { null as String? }
 
-        val result = providers.resolveDir(emptyProvider, defaultDir)
+        val result = emptyProvider.resolvePath().orElse(defaultDir).get()
 
         assertEquals(defaultDir.toAbsolutePath(), result)
     }
@@ -39,7 +39,7 @@ class GradlePropertiesTest {
         // Create a provider with empty string
         val emptyProvider = providers.provider { "" }
 
-        val result = providers.resolveDir(emptyProvider, defaultDir)
+        val result = emptyProvider.resolvePath().orElse(defaultDir).get()
 
         assertEquals(defaultDir.toAbsolutePath(), result)
     }
@@ -49,7 +49,7 @@ class GradlePropertiesTest {
         // Create a provider with blank string
         val blankProvider = providers.provider { "   " }
 
-        val result = providers.resolveDir(blankProvider, defaultDir)
+        val result = blankProvider.resolvePath().orElse(defaultDir).get()
 
         assertEquals(defaultDir.toAbsolutePath(), result)
     }
@@ -59,7 +59,7 @@ class GradlePropertiesTest {
         // Create a provider with tilde path
         val tildeProvider = providers.provider { "~/.intellijPlatform/cache" }
 
-        val result = providers.resolveDir(tildeProvider, defaultDir)
+        val result = tildeProvider.resolvePath().orElse(defaultDir).get()
 
         assertEquals(result.pathString, System.getProperty("user.home") + "/.intellijPlatform/cache")
     }
@@ -70,7 +70,7 @@ class GradlePropertiesTest {
         // Create a provider with custom path
         val customProvider = providers.provider { customPath }
 
-        val result = providers.resolveDir(customProvider, defaultDir)
+        val result = customProvider.resolvePath().orElse(defaultDir).get()
 
         assertEquals(tempDir.resolve("custom").toAbsolutePath(), result)
     }
@@ -81,7 +81,7 @@ class GradlePropertiesTest {
         // Create a provider with nested path
         val nestedProvider = providers.provider { customPath }
 
-        val result = providers.resolveDir(nestedProvider, defaultDir)
+        val result = nestedProvider.resolvePath().orElse(defaultDir).get()
 
         assertEquals(tempDir.resolve("deep/nested/path").toAbsolutePath(), result)
     }
@@ -91,7 +91,7 @@ class GradlePropertiesTest {
         // Create a provider with tilde in relative path
         val tildeRelativeProvider = providers.provider { "~/my-project/.cache/intellij" }
 
-        val result = providers.resolveDir(tildeRelativeProvider, defaultDir)
+        val result = tildeRelativeProvider.resolvePath().orElse(defaultDir).get()
 
         assertEquals(result.pathString, System.getProperty("user.home") + "/my-project/.cache/intellij")
     }

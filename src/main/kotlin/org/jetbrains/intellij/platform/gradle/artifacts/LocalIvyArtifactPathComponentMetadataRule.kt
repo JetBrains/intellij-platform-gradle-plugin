@@ -163,7 +163,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
                         log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' is empty. $ruleName will not be registered.")
                     } else {
                         val artifactLocationPath = configuration.platformPath().safePathString
-                        val ivyLocationPath = providers.localPlatformArtifactsPath(rootProjectDirectory).safePathString
+                        val ivyLocationPath = providers.localPlatformArtifactsPath(rootProjectDirectory).get().safePathString
 
                         dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
                             params(artifactLocationPath, ivyLocationPath)

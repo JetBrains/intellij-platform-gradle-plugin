@@ -1467,7 +1467,7 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
-        val ivyFile = providers.localPlatformArtifactsPath(rootProjectDirectory).resolve(fileName)
+        val ivyFile = providers.localPlatformArtifactsPath(rootProjectDirectory).get().resolve(fileName)
 
         val newIvyModule = block()
         IVY_MODULE_WRITE_LOCK.withLock {

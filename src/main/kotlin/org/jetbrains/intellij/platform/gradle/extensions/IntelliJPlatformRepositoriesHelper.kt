@@ -154,7 +154,7 @@ class IntelliJPlatformRepositoriesHelper(
         name = repositoryName
 
         // Location of Ivy files generated for the current project.
-        val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory)
+        val localPlatformArtifactsPath = providers.localPlatformArtifactsPath(rootProjectDirectory).get()
         ivyPattern("${localPlatformArtifactsPath.safePathString}/[revision]/[organization]-[module]-[revision].[ext]")
 
         // As all artifacts defined in Ivy repositories have a full artifact path set as their names, we can use them to locate artifact files
