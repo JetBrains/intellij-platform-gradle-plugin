@@ -247,7 +247,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     }
 
     @IntelliJPlatform
-    interface Caching : ExtensionAware {
+    abstract class Caching : ExtensionAware {
 
         /**
          * The extension to define caching related to resolving IntelliJ Platform dependencies.
@@ -273,7 +273,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          *
          * @see GradleProperties.IntellijPlatformCache
          */
-        val path: DirectoryProperty
+        abstract val path: DirectoryProperty
 
         /**
          * Represents the configuration for caching IntelliJ Platform IDEs.
@@ -322,7 +322,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 target.configureExtension<Caching>(Extensions.CACHING) {
                     path.convention(
                         project.layout.dir(
-                            project.providers.intellijPlatformCachePath(project.rootProjectPath).map { it.toFile() }
+                            project.providers.intellijPlatformCachePath(project.rootProjectPath).map { it.toFile().also(File::mkdirs) }
                         )
                     ).finalizeValue()
                 }
