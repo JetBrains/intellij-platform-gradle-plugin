@@ -216,5 +216,9 @@ internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory:
  * Resolves the directory path from the given provider.
  */
 internal fun Provider<String>.resolvePath() = map {
-    Path.of(it.replaceFirst("^~".toRegex(), System.getProperty("user.home"))).createDirectories().absolute()
+    when {
+        it.isBlank() -> null
+        else -> Path.of(it.replaceFirst("^~".toRegex(), System.getProperty("user.home")))
+            .createDirectories().absolute()
+    }
 }
