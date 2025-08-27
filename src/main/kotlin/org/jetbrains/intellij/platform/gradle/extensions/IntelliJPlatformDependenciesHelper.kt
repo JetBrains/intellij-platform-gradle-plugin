@@ -381,9 +381,9 @@ class IntelliJPlatformDependenciesHelper(
                 }
                 require(version.isNotBlank()) {
                     """
-                The `intellijPlatform.plugins` dependency helper was called with the `$id` plugin with no `version` provided.
-                If you expect to add a dependency on a bundled plugin, use `intellijPlatform.bundledPlugin` or `intellijPlatform.bundledPlugins` instead.
-                """.trimIndent()
+                    The `intellijPlatform.plugins` dependency helper was called with the `$id` plugin with no `version` provided.
+                    If you expect to add a dependency on a bundled plugin, use `intellijPlatform.bundledPlugin` or `intellijPlatform.bundledPlugins` instead.
+                    """.trimIndent()
                 }
                 createIntelliJPlatformPlugin(id, version, group).apply(action)
             }

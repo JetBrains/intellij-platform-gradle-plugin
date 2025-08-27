@@ -82,12 +82,12 @@ abstract class CoroutinesJavaAgentValueSource : ValueSource<File, CoroutinesJava
         if (!targetFile.exists()) {
             val manifest = Manifest(
                 """
-            Manifest-Version: 1.0
-            Premain-Class: $fqn
-            Can-Retransform-Classes: true
-            Multi-Release: true
-            
-            """.trimIndent().byteInputStream(),
+                Manifest-Version: 1.0
+                Premain-Class: $fqn
+                Can-Retransform-Classes: true
+                Multi-Release: true
+                
+                """.trimIndent().byteInputStream(),
             )
 
             targetFile.createNewFile()
