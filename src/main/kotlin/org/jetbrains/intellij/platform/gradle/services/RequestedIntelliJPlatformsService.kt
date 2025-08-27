@@ -36,13 +36,15 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                         }
 
                         set(
-                            RequestedIntelliJPlatform(
-                                type = configuration.type.get(),
-                                version = configuration.version.get(),
-                                useInstaller = configuration.useInstaller.get(),
-                                useCache = configuration.useCache.get(),
-                                productMode = configuration.productMode.get(),
-                            ),
+                            providerFactory.provider {
+                                RequestedIntelliJPlatform(
+                                    type = configuration.type.get(),
+                                    version = configuration.version.get(),
+                                    useInstaller = configuration.useInstaller.get(),
+                                    useCache = configuration.useCache.get(),
+                                    productMode = configuration.productMode.get(),
+                                )
+                            },
                         )
                     }
 
