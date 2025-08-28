@@ -2,10 +2,12 @@
 
 package org.jetbrains.intellij.platform.gradle.argumentProviders
 
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
+import org.jetbrains.intellij.platform.gradle.performanceTest.ProfilerName
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.nio.file.Path
 
@@ -19,7 +21,7 @@ import java.nio.file.Path
 class PerformanceTestArgumentProvider(
     @InputDirectory @PathSensitive(RELATIVE) val scriptPath: Path,
     @InputDirectory @PathSensitive(RELATIVE) val testArtifactsDirectory: Path,
-    private val profilerName: String,
+    private val profilerName: Property<ProfilerName>,
 ) : CommandLineArgumentProvider {
 
     override fun asArguments() = listOf(
@@ -31,7 +33,7 @@ class PerformanceTestArgumentProvider(
         "-Dlinux.native.menu.force.disable=true",
         "-Didea.fatal.error.notification=true",
         "-Dtestscript.filename=${scriptPath.safePathString}",
-        "-DintegrationTests.profiler=$profilerName",
+        "-DintegrationTests.profiler=${profilerName.get().name.lowercase()}",
         "-Dide.performance.screenshot.before.kill=${testArtifactsDirectory.safePathString}",
         "-Didea.log.path=${testArtifactsDirectory.safePathString}",
         "-Dsnapshots.path=${testArtifactsDirectory.safePathString}",

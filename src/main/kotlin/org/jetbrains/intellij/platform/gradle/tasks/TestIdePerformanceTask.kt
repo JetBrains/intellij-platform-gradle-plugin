@@ -95,7 +95,7 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
                     PerformanceTestArgumentProvider(
                         scriptPath,
                         testArtifactsDirPath,
-                        profilerName.get().name.lowercase(),
+                        profilerName,
                     )
                 )
                 super.exec()
