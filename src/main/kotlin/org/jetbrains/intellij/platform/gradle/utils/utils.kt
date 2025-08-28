@@ -88,7 +88,7 @@ fun FileCollection.platformPath(requestedPlatform: RequestedIntelliJPlatform? = 
         $message
         Please ensure there is a single IntelliJ Platform dependency defined in your project and that the necessary repositories, where it can be located, are added.
         See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
-        """.trimIndent()
+        """.trimIndent(),
     )
 }
 
@@ -135,6 +135,12 @@ internal fun Path.resolvePluginPath() = deepResolve {
             -> null
     }
 }
+
+/**
+ * Shorthand for an absolute and normalized path with invariant separators.
+ */
+internal val Path.safePathString
+    get() = absolute().normalize().invariantSeparatorsPathString
 
 internal fun IdePluginManager.safelyCreatePlugin(
     path: Path,
@@ -218,8 +224,37 @@ internal inline fun <reified T : Any> cachedListProvider(
         finalizeValueOnRead()
     }
 
-/**
- * Shorthand for an absolute and normalized path with invariant separators.
- */
-internal val Path.safePathString
-    get() = absolute().normalize().invariantSeparatorsPathString
+internal data class Quadruple<T1, T2, T3, T4>(val first: T1, val second: T2, val third: T3, val fourth: T4)
+
+internal fun <A : Any, B : Any, C : Any, R : Any> zip(
+    a: Provider<A>,
+    b: Provider<B>,
+    c: Provider<C>,
+    combiner: (A, B, C) -> R,
+): Provider<R> = a
+    .zip(b) { av, bv -> av to bv }
+    .zip(c) { (av, bv), cv -> combiner(av, bv, cv) }
+
+internal fun <A : Any, B : Any, C : Any, D : Any, R : Any> zip(
+    a: Provider<A>,
+    b: Provider<B>,
+    c: Provider<C>,
+    d: Provider<D>,
+    combiner: (A, B, C, D) -> R,
+): Provider<R> = a
+    .zip(b) { av, bv -> av to bv }
+    .zip(c) { (av, bv), cv -> Triple(av, bv, cv) }
+    .zip(d) { (av, bv, cv), dv -> combiner(av, bv, cv, dv) }
+
+internal fun <A : Any, B : Any, C : Any, D : Any, E : Any, R : Any> zip(
+    a: Provider<A>,
+    b: Provider<B>,
+    c: Provider<C>,
+    d: Provider<D>,
+    e: Provider<E>,
+    combiner: (A, B, C, D, E) -> R,
+): Provider<R> = a
+    .zip(b) { av, bv -> av to bv }
+    .zip(c) { (av, bv), cv -> Triple(av, bv, cv) }
+    .zip(d) { (av, bv, cv), dv -> Quadruple(av, bv, cv, dv) }
+    .zip(e) { (av, bv, cv, dv), ev -> combiner(av, bv, cv, dv, ev) }

@@ -12,6 +12,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.ProductMode
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
+import org.jetbrains.intellij.platform.gradle.utils.zip
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
@@ -36,46 +37,44 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                         }
 
                         set(
-                            providerFactory.provider {
-                                RequestedIntelliJPlatform(
-                                    type = configuration.type.get(),
-                                    version = configuration.version.get(),
-                                    useInstaller = configuration.useInstaller.get(),
-                                    useCache = configuration.useCache.get(),
-                                    productMode = configuration.productMode.get(),
-                                )
+                            zip(
+                                configuration.type,
+                                configuration.version,
+                                configuration.useInstaller,
+                                configuration.useCache,
+                                configuration.productMode,
+                            ) { type, version, useInstaller, useCache, productMode ->
+                                RequestedIntelliJPlatform(type, version, useInstaller, useCache, productMode)
                             },
                         )
                     }
 
-                    else -> providerFactory.provider {
+                    else -> {
                         val errorProvider = { type: String ->
                             providerFactory.provider {
                                 error("The '$key' configuration does not specify the $type of the IntelliJ Platform dependency nor can be resolved from the base configuration.")
                             }
                         }
 
-                        RequestedIntelliJPlatform(
-                            type = configuration.type
+                        zip(
+                            configuration.type
                                 .orElse(base.map { it.type })
-                                .orElse(errorProvider("type"))
-                                .get(),
-                            version = configuration.version
+                                .orElse(errorProvider("type")),
+                            configuration.version
                                 .orElse(base.map { it.version })
-                                .orElse(errorProvider("version")).get(),
-                            useInstaller = configuration.useInstaller
+                                .orElse(errorProvider("version")),
+                            configuration.useInstaller
                                 .orElse(base.map { it.useInstaller })
-                                .orElse(errorProvider("useInstaller"))
-                                .get(),
-                            useCache = configuration.useCache
+                                .orElse(errorProvider("useInstaller")),
+                            configuration.useCache
                                 .orElse(base.map { it.useCache })
-                                .orElse(errorProvider("useCache"))
-                                .get(),
-                            productMode = configuration.productMode
+                                .orElse(errorProvider("useCache")),
+                            configuration.productMode
                                 .orElse(base.map { it.productMode })
-                                .orElse(errorProvider("productMode"))
-                                .get(),
-                        )
+                                .orElse(errorProvider("productMode")),
+                        ) { type, version, useInstaller, useCache, productMode ->
+                            RequestedIntelliJPlatform(type, version, useInstaller, useCache, productMode)
+                        }
                     }
                 }
             },
