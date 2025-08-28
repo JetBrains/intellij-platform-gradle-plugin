@@ -16,10 +16,15 @@
 
 ### Fixed
 
-- Validate artifact file existence in `LocalIvyArtifactPathComponentMetadataRule` and skip non-existent paths to prevent resolution errors.
 - Reorder configuration creation to avoid `ConcurrentModificationException` when using the custom cache.
 - Correctly resolve `~` in `GradleProperties` to the users home directory.
 - Remove `extendsFrom` usages in custom IntelliJ Platform test configurations to avoid propagation of dependencies on bundled modules and plugins coming from the base IntelliJ Platform.
+
+## [2.7.2] - 2025-08-14
+
+### Fixed
+
+- Validate artifact file existence in `LocalIvyArtifactPathComponentMetadataRule` and skip non-existent paths to prevent resolution errors.
 
 ## [2.7.1] - 2025-08-09
 
