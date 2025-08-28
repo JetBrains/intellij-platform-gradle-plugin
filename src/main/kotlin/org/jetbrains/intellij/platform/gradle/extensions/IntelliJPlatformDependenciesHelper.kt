@@ -165,13 +165,6 @@ class IntelliJPlatformDependenciesHelper(
             requestedPlatform.map { configuration.platformPath(it) }
         }
 
-    /**
-     * Provides access to the current IntelliJ Platform path.
-     *
-     * @param configurationName The IntelliJ Platform configuration name.
-     */
-    internal fun platformPath(configurationName: String) = platformPathProvider(configurationName).get()
-
     internal fun ide(platformPath: Path) = gradle.registerClassLoaderScopedBuildService(IdesManagerService::class)
         .map { it.resolve(platformPath) }
         .get()
@@ -196,7 +189,7 @@ class IntelliJPlatformDependenciesHelper(
     ) = configurations[configurationName].dependencies.addLater(
         cachedProvider {
             val path = pathProvider.orNull
-            val platformPath = platformPath(intellijPlatformConfigurationName)
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
             requireNotNull(path) { "The `intellijPlatform.bundledLibrary` dependency helper was called with no `path` value provided." }
 
             createBundledLibrary(path, platformPath).apply(action)
@@ -408,7 +401,7 @@ class IntelliJPlatformDependenciesHelper(
             val plugins = pluginsProvider.orNull
             requireNotNull(plugins) { "The `intellijPlatform.compatiblePlugins` dependency helper was called with no `plugins` value provided." }
 
-            val platformPath = platformPath(intellijPlatformConfigurationName)
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
             val productInfo = platformPath.productInfo()
 
             plugins.map { pluginId ->
@@ -446,7 +439,7 @@ class IntelliJPlatformDependenciesHelper(
     ) = configurations[configurationName].dependencies.addAllLater(
         cachedListProvider {
             val bundledPlugins = bundledPluginsProvider.orNull
-            val platformPath = platformPath(intellijPlatformConfigurationName)
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
             requireNotNull(bundledPlugins) { "The `intellijPlatform.bundledPlugins` dependency helper was called with no `bundledPlugins` value provided." }
 
             bundledPlugins
@@ -475,7 +468,7 @@ class IntelliJPlatformDependenciesHelper(
             val bundledModules = bundledModulesProvider.orNull
             requireNotNull(bundledModules) { "The `intellijPlatform.bundledModules` dependency helper was called with no `bundledModules` value provided." }
 
-            val platformPath = platformPath(intellijPlatformConfigurationName)
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
 
             bundledModules
                 .map(String::trim)
@@ -501,7 +494,7 @@ class IntelliJPlatformDependenciesHelper(
     ) = configurations[configurationName].dependencies.addLater(
         cachedProvider {
             val localPath = localPathProvider.orNull
-            val platformPath = platformPath(intellijPlatformConfigurationName)
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
             requireNotNull(localPath) { "The `intellijPlatform.localPlugin` dependency helper was called with no `localPath` value provided." }
 
             createIntelliJPlatformLocalPlugin(localPath, platformPath).apply(action)
@@ -599,7 +592,7 @@ class IntelliJPlatformDependenciesHelper(
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(
-        createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName),
+        createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName).map { it.onEach(action) },
     )
 
     /**
@@ -707,7 +700,7 @@ class IntelliJPlatformDependenciesHelper(
             val version = versionProvider.orNull
             requireNotNull(version) { "The `intellijPlatform.platformDependency`/`intellijPlatform.testPlatformDependency` dependency helper was called with no `version` value provided." }
 
-            val platformPath = platformPath(intellijPlatformConfigurationName)
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
 
             createPlatformDependency(coordinates, version, platformPath).apply(action)
         },
@@ -1289,7 +1282,7 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun obtainJetBrainsRuntimeVersion(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY): String? {
         val dependencies = runCatching {
-            val platformPath = platformPath(intellijPlatformConfigurationName)
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
             platformPath.resolve("dependencies.txt").takeIf { it.exists() }
         }.getOrNull() ?: return null
 
@@ -1381,7 +1374,7 @@ class IntelliJPlatformDependenciesHelper(
                 version {
                     val buildNumber by lazy {
                         runCatching {
-                            val platformPath = platformPath(intellijPlatformConfigurationName)
+                            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
                             val productInfo = platformPath.productInfo()
                             productInfo.buildNumber.toVersion()
 

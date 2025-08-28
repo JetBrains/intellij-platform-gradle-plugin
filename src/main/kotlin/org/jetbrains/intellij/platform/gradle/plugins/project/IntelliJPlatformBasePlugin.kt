@@ -295,7 +295,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     addAllLater(
                         addDefaultDependenciesProvider.zip(instrumentCodeProvider) { addDefaultDependencies, instrumentCode ->
                             val platformPath by lazy {
-                                runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }.getOrNull()
+                                runCatching {
+                                    dependenciesHelper.platformPathProvider(intellijPlatformConfiguration.name).get()
+                                }.getOrNull()
                             }
 
                             buildList {
@@ -355,8 +357,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
                             buildList {
                                 if (enabled) {
-                                    runCatching { dependenciesHelper.platformPath(intellijPlatformConfiguration.name) }
-                                        .onSuccess { add(dependenciesHelper.createIntelliJPlatformTestRuntime(it)) }
+                                    runCatching {
+                                        dependenciesHelper.platformPathProvider(intellijPlatformConfiguration.name)
+                                            .get()
+                                    }.onSuccess { add(dependenciesHelper.createIntelliJPlatformTestRuntime(it)) }
                                 }
                             }
                         },
