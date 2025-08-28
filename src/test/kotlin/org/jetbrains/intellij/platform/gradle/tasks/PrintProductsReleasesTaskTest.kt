@@ -27,7 +27,7 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
                 """
                 > Task :${Tasks.PRINT_PRODUCTS_RELEASES}
                 IC-2025.2
-                IC-2025.1.4
+                IC-2025.1.5
                 IC-2024.3.6
                 IC-2024.2.6
                 IC-2024.1.7
