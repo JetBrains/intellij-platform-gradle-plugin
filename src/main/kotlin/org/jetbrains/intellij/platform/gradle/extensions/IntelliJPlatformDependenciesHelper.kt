@@ -227,9 +227,8 @@ class IntelliJPlatformDependenciesHelper(
         val requestProvider = requestedIntelliJPlatforms.set(configuration)
 
         configurations[localConfigurationName].dependencies.addAllLater(
-            cachedListProvider {
+            requestProvider.map { request ->
                 buildList {
-                    val request = requestProvider.get()
                     if (request.useCache) {
                         val localPath = cacheResolver.resolve {
                             type = request.type
@@ -249,9 +248,8 @@ class IntelliJPlatformDependenciesHelper(
         )
 
         configurations[dependencyArchiveConfigurationName].dependencies.addAllLater(
-            cachedListProvider {
+            requestProvider.map { request ->
                 buildList {
-                    val request = requestProvider.get()
                     if (!request.useCache) {
                         add(createIntelliJPlatformDependency(request))
                     }
@@ -601,7 +599,7 @@ class IntelliJPlatformDependenciesHelper(
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(
-        createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName)
+        createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName),
     )
 
     /**
@@ -820,11 +818,11 @@ class IntelliJPlatformDependenciesHelper(
     private fun createJetBrainsClient(type: IntelliJPlatformType, version: String): Dependency {
         val jetBrainsClientType = requireNotNull(IntelliJPlatformType.JetBrainsClient.installer)
 
-        val buildNumber = providers.of(ProductReleaseBuildValueSource::class) {
+        val buildNumberProvider = providers.of(ProductReleaseBuildValueSource::class) {
             parameters.productsReleasesCdnBuildsUrl = providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
             parameters.version = version
             parameters.type = type
-        }.get()
+        }
 
         val (extension, classifier) = with(OperatingSystem.current()) {
             val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
@@ -843,7 +841,7 @@ class IntelliJPlatformDependenciesHelper(
         return dependencies.create(
             group = jetBrainsClientType.groupId,
             name = jetBrainsClientType.artifactId,
-            version = buildNumber,
+            version = buildNumberProvider.get(),
             ext = extension,
             classifier = classifier,
         )
@@ -1310,7 +1308,7 @@ class IntelliJPlatformDependenciesHelper(
      * The runtime version is obtained from the IntelliJ Platform configuration.
      *
      * @param intellijPlatformConfigurationName Configuration name for IntelliJ Platform dependency, defaults to "intellijPlatformDependency"
-     * @return List property containing JetBrains Runtime dependency if version could be obtained, empty list otherwise
+     * @return List property containing JetBrains Runtime dependency if a version could be obtained, empty list otherwise
      */
     internal fun createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY): ListProperty<Dependency> =
         cachedListProvider {
@@ -1506,9 +1504,9 @@ class IntelliJPlatformDependenciesHelper(
             parameters {
                 intellijPlatformPath = layout.dir(provider { platformPath.toFile() })
             }
-        }
+        }.get()
 
-        moduleDescriptors.get().forEach {
+        moduleDescriptors.forEach {
             exclude(it.groupId, it.artifactId)
         }
     }

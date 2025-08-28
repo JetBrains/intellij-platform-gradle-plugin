@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
+import org.jetbrains.intellij.platform.gradle.utils.zip
 import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
@@ -1728,8 +1729,8 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      */
     fun jetbrainsRuntime(version: Provider<String>, variant: Provider<String>, architecture: Provider<String>) =
         dependenciesHelper.addJetBrainsRuntimeDependency(
-            explicitVersionProvider = dependenciesHelper.provider {
-                dependenciesHelper.buildJetBrainsRuntimeVersion(version.get(), variant.orNull, architecture.orNull)
+            explicitVersionProvider = zip(version, variant, architecture) { version, variant, architecture ->
+                dependenciesHelper.buildJetBrainsRuntimeVersion(version, variant, architecture)
             },
         )
 
@@ -1931,7 +1932,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      */
     fun testPlugin(id: Provider<String>, version: Provider<String>, group: Provider<String>) =
         dependenciesHelper.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = dependenciesHelper.provider { listOf(Triple(id.get(), version.get(), group.get())) },
+            pluginsProvider = zip(id, version, group) { id, version, group -> listOf(Triple(id, version, group)) },
             configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
         )
 
