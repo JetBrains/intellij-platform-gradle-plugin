@@ -166,13 +166,11 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     name = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS.withSuffix,
                     description = "Custom IntelliJ Platform test bundled plugins",
                 ) {
-                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS])
                 }
                 val customIntellijPlatformTestBundledModulesConfiguration = project.configurations.create(
                     name = Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES.withSuffix,
                     description = "Custom IntelliJ Platform test bundled modules",
                 ) {
-                    extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES])
                 }
 
                 val customIntellijPlatformTestDependenciesConfiguration = project.configurations.create(
@@ -180,7 +178,6 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     description = "Custom IntelliJ Platform Test Dependencies"
                 ) {
                     extendsFrom(
-                        project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES],
                         customIntellijPlatformTestPluginConfiguration,
                         customIntellijPlatformTestBundledPluginsConfiguration,
                         customIntellijPlatformTestBundledModulesConfiguration,
