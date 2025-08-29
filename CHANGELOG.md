@@ -19,6 +19,7 @@
 - Reorder configuration creation to avoid `ConcurrentModificationException` when using the custom cache.
 - Correctly resolve `~` in `GradleProperties` to the users home directory.
 - Remove `extendsFrom` usages in custom IntelliJ Platform test configurations to avoid propagation of dependencies on bundled modules and plugins coming from the base IntelliJ Platform.
+- Refactor `IntelliJPlatformDependenciesExtension` to replace lambda-based configuration with `Action` for improved interoperability and Groovy support  JetBrains/intellij-platform-gradle-plugin#2017.
 
 ## [2.7.2] - 2025-08-14
 

@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
+import org.gradle.api.Action
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -52,9 +53,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param configure IntelliJ Platform dependency configuration lambda.
      */
-    fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) =
+    fun create(configure: Action<IntelliJPlatformDependencyConfiguration>) =
         dependenciesHelper.addIntelliJPlatformCacheableDependency(
-            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply(configure)
+            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider)
+                .apply(configure::execute),
         )
 
     /**
@@ -77,11 +79,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun create(
         type: Any,
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create {
         this.type = type.toIntelliJPlatformType()
         this.version = version
-        configure()
+        apply(configure::execute)
     }
 
     /**
@@ -95,11 +97,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun create(
         type: Any,
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create {
         this.type = type.toIntelliJPlatformType()
         this.version = version
-        configure()
+        apply(configure::execute)
     }
 
     /**
@@ -113,11 +115,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun create(
         type: Provider<*>,
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create {
         this.type = type.toIntelliJPlatformType()
         this.version = version
-        configure()
+        apply(configure::execute)
     }
 
     /**
@@ -129,7 +131,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun androidStudio(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.AndroidStudio, version, configure)
 
     /**
@@ -141,7 +143,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun androidStudio(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.AndroidStudio, version, configure)
 
     /**
@@ -154,7 +156,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @Deprecated("Aqua (QA) is no longer available as a target IntelliJ Platform")
     fun aqua(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.Aqua, version, configure)
 
     /**
@@ -167,7 +169,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @Deprecated("Aqua (QA) is no longer available as a target IntelliJ Platform")
     fun aqua(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.Aqua, version, configure)
 
     /**
@@ -179,7 +181,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun datagrip(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.DataGrip, version, configure)
 
     /**
@@ -191,7 +193,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun datagrip(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.DataGrip, version, configure)
 
     /**
@@ -203,7 +205,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun dataspell(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.DataSpell, version, configure)
 
     /**
@@ -215,7 +217,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun dataspell(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.DataSpell, version, configure)
 
     /**
@@ -227,7 +229,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun clion(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.CLion, version, configure)
 
     /**
@@ -239,7 +241,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun clion(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.CLion, version, configure)
 
     /**
@@ -251,7 +253,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun fleetBackend(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.FleetBackend, version, configure)
 
     /**
@@ -263,7 +265,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun fleetBackend(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.FleetBackend, version, configure)
 
     /**
@@ -275,7 +277,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun gateway(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.Gateway, version, configure)
 
     /**
@@ -287,7 +289,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun gateway(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.Gateway, version, configure)
 
     /**
@@ -299,7 +301,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun goland(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.GoLand, version, configure)
 
     /**
@@ -311,7 +313,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun goland(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.GoLand, version, configure)
 
     /**
@@ -323,7 +325,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun intellijIdeaCommunity(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.IntellijIdeaCommunity, version, configure)
 
     /**
@@ -335,7 +337,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun intellijIdeaCommunity(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.IntellijIdeaCommunity, version, configure)
 
     /**
@@ -347,7 +349,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun intellijIdeaUltimate(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.IntellijIdeaUltimate, version, configure)
 
     /**
@@ -359,7 +361,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun intellijIdeaUltimate(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.IntellijIdeaUltimate, version, configure)
 
     /**
@@ -371,7 +373,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun mps(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.MPS, version, configure)
 
     /**
@@ -383,7 +385,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun mps(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.MPS, version, configure)
 
     /**
@@ -395,7 +397,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun phpstorm(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.PhpStorm, version, configure)
 
     /**
@@ -407,7 +409,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun phpstorm(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.PhpStorm, version, configure)
 
     /**
@@ -419,7 +421,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun pycharmCommunity(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.PyCharmCommunity, version, configure)
 
     /**
@@ -431,7 +433,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun pycharmCommunity(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.PyCharmCommunity, version, configure)
 
     /**
@@ -443,7 +445,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun pycharmProfessional(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.PyCharmProfessional, version, configure)
 
     /**
@@ -455,7 +457,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun pycharmProfessional(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.PyCharmProfessional, version, configure)
 
     /**
@@ -467,7 +469,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun rider(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.Rider, version, configure)
 
     /**
@@ -479,7 +481,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun rider(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.Rider, version, configure)
 
     /**
@@ -491,7 +493,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun rubymine(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.RubyMine, version, configure)
 
     /**
@@ -503,7 +505,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun rubymine(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.RubyMine, version, configure)
 
     /**
@@ -515,7 +517,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun rustRover(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.RustRover, version, configure)
 
     /**
@@ -527,7 +529,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun rustRover(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.RustRover, version, configure)
 
     /**
@@ -539,7 +541,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun webstorm(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.WebStorm, version, configure)
 
     /**
@@ -551,7 +553,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @JvmOverloads
     fun webstorm(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.WebStorm, version, configure)
 
     /**
@@ -564,7 +566,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
     fun writerside(
         version: String,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.Writerside, version, configure)
 
     /**
@@ -577,7 +579,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
     fun writerside(
         version: Provider<String>,
-        configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create(IntelliJPlatformType.Writerside, version, configure)
 
     /**
