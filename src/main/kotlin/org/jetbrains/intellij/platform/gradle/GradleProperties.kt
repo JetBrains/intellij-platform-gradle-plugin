@@ -17,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginProjectConfigurationTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
+import org.jetbrains.intellij.platform.gradle.utils.FileUtils
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.nio.file.Path
 import kotlin.io.path.absolute
@@ -218,7 +219,6 @@ internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory:
 internal fun Provider<String>.resolvePath() = map {
     when {
         it.isBlank() -> null
-        else -> Path.of(it.replaceFirst("^~".toRegex(), System.getProperty("user.home")))
-            .createDirectories().absolute()
+        else -> Path.of(FileUtils.expandUserHome(it)).createDirectories().absolute()
     }
 }
