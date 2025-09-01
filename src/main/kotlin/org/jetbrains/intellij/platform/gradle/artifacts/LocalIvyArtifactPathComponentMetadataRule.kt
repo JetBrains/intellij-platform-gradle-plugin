@@ -15,8 +15,11 @@ import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.all
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
+import org.jetbrains.intellij.platform.gradle.extensions.parseIdeNotation
 import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
+import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
@@ -92,16 +95,22 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
             return
         }
 
+        /**
+         * Unfortunately, Gradle here doesn't expose anything from Ivy metadata, all we know is: group, name and version.
+         * Much more is visible in debug, but all that is private.
+         * So we have to read the Ivy XML again.
+         */
+        val ivyXmlFile = File("$absNormalizedIvyPath/${id.version}/${id.group}-${id.name}-${id.version}.xml")
+        val ivyModule = XML.decodeFromString<IvyModule>(ivyXmlFile.readText())
+        val (moduleType, moduleVersion) = id.version.parseIdeNotation()
+        val productInfo = Path.of(absNormalizedPlatformPath).productInfo()
+
+        if (moduleType != productInfo.type || moduleVersion != productInfo.buildNumber) {
+            return
+        }
+
         context.details.allVariants {
             withFiles {
-                /**
-                 * Unfortunately, Gradle here doesn't expose anything from Ivy metadata, all we know is: group, name and version.
-                 * Much more is visible in debug, but all that is private.
-                 * So we have to read the Ivy XML again.
-                 */
-                val ivyXmlFile = File("$absNormalizedIvyPath/${id.version}/${id.group}-${id.name}-${id.version}.xml")
-                val ivyModule = XML.decodeFromString<IvyModule>(ivyXmlFile.readText())
-
                 // Remove all existing artifacts because they have relative paths and won't be found.
                 removeAllFiles()
 
