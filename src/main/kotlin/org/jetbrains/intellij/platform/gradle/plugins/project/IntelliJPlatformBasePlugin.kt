@@ -350,19 +350,15 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
             create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH,
-                description = "IntelliJ Platform Test Runtime fix Classpath resolvable configuration"
+                description = "IntelliJ Platform Test Runtime Fix Classpath"
             ) {
                 defaultDependencies {
-                    addAllLater(
-                        project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
-                            buildList {
-                                if (enabled) {
-                                    runCatching {
-                                        dependenciesHelper.platformPathProvider(intellijPlatformConfiguration.name)
-                                            .get()
-                                    }.onSuccess { add(dependenciesHelper.createIntelliJPlatformTestRuntime(it)) }
-                                }
-                            }
+                    val enabledProvider = project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
+                    val platformPathProvider = dependenciesHelper.platformPathProvider(intellijPlatformConfiguration.name)
+
+                    addLater(
+                        enabledProvider.zip(platformPathProvider) { enabled, platformPath ->
+                            dependenciesHelper.createIntelliJPlatformTestRuntime(platformPath).takeIf { enabled }
                         },
                     )
                 }
