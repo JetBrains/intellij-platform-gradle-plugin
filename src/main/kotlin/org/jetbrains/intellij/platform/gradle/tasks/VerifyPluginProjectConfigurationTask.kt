@@ -3,10 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import groovy.lang.Closure
-import org.gradle.api.Action
-import org.gradle.api.DefaultTask
-import org.gradle.api.JavaVersion
-import org.gradle.api.Project
+import org.gradle.api.*
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.model.ObjectFactory
@@ -218,17 +215,19 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     }
 
     @Nested
+    @Incubating
     override fun getReports(): VerifyPluginConfigurationReports = reports
 
+    @Incubating
     override fun reports(closure: Closure<*>): VerifyPluginConfigurationReports {
         return reports(ClosureBackedAction(closure))
     }
 
+    @Incubating
     override fun reports(configureAction: Action<in VerifyPluginConfigurationReports>): VerifyPluginConfigurationReports {
         configureAction.execute(reports)
         return reports
     }
-
 
     private fun getPlatformJavaVersion(buildNumber: Version) =
         PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value

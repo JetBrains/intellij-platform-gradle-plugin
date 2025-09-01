@@ -8,6 +8,8 @@
 - Introduce `intellijPlatform.caching` extension
 - Allow for customizing the cached IntelliJ Platform directory name with `intellijPlatform.caching.ides.name`
 - Introduce `intellijPlatform.caching.ides.enabled` to control IntelliJ Platform caching globally
+- Integrate Reporting API to `VerifyPluginProjectConfigurationTask` by @alajemba-vik JetBrains/intellij-platform-gradle-plugin#2016
+- Integrate Problems API to improve error reporting in `VerifyPluginTask` by @alajemba-vik JetBrains/intellij-platform-gradle-plugin#1987
 
 ### Changed
 
