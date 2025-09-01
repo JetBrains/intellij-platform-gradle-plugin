@@ -234,7 +234,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
         val executable = pluginVerifierExecutable.orNull?.asPath
             ?: throw problemReporter.reportError(
-                GradleException("No IntelliJ Plugin Verifier executable found"),
+                GradleException("No IntelliJ Plugin Verifier executable found."),
                 Problems.VerifyPlugin.InvalidPluginVerifier,
                 problemsReportUrl,
             ) {
@@ -249,7 +249,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         with(ides) {
             if (isEmpty) {
                 throw problemReporter.reportError(
-                    GradleException("No IDE resolved for verification with the IntelliJ Plugin Verifier"),
+                    GradleException("No IDE resolved for verification with the IntelliJ Plugin Verifier."),
                     Problems.VerifyPlugin.InvalidIDEs,
                     problemsReportUrl,
                 ) {

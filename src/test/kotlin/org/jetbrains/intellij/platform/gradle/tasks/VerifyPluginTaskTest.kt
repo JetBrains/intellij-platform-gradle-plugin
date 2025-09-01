@@ -14,7 +14,6 @@ import kotlin.test.*
 class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
-    @Ignore("Due to Problems API integration")
     fun `warn about no IDE picked for verification`() {
         writePluginVerifierDependency()
 
@@ -35,7 +34,6 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    @Ignore("Due to Problems API integration")
     fun `run plugin verifier fails on old version lower than 1_255`() {
         writePluginXmlFile()
         writePluginVerifierDependency("1.254")
@@ -53,7 +51,6 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
 
     @Test
-    @Ignore("Due to Problems API integration")
     fun `run plugin verifier and fail on invalid CLI path`() {
         writePluginXmlFile()
         writePluginVerifierIde()
@@ -295,7 +292,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
-            assertContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
+            assertContains("Verification failed with [DEPRECATED_API_USAGES] problems.", output)
         }
     }
 
@@ -357,8 +354,8 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         }
     }
 
-    @Ignore("Since we drop the until-build, the recommended() list grows fast and we can't run it on CI")
     @Test
+    @Ignore("Since we drop the until-build, the recommended() list grows fast and we can't run it on CI")
     fun `pass on recommended ides`() {
         writeJavaFile()
         writePluginXmlFile()
@@ -404,7 +401,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
-            assertContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
+            assertContains("Verification failed with [DEPRECATED_API_USAGES] problems.", output)
         }
     }
 
