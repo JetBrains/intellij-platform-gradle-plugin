@@ -142,6 +142,29 @@ internal fun Path.resolvePluginPath() = deepResolve {
 internal val Path.safePathString
     get() = absolute().normalize().invariantSeparatorsPathString
 
+/**
+ * A property extension for `String` that expands the tilde (`~`) representing the user's home directory
+ * into its absolute path.
+ *
+ * If the string is exactly "~", it is replaced with the value of the "user.home" property.
+ * If the string starts with "~/", it replaces the "~" with the "user.home" property and appends the remaining path.
+ * For all other cases, the original string is returned unchanged.
+ */
+internal val String.expandUserHome: String
+    get() = when {
+        equals("~") -> System.getProperty("user.home")
+        startsWith("~/") || startsWith("~\\") -> System.getProperty("user.home") + substring(1)
+        else -> this
+    }
+
+/**
+ * Safely creates a plugin from the given path using the `IdePluginManager`. Handles plugin creation failures
+ * by throwing a `GradleException` with detailed error messages.
+ *
+ * @param path The path to the plugin file or directory.
+ * @param validateDescriptor Indicates whether the descriptor of the plugin should be validated during the creation process.
+ * @param suppressPluginProblems Indicates whether plugin problems should be suppressed, treating any issues as warnings.
+ */
 internal fun IdePluginManager.safelyCreatePlugin(
     path: Path,
     validateDescriptor: Boolean = false,
@@ -157,6 +180,14 @@ internal fun IdePluginManager.safelyCreatePlugin(
         plugin
     }
 
+/**
+ * Determines the appropriate problem resolver for plugin creation based on the suppression flag.
+ *
+ * @param suppressPluginProblems A boolean flag indicating whether plugin problems should be treated as warnings.
+ *                               If true, all plugin problems are treated as warnings. Otherwise, problems are resolved
+ *                               using specific remapping logic and the JetBrains plugin resolution strategy.
+ * @return An instance of [PluginCreationResultResolver], which handles plugin creation problems resolution based on the input flag.
+ */
 private fun getProblemResolver(suppressPluginProblems: Boolean): PluginCreationResultResolver {
     return if (suppressPluginProblems) {
         AnyProblemToWarningPluginCreationResultResolver
