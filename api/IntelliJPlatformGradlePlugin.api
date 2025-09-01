@@ -3297,6 +3297,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginT
 	public abstract fun getIdes ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getIgnoredProblemsFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
+	public abstract fun getProblems ()Lorg/gradle/api/problems/Problems;
+	public abstract fun getProblemsReportFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getSubsystemsToCheck ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTeamCityOutputFormat ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVerificationReportsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
