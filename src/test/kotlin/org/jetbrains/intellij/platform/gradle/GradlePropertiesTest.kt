@@ -2,6 +2,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.testfixtures.ProjectBuilder
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.nio.file.Path
 import kotlin.io.path.pathString
 import kotlin.test.BeforeTest
@@ -61,7 +62,7 @@ class GradlePropertiesTest {
 
         val result = tildeProvider.resolvePath().orElse(defaultDir).get()
 
-        assertEquals(result.pathString, System.getProperty("user.home") + "/.intellijPlatform/cache")
+        assertEquals(result.safePathString, Path.of(System.getProperty("user.home") + "/.intellijPlatform/cache").safePathString)
     }
 
     @Test
@@ -72,7 +73,7 @@ class GradlePropertiesTest {
 
         val result = customProvider.resolvePath().orElse(defaultDir).get()
 
-        assertEquals(tempDir.resolve("custom").toAbsolutePath(), result)
+        assertEquals(tempDir.resolve("custom").toAbsolutePath().safePathString, result.safePathString)
     }
 
     @Test
@@ -83,7 +84,7 @@ class GradlePropertiesTest {
 
         val result = nestedProvider.resolvePath().orElse(defaultDir).get()
 
-        assertEquals(tempDir.resolve("deep/nested/path").toAbsolutePath(), result)
+        assertEquals(tempDir.resolve("deep/nested/path").safePathString, result.safePathString)
     }
 
     @Test
@@ -93,6 +94,6 @@ class GradlePropertiesTest {
 
         val result = tildeRelativeProvider.resolvePath().orElse(defaultDir).get()
 
-        assertEquals(result.pathString, System.getProperty("user.home") + "/my-project/.cache/intellij")
+        assertEquals(result.safePathString, Path.of(System.getProperty("user.home") + "/my-project/.cache/intellij").safePathString)
     }
 }
