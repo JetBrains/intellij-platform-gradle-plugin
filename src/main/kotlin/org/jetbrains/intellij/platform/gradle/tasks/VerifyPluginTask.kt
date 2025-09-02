@@ -8,18 +8,23 @@ import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.problems.Severity
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
+import org.gradle.internal.logging.ConsoleRenderer
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
+import org.gradle.kotlin.dsl.provideDelegate
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.Problems
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.reportError
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -28,7 +33,9 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 import java.util.*
+import javax.inject.Inject
 import kotlin.io.path.exists
+import org.gradle.api.problems.Problems as GradleProblems
 
 /**
  * Runs the IntelliJ Plugin Verifier CLI tool to check compatibility with specified IDE builds.
@@ -42,6 +49,29 @@ import kotlin.io.path.exists
 // TODO: Parallel run? https://docs.gradle.org/current/userguide/worker_api.html#converting_to_worker_api
 @UntrackedTask(because = "Should always run")
 abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware {
+    /**
+     * Provides access to Gradle's Problems API for structured issue reporting
+     *
+     * The Problems API enables standardized error and warning reporting with rich context information,
+     * including file locations, documentation links, and suggested solutions.
+     *
+     * @see [org.gradle.api.problems.Problems]
+     * @see [org.gradle.api.problems.ProblemReporter]
+     * @since Gradle 8.6
+     */
+    @get:Inject
+    abstract val problems: GradleProblems
+
+    /**
+     * Problem reporter for emitting structured build issues using Gradle's Problems API.
+     *
+     * This reporter is used to create and throw problems.
+     *
+     * @see [org.gradle.api.problems.ProblemReporter]
+     * @see [org.gradle.api.problems.ProblemSpec]
+     */
+    private val problemReporter by lazy { problems.reporter }
+
 
     /**
      * Holds a reference to IntelliJ Platform IDEs which will be used by the IntelliJ Plugin Verifier CLI tool for verification.
@@ -169,6 +199,18 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     @get:Optional
     abstract val verificationReportsFormats: ListProperty<VerificationReportsFormats>
 
+    /**
+     * The default path where the output report of the Problems API will be.
+     *
+     * Default value: [org.gradle.api.file.ProjectLayout.getBuildDirectory]/reports/problems/problems-report.html
+     *
+     * @see Problems
+     */
+    @get:Internal
+    abstract val problemsReportFile: RegularFileProperty
+
+    private val problemsReportUrl get() = ConsoleRenderer().asClickableFileUrl(problemsReportFile.get().asFile)
+
     private val log = Logger(javaClass)
 
     /**
@@ -178,20 +220,27 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     override fun exec() {
         val file = archiveFile.orNull?.asPath
         if (file == null || !file.exists()) {
-            throw IllegalStateException("Plugin file does not exist: $file")
+            throw problemReporter.reportError(
+                IllegalStateException("Plugin file $file does not exist"),
+                Problems.VerifyPlugin.InvalidPlugin,
+                problemsReportUrl,
+            ) {
+                fileLocation(file?.toString() ?: "")
+                details("This happened because the plugin you're verifying could not be found")
+            }
         }
 
         log.debug("Distribution file: $file")
 
-        val executable = pluginVerifierExecutable.orNull
-            ?.asPath
-            ?: throw GradleException(
-                """
-                No IntelliJ Plugin Verifier executable found.
-                Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.pluginVerification.cliPath` extension property is set
-                See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification
-                """.trimIndent()
-            )
+        val executable = pluginVerifierExecutable.orNull?.asPath
+            ?: throw problemReporter.reportError(
+                GradleException("No IntelliJ Plugin Verifier executable found."),
+                Problems.VerifyPlugin.InvalidPluginVerifier,
+                problemsReportUrl,
+            ) {
+                documentedAt("https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification")
+                solution("Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.pluginVerification.cliPath` extension property is set")
+            }
 
         log.debug("Verifier path: $executable")
 
@@ -199,20 +248,23 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
         with(ides) {
             if (isEmpty) {
-                throw GradleException(
-                    """
-                    No IDE resolved for verification with the IntelliJ Plugin Verifier.
-                    Please ensure the `intellijPlatform.pluginVerification.ides` extension block is configured along with the `defaultRepositories()` (or at least `localPlatformArtifacts()`) entry in the repositories section.
-                    See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides
-                    """.trimIndent()
-                )
-            }
-            args(listOf("check-plugin") + getOptions() + file.safePathString + map {
-                when {
-                    it.isDirectory -> it.absolutePath
-                    else -> it.readText()
+                throw problemReporter.reportError(
+                    GradleException("No IDE resolved for verification with the IntelliJ Plugin Verifier."),
+                    Problems.VerifyPlugin.InvalidIDEs,
+                    problemsReportUrl,
+                ) {
+                    documentedAt("https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides")
+                    solution("Please ensure the `intellijPlatform.pluginVerification.ides` extension block is configured along with the `defaultRepositories()` (or at least `localPlatformArtifacts()`) entry in the repositories section")
                 }
-            })
+            }
+            args(
+                listOf("check-plugin") + getOptions() + file.safePathString + map {
+                    when {
+                        it.isDirectory -> it.absolutePath
+                        else -> it.readText()
+                    }
+                },
+            )
         }
 
         ByteArrayOutputStream().use { os ->
@@ -269,7 +321,8 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      */
     @Throws(GradleException::class)
     private fun verifyOutput(output: String) {
-        log.debug("Current failure levels: ${FailureLevel.values().joinToString(", ")}")
+        val failureLevels = failureLevel.get()
+        log.debug("Current failure levels: ${failureLevels.joinToString(", ")}")
 
         val invalidFilesMessage = "The following files specified for the verification are not valid plugins:"
         if (output.contains(invalidFilesMessage)) {
@@ -278,16 +331,87 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 .dropLastWhile { !it.startsWith(" ") }
                 .joinToString("\n")
 
-            throw GradleException(errorMessage)
+            throw problemReporter.reportError(
+                GradleException(errorMessage),
+                Problems.VerifyPlugin.InvalidPlugin,
+                problemsReportUrl,
+            ) {
+                details("Verification failed because the plugin(s) provided are not valid")
+            }
         }
 
-        FailureLevel.values().forEach { level ->
-            if (failureLevel.get().contains(level) && output.contains(level.sectionHeading)) {
-                log.debug("Failing task on '$failureLevel' failure level")
-                throw GradleException(
-                    "$level: ${level.message} Check Plugin Verifier report for more details.\n" +
-                            "Incompatible API Changes: https://jb.gg/intellij-api-changes"
-                )
+        val problems = collectProblems(output)
+
+        problems.forEach { (ideVersion, ideProblems) ->
+            ideProblems.forEach { (failureLevel, issues) ->
+                issues.forEach { (title, description) ->
+                    problemReporter.report(
+                        Problems.VerifyPlugin.VerificationFailure(failureLevel),
+                    ) {
+                        contextualLabel(title)
+                        details(description)
+                        severity(
+                            when {
+                                failureLevel in failureLevels -> Severity.ERROR
+                                else -> Severity.WARNING
+                            },
+                        )
+                    }
+                }
+            }
+        }
+
+        val verificationFailures = problems
+            .flatMap { it.value.keys }
+            .toSet()
+            .intersect(failureLevels)
+
+        if (verificationFailures.isNotEmpty()) {
+            throw GradleException("Verification failed with $verificationFailures problems. See the report at: $problemsReportUrl")
+        }
+    }
+
+    private fun collectProblems(output: String): Map<String, Map<FailureLevel, Map<String, String>>> {
+        val headingToLevel = FailureLevel.values().associateBy { it.sectionHeading }
+        val pluginLine = Regex("^Plugin .*? against (\\S+):")
+
+        val lines = output.lineSequence().toList()
+        val starts = lines.mapIndexedNotNull { i, s -> pluginLine.find(s)?.let { i to it.groupValues[1] } }
+
+        return buildMap {
+            starts.forEachIndexed { idx, (start, ide) ->
+                val end = starts.getOrNull(idx + 1)?.first ?: lines.size
+                val entries = lines.subList(start + 1, end)
+
+                val headers = entries.mapIndexedNotNull { i, entry ->
+                    headingToLevel.entries.firstOrNull { entry.startsWith(it.key) }?.let { i to it.value }
+                }
+
+                val map = headers.associateTo(linkedMapOf()) { (start, level) ->
+                    val items = entries.drop(start + 1).takeWhile { it.startsWith(' ') }.map { it.trim() }
+                    level to parseItemsToMap(items)
+                }
+
+                put(ide, map)
+            }
+        }
+    }
+
+    private fun parseItemsToMap(items: List<String>): Map<String, String> {
+        val keys = items.mapIndexedNotNull { i, item ->
+            when {
+                item.startsWith("#") -> i to item.removePrefix("#")
+                else -> null
+            }
+        }
+        return buildMap {
+            keys.forEachIndexed { idx, (start, key) ->
+                val end = keys.getOrNull(idx + 1)?.first ?: items.size
+                val value = items.subList(start + 1, end)
+                    .asSequence()
+                    .filter { it.isNotBlank() && !it.startsWith("#") }
+                    .joinToString("\n")
+                put(key, value)
             }
         }
     }
@@ -302,23 +426,26 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
-                val intellijPluginVerifierIdesConfiguration = project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES]
+                val intellijPluginVerifierIdesConfiguration =
+                    project.configurations[Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES]
                 val pluginVerificationProvider = project.extensionProvider.map { it.pluginVerification }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
 
-                ides = project.files(project.provider {
-                    with(intellijPluginVerifierIdesConfiguration.incoming.dependencies) {
-                        if (size > 5) {
-                            val ideList = joinToString(", ") { "${it.group}:${it.name}:${it.version}" }
-                            log.warn("The ${Tasks.VERIFY_PLUGIN} task is about to resolve $size IDEs: $ideList")
+                ides = project.files(
+                    project.provider {
+                        with(intellijPluginVerifierIdesConfiguration.incoming.dependencies) {
+                            if (size > 5) {
+                                val ideList = joinToString(", ") { "${it.group}:${it.name}:${it.version}" }
+                                log.warn("The ${Tasks.VERIFY_PLUGIN} task is about to resolve $size IDEs: $ideList")
+                            }
+                            flatMap {
+                                project.configurations.detachedConfiguration(it).apply {
+                                    attributes { attribute(Attributes.extracted, true) }
+                                }.resolve()
+                            }
                         }
-                        flatMap {
-                            project.configurations.detachedConfiguration(it).apply {
-                                attributes { attribute(Attributes.extracted, true) }
-                            }.resolve()
-                        }
-                    }
-                })
+                    },
+                )
 
                 freeArgs.convention(pluginVerificationProvider.flatMap { it.freeArgs })
                 failureLevel.convention(pluginVerificationProvider.flatMap { it.failureLevel })
@@ -331,6 +458,8 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 offline.convention(project.gradle.startParameter.isOffline)
+
+                problemsReportFile.convention(project.layout.buildDirectory.file("reports/problems/problems-report.html"))
             }
     }
 
@@ -338,51 +467,51 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     enum class FailureLevel(val sectionHeading: String, val message: String) {
         COMPATIBILITY_WARNINGS(
             "Compatibility warnings",
-            "Compatibility warnings detected against the specified IDE version."
+            "Compatibility warnings detected against the specified IDE version.",
         ),
         COMPATIBILITY_PROBLEMS(
             "Compatibility problems",
-            "Compatibility problems detected against the specified IDE version."
+            "Compatibility problems detected against the specified IDE version.",
         ),
         DEPRECATED_API_USAGES(
             "Deprecated API usages",
-            "Plugin uses API marked as deprecated (@Deprecated)."
+            "Plugin uses API marked as deprecated (@Deprecated).",
         ),
         SCHEDULED_FOR_REMOVAL_API_USAGES(
             /* # usage(s) of */"scheduled for removal API",
-            "Plugin uses API marked as scheduled for removal (ApiStatus.@ScheduledForRemoval)."
+            "Plugin uses API marked as scheduled for removal (ApiStatus.@ScheduledForRemoval).",
         ),
         EXPERIMENTAL_API_USAGES(
             "Experimental API usages",
-            "Plugin uses API marked as experimental (ApiStatus.@Experimental)."
+            "Plugin uses API marked as experimental (ApiStatus.@Experimental).",
         ),
         INTERNAL_API_USAGES(
             "Internal API usages",
-            "Plugin uses API marked as internal (ApiStatus.@Internal)."
+            "Plugin uses API marked as internal (ApiStatus.@Internal).",
         ),
         OVERRIDE_ONLY_API_USAGES(
             "Override-only API usages",
-            "Override-only API is used incorrectly (ApiStatus.@OverrideOnly)."
+            "Override-only API is used incorrectly (ApiStatus.@OverrideOnly).",
         ),
         NON_EXTENDABLE_API_USAGES(
             "Non-extendable API usages",
-            "Non-extendable API is used incorrectly (ApiStatus.@NonExtendable)."
+            "Non-extendable API is used incorrectly (ApiStatus.@NonExtendable).",
         ),
         PLUGIN_STRUCTURE_WARNINGS(
             "Plugin structure warnings",
-            "The structure of the plugin is not valid."
+            "The structure of the plugin is not valid.",
         ),
         MISSING_DEPENDENCIES(
             "Missing dependencies",
-            "Plugin has some dependencies missing."
+            "Plugin has some dependencies missing.",
         ),
         INVALID_PLUGIN(
             "The following files specified for the verification are not valid plugins",
-            "Provided plugin artifact is not valid."
+            "Provided plugin artifact is not valid.",
         ),
         NOT_DYNAMIC(
             "Plugin probably cannot be enabled or disabled without IDE restart",
-            "Plugin probably cannot be enabled or disabled without IDE restart."
+            "Plugin probably cannot be enabled or disabled without IDE restart.",
         );
 
         companion object {

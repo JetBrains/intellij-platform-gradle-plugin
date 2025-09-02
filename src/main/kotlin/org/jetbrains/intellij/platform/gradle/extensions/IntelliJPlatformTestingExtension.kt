@@ -229,19 +229,12 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     description = "Custom IntelliJ Platform Test Runtime Fix Classpath",
                 ) {
                     defaultDependencies {
-                        addAllLater(
-                            project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies].map { enabled ->
-                                buildList {
-                                    if (enabled) {
-                                        runCatching {
-                                            dependenciesHelper.createIntelliJPlatformTestRuntime(
-                                                dependenciesHelper.platformPathProvider(
-                                                    customIntelliJPlatformConfiguration.name,
-                                                ).get(),
-                                            )
-                                        }.onSuccess { add(it) }
-                                    }
-                                }
+                        val enabledProvider = project.providers[GradleProperties.AddDefaultIntelliJPlatformDependencies]
+                        val platformPathProvider = dependenciesHelper.platformPathProvider(customIntelliJPlatformConfiguration.name)
+
+                        addLater(
+                            enabledProvider.zip(platformPathProvider) { enabled, platformPath ->
+                                dependenciesHelper.createIntelliJPlatformTestRuntime(platformPath).takeIf { enabled }
                             },
                         )
                     }

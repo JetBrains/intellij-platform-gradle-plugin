@@ -292,7 +292,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
-            assertContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
+            assertContains("Verification failed with [DEPRECATED_API_USAGES] problems.", output)
         }
     }
 
@@ -354,8 +354,8 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
         }
     }
 
-    @Ignore("Since we drop the until-build, the recommended() list grows fast and we can't run it on CI")
     @Test
+    @Ignore("Since we drop the until-build, the recommended() list grows fast and we can't run it on CI")
     fun `pass on recommended ides`() {
         writeJavaFile()
         writePluginXmlFile()
@@ -401,7 +401,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
-            assertContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
+            assertContains("Verification failed with [DEPRECATED_API_USAGES] problems.", output)
         }
     }
 
