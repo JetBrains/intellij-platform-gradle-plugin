@@ -6,6 +6,7 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 private const val DEPENDENCIES = "dependencies"
@@ -162,6 +163,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     }
 
     @Test
+    @Ignore("Temporarily disabled due to Maven Central library publishing delays")
     fun `correctly resolve Marketplace ZIP Signer dependency in the latest version`() {
         buildFile write //language=kotlin
                 """
@@ -205,6 +207,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     }
 
     @Test
+    @Ignore("Temporarily disabled due to Maven Central library publishing delays")
     fun `correctly resolve Marketplace ZIP Signer dependency in the latest version when a default dependency is used`() {
         buildFile write //language=kotlin
                 """
@@ -352,7 +355,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES, projectProperties = properties) {
             assertContains(
                 """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
                 \--- bundledModule:intellij-platform-test-runtime:IC-243.21565.193
                 """.trimIndent(),
                 output,
@@ -363,7 +366,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)) {
             assertContains(
                 """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
                 \--- bundledModule:intellij-platform-test-runtime:RD-243.21565.191
                 """.trimIndent(),
                 output,
@@ -371,7 +374,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
 
             assertContains(
                 """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
                 \--- bundledModule:intellij-platform-test-runtime:RD-243.21565.191
                 """.trimIndent(),
                 output,
@@ -420,7 +423,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.1.7")) {
             assertContains(
                 """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
                 \--- bundledModule:intellij-platform-test-runtime:RD-241.19072.30
                 """.trimIndent(),
                 output,
@@ -436,7 +439,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.2.8")) {
             assertContains(
                 """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime fix Classpath resolvable configuration
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
                 \--- bundledModule:intellij-platform-test-runtime:RD-242.23726.225
                 """.trimIndent(),
                 output,
