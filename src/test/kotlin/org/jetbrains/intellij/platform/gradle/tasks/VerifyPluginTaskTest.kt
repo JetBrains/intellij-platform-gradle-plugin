@@ -292,7 +292,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
-            assertContains("Verification failed with [DEPRECATED_API_USAGES] problems.", output)
+            assertContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
         }
     }
 
@@ -401,7 +401,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
             assertContains("Deprecated API usages", output)
-            assertContains("Verification failed with [DEPRECATED_API_USAGES] problems.", output)
+            assertContains("org.gradle.api.GradleException: DEPRECATED_API_USAGES", output)
         }
     }
 
