@@ -984,7 +984,10 @@ class IntelliJPlatformDependenciesHelper(
             "$unresolvedPluginId See https://jb.gg/ij-plugin-dependencies."
         }
 
-        val artifactPath = requireNotNull(plugin.originalFile)
+        val artifactPath = requireNotNull(plugin.originalFile) {
+            "The '$id' entry refers to a bundled plugin, but it is actually a bundled module. " +
+            "Use bundledModule(\"$id\") instead of bundledPlugin(\"$id\")."
+        }
         // It is crucial to use the IDE type + build number to the version.
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
