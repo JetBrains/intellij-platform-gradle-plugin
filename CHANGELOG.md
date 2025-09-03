@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.8.0] - 2025-09-03
+
 ### Added
 
 - Add license information into a published POM file
@@ -1520,7 +1522,9 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.1...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.8.0...HEAD
+[2.8.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.2...v2.8.0
+[2.7.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.1...v2.7.2
 [2.7.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.0...v2.7.1
 [2.7.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.6.0...v2.7.0
 [2.6.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.5.0...v2.6.0
