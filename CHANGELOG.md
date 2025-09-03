@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Update the artifact URL pattern to include `classifier` in `.tar.gz` naming for correct source resolution
+
 ## [2.8.0] - 2025-09-03
 
 ### Added
