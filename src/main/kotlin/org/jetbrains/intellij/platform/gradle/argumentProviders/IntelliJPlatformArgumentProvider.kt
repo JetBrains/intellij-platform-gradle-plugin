@@ -80,6 +80,7 @@ class IntelliJPlatformArgumentProvider(
             ?.takeIf { it.asPath.exists() }
             ?.takeIf {
                 productInfo.type in listOf(
+                    IntelliJPlatformType.IntellijIdea,
                     IntelliJPlatformType.IntellijIdeaCommunity,
                     IntelliJPlatformType.IntellijIdeaUltimate,
                 )
