@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Update `String.parseIdeNotation()` to throw an exception for invalid IntelliJ Platform notation instead of returning a default value
+
 ### Fixed
 
 - Update the artifact URL pattern to include `classifier` in `.tar.gz` naming for correct source resolution

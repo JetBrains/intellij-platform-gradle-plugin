@@ -9,7 +9,6 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 
 /**
  * Parses a string representation of an IntelliJ Platform type and version, such as `IU-2024.2`.
- * If the type is missing, returns the default [IntelliJPlatformType.IntellijIdeaCommunity].
  *
  * @receiver The string representing the IntelliJ Platform notation.
  * @return A pair consisting of the corresponding [IntelliJPlatformType] and version string.
@@ -17,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 internal fun String.parseIdeNotation() = trim().split('-').let {
     when {
         it.size == 2 -> it.first().toIntelliJPlatformType() to it.last()
-        else -> IntelliJPlatformType.IntellijIdeaCommunity to it.first()
+        else -> throw IllegalArgumentException("Invalid IntelliJ Platform notation: '$this'. Expected format: '<type>-<version>', like 'IU-2025.3'.")
     }
 }
 
