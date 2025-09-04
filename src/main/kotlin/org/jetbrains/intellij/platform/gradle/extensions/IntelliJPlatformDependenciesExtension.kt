@@ -319,6 +319,30 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on IntelliJ IDEA Community.
      *
+     * @param version The version of IntelliJ IDEA.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun intellijIdea(
+        version: String,
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
+    ) = create(IntelliJPlatformType.IntellijIdea, version, configure)
+
+    /**
+     * Adds a dependency on IntelliJ IDEA Community.
+     *
+     * @param version The version of IntelliJ IDEA Community.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun intellijIdea(
+        version: Provider<String>,
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
+    ) = create(IntelliJPlatformType.IntellijIdea, version, configure)
+
+    /**
+     * Adds a dependency on IntelliJ IDEA Community.
+     *
      * @param version The version of IntelliJ IDEA Community.
      * @param configure IntelliJ Platform dependency configuration.
      */

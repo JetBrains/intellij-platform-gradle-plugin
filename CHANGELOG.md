@@ -5,6 +5,7 @@
 ### Added
 
 - Add `IntellijIdea` platform type with corresponding artifact coordinates. JetBrains/intellij-platform-gradle-plugin#2021
+- Add `intellijIdea` dependency helpers to support the unified IntelliJ IDEA platform type. JetBrains/intellij-platform-gradle-plugin#2021
 
 ### Changed
 
