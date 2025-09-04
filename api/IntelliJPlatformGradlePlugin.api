@@ -313,6 +313,7 @@ public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformType :
 	public static final field FleetBackend Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field Gateway Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field GoLand Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public static final field IntellijIdea Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field IntellijIdeaCommunity Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field IntellijIdeaUltimate Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field JetBrainsClient Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
@@ -706,6 +707,12 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public static synthetic fun goland$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;ILjava/lang/Object;)V
 	public static synthetic fun goland$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;ZLorg/jetbrains/intellij/platform/gradle/ProductMode;ILjava/lang/Object;)V
 	public final fun instrumentationTools ()V
+	public final fun intellijIdea (Ljava/lang/String;)V
+	public final fun intellijIdea (Ljava/lang/String;Lorg/gradle/api/Action;)V
+	public final fun intellijIdea (Lorg/gradle/api/provider/Provider;)V
+	public final fun intellijIdea (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;)V
+	public static synthetic fun intellijIdea$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun intellijIdea$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;ILjava/lang/Object;)V
 	public final fun intellijIdeaCommunity (Ljava/lang/String;)V
 	public final fun intellijIdeaCommunity (Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun intellijIdeaCommunity (Ljava/lang/String;Z)V
