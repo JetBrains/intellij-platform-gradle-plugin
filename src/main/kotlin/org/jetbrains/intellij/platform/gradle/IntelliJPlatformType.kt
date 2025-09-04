@@ -63,13 +63,13 @@ enum class IntelliJPlatformType(
         maven = Coordinates("com.jetbrains.intellij.goland", "goland"),
         installer = Coordinates("go", "goland"),
     ),
-    @Deprecated("IntelliJ IDEA Community (IC) is no longer available as a target IntelliJ Platform", replaceWith = ReplaceWith("IntellijIdea"))
+    @Deprecated("Starting with version 2025.3, IntelliJ IDEA Community (IC) is not available as a target IntelliJ Platform", replaceWith = ReplaceWith("IntellijIdea"))
     IntellijIdeaCommunity(
         code = "IC",
         maven = Coordinates("com.jetbrains.intellij.idea", "ideaIC"),
         installer = Coordinates("idea", "ideaIC"),
     ),
-    @Deprecated("IntelliJ IDEA Ultimate (IU) is now renamed to IntelliJ IDEA (IU)", replaceWith = ReplaceWith("IntellijIdea"))
+    @Deprecated("Starting with version 2025.3, IntelliJ IDEA Ultimate (IU) is now substituted with IntelliJ IDEA (IU)", replaceWith = ReplaceWith("IntellijIdea"))
     IntellijIdeaUltimate(
         code = "IU",
         maven = Coordinates("com.jetbrains.intellij.idea", "ideaIU"),
