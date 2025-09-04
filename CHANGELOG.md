@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add `IntellijIdea` platform type with corresponding artifact coordinates. JetBrains/intellij-platform-gradle-plugin#2021
+
 ### Changed
 
 - Update `String.parseIdeNotation()` to throw an exception for invalid IntelliJ Platform notation instead of returning a default value
