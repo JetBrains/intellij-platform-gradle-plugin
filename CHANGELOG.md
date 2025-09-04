@@ -11,6 +11,7 @@
 
 - Update `String.parseIdeNotation()` to throw an exception for invalid IntelliJ Platform notation instead of returning a default value
 - Deprecate `IntelliJPlatformType.IntellijIdeaCommunity` and `IntelliJPlatformType.IntellijIdeaUltimate` with replacement suggestions to `IntelliJPlatformType.IntellijIdea`. JetBrains/intellij-platform-gradle-plugin#2021
+- Deprecate `intellijIdeaCommunity` and `intellijIdeaUltimate` dependency helpers with replacement suggestions to `intellijIdea`. JetBrains/intellij-platform-gradle-plugin#2021
 
 ### Fixed
 

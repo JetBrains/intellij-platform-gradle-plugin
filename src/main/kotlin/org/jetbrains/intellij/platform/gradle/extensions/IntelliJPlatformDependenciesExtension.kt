@@ -347,6 +347,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configure IntelliJ Platform dependency configuration.
      */
     @JvmOverloads
+    @Deprecated("IntelliJ IDEA Community (IC) is no longer available as a target IntelliJ Platform", replaceWith = ReplaceWith("intellijIdea(version, configure)"))
     fun intellijIdeaCommunity(
         version: String,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
@@ -359,6 +360,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configure IntelliJ Platform dependency configuration.
      */
     @JvmOverloads
+    @Deprecated("IntelliJ IDEA Community (IC) is no longer available as a target IntelliJ Platform", replaceWith = ReplaceWith("intellijIdea(version, configure)"))
     fun intellijIdeaCommunity(
         version: Provider<String>,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
@@ -371,6 +373,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configure IntelliJ Platform dependency configuration.
      */
     @JvmOverloads
+    @Deprecated("IntelliJ IDEA Ultimate (IU) is now renamed to IntelliJ IDEA (IU)", replaceWith = ReplaceWith("intellijIdea(version, configure)"))
     fun intellijIdeaUltimate(
         version: String,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
@@ -383,6 +386,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configure IntelliJ Platform dependency configuration.
      */
     @JvmOverloads
+    @Deprecated("IntelliJ IDEA Ultimate (IU) is now renamed to IntelliJ IDEA (IU)", replaceWith = ReplaceWith("intellijIdea(version, configure)"))
     fun intellijIdeaUltimate(
         version: Provider<String>,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
