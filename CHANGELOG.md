@@ -9,6 +9,7 @@
 ### Changed
 
 - Update `String.parseIdeNotation()` to throw an exception for invalid IntelliJ Platform notation instead of returning a default value
+- Deprecate `IntelliJPlatformType.IntellijIdeaCommunity` and `IntelliJPlatformType.IntellijIdeaUltimate` with replacement suggestions to `IntelliJPlatformType.IntellijIdea`. JetBrains/intellij-platform-gradle-plugin#2021
 
 ### Fixed
 
