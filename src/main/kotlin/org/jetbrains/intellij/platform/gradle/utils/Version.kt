@@ -48,6 +48,8 @@ class Version(
         return result
     }
 
+    fun isBuildNumber() = major in 100..999
+
     companion object {
         fun parse(versionString: String) =
             versionString.split(' ', '.', '-', '"', '_')

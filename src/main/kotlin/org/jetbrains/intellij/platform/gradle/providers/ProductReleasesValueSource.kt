@@ -8,6 +8,7 @@ import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.AndroidStudioReleases
@@ -94,7 +95,9 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                         product.channels.forEach channel@{ channelEntry ->
                             channelEntry.builds.forEach { build ->
                                 product.codes.forEach codes@{ code ->
-                                    val type = runCatching { code.toIntelliJPlatformType() }.getOrElse { return@codes }
+                                    val type = runCatching {
+                                        code.toIntelliJPlatformType(Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER.version)
+                                    }.getOrElse { return@codes }
                                     val channel = runCatching { Channel.valueOf(channelEntry.status.uppercase()) }.getOrElse { return@channel }
 
                                     yield(

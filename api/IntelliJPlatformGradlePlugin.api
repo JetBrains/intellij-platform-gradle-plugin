@@ -119,6 +119,8 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Constraints 
 	public final fun getMINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public final fun getMINIMAL_INTELLIJ_PLATFORM_VERSION ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public final fun getMINIMAL_SPLIT_MODE_BUILD_NUMBER ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
+	public final fun getUNIFIED_INTELLIJ_IDEA_BUILD_NUMBER ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
+	public final fun getUNIFIED_INTELLIJ_IDEA_VERSION ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Extensions {
@@ -336,11 +338,11 @@ public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformType :
 
 public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformType$Companion {
 	public final fun fromCode (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public final fun fromCode (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformTypeKt {
-	public static final fun toIntelliJPlatformType (Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
-	public static final fun toIntelliJPlatformType (Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
+	public static final fun toIntelliJPlatformType (Ljava/lang/Object;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/ProductMode : java/lang/Enum {
@@ -3567,6 +3569,7 @@ public final class org/jetbrains/intellij/platform/gradle/utils/Version : java/l
 	public final fun getPatch ()I
 	public final fun getVersion ()Ljava/lang/String;
 	public fun hashCode ()I
+	public final fun isBuildNumber ()Z
 	public fun toString ()Ljava/lang/String;
 }
 

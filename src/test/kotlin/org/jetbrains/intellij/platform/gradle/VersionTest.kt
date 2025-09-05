@@ -46,5 +46,6 @@ class VersionTest {
         assertFailsWith<IllegalArgumentException> { "2025.3".parseIdeNotation() }
         assertEquals("PS-2025.3".parseIdeNotation(), IntelliJPlatformType.PhpStorm to "2025.3")
         assertEquals("IU-2025.3".parseIdeNotation(), IntelliJPlatformType.IntellijIdea to "2025.3")
+        assertEquals("IU-2025.2".parseIdeNotation(), IntelliJPlatformType.IntellijIdeaUltimate to "2025.2")
     }
 }

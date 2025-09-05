@@ -81,7 +81,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         version: String,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create {
-        this.type = type.toIntelliJPlatformType()
+        this.type = type.toIntelliJPlatformType(version)
         this.version = version
         apply(configure::execute)
     }
@@ -99,7 +99,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         version: Provider<String>,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create {
-        this.type = type.toIntelliJPlatformType()
+        this.type = version.map { type.toIntelliJPlatformType(it) }
         this.version = version
         apply(configure::execute)
     }
@@ -117,7 +117,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         version: Provider<String>,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
     ) = create {
-        this.type = type.toIntelliJPlatformType()
+        this.type = type.zip(version) { typeValue, versionValue -> typeValue.toIntelliJPlatformType(versionValue) }
         this.version = version
         apply(configure::execute)
     }
@@ -814,7 +814,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         productMode: ProductMode = ProductMode.MONOLITH,
     ) = create {
         val (type, version) = notation.parseIdeNotation()
-        this.type = type.toIntelliJPlatformType()
+        this.type = type
         this.version = version
         this.useInstaller = useInstaller
         this.productMode = productMode
@@ -838,8 +838,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         productMode: ProductMode = ProductMode.MONOLITH,
     ) = create {
         val parsedNotationProvider = notation.map { it.parseIdeNotation() }
-        this.type = parsedNotationProvider.map { it.first }.toIntelliJPlatformType()
-        this.version = parsedNotationProvider.map { it.second }
+        val version = parsedNotationProvider.map { it.second }
+        val type = parsedNotationProvider.map { it.first }.zip(version) { typeValue, versionValue ->
+            typeValue.toIntelliJPlatformType(versionValue)
+        }
+
+        this.type = type
+        this.version = version
         this.useInstaller = useInstaller
         this.productMode = productMode
     }

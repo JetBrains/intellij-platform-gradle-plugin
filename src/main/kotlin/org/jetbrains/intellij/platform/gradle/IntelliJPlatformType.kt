@@ -2,8 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle
 
-import org.gradle.api.provider.Provider
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.utils.Version
 
 // TODO any changes must be synchronized with
 // IntelliJPlatformDependenciesExtension
@@ -137,29 +137,42 @@ enum class IntelliJPlatformType(
         private val map = values().associateBy(IntelliJPlatformType::code)
 
         /**
+         * Note: this method returns [IntellijIdea] for `IU` value, ignoring the [IntellijIdeaUltimate] type.
+         *
+         * @param code the product code name
+         * @return the IntelliJ Platform type for the specified code name
          * @throws IllegalArgumentException
          */
         @Throws(IllegalArgumentException::class)
         fun fromCode(code: String) = requireNotNull(map[code]) {
             "Specified type '$code' is unknown. Supported values: ${values().joinToString()}"
         }
+        /**
+         * Note: this method returns [IntellijIdea] for `IU` value, ignoring the [IntellijIdeaUltimate] type.
+         *
+         * @param code the product code name
+         * @return the IntelliJ Platform type for the specified code name
+         * @throws IllegalArgumentException
+         */
+        @Throws(IllegalArgumentException::class)
+        fun fromCode(code: String, version: String) = fromCode(code).run {
+            when {
+               this == IntellijIdea -> {
+                   with (Version.parse(version)) {
+                       when {
+                           isBuildNumber() && this < Constants.Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER -> IntellijIdeaUltimate
+                           !isBuildNumber() && this < Constants.Constraints.UNIFIED_INTELLIJ_IDEA_VERSION -> IntellijIdeaUltimate
+                           else -> IntellijIdea
+                       }
+                   }
+               }
+               else -> this
+            }
+        }
     }
 
     override fun toString() = code
 }
-
-/**
- * Maps the value held by this [Provider] to an [IntelliJPlatformType].
- *
- * This extension function transforms a [Provider] containing a value that can be converted
- * to an [IntelliJPlatformType] into a [Provider] of [IntelliJPlatformType].
-
- * @receiver A [Provider] containing a value that can be converted to [IntelliJPlatformType]
- * @return A [Provider] of [IntelliJPlatformType] for the given provider value
- * @throws IllegalArgumentException if the provider value cannot be converted to [IntelliJPlatformType]
- */
-@Throws(IllegalArgumentException::class)
-fun Provider<*>.toIntelliJPlatformType() = map { it.toIntelliJPlatformType() }
 
 /**
  * Maps the value to an [IntelliJPlatformType].
@@ -171,8 +184,8 @@ fun Provider<*>.toIntelliJPlatformType() = map { it.toIntelliJPlatformType() }
  * @throws IllegalArgumentException if the value cannot be converted to [IntelliJPlatformType]
  */
 @Throws(IllegalArgumentException::class)
-fun Any.toIntelliJPlatformType(): IntelliJPlatformType = when (this) {
+fun Any.toIntelliJPlatformType(version: String) = when (this) {
     is IntelliJPlatformType -> this
-    is String -> IntelliJPlatformType.fromCode(this)
+    is String -> IntelliJPlatformType.fromCode(this, version)
     else -> throw IllegalArgumentException("Invalid argument type: '$javaClass'. Supported types: String or ${IntelliJPlatformType::class.java}")
 }

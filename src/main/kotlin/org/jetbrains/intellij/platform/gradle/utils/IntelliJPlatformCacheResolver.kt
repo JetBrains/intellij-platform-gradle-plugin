@@ -76,7 +76,7 @@ class IntelliJPlatformCacheResolver internal constructor(
         version: String,
         configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
     ) = resolve {
-        this.type = type.toIntelliJPlatformType()
+        this.type = type.toIntelliJPlatformType(version)
         this.version = version
         configure()
     }
@@ -98,7 +98,7 @@ class IntelliJPlatformCacheResolver internal constructor(
         version: Provider<String>,
         configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
     ) = resolve {
-        this.type = type.toIntelliJPlatformType()
+        this.type = version.map { type.toIntelliJPlatformType(it) }
         this.version = version
         configure()
     }
@@ -120,7 +120,7 @@ class IntelliJPlatformCacheResolver internal constructor(
         version: Provider<String>,
         configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
     ) = resolve {
-        this.type = type.toIntelliJPlatformType()
+        this.type = type.zip(version) { typeValue, versionValue -> typeValue.toIntelliJPlatformType(versionValue) }
         this.version = version
         configure()
     }

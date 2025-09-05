@@ -177,7 +177,7 @@ val ProductInfo.fullVersion
     get() = "$productCode-$buildNumber"
 
 val ProductInfo.type
-    get() = productCode.toIntelliJPlatformType()
+    get() = productCode.toIntelliJPlatformType(buildNumber)
 
 /**
  * Validates that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.

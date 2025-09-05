@@ -932,7 +932,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 version: String,
                 configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
             ) = create {
-                this.type = type.toIntelliJPlatformType()
+                this.type = type.toIntelliJPlatformType(version)
                 this.version = version
                 configure()
             }
@@ -950,7 +950,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 version: Provider<String>,
                 configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
             ) = create {
-                this.type = type.toIntelliJPlatformType()
+                this.type = version.map { type.toIntelliJPlatformType(it) }
                 this.version = version
                 configure()
             }
@@ -968,7 +968,9 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 version: Provider<String>,
                 configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
             ) = create {
-                this.type = type.toIntelliJPlatformType()
+                this.type = type.zip(version) { typeValue, versionValue ->
+                    typeValue.toIntelliJPlatformType(versionValue)
+                }
                 this.version = version
                 configure()
             }
