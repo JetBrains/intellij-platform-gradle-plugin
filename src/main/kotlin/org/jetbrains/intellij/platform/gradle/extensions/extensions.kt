@@ -15,7 +15,11 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
  */
 internal fun String.parseIdeNotation() = trim().split('-').let {
     when {
-        it.size == 2 -> it.let { (type, version) -> type.toIntelliJPlatformType(version) to version }
+        it.size == 2 -> it
+            .let { (type, version) -> type.toIntelliJPlatformType(version) to version }
+            .let { (type, version) -> requireNotNull(type) {
+                "Could not determine IntelliJ Platform type for '$type' and version '$version'."
+            } to version }
         else -> throw IllegalArgumentException("Invalid IntelliJ Platform notation: '$this'. Expected format: '<type>-<version>', like 'IU-2025.3'.")
     }
 }

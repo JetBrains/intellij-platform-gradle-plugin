@@ -8,7 +8,6 @@ import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
-import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.AndroidStudioReleases
@@ -96,8 +95,9 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                             channelEntry.builds.forEach { build ->
                                 product.codes.forEach codes@{ code ->
                                     val type = runCatching {
-                                        code.toIntelliJPlatformType(Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER.version)
-                                    }.getOrElse { return@codes }
+                                        code.toIntelliJPlatformType(build.fullNumber)
+                                    }.getOrNull() ?: return@codes
+
                                     val channel = runCatching { Channel.valueOf(channelEntry.status.uppercase()) }.getOrElse { return@channel }
 
                                     yield(
@@ -109,7 +109,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                                             version = build.version.toVersion(),
                                             id = when (channel) {
                                                 Channel.RELEASE -> with(build.version.toVersion()) {
-                                                    "$major.$minor" + (".$patch".takeIf { patch > 0 }.orEmpty())
+                                                    "$major.$minor" + ".$patch".takeIf { patch > 0 }.orEmpty()
                                                 }
 
                                                 else -> build.fullNumber
@@ -154,14 +154,14 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             return getComparativeVersion(since) >= since && (until?.let { getComparativeVersion(it) <= it } != false)
         }
 
-        val types = types.get()
+        val codes = types.get().map { it.code }
         val channels = channels.get()
 
-        log.info("Filtering releases with since='$since', until='$until', types='${types.joinToString(",")}', channels='${channels.joinToString(",")}'")
+        log.info("Filtering releases with since='$since', until='$until', types='${codes.joinToString(",")}', channels='${channels.joinToString(",")}'")
 
         (jetbrainsIdesReleases + androidStudioReleases)
             .asSequence()
-            .filter { it.type in types }
+            .filter { it.type.code in codes }
             .filter { it.channel in channels }
             .filter { it.testVersion() }
             .groupBy { "${it.type.code}-${it.version.major}.${it.version.minor}" }

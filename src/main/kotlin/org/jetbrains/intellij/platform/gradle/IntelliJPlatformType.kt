@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.utils.Version
 
@@ -157,16 +158,37 @@ enum class IntelliJPlatformType(
         @Throws(IllegalArgumentException::class)
         fun fromCode(code: String, version: String) = fromCode(code).run {
             when {
-               this == IntellijIdea -> {
-                   with (Version.parse(version)) {
-                       when {
-                           isBuildNumber() && this < Constants.Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER -> IntellijIdeaUltimate
-                           !isBuildNumber() && this < Constants.Constraints.UNIFIED_INTELLIJ_IDEA_VERSION -> IntellijIdeaUltimate
-                           else -> IntellijIdea
-                       }
-                   }
-               }
-               else -> this
+                /**
+                 * By default, IU is parsed to [IntellijIdea].
+                 * Based on the [version], we set it back to [IntellijIdeaUltimate] if it's below
+                 * [Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER] or [Constraints.UNIFIED_INTELLIJ_IDEA_VERSION].
+                 */
+                this == IntellijIdea -> {
+                    with(Version.parse(version)) {
+                        when {
+                            isBuildNumber() && this < Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER -> IntellijIdeaUltimate
+                            !isBuildNumber() && this < Constraints.UNIFIED_INTELLIJ_IDEA_VERSION -> IntellijIdeaUltimate
+                            else -> IntellijIdea
+                        }
+                    }
+                }
+                /**
+                 * If IC is parsed with the version higher than
+                 * [Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER] or [Constraints.UNIFIED_INTELLIJ_IDEA_VERSION],
+                 * we set it to `null` as IC is no longer published.
+                 */
+
+                this == IntellijIdeaCommunity -> {
+                    with(Version.parse(version)) {
+                        when {
+                            isBuildNumber() && this >= Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER -> null
+                            !isBuildNumber() && this >= Constraints.UNIFIED_INTELLIJ_IDEA_VERSION -> null
+                            else -> IntellijIdeaCommunity
+                        }
+
+                    }
+                }
+                else -> this
             }
         }
     }
