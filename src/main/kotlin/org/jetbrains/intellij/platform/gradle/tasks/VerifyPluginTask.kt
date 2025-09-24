@@ -17,7 +17,6 @@ import org.gradle.internal.logging.ConsoleRenderer
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.provideDelegate
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
