@@ -46,6 +46,7 @@ import org.gradle.api.problems.Problems as GradleProblems
  */
 // TODO: Use Reporting for handling verification report output? See: https://docs.gradle.org/current/dsl/org.gradle.api.reporting.Reporting.html
 // TODO: Parallel run? https://docs.gradle.org/current/userguide/worker_api.html#converting_to_worker_api
+@Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Should always run")
 abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware {
     /**
@@ -60,17 +61,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
      */
     @get:Inject
     abstract val problems: GradleProblems
-
-    /**
-     * Problem reporter for emitting structured build issues using Gradle's Problems API.
-     *
-     * This reporter is used to create and throw problems.
-     *
-     * @see [org.gradle.api.problems.ProblemReporter]
-     * @see [org.gradle.api.problems.ProblemSpec]
-     */
-    private val problemReporter by lazy { problems.reporter }
-
 
     /**
      * Holds a reference to IntelliJ Platform IDEs which will be used by the IntelliJ Plugin Verifier CLI tool for verification.
@@ -219,7 +209,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
     override fun exec() {
         val file = archiveFile.orNull?.asPath
         if (file == null || !file.exists()) {
-            throw problemReporter.reportError(
+            throw problems.reporter.reportError(
                 IllegalStateException("Plugin file $file does not exist"),
                 Problems.VerifyPlugin.InvalidPlugin,
                 problemsReportUrl,
@@ -232,7 +222,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
         log.debug("Distribution file: $file")
 
         val executable = pluginVerifierExecutable.orNull?.asPath
-            ?: throw problemReporter.reportError(
+            ?: throw problems.reporter.reportError(
                 GradleException("No IntelliJ Plugin Verifier executable found"),
                 Problems.VerifyPlugin.InvalidPluginVerifier,
                 problemsReportUrl,
@@ -247,7 +237,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
 
         with(ides) {
             if (isEmpty) {
-                throw problemReporter.reportError(
+                throw problems.reporter.reportError(
                     GradleException("No IDE resolved for verification with the IntelliJ Plugin Verifier"),
                     Problems.VerifyPlugin.InvalidIDEs,
                     problemsReportUrl,
@@ -330,7 +320,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
                 .dropLastWhile { !it.startsWith(" ") }
                 .joinToString("\n")
 
-            throw problemReporter.reportError(
+            throw problems.reporter.reportError(
                 GradleException(errorMessage),
                 Problems.VerifyPlugin.InvalidPlugin,
                 problemsReportUrl,
@@ -339,12 +329,12 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             }
         }
 
-        val problems = collectProblems(output)
+        val collectedProblems = collectProblems(output)
 
-        problems.forEach { (ideVersion, ideProblems) ->
+        collectedProblems.forEach { (ideVersion, ideProblems) ->
             ideProblems.forEach { (failureLevel, issues) ->
                 issues.forEach { (title, description) ->
-                    problemReporter.report(
+                    problems.reporter.report(
                         Problems.VerifyPlugin.VerificationFailure(failureLevel),
                     ) {
                         contextualLabel(title)
@@ -360,7 +350,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware 
             }
         }
 
-        val verificationFailures = problems
+        val verificationFailures = collectedProblems
             .flatMap { it.value.keys }
             .toSet()
             .intersect(failureLevels)
