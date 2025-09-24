@@ -603,6 +603,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun compatiblePlugins (Ljava/util/List;)V
 	public final fun compatiblePlugins (Lorg/gradle/api/provider/Provider;)V
 	public final fun compatiblePlugins ([Ljava/lang/String;)V
+	public final fun composeUI ()V
 	public final fun create (Ljava/lang/Object;Ljava/lang/String;)V
 	public final fun create (Ljava/lang/Object;Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun create (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;)V

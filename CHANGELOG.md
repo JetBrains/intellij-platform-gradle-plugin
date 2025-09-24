@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add `composeUI()` dependency helper to add Compose UI framework dependencies.
+
 ### Changed
 
 - Update minimal supported Gradle version to `8.13`

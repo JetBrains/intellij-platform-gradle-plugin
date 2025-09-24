@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.Action
+import org.gradle.api.Incubating
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -2593,6 +2594,22 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         dependenciesHelper.addBundledLibrary(
             pathProvider = path,
         )
+
+    /**
+     * Configures and bundles the necessary modules for the Compose UI framework.
+     *
+     * The method encapsulates and returns a list of essential module identifiers required
+     * for integrating and using the Compose UI components in the IntelliJ Platform.
+     */
+    @Incubating
+    fun composeUI() = bundledModules(
+        "intellij.libraries.skiko",
+        "intellij.libraries.compose.foundation.desktop",
+        "intellij.platform.jewel.foundation",
+        "intellij.platform.compose",
+        "intellij.platform.jewel.ui",
+        "intellij.platform.jewel.ideLafBridge",
+    )
 
     companion object {
         fun register(
