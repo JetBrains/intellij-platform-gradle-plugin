@@ -4,13 +4,13 @@ on: [ workflow_call ]
 
 jobs:
   baseUnitTest:
-    name: Gradle 9.0.0 @ ubuntu-latest
+    name: Gradle 9.1.0 @ ubuntu-latest
     uses: ./.github/workflows/reusable-single-unitTest.yml
     secrets: inherit
     permissions:
       checks: write
     with:
-      gradleVersion: "9.0.0"
+      gradleVersion: "9.1.0"
       os: ubuntu-latest
 
   unitTests:
@@ -31,7 +31,7 @@ jobs:
         gradleVersion:
           - "8.13"
           - "8.14.3"
-          - "9.0.0"
+          - "9.1.0"
           - "nightly"
         os:
           - windows-latest
@@ -39,4 +39,4 @@ jobs:
           - macos-latest
         exclude:
           - os: ubuntu-latest
-            gradleVersion: "9.0.0"
+            gradleVersion: "9.1.0"
