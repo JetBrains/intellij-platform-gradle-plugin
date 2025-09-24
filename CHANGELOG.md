@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Update minimal supported Gradle version to `8.13`
+
 ### Fixed
 
 - Refactor IntelliJ Platform type resolution and validation to exclude unavailable distribution constrains JetBrains/intellij-platform-gradle-plugin#2027
