@@ -3,10 +3,12 @@
 package org.jetbrains.intellij.platform.gradle.services
 
 import org.gradle.api.model.ObjectFactory
+import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.tasks.Input
 import org.gradle.kotlin.dsl.property
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
@@ -21,7 +23,12 @@ private const val baseConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPEN
 abstract class RequestedIntelliJPlatformsService @Inject constructor(
     private val objectFactory: ObjectFactory,
     private val providerFactory: ProviderFactory,
-) : BuildService<BuildServiceParameters.None> {
+) : BuildService<RequestedIntelliJPlatformsService.Parameters> {
+
+    interface Parameters : BuildServiceParameters {
+        @get:Input
+        val useInstaller: Property<Boolean>
+    }
 
     private val map = ConcurrentHashMap<String, Provider<RequestedIntelliJPlatform>>()
     private val base = objectFactory.property<RequestedIntelliJPlatform>()
@@ -40,7 +47,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                             zip(
                                 configuration.type,
                                 configuration.version,
-                                configuration.useInstaller,
+                                configuration.useInstaller.orElse(parameters.useInstaller),
                                 configuration.useCache,
                                 configuration.productMode,
                             ) { type, version, useInstaller, useCache, productMode ->

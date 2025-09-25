@@ -38,7 +38,7 @@ abstract class IntelliJPlatformDependencyConfiguration @Inject constructor(
     /**
      * Switches between the IDE installer and archive from the IntelliJ Maven repository.
      */
-    val useInstaller = objects.property<Boolean>().convention(true)
+    val useInstaller = objects.property<Boolean>()
 
     /**
      * Switches between the Gradle cache and the custom cache directory.

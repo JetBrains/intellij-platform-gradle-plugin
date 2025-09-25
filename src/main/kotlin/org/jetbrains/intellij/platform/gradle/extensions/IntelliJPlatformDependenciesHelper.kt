@@ -81,7 +81,9 @@ class IntelliJPlatformDependenciesHelper(
     private val pluginManager by lazy { IdePluginManager.createManager() }
     private val pluginRepository by lazy { PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE) }
     internal val requestedIntelliJPlatforms by lazy {
-        gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class, projectPath).get()
+        gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class, projectPath) {
+            parameters.useInstaller = true
+        }.get()
     }
     private val extractorServiceProvider by lazy {
         gradle.registerClassLoaderScopedBuildService(ExtractorService::class)
