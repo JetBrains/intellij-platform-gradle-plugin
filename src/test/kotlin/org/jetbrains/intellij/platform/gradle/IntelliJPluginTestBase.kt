@@ -92,6 +92,13 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
+                    
+                    caching {
+                        ides {
+                            enabled = true
+                            path = File("$gradleHome", "ides")
+                        }
+                    }
                 }
                 
                 tasks {
