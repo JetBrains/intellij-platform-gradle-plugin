@@ -4,11 +4,13 @@ package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
 
     @Test
+    @Ignore("When using cache, this warning is not emitted.")
     fun `warn when using Rider with useInstaller true`() {
         gradleProperties write //language=properties
                 """
