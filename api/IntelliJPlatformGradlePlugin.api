@@ -1136,7 +1136,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun local (Ljava/lang/String;)V
 	public final fun local (Lorg/gradle/api/file/Directory;)V
 	public final fun local (Lorg/gradle/api/provider/Provider;)V
-	public final fun recommended ()V
+	public final fun recommended ()Lorg/gradle/api/provider/Provider;
 	public final fun select (Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun select$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 }
@@ -2930,6 +2930,10 @@ public abstract class org/jetbrains/intellij/platform/gradle/services/RequestedI
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;)V
 	public final fun get (Ljava/lang/String;)Lorg/gradle/api/provider/Provider;
 	public final fun set (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration;)Lorg/gradle/api/provider/Provider;
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatformsService$Parameters : org/gradle/api/services/BuildServiceParameters {
+	public abstract fun getUseInstaller ()Lorg/gradle/api/provider/Property;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/services/ShimManagerService : java/lang/AutoCloseable, org/gradle/api/services/BuildService {
