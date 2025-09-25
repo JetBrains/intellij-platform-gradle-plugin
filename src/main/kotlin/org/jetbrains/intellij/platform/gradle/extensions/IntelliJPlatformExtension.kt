@@ -916,7 +916,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     }
                     .apply(configure)
 
-                dependenciesHelper.addIntelliJPlatformDependency(configuration)
+                dependenciesHelper.addIntelliJPlatformCacheableDependency(configuration)
             }
 
             /**
@@ -1075,9 +1075,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
                 replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
             )
-            fun ide(notation: String) = dependenciesHelper.addIntelliJPluginVerifierIdes(
-                notationsProvider = dependenciesHelper.provider { listOf(notation) },
-            )
+            fun ide(notation: String) {
+                val (type, version) = notation.parseIdeNotation()
+                create(type, version)
+            }
 
             /**
              * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
@@ -1088,9 +1089,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
                 replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
             )
-            fun ide(notation: Provider<String>) = dependenciesHelper.addIntelliJPluginVerifierIdes(
-                notationsProvider = notation.map { listOf(it) },
-            )
+            fun ide(notation: Provider<String>) {
+                val (type, version) = notation.get().parseIdeNotation()
+                create(type, version)
+            }
 
             /**
              * Adds dependencies to binary IDE releases to be used for testing with the IntelliJ Plugin Verifier.
@@ -1101,9 +1103,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
                 replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
             )
-            fun ides(notations: List<String>) = dependenciesHelper.addIntelliJPluginVerifierIdes(
-                notationsProvider = dependenciesHelper.provider { notations },
-            )
+            fun ides(notations: List<String>) {
+                notations.forEach {
+                    val (type, version) = it.parseIdeNotation()
+                    create(type, version)
+                }
+            }
 
             /**
              * Adds dependencies to binary IDE releases to be used for testing with the IntelliJ Plugin Verifier.
@@ -1114,9 +1119,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
                 replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
             )
-            fun ides(notations: Provider<List<String>>) = dependenciesHelper.addIntelliJPluginVerifierIdes(
-                notationsProvider = notations,
-            )
+            fun ides(notations: Provider<List<String>>) {
+                notations.get().forEach {
+                    val (type, version) = it.parseIdeNotation()
+                    create(type, version)
+                }
+            }
 
             /**
              * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
@@ -1165,9 +1173,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see ide
              * @see ProductReleasesValueSource
              */
-            fun recommended() = dependenciesHelper.addIntelliJPluginVerifierIdes(
-                notationsProvider = ProductReleasesValueSource(),
-            )
+            fun recommended() = ProductReleasesValueSource().map { notations ->
+                notations.map { notation ->
+                    val (type, version) = notation.parseIdeNotation()
+                    create(type, version)
+                }
+            }
 
             /**
              * Retrieves matching IDEs using custom filter parameters.

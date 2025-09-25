@@ -54,11 +54,11 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param configure IntelliJ Platform dependency configuration lambda.
      */
-    fun create(configure: Action<IntelliJPlatformDependencyConfiguration>) =
-        dependenciesHelper.addIntelliJPlatformCacheableDependency(
-            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider)
-                .apply(configure::execute),
-        )
+    fun create(configure: Action<IntelliJPlatformDependencyConfiguration>) {
+        val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider)
+            .apply(configure::execute)
+        dependenciesHelper.addIntelliJPlatformCacheableDependency(configuration)
+    }
 
     /**
      * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
