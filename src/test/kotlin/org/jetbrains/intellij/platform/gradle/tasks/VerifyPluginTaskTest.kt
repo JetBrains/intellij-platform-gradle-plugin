@@ -257,7 +257,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.VERIFY_PLUGIN) {
             assertContains(
-                "Compatible. 1 usage of scheduled for removal API and 1 usage of deprecated API. 1 usage of internal API",
+                "Compatible. 1 usage of scheduled for removal API and 2 usages of deprecated API. 1 usage of internal API",
                 output
             )
             assertNotContains("Reference to a missing property", output)
