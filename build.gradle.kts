@@ -164,6 +164,7 @@ fun Test.configureTests() {
     systemProperties["test.gradle.arguments"] = providers.gradleProperty("testGradleArguments").get()
     systemProperties["test.intellijPlatform.type"] = providers.gradleProperty("testIntellijPlatformType").get()
     systemProperties["test.intellijPlatform.version"] = providers.gradleProperty("testIntellijPlatformVersion").get()
+    systemProperties["test.intellijPlatform.buildNumber"] = providers.gradleProperty("testIntellijPlatformBuildNumber").get()
     systemProperties["test.kotlin.version"] = providers.gradleProperty("testKotlinVersion").get()
     systemProperties["test.markdownPlugin.version"] = providers.gradleProperty("testMarkdownPluginVersion").get()
 
