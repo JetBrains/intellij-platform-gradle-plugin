@@ -43,49 +43,49 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
         ) {
             buildDirectory.resolve("classes/java/main/Main.class").let {
                 assertExists(it)
-                assertEquals(607, it.fileSize())
+                assertEquals(658, it.fileSize())
             }
             buildDirectory.resolve("classes/java/main/CustomMain.class").let {
                 assertExists(it)
-                assertEquals(632, it.fileSize())
+                assertEquals(683, it.fileSize())
             }
             buildDirectory.resolve("tmp/instrumentCode/Main.class").let {
                 assertExists(it)
-                assertEquals(964, it.fileSize())
+                assertEquals(1015, it.fileSize())
             }
             buildDirectory.resolve("classes/java/main/Form.class").let {
                 assertExists(it)
-                assertEquals(433, it.fileSize())
+                assertEquals(482, it.fileSize())
             }
             buildDirectory.resolve("tmp/instrumentCode/Form.class").let {
                 assertExists(it)
-                assertEquals(1220, it.fileSize())
+                assertEquals(1269, it.fileSize())
             }
             buildDirectory.resolve("classes/kotlin/main/MainKt.class").let {
                 assertExists(it)
                 assertEquals(787, it.fileSize())
             }
 
-            buildDirectory.resolve("idea-sandbox/IC-2022.3.3/plugins/test/lib/test-1.0.0.jar").let { jar ->
+            buildDirectory.resolve("idea-sandbox/IC-$intellijPlatformVersion/plugins/test/lib/test-1.0.0.jar").let { jar ->
                 jar containsFileInArchive "Main.class"
-                assertEquals(964, (jar readEntry "Main.class").length)
+                assertEquals(1015, (jar readEntry "Main.class").length)
 
                 jar containsFileInArchive "Form.class"
-                assertEquals(1220, (jar readEntry "Form.class").length)
+                assertEquals(1269, (jar readEntry "Form.class").length)
 
                 jar containsFileInArchive "MainKt.class"
                 assertEquals(1179, (jar readEntry "MainKt.class").length)
 
                 jar containsFileInArchive "CustomMain.class"
-                assertEquals(989, (jar readEntry "CustomMain.class").length)
+                assertEquals(1040, (jar readEntry "CustomMain.class").length)
             }
 
-            buildDirectory.resolve("idea-sandbox/IC-2022.3.3/plugins/test/lib/test.submodule.jar").let { jar ->
+            buildDirectory.resolve("idea-sandbox/IC-$intellijPlatformVersion/plugins/test/lib/test.submodule.jar").let { jar ->
                 jar containsFileInArchive "FormSub.class"
-                assertEquals(1229, (jar readEntry "FormSub.class").length)
+                assertEquals(1278, (jar readEntry "FormSub.class").length)
 
                 jar containsFileInArchive "MainSub.class"
-                assertEquals(977, (jar readEntry "MainSub.class").length)
+                assertEquals(1028, (jar readEntry "MainSub.class").length)
 
                 jar containsFileInArchive "MyProjectService.class"
                 assertEquals(583, (jar readEntry "MyProjectService.class").length)

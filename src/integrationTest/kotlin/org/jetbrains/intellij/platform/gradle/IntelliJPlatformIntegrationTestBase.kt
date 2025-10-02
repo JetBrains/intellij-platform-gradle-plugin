@@ -11,6 +11,7 @@ import kotlin.test.BeforeTest
 @OptIn(ExperimentalPathApi::class)
 open class IntelliJPlatformIntegrationTestBase(
     private val resourceName: String? = null,
+    protected val useCache: Boolean = true,
 ) : IntelliJPlatformTestBase() {
 
     protected open val defaultProjectProperties: Map<String, Any> = mapOf(
@@ -24,6 +25,10 @@ open class IntelliJPlatformIntegrationTestBase(
 
         if (resourceName != null) {
             use(resourceName)
+        }
+
+        if (useCache) {
+            buildFile.useCache()
         }
     }
 
@@ -65,5 +70,27 @@ open class IntelliJPlatformIntegrationTestBase(
     infix fun Path.readEntry(path: String) = ZipFile(pathString).use { zip ->
         val entry = zip.getEntry(path)
         zip.getInputStream(entry).bufferedReader().use { it.readText() }
+    }
+
+    /**
+     * Configures caching for IntelliJ Platform integration tests within the provided file path context.
+     *
+     * Usage of this method is intended to prepare the test environment for scenarios requiring IDEs caching to
+     * be enabled.
+     *
+     * The changes applied by this method are written directly to the file represented by the receiver [Path].
+     */
+    protected fun Path.useCache() {
+        this write //language=kotlin
+                """
+                intellijPlatform {
+                    caching {
+                        ides {
+                            enabled = true
+                            path = File("$gradleHome", "ides")
+                        }
+                    }
+                }
+                """.trimIndent()
     }
 }

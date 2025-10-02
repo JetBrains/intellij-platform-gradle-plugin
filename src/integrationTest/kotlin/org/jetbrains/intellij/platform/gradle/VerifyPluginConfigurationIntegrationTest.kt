@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -16,11 +17,12 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     private val defaultSystemProperties
         get() = mapOf("user.home" to dir.resolve("home"))
 
+    private val major = Version.parse(intellijPlatformBuildNumber).major
+
     override val defaultProjectProperties
         get() = super.defaultProjectProperties + mapOf(
-            "intellijVersion" to "2022.3",
-            "sinceBuild" to "223",
-            "languageVersion" to "17",
+            "sinceBuild" to "$major",
+            "languageVersion" to "21",
         )
 
     @Test
@@ -55,8 +57,8 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
             projectProperties = defaultProjectProperties + mapOf("sinceBuild" to "203"),
         ) {
             output containsText issuesFoundSentence
-            output containsText "- The since-build='203' is lower than the target IntelliJ Platform major version: '223'."
-            output containsText "- The Java configuration specifies targetCompatibility=17 but since-build='203' property requires targetCompatibility='11'."
+            output containsText "- The since-build='203' is lower than the target IntelliJ Platform major version: '$major'."
+            output containsText "- The Java configuration specifies targetCompatibility=21 but since-build='203' property requires targetCompatibility='11'."
         }
     }
 }

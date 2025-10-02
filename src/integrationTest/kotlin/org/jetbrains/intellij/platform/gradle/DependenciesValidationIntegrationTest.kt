@@ -13,6 +13,7 @@ private const val DEPENDENCIES = "dependencies"
 
 class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "intellij-platform-dependency-validation",
+    useCache = false,
 ) {
 
     @Test
@@ -45,27 +46,11 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        build(DEPENDENCIES) {
+        build(DEPENDENCIES, "--configuration=intellijPlatformDependencyArchive") {
             assertContains(
                 """
                 intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
-                \--- idea:ideaIC:2022.3.3
-                """.trimIndent(),
-                output,
-            )
-
-            assertContains(
-                """
-                intellijPlatformLocal - IntelliJ Platform local
-                No dependencies
-                """.trimIndent(),
-                output,
-            )
-
-            assertContains(
-                """
-                intellijPlatformDependency - IntelliJ Platform
-                \--- idea:ideaIC:2022.3.3
+                \--- idea:ideaIC:$intellijPlatformVersion
                 """.trimIndent(),
                 output,
             )
@@ -91,7 +76,10 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent()
 
         buildAndFail(DEPENDENCIES) {
-            assertContains("The 'intellijPlatformDependency' configuration already contains the following IntelliJ Platform dependency: $intellijPlatformType-$intellijPlatformVersion (installer)", output)
+            assertContains(
+                "The 'intellijPlatformDependency' configuration already contains the following IntelliJ Platform dependency: $intellijPlatformType-$intellijPlatformVersion (installer)",
+                output,
+            )
         }
     }
 
@@ -115,7 +103,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform
-                \--- idea:ideaIC:2022.3.3 FAILED
+                \--- idea:ideaIC:$intellijPlatformVersion FAILED
                 """.trimIndent(),
                 output,
             )
@@ -126,7 +114,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """
                 > Failed to query the value of task ':verifyPluginProjectConfiguration' property 'runtimeDirectory'.
                    > Could not resolve all files for configuration ':intellijPlatformDependency'.
-                      > Could not find idea:ideaIC:2022.3.3.
+                      > Could not find idea:ideaIC:$intellijPlatformVersion.
                 """.trimIndent(),
                 output,
             )
@@ -151,7 +139,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        build(DEPENDENCIES) {
+        build(DEPENDENCIES, "--configuration=marketplaceZipSigner") {
             assertContains(
                 """
                 marketplaceZipSigner - Marketplace ZIP Signer
@@ -207,7 +195,6 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     }
 
     @Test
-    @Ignore("Temporarily disabled due to Maven Central library publishing delays")
     fun `correctly resolve Marketplace ZIP Signer dependency in the latest version when a default dependency is used`() {
         buildFile write //language=kotlin
                 """
@@ -225,16 +212,11 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 
                 intellijPlatform {
                     instrumentCode = false
-                
-                    signing {
-                        certificateChainFile = file("certificate/chain.crt")
-                        privateKeyFile = file("certificate/private.pem")
-                    }
                 }
                 """.trimIndent()
 
         val latestVersion = Coordinates("org.jetbrains", "marketplace-zip-signer").resolveLatestVersion()
-        build(DEPENDENCIES) {
+        build(DEPENDENCIES, "--configuration=marketplaceZipSigner") {
             assertContains(
                 """
                 marketplaceZipSigner - Marketplace ZIP Signer
@@ -242,10 +224,6 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent(),
                 output,
             )
-        }
-
-        build(Tasks.SIGN_PLUGIN) {
-            assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SUCCESS)
         }
     }
 
@@ -261,28 +239,36 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 
                 dependencies {
                     intellijPlatform {
-                        create("$intellijPlatformType", "2024.3")
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
                         bundledPlugin("Git4Idea")
                     }
                 }
-                
-                intellijPlatform {
-                    instrumentCode = false
-                }
                 """.trimIndent()
 
-        build(DEPENDENCIES) {
+        buildFile.useCache()
+
+        build(DEPENDENCIES, "--configuration=compileClasspath") {
             assertContains(
                 """
                 compileClasspath - Compile classpath for 'main'.
-                +--- bundledPlugin:Git4Idea:IC-243.21565.193
-                |    \--- bundledModule:intellij.platform.collaborationTools:IC-243.21565.193
-                |         +--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-243.21565.193
-                |         |    \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193
-                |         |         \--- bundledModule:intellij.platform.vcs.impl:IC-243.21565.193
-                |         |              \--- bundledModule:intellij.libraries.microba:IC-243.21565.193
-                |         \--- bundledModule:intellij.platform.vcs.log.impl:IC-243.21565.193 (*)
-                \--- idea:ideaIC:2024.3
+                +--- bundledPlugin:Git4Idea:IC-$intellijPlatformBuildNumber
+                |    \--- bundledModule:intellij.platform.collaborationTools:IC-$intellijPlatformBuildNumber
+                |         +--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-$intellijPlatformBuildNumber
+                |         |    +--- bundledModule:intellij.platform.vcs.log.impl:IC-$intellijPlatformBuildNumber
+                |         |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-$intellijPlatformBuildNumber
+                |         |    |    |    +--- bundledModule:intellij.libraries.microba:IC-$intellijPlatformBuildNumber
+                |         |    |    |    \--- bundledModule:intellij.platform.vcs.impl.shared:IC-$intellijPlatformBuildNumber
+                |         |    |    \--- bundledModule:intellij.platform.vcs.impl.shared:IC-$intellijPlatformBuildNumber
+                |         |    +--- bundledModule:intellij.platform.vcs.impl.backend:IC-$intellijPlatformBuildNumber
+                |         |    |    +--- bundledModule:intellij.platform.kernel.backend:IC-$intellijPlatformBuildNumber
+                |         |    |    |    \--- bundledModule:intellij.platform.rpc.backend:IC-$intellijPlatformBuildNumber
+                |         |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-$intellijPlatformBuildNumber (*)
+                |         |    |    \--- bundledModule:intellij.platform.vcs.impl.shared:IC-$intellijPlatformBuildNumber
+                |         |    +--- bundledModule:intellij.platform.vcs.impl.shared:IC-$intellijPlatformBuildNumber
+                |         |    \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:IC-$intellijPlatformBuildNumber
+                |         +--- bundledModule:intellij.platform.vcs.log.impl:IC-$intellijPlatformBuildNumber (*)
+                |         \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:IC-$intellijPlatformBuildNumber
+                \--- localIde:IC:IC-$intellijPlatformBuildNumber
                 """.trimIndent(),
                 output,
             )
@@ -301,7 +287,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 
                 dependencies {
                     intellijPlatform {
-                        create("$intellijPlatformType", "2024.3")
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
                         bundledPlugin("Coverage")
                     }
                 }
@@ -312,14 +298,19 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent()
 
         build(DEPENDENCIES) {
+            val coordinates = when {
+                useCache -> "localIde:IC:IC-$intellijPlatformBuildNumber"
+                else -> "idea:ideaIC:$intellijPlatformVersion"
+            }
+
             assertContains(
                 """
                 compileClasspath - Compile classpath for 'main'.
-                +--- bundledPlugin:Coverage:IC-243.21565.193
-                |    +--- bundledModule:intellij.platform.coverage:IC-243.21565.193
-                |    |    \--- bundledModule:intellij.platform.coverage.agent:IC-243.21565.193
-                |    \--- bundledPlugin:com.intellij.java:IC-243.21565.193
-                \--- idea:ideaIC:2024.3
+                +--- bundledPlugin:Coverage:IC-$intellijPlatformBuildNumber
+                |    +--- bundledModule:intellij.platform.coverage:IC-$intellijPlatformBuildNumber
+                |    |    \--- bundledModule:intellij.platform.coverage.agent:IC-$intellijPlatformBuildNumber
+                |    \--- bundledPlugin:com.intellij.java:IC-$intellijPlatformBuildNumber
+                \--- $coordinates
                 """.trimIndent(),
                 output,
             )
@@ -363,7 +354,10 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         }
 
         // Test with Rider to verify intellij.rider dependency
-        build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)) {
+        build(
+            DEPENDENCIES,
+            projectProperties = properties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider),
+        ) {
             assertContains(
                 """
                 intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath

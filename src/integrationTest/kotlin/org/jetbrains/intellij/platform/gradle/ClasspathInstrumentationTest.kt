@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import kotlin.test.Test
 
 private const val DEPENDENCIES = "dependencies"
@@ -21,14 +22,13 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     fun `dependencies should contain IntelliJ Platform and Markdown plugin`() {
         build(DEPENDENCIES, projectProperties = defaultProjectProperties) {
             output containsText """
-                compileClasspath - Compile classpath for 'main'.
-                +--- idea:ideaIC:$intellijPlatformVersion
-                \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
+                intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
+                \--- idea:ideaIC:$intellijPlatformVersion
             """.trimIndent()
 
             output containsText """
-                intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
-                \--- idea:ideaIC:$intellijPlatformVersion
+                intellijPlatformLocal - IntelliJ Platform local
+                No dependencies
             """.trimIndent()
 
             output containsText """
@@ -36,24 +36,25 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
                 \--- com.jetbrains.plugins:org.intellij.plugins.markdown:$markdownPluginVersion
             """.trimIndent()
 
+            val major = Version.parse(intellijPlatformBuildNumber).major
             output containsText """
                 intellijPlatformJavaCompiler - Java Compiler used by Ant tasks
-                \--- com.jetbrains.intellij.java:java-compiler-ant-tasks:{strictly [223, 223.8836.41]; prefer 223.8836.41} -> 223.8836.41
-                     +--- com.jetbrains.intellij.java:java-gui-forms-compiler:223.8836.41
-                     |    +--- com.jetbrains.intellij.platform:util-jdom:223.8836.41
+                \--- com.jetbrains.intellij.java:java-compiler-ant-tasks:{strictly [$major, $intellijPlatformBuildNumber]; prefer $intellijPlatformBuildNumber} -> $intellijPlatformBuildNumber
+                     +--- com.jetbrains.intellij.java:java-gui-forms-compiler:$intellijPlatformBuildNumber
+                     |    +--- com.jetbrains.intellij.platform:util-jdom:$intellijPlatformBuildNumber
                      |    |    +--- jaxen:jaxen:1.2.0
-                     |    |    \--- org.jetbrains:annotations:23.0.0
-                     |    +--- com.jetbrains.intellij.java:java-gui-forms-rt:223.8836.41
-                     |    +--- org.jetbrains.intellij.deps:asm-all:9.2
+                     |    |    \--- org.jetbrains:annotations:24.0.0
+                     |    +--- com.jetbrains.intellij.java:java-gui-forms-rt:$intellijPlatformBuildNumber
+                     |    +--- org.jetbrains.intellij.deps:asm-all:9.6.1
                      |    +--- com.jgoodies:forms:1.1-preview
-                     |    +--- com.jetbrains.intellij.java:java-compiler-instrumentation-util:223.8836.41
-                     |    |    \--- org.jetbrains.intellij.deps:asm-all:9.2
-                     |    \--- org.jetbrains:annotations:23.0.0
-                     +--- com.jetbrains.intellij.java:java-gui-forms-rt:223.8836.41
-                     +--- org.jetbrains.intellij.deps:asm-all:9.2
-                     +--- com.jetbrains.intellij.java:java-compiler-instrumentation-util:223.8836.41 (*)
-                     \--- com.jetbrains.intellij.java:java-compiler-instrumentation-util-java8:223.8836.41
-                          \--- com.jetbrains.intellij.java:java-compiler-instrumentation-util:223.8836.41 (*)
+                     |    +--- com.jetbrains.intellij.java:java-compiler-instrumentation-util:$intellijPlatformBuildNumber
+                     |    |    \--- org.jetbrains.intellij.deps:asm-all:9.6.1
+                     |    \--- org.jetbrains:annotations:24.0.0
+                     +--- com.jetbrains.intellij.java:java-gui-forms-rt:$intellijPlatformBuildNumber
+                     +--- org.jetbrains.intellij.deps:asm-all:9.6.1
+                     +--- com.jetbrains.intellij.java:java-compiler-instrumentation-util:$intellijPlatformBuildNumber (*)
+                     \--- com.jetbrains.intellij.java:java-compiler-instrumentation-util-java8:$intellijPlatformBuildNumber
+                          \--- com.jetbrains.intellij.java:java-compiler-instrumentation-util:$intellijPlatformBuildNumber (*)
             """.trimIndent()
         }
     }

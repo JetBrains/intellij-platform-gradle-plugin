@@ -68,7 +68,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 }
                 
                 kotlin {
-                    jvmToolchain(17)
+                    jvmToolchain(21)
                 }
                 
                 repositories {

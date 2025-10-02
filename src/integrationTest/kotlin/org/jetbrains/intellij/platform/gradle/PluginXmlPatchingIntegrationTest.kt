@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import kotlin.test.Test
 
 class PluginXmlPatchingIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -40,10 +41,11 @@ class PluginXmlPatchingIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `patch plugin_xml and set the until-build to null if targeted 243+`() {
+        val major = Version.parse(intellijPlatformVersion).major
+
         build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties + mapOf(
-            "intellijPlatform.version" to "2024.3",
             "languageVersion" to "21",
-            "sinceBuild" to "243",
+            "sinceBuild" to major,
         )) {
             assertTaskOutcome(Tasks.PATCH_PLUGIN_XML, TaskOutcome.SUCCESS)
 
@@ -52,7 +54,7 @@ class PluginXmlPatchingIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
             patchedPluginXml containsText //language=xml
                     """
-                    <idea-version since-build="243" />
+                    <idea-version since-build="$major" />
                     """.trimIndent()
         }
     }

@@ -31,11 +31,11 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
             buildDirectory.resolve("classes/java/main").let {
                 it.resolve("ExampleAction.class").let { file ->
                     assertExists(file)
-                    assertEquals(576, file.fileSize())
+                    assertEquals(625, file.fileSize())
                 }
                 it.resolve("Main.class").let { file ->
                     assertExists(file)
-                    assertEquals(607, file.fileSize())
+                    assertEquals(658, file.fileSize())
                 }
             }
             buildDirectory.resolve("classes/kotlin/main").let {
@@ -52,10 +52,10 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
                 jar readEntry "META-INF/plugin.xml" containsText "<action id=\"ExampleAction\" class=\"ExampleAction\" text=\"Example Action\">"
 
                 jar containsFileInArchive "ExampleAction.class"
-                assertEquals(576, (jar readEntry "ExampleAction.class").length)
+                assertEquals(625, (jar readEntry "ExampleAction.class").length)
 
                 jar containsFileInArchive "Main.class"
-                assertEquals(607, (jar readEntry "Main.class").length)
+                assertEquals(658, (jar readEntry "Main.class").length)
 
                 jar containsFileInArchive "MainKt.class"
                 assertEquals(972, (jar readEntry "MainKt.class").length)
@@ -81,11 +81,11 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
             buildDirectory.resolve("instrumented/instrumentCode").let {
                 it.resolve("ExampleAction.class").let { file ->
                     assertExists(file)
-                    assertEquals(979, file.fileSize())
+                    assertEquals(1028, file.fileSize())
                 }
                 it.resolve("Main.class").let { file ->
                     assertExists(file)
-                    assertEquals(964, file.fileSize())
+                    assertEquals(1015, file.fileSize())
                 }
                 it.resolve("MainKt.class").let { file ->
                     assertExists(file)
@@ -100,10 +100,10 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
                 jar readEntry "META-INF/plugin.xml" containsText "<action id=\"ExampleAction\" class=\"ExampleAction\" text=\"Example Action\">"
 
                 jar containsFileInArchive "ExampleAction.class"
-                assertEquals(979, (jar readEntry "ExampleAction.class").length)
+                assertEquals(1028, (jar readEntry "ExampleAction.class").length)
 
                 jar containsFileInArchive "Main.class"
-                assertEquals(964, (jar readEntry "Main.class").length)
+                assertEquals(1015, (jar readEntry "Main.class").length)
 
                 jar containsFileInArchive "MainKt.class"
                 assertEquals(972, (jar readEntry "MainKt.class").length)

@@ -6,6 +6,7 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import kotlin.io.path.*
 import kotlin.test.Ignore
 import kotlin.test.Test
@@ -18,6 +19,12 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     private val updatesFile
         get() = sandbox.resolve("config/options/updates.xml")
+
+    private val sinceBuild: String
+        get() {
+            val version = Version.parse(intellijPlatformBuildNumber)
+            return "${version.major}.${version.minor}"
+        }
 
     @Test
     @Ignore
@@ -310,7 +317,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 "META-INF/plugin.xml",
                 """
                 <idea-plugin>
-                  <idea-version since-build="223.8836" />
+                  <idea-version since-build="$sinceBuild" />
                   <version>1.0.0</version>
                   <name>myPluginName</name>
                   <depends config-file="other.xml" />

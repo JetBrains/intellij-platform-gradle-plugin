@@ -13,7 +13,7 @@ class ApplyRecommendedRepositoriesIntegrationTest : IntelliJPlatformIntegrationT
 
     @Test
     fun `attach bundled plugin sources`() {
-        build(CLEAN, projectProperties = defaultProjectProperties) {
+        build(CLEAN) {
             assertLogValue("repositories = ") {
                 val repositories = it.split(";")
 

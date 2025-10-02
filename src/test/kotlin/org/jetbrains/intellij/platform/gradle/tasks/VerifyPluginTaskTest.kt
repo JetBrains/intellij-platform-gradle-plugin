@@ -550,10 +550,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                     public static void main(String[] args) {
                         App$classNameSuffix.message("somemessage", "someparam1");
                     
-                        System.out.println(com.intellij.openapi.project.ProjectCoreUtil.theProject);
-                        
-                        com.intellij.openapi.project.ProjectCoreUtil util = new com.intellij.openapi.project.ProjectCoreUtil();
-                        System.out.println(util.theProject);
+                        System.out.println(com.intellij.openapi.project.ProjectCoreUtil.theOnlyOpenProject());
                         
                         System.out.println(com.intellij.openapi.project.Project.DIRECTORY_STORE_FOLDER);
                         com.intellij.openapi.components.ServiceManager.getService(String.class);

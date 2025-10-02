@@ -24,15 +24,16 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                 """.trimIndent()
 
         build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-            assertContains("Searchable options index builder completed", output)
+            assertContains("Found 230 configurables", output)
         }
 
-        val xml = buildDirectory.resolve("tmp/${Tasks.BUILD_SEARCHABLE_OPTIONS}/projectName-1.0.0.jar/search/projectName-1.0.0.jar.searchableOptions.xml")
+        val xml = buildDirectory.resolve("tmp/${Tasks.BUILD_SEARCHABLE_OPTIONS}/p-PluginName-searchableOptions.json")
         assertExists(xml)
 
         xml.readText().let {
-            assertContains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">", it)
-            assertContains("hit=\"Label for Test Searchable Configurable\"", it)
+            assertContains("test.searchable.configurable", it)
+            assertContains("Test Searchable Configurable", it)
+            assertContains("\"hit\":\"Label for Test Searchable Configurable\"", it)
         }
     }
 
@@ -71,15 +72,16 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                 """.trimIndent()
 
         build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-            assertContains("Searchable options index builder completed", output)
+            assertContains("Found 230 configurables", output)
         }
 
-        val xml = buildDirectory.resolve("tmp/${Tasks.BUILD_SEARCHABLE_OPTIONS}/projectName-1.0.0.jar/search/projectName-1.0.0.jar.searchableOptions.xml")
+        val xml = buildDirectory.resolve("tmp/${Tasks.BUILD_SEARCHABLE_OPTIONS}/p-PluginName-searchableOptions.json")
         assertExists(xml)
 
         xml.readText().let {
-            assertContains("<configurable id=\"test.searchable.configurable\" configurable_name=\"Test Searchable Configurable\">", it)
-            assertContains("hit=\"Label for Test Searchable Configurable\"", it)
+            assertContains("test.searchable.configurable", it)
+            assertContains("Test Searchable Configurable", it)
+            assertContains("\"hit\":\"Label for Test Searchable Configurable\"", it)
         }
     }
 

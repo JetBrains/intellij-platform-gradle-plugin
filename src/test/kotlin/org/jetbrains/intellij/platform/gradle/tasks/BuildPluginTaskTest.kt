@@ -7,11 +7,18 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import java.util.jar.Manifest
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.*
 
 class BuildPluginTaskTest : IntelliJPluginTestBase() {
+
+    private val sinceBuild: String
+        get() {
+            val version = Version.parse(intellijPlatformBuildNumber)
+            return "${version.major}.${version.minor}"
+        }
 
     @BeforeTest
     override fun setup() {
@@ -92,7 +99,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                     assertEquals(
                         """
                         <idea-plugin>
-                          <idea-version since-build="223.8836" />
+                          <idea-version since-build="$sinceBuild" />
                           <version>1.0.0</version>
                           <name>MyPluginName</name>
                           <vendor>JetBrains</vendor>
@@ -445,7 +452,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         assertEquals("0.0.0", it.getValue("Build-Plugin-Version"))
                         assertEquals(intellijPlatformType, it.getValue("Platform-Type"))
                         assertEquals(intellijPlatformVersion, it.getValue("Platform-Version"))
-                        assertEquals("223.8836.41", it.getValue("Platform-Build"))
+                        assertEquals(intellijPlatformBuildNumber, it.getValue("Platform-Build"))
                         assertEquals("false", it.getValue("Kotlin-Stdlib-Bundled"))
                         assertEquals(null, it.getValue("Kotlin-Version"))
                     }

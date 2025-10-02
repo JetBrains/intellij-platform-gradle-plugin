@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import kotlin.io.path.listDirectoryEntries
 import kotlin.test.Test
 
@@ -13,6 +14,12 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
 
     private val outputPluginXml
         get() = buildDirectory.resolve("resources/main/META-INF/").listDirectoryEntries().first()
+
+    private val sinceBuild: String
+        get() {
+            val version = Version.parse(intellijPlatformBuildNumber)
+            return "${version.major}.${version.minor}"
+        }
 
     @Test
     fun `use patched plugin xml files`() {
@@ -27,7 +34,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
             outputPluginXml,
             """
             <idea-plugin>
-              <idea-version since-build="223.8836" />
+              <idea-version since-build="$sinceBuild" />
               <version>1.0.0</version>
             </idea-plugin>
             """.trimIndent()

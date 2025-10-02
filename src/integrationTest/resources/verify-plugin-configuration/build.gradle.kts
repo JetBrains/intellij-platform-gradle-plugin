@@ -1,4 +1,5 @@
-val intellijVersionProperty = providers.gradleProperty("intellijVersion")
+val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type")
+val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version")
 val sinceBuildProperty = providers.gradleProperty("sinceBuild")
 val languageVersionProperty = providers.gradleProperty("languageVersion").map { JavaLanguageVersion.of(it) }
 
@@ -17,7 +18,7 @@ repositories {
 
 dependencies {
     intellijPlatform {
-        intellijIdeaCommunity(intellijVersionProperty)
+        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
     }
 }
 

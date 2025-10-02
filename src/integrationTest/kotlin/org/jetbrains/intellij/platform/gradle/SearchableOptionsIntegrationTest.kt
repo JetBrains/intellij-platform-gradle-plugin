@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.exists
+import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -13,6 +14,7 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
 ) {
 
     @Test
+    @Ignore("Drop the old searchable options format available in <242")
     fun `test searchable options`() {
         build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties) {
             val searchableOptionsJar = buildDirectory.resolve("libs/test-1.0.0-searchableOptions.jar")
@@ -46,7 +48,7 @@ class SearchableOptionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `test searchable options in 242+`() {
-        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties + mapOf("intellijPlatform.version" to "242.23726.38")) {
+        build(Tasks.BUILD_PLUGIN, projectProperties = defaultProjectProperties) {
             val searchableOptionsJar = buildDirectory.resolve("libs/test-1.0.0-searchableOptions.jar")
             assertExists(searchableOptionsJar)
 

@@ -6,6 +6,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.exists
 import kotlin.io.path.notExists
+import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -13,7 +14,17 @@ private const val CUSTOM_RUN_IDE_TASK_NAME = "customRunIde"
 
 class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "multi-module",
+    useCache = false,
 ) {
+
+    @BeforeTest
+    override fun setup() {
+        super.setup()
+
+        dir.resolve("base/build.gradle.kts").useCache()
+        dir.resolve("ext/build.gradle.kts").useCache()
+        dir.resolve("submodule/build.gradle.kts").useCache()
+    }
 
     @Ignore
     @Test

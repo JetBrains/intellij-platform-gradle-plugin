@@ -15,13 +15,6 @@ repositories {
     }
 }
 
-dependencies {
-    intellijPlatform {
-        create(providers.gradleProperty("intellijPlatform.type"), providers.gradleProperty("intellijPlatform.version"))
-        instrumentationTools()
-    }
-}
-
 afterEvaluate {
     repositories
         .filterIsInstance<UrlArtifactRepository>()

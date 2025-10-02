@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.utils.Version
 import kotlin.io.path.*
 import kotlin.test.Test
 
@@ -54,9 +55,11 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            val major = Version.parse(intellijPlatformBuildNumber).major
+
             assertContains(HEADER, output)
             assertContains(
-                "- The since-build='211' is lower than the target IntelliJ Platform major version: '223'.", output
+                "- The since-build='211' is lower than the target IntelliJ Platform major version: '$major'.", output
             )
         }
     }
@@ -73,7 +76,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Java configuration specifies sourceCompatibility='1.8' but IntelliJ Platform '2022.3.3' requires sourceCompatibility='17'.", output
+                "- The Java configuration specifies sourceCompatibility='1.8' but IntelliJ Platform '$intellijPlatformVersion' requires sourceCompatibility='21'.", output
             )
         }
     }
@@ -83,33 +86,14 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 java {
-                    targetCompatibility = JavaVersion.VERSION_19
+                    targetCompatibility = JavaVersion.VERSION_25
                 }
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Java configuration specifies targetCompatibility='19' but IntelliJ Platform '2022.3.3' requires targetCompatibility='17'.", output
-            )
-        }
-    }
-
-    @Test
-    fun `report too high Kotlin jvmTarget`() {
-        buildFile write //language=kotlin
-                """
-                kotlin {
-                    compilerOptions {
-                        jvmTarget = JvmTarget.JVM_19
-                    }
-                }
-                """.trimIndent()
-
-        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
-            assertContains(HEADER, output)
-            assertContains(
-                "- The Kotlin configuration specifies jvmTarget='19' but IntelliJ Platform '2022.3.3' requires jvmTarget='17'.", output
+                "- The Java configuration specifies targetCompatibility='25' but IntelliJ Platform '$intellijPlatformVersion' requires targetCompatibility='21'.", output
             )
         }
     }
@@ -141,35 +125,6 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `report too high Kotlin apiVersion`() {
-        pluginXml write //language=xml
-                """
-                <idea-plugin>
-                    <name>PluginName</name>
-                    <description>Lorem ipsum.</description>
-                    <vendor>JetBrains</vendor>
-                    <idea-version since-build="211" until-build='212.*' />
-                </idea-plugin>
-                """.trimIndent()
-
-        buildFile write //language=kotlin
-                """
-                kotlin {
-                    compilerOptions {
-                        apiVersion = KotlinVersion.fromVersion("1.9")
-                    }
-                }
-                """.trimIndent()
-
-        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
-            assertContains(HEADER, output)
-            assertContains(
-                "- The Kotlin configuration specifies apiVersion='1.9' but since-build='223.8836' property requires apiVersion='1.7'.", output
-            )
-        }
-    }
-
-    @Test
     fun `do not report too low patch number in Kotlin languageVersion`() {
         pluginXml write //language=xml
                 """
@@ -185,7 +140,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 """
                 kotlin {
                     compilerOptions {
-                        languageVersion = KotlinVersion.fromVersion("1.7")
+                        languageVersion = KotlinVersion.fromVersion("2.1")
                     }
                 }
                 """.trimIndent()
@@ -209,7 +164,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Kotlin configuration specifies languageVersion='1.5' but IntelliJ Platform '2022.3.3' requires languageVersion='1.7'.", output
+                "- The Kotlin configuration specifies languageVersion='1.5' but IntelliJ Platform '$intellijPlatformVersion' requires languageVersion='2.1'.", output
             )
         }
     }

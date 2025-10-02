@@ -32,9 +32,7 @@ dependencies {
 
         // Use ./gradlew printBundledPlugins
         bundledPlugins(
-            "AntSupport",
             "Coverage",
-            "DevKit",
             "Git4Idea",
             "JUnit"
         )

@@ -10,23 +10,22 @@ class SplitModeIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "split-mode",
 ) {
 
-    private val sufficientVersion = "2024.1"
-
     override val defaultProjectProperties
         get() = super.defaultProjectProperties + mapOf("splitMode" to true)
 
     @Test
     @Ignore("${Tasks.RUN_IDE} task never finishes")
     fun `run IDE in Split Mode`() {
-        buildAndFail(Tasks.RUN_IDE, projectProperties = defaultProjectProperties + mapOf("intellijPlatform.version" to sufficientVersion)) {
+        buildAndFail(Tasks.RUN_IDE, projectProperties = defaultProjectProperties) {
             assertContains("com.intellij.idea.Main splitMode", output)
             assertContains("Timeout has been exceeded", output)
         }
     }
 
     @Test
+    @Ignore("Testing 241 is no longer necessary")
     fun `fail running Split Mode with too low IntelliJ Platform version`() {
-        buildAndFail(Tasks.RUN_IDE, projectProperties = defaultProjectProperties) {
+        buildAndFail(Tasks.RUN_IDE, projectProperties = defaultProjectProperties + mapOf("intellijPlatform.version" to "2022.3.3")) {
             assertContains("Split Mode requires the IntelliJ Platform in version '241.14473' or later, but '223.8836.41' was provided.", output)
         }
     }
@@ -43,7 +42,7 @@ class SplitModeIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 }
                 """.trimIndent()
 
-        buildAndFail(Tasks.RUN_IDE, projectProperties = defaultProjectProperties + mapOf("intellijPlatform.version" to sufficientVersion)) {
+        buildAndFail(Tasks.RUN_IDE, projectProperties = defaultProjectProperties) {
             assertContains("Passing arguments directly is not supported in Split Mode. Use `argumentProviders` instead.", output)
         }
     }
@@ -61,7 +60,7 @@ class SplitModeIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 }
                 """.trimIndent()
 
-        build(Tasks.RUN_IDE, projectProperties = defaultProjectProperties + mapOf("intellijPlatform.version" to sufficientVersion)) {
+        build(Tasks.RUN_IDE, projectProperties = defaultProjectProperties) {
             assertContains("com.intellij.idea.Main splitMode foo", output)
         }
     }

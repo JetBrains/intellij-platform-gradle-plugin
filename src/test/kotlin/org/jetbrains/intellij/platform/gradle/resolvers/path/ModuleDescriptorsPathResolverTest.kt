@@ -12,19 +12,6 @@ import kotlin.test.assertFailsWith
 
 class ModuleDescriptorsPathResolverTest : IntelliJPluginTestBase() {
 
-    /**
-     * TODO: Note this test is supposed to succeed as soon IntelliJ Platform will start bundling the file (expectedly with 2024.1 GA).
-     * The currently used version is [intellijPlatformVersion].
-     */
-    @Test
-    fun `resolve module-descriptors file using the current IntelliJ Platform`() {
-        prepareTest()
-
-        buildAndFail(randomTaskName) {
-            assertContains("Cannot resolve 'Module Descriptors'", output)
-        }
-    }
-
     @Test
     fun `fail on a missing file in provided platformPath`() {
         val resolver = ModuleDescriptorsPathResolver(
