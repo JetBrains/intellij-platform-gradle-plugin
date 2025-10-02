@@ -903,20 +903,28 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         ) {
 
             /**
+             * Creates a configuration for the IntelliJ-based IDE with the specified type and version.
+             *
+             * @param configure IntelliJ Platform dependency configuration.
+             */
+            private fun createConfiguration(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) =
+                objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider)
+                    .apply(configure)
+
+            /**
              * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
              * adds an IntelliJ Platform dependency based on the provided configuration.
              *
              * @param configure IntelliJ Platform dependency configuration.
              */
             fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) {
-                val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider)
-                    .apply {
-                        configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY
-                        intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY
-                    }
-                    .apply(configure)
-
-                dependenciesHelper.addIntelliJPlatformCacheableDependency(configuration)
+                val configuration = createConfiguration(configure)
+                dependenciesHelper.addIntelliJPlatformCacheableDependencies(
+                    configurationsProvider = dependenciesHelper.provider { listOf(configuration) },
+                    dependencyConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                    dependencyArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                    localArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+                )
             }
 
             /**
@@ -1173,11 +1181,23 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see ide
              * @see ProductReleasesValueSource
              */
-            fun recommended() = ProductReleasesValueSource().map { notations ->
-                notations.map { notation ->
-                    val (type, version) = notation.parseIdeNotation()
-                    create(type, version)
+            fun recommended() {
+                val configurationsProvider = ProductReleasesValueSource().map { notations ->
+                    notations.map { notation ->
+                        val (type, version) = notation.parseIdeNotation()
+                        createConfiguration {
+                            this.type = type
+                            this.version = version
+                        }
+                    }
                 }
+
+                dependenciesHelper.addIntelliJPlatformCacheableDependencies(
+                    configurationsProvider = configurationsProvider,
+                    dependencyConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
+                    dependencyArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                    localArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+                )
             }
 
             /**

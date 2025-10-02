@@ -54,11 +54,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param configure IntelliJ Platform dependency configuration lambda.
      */
-    fun create(configure: Action<IntelliJPlatformDependencyConfiguration>) {
-        val configuration = objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider)
-            .apply(configure::execute)
-        dependenciesHelper.addIntelliJPlatformCacheableDependency(configuration)
-    }
+    fun create(configure: Action<IntelliJPlatformDependencyConfiguration>) =
+        create(
+            objects
+                .newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider)
+                .apply(configure::execute),
+        )
 
     /**
      * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
@@ -67,7 +68,26 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param configure IntelliJ Platform dependency configuration.
      */
     fun create(configuration: IntelliJPlatformDependencyConfiguration) =
-        dependenciesHelper.addIntelliJPlatformCacheableDependency(configuration)
+        create(listOf(configuration))
+
+    /**
+     * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
+     * adds an IntelliJ Platform dependency based on the provided configuration.
+     *
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    internal fun create(
+        configurations: List<IntelliJPlatformDependencyConfiguration>,
+        dependencyConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        dependencyArchivesConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
+        localArchivesConfigurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
+    ) =
+        dependenciesHelper.addIntelliJPlatformCacheableDependencies(
+            configurationsProvider = dependenciesHelper.provider { configurations },
+            dependencyConfigurationName = dependencyConfigurationName,
+            dependencyArchivesConfigurationName = dependencyArchivesConfigurationName,
+            localArchivesConfigurationName = localArchivesConfigurationName,
+        )
 
     /**
      * Adds a dependency on the IntelliJ Platform.
@@ -749,7 +769,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = create(type, version) {
         this.useInstaller = useInstaller
         this.productMode = productMode
-        this.configurationName = configurationName
     }
 
     /**

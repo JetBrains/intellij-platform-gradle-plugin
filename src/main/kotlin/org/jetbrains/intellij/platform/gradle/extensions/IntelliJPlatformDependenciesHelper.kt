@@ -162,9 +162,14 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun platformPathProvider(configurationName: String) =
         requestedIntelliJPlatformPaths.computeIfAbsent(configurationName) {
-            val configuration = configurations[configurationName].asLenient
+            val configuration = configurations[configurationName].apply {
+                resolve()
+                incoming.files
+            }
             val requestedPlatform = requestedIntelliJPlatforms[configurationName]
-            requestedPlatform.map { configuration.platformPath(it) }
+            requestedPlatform.map {
+                configuration.platformPath(it)
+            }
         }
 
     internal fun ide(platformPath: Path) = gradle.registerClassLoaderScopedBuildService(IdesManagerService::class)
@@ -209,66 +214,49 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a request for the IntelliJ Platform with the specified configuration details.
      *
-     * @param configure IntelliJ Platform dependency configuration.
+     * @param configurationsProvider IntelliJ Platform dependency configuration.
      */
-    internal fun addIntelliJPlatformCacheableDependency(configuration: IntelliJPlatformDependencyConfiguration) {
-        val dependencyArchiveConfigurationName = configuration.configurationName.get()
-
-        // TODO: This is hacky but we need to add a cached artifact to the [Configurations.INTELLIJ_PLATFORM_LOCAL] configuration,
-        //       still respecting suffix, and passing that name from elsewhere would be too messy.
-        val suffix = configuration.intellijPlatformConfigurationName.get()
-            .removePrefix(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
-        val localConfigurationName = Configurations.INTELLIJ_PLATFORM_LOCAL + suffix
-        val requestProvider = requestedIntelliJPlatforms.set(configuration)
-
-        configurations[localConfigurationName].dependencies.addAllLater(
-            requestProvider.map { request ->
-                buildList {
-                    if (request.useCache) {
-                        val localPath = cacheResolver.resolve {
-                            type = request.type
-                            version = request.version
-                            productMode = request.productMode
-                            useInstaller = request.useInstaller
-                            useCache = true
-                            configurationName = configuration.configurationName
-                            intellijPlatformConfigurationName =
-                                configuration.intellijPlatformConfigurationName.map { "$it#local" }
-                        }
-                        val platformPath = resolveArtifactPath(localPath)
-                        add(createIntelliJPlatformLocal(platformPath))
-                    }
+    internal fun addIntelliJPlatformCacheableDependencies(
+        configurationsProvider: Provider<List<IntelliJPlatformDependencyConfiguration>>,
+        dependencyConfigurationName: String,
+        dependencyArchivesConfigurationName: String,
+        localArchivesConfigurationName: String,
+    ) {
+        val requestsProvider = cachedListProvider {
+            configurationsProvider.map { configurations ->
+                configurations.map {
+                    requestedIntelliJPlatforms.set(it, dependencyConfigurationName).get()
                 }
+            }.get()
+        }
+
+        configurations[localArchivesConfigurationName].dependencies.addAllLater(
+            requestsProvider.map { requests ->
+                requests.filter { it.useCache }
+                    .map { requests ->
+                        requests.let {
+                            val localPath = cacheResolver.resolve(localArchivesConfigurationName) {
+                                type = it.type
+                                version = it.version
+                                productMode = it.productMode
+                                useInstaller = it.useInstaller
+                                useCache = true
+                            }
+                            val platformPath = resolveArtifactPath(localPath)
+                            createIntelliJPlatformLocal(platformPath)
+                        }
+                    }
             },
         )
 
-        configurations[dependencyArchiveConfigurationName].dependencies.addAllLater(
-            requestProvider.map { request ->
-                buildList {
-                    if (!request.useCache) {
-                        add(createIntelliJPlatformDependency(request))
-                    }
-                }
+        configurations[dependencyArchivesConfigurationName].dependencies.addAllLater(
+            requestsProvider.map { requests ->
+                requests
+                    .filter { !it.useCache }
+                    .map { createIntelliJPlatformDependency(it) }
             },
         )
     }
-
-    /**
-     * A base method for adding a dependency on the IntelliJ Platform.
-     *
-     * @param configuration The IntelliJ Platform dependency configuration.
-     * @param action An optional action to be performed on the created dependency.
-     * @throws GradleException
-     */
-    @Throws(GradleException::class)
-    internal fun addIntelliJPlatformDependency(
-        configuration: IntelliJPlatformDependencyConfiguration,
-        action: DependencyAction = {},
-    ) = addIntelliJPlatformDependency(
-        requestedIntelliJPlatformProvider = requestedIntelliJPlatforms.set(configuration),
-        configurationName = configuration.configurationName.get(),
-        action = action,
-    )
 
     /**
      * A base method for adding a dependency on the IntelliJ Platform.
@@ -343,9 +331,8 @@ class IntelliJPlatformDependenciesHelper(
                         useInstaller = true
                         useCache = false
                         productMode = ProductMode.MONOLITH
-                        this.intellijPlatformConfigurationName = intellijPlatformConfigurationName
                     }
-                requestedIntelliJPlatforms.set(dependencyConfiguration)
+                requestedIntelliJPlatforms.set(dependencyConfiguration, configurationName)
 
                 createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
             }
@@ -441,13 +428,14 @@ class IntelliJPlatformDependenciesHelper(
     ) = configurations[configurationName].dependencies.addAllLater(
         cachedListProvider {
             val bundledPlugins = bundledPluginsProvider.orNull
-            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
             requireNotNull(bundledPlugins) { "The `intellijPlatform.bundledPlugins` dependency helper was called with no `bundledPlugins` value provided." }
+
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
 
             bundledPlugins
                 .map(String::trim)
                 .filter(String::isNotEmpty)
-                .map { createIntelliJPlatformBundledPlugin(platformPath, it) }
+                .map { createIntelliJPlatformBundledPlugin(requireNotNull(platformPath), it) }
                 .onEach(action)
         },
     )
@@ -496,8 +484,9 @@ class IntelliJPlatformDependenciesHelper(
     ) = configurations[configurationName].dependencies.addLater(
         cachedProvider {
             val localPath = localPathProvider.orNull
-            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
             requireNotNull(localPath) { "The `intellijPlatform.localPlugin` dependency helper was called with no `localPath` value provided." }
+
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
 
             createIntelliJPlatformLocalPlugin(localPath, platformPath).apply(action)
         },
@@ -988,7 +977,7 @@ class IntelliJPlatformDependenciesHelper(
 
         val artifactPath = requireNotNull(plugin.originalFile) {
             "The '$id' entry refers to a bundled plugin, but it is actually a bundled module. " +
-            "Use bundledModule(\"$id\") instead of bundledPlugin(\"$id\")."
+                    "Use bundledModule(\"$id\") instead of bundledPlugin(\"$id\")."
         }
         // It is crucial to use the IDE type + build number to the version.
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy

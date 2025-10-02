@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.extensions
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.property
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.ProductMode
@@ -56,14 +55,4 @@ abstract class IntelliJPlatformDependencyConfiguration @Inject constructor(
      */
     @Deprecated("Use 'useCache' instead.", replaceWith = ReplaceWith("this.useCache"))
     val useCustomCache = useCache
-
-    /**
-     * The name of the configuration to add the dependency to.
-     */
-    val configurationName = objects.property<String>().convention(Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE)
-
-    /**
-     * The name of the IntelliJ Platform consumer configuration which holds information about the current IntelliJ Platform instance.
-     */
-    internal val intellijPlatformConfigurationName = objects.property<String>().convention(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
 }

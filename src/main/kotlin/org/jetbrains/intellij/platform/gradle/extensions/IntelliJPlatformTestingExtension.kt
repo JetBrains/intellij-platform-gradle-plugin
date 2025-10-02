@@ -78,10 +78,12 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     description = "Custom IntelliJ Platform dependency archive",
                 )
 
-                dependenciesExtension.create(this@all.apply {
-                    configurationName = customIntelliJPlatformDependencyConfiguration.name
-                    intellijPlatformConfigurationName = customIntellijPlatformConfigurationName
-                })
+                dependenciesExtension.create(
+                    configurations = listOf(this@all),
+                    dependencyConfigurationName = customIntellijPlatformConfigurationName,
+                    dependencyArchivesConfigurationName = customIntelliJPlatformDependencyConfiguration.name,
+                    localArchivesConfigurationName = customIntelliJPlatformLocalConfiguration.name,
+                )
 
                 val customIntelliJPlatformConfiguration = project.configurations.create(
                     name = customIntellijPlatformConfigurationName,

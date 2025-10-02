@@ -74,8 +74,9 @@ class IntelliJPlatformCacheResolver internal constructor(
     fun resolve(
         type: Any,
         version: String,
+        configurationName: String,
         configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
-    ) = resolve {
+    ) = resolve(configurationName) {
         this.type = type.toIntelliJPlatformType(version)
         this.version = version
         configure()
@@ -96,8 +97,9 @@ class IntelliJPlatformCacheResolver internal constructor(
     fun resolve(
         type: Any,
         version: Provider<String>,
+        configurationName: String,
         configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
-    ) = resolve {
+    ) = resolve(configurationName) {
         this.type = version.map { type.toIntelliJPlatformType(it) }
         this.version = version
         configure()
@@ -118,8 +120,9 @@ class IntelliJPlatformCacheResolver internal constructor(
     fun resolve(
         type: Provider<*>,
         version: Provider<String>,
+        configurationName: String,
         configure: IntelliJPlatformDependencyConfiguration.() -> Unit = {},
-    ) = resolve {
+    ) = resolve(configurationName) {
         this.type = type.zip(version) { typeValue, versionValue -> typeValue.toIntelliJPlatformType(versionValue) }
         this.version = version
         configure()
@@ -134,10 +137,11 @@ class IntelliJPlatformCacheResolver internal constructor(
      * @param configure IntelliJ Platform dependency configuration.
      * @return The path to the resolved IntelliJ Platform
      */
-    fun resolve(configure: IntelliJPlatformDependencyConfiguration.() -> Unit): Path {
+    fun resolve(configurationName: String, configure: IntelliJPlatformDependencyConfiguration.() -> Unit): Path {
         val dependenciesHelper = dependenciesHelperProvider.get()
         val requestedProvider = dependenciesHelper.requestedIntelliJPlatforms.set(
-            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply(configure)
+            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply(configure),
+            configurationName,
         )
 
         val targetDirectory = parameters.cacheDirectory.dir(
@@ -154,7 +158,7 @@ class IntelliJPlatformCacheResolver internal constructor(
 
         dependenciesHelper.addIntelliJPlatformDependency(
             requestedIntelliJPlatformProvider = requestedProvider,
-            configurationName = configuration.name,
+            configurationName = configurationName,
         )
 
         extractorService.get().extract(
