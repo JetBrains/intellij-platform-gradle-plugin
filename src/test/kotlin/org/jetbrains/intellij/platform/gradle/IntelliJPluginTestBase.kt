@@ -96,7 +96,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                     caching {
                         ides {
                             enabled = true
-                            path = File("$gradleHome", "ides")
+                            path = File("${gradleHome.invariantSeparatorsPathString}", "ides")
                         }
                     }
                 }
