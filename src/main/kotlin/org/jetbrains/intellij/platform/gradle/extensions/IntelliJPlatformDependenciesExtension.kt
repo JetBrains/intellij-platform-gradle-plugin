@@ -2624,6 +2624,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     fun composeUI() = bundledModules(
         "intellij.libraries.skiko",
         "intellij.libraries.compose.foundation.desktop",
+        "intellij.libraries.compose.runtime.desktop",
         "intellij.platform.jewel.foundation",
         "intellij.platform.compose",
         "intellij.platform.jewel.ui",
