@@ -2621,15 +2621,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * for integrating and using the Compose UI components in the IntelliJ Platform.
      */
     @Incubating
-    fun composeUI() = bundledModules(
-        "intellij.libraries.skiko",
-        "intellij.libraries.compose.foundation.desktop",
-        "intellij.libraries.compose.runtime.desktop",
-        "intellij.platform.jewel.foundation",
-        "intellij.platform.compose",
-        "intellij.platform.jewel.ui",
-        "intellij.platform.jewel.ideLafBridge",
-    )
+    fun composeUI() = dependenciesHelper.addComposeUiDependencies()
 
     companion object {
         fun register(

@@ -469,6 +469,50 @@ class IntelliJPlatformDependenciesHelper(
     )
 
     /**
+     * Adds Compose UI-related bundled modules depending on the current IntelliJ Platform build.
+     *
+     * Because composeUI() in the extension layer has no access to product info, this helper
+     * inspects the platform located at [intellijPlatformConfigurationName] and decides which
+     * modules to include.
+     */
+    internal fun addComposeUiDependencies(
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addAllLater(
+        cachedListProvider {
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
+            val productInfo = platformPath.productInfo()
+            val major = productInfo.buildNumber.toVersion().major
+
+            val modules = buildList {
+                // 2024.3+
+                if (major >= 243) {
+                    add("intellij.libraries.skiko")
+                    add("intellij.platform.compose")
+                }
+
+                // 2025.1+
+                if (major >= 251) {
+                    add("intellij.libraries.compose.foundation.desktop")
+                    add("intellij.platform.jewel.foundation")
+                    add("intellij.platform.jewel.ui")
+                    add("intellij.platform.jewel.ideLafBridge")
+                }
+
+                // 2025.3+
+                if (major >= 253) {
+                    add("intellij.libraries.compose.runtime.desktop")
+                }
+            }
+
+            modules
+                .map { createIntelliJPlatformBundledModule(it, platformPath) }
+                .onEach(action)
+        },
+    )
+
+    /**
      * A base method for adding a dependency on a local plugin for IntelliJ Platform.
      *
      * @param localPathProvider The provider of the path to the local plugin.
