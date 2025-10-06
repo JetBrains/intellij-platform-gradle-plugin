@@ -25,6 +25,7 @@ import org.jetbrains.intellij.platform.gradle.Problems
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.reportError
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.ProblemsAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -32,9 +33,7 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 import java.util.*
-import javax.inject.Inject
 import kotlin.io.path.exists
-import org.gradle.api.problems.Problems as GradleProblems
 
 /**
  * Runs the IntelliJ Plugin Verifier CLI tool to check compatibility with specified IDE builds.
@@ -48,19 +47,7 @@ import org.gradle.api.problems.Problems as GradleProblems
 // TODO: Parallel run? https://docs.gradle.org/current/userguide/worker_api.html#converting_to_worker_api
 @Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Should always run")
-abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware {
-    /**
-     * Provides access to Gradle's Problems API for structured issue reporting
-     *
-     * The Problems API enables standardized error and warning reporting with rich context information,
-     * including file locations, documentation links, and suggested solutions.
-     *
-     * @see [org.gradle.api.problems.Problems]
-     * @see [org.gradle.api.problems.ProblemReporter]
-     * @since Gradle 8.6
-     */
-    @get:Inject
-    abstract val problems: GradleProblems
+abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware, ProblemsAware {
 
     /**
      * Holds a reference to IntelliJ Platform IDEs which will be used by the IntelliJ Plugin Verifier CLI tool for verification.

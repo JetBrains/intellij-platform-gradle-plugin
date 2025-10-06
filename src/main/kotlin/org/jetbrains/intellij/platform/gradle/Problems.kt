@@ -65,6 +65,7 @@ internal object Problems {
  * @param spec An action that further configures the problem specification.
  * @return A RuntimeException that includes the original exception and the problem details.
  */
+@Suppress("UnstableApiUsage")
 internal fun ProblemReporter.reportError(
     exception: Exception,
     problemId: ProblemId,
