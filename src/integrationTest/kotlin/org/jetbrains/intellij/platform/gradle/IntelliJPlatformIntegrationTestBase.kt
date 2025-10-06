@@ -86,7 +86,7 @@ open class IntelliJPlatformIntegrationTestBase(
                 intellijPlatform {
                     caching {
                         ides {
-                            enabled = true
+                            enabled = false
                             path = File("${gradleHome.invariantSeparatorsPathString}", "ides")
                         }
                     }
