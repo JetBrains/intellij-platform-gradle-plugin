@@ -248,6 +248,11 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         buildFile.useCache()
 
         build(DEPENDENCIES, "--configuration=compileClasspath") {
+            val coordinates = when {
+                useCache -> "localIde:IC:IC-$intellijPlatformBuildNumber"
+                else -> "idea:ideaIC:$intellijPlatformVersion"
+            }
+
             assertContains(
                 """
                 compileClasspath - Compile classpath for 'main'.
@@ -268,7 +273,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 |         |    \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:IC-$intellijPlatformBuildNumber
                 |         +--- bundledModule:intellij.platform.vcs.log.impl:IC-$intellijPlatformBuildNumber (*)
                 |         \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:IC-$intellijPlatformBuildNumber
-                \--- localIde:IC:IC-$intellijPlatformBuildNumber
+                \--- $coordinates
                 """.trimIndent(),
                 output,
             )
