@@ -118,40 +118,75 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                             getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
 
                         if (sinceBuild.version.contains('*')) {
-                            val message = "The since-build='$sinceBuild' should not contain wildcard."
-                            report(message)
-                            add(message)
+                            val label = "Invalid since-build version format"
+                            val details = "The since-build='$sinceBuild' contains a wildcard character (*). Wildcards are not supported in since-build declarations and may cause compatibility issues."
+                            val solution = "Remove the wildcard from since-build in plugin.xml. Use a specific version number like '${sinceBuild.major}'."
+                            report(label) {
+                                details(details)
+                                solution(solution)
+                            }
+                            add("$label $details $solution")
                         }
                         if (sinceBuild.major < platformBuild.major) {
-                            val message = "The since-build='$sinceBuild' is lower than the target IntelliJ Platform major version: '${platformBuild.major}'."
-                            report(message)
-                            add(message)
+                            val label = "since-build is lower than target platform version"
+                            val details = "The since-build='$sinceBuild' (major version ${sinceBuild.major}) is lower than the target IntelliJ Platform major version '${platformBuild.major}'. This means your plugin declares support for older IDE versions than you're building against."
+                            val solution = "Update since-build in plugin.xml to match or exceed the target platform version: '${platformBuild.major}'."
+                            report(label) {
+                                details(details)
+                                solution(solution)
+                            }
+                            add("$label $details $solution")
                         }
                         if (sinceBuild.major >= 243 && file.parse { ideaVersion.untilBuild != null }) {
-                            val message = "The until-build property is not recommended for use. Consider using empty until-build for future plugin versions, so users can use your plugin when they update IDE to the latest version."
-                            report(message)
-                            add(message)
+                            val label = "until-build property should be removed"
+                            val details = "For IntelliJ Platform 2024.3+ (build 243+), the until-build property restricts plugin compatibility with future IDE versions. This prevents users from installing your plugin when they update to newer IDE versions."
+                            val solution = "Remove the until-build property from plugin.xml to allow forward compatibility with future IDE versions."
+                            report(label) {
+                                details(details)
+                                solution(solution)
+                            }
+                            add("$label $details $solution")
                         }
                         if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
-                            val message = "The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility='$sinceBuildJavaVersion'."
-                            report(message)
-                            add(message)
+                            val label = "Java targetCompatibility exceeds since-build requirements"
+                            val details = "Java targetCompatibility is set to '$targetCompatibilityJavaVersion', but since-build='$sinceBuild' only requires Java '$sinceBuildJavaVersion'. This creates bytecode that may not be compatible with the minimum supported IDE version."
+                            val solution = "Lower targetCompatibility to '$sinceBuildJavaVersion' or increase since-build to match the target Java version."
+                            report(label) {
+                                details(details)
+                                solution(solution)
+                            }
+                            add("$label $details $solution")
                         }
                         if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
-                            val message = "The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but since-build='$sinceBuild' property requires jvmTarget='$sinceBuildJavaVersion'."
-                            report(message)
-                            add(message)
+                            val label = "Kotlin jvmTarget exceeds since-build requirements"
+                            val details = "Kotlin jvmTarget is set to '$jvmTargetJavaVersion', but since-build='$sinceBuild' only requires Java '$sinceBuildJavaVersion'. This creates bytecode that may not be compatible with the minimum supported IDE version."
+                            val solution = "Lower Kotlin jvmTarget to '$sinceBuildJavaVersion' or increase since-build to match the JVM target version."
+                            report(label) {
+                                details(details)
+                                solution(solution)
+                            }
+                            add("$label $details $solution")
                         }
                         if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
-                            val message = "The Kotlin configuration specifies apiVersion='$kotlinApiVersion' but since-build='$sinceBuild' property requires apiVersion='$sinceBuildKotlinApiVersion'."
-                            report(message)
-                            add(message)
+                            val label = "Kotlin apiVersion exceeds since-build requirements"
+                            val details = "Kotlin apiVersion is set to '$kotlinApiVersion', but since-build='$sinceBuild' only requires Kotlin API '$sinceBuildKotlinApiVersion'. This may cause compatibility issues with the minimum supported IDE version."
+                            val solution = "Lower Kotlin apiVersion to '$sinceBuildKotlinApiVersion' or increase since-build to match the Kotlin API version."
+                            report(label) {
+                                details(details)
+                                solution(solution)
+                            }
+                            add("$label $details $solution")
                         }
                     }
                     ?: run {
-                        val message = "The plugin.xml descriptor file could not be found."
-                        report(message)
-                        add(message)
+                        val label = "Missing plugin.xml descriptor"
+                        val details = "The plugin.xml descriptor file could not be found in the expected location. This file is required to define plugin metadata, extensions, and configurations."
+                        val solution = "Create a plugin.xml file in src/main/resources/META-INF/ directory with the required plugin descriptor structure."
+                        report(label) {
+                            details(details)
+                            solution(solution)
+                        }
+                        add("$label $details $solution")
                     }
 
                 run {
@@ -165,57 +200,110 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
                     val containsEntry = gitignore.readLines().any { line -> line.contains(CACHE_DIRECTORY) }
                     if (!containsEntry) {
-                        val message = "The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file."
-                        report(message)
-                        add(message)
+                        val label = "IntelliJ Platform cache not excluded from VCS"
+                        val details = "The IntelliJ Platform cache directory ('$CACHE_DIRECTORY') is not listed in .gitignore. This directory contains downloaded IDE dependencies and should not be committed to version control."
+                        val solution = "Add '$CACHE_DIRECTORY' entry to your .gitignore file."
+                        report(label) {
+                            details(details)
+                            solution(solution)
+                        }
+                        add("$label $details $solution")
                     }
                 }
             }
 
             if (platformBuild < MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
-                val message = "The minimal supported IntelliJ Platform version is $MINIMAL_INTELLIJ_PLATFORM_VERSION ($MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER), current: $platformVersion ($platformBuild)"
-                report(message)
-                add(message)
+                val label = "IntelliJ Platform version too old"
+                val details = "The project targets IntelliJ Platform version $platformVersion (build $platformBuild), but the minimum supported version is $MINIMAL_INTELLIJ_PLATFORM_VERSION (build $MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER). Older versions are no longer maintained and may have compatibility issues."
+                val solution = "Update your IntelliJ Platform dependency to version $MINIMAL_INTELLIJ_PLATFORM_VERSION or newer."
+                report(label) {
+                    details(details)
+                    solution(solution)
+                }
+                add("$label $details $solution")
             }
             if (platformBuild >= Version(251) && kotlinVersion < Version(2)) {
-                val message = "When targeting the IntelliJ Platform in version 2025.1+ (251+), the required Kotlin version is 2.0.0+, current: $kotlinVersion"
-                report(message)
-                add(message)
+                val label = "Kotlin version too old for target platform"
+                val details = "IntelliJ Platform 2025.1+ (build 251+) requires Kotlin 2.0.0 or newer, but your project is using Kotlin $kotlinVersion. The platform's bundled Kotlin version may conflict with your project's dependencies."
+                val solution = "Update your Kotlin version to 2.0.0 or newer in your build configuration."
+                report(label) {
+                    details(details)
+                    solution(solution)
+                }
+                add("$label $details $solution")
             }
             if (platformJavaVersion > sourceCompatibilityJavaVersion) {
-                val message = "The Java configuration specifies sourceCompatibility='$sourceCompatibilityJavaVersion' but IntelliJ Platform '$platformVersion' requires sourceCompatibility='$platformJavaVersion'."
-                report(message)
-                add(message)
+                val label = "Java sourceCompatibility too low for target platform"
+                val details = "Java sourceCompatibility is set to '$sourceCompatibilityJavaVersion', but IntelliJ Platform '$platformVersion' requires Java '$platformJavaVersion'. This mismatch may prevent your plugin from compiling or using platform APIs correctly."
+                val solution = "Update sourceCompatibility to '$platformJavaVersion' in your build configuration."
+                report(label) {
+                    details(details)
+                    solution(solution)
+                }
+                add("$label $details $solution")
             }
             if (platformKotlinLanguageVersion > kotlinLanguageVersion) {
-                val message = "The Kotlin configuration specifies languageVersion='$kotlinLanguageVersion' but IntelliJ Platform '$platformVersion' requires languageVersion='$platformKotlinLanguageVersion'."
-                report(message)
-                add(message)
+                val label = "Kotlin languageVersion too low for target platform"
+                val details = "Kotlin languageVersion is set to '$kotlinLanguageVersion', but IntelliJ Platform '$platformVersion' requires Kotlin '$platformKotlinLanguageVersion'. This may cause compatibility issues with platform APIs."
+                val solution = "Update Kotlin languageVersion to '$platformKotlinLanguageVersion' in your build configuration."
+                report(label) {
+                    details(details)
+                    solution(solution)
+                }
+                add("$label $details $solution")
             }
             if (platformJavaVersion < targetCompatibilityJavaVersion) {
-                val message = "The Java configuration specifies targetCompatibility='$targetCompatibilityJavaVersion' but IntelliJ Platform '$platformVersion' requires targetCompatibility='$platformJavaVersion'."
-                report(message)
-                add(message)
+                val label = "Java targetCompatibility too high for target platform"
+                val details = "Java targetCompatibility is set to '$targetCompatibilityJavaVersion', but IntelliJ Platform '$platformVersion' only supports Java '$platformJavaVersion'. This creates bytecode that cannot be executed by the target platform."
+                val solution = "Lower targetCompatibility to '$platformJavaVersion' to match the platform's Java version."
+                report(label) {
+                    details(details)
+                    solution(solution)
+                }
+                add("$label $details $solution")
             }
             if (platformJavaVersion < jvmTargetJavaVersion) {
-                val message = "The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but IntelliJ Platform '$platformVersion' requires jvmTarget='$platformJavaVersion'."
-                report(message)
-                add(message)
+                val label = "Kotlin jvmTarget too high for target platform"
+                val details = "Kotlin jvmTarget is set to '$jvmTargetJavaVersion', but IntelliJ Platform '$platformVersion' only supports Java '$platformJavaVersion'. This creates bytecode that cannot be executed by the target platform."
+                val solution = "Lower Kotlin jvmTarget to '$platformJavaVersion' to match the platform's Java version."
+                report(label) {
+                    details(details)
+                    solution(solution)
+                }
+                add("$label $details $solution")
             }
             if (kotlinPluginAvailable && kotlinStdlibDefaultDependency) {
-                val message = "The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib"
-                report(message)
-                add(message)
+                val label = "Kotlin stdlib dependency conflict"
+                val details = "The Kotlin Standard Library (stdlib) is automatically added by the Gradle Kotlin plugin and may conflict with the version bundled in IntelliJ Platform. This can cause ClassNotFoundException or version mismatch issues at runtime."
+                val solution = "Exclude the Kotlin stdlib dependency by setting 'kotlin.stdlib.default.dependency=false' in gradle.properties. See: https://jb.gg/intellij-platform-kotlin-stdlib"
+                report(label) {
+                    details(details)
+                    solution(solution)
+                    documentedAt("https://jb.gg/intellij-platform-kotlin-stdlib")
+                }
+                add("$label $details $solution")
             }
             if (kotlinxCoroutinesLibraryPresent) {
-                val message = "The Kotlin Coroutines library must not be added explicitly to the project nor as a transitive dependency as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines"
-                report(message)
-                add(message)
+                val label = "Kotlin Coroutines library must not be added explicitly"
+                val details = "The Kotlin Coroutines library is bundled with IntelliJ Platform and should not be added as a project dependency. Including it explicitly may cause version conflicts and runtime errors."
+                val solution = "Remove kotlinx-coroutines dependencies from your build configuration. The platform provides the correct version automatically. See: https://jb.gg/intellij-platform-kotlin-coroutines"
+                report(label) {
+                    details(details)
+                    solution(solution)
+                    documentedAt("https://jb.gg/intellij-platform-kotlin-coroutines")
+                }
+                add("$label $details $solution")
             }
             if (runtimeMetadata.get()["java.vendor"] != "JetBrains s.r.o.") {
-                val message = "The currently selected Java Runtime is not JetBrains Runtime (JBR). This may lead to unexpected IDE behaviors. Please use IntelliJ Platform binary release with bundled JBR or define it explicitly with project dependencies or JVM Toolchain, see: https://jb.gg/intellij-platform-with-jbr"
-                report(message)
-                add(message)
+                val label = "Non-JetBrains Runtime detected"
+                val details = "The current Java Runtime is not JetBrains Runtime (JBR). JBR includes IDE-specific patches and optimizations. Using a different runtime may lead to unexpected behaviors, rendering issues, or missing features."
+                val solution = "Use IntelliJ Platform with bundled JBR, or configure JVM Toolchain to use JBR explicitly. See: https://jb.gg/intellij-platform-with-jbr"
+                report(label) {
+                    details(details)
+                    solution(solution)
+                    documentedAt("https://jb.gg/intellij-platform-with-jbr")
+                }
+                add("$label $details $solution")
             }
         }
             .filter { message -> mutedMessagePatterns.none { pattern -> message.contains(pattern) } }
@@ -224,12 +312,17 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             ?.also { log.warn("The following plugin configuration issues were found:\n$it") }
     }
 
-    private fun report(label: String, details: String = "", severity: Severity = Severity.WARNING) =
+    private fun report(
+        label: String,
+        severity: Severity = Severity.WARNING,
+        spec: org.gradle.api.problems.ProblemSpec.() -> Unit = {},
+    ) {
         problems.reporter.report(Problems.VerifyPluginProjectConfiguration.ConfigurationIssue) {
             contextualLabel(label)
-            details(details)
             severity(severity)
+            spec()
         }
+    }
 
     private fun getPlatformJavaVersion(buildNumber: Version) =
         PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value
