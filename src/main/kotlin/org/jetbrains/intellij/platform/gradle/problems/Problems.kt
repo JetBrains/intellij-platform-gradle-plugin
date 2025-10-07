@@ -1,4 +1,4 @@
-package org.jetbrains.intellij.platform.gradle
+package org.jetbrains.intellij.platform.gradle.problems
 
 import org.gradle.api.Action
 import org.gradle.api.problems.*
@@ -25,6 +25,10 @@ internal object Problems {
         )
 
         val VerifyPlugin = ProblemGroup.create("$ID.verify-plugin", "Verify Plugin")
+        val VerifyPluginProjectConfiguration = ProblemGroup.create(
+            "$ID.verify-plugin-project-configuration",
+            "Verify Plugin Project Configuration",
+        )
     }
 
     object VerifyPlugin {
@@ -52,6 +56,14 @@ internal object Problems {
                 Groups.VerifyPlugin,
             )
         }
+    }
+
+    object VerifyPluginProjectConfiguration {
+        val ConfigurationIssue = ProblemId.create(
+            "configuration-issue",
+            "Plugin Configuration Issue",
+            Groups.VerifyPluginProjectConfiguration,
+        )
     }
 }
 

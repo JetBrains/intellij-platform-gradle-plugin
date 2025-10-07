@@ -7,6 +7,7 @@ import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.problems.Severity
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -20,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.problems.Problems
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
@@ -39,8 +41,9 @@ import kotlin.io.path.readLines
  * @see <a href="https://jb.gg/intellij-platform-versions">Build Number Ranges</a>
  */
 @CacheableTask
+@Suppress("UnstableApiUsage")
 abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPlatformVersionAware, KotlinMetadataAware,
-    RuntimeAware, PluginAware, ModuleAware {
+    RuntimeAware, PluginAware, ModuleAware, ProblemsAware {
 
     /**
      * Root project path.
@@ -105,7 +108,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         // Get muted message patterns from the property
         val mutedMessagePatterns = mutedMessages.getOrElse(emptyList())
 
-        sequence {
+        val messages = buildList {
             if (!isModule) {
                 pluginXml.orNull
                     ?.let { file ->
@@ -115,25 +118,41 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                             getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
 
                         if (sinceBuild.version.contains('*')) {
-                            yield("The since-build='$sinceBuild' should not contain wildcard.")
+                            val message = "The since-build='$sinceBuild' should not contain wildcard."
+                            report(message)
+                            add(message)
                         }
                         if (sinceBuild.major < platformBuild.major) {
-                            yield("The since-build='$sinceBuild' is lower than the target IntelliJ Platform major version: '${platformBuild.major}'.")
+                            val message = "The since-build='$sinceBuild' is lower than the target IntelliJ Platform major version: '${platformBuild.major}'."
+                            report(message)
+                            add(message)
                         }
                         if (sinceBuild.major >= 243 && file.parse { ideaVersion.untilBuild != null }) {
-                            yield("The until-build property is not recommended for use. Consider using empty until-build for future plugin versions, so users can use your plugin when they update IDE to the latest version.")
+                            val message = "The until-build property is not recommended for use. Consider using empty until-build for future plugin versions, so users can use your plugin when they update IDE to the latest version."
+                            report(message)
+                            add(message)
                         }
                         if (sinceBuildJavaVersion < targetCompatibilityJavaVersion) {
-                            yield("The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility='$sinceBuildJavaVersion'.")
+                            val message = "The Java configuration specifies targetCompatibility=$targetCompatibilityJavaVersion but since-build='$sinceBuild' property requires targetCompatibility='$sinceBuildJavaVersion'."
+                            report(message)
+                            add(message)
                         }
                         if (sinceBuildJavaVersion < jvmTargetJavaVersion) {
-                            yield("The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but since-build='$sinceBuild' property requires jvmTarget='$sinceBuildJavaVersion'.")
+                            val message = "The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but since-build='$sinceBuild' property requires jvmTarget='$sinceBuildJavaVersion'."
+                            report(message)
+                            add(message)
                         }
                         if (sinceBuildKotlinApiVersion < kotlinApiVersion) {
-                            yield("The Kotlin configuration specifies apiVersion='$kotlinApiVersion' but since-build='$sinceBuild' property requires apiVersion='$sinceBuildKotlinApiVersion'.")
+                            val message = "The Kotlin configuration specifies apiVersion='$kotlinApiVersion' but since-build='$sinceBuild' property requires apiVersion='$sinceBuildKotlinApiVersion'."
+                            report(message)
+                            add(message)
                         }
                     }
-                    ?: yield("The plugin.xml descriptor file could not be found.")
+                    ?: run {
+                        val message = "The plugin.xml descriptor file could not be found."
+                        report(message)
+                        add(message)
+                    }
 
                 run {
                     val gitignore = gitignoreFile.orNull?.asPath ?: return@run
@@ -146,44 +165,71 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
                     val containsEntry = gitignore.readLines().any { line -> line.contains(CACHE_DIRECTORY) }
                     if (!containsEntry) {
-                        this@sequence.yield("The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file.")
+                        val message = "The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file."
+                        report(message)
+                        add(message)
                     }
                 }
             }
 
             if (platformBuild < MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
-                yield("The minimal supported IntelliJ Platform version is $MINIMAL_INTELLIJ_PLATFORM_VERSION ($MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER), current: $platformVersion ($platformBuild)")
+                val message = "The minimal supported IntelliJ Platform version is $MINIMAL_INTELLIJ_PLATFORM_VERSION ($MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER), current: $platformVersion ($platformBuild)"
+                report(message)
+                add(message)
             }
             if (platformBuild >= Version(251) && kotlinVersion < Version(2)) {
-                yield("When targeting the IntelliJ Platform in version 2025.1+ (251+), the required Kotlin version is 2.0.0+, current: $kotlinVersion")
+                val message = "When targeting the IntelliJ Platform in version 2025.1+ (251+), the required Kotlin version is 2.0.0+, current: $kotlinVersion"
+                report(message)
+                add(message)
             }
             if (platformJavaVersion > sourceCompatibilityJavaVersion) {
-                yield("The Java configuration specifies sourceCompatibility='$sourceCompatibilityJavaVersion' but IntelliJ Platform '$platformVersion' requires sourceCompatibility='$platformJavaVersion'.")
+                val message = "The Java configuration specifies sourceCompatibility='$sourceCompatibilityJavaVersion' but IntelliJ Platform '$platformVersion' requires sourceCompatibility='$platformJavaVersion'."
+                report(message)
+                add(message)
             }
             if (platformKotlinLanguageVersion > kotlinLanguageVersion) {
-                yield("The Kotlin configuration specifies languageVersion='$kotlinLanguageVersion' but IntelliJ Platform '$platformVersion' requires languageVersion='$platformKotlinLanguageVersion'.")
+                val message = "The Kotlin configuration specifies languageVersion='$kotlinLanguageVersion' but IntelliJ Platform '$platformVersion' requires languageVersion='$platformKotlinLanguageVersion'."
+                report(message)
+                add(message)
             }
             if (platformJavaVersion < targetCompatibilityJavaVersion) {
-                yield("The Java configuration specifies targetCompatibility='$targetCompatibilityJavaVersion' but IntelliJ Platform '$platformVersion' requires targetCompatibility='$platformJavaVersion'.")
+                val message = "The Java configuration specifies targetCompatibility='$targetCompatibilityJavaVersion' but IntelliJ Platform '$platformVersion' requires targetCompatibility='$platformJavaVersion'."
+                report(message)
+                add(message)
             }
             if (platformJavaVersion < jvmTargetJavaVersion) {
-                yield("The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but IntelliJ Platform '$platformVersion' requires jvmTarget='$platformJavaVersion'.")
+                val message = "The Kotlin configuration specifies jvmTarget='$jvmTargetJavaVersion' but IntelliJ Platform '$platformVersion' requires jvmTarget='$platformJavaVersion'."
+                report(message)
+                add(message)
             }
             if (kotlinPluginAvailable && kotlinStdlibDefaultDependency) {
-                yield("The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib")
+                val message = "The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib"
+                report(message)
+                add(message)
             }
             if (kotlinxCoroutinesLibraryPresent) {
-                yield("The Kotlin Coroutines library must not be added explicitly to the project nor as a transitive dependency as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines")
+                val message = "The Kotlin Coroutines library must not be added explicitly to the project nor as a transitive dependency as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines"
+                report(message)
+                add(message)
             }
             if (runtimeMetadata.get()["java.vendor"] != "JetBrains s.r.o.") {
-                yield("The currently selected Java Runtime is not JetBrains Runtime (JBR). This may lead to unexpected IDE behaviors. Please use IntelliJ Platform binary release with bundled JBR or define it explicitly with project dependencies or JVM Toolchain, see: https://jb.gg/intellij-platform-with-jbr")
+                val message = "The currently selected Java Runtime is not JetBrains Runtime (JBR). This may lead to unexpected IDE behaviors. Please use IntelliJ Platform binary release with bundled JBR or define it explicitly with project dependencies or JVM Toolchain, see: https://jb.gg/intellij-platform-with-jbr"
+                report(message)
+                add(message)
             }
         }
-            .filter { mutedMessagePatterns.none { pattern -> it.contains(pattern) } }
+            .filter { message -> mutedMessagePatterns.none { pattern -> message.contains(pattern) } }
             .joinToString("\n") { "- $it" }
             .takeIf { it.isNotEmpty() }
             ?.also { log.warn("The following plugin configuration issues were found:\n$it") }
     }
+
+    private fun report(label: String, details: String = "", severity: Severity = Severity.WARNING) =
+        problems.reporter.report(Problems.VerifyPluginProjectConfiguration.ConfigurationIssue) {
+            contextualLabel(label)
+            details(details)
+            severity(severity)
+        }
 
     private fun getPlatformJavaVersion(buildNumber: Version) =
         PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value
