@@ -59,7 +59,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
             assertContains(HEADER, output)
             assertContains(
-                "- The since-build='211' is lower than the target IntelliJ Platform major version: '$major'.", output
+                "- since-build is lower than target platform version The since-build='211' (major version 211) is lower than the target IntelliJ Platform major version '$major'. This means your plugin declares support for older IDE versions than you're building against. Update since-build in plugin.xml to match or exceed the target platform version: '$major'.", output
             )
         }
     }
@@ -76,7 +76,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Java configuration specifies sourceCompatibility='1.8' but IntelliJ Platform '$intellijPlatformVersion' requires sourceCompatibility='21'.", output
+                "- Java sourceCompatibility too low for target platform Java sourceCompatibility is set to '1.8', but IntelliJ Platform '$intellijPlatformVersion' requires Java '21'. This mismatch may prevent your plugin from compiling or using platform APIs correctly. Update sourceCompatibility to '21' in your build configuration.", output
             )
         }
     }
@@ -93,7 +93,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Java configuration specifies targetCompatibility='25' but IntelliJ Platform '$intellijPlatformVersion' requires targetCompatibility='21'.", output
+                "- Java targetCompatibility too high for target platform Java targetCompatibility is set to '25', but IntelliJ Platform '$intellijPlatformVersion' only supports Java '21'. This creates bytecode that cannot be executed by the target platform. Lower targetCompatibility to '21' to match the platform's Java version.", output
             )
         }
     }
@@ -164,7 +164,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Kotlin configuration specifies languageVersion='1.5' but IntelliJ Platform '$intellijPlatformVersion' requires languageVersion='2.1'.", output
+                "- Kotlin languageVersion too low for target platform Kotlin languageVersion is set to '1.5', but IntelliJ Platform '$intellijPlatformVersion' requires Kotlin '2.1'. This may cause compatibility issues with platform APIs. Update Kotlin languageVersion to '2.1' in your build configuration.", output
             )
         }
     }
@@ -187,7 +187,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib",
+                "- Kotlin stdlib dependency conflict The Kotlin Standard Library (stdlib) is automatically added by the Gradle Kotlin plugin and may conflict with the version bundled in IntelliJ Platform. This can cause ClassNotFoundException or version mismatch issues at runtime. Exclude the Kotlin stdlib dependency by setting 'kotlin.stdlib.default.dependency=false' in gradle.properties. See: https://jb.gg/intellij-platform-kotlin-stdlib",
                 output
             )
         }
@@ -200,7 +200,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The dependency on the Kotlin Standard Library (stdlib) is automatically added when using the Gradle Kotlin plugin and may conflict with the version provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-stdlib",
+                "- Kotlin stdlib dependency conflict The Kotlin Standard Library (stdlib) is automatically added by the Gradle Kotlin plugin and may conflict with the version bundled in IntelliJ Platform. This can cause ClassNotFoundException or version mismatch issues at runtime. Exclude the Kotlin stdlib dependency by setting 'kotlin.stdlib.default.dependency=false' in gradle.properties. See: https://jb.gg/intellij-platform-kotlin-stdlib",
                 output
             )
         }
@@ -227,7 +227,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The Kotlin Coroutines library must not be added explicitly to the project nor as a transitive dependency as it is already provided with the IntelliJ Platform, see: https://jb.gg/intellij-platform-kotlin-coroutines",
+                "- Kotlin Coroutines library must not be added explicitly The Kotlin Coroutines library is bundled with IntelliJ Platform and should not be added as a project dependency. Including it explicitly may cause version conflicts and runtime errors. Remove kotlinx-coroutines dependencies from your build configuration. The platform provides the correct version automatically. See: https://jb.gg/intellij-platform-kotlin-coroutines",
                 output
             )
         }
@@ -237,7 +237,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     @OptIn(ExperimentalPathApi::class)
     fun `report IntelliJ Platform cache missing in gitignore`() {
         val message =
-            "- The IntelliJ Platform cache directory should be excluded from the version control system. Add the '$CACHE_DIRECTORY' entry to the '.gitignore' file"
+            "- IntelliJ Platform cache not excluded from VCS The IntelliJ Platform cache directory ('$CACHE_DIRECTORY') is not listed in .gitignore. This directory contains downloaded IDE dependencies and should not be committed to version control. Add '$CACHE_DIRECTORY' entry to your .gitignore file."
 
         pluginXml write //language=xml
                 """
@@ -310,7 +310,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The until-build property is not recommended for use. Consider using empty until-build for future plugin versions, so users can use your plugin when they update IDE to the latest version.", output
+                "- until-build property should be removed For IntelliJ Platform 2024.3+ (build 243+), the until-build property restricts plugin compatibility with future IDE versions. This prevents users from installing your plugin when they update to newer IDE versions. Remove the until-build property from plugin.xml to allow forward compatibility with future IDE versions.", output
             )
         }
     }
@@ -341,7 +341,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
             assertContains(
-                "- The since-build='211.*' should not contain wildcard.", output
+                "- Invalid since-build version format The since-build='211.*' contains a wildcard character (*). Wildcards are not supported in since-build declarations and may cause compatibility issues. Remove the wildcard from since-build in plugin.xml. Use a specific version number like '211'.", output
             )
         }
     }
@@ -372,22 +372,18 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         // First run without muting - should show the warning
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(HEADER, output)
-            assertContains(
-                "- The since-build='211.*' should not contain wildcard.", output
-            )
+            assertContains("Invalid since-build version format", output)
         }
 
         // Now add the muted message pattern to gradle.properties
         gradleProperties write //language=properties
                 """
-                org.jetbrains.intellij.platform.verifyPluginProjectConfigurationMutedMessages=should not contain wildcard
+                org.jetbrains.intellij.platform.verifyPluginProjectConfigurationMutedMessages=Invalid since-build version format
                 """.trimIndent()
 
         // Run again with muting - should not show the warning
         build(CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
-            assertNotContains(
-                "- The since-build='211.*' should not contain wildcard.", output
-            )
+            assertNotContains("Invalid since-build version format The since-build='211.*'", output)
         }
     }
 }
