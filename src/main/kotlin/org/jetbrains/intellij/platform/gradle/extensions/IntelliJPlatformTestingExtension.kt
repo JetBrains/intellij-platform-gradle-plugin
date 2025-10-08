@@ -8,10 +8,12 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.tasks.DefaultTaskDependency
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -40,7 +42,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
     private inline fun <reified C : CommonParameters<T>, reified T> register() where T : Task, T : IntelliJPlatformVersionAware, T : RuntimeAware, T : SandboxAware =
         project.objects.domainObjectContainer(
             elementType = C::class,
-            factory = { project.objects.newInstance<C>(it, project) },
+            factory = { project.objects.newInstance<C>(it, project, dependenciesHelper) },
         ).apply {
             all {
                 if (project.pluginManager.isModule) {
@@ -254,6 +256,8 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     intellijPlatformTestBundledModulesConfiguration = customIntellijPlatformTestBundledModulesConfiguration.name
                 }
 
+                testDependenciesConfigurationName.set(customIntellijPlatformTestDependenciesConfiguration.name)
+
                 val prepareSandboxTask = project.tasks.register<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX.withSuffix) {
                     group = Plugin.GROUP_NAME
 
@@ -297,6 +301,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
     abstract class CommonParameters<T : Task> @Inject constructor(
         private val name: String,
         private val project: Project,
+        private val dependenciesHelper: IntelliJPlatformDependenciesHelper,
         private val taskClass: Class<T>,
     ) : IntelliJPlatformDependencyConfiguration(project.objects, project.extensionProvider), Named, ExtensionAware, Buildable {
 
@@ -305,9 +310,54 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         abstract val splitMode: Property<Boolean>
         abstract val splitModeTarget: Property<SplitModeTarget>
 
+        internal val testDependenciesConfigurationName: Property<String> = project.objects.property(String::class.java)
+
         fun plugins(configuration: Action<IntelliJPlatformPluginsExtension>) {
             configuration.execute(the<IntelliJPlatformPluginsExtension>())
         }
+
+        /**
+         * Adds a dependency on the `test-framework` library or its variant, required for testing plugins.
+         *
+         * There are multiple Test Framework variants available, which provide additional classes for testing specific modules, like:
+         * JUnit4, JUnit 5, Maven, JavaScript, Go, Java, ReSharper, etc.
+         *
+         * The version, if absent, is determined by the IntelliJ Platform build number.
+         *
+         * @param type Test framework variant type.
+         * @param version Test framework library version.
+         * @see TestFrameworkType
+         */
+        @JvmOverloads
+        fun testFramework(
+            type: TestFrameworkType,
+            version: String = Constraints.CLOSEST_VERSION,
+        ) = dependenciesHelper.addTestFrameworkDependency(
+            type = type,
+            versionProvider = dependenciesHelper.provider { version },
+            configurationName = testDependenciesConfigurationName.get(),
+        )
+
+        /**
+         * Adds a dependency on the `test-framework` library required for testing plugins.
+         *
+         * There are multiple Test Framework variants available, which provide additional classes for testing specific modules, like:
+         * JUnit4, JUnit 5, Maven, JavaScript, Go, Java, ReSharper, etc.
+         *
+         * The version, if absent, is determined by the IntelliJ Platform build number.
+         *
+         * @param type Test Framework variant type.
+         * @param version Library version.
+         * @see TestFrameworkType
+         */
+        fun testFramework(
+            type: TestFrameworkType,
+            version: Provider<String>,
+        ) = dependenciesHelper.addTestFrameworkDependency(
+            type = type,
+            versionProvider = version,
+            configurationName = testDependenciesConfigurationName.get(),
+        )
 
         val task
             get() = project.tasks.named(name, taskClass)
@@ -330,15 +380,15 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         internal val String.withSuffix get() = "${this}_${name}"
     }
 
-    abstract class RunIdeParameters @Inject constructor(name: String, project: Project) :
-        CommonParameters<RunIdeTask>(name, project, RunIdeTask::class.java)
+    abstract class RunIdeParameters @Inject constructor(name: String, project: Project, dependenciesHelper: IntelliJPlatformDependenciesHelper) :
+        CommonParameters<RunIdeTask>(name, project, dependenciesHelper, RunIdeTask::class.java)
 
-    abstract class TestIdeParameters @Inject constructor(name: String, project: Project) :
-        CommonParameters<TestIdeTask>(name, project, TestIdeTask::class.java)
+    abstract class TestIdeParameters @Inject constructor(name: String, project: Project, dependenciesHelper: IntelliJPlatformDependenciesHelper) :
+        CommonParameters<TestIdeTask>(name, project, dependenciesHelper, TestIdeTask::class.java)
 
-    abstract class TestIdeUiParameters @Inject constructor(name: String, project: Project) :
-        CommonParameters<TestIdeUiTask>(name, project, TestIdeUiTask::class.java)
+    abstract class TestIdeUiParameters @Inject constructor(name: String, project: Project, dependenciesHelper: IntelliJPlatformDependenciesHelper) :
+        CommonParameters<TestIdeUiTask>(name, project, dependenciesHelper, TestIdeUiTask::class.java)
 
-    abstract class TestIdePerformanceParameters @Inject constructor(name: String, project: Project) :
-        CommonParameters<TestIdePerformanceTask>(name, project, TestIdePerformanceTask::class.java)
+    abstract class TestIdePerformanceParameters @Inject constructor(name: String, project: Project, dependenciesHelper: IntelliJPlatformDependenciesHelper) :
+        CommonParameters<TestIdePerformanceTask>(name, project, dependenciesHelper, TestIdePerformanceTask::class.java)
 }

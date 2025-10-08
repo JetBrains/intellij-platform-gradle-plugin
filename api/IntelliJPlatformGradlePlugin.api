@@ -1286,7 +1286,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration, org/gradle/api/Buildable, org/gradle/api/Named, org/gradle/api/plugins/ExtensionAware {
-	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;Ljava/lang/Class;)V
+	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Ljava/lang/Class;)V
 	public fun getBuildDependencies ()Lorg/gradle/api/internal/tasks/DefaultTaskDependency;
 	public synthetic fun getBuildDependencies ()Lorg/gradle/api/tasks/TaskDependency;
 	public abstract fun getLocalPath ()Lorg/gradle/api/file/DirectoryProperty;
@@ -1299,6 +1299,10 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun plugins (Lorg/gradle/api/Action;)V
 	public final fun prepareSandboxTask (Lorg/gradle/api/Action;)V
 	public final fun task (Lorg/gradle/api/Action;)V
+	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;)V
+	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Ljava/lang/String;)V
+	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Lorg/gradle/api/provider/Provider;)V
+	public static synthetic fun testFramework$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters;Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Ljava/lang/String;ILjava/lang/Object;)V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$Companion {
@@ -1306,19 +1310,19 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$RunIdeParameters : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters {
-	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;)V
+	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;)V
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$TestIdeParameters : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters {
-	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;)V
+	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;)V
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$TestIdePerformanceParameters : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters {
-	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;)V
+	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;)V
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$TestIdeUiParameters : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters {
-	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;)V
+	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;)V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/flow/StopShimServerAction : org/gradle/api/flow/FlowAction {

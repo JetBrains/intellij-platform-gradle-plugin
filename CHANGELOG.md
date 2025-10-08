@@ -5,6 +5,7 @@
 ### Added
 
 - Add `composeUI()` dependency helper to add Compose UI framework dependencies.
+- Introduce `testFramework` support in `intellijPlatformTesting` extension and add corresponding test cases. JetBrains/intellij-platform-gradle-plugin#2022
 
 ### Changed
 
