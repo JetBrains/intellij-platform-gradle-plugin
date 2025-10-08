@@ -57,8 +57,8 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
             projectProperties = defaultProjectProperties + mapOf("sinceBuild" to "203"),
         ) {
             output containsText issuesFoundSentence
-            output containsText "- The since-build='203' is lower than the target IntelliJ Platform major version: '$major'."
-            output containsText "- The Java configuration specifies targetCompatibility=21 but since-build='203' property requires targetCompatibility='11'."
+            output containsText "- since-build is lower than target platform version The since-build='203' (major version 203) is lower than the target IntelliJ Platform major version '$major'. This means your plugin declares support for older IDE versions than you're building against. Update since-build in plugin.xml to match or exceed the target platform version: '$major'."
+            output containsText "- Java targetCompatibility exceeds since-build requirements Java targetCompatibility is set to '21', but since-build='203' only requires Java '11'. This creates bytecode that may not be compatible with the minimum supported IDE version. Lower targetCompatibility to '11' or increase since-build to match the target Java version."
         }
     }
 }
