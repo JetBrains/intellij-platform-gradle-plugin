@@ -196,26 +196,40 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     override fun exec() {
         val file = archiveFile.orNull?.asPath
         if (file == null || !file.exists()) {
+            val label = "Plugin archive file not found"
+            val details = "The plugin archive file ${file ?: "is not specified"} does not exist or could not be found. This typically happens when the BuildPluginTask has not been executed or its output location was changed."
+            val solution = "Ensure the BuildPluginTask has been executed successfully and verify the archiveFile property points to a valid plugin artifact."
+
             throw problems.reporter.reportError(
-                IllegalStateException("Plugin file $file does not exist"),
+                IllegalStateException("$label $details $solution"),
                 Problems.VerifyPlugin.InvalidPlugin,
                 problemsReportUrl,
             ) {
+                contextualLabel(label)
+                details(details)
+                solution(solution)
                 fileLocation(file?.toString() ?: "")
-                details("This happened because the plugin you're verifying could not be found")
             }
         }
 
         log.debug("Distribution file: $file")
 
         val executable = pluginVerifierExecutable.orNull?.asPath
-            ?: throw problems.reporter.reportError(
-                GradleException("No IntelliJ Plugin Verifier executable found"),
-                Problems.VerifyPlugin.InvalidPluginVerifier,
-                problemsReportUrl,
-            ) {
-                documentedAt("https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification")
-                solution("Please ensure the `pluginVerifier()` entry is present in the project dependencies section or `intellijPlatform.pluginVerification.cliPath` extension property is set")
+            ?: run {
+                val label = "IntelliJ Plugin Verifier executable not found"
+                val details = "The IntelliJ Plugin Verifier CLI tool executable could not be located. This dependency is required to perform plugin verification against target IDE versions."
+                val solution = "Add the pluginVerifier() dependency in the project dependencies section: dependencies { intellijPlatform { pluginVerifier() } }, or configure the intellijPlatform.pluginVerification.cliPath extension property to point to a local Plugin Verifier installation."
+
+                throw problems.reporter.reportError(
+                    GradleException("$label $details $solution"),
+                    Problems.VerifyPlugin.InvalidPluginVerifier,
+                    problemsReportUrl,
+                ) {
+                    contextualLabel(label)
+                    details(details)
+                    solution(solution)
+                    documentedAt("https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification")
+                }
             }
 
         log.debug("Verifier path: $executable")
@@ -224,13 +238,19 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
 
         with(ides) {
             if (isEmpty) {
+                val label = "No IDE versions configured for verification"
+                val details = "The IntelliJ Plugin Verifier requires at least one IDE version to verify the plugin against, but none were configured. IDE versions are specified through the intellijPlatform.pluginVerification.ides block."
+                val solution = "Configure IDE versions in the intellijPlatform.pluginVerification.ides block (e.g., ides { recommended() }) and ensure defaultRepositories() or at least localPlatformArtifacts() is present in the repositories section to resolve IDE artifacts."
+
                 throw problems.reporter.reportError(
-                    GradleException("No IDE resolved for verification with the IntelliJ Plugin Verifier"),
+                    GradleException("$label $details $solution"),
                     Problems.VerifyPlugin.InvalidIDEs,
                     problemsReportUrl,
                 ) {
+                    contextualLabel(label)
+                    details(details)
+                    solution(solution)
                     documentedAt("https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides")
-                    solution("Please ensure the `intellijPlatform.pluginVerification.ides` extension block is configured along with the `defaultRepositories()` (or at least `localPlatformArtifacts()`) entry in the repositories section")
                 }
             }
             args(
@@ -307,12 +327,18 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
                 .dropLastWhile { !it.startsWith(" ") }
                 .joinToString("\n")
 
+            val label = "Invalid plugin structure detected"
+            val details = "The Plugin Verifier determined that the provided plugin artifact does not have a valid plugin structure. This may indicate missing plugin.xml, incorrect JAR structure, or other structural issues.\n$errorMessage"
+            val solution = "Verify the plugin build process is completing successfully and the generated archive contains a valid plugin structure with META-INF/plugin.xml and required classes."
+
             throw problems.reporter.reportError(
-                GradleException(errorMessage),
+                GradleException("$label $details $solution"),
                 Problems.VerifyPlugin.InvalidPlugin,
                 problemsReportUrl,
             ) {
-                details("Verification failed because the plugin(s) provided are not valid")
+                contextualLabel(label)
+                details(details)
+                solution(solution)
             }
         }
 
@@ -321,11 +347,45 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
         collectedProblems.forEach { (ideVersion, ideProblems) ->
             ideProblems.forEach { (failureLevel, issues) ->
                 issues.forEach { (title, description) ->
+                    val label = "$title [${failureLevel.sectionHeading}]"
+                    val details = buildString {
+                        append("IDE Version: $ideVersion")
+                        append("\n")
+                        append(failureLevel.message)
+                        append("\n\n")
+                        append(description)
+                    }
+                    val solution = when (failureLevel) {
+                        FailureLevel.COMPATIBILITY_PROBLEMS, FailureLevel.COMPATIBILITY_WARNINGS ->
+                            "Review the compatibility issues and update your plugin code to use compatible APIs for the target IDE version. Consider updating dependency versions or adjusting the since-build/until-build range."
+                        FailureLevel.DEPRECATED_API_USAGES ->
+                            "Replace deprecated API usage with recommended alternatives. Check the IDE's API documentation for migration paths."
+                        FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES ->
+                            "Remove usage of APIs scheduled for removal and migrate to replacement APIs immediately to ensure future compatibility."
+                        FailureLevel.EXPERIMENTAL_API_USAGES ->
+                            "Be aware that experimental APIs may change without notice. Consider using stable alternatives or accept the risk of future API changes."
+                        FailureLevel.INTERNAL_API_USAGES ->
+                            "Replace internal API usage with public APIs. Internal APIs are not intended for plugin use and may break compatibility."
+                        FailureLevel.OVERRIDE_ONLY_API_USAGES ->
+                            "Override-only APIs should only be overridden in subclasses, not called directly. Review your usage and follow the API contract."
+                        FailureLevel.NON_EXTENDABLE_API_USAGES ->
+                            "Do not extend classes or interfaces marked as non-extendable. Use composition or find alternative extension points."
+                        FailureLevel.PLUGIN_STRUCTURE_WARNINGS ->
+                            "Fix the plugin structure issues identified. Ensure plugin.xml is valid and all required files are present."
+                        FailureLevel.MISSING_DEPENDENCIES ->
+                            "Add the missing plugin dependencies to your plugin.xml <depends> section or include them in your plugin distribution."
+                        FailureLevel.INVALID_PLUGIN ->
+                            "Fix the plugin structure to create a valid plugin artifact. Ensure META-INF/plugin.xml exists and is properly formatted."
+                        FailureLevel.NOT_DYNAMIC ->
+                            "If dynamic loading is required, review the plugin structure and ensure all components support dynamic loading. Otherwise, accept that IDE restart is needed."
+                    }
+
                     problems.reporter.report(
                         Problems.VerifyPlugin.VerificationFailure(failureLevel),
                     ) {
-                        contextualLabel(title)
-                        details(description)
+                        contextualLabel(label)
+                        details(details)
+                        solution(solution)
                         severity(
                             when {
                                 failureLevel in failureLevels -> Severity.ERROR
