@@ -14,6 +14,7 @@
 
 - Refactor IntelliJ Platform type resolution and validation to exclude unavailable distribution constrains JetBrains/intellij-platform-gradle-plugin#2027
 - Refactor `ide` and `ides` methods to rely on the cacheable IntelliJ Platform dependency creation.
+- Refactor `IntelliJPlatformDependenciesHelper` to replace `DependencyHandler` with `DependencyFactory` for dependency creation. JetBrains/intellij-platform-gradle-plugin#2024
 
 ## [2.9.0] - 2025-09-07
 
