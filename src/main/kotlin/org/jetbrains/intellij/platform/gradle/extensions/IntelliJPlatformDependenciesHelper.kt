@@ -12,6 +12,7 @@ import org.gradle.api.Incubating
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.artifacts.dsl.DependencyFactory
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
 import org.gradle.api.file.ProjectLayout
@@ -55,7 +56,7 @@ import kotlin.io.path.*
  * Helper class for managing dependencies on the IntelliJ Platform in Gradle projects.
  *
  * @param configurations The Gradle [ConfigurationContainer] to manage configurations.
- * @param dependencies The Gradle [DependencyHandler] to manage dependencies.
+ * @param dependencyFactory The Gradle [DependencyHandler] to manage dependencies.
  * @param layout The Gradle [ProjectLayout] to manage layout providers.
  * @param objects The Gradle [ObjectFactory] used for creating objects.
  * @param providers The Gradle [ProviderFactory] used for creating providers.
@@ -66,7 +67,7 @@ import kotlin.io.path.*
  */
 class IntelliJPlatformDependenciesHelper(
     private val configurations: ConfigurationContainer,
-    private val dependencies: DependencyHandler,
+    private val dependencyFactory: DependencyFactory,
     private val layout: ProjectLayout,
     private val objects: ObjectFactory,
     private val providers: ProviderFactory,
@@ -827,15 +828,11 @@ class IntelliJPlatformDependenciesHelper(
         requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: '$version'" }
         requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
 
+        val group = type.installer.groupId
+        val name = type.installer.artifactId
         val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
 
-        return dependencies.create(
-            group = type.installer.groupId,
-            name = type.installer.artifactId,
-            classifier = classifier,
-            ext = extension,
-            version = version,
-        )
+        return dependencyFactory.create(group, name, version, classifier, extension)
     }
 
     /**
@@ -866,13 +863,10 @@ class IntelliJPlatformDependenciesHelper(
             }
         }.let { (type, classifier) -> type.toString() to classifier }
 
-        return dependencies.create(
-            group = jetBrainsClientType.groupId,
-            name = jetBrainsClientType.artifactId,
-            version = buildNumberProvider.get(),
-            ext = extension,
-            classifier = classifier,
-        )
+        val group = jetBrainsClientType.groupId
+        val name = jetBrainsClientType.artifactId
+
+        return dependencyFactory.create(group, name, buildNumberProvider.get(), classifier, extension)
     }
 
     /**
@@ -881,7 +875,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param path Relative path to the library, like: `lib/testFramework.jar`.
      * @param platformPath Path to the current IntelliJ Platform.
      */
-    private fun createBundledLibrary(path: String, platformPath: Path) = dependencies.create(
+    private fun createBundledLibrary(path: String, platformPath: Path) = dependencyFactory.create(
         objects.fileCollection().from(platformPath.resolve(path)),
     )
 
@@ -894,11 +888,10 @@ class IntelliJPlatformDependenciesHelper(
     private fun createIntelliJPlatform(type: IntelliJPlatformType, version: String): Dependency {
         requireNotNull(type.maven) { "Specified type '$type' has no artifact coordinates available." }
 
-        return dependencies.create(
-            group = type.maven.groupId,
-            name = type.maven.artifactId,
-            version = version,
-        )
+        val group = type.maven.groupId
+        val name = type.maven.artifactId
+
+        return dependencyFactory.create(group, name, version)
     }
 
     /**
@@ -912,6 +905,9 @@ class IntelliJPlatformDependenciesHelper(
         version: String,
     ): Dependency {
         requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
+
+        val group = type.installer.groupId
+        val name = type.installer.artifactId
 
         if (type == IntelliJPlatformType.Rider) {
             log.warn("Using Rider as a target IntelliJ Platform with `useInstaller = true` is currently not supported, please set `useInstaller = false` instead. See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1852")
@@ -927,13 +923,7 @@ class IntelliJPlatformDependenciesHelper(
             }
         }.let { (type, classifier) -> type.toString() to classifier }
 
-        return dependencies.create(
-            group = type.installer.groupId,
-            name = type.installer.artifactId,
-            version = version,
-            ext = extension,
-            classifier = classifier,
-        )
+        return dependencyFactory.create(group, name, version, classifier, extension)
     }
 
     /**
@@ -963,11 +953,10 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
-        return dependencies.create(
-            group = Dependencies.LOCAL_IDE_GROUP,
-            name = type.code,
-            version = version,
-        )
+        val group = Dependencies.LOCAL_IDE_GROUP
+        val name = type.code
+
+        return dependencyFactory.create(group, name, version)
     }
 
     /**
@@ -985,11 +974,10 @@ class IntelliJPlatformDependenciesHelper(
         val groupId = group.substringBefore('@').ifEmpty { Dependencies.MARKETPLACE_GROUP }
         val channel = group.substringAfter('@', "")
 
-        return dependencies.create(
-            group = "$channel.$groupId".trim('.'),
-            name = pluginId.trim(),
-            version = version,
-        )
+        val group = "$channel.$groupId".trim('.')
+        val name = pluginId.trim()
+
+        return dependencyFactory.create(group, name, version)
     }
 
     /**
@@ -1041,11 +1029,9 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
-        return dependencies.create(
-            group = Dependencies.BUNDLED_PLUGIN_GROUP,
-            name = id,
-            version = version,
-        )
+        val group = Dependencies.BUNDLED_PLUGIN_GROUP
+
+        return dependencyFactory.create(group, id, version)
     }
 
     /**
@@ -1059,9 +1045,9 @@ class IntelliJPlatformDependenciesHelper(
         requireNotNull(bundledModule) { "Specified bundledModule '$id' doesn't exist." }
 
         val classpath = bundledModule.classpath.paths.map { it.safePathString }
-
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
-        return dependencies.create(group, name, version)
+
+        return dependencyFactory.create(group, name, version)
     }
 
     /**
@@ -1180,6 +1166,7 @@ class IntelliJPlatformDependenciesHelper(
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
         val version = productInfo.fullVersion + "-" + (plugin.pluginVersion ?: "0.0.0")
+        val group = Dependencies.LOCAL_PLUGIN_GROUP
         val name = plugin.pluginId ?: artifactPath.name
 
         writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version, artifactPath) {
@@ -1193,11 +1180,7 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
-        return dependencies.create(
-            group = Dependencies.LOCAL_PLUGIN_GROUP,
-            name = name,
-            version = version,
-        )
+        return dependencyFactory.create(group, name, version)
     }
 
     /**
@@ -1224,6 +1207,8 @@ class IntelliJPlatformDependenciesHelper(
         val javaVersion = runtimeMetadata["java.version"]
         requireNotNull(javaVersion)
 
+        val group = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP
+
         // E.g.: JBR
         val name = javaVendorVersion.substringBefore(javaVersion).trim('-')
         // It is crucial to use the full version.
@@ -1244,11 +1229,7 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
-        return dependencies.create(
-            group = Dependencies.LOCAL_JETBRAINS_RUNTIME_GROUP,
-            name = name,
-            version = version,
-        )
+        return dependencyFactory.create(group, name, version)
     }
 
     /**
@@ -1268,12 +1249,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version JetBrains Runtime (JBR) dependency version
      */
     internal fun createJetBrainsRuntime(version: String) =
-        dependencies.create(
-            group = "com.jetbrains",
-            name = "jbr",
-            version = version,
-            ext = "tar.gz",
-        )
+        dependencyFactory.create("com.jetbrains", "jbr", version, null, "tar.gz")
 
     /**
      * Creates IntelliJ Plugin Verifier CLI tool dependency.
@@ -1369,7 +1345,7 @@ class IntelliJPlatformDependenciesHelper(
             .map { it.safePathString }.toSet()
 
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
-        return dependencies.create(group, name, version)
+        return dependencyFactory.create(group, name, version)
     }
 
     /**
@@ -1387,12 +1363,7 @@ class IntelliJPlatformDependenciesHelper(
         classifier: String? = null,
         extension: String? = null,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
-    ) = dependencies.create(
-        group = coordinates.groupId,
-        name = coordinates.artifactId,
-        classifier = classifier,
-        ext = extension,
-    ).apply {
+    ) = dependencyFactory.create(coordinates.groupId, coordinates.artifactId, null, classifier, extension).apply {
         val requestedIntelliJPlatform by lazy {
             requestedIntelliJPlatforms[intellijPlatformConfigurationName].get()
         }

@@ -211,7 +211,7 @@ val Project.extensionProvider
 internal val Project.dependenciesHelper
     get() = IntelliJPlatformDependenciesHelper(
         configurations,
-        dependencies,
+        dependencyFactory,
         layout,
         objects,
         providers,
