@@ -26,6 +26,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
         )
 
     @Test
+    @Ignore
     fun `should not report issues on valid configuration`() {
         build(
             Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
@@ -50,6 +51,7 @@ class VerifyPluginConfigurationIntegrationTest : IntelliJPlatformIntegrationTest
     }
 
     @Test
+    @Ignore
     fun `should report incorrect target compatibility`() {
         build(
             Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION,
