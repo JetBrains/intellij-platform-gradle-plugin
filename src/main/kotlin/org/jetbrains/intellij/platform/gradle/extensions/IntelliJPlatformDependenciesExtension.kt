@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.extensions
 import org.gradle.api.Action
 import org.gradle.api.Incubating
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.file.Directory
@@ -12,6 +13,7 @@ import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.exclude
 import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -19,6 +21,8 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependenc
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.models.coroutines
+import org.jetbrains.intellij.platform.gradle.models.kotlinStdlib
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.InstrumentCodeTask
@@ -2636,5 +2640,58 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
                 extensionProvider,
                 objects,
             )
+    }
+}
+
+/**
+ * Excludes all Kotlin stdlib transitive dependencies.
+ *
+ * This helper excludes the following Kotlin stdlib modules:
+ * - `kotlin-stdlib`
+ * - `kotlin-stdlib-jdk8`
+ *
+ * Example usage:
+ * ```kotlin
+ * dependencies {
+ *     testImplementation(libs.someLibrary) {
+ *         excludeKotlinStdlib()
+ *     }
+ * }
+ * ```
+ *
+ * @see kotlinStdlib
+ */
+fun ModuleDependency.excludeKotlinStdlib() {
+    kotlinStdlib.forEach { coordinates ->
+        exclude(coordinates.groupId, coordinates.artifactId)
+    }
+}
+
+/**
+ * Excludes all Kotlin Coroutines transitive dependencies.
+ *
+ * This helper excludes the following coroutines modules from both `org.jetbrains.kotlinx` and `com.intellij.platform` groups:
+ * - `kotlinx-coroutines-core`
+ * - `kotlinx-coroutines-core-jvm`
+ * - `kotlinx-coroutines-jdk8`
+ * - `kotlinx-coroutines-debug`
+ * - `kotlinx-coroutines-guava`
+ * - `kotlinx-coroutines-slf4j`
+ * - `kotlinx-coroutines-test`
+ *
+ * Example usage:
+ * ```kotlin
+ * dependencies {
+ *     testImplementation(libs.kotestAssertions) {
+ *         excludeCoroutines()
+ *     }
+ * }
+ * ```
+ *
+ * @see coroutines
+ */
+fun ModuleDependency.excludeCoroutines() {
+    coroutines.forEach { coordinates ->
+        exclude(coordinates.groupId, coordinates.artifactId)
     }
 }

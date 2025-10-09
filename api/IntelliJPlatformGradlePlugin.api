@@ -940,6 +940,11 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtensionKt {
+	public static final fun excludeCoroutines (Lorg/gradle/api/artifacts/ModuleDependency;)V
+	public static final fun excludeKotlinStdlib (Lorg/gradle/api/artifacts/ModuleDependency;)V
+}
+
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper {
 	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/artifacts/dsl/DependencyFactory;Lorg/gradle/api/file/ProjectLayout;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/lang/String;Lorg/gradle/api/invocation/Gradle;Ljava/nio/file/Path;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
 }
@@ -1452,6 +1457,8 @@ public final class org/jetbrains/intellij/platform/gradle/models/Coordinates {
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/CoordinatesKt {
+	public static final fun getCoroutines ()Ljava/util/Set;
+	public static final fun getKotlinStdlib ()Ljava/util/Set;
 	public static final fun resolveLatestVersion (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;)Ljava/lang/String;
 	public static synthetic fun resolveLatestVersion$default (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
 }

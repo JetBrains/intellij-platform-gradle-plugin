@@ -86,29 +86,7 @@ private val explicitExclusions = setOf(
     Coordinates("org.jetbrains", "jetCheck"),
     Coordinates("org.hamcrest", "hamcrest-core"),
     Coordinates("org.jetbrains.teamcity", "serviceMessages"),
-
-    // Kotlin
-    Coordinates("org.jetbrains.kotlin", "kotlin-stdlib"),
-    Coordinates("org.jetbrains.kotlin", "kotlin-stdlib-jdk8"),
-
-    // KotlinX Coroutines
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-core"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-debug"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-guava"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-slf4j"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-test"),
-
-    // KotlinX Coroutines repacked in IntelliJ Platform
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-core-jvm"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-jdk8"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-core"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-debug"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-guava"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-slf4j"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-test"),
-)
+) + kotlinStdlib + coroutines
 
 private val fallbackExclusions = setOf(
     // TestFrameworkType.Platform
