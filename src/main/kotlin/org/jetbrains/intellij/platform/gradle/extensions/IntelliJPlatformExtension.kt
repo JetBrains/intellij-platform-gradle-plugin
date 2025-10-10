@@ -607,7 +607,11 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         companion object : Registrable<PluginConfiguration> {
             override fun register(project: Project, target: Any) =
                 target.configureExtension<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION) {
-                    version.convention(project.provider { project.version.toString() })
+                    version.convention(
+                        project.provider {
+                            project.version.toString().takeIf { it != "unspecified" }.orEmpty()
+                        },
+                    )
                 }
         }
     }
