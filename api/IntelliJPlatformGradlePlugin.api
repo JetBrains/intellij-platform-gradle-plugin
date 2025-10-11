@@ -343,6 +343,7 @@ public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformType$C
 
 public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformTypeKt {
 	public static final fun toIntelliJPlatformType (Ljava/lang/Object;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public static final fun validateVersion (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/ProductMode : java/lang/Enum {
