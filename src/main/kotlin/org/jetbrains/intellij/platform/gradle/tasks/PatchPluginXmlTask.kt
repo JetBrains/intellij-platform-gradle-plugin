@@ -232,7 +232,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
             with(document) {
                 patch(pluginId, "id")
                 patch(pluginName, "name")
-                patch(pluginVersion.takeIf { it.get() != Project.DEFAULT_VERSION }, "version")
+                patch(pluginVersion.takeIf { it.get() != Project.DEFAULT_VERSION && it.get().isNotBlank() }, "version")
                 patch(pluginDescription, "description", isCDATA = true)
                 patch(changeNotes, "change-notes", isCDATA = true)
 
