@@ -232,29 +232,33 @@ class IntelliJPlatformDependenciesHelper(
         }
 
         configurations[localArchivesConfigurationName].dependencies.addAllLater(
-            requestsProvider.map { requests ->
-                requests.filter { it.useCache }
-                    .map { requests ->
-                        requests.let {
-                            val localPath = cacheResolver.resolve(localArchivesConfigurationName) {
-                                type = it.type
-                                version = it.version
-                                productMode = it.productMode
-                                useInstaller = it.useInstaller
-                                useCache = true
+            cachedListProvider {
+                requestsProvider.map { requests ->
+                    requests.filter { it.useCache }
+                        .map { requests ->
+                            requests.let {
+                                val localPath = cacheResolver.resolve(localArchivesConfigurationName) {
+                                    type = it.type
+                                    version = it.version
+                                    productMode = it.productMode
+                                    useInstaller = it.useInstaller
+                                    useCache = true
+                                }
+                                val platformPath = resolveArtifactPath(localPath)
+                                createIntelliJPlatformLocal(platformPath)
                             }
-                            val platformPath = resolveArtifactPath(localPath)
-                            createIntelliJPlatformLocal(platformPath)
                         }
-                    }
-            },
+                }.get()
+            }
         )
 
         configurations[dependencyArchivesConfigurationName].dependencies.addAllLater(
-            requestsProvider.map { requests ->
-                requests
-                    .filter { !it.useCache }
-                    .map { createIntelliJPlatformDependency(it) }
+            cachedListProvider {
+                requestsProvider.map { requests ->
+                    requests
+                        .filter { !it.useCache }
+                        .map { createIntelliJPlatformDependency(it) }
+                }.get()
             },
         )
     }
@@ -801,6 +805,8 @@ class IntelliJPlatformDependenciesHelper(
      */
     private fun createIntelliJPlatformDependency(requestedIntelliJPlatform: RequestedIntelliJPlatform) =
         with(requestedIntelliJPlatform) {
+            runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
+
             when {
                 productMode == ProductMode.FRONTEND -> createJetBrainsClient(type, version)
                 type == IntelliJPlatformType.AndroidStudio -> createAndroidStudio(version)
@@ -818,6 +824,8 @@ class IntelliJPlatformDependenciesHelper(
      */
     private fun createAndroidStudio(version: String): Dependency {
         val type = IntelliJPlatformType.AndroidStudio
+        runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
+
         val downloadLink = providers.of(AndroidStudioDownloadLinkValueSource::class) {
             parameters {
                 androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
@@ -842,6 +850,8 @@ class IntelliJPlatformDependenciesHelper(
      */
     private fun createJetBrainsClient(type: IntelliJPlatformType, version: String): Dependency {
         val jetBrainsClientType = requireNotNull(IntelliJPlatformType.JetBrainsClient.installer)
+        runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
+        runCatching { IntelliJPlatformType.JetBrainsClient.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
 
         val buildNumberProvider = providers.of(ProductReleaseBuildValueSource::class) {
             parameters.productsReleasesCdnBuildsUrl = providers[GradleProperties.ProductsReleasesCdnBuildsUrl]

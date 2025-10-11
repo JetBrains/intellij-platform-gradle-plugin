@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 
 // TODO any changes must be synchronized with
@@ -28,6 +29,7 @@ enum class IntelliJPlatformType(
         maven = null,
         installer = Coordinates("com.google.android.studio", "android-studio"),
     ),
+
     @Deprecated("Aqua (QA) is no longer available as a target IntelliJ Platform")
     Aqua(
         code = "QA",
@@ -64,13 +66,11 @@ enum class IntelliJPlatformType(
         maven = Coordinates("com.jetbrains.intellij.goland", "goland"),
         installer = Coordinates("go", "goland"),
     ),
-    @Deprecated("Starting with version 2025.3, IntelliJ IDEA Community (IC) is not available as a target IntelliJ Platform", replaceWith = ReplaceWith("IntellijIdea"))
     IntellijIdeaCommunity(
         code = "IC",
         maven = Coordinates("com.jetbrains.intellij.idea", "ideaIC"),
         installer = Coordinates("idea", "ideaIC"),
     ),
-    @Deprecated("Starting with version 2025.3, IntelliJ IDEA Ultimate (IU) is now substituted with IntelliJ IDEA (IU)", replaceWith = ReplaceWith("IntellijIdea"))
     IntellijIdeaUltimate(
         code = "IU",
         maven = Coordinates("com.jetbrains.intellij.idea", "ideaIU"),
@@ -126,6 +126,7 @@ enum class IntelliJPlatformType(
         maven = Coordinates("com.jetbrains.intellij.webstorm", "webstorm"),
         installer = Coordinates("webstorm", "WebStorm"),
     ),
+
     @Deprecated("Writerside (WRS) is no longer available as a target IntelliJ Platform")
     Writerside(
         code = "WRS",
@@ -133,6 +134,9 @@ enum class IntelliJPlatformType(
         installer = Coordinates("writerside", "writerside"),
     ),
     ;
+
+    internal val log = Logger(javaClass)
+
 
     companion object {
         private val map = values().associateBy(IntelliJPlatformType::code)
@@ -148,11 +152,13 @@ enum class IntelliJPlatformType(
         fun fromCode(code: String) = requireNotNull(map[code]) {
             "Specified type '$code' is unknown. Supported values: ${values().joinToString()}"
         }
+
         /**
          * Note: this method returns [IntellijIdea] for `IU` value, ignoring the [IntellijIdeaUltimate] type.
          *
          * @param code the product code name
-         * @return the IntelliJ Platform type for the specified code name
+         * @param version the version string
+         * @return the IntelliJ Platform type for the specified code name.
          * @throws IllegalArgumentException
          */
         @Throws(IllegalArgumentException::class)
@@ -172,22 +178,7 @@ enum class IntelliJPlatformType(
                         }
                     }
                 }
-                /**
-                 * If IC is parsed with the version higher than
-                 * [Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER] or [Constraints.UNIFIED_INTELLIJ_IDEA_VERSION],
-                 * we set it to `null` as IC is no longer published.
-                 */
 
-                this == IntellijIdeaCommunity -> {
-                    with(Version.parse(version)) {
-                        when {
-                            isBuildNumber() && this >= Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER -> null
-                            !isBuildNumber() && this >= Constraints.UNIFIED_INTELLIJ_IDEA_VERSION -> null
-                            else -> IntellijIdeaCommunity
-                        }
-
-                    }
-                }
                 else -> this
             }
         }
@@ -200,14 +191,49 @@ enum class IntelliJPlatformType(
  * Maps the value to an [IntelliJPlatformType].
  *
  * This extension function transforms [Any] value that can be converted into [IntelliJPlatformType].
+ * Also validates that the type-version combination is valid.
  *
  * @receiver [Any] value that can be converted to [IntelliJPlatformType]
+ * @param version The version string to help determine the correct type
  * @return [IntelliJPlatformType] instance
- * @throws IllegalArgumentException if the value cannot be converted to [IntelliJPlatformType]
+ * @throws IllegalArgumentException if the value cannot be converted to [IntelliJPlatformType] or if the combination is invalid
  */
 @Throws(IllegalArgumentException::class)
 fun Any.toIntelliJPlatformType(version: String) = when (this) {
     is IntelliJPlatformType -> this
     is String -> IntelliJPlatformType.fromCode(this, version)
     else -> throw IllegalArgumentException("Invalid argument type: '$javaClass'. Supported types: String or ${IntelliJPlatformType::class.java}")
+}
+
+/**
+ * Validates that the given version is compatible with this IntelliJ Platform type.
+ * For IntelliJ IDEA Community (IC), versions 2025.3+ are not available.
+ *
+ * @receiver The [IntelliJPlatformType] to validate
+ * @param version The version string to validate
+ * @return The same [IntelliJPlatformType] if valid
+ * @throws IllegalArgumentException if the version is not compatible with this type
+ */
+@Throws(IllegalArgumentException::class)
+fun IntelliJPlatformType.validateVersion(version: String) = also {
+    fun test(buildConstraint: Version, versionConstraint: Version, message: String) = with(Version.parse(version)) {
+        this >= when {
+            isBuildNumber() -> buildConstraint
+            else -> versionConstraint
+        }
+    }.let { matches ->
+        if (matches) {
+            throw IllegalArgumentException(message)
+        }
+    }
+
+    when (this) {
+        IntelliJPlatformType.IntellijIdeaCommunity -> test(
+            Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER,
+            Constraints.UNIFIED_INTELLIJ_IDEA_VERSION,
+            "IntelliJ IDEA Community (IC) is no longer published since ${Constraints.UNIFIED_INTELLIJ_IDEA_VERSION} (${Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER}), use: intellijIdea(\"$version\")",
+        )
+
+        else -> {}
+    }
 }

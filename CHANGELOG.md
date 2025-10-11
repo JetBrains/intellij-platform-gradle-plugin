@@ -7,10 +7,12 @@
 - Add `composeUI()` dependency helper to add Compose UI framework dependencies.
 - Introduce `testFramework` support in `intellijPlatformTesting` extension and add corresponding test cases. JetBrains/intellij-platform-gradle-plugin#2022
 - Add `ModuleDependency.excludeKotlinStdlib()` and `ModuleDependency.excludeCoroutines()` extension function to exclude all Kotlin stdlib and Kotlinx Coroutines transitive dependencies JetBrains/intellij-platform-gradle-plugin#2029
+ - Improve deprecated IntelliJ Platform artifacts based on their version and introduce error logging for them.
 
 ### Changed
 
 - Update minimal supported Gradle version to `8.13`
+- Revert deprecation of `intellijIdeaCommunity` and `intellijIdeaUltimate` dependency helpers.
 
 ### Fixed
 

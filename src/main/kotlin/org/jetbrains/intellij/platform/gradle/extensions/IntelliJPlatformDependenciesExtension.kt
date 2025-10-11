@@ -368,11 +368,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on IntelliJ IDEA Community.
      *
+     * Note: Starting with version 2025.3, IntelliJ IDEA Community (IC) is no longer published.
+     * For versions 2025.3+, use [intellijIdea] instead.
+     *
      * @param version The version of IntelliJ IDEA Community.
      * @param configure IntelliJ Platform dependency configuration.
+     * @throws IllegalArgumentException if version is 2025.3 or higher
      */
     @JvmOverloads
-    @Deprecated("Starting with version 2025.3, IntelliJ IDEA Community (IC) is not available as a target IntelliJ Platform", replaceWith = ReplaceWith("intellijIdea(version, configure)"))
     fun intellijIdeaCommunity(
         version: String,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
@@ -381,11 +384,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on IntelliJ IDEA Community.
      *
+     * Note: Starting with version 2025.3, IntelliJ IDEA Community (IC) is no longer published.
+     * For versions 2025.3+, use [intellijIdea] instead.
+     *
      * @param version The version of IntelliJ IDEA Community.
      * @param configure IntelliJ Platform dependency configuration.
+     * @throws IllegalArgumentException if version is 2025.3 or higher
      */
     @JvmOverloads
-    @Deprecated("Starting with version 2025.3, IntelliJ IDEA Community (IC) is not available as a target IntelliJ Platform", replaceWith = ReplaceWith("intellijIdea(version, configure)"))
     fun intellijIdeaCommunity(
         version: Provider<String>,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
@@ -394,11 +400,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on IntelliJ IDEA Ultimate.
      *
+     * Note: Starting with version 2025.3, use [intellijIdea] instead which supports both Community and Ultimate editions.
+     * This method is still valid for versions prior to 2025.3.
+     *
      * @param version The version of IntelliJ IDEA Ultimate.
      * @param configure IntelliJ Platform dependency configuration.
      */
     @JvmOverloads
-    @Deprecated("Starting with version 2025.3, IntelliJ IDEA Ultimate (IU) is now substituted with IntelliJ IDEA (IU)", replaceWith = ReplaceWith("intellijIdea(version, configure)"))
     fun intellijIdeaUltimate(
         version: String,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
@@ -407,11 +415,13 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on IntelliJ IDEA Ultimate.
      *
+     * Note: Starting with version 2025.3, use [intellijIdea] instead which supports both Community and Ultimate editions.
+     * This method is still valid for versions prior to 2025.3.
+     *
      * @param version The version of IntelliJ IDEA Ultimate.
      * @param configure IntelliJ Platform dependency configuration.
      */
     @JvmOverloads
-    @Deprecated("Starting with version 2025.3, IntelliJ IDEA Ultimate (IU) is now substituted with IntelliJ IDEA (IU)", replaceWith = ReplaceWith("intellijIdea(version, configure)"))
     fun intellijIdeaUltimate(
         version: Provider<String>,
         configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
@@ -1206,6 +1216,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on IntelliJ IDEA Community.
      *
+     * Note: Starting with version 2025.3, IntelliJ IDEA Community (IC) is no longer published.
+     * For versions 2025.3+, use [intellijIdea] instead.
+     *
      * @param version The version of IntelliJ IDEA Community.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      * @param productMode Describes a mode in which a product may be started.
@@ -1226,6 +1239,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
     /**
      * Adds a dependency on IntelliJ IDEA Community.
+     *
+     * Note: Starting with version 2025.3, IntelliJ IDEA Community (IC) is no longer published.
+     * For versions 2025.3+, use [intellijIdea] instead.
      *
      * @param version The provider for the version of IntelliJ IDEA Community.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
@@ -1248,6 +1264,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on IntelliJ IDEA Ultimate.
      *
+     * Note: Starting with version 2025.3, use [intellijIdea] instead which supports both Community and Ultimate editions.
+     * This method is still valid for versions prior to 2025.3.
+     *
      * @param version The version of IntelliJ IDEA Ultimate.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
      * @param productMode Describes a mode in which a product may be started.
@@ -1268,6 +1287,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
     /**
      * Adds a dependency on IntelliJ IDEA Ultimate.
+     *
+     * Note: Starting with version 2025.3, use [intellijIdea] instead which supports both Community and Ultimate editions.
+     * This method is still valid for versions prior to 2025.3.
      *
      * @param version The provider for the version of IntelliJ IDEA Ultimate.
      * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
