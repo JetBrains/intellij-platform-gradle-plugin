@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import org.jetbrains.intellij.platform.gradle.validateVersion
 import java.net.URI
 
 /**
@@ -95,7 +96,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                             channelEntry.builds.forEach { build ->
                                 product.codes.forEach codes@{ code ->
                                     val type = runCatching {
-                                        code.toIntelliJPlatformType(build.fullNumber)
+                                        code.toIntelliJPlatformType(build.fullNumber).validateVersion(build.fullNumber)
                                     }.getOrNull() ?: return@codes
 
                                     val channel = runCatching { Channel.valueOf(channelEntry.status.uppercase()) }.getOrElse { return@channel }
