@@ -43,6 +43,8 @@ object Constants {
         val MINIMAL_SPLIT_MODE_BUILD_NUMBER = "241.14473".toVersion()
         val UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER = "253".toVersion()
         val UNIFIED_INTELLIJ_IDEA_VERSION = "2025.3".toVersion()
+        val UNIFIED_PYCHARM_BUILD_NUMBER = "253".toVersion()
+        val UNIFIED_PYCHARM_VERSION = "2025.3".toVersion()
     }
 
     object Extensions {

@@ -121,6 +121,8 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Constraints 
 	public final fun getMINIMAL_SPLIT_MODE_BUILD_NUMBER ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public final fun getUNIFIED_INTELLIJ_IDEA_BUILD_NUMBER ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public final fun getUNIFIED_INTELLIJ_IDEA_VERSION ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
+	public final fun getUNIFIED_PYCHARM_BUILD_NUMBER ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
+	public final fun getUNIFIED_PYCHARM_VERSION ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Extensions {
@@ -321,6 +323,7 @@ public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformType :
 	public static final field JetBrainsClient Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field MPS Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field PhpStorm Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public static final field PyCharm Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field PyCharmCommunity Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field PyCharmProfessional Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final field Rider Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
@@ -811,6 +814,12 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun plugins (Ljava/util/List;)V
 	public final fun plugins (Lorg/gradle/api/provider/Provider;)V
 	public final fun plugins ([Ljava/lang/String;)V
+	public final fun pycharm (Ljava/lang/String;)V
+	public final fun pycharm (Ljava/lang/String;Lorg/gradle/api/Action;)V
+	public final fun pycharm (Lorg/gradle/api/provider/Provider;)V
+	public final fun pycharm (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;)V
+	public static synthetic fun pycharm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun pycharm$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;ILjava/lang/Object;)V
 	public final fun pycharmCommunity (Ljava/lang/String;)V
 	public final fun pycharmCommunity (Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun pycharmCommunity (Ljava/lang/String;Z)V

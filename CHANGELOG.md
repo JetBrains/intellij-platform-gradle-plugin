@@ -8,6 +8,8 @@
 - Introduce `testFramework` support in `intellijPlatformTesting` extension and add corresponding test cases. JetBrains/intellij-platform-gradle-plugin#2022
 - Add `ModuleDependency.excludeKotlinStdlib()` and `ModuleDependency.excludeCoroutines()` extension function to exclude all Kotlin stdlib and Kotlinx Coroutines transitive dependencies JetBrains/intellij-platform-gradle-plugin#2029
  - Improve deprecated IntelliJ Platform artifacts based on their version and introduce error logging for them.
+- Add `PyCharm` platform type with corresponding artifact coordinates. JetBrains/intellij-platform-gradle-plugin#2036
+- Add `pycharm` dependency helpers to support the unified PyCharm platform type. JetBrains/intellij-platform-gradle-plugin#2036
 
 ### Changed
 
@@ -19,7 +21,7 @@
 - Refactor IntelliJ Platform type resolution and validation to exclude unavailable distribution constrains JetBrains/intellij-platform-gradle-plugin#2027
 - Refactor `ide` and `ides` methods to rely on the cacheable IntelliJ Platform dependency creation.
 - Refactor `IntelliJPlatformDependenciesHelper` to replace `DependencyHandler` with `DependencyFactory` for dependency creation. JetBrains/intellij-platform-gradle-plugin#2024
-- Handle unspecified project version in `PluginConfiguration` to prevent setting it to the "unspecified" value.
+- Handle unspecified project version in `PluginConfiguration` to prevent setting it to the "unspecified" value. 
 
 ## [2.9.0] - 2025-09-07
 

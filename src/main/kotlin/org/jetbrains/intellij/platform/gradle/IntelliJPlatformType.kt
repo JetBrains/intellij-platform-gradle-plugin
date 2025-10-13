@@ -96,6 +96,11 @@ enum class IntelliJPlatformType(
         maven = Coordinates("com.jetbrains.intellij.phpstorm", "phpstorm"),
         installer = Coordinates("webide", "PhpStorm"),
     ),
+    PyCharm(
+        code = "PY",
+        maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharm"),
+        installer = Coordinates("python", "pycharm"),
+    ),
     PyCharmProfessional(
         code = "PY",
         maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPY"),
@@ -179,6 +184,16 @@ enum class IntelliJPlatformType(
                     }
                 }
 
+                this == PyCharm -> {
+                    with(Version.parse(version)) {
+                        when {
+                            isBuildNumber() && this < Constraints.UNIFIED_PYCHARM_BUILD_NUMBER -> PyCharmProfessional
+                            !isBuildNumber() && this < Constraints.UNIFIED_PYCHARM_VERSION -> PyCharmProfessional
+                            else -> PyCharm
+                        }
+                    }
+                }
+
                 else -> this
             }
         }
@@ -232,6 +247,12 @@ fun IntelliJPlatformType.validateVersion(version: String) = also {
             Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER,
             Constraints.UNIFIED_INTELLIJ_IDEA_VERSION,
             "IntelliJ IDEA Community (IC) is no longer published since ${Constraints.UNIFIED_INTELLIJ_IDEA_VERSION} (${Constraints.UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER}), use: intellijIdea(\"$version\")",
+        )
+
+        IntelliJPlatformType.PyCharmCommunity -> test(
+            Constraints.UNIFIED_PYCHARM_BUILD_NUMBER,
+            Constraints.UNIFIED_PYCHARM_VERSION,
+            "PyCharm Community (PC) is no longer published since ${Constraints.UNIFIED_PYCHARM_VERSION} (${Constraints.UNIFIED_PYCHARM_BUILD_NUMBER}), use: pycharm(\"$version\")",
         )
 
         else -> {}

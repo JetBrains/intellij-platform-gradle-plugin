@@ -373,7 +373,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of IntelliJ IDEA Community.
      * @param configure IntelliJ Platform dependency configuration.
-     * @throws IllegalArgumentException if version is 2025.3 or higher
      */
     @JvmOverloads
     fun intellijIdeaCommunity(
@@ -389,7 +388,6 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      *
      * @param version The version of IntelliJ IDEA Community.
      * @param configure IntelliJ Platform dependency configuration.
-     * @throws IllegalArgumentException if version is 2025.3 or higher
      */
     @JvmOverloads
     fun intellijIdeaCommunity(
@@ -476,7 +474,34 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     ) = create(IntelliJPlatformType.PhpStorm, version, configure)
 
     /**
+     * Adds a dependency on PyCharm.
+     *
+     * @param version The version of PyCharm.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun pycharm(
+        version: String,
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
+    ) = create(IntelliJPlatformType.PyCharm, version, configure)
+
+    /**
+     * Adds a dependency on PyCharm.
+     *
+     * @param version The version of PyCharm.
+     * @param configure IntelliJ Platform dependency configuration.
+     */
+    @JvmOverloads
+    fun pycharm(
+        version: Provider<String>,
+        configure: Action<IntelliJPlatformDependencyConfiguration> = Action {},
+    ) = create(IntelliJPlatformType.PyCharm, version, configure)
+
+    /**
      * Adds a dependency on PyCharm Community.
+     *
+     * Note: Starting with version 2025.3, PyCharm Community (PC) is no longer published.
+     * For versions 2025.3+, use [pycharm] instead.
      *
      * @param version The version of PyCharm Community.
      * @param configure IntelliJ Platform dependency configuration.
@@ -489,6 +514,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
     /**
      * Adds a dependency on PyCharm Community.
+     *
+     * Note: Starting with version 2025.3, PyCharm Community (PC) is no longer published.
+     * For versions 2025.3+, use [pycharm] instead.
      *
      * @param version The version of PyCharm Community.
      * @param configure IntelliJ Platform dependency configuration.
@@ -502,6 +530,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
     /**
      * Adds a dependency on PyCharm Professional.
      *
+     * Note: Starting with version 2025.3, PyCharm Professional (PY) is no longer published.
+     * For versions 2025.3+, use [pycharm] instead.
+     *
      * @param version The version of PyCharm Professional.
      * @param configure IntelliJ Platform dependency configuration.
      */
@@ -513,6 +544,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
 
     /**
      * Adds a dependency on PyCharm Professional.
+     *
+     * Note: Starting with version 2025.3, PyCharm Professional (PC) is no longer published.
+     * For versions 2025.3+, use [pycharm] instead.
      *
      * @param version The version of PyCharm Professional.
      * @param configure IntelliJ Platform dependency configuration.
