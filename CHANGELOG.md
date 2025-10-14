@@ -2,14 +2,17 @@
 
 ## [next]
 
+## [2.10.0] - 2025-10-14
+
 ### Added
 
 - Add `composeUI()` dependency helper to add Compose UI framework dependencies.
 - Introduce `testFramework` support in `intellijPlatformTesting` extension and add corresponding test cases. JetBrains/intellij-platform-gradle-plugin#2022
 - Add `ModuleDependency.excludeKotlinStdlib()` and `ModuleDependency.excludeCoroutines()` extension function to exclude all Kotlin stdlib and Kotlinx Coroutines transitive dependencies JetBrains/intellij-platform-gradle-plugin#2029
- - Improve deprecated IntelliJ Platform artifacts based on their version and introduce error logging for them.
+- Improve deprecated IntelliJ Platform artifacts based on their version and introduce error logging for them.
 - Add `PyCharm` platform type with corresponding artifact coordinates. JetBrains/intellij-platform-gradle-plugin#2036
 - Add `pycharm` dependency helpers to support the unified PyCharm platform type. JetBrains/intellij-platform-gradle-plugin#2036
+- Integration with Problems API
 
 ### Changed
 
@@ -21,7 +24,7 @@
 - Refactor IntelliJ Platform type resolution and validation to exclude unavailable distribution constrains JetBrains/intellij-platform-gradle-plugin#2027
 - Refactor `ide` and `ides` methods to rely on the cacheable IntelliJ Platform dependency creation.
 - Refactor `IntelliJPlatformDependenciesHelper` to replace `DependencyHandler` with `DependencyFactory` for dependency creation. JetBrains/intellij-platform-gradle-plugin#2024
-- Handle unspecified project version in `PluginConfiguration` to prevent setting it to the "unspecified" value. 
+- Handle unspecified project version in `PluginConfiguration` to prevent setting it to the "unspecified" value.
 
 ## [2.9.0] - 2025-09-07
 
@@ -1563,7 +1566,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.9.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.0...HEAD
+[2.10.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.9.0...v2.10.0
 [2.9.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.8.0...v2.9.0
 [2.8.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.2...v2.8.0
 [2.7.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.7.1...v2.7.2
