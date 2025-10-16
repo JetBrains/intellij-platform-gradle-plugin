@@ -233,22 +233,21 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        platformPathProvider(intellijPlatformConfigurationName).map { platformPath ->
-            val path = pathProvider.orNull
-            requireNotNull(path) { "The `intellijPlatform.bundledLibrary` dependency helper was called with no `path` value provided." }
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val platformPath = platformPathProvider(intellijPlatformConfigurationName).get()
+        val path = pathProvider.orNull
+        requireNotNull(path) { "The `intellijPlatform.bundledLibrary` dependency helper was called with no `path` value provided." }
 
-            createBundledLibrary(path, platformPath).apply(action)
-        }.cached(),
-    ).also {
-        log.warn(
-            """
-            Do not use `bundledLibrary()` in production, as direct access to the IntelliJ Platform libraries is not recommended.
-
-            It should only be used as a workaround in case the IntelliJ Platform Gradle Plugin is not aligned with the latest IntelliJ Platform classpath changes.
-            """.trimIndent(),
-        )
-    }
+        createBundledLibrary(path, platformPath).apply(action).also {
+            log.warn(
+                """
+                Do not use `bundledLibrary()` in production, as direct access to the IntelliJ Platform libraries is not recommended.
+    
+                It should only be used as a workaround in case the IntelliJ Platform Gradle Plugin is not aligned with the latest IntelliJ Platform classpath changes.
+                """.trimIndent()
+            )
+        }
+    }.cached())
 
     /**
      * Creates a request for the IntelliJ Platform with the specified configuration details.
@@ -308,11 +307,12 @@ class IntelliJPlatformDependenciesHelper(
         requestedIntelliJPlatformProvider: Provider<RequestedIntelliJPlatform>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        requestedIntelliJPlatformProvider.map {
-            createIntelliJPlatformDependency(it).apply(action)
-        },
-    )
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val requestedIntelliJPlatform = requestedIntelliJPlatformProvider.orNull
+        requireNotNull(requestedIntelliJPlatform) { "The `intellijPlatform.dependency` dependency helper was called with no `requestedIntelliJPlatform` value provided." }
+
+        createIntelliJPlatformDependency(requestedIntelliJPlatform).apply(action)
+    }.cached())
 
     /**
      * A base method for adding a dependency on the IntelliJ Platform.
@@ -326,17 +326,17 @@ class IntelliJPlatformDependenciesHelper(
         notationsProvider: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(
-        notationsProvider.map { notations ->
-            notations.map {
-                val (type, version) = it.parseIdeNotation()
-                when (type) {
-                    IntelliJPlatformType.AndroidStudio -> createAndroidStudio(version)
-                    else -> createIntelliJPlatformInstaller(type, version)
-                }.apply(action)
-            }
-        }.cached(),
-    )
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        val notations = notationsProvider.get()
+
+        notations.map {
+            val (type, version) = it.parseIdeNotation()
+            when (type) {
+                IntelliJPlatformType.AndroidStudio -> createAndroidStudio(version)
+                else -> createIntelliJPlatformInstaller(type, version)
+            }.apply(action)
+        }
+    }.cached())
 
     /**
      * A base method for adding a dependency on a local IntelliJ Platform instance.
@@ -353,24 +353,25 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        localPathProvider.map { localPath ->
-            val platformPath = resolveArtifactPath(localPath)
-            val productInfo = platformPath.productInfo()
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val localPath = localPathProvider.orNull
+        requireNotNull(localPath) { "The `intellijPlatform.local` dependency helper was called with no `localPath` value provided." }
 
-            val dependencyConfiguration =
-                objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply {
-                    type = productInfo.type
-                    version = productInfo.version
-                    useInstaller = true
-                    useCache = false
-                    productMode = ProductMode.MONOLITH
-                }
-            requestedIntelliJPlatforms.set(dependencyConfiguration, intellijPlatformConfigurationName)
+        val platformPath = resolveArtifactPath(localPath)
+        val productInfo = platformPath.productInfo()
 
-            createIntelliJPlatformLocal(platformPath).apply(action)
-        }.cached(),
-    )
+        val dependencyConfiguration =
+            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply {
+                type = productInfo.type
+                version = productInfo.version
+                useInstaller = true
+                useCache = false
+                productMode = ProductMode.MONOLITH
+            }
+        requestedIntelliJPlatforms.set(dependencyConfiguration, intellijPlatformConfigurationName)
+
+        createIntelliJPlatformLocal(platformPath).apply(action)
+    }.cached())
 
     /**
      * A base method for adding a dependency on a plugin for IntelliJ Platform.
@@ -383,22 +384,22 @@ class IntelliJPlatformDependenciesHelper(
         pluginsProvider: Provider<List<Triple<String, String, String>>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(
-        pluginsProvider.map { plugins ->
-            plugins.map { (id, version, group) ->
-                require(id.isNotBlank()) {
-                    "The `intellijPlatform.plugins` dependency helper was called with a plugin with no `id` provided."
-                }
-                require(version.isNotBlank()) {
-                    """
-                    The `intellijPlatform.plugins` dependency helper was called with the `$id` plugin with no `version` provided.
-                    If you expect to add a dependency on a bundled plugin, use `intellijPlatform.bundledPlugin` or `intellijPlatform.bundledPlugins` instead.
-                    """.trimIndent()
-                }
-                createIntelliJPlatformPlugin(id, version, group).apply(action)
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        val plugins = pluginsProvider.get()
+
+        plugins.map { (id, version, group) ->
+            require(id.isNotBlank()) {
+                "The `intellijPlatform.plugins` dependency helper was called with a plugin with no `id` provided."
             }
-        }.cached(),
-    )
+            require(version.isNotBlank()) {
+                """
+                The `intellijPlatform.plugins` dependency helper was called with the `$id` plugin with no `version` provided.
+                If you expect to add a dependency on a bundled plugin, use `intellijPlatform.bundledPlugin` or `intellijPlatform.bundledPlugins` instead.
+                """.trimIndent()
+            }
+            createIntelliJPlatformPlugin(id, version, group).apply(action)
+        }
+    }.cached())
 
     /**
      * A base method for adding a dependency on plugins compatible with the current IntelliJ Platform version.
@@ -415,28 +416,32 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(
-        platformPathProvider(intellijPlatformConfigurationName).zip(pluginsProvider) { platformPath, plugins ->
-            val productInfo = platformPath.productInfo()
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        val plugins = pluginsProvider.orNull
+        requireNotNull(plugins) { "The `intellijPlatform.compatiblePlugins` dependency helper was called with no `plugins` value provided." }
 
-            plugins.map { pluginId ->
-                val platformType = productInfo.productCode
-                val platformVersion = productInfo.buildNumber
+        val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
+        requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
 
-                val plugin = pluginRepository.pluginManager.searchCompatibleUpdates(
-                    build = "$platformType-$platformVersion",
-                    xmlIds = listOf(pluginId),
-                ).firstOrNull()
-                    ?: throw GradleException("No plugin update with id='$pluginId' compatible with '$platformType-$platformVersion' found in JetBrains Marketplace")
+        val productInfo = platformPath.productInfo()
 
-                createIntelliJPlatformPlugin(
-                    plugin.pluginXmlId,
-                    plugin.version,
-                    Dependencies.MARKETPLACE_GROUP,
-                ).apply(action)
-            }
-        }.cached(),
-    )
+        plugins.map { pluginId ->
+            val platformType = productInfo.productCode
+            val platformVersion = productInfo.buildNumber
+
+            val plugin = pluginRepository.pluginManager.searchCompatibleUpdates(
+                build = "$platformType-$platformVersion",
+                xmlIds = listOf(pluginId),
+            ).firstOrNull()
+                ?: throw GradleException("No plugin update with id='$pluginId' compatible with '$platformType-$platformVersion' found in JetBrains Marketplace")
+
+            createIntelliJPlatformPlugin(
+                plugin.pluginXmlId,
+                plugin.version,
+                Dependencies.MARKETPLACE_GROUP,
+            ).apply(action)
+        }
+    }.cached())
 
     /**
      * A base method for adding a dependency on an IntelliJ Platform bundled plugin.
@@ -451,15 +456,19 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_PLUGINS,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(
-        platformPathProvider(intellijPlatformConfigurationName).zip(bundledPluginsProvider) { platformPath, bundledPlugins ->
-            bundledPlugins
-                .map(String::trim)
-                .filter(String::isNotEmpty)
-                .map { createIntelliJPlatformBundledPlugin(requireNotNull(platformPath), it) }
-                .onEach(action)
-        }.cached(),
-    )
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        val bundledPlugins = bundledPluginsProvider.orNull
+        requireNotNull(bundledPlugins) { "The `intellijPlatform.bundledPlugins` dependency helper was called with no `bundledPlugins` value provided." }
+
+        val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
+        requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
+
+        bundledPlugins
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .map { createIntelliJPlatformBundledPlugin(platformPath, it) }
+            .onEach(action)
+    }.cached())
 
     /**
      * A base method for adding a dependency on an IntelliJ Platform bundled module.
@@ -474,15 +483,19 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(
-        platformPathProvider(intellijPlatformConfigurationName).zip(bundledModulesProvider) { platformPath, bundledModules ->
-            bundledModules
-                .map(String::trim)
-                .filter(String::isNotEmpty)
-                .map { createIntelliJPlatformBundledModule(it, platformPath) }
-                .onEach(action)
-        }.cached(),
-    )
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        val bundledModules = bundledModulesProvider.orNull
+        requireNotNull(bundledModules) { "The `intellijPlatform.bundledModules` dependency helper was called with no `bundledModules` value provided." }
+
+        val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
+        requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
+
+        bundledModules
+            .map(String::trim)
+            .filter(String::isNotEmpty)
+            .map { createIntelliJPlatformBundledModule(it, platformPath) }
+            .onEach(action)
+    }.cached())
 
     /**
      * Adds Compose UI-related bundled modules depending on the current IntelliJ Platform build.
@@ -495,37 +508,38 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(
-        platformPathProvider(intellijPlatformConfigurationName).map { platformPath ->
-            val productInfo = platformPath.productInfo()
-            val major = productInfo.buildNumber.toVersion().major
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
+        requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
 
-            val modules = buildList {
-                // 2024.3+
-                if (major >= 243) {
-                    add("intellij.libraries.skiko")
-                    add("intellij.platform.compose")
-                }
+        val productInfo = platformPath.productInfo()
+        val major = productInfo.buildNumber.toVersion().major
 
-                // 2025.1+
-                if (major >= 251) {
-                    add("intellij.libraries.compose.foundation.desktop")
-                    add("intellij.platform.jewel.foundation")
-                    add("intellij.platform.jewel.ui")
-                    add("intellij.platform.jewel.ideLafBridge")
-                }
-
-                // 2025.3+
-                if (major >= 253) {
-                    add("intellij.libraries.compose.runtime.desktop")
-                }
+        val modules = buildList {
+            // 2024.3+
+            if (major >= 243) {
+                add("intellij.libraries.skiko")
+                add("intellij.platform.compose")
             }
 
-            modules
-                .map { createIntelliJPlatformBundledModule(it, platformPath) }
-                .onEach(action)
-        }.cached(),
-    )
+            // 2025.1+
+            if (major >= 251) {
+                add("intellij.libraries.compose.foundation.desktop")
+                add("intellij.platform.jewel.foundation")
+                add("intellij.platform.jewel.ui")
+                add("intellij.platform.jewel.ideLafBridge")
+            }
+
+            // 2025.3+
+            if (major >= 253) {
+                add("intellij.libraries.compose.runtime.desktop")
+            }
+        }
+
+        modules
+            .map { createIntelliJPlatformBundledModule(it, platformPath) }
+            .onEach(action)
+    }.cached())
 
     /**
      * A base method for adding a dependency on a local plugin for IntelliJ Platform.
@@ -540,11 +554,15 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_LOCAL,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        platformPathProvider(intellijPlatformConfigurationName).zip(localPathProvider) { platformPath, localPath ->
-            createIntelliJPlatformLocalPlugin(localPath, platformPath).apply(action)
-        }.cached(),
-    )
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val localPath = localPathProvider.orNull
+        requireNotNull(localPath) { "The `intellijPlatform.localPlugin` dependency helper was called with no `localPath` value provided." }
+
+        val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
+        requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
+
+        createIntelliJPlatformLocalPlugin(localPath, platformPath).apply(action)
+    }.cached())
 
     /**
      * A base method for adding a project dependency on a local plugin for IntelliJ Platform.
@@ -630,12 +648,9 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.JETBRAINS_RUNTIME_DEPENDENCY,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(
-        provider {
-            createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName)
-                .onEach(action)
-        }.cached()
-    )
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        createJetBrainsRuntimeObtainedDependency(intellijPlatformConfigurationName).onEach(action)
+    }.cached())
 
     /**
      * A base method for adding a dependency on JetBrains Runtime.
@@ -647,16 +662,17 @@ class IntelliJPlatformDependenciesHelper(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.JETBRAINS_RUNTIME_LOCAL_INSTANCE,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        localPathProvider.map { localPath ->
-            val artifactPath = resolvePath(localPath)
-                .takeIf { it.exists() }
-                ?.resolveJavaRuntimeDirectory()
-                .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val localPath = localPathProvider.orNull
+        requireNotNull(localPath) { "The `intellijPlatform.jetBrainsRuntimeLocal` dependency helper was called with no `localPath` value provided." }
 
-            createJetBrainsRuntimeLocal(artifactPath).apply(action)
-        }.cached(),
-    )
+        val artifactPath = resolvePath(localPath)
+            .takeIf { it.exists() }
+            ?.resolveJavaRuntimeDirectory()
+            .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
+
+        createJetBrainsRuntimeLocal(artifactPath).apply(action)
+    }.cached())
 
     /**
      * A base method for adding a dependency on IntelliJ Plugin Verifier.
@@ -669,11 +685,12 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        versionProvider.map { version ->
-            createPluginVerifier(version).apply(action)
-        }.cached(),
-    )
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.pluginVerifier` dependency helper was called with no `version` value provided." }
+
+        createPluginVerifier(version).apply(action)
+    }.cached())
 
     /**
      * Adds a dependency on the `test-framework` library required for testing plugins.
@@ -695,24 +712,25 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_TEST_DEPENDENCIES,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(
-        platformPathProvider(intellijPlatformConfigurationName).map { platformPath ->
-            when (type) {
-                TestFrameworkType.Bundled -> type.coordinates.map {
-                    createBundledLibrary(it.artifactId, platformPath)
-                }
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
+        requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
 
-                else -> {
-                    val version = versionProvider.orNull
-                    requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
+        when (type) {
+            TestFrameworkType.Bundled -> type.coordinates.map {
+                createBundledLibrary(it.artifactId, platformPath)
+            }
 
-                    type.coordinates.map {
-                        createPlatformDependency(it, version, platformPath)
-                    }
+            else -> {
+                val version = versionProvider.orNull
+                requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
+
+                type.coordinates.map {
+                    createPlatformDependency(it, version, platformPath)
                 }
-            }.onEach(action)
-        },
-    )
+            }
+        }.onEach(action)
+    }.cached())
 
     /**
      * Adds a dependency on the IntelliJ Platform dependency.
@@ -731,11 +749,15 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCIES,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        platformPathProvider(intellijPlatformConfigurationName).zip(versionProvider) { platformPath, version ->
-            createPlatformDependency(coordinates, version, platformPath).apply(action)
-        }.cached(),
-    )
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.platformDependency`/`intellijPlatform.testPlatformDependency` dependency helper was called with no `version` value provided." }
+
+        val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
+        requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
+
+        createPlatformDependency(coordinates, version, platformPath).apply(action)
+    }.cached())
 
     /**
      * A base method for adding a dependency on Marketplace ZIP Signer.
@@ -748,11 +770,12 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.MARKETPLACE_ZIP_SIGNER,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        versionProvider.map { version ->
-            createMarketplaceZipSigner(version).apply(action)
-        }.cached(),
-    )
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.zipSigner` dependency helper was called with no `version` value provided." }
+
+        createMarketplaceZipSigner(version).apply(action)
+    }.cached())
 
     /**
      * A base method for adding a dependency on Robot Server Plugin.
@@ -765,11 +788,12 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(
-        versionProvider.map { version ->
-            createRobotServerPlugin(version).apply(action)
-        }.cached(),
-    )
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.robotServerPlugin` dependency helper was called with no `version` value provided." }
+
+        createRobotServerPlugin(version).apply(action)
+    }.cached())
 
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
         providers.of(ProductReleasesValueSource::class) {
