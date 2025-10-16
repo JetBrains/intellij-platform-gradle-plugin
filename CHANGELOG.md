@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Fix the incorrect configuration name in the `requestedIntelliJPlatforms.set` method call for local IntelliJ Platform dependency.
+
 ## [2.10.0] - 2025-10-14
 
 ### Added

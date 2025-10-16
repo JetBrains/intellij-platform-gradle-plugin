@@ -337,7 +337,7 @@ class IntelliJPlatformDependenciesHelper(
                         useCache = false
                         productMode = ProductMode.MONOLITH
                     }
-                requestedIntelliJPlatforms.set(dependencyConfiguration, configurationName)
+                requestedIntelliJPlatforms.set(dependencyConfiguration, intellijPlatformConfigurationName)
 
                 createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
             }
