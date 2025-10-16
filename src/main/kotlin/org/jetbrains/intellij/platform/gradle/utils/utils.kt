@@ -19,13 +19,9 @@ import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
 import org.gradle.api.internal.GradleInternal
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.plugins.PluginManager
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.provider.ProviderFactory
-import org.gradle.kotlin.dsl.listProperty
-import org.gradle.kotlin.dsl.property
 import org.gradle.kotlin.dsl.the
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
@@ -208,6 +204,7 @@ val Project.rootProjectPath
 val Project.extensionProvider
     get() = provider { the<IntelliJPlatformExtension>() }
 
+@Suppress("UnstableApiUsage")
 internal val Project.dependenciesHelper
     get() = IntelliJPlatformDependenciesHelper(
         configurations,
@@ -224,68 +221,3 @@ internal val Project.dependenciesHelper
 
 internal val PluginManager.isModule
     get() = hasPlugin(Plugins.MODULE) && !hasPlugin(Plugin.ID)
-
-/**
- * Helper function for creating cached [ProviderFactory.provider].
- */
-internal inline fun <reified T : Any> cachedProvider(
-    objects: ObjectFactory,
-    providers: ProviderFactory,
-    crossinline value: () -> T,
-) = objects
-    .property<T>()
-    .value(providers.provider { value() })
-    .apply {
-        disallowChanges()
-        finalizeValueOnRead()
-    }
-
-/**
- * Helper function for creating cached list [ProviderFactory.provider].
- */
-internal inline fun <reified T : Any> cachedListProvider(
-    objects: ObjectFactory,
-    providers: ProviderFactory,
-    crossinline value: () -> List<T>,
-) = objects
-    .listProperty<T>()
-    .value(providers.provider { value() })
-    .apply {
-        disallowChanges()
-        finalizeValueOnRead()
-    }
-
-internal data class Quadruple<T1, T2, T3, T4>(val first: T1, val second: T2, val third: T3, val fourth: T4)
-
-internal fun <A : Any, B : Any, C : Any, R : Any> zip(
-    a: Provider<A>,
-    b: Provider<B>,
-    c: Provider<C>,
-    combiner: (A, B, C) -> R,
-): Provider<R> = a
-    .zip(b) { av, bv -> av to bv }
-    .zip(c) { (av, bv), cv -> combiner(av, bv, cv) }
-
-internal fun <A : Any, B : Any, C : Any, D : Any, R : Any> zip(
-    a: Provider<A>,
-    b: Provider<B>,
-    c: Provider<C>,
-    d: Provider<D>,
-    combiner: (A, B, C, D) -> R,
-): Provider<R> = a
-    .zip(b) { av, bv -> av to bv }
-    .zip(c) { (av, bv), cv -> Triple(av, bv, cv) }
-    .zip(d) { (av, bv, cv), dv -> combiner(av, bv, cv, dv) }
-
-internal fun <A : Any, B : Any, C : Any, D : Any, E : Any, R : Any> zip(
-    a: Provider<A>,
-    b: Provider<B>,
-    c: Provider<C>,
-    d: Provider<D>,
-    e: Provider<E>,
-    combiner: (A, B, C, D, E) -> R,
-): Provider<R> = a
-    .zip(b) { av, bv -> av to bv }
-    .zip(c) { (av, bv), cv -> Triple(av, bv, cv) }
-    .zip(d) { (av, bv, cv), dv -> Quadruple(av, bv, cv, dv) }
-    .zip(e) { (av, bv, cv, dv), ev -> combiner(av, bv, cv, dv, ev) }

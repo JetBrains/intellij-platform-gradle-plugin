@@ -201,7 +201,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 }
 
                 defaultDependencies {
-                    addAllLater(dependenciesHelper.createJetBrainsRuntimeObtainedDependency())
+                    addAllLater(
+                        project.provider {
+                            dependenciesHelper.createJetBrainsRuntimeObtainedDependency()
+                        }
+                    )
                 }
             }
 

@@ -140,9 +140,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 )
             }
 
-            runtimeDirectory = layout.dir(cachedProvider(objects, providers) {
+            runtimeDirectory = layout.dir(project.cachedProvider {
                 javaRuntimePathResolver.resolve().toFile()
-            })
+            }.map { it })
             runtimeMetadata = providers.of(JavaRuntimeMetadataValueSource::class) {
                 parameters {
                     executable = layout.file(

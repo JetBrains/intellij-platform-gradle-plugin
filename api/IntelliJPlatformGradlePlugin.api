@@ -3527,6 +3527,12 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/companion/TestCo
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
+public final class org/jetbrains/intellij/platform/gradle/utils/CachedKt {
+	public static final fun asImmutable (Lorg/gradle/api/provider/HasConfigurableValue;)Lorg/gradle/api/provider/HasConfigurableValue;
+	public static final fun getMarkedAsNonNull (Ljava/lang/Object;)Ljava/lang/Object;
+	public static final fun markAsNonNull (Ljava/lang/Object;)V
+}
+
 public abstract interface class org/jetbrains/intellij/platform/gradle/utils/IdeServicesPluginRepositoryService : org/jetbrains/intellij/pluginRepository/internal/api/PluginRepositoryService {
 	public abstract fun uploadById (ILokhttp3/RequestBody;Lokhttp3/RequestBody;ZLokhttp3/MultipartBody$Part;)Lretrofit2/Call;
 	public abstract fun uploadByStringIdAndFamily (Lokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/RequestBody;ZLokhttp3/MultipartBody$Part;)Lretrofit2/Call;
