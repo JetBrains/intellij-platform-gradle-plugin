@@ -48,6 +48,7 @@ import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
+import kotlin.collections.buildList
 import kotlin.concurrent.withLock
 import kotlin.io.path.*
 
@@ -353,24 +354,24 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
-        val localPath = localPathProvider.orNull
-        requireNotNull(localPath) { "The `intellijPlatform.local` dependency helper was called with no `localPath` value provided." }
+    ) = configurations[configurationName].dependencies.addAllLater(provider {
+        buildList {
+            val localPath = localPathProvider.orNull ?: return@buildList
+            val platformPath = resolveArtifactPath(localPath)
+            val productInfo = platformPath.productInfo()
 
-        val platformPath = resolveArtifactPath(localPath)
-        val productInfo = platformPath.productInfo()
+            val dependencyConfiguration =
+                objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply {
+                    type = productInfo.type
+                    version = productInfo.version
+                    useInstaller = true
+                    useCache = false
+                    productMode = ProductMode.MONOLITH
+                }
+            requestedIntelliJPlatforms.set(dependencyConfiguration, intellijPlatformConfigurationName)
 
-        val dependencyConfiguration =
-            objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply {
-                type = productInfo.type
-                version = productInfo.version
-                useInstaller = true
-                useCache = false
-                productMode = ProductMode.MONOLITH
-            }
-        requestedIntelliJPlatforms.set(dependencyConfiguration, intellijPlatformConfigurationName)
-
-        createIntelliJPlatformLocal(platformPath).apply(action)
+            createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
+        }
     }.cached())
 
     /**
