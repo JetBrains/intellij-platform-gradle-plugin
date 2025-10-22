@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Cast `IntelliJPlatformType.fromCode` to `IntelliJPlatformType` again to correctly apply the IJ Ultimate/IJ Unified distribution constraints for transparency reasons.
+
 ## [2.10.1] - 2025-10-19
 
 ### Fixed

@@ -215,7 +215,7 @@ enum class IntelliJPlatformType(
  */
 @Throws(IllegalArgumentException::class)
 fun Any.toIntelliJPlatformType(version: String) = when (this) {
-    is IntelliJPlatformType -> this
+    is IntelliJPlatformType -> IntelliJPlatformType.fromCode(code, version)
     is String -> IntelliJPlatformType.fromCode(this, version)
     else -> throw IllegalArgumentException("Invalid argument type: '$javaClass'. Supported types: String or ${IntelliJPlatformType::class.java}")
 }
