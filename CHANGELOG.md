@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add `--list-ides` CLI option to `verifyPlugin` task to list IDEs that will be used for verification without performing actual verification.
+
 ### Fixed
 
 - Security update

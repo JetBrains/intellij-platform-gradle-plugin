@@ -581,4 +581,48 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 </idea-plugin>
                 """.trimIndent()
     }
+
+    @Test
+    fun `list ides mode prints IDE list without performing verification`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        build(Tasks.VERIFY_PLUGIN, "--list-ides") {
+            assertContains("IDEs that will be used for verification:", output)
+            assertContains("$intellijPlatformType-$intellijPlatformVersion - ", output)
+
+            // Verify verification is not performed
+            assertNotContains("Starting the IntelliJ Plugin Verifier", output)
+            assertNotContains("Compatible", output)
+        }
+    }
+
+    @Test
+    fun `list ides mode with multiple IDEs`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+        writePluginVerifierIde("PS", "2022.3")
+
+        build(Tasks.VERIFY_PLUGIN, "--list-ides") {
+            assertContains("IDEs that will be used for verification:", output)
+            assertContains("$intellijPlatformType-$intellijPlatformVersion - ", output)
+            assertContains("PS-2022.3 - ", output)
+
+            // Verify verification is not performed
+            assertNotContains("Starting the IntelliJ Plugin Verifier", output)
+        }
+    }
+
+    @Test
+    fun `list ides mode fails when no IDEs configured`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+
+        buildAndFail(Tasks.VERIFY_PLUGIN, "--list-ides") {
+            assertContains("No IDE versions configured for verification", output)
+            assertNotContains("IDEs that will be used for verification:", output)
+        }
+    }
 }

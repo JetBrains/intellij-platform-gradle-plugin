@@ -13,6 +13,7 @@ import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.options.Option
 import org.gradle.internal.logging.ConsoleRenderer
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
@@ -22,15 +23,14 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.problems.Problems
 import org.jetbrains.intellij.platform.gradle.problems.reportError
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.ProblemsAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
-import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import org.jetbrains.intellij.platform.gradle.utils.safePathString
+import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.ByteArrayOutputStream
 import java.util.*
 import kotlin.io.path.exists
@@ -185,6 +185,17 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     @get:Internal
     abstract val problemsReportFile: RegularFileProperty
 
+    /**
+     * A flag to list IDEs without performing verification.
+     * When enabled, only prints the list of IDEs that will be used for verification without performing actual verification.
+     *
+     * Default value: `false`
+     */
+    @get:Input
+    @get:Optional
+    @get:Option(option = "list-ides", description = "List IDEs that would be used for verification without performing it")
+    abstract val listIdes: Property<Boolean>
+
     private val problemsReportUrl get() = ConsoleRenderer().asClickableFileUrl(problemsReportFile.get().asFile)
 
     private val log = Logger(javaClass)
@@ -194,6 +205,35 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
      */
     @TaskAction
     override fun exec() {
+        with(ides) {
+            if (isEmpty) {
+                val label = "No IDE versions configured for verification"
+                val details = "The IntelliJ Plugin Verifier requires at least one IDE version to verify the plugin against, but none were configured. IDE versions are specified through the intellijPlatform.pluginVerification.ides block."
+                val solution = "Configure IDE versions in the intellijPlatform.pluginVerification.ides block (e.g., ides { recommended() }) and ensure defaultRepositories() or at least localPlatformArtifacts() is present in the repositories section to resolve IDE artifacts."
+
+                throw problems.reporter.reportError(
+                    GradleException("$label $details $solution"),
+                    Problems.VerifyPlugin.InvalidIDEs,
+                    problemsReportUrl,
+                ) {
+                    contextualLabel(label)
+                    details(details)
+                    solution(solution)
+                    documentedAt("https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides")
+                }
+            }
+
+            if (listIdes.getOrElse(false)) {
+                return map { it.toPath().resolvePlatformPath() }.joinToString(
+                    separator = "\n",
+                    prefix = "IDEs that will be used for verification:\n",
+                ) { platformPath ->
+                    val productInfo = platformPath.productInfo()
+                    "${productInfo.type}-${productInfo.version} - ${platformPath.safePathString}"
+                }.let(::println)
+            }
+        }
+
         val file = archiveFile.orNull?.asPath
         if (file == null || !file.exists()) {
             val label = "Plugin archive file not found"
@@ -236,32 +276,14 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
 
         classpath = objectFactory.fileCollection().from(executable)
 
-        with(ides) {
-            if (isEmpty) {
-                val label = "No IDE versions configured for verification"
-                val details = "The IntelliJ Plugin Verifier requires at least one IDE version to verify the plugin against, but none were configured. IDE versions are specified through the intellijPlatform.pluginVerification.ides block."
-                val solution = "Configure IDE versions in the intellijPlatform.pluginVerification.ides block (e.g., ides { recommended() }) and ensure defaultRepositories() or at least localPlatformArtifacts() is present in the repositories section to resolve IDE artifacts."
-
-                throw problems.reporter.reportError(
-                    GradleException("$label $details $solution"),
-                    Problems.VerifyPlugin.InvalidIDEs,
-                    problemsReportUrl,
-                ) {
-                    contextualLabel(label)
-                    details(details)
-                    solution(solution)
-                    documentedAt("https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-extension.html#intellijPlatform-pluginVerification-ides")
+        args(
+            listOf("check-plugin") + getOptions() + file.safePathString + ides.map {
+                when {
+                    it.isDirectory -> it.absolutePath
+                    else -> it.readText()
                 }
-            }
-            args(
-                listOf("check-plugin") + getOptions() + file.safePathString + map {
-                    when {
-                        it.isDirectory -> it.absolutePath
-                        else -> it.readText()
-                    }
-                },
-            )
-        }
+            },
+        )
 
         ByteArrayOutputStream().use { os ->
             standardOutput = TeeOutputStream(System.out, os)
@@ -494,6 +516,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
 
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 offline.convention(project.gradle.startParameter.isOffline)
+                listIdes.convention(false)
 
                 problemsReportFile.convention(project.layout.buildDirectory.file("reports/problems/problems-report.html"))
             }
