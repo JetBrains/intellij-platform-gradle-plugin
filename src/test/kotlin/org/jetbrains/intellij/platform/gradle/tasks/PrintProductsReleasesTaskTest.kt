@@ -26,7 +26,7 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
             assertContains(
                 """
                 > Task :${Tasks.PRINT_PRODUCTS_RELEASES}
-                IC-2025.2.3
+                IC-2025.2.4
                 IC-2025.1.6
                 """.trimIndent(),
                 output,
