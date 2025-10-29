@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle
 import org.gradle.api.GradleException
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import java.lang.management.ManagementFactory
 import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
 import kotlin.io.path.ExperimentalPathApi
@@ -17,6 +18,9 @@ import kotlin.test.assertEquals
 abstract class IntelliJPlatformTestBase {
 
     val isCI = (System.getenv("CI") ?: "false").toBoolean()
+    val isDebugged by lazy {
+        ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0
+    }
     var debugEnabled = !isCI
     val gradleDefault = System.getProperty("test.gradle.default")
     val gradleScan = System.getProperty("test.gradle.scan").toBoolean()
@@ -134,7 +138,7 @@ abstract class IntelliJPlatformTestBase {
                 *tasks,
                 *listOfNotNull(
                     "--stacktrace",
-                    "--configuration-cache",
+                    "--configuration-cache".takeIf { !isDebugged },
                     "--scan".takeIf { gradleScan },
                 ).toTypedArray(),
                 *gradleArguments.toTypedArray(),
