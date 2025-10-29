@@ -4,6 +4,12 @@
 
 ### Fixed
 
+- Security update
+
+## [2.10.2] - 2025-10-22
+
+### Fixed
+
 - Cast `IntelliJPlatformType.fromCode` to `IntelliJPlatformType` again to correctly apply the IJ Ultimate/IJ Unified distribution constraints for transparency reasons.
 
 ## [2.10.1] - 2025-10-19
@@ -1576,7 +1582,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.1...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.2...HEAD
+[2.10.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.1...v2.10.2
 [2.10.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.0...v2.10.1
 [2.10.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.9.0...v2.10.0
 [2.9.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.8.0...v2.9.0
