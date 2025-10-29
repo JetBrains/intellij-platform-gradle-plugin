@@ -27,7 +27,7 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
                 """
                 > Task :${Tasks.PRINT_PRODUCTS_RELEASES}
                 IC-2025.2.4
-                IC-2025.1.6
+                IC-2025.1.7
                 """.trimIndent(),
                 output,
             )
