@@ -3330,6 +3330,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginT
 	public abstract fun getFreeArgs ()Lorg/gradle/api/provider/ListProperty;
 	public abstract fun getIdes ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getIgnoredProblemsFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getListIdes ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
 	public abstract fun getProblemsReportFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getSubsystemsToCheck ()Lorg/gradle/api/provider/Property;
