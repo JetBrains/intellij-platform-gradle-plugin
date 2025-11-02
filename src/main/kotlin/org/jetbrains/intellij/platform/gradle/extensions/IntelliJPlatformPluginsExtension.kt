@@ -180,6 +180,17 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     /**
      * Adds a dependency on a bundled IntelliJ Platform plugin.
      *
+     * @param id The bundled plugin identifier.
+     */
+    fun bundledPlugin(id: String) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
+        bundledPluginsProvider = dependenciesHelper.provider { listOf(id) },
+        configurationName = intellijPlatformTestBundledPluginsConfiguration.get(),
+        intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
+    )
+
+    /**
+     * Adds a dependency on a bundled IntelliJ Platform plugin.
+     *
      * @param id The provider of the bundled plugin identifier.
      */
     fun bundledPlugin(id: Provider<String>) = dependenciesHelper.addIntelliJPlatformBundledPluginDependencies(
