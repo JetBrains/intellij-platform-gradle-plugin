@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.10.3] - 2025-11-02
+
 ### Added
 
 - Add `--list-ides` CLI option to `verifyPlugin` task to list IDEs that will be used for verification without performing actual verification.
@@ -1586,7 +1588,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.2...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.3...HEAD
+[2.10.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.2...v2.10.3
 [2.10.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.1...v2.10.2
 [2.10.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.0...v2.10.1
 [2.10.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.9.0...v2.10.0
