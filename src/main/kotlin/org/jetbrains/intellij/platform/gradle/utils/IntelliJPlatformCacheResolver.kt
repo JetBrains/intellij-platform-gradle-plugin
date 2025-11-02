@@ -21,7 +21,6 @@ import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
 import java.nio.file.Path
-import java.util.*
 
 /**
  * Resolves IntelliJ Platform dependencies from configured repositories and extracts them to a shared cache directory.
@@ -153,7 +152,7 @@ class IntelliJPlatformCacheResolver internal constructor(
             return targetDirectory
         }
 
-        val configurationName = "${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}_${UUID.randomUUID()}"
+        val configurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withRandomSuffix
         val configuration = configurations.create(configurationName)
 
         dependenciesHelper.addIntelliJPlatformDependency(

@@ -31,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import java.nio.file.Path
+import java.util.*
 import kotlin.io.path.*
 
 val FileSystemLocation.asPath
@@ -221,3 +222,5 @@ internal val Project.dependenciesHelper
 
 internal val PluginManager.isModule
     get() = hasPlugin(Plugins.MODULE) && !hasPlugin(Plugin.ID)
+
+internal val String.withRandomSuffix get() = "${this}_${UUID.randomUUID()}"
