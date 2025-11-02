@@ -152,12 +152,10 @@ class IntelliJPlatformCacheResolver internal constructor(
             return targetDirectory
         }
 
-        val configurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withRandomSuffix
-        val configuration = configurations.create(configurationName)
-
+        val configuration = configurations.create(Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withRandomSuffix)
         dependenciesHelper.addIntelliJPlatformDependency(
             requestedIntelliJPlatformProvider = requestedProvider,
-            configurationName = configurationName,
+            configurationName = configuration.name,
         )
 
         extractorService.get().extract(
