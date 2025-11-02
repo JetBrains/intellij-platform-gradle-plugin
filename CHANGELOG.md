@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Use `withRandomSuffix` for `intellijPlatformConfigurationName` in local dependency configurations defined for Plugin Verifier
+
 ## [2.10.3] - 2025-11-02
 
 ### Added

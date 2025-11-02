@@ -1146,6 +1146,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             fun local(localPath: Provider<*>) = dependenciesHelper.addIntelliJPlatformLocalDependency(
                 localPathProvider = localPath,
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES.withRandomSuffix,
             )
 
             /**
@@ -1156,6 +1157,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             fun local(localPath: String) = dependenciesHelper.addIntelliJPlatformLocalDependency(
                 localPathProvider = dependenciesHelper.provider { localPath },
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES.withRandomSuffix,
             )
 
             /**
@@ -1166,6 +1168,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             fun local(localPath: File) = dependenciesHelper.addIntelliJPlatformLocalDependency(
                 localPathProvider = dependenciesHelper.provider { localPath },
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES.withRandomSuffix,
             )
 
             /**
@@ -1176,6 +1179,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             fun local(localPath: Directory) = dependenciesHelper.addIntelliJPlatformLocalDependency(
                 localPathProvider = dependenciesHelper.provider { localPath },
                 configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+                intellijPlatformConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES.withRandomSuffix,
             )
 
             /**
