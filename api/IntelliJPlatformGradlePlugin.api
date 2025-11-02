@@ -1204,6 +1204,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun bundledModules (Ljava/util/List;)V
 	public final fun bundledModules (Lorg/gradle/api/provider/Provider;)V
 	public final fun bundledModules ([Ljava/lang/String;)V
+	public final fun bundledPlugin (Ljava/lang/String;)V
 	public final fun bundledPlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun bundledPlugins (Ljava/util/List;)V
 	public final fun bundledPlugins (Lorg/gradle/api/provider/Provider;)V
