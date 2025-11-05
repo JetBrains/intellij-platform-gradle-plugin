@@ -2,10 +2,12 @@
 
 ## [next]
 
+## [2.10.4] - 2025-11-02
+
 ### Added
 
 - Add `bundledPlugin(id: String)` helper to IntelliJPlatformPluginsExtension
-- 
+
 ### Fixed
 
 - Use `withRandomSuffix` for `intellijPlatformConfigurationName` in local dependency configurations defined for Plugin Verifier
@@ -1596,7 +1598,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.3...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.4...HEAD
+[2.10.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.3...v2.10.4
 [2.10.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.2...v2.10.3
 [2.10.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.1...v2.10.2
 [2.10.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.0...v2.10.1
