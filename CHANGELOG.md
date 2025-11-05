@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add `org.jetbrains.intellij.deps.kotlinx` as a `kotlinx.coroutines` shadowed dependency group eligible for exclusion. 
+
 ## [2.10.4] - 2025-11-02
 
 ### Added

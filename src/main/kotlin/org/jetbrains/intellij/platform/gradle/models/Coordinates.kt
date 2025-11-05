@@ -28,26 +28,23 @@ val kotlinStdlib = setOf(
 /**
  * Coordinates of all Kotlin Coroutines modules that should be excluded from dependencies.
  *
- * This collection includes modules from both:
+ * This collection includes modules from:
  * - `org.jetbrains.kotlinx` group (standard coroutines)
  * - `com.intellij.platform` group (repacked coroutines in IntelliJ Platform)
+ * - `org.jetbrains.intellij.deps.kotlinx` group (repacked coroutines in IntelliJ Platform since October 23rd, 2025)
  */
-val coroutines = setOf(
-    // KotlinX Coroutines
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-core-jvm"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-jdk8"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-core"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-debug"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-guava"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-slf4j"),
-    Coordinates("org.jetbrains.kotlinx", "kotlinx-coroutines-test"),
-
-    // KotlinX Coroutines repacked in the IntelliJ Platform
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-core-jvm"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-jdk8"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-core"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-debug"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-guava"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-slf4j"),
-    Coordinates("com.intellij.platform", "kotlinx-coroutines-test"),
-)
+val coroutines = listOf(
+    "org.jetbrains.kotlinx",
+    "com.intellij.platform",
+    "org.jetbrains.intellij.deps.kotlinx",
+).flatMapTo(mutableSetOf()) { groupId ->
+    listOf(
+        "kotlinx-coroutines-core-jvm",
+        "kotlinx-coroutines-jdk8",
+        "kotlinx-coroutines-core",
+        "kotlinx-coroutines-debug",
+        "kotlinx-coroutines-guava",
+        "kotlinx-coroutines-slf4j",
+        "kotlinx-coroutines-test",
+    ).map { artifactId -> Coordinates(groupId, artifactId) }
+}
