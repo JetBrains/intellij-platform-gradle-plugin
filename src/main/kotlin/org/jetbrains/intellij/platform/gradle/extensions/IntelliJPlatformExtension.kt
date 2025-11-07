@@ -306,7 +306,9 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             companion object : Registrable<Ides> {
                 override fun register(project: Project, target: Any) =
                     target.configureExtension<Ides>(Extensions.IDES) {
-                        enabled.convention(false)
+                        enabled.convention(
+                            project.providers[GradleProperties.IntellijPlatformIdesCacheEnabled]
+                        )
                         path.convention(
                             project.layout.dir(
                                 project.providers.intellijPlatformIdesCachePath(project.rootProjectPath).map { it.toFile() }

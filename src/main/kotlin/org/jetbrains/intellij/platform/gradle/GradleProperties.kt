@@ -10,6 +10,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IDES
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IVY
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
@@ -73,6 +74,15 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      * Default value: [IntellijPlatformCache]/ides/
      */
     object IntellijPlatformIdesCache : GradleProperties<String>("")
+
+    /**
+     * Indicates whether caching for IntelliJ Platform IDEs is enabled globally.
+     *
+     * This property can still be overridden locally with [IntelliJPlatformDependencyConfiguration.useCache].
+     *
+     * Default value: `false`
+     */
+    object IntellijPlatformIdesCacheEnabled : GradleProperties<Boolean>(false)
 
     /**
      * The [IntelliJPlatformRepositoriesExtension.localPlatformArtifacts] entry applied to the `repositories {}` block is required
