@@ -64,7 +64,7 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.PUBLISH_PLUGIN) {
-            assertContains("Failed to upload plugin: Upload failed: Authentication Failed: Invalid token: Token is malformed", output)
+            assertContains("Failed to upload plugin: Upload failed: Authentication Failed: token is invalid", output)
         }
     }
 
