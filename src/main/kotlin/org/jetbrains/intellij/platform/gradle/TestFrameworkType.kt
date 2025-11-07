@@ -30,13 +30,20 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
 
     object Plugin {
         object CSS : TestFrameworkType(Coordinates("com.jetbrains.intellij.css", "css-test-framework"))
+        object Debugger : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "debugger-test-framework"))
+        object ExternalSystem : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "external-system-test-framework"))
         object Go : TestFrameworkType(Coordinates("com.jetbrains.intellij.go", "go-test-framework"))
         object Ruby : TestFrameworkType(Coordinates("com.jetbrains.intellij.idea", "ruby-test-framework"))
         object Java : TestFrameworkType(Coordinates("com.jetbrains.intellij.java", "java-test-framework"))
         object JavaScript : TestFrameworkType(Coordinates("com.jetbrains.intellij.javascript", "javascript-test-framework"))
-        object LSP : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-lsp-framework"))
+        object LSP : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "lsp-test-framework"))
         object Maven : TestFrameworkType(Coordinates("com.jetbrains.intellij.maven", "maven-test-framework"))
+        object PolySymbols : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "poly-symbols-test-framework"))
+        object Qodana : TestFrameworkType(Coordinates("com.jetbrains.intellij.qodana", "qodana-test-framework"))
         object ReSharper : TestFrameworkType(Coordinates("com.jetbrains.intellij.resharper", "resharper-test-framework"))
+        object UAST : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "uast-test-framework"))
+        object VCS : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "vcs-test-framework"))
         object XML : TestFrameworkType(Coordinates("com.jetbrains.intellij.xml", "xml-test-framework"))
+        object WebSymbols : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "web-symbols-test-framework"))
     }
 }
