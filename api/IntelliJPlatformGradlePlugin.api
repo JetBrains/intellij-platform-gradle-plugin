@@ -264,6 +264,10 @@ public final class org/jetbrains/intellij/platform/gradle/GradleProperties$Intel
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$IntellijPlatformIdesCache;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/GradleProperties$IntellijPlatformIdesCacheEnabled : org/jetbrains/intellij/platform/gradle/GradleProperties {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$IntellijPlatformIdesCacheEnabled;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$LocalPlatformArtifacts : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$LocalPlatformArtifacts;
 }
@@ -386,6 +390,14 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$CSS;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Debugger : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Debugger;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$ExternalSystem : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$ExternalSystem;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Go : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Go;
 }
@@ -406,12 +418,32 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Maven;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$PolySymbols : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$PolySymbols;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Qodana : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Qodana;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$ReSharper : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$ReSharper;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Ruby : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Ruby;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$UAST : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$UAST;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$VCS : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$VCS;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$WebSymbols : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$WebSymbols;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$XML : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
