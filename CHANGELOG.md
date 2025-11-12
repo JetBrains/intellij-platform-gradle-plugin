@@ -8,6 +8,10 @@
 - Expand `TestFrameworkType` with additional frameworks including Debugger, ExternalSystem, PolySymbols, Qodana, UAST, VCS, and WebSymbols.
 - Introduce `org.jetbrains.intellij.platform.intellijPlatformIdesCacheEnabled` Gradle property to control IntelliJ Platform IDEs caching globally via `intellijPlatform.caching.ides.enabled` convention.
 
+### Changed
+
+- Replace exception with a warning for unknown input paths in `CollectorTransformer`.
+
 ## [2.10.4] - 2025-11-02
 
 ### Added

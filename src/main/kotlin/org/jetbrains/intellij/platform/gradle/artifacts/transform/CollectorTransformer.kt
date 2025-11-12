@@ -91,7 +91,7 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
                     }
                 }
 
-                else -> throw GradleException("Unknown input: $path")
+                else -> log.warn("Unknown input: $path")
             }
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
