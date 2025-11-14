@@ -12,6 +12,10 @@
 
 - Replace exception with a warning for unknown input paths in `CollectorTransformer`.
 
+### Fixed
+
+- Fix `Path.deepResolve` to correctly resolve `singleOrNull` entries.
+
 ## [2.10.4] - 2025-11-02
 
 ### Added

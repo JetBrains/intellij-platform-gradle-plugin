@@ -92,7 +92,7 @@ fun FileCollection.platformPath(requestedPlatform: RequestedIntelliJPlatform? = 
 private fun Path.deepResolve(block: Path.() -> Path?) = generateSequence(this) { parent ->
     val entry = parent
         .listDirectoryEntries()
-        .singleOrNull() // pick an entry if it is a singleton in a directory
+        .singleOrNull{ !it.isHidden() } // pick an entry if it is a singleton in a directory, exclude hidden entries
         ?.takeIf { it.isDirectory() } // and this entry is a directory
         ?: return@generateSequence null
     block(entry)
