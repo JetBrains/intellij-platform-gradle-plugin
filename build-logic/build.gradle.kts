@@ -10,10 +10,6 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.xmlutil.core)
-    implementation(libs.xmlutil.serialization) {
-        exclude("io.github.pdvrieze.xmlutil", "core")
-    }
     implementation(libs.kotlinx.serialization.json)
 }
 

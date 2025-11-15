@@ -6,7 +6,7 @@ kotlinxSerialization = "1.6.3"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 undertow = "2.3.20.Final"
-xmlutil = "0.86.3"
+xmlutil = "0.91.3"
 
 # plugins
 dokka = "2.1.0"
@@ -24,7 +24,7 @@ kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 undertow = { group = "io.undertow", name = "undertow-core", version.ref = "undertow" }
-xmlutil-core = { group = "io.github.pdvrieze.xmlutil", name = "core-jvm", version.ref = "xmlutil" }
+xmlutil-core = { group = "io.github.pdvrieze.xmlutil", name = "core-jvmcommon", version.ref = "xmlutil" }
 xmlutil-serialization = { group = "io.github.pdvrieze.xmlutil", name = "serialization-jvm", version.ref = "xmlutil" }
 
 [plugins]
