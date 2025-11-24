@@ -2,17 +2,37 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.assertContains
 import org.jetbrains.intellij.platform.gradle.buildFile
+import org.jetbrains.intellij.platform.gradle.models.JetBrainsIdesReleases
+import org.jetbrains.intellij.platform.gradle.models.decode
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import org.jetbrains.intellij.platform.gradle.write
+import java.net.URI
 import kotlin.test.Test
 
 class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `print product releases`() {
+        // Fetch actual releases from the remote resource
+        val content = URI(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES).toURL().readText()
+        val releases = decode<JetBrainsIdesReleases>(content)
+
+        // Get all IC release versions grouped by minor version, keeping only the highest patch for each
+        val icReleases = releases.products
+            .first { intellijPlatformType in it.codes }
+            .channels
+            .first { it.status == "release" }
+            .builds
+            .map { it.version.toVersion() }
+            .filter { it >= intellijPlatformVersion.toVersion() }
+            .groupBy { "${it.major}.${it.minor}" }
+            .map { (_, versions) -> versions.maxBy { it.patch } }
+
         buildFile write //language=kotlin
                 """
                 tasks {
@@ -24,11 +44,7 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.PRINT_PRODUCTS_RELEASES) {
             assertContains(
-                """
-                > Task :${Tasks.PRINT_PRODUCTS_RELEASES}
-                IC-2025.2.4
-                IC-2025.1.7
-                """.trimIndent(),
+                "> Task :${Tasks.PRINT_PRODUCTS_RELEASES}\n" + icReleases.joinToString("\n") { "$intellijPlatformType-$it" },
                 output,
             )
         }
