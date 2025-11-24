@@ -15,6 +15,7 @@
 ### Fixed
 
 - Fix `Path.deepResolve` to correctly resolve `singleOrNull` entries.
+- Fix JetBrains Runtime architecture detection for Linux ARM64 systems JetBrains/intellij-platform-gradle-plugin#2054
 
 ## [2.10.4] - 2025-11-02
 

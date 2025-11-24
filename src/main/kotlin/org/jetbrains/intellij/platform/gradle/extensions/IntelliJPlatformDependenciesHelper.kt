@@ -48,7 +48,6 @@ import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
-import kotlin.collections.buildList
 import kotlin.concurrent.withLock
 import kotlin.io.path.*
 
@@ -1554,13 +1553,12 @@ class IntelliJPlatformDependenciesHelper(
             }
         }
 
-        val arch = when (architecture ?: System.getProperty("os.arch")) {
-            "aarch64", "arm64" -> "aarch64"
-            "x86_64", "amd64" -> "x64"
-            else -> when {
-                operatingSystem.isWindows && System.getenv("ProgramFiles(x86)") != null -> "x64"
-                else -> "x86"
-            }
+        val osArch = (architecture ?: System.getProperty("os.arch")).lowercase()
+        val arch = when {
+            osArch in listOf("aarch64", "arm64") || osArch.contains("arm") || osArch.contains("aarch") -> "aarch64"
+            osArch in listOf("x86_64", "amd64", "x64") -> "x64"
+            operatingSystem.isWindows && System.getenv("ProgramFiles(x86)") != null -> "x64"
+            else -> "x86"
         }
 
         return "jbr_$variant-$jdk-$os-$arch-b$build"
