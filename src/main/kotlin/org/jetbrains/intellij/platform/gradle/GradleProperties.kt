@@ -202,7 +202,7 @@ inline operator fun <reified T : Any> ProviderFactory.get(property: GradleProper
  */
 internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
     get(GradleProperties.IntellijPlatformCache).resolvePath()
-        .orElse(provider { rootProjectDirectory.resolve(CACHE_DIRECTORY) })
+        .orElse(provider { rootProjectDirectory.resolve(CACHE_DIRECTORY) }) as Provider<Path>
 
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
@@ -211,7 +211,7 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
  */
 internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
     get(GradleProperties.LocalPlatformArtifacts).resolvePath()
-        .orElse(intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_IVY) })
+        .orElse(intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_IVY) }) as Provider<Path>
 
 /**
  * Represents an alternative location where extracted IDEs are stored, as an alternative to the Gradle cache.
@@ -220,8 +220,7 @@ internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Pa
  */
 internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory: Path) =
     get(GradleProperties.IntellijPlatformIdesCache).resolvePath()
-        .orElse(intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_IDES) })
-
+        .orElse(intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_IDES) }) as Provider<Path>
 
 /**
  * Resolves the directory path from the given provider.
