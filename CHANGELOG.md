@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.10.5] - 2025-11-25
+
 ### Added
 
 - Add `org.jetbrains.intellij.deps.kotlinx` as a `kotlinx.coroutines` shadowed dependency group eligible for exclusion.
@@ -1613,7 +1615,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.4...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.5...HEAD
+[2.10.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.4...v2.10.5
 [2.10.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.3...v2.10.4
 [2.10.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.2...v2.10.3
 [2.10.2]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.1...v2.10.2
