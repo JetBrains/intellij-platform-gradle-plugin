@@ -10,7 +10,7 @@ on:
         description: "Gradle Version"
         required: true
         type: string
-        default: "9.2.0"
+        default: "9.2.1"
       os:
         description: "Operation System"
         required: true
