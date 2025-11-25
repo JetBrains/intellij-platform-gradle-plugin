@@ -50,28 +50,28 @@ inline fun <reified T : Any> ProviderFactory.cachedProvider(
     objects: ObjectFactory,
     crossinline block: () -> T?
 ): Provider<out T> =
-    provider { block() }.cached(objects)
+    provider { block().markedAsNonNull }.cached(objects)
 
 @JvmName("cachedListProvider")
 inline fun <reified T : Any> ProviderFactory.cachedProvider(
     objects: ObjectFactory,
     crossinline block: () -> List<T>?
 ): Provider<out List<T>> =
-    provider { block() }.cached(objects)
+    provider { block().markedAsNonNull }.cached(objects)
 
 @JvmName("cachedMapProvider")
 inline fun <reified K : Any, reified V : Any> ProviderFactory.cachedProvider(
     objects: ObjectFactory,
     crossinline block: () -> Map<K, V>?
 ): Provider<out Map<K, V>> =
-    provider { block() }.cached(objects)
+    provider { block().markedAsNonNull }.cached(objects)
 
 @JvmName("cachedSetProvider")
 inline fun <reified T : Any> ProviderFactory.cachedProvider(
     objects: ObjectFactory,
     crossinline block: () -> Set<T>?
 ): Provider<out Set<T>> =
-    provider { block() }.cached(objects)
+    provider { block().markedAsNonNull }.cached(objects)
 
 @OptIn(ExperimentalTypeInference::class)
 @OverloadResolutionByLambdaReturnType
@@ -229,7 +229,7 @@ inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
     right: Provider<out U>,
     crossinline combiner: (T, U) -> R?
 ): Provider<out R> =
-    zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue) }.cached(objects)
+    zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue).markedAsNonNull }.cached(objects)
 
 @JvmName("cachedZipToList")
 inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
@@ -237,7 +237,7 @@ inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
     right: Provider<out U>,
     crossinline combiner: (T, U) -> List<R>?
 ): Provider<out List<R>> =
-    zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue) }.cached(objects)
+    zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue).markedAsNonNull }.cached(objects)
 
 @JvmName("cachedZipToMap")
 inline fun <T : Any, U : Any, reified K : Any, reified V : Any> Provider<out T>.cachedZip(
@@ -245,7 +245,7 @@ inline fun <T : Any, U : Any, reified K : Any, reified V : Any> Provider<out T>.
     right: Provider<out U>,
     crossinline combiner: (T, U) -> Map<K, V>?
 ): Provider<out Map<K, V>> =
-    zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue) }.cached(objects)
+    zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue).markedAsNonNull }.cached(objects)
 
 @JvmName("cachedZipToSet")
 inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
@@ -253,7 +253,7 @@ inline fun <T : Any, U : Any, reified R : Any> Provider<out T>.cachedZip(
     right: Provider<out U>,
     crossinline combiner: (T, U) -> Set<R>?
 ): Provider<out Set<R>> =
-    zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue) }.cached(objects)
+    zip(right) { leftValue, rightValue -> combiner(leftValue, rightValue).markedAsNonNull }.cached(objects)
 
 inline fun <reified T : Any> Provider<out T>.cached(
     project: Project

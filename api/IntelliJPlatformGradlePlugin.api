@@ -1088,6 +1088,18 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration$DefaultImpls {
+	public static fun getIdeaVersion (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration$IdeaVersion;
+	public static fun getProductDescriptor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration$ProductDescriptor;
+	public static fun getVendor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration$Vendor;
+	public static fun ideaVersion (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;Lgroovy/lang/Closure;)V
+	public static fun ideaVersion (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;Lorg/gradle/api/Action;)V
+	public static fun productDescriptor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;Lgroovy/lang/Closure;)V
+	public static fun productDescriptor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;Lorg/gradle/api/Action;)V
+	public static fun vendor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;Lgroovy/lang/Closure;)V
+	public static fun vendor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;Lorg/gradle/api/Action;)V
+}
+
 public abstract interface class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration$IdeaVersion {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration$IdeaVersion$Companion;
 	public abstract fun getSinceBuild ()Lorg/gradle/api/provider/Property;
@@ -1144,6 +1156,12 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/extension
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Companion : org/jetbrains/intellij/platform/gradle/extensions/Registrable {
 	public synthetic fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Ljava/lang/Object;
 	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$DefaultImpls {
+	public static fun getIdes (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;
+	public static fun ides (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification;Lgroovy/lang/Closure;)V
+	public static fun ides (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification;Lorg/gradle/api/Action;)V
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides {
@@ -1226,6 +1244,18 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration {
+}
+
+public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin$DefaultImpls {
+	public static fun getIdeaVersion (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration$IdeaVersion;
+	public static fun getProductDescriptor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration$ProductDescriptor;
+	public static fun getVendor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration$Vendor;
+	public static fun ideaVersion (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin;Lgroovy/lang/Closure;)V
+	public static fun ideaVersion (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin;Lorg/gradle/api/Action;)V
+	public static fun productDescriptor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin;Lgroovy/lang/Closure;)V
+	public static fun productDescriptor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin;Lorg/gradle/api/Action;)V
+	public static fun vendor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin;Lgroovy/lang/Closure;)V
+	public static fun vendor (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$VerifyPlugin;Lorg/gradle/api/Action;)V
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension : org/gradle/api/plugins/ExtensionAware {
@@ -1407,6 +1437,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Companion {
@@ -1447,6 +1478,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Item;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Item$Companion {
@@ -1477,6 +1509,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Item$Download;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Item$Download$Companion {
@@ -1533,6 +1566,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$$seri
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Artifact {
@@ -1567,6 +1601,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Artif
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Artifact;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Artifact$Companion {
@@ -1601,6 +1636,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Confi
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Configuration;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Configuration$Companion {
@@ -1634,6 +1670,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Depen
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Dependency;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Dependency$Artifact {
@@ -1663,6 +1700,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Depen
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Dependency$Artifact;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Dependency$Artifact$Companion {
@@ -1701,6 +1739,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Info$
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModule$Info;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Info$Companion {
@@ -1730,6 +1769,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsCdnBui
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsCdnBuilds;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsCdnBuilds$Companion {
@@ -1760,6 +1800,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsCdnBui
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsCdnBuilds$Release;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsCdnBuilds$Release$Companion {
@@ -1786,6 +1827,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Companion {
@@ -1816,6 +1858,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel {
@@ -1852,6 +1895,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build {
@@ -1889,6 +1933,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost {
@@ -1911,6 +1956,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost$Companion {
@@ -1942,6 +1988,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button$Companion {
@@ -1976,6 +2023,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesRe
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch$Companion {
@@ -2018,6 +2066,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/MavenMetadata$$
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/MavenMetadata;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/MavenMetadata$Companion {
@@ -2050,6 +2099,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/MavenMetadata$M
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/MavenMetadata$MavenMetadataVersioning;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/MavenMetadata$MavenMetadataVersioning$Companion {
@@ -2080,6 +2130,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescripto
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ModuleDescriptor;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Companion {
@@ -2106,6 +2157,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescripto
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Dependency;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Dependency$Companion {
@@ -2132,6 +2184,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescripto
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Resources;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Resources$Companion {
@@ -2158,6 +2211,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescripto
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Resources$ResourceRoot;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ModuleDescriptor$Resources$ResourceRoot$Companion {
@@ -2292,6 +2346,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$$se
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Companion {
@@ -2322,6 +2377,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Cus
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo$CustomProperty;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$CustomProperty$Companion {
@@ -2372,6 +2428,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Lau
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo$Launch;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Launch$Companion {
@@ -2412,6 +2469,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Lau
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo$Launch$CustomCommand;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Launch$CustomCommand$Companion {
@@ -2457,6 +2515,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Lay
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo$LayoutItem;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$LayoutItem$Companion {
@@ -2509,6 +2568,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins {
@@ -2533,6 +2593,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Companion {
@@ -2559,6 +2620,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$BundledPlugins$Module$Companion {
@@ -2591,6 +2653,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$Companion {
@@ -2617,6 +2680,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$
 	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
 	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
 	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$ModuleIncludes$FromModule$Companion {
@@ -2861,11 +2925,12 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/providers
 	public abstract fun getJetbrainsIdesUrl ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/resolvers/Resolver {
+public abstract class org/jetbrains/intellij/platform/gradle/resolvers/Resolver {
+	public fun <init> ()V
 	public abstract fun getSubject ()Ljava/lang/String;
 	public fun getSubjectInput ()Ljava/lang/Object;
 	public abstract fun resolve ()Ljava/lang/Object;
-	public fun resolve (Lkotlin/sequences/Sequence;)Ljava/lang/Object;
+	protected final fun resolve (Lkotlin/sequences/Sequence;)Ljava/lang/Object;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/resolvers/path/IntelliJPluginVerifierPathResolver : org/jetbrains/intellij/platform/gradle/resolvers/path/PathResolver {
@@ -3007,9 +3072,13 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/BuildPluginTask$
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/BuildSearchableOptionsTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/BuildSearchableOptionsTask$Companion;
 	public fun <init> ()V
+	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun exec ()V
 	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getShowPaidPluginWarning ()Lorg/gradle/api/provider/Property;
+	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/BuildSearchableOptionsTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3045,10 +3114,13 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/InitializeInt
 	public fun <init> ()V
 	public abstract fun getLatestPluginVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public abstract fun getPluginVersion ()Lorg/gradle/api/provider/Property;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getSelfUpdateCheck ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSelfUpdateLock ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun initialize ()V
+	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3097,6 +3169,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PatchPluginXm
 	public abstract fun getChangeNotes ()Lorg/gradle/api/provider/Property;
 	public abstract fun getInputFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getOutputFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public abstract fun getPluginDescription ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPluginId ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPluginName ()Lorg/gradle/api/provider/Property;
@@ -3106,12 +3179,14 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PatchPluginXm
 	public abstract fun getProductDescriptorOptional ()Lorg/gradle/api/provider/Property;
 	public abstract fun getProductDescriptorReleaseDate ()Lorg/gradle/api/provider/Property;
 	public abstract fun getProductDescriptorReleaseVersion ()Lorg/gradle/api/provider/Property;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getSinceBuild ()Lorg/gradle/api/provider/Property;
 	public abstract fun getUntilBuild ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVendorEmail ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVendorName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVendorUrl ()Lorg/gradle/api/provider/Property;
 	public final fun patchPluginXml ()V
+	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/PatchPluginXmlTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3141,12 +3216,17 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandbo
 	public abstract fun getDefaultDestinationDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public fun getDestinationDir ()Ljava/io/File;
 	public abstract fun getDisabledPlugins ()Lorg/gradle/api/provider/SetProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public abstract fun getPluginDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getPluginJar ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getPluginName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPluginsClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getSandboxSuffix ()Lorg/gradle/api/provider/Property;
+	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
+	public fun validateIntelliJPlatformVersion ()V
+	public fun validateSplitModeSupport ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandboxTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3156,6 +3236,10 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandboxTa
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareTestTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/PrepareTestTask$Companion;
 	public fun <init> ()V
+	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/PrepareTestTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3166,7 +3250,10 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrintBundledP
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/PrintBundledPluginsTask$Companion;
 	public fun <init> ()V
 	public abstract fun getIdesManager ()Lorg/gradle/api/provider/Property;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public final fun printBundledPlugins ()V
+	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/PrintBundledPluginsTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3203,7 +3290,13 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PublishPluginTas
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$Companion;
 	public fun <init> ()V
+	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun exec ()V
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
+	public fun validateIntelliJPlatformVersion ()V
+	public fun validateSplitModeSupport ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3245,10 +3338,14 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/SignPluginTask$C
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/TestIdePerformanceTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/TestIdePerformanceTask$Companion;
 	public fun <init> ()V
+	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun exec ()V
 	public abstract fun getArtifactsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getProfilerName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTestDataDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/TestIdePerformanceTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3258,7 +3355,11 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/TestIdePerforman
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask : org/gradle/api/tasks/testing/Test, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/TestIdeTask$Companion;
 	public fun <init> ()V
+	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun executeTests ()V
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3268,8 +3369,12 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask$Comp
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/TestIdeUiTask : org/gradle/api/tasks/testing/Test, org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/TestIdeUiTask$Companion;
 	public fun <init> ()V
+	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun executeTests ()V
 	public abstract fun getArchiveFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/TestIdeUiTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3282,9 +3387,12 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginP
 	public abstract fun getGitignoreFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getIntellijPlatformCache ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getMutedMessages ()Lorg/gradle/api/provider/ListProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getRootDirectory ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSourceCompatibility ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTargetCompatibility ()Lorg/gradle/api/provider/Property;
+	public fun validateIntelliJPlatformVersion ()V
 	public final fun verifyPluginConfiguration ()V
 }
 
@@ -3331,11 +3439,14 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginT
 	public abstract fun getIgnoredProblemsFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getListIdes ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public abstract fun getProblemsReportFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getSubsystemsToCheck ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTeamCityOutputFormat ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVerificationReportsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getVerificationReportsFormats ()Lorg/gradle/api/provider/ListProperty;
+	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3399,6 +3510,12 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public abstract fun getCoroutinesJavaAgentFile ()Lorg/gradle/api/file/RegularFileProperty;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware$DefaultImpls {
+	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware;)Ljava/nio/file/Path;
+	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware;)V
+}
+
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
 	public abstract fun getIntelliJPlatformConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getIntelliJPlatformPluginConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
@@ -3406,6 +3523,12 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public fun validateIntelliJPlatformVersion ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware$DefaultImpls {
+	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware;)Ljava/nio/file/Path;
+	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware;)V
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/JavaCompilerAware {
@@ -3447,6 +3570,13 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware : org/gradle/process/JavaForkOptions, org/jetbrains/intellij/platform/gradle/tasks/aware/AutoReloadAware, org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware {
 }
 
+public final class org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware$DefaultImpls {
+	public static fun applySandboxFrom (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware;Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
+	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware;)Ljava/nio/file/Path;
+	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware;)V
+}
+
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
 	public abstract fun getJetbrainsRuntimeConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getRuntimeArchitecture ()Lorg/gradle/api/provider/Property;
@@ -3455,8 +3585,18 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public abstract fun getRuntimeMetadata ()Lorg/gradle/api/provider/MapProperty;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware$DefaultImpls {
+	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware;)Ljava/nio/file/Path;
+	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware;)V
+}
+
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware : org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure {
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware$DefaultImpls {
+	public static fun applySandboxFrom (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware;Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure {
@@ -3483,6 +3623,14 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public fun validateSplitModeSupport ()V
 }
 
+public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$DefaultImpls {
+	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Ljava/nio/file/Path;
+	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public static fun getSplitModeFrontendProperties (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/gradle/api/provider/Provider;
+	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)V
+	public static fun validateSplitModeSupport (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)V
+}
+
 public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget : java/lang/Enum {
 	public static final field BACKEND Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget;
 	public static final field BOTH Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget;
@@ -3497,6 +3645,13 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public abstract fun getIntellijPlatformTestClasspathConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getIntellijPlatformTestRuntimeClasspathConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getPluginDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware$DefaultImpls {
+	public static fun applySandboxFrom (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware;Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
+	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware;)Ljava/nio/file/Path;
+	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware;)V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/companion/JarCompanion {

@@ -10,7 +10,7 @@ import kotlin.io.path.listDirectoryEntries
 /**
  * Interface for resolving a [Path] to executables or other files of any kind.
  */
-abstract class PathResolver : Resolver<Path> {
+abstract class PathResolver : Resolver<Path>() {
 
     /**
      * A sequence of possible locations of the [Path] we're looking for.
