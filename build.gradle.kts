@@ -75,8 +75,9 @@ kotlin {
 tasks {
     withType<KotlinCompile>().configureEach {
         compilerOptions {
-            apiVersion.set(KotlinVersion.KOTLIN_1_8)
-            languageVersion.set(KotlinVersion.KOTLIN_1_8)
+            apiVersion = KotlinVersion.KOTLIN_1_8
+            languageVersion = KotlinVersion.KOTLIN_1_8
+            freeCompilerArgs = listOf("-Xjvm-default=all-compatibility")
         }
     }
 
