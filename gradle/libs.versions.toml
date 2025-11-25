@@ -12,7 +12,7 @@ xmlutil = "0.91.3"
 dokka = "2.1.0"
 bcv = "0.18.1"
 gradlePluginPublish = "2.0.0"
-gradleChangelogPlugin = "2.4.0"
+gradleChangelogPlugin = "2.5.0"
 
 [libraries]
 intellij-pluginRepositoryRestClient = { group = "org.jetbrains.intellij", name = "plugin-repository-rest-client", version.ref = "intellijPluginRepositoryRestClient" }
