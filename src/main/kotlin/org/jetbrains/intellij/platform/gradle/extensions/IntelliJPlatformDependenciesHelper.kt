@@ -35,10 +35,7 @@ import org.jetbrains.intellij.platform.gradle.providers.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.services.*
-import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
-import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
-import org.jetbrains.intellij.platform.gradle.tasks.SignPluginTask
-import org.jetbrains.intellij.platform.gradle.tasks.TestIdeUiTask
+import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformCacheResolver.Parameters
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
@@ -1293,6 +1290,19 @@ class IntelliJPlatformDependenciesHelper(
             coordinates = Coordinates("org.jetbrains", "marketplace-zip-signer"),
             version = version,
             classifier = "cli",
+            extension = "jar",
+        )
+
+    /**
+     * Adds a dependency on a Compose Hot Reload agent with [RunIdeTask].
+     *
+     * @param version agent version.
+     */
+    internal fun createComposeHotReloadAgent(version: String = Constraints.LATEST_VERSION) =
+        createDependency(
+            coordinates = Coordinates("org.jetbrains.compose.hot-reload", "hot-reload-agent"),
+            version = version,
+            classifier = "standalone",
             extension = "jar",
         )
 

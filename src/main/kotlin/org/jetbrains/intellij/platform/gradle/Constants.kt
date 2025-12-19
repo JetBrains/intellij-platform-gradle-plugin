@@ -30,6 +30,7 @@ object Constants {
             const val IDEA = "idea"
             const val JAVA_TEST_FIXTURES = "java-test-fixtures"
             const val KOTLIN = "org.jetbrains.kotlin.jvm"
+            const val KOTLIN_COMPOSE = "org.jetbrains.kotlin.plugin.compose"
         }
     }
 
@@ -37,6 +38,7 @@ object Constants {
         const val CLOSEST_VERSION = "closest"
         const val LATEST_VERSION = "latest"
         const val PLATFORM_VERSION = "platform"
+
         val MINIMAL_GRADLE_VERSION: GradleVersion = GradleVersion.version("8.13")
         val MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER = "223".toVersion()
         val MINIMAL_INTELLIJ_PLATFORM_VERSION = "2022.3".toVersion()
@@ -45,6 +47,8 @@ object Constants {
         val UNIFIED_INTELLIJ_IDEA_VERSION = "2025.3".toVersion()
         val UNIFIED_PYCHARM_BUILD_NUMBER = "253".toVersion()
         val UNIFIED_PYCHARM_VERSION = "2025.3".toVersion()
+
+        const val COMPOSE_HOT_RELOAD_VERSION = "1.1.0-alpha03"
     }
 
     object Extensions {
@@ -107,6 +111,8 @@ object Constants {
         const val JETBRAINS_RUNTIME = "jetbrainsRuntime"
         const val JETBRAINS_RUNTIME_DEPENDENCY = "jetbrainsRuntimeDependency"
         const val JETBRAINS_RUNTIME_LOCAL_INSTANCE = "jetbrainsRuntimeLocalInstance"
+
+        const val COMPOSE_HOT_RELOAD_AGENT = "composeHotReloadAgent"
 
         object Attributes {
             const val COMPOSED_JAR_NAME = "composed-jar"

@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add `--compose-hot-reload` argument for `RunIdeTask` task that enables Compose Hot Reload agent.
+
 ### Fixed
 
 - Fix the execution of `JavaExec` based tasks when the class path gets shortened.
