@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add `--compose-hot-reload` argument for `RunIdeTask` task that enables Compose Hot Reload agent.
+
 ### Fixed
 
 - Include `IU` and `PY` releases when resolving Plugin Verifier compatible IDEs while requesting `IC` or `PC` for versions `2025.3` (`253`) and later.

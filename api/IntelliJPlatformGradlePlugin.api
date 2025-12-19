@@ -18,6 +18,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Components {
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Configurations {
+	public static final field COMPOSE_HOT_RELOAD_AGENT Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Configurations;
 	public static final field INTELLIJ_PLATFORM_BUNDLED_MODULES Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_BUNDLED_PLUGINS Ljava/lang/String;
@@ -112,6 +113,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Constraints {
 	public static final field CLOSEST_VERSION Ljava/lang/String;
+	public static final field COMPOSE_HOT_RELOAD_VERSION Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Constraints;
 	public static final field LATEST_VERSION Ljava/lang/String;
 	public static final field PLATFORM_VERSION Ljava/lang/String;
@@ -185,6 +187,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Plugins$Exte
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Plugins$External;
 	public static final field JAVA_TEST_FIXTURES Ljava/lang/String;
 	public static final field KOTLIN Ljava/lang/String;
+	public static final field KOTLIN_COMPOSE Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox {
@@ -3287,7 +3290,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PublishPluginTas
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/ComposeHotReloadAware, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$Companion;
 	public fun <init> ()V
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
@@ -3295,6 +3298,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : 
 	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
+	public final fun setComposeHotReloadArg (Z)V
 	public fun validateIntelliJPlatformVersion ()V
 	public fun validateSplitModeSupport ()V
 }
@@ -3504,6 +3508,11 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/AutoReloadAware {
 	public abstract fun getAutoReload ()Lorg/gradle/api/provider/Property;
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ComposeHotReloadAware {
+	public abstract fun getComposeHotReload ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJavaAgentConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {

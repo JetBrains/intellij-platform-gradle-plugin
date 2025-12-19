@@ -13,6 +13,7 @@ import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
@@ -55,8 +56,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         /**
          * Configure the [IdeaPlugin] to:
-         * - set the `idea.module.downloadSources` flag to `true` to tell IDE that sources are required when working with IntelliJ Platform Gradle Plugin
-         * - exclude the [CACHE_DIRECTORY] from the IDEA module
+         * - Set the `idea.module.downloadSources` flag to `true` to tell IDE that sources are required when working with IntelliJ Platform Gradle Plugin
+         * - Exclude the [CACHE_DIRECTORY] from the IDEA module
          */
         project.pluginManager.withPlugin(Plugins.External.IDEA) {
             project.extensions.configure<IdeaModel>(Plugins.External.IDEA) {
@@ -384,6 +385,15 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 )
             }
 
+            create(
+                name = Configurations.COMPOSE_HOT_RELOAD_AGENT,
+                description = "Compose Hot Reload Agent",
+            ) {
+                defaultDependencies {
+                    add(dependenciesHelper.createComposeHotReloadAgent(Constraints.COMPOSE_HOT_RELOAD_VERSION))
+                }
+            }
+
             this@configurations[Configurations.External.COMPILE_ONLY].extendsFrom(
                 intellijPlatformConfiguration,
                 intellijPlatformDependenciesConfiguration,
@@ -507,5 +517,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         ).forEach {
             it.register(project)
         }
+
+        project.preconfigureKotlinCompiler()
     }
 }
