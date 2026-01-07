@@ -327,11 +327,11 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             }
 
             inputs.properties(
-                "kotlinJvmTarget" to project.provider { kotlinJvmTarget.orNull.toString() },
-                "kotlinApiVersion" to project.provider { kotlinApiVersion.orNull.toString() },
-                "kotlinLanguageVersion" to project.provider { kotlinLanguageVersion.orNull.toString() },
-                "kotlinVersion" to project.provider { kotlinVersion.orNull.toString() },
-                "kotlinStdlibDefaultDependency" to project.provider { kotlinStdlibDefaultDependency.orNull.toString() },
+                "kotlinJvmTarget" to project.provider { kotlinJvmTarget.orNull.orEmpty() },
+                "kotlinApiVersion" to project.provider { kotlinApiVersion.orNull.orEmpty() },
+                "kotlinLanguageVersion" to project.provider { kotlinLanguageVersion.orNull.orEmpty() },
+                "kotlinVersion" to project.provider { kotlinVersion.orNull.orEmpty() },
+                "kotlinStdlibDefaultDependency" to project.provider { kotlinStdlibDefaultDependency.orNull?.toString().toBoolean() },
             )
         }
 
