@@ -8,6 +8,7 @@ import kotlin.io.path.pathString
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class GradlePropertiesTest {
 
@@ -28,7 +29,7 @@ class GradlePropertiesTest {
     @Test
     fun `resolveDir returns default directory when provider has no value`() {
         // Create a provider that has no value
-        val emptyProvider = providers.provider { null as String? }
+        val emptyProvider = providers.provider { "" }
 
         val result = emptyProvider.resolvePath().orElse(defaultDir).get()
 
@@ -61,7 +62,7 @@ class GradlePropertiesTest {
         val tildeProvider = providers.provider { "~/.intellijPlatform/cache" }
 
         val result = tildeProvider.resolvePath().orElse(defaultDir).get()
-
+        assertNotNull(result)
         assertEquals(result.safePathString, Path.of(System.getProperty("user.home") + "/.intellijPlatform/cache").safePathString)
     }
 
@@ -72,6 +73,7 @@ class GradlePropertiesTest {
         val customProvider = providers.provider { customPath }
 
         val result = customProvider.resolvePath().orElse(defaultDir).get()
+        assertNotNull(result)
 
         assertEquals(tempDir.resolve("custom").toAbsolutePath().safePathString, result.safePathString)
     }
@@ -83,6 +85,7 @@ class GradlePropertiesTest {
         val nestedProvider = providers.provider { customPath }
 
         val result = nestedProvider.resolvePath().orElse(defaultDir).get()
+        assertNotNull(result)
 
         assertEquals(tempDir.resolve("deep/nested/path").safePathString, result.safePathString)
     }
@@ -93,6 +96,7 @@ class GradlePropertiesTest {
         val tildeRelativeProvider = providers.provider { "~/my-project/.cache/intellij" }
 
         val result = tildeRelativeProvider.resolvePath().orElse(defaultDir).get()
+        assertNotNull(result)
 
         assertEquals(result.safePathString, Path.of(System.getProperty("user.home") + "/my-project/.cache/intellij").safePathString)
     }
