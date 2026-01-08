@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Fix the execution of `JavaExec` based tasks when the class path gets shortened.
+
 ## [2.10.5] - 2025-11-25
 
 ### Added
