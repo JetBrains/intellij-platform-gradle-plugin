@@ -89,9 +89,9 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val jetbrainsIdesReleases = jetbrainsIdesContent
             ?.also { log.info("Reading JetBrains IDEs releases from URL: ${jetbrainsIdesUrl.orNull}") }
             ?.let { decode<JetBrainsIdesReleases>(it) }
-            ?.let {
+            ?.let { releases ->
                 sequence {
-                    it.products.forEach { product ->
+                    releases.products.forEach { product ->
                         product.channels.forEach channel@{ channelEntry ->
                             channelEntry.builds.forEach { build ->
                                 product.codes.forEach codes@{ code ->
@@ -110,7 +110,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                                             version = build.version.toVersion(),
                                             id = when (channel) {
                                                 Channel.RELEASE -> with(build.version.toVersion()) {
-                                                    "$major.$minor" + ".$patch".takeIf { patch > 0 }.orEmpty()
+                                                    val id = "$major.$minor" + ".$patch".takeIf { patch > 0 }.orEmpty()
+                                                    version.takeIf { it.startsWith(id) } ?: id
                                                 }
 
                                                 else -> build.fullNumber

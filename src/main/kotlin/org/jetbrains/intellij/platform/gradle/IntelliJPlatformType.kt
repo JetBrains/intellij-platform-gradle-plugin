@@ -167,7 +167,7 @@ enum class IntelliJPlatformType(
          * @throws IllegalArgumentException
          */
         @Throws(IllegalArgumentException::class)
-        fun fromCode(code: String, version: String) = fromCode(code).run {
+        fun fromCode(code: String, version: String) = with(fromCode(code)) {
             when {
                 /**
                  * By default, IU is parsed to [IntellijIdea].

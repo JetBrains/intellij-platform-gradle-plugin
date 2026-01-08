@@ -2,9 +2,10 @@
 
 ## [next]
 
-### Changed
+### Fixed
 
 - Include `IU` and `PY` releases when resolving Plugin Verifier compatible IDEs while requesting `IC` or `PC` for versions `2025.3` (`253`) and later.
+- Fix `ProductReleasesValueSource` to correctly handle and preserve 4-component version numbers (e.g., `2025.3.1.1`) when resolving IDE releases.
 
 ## [2.10.5] - 2025-11-25
 

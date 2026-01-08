@@ -84,6 +84,28 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
         }
     }
 
+    @Test
+    fun `list releases for IC in 2024_1 range does not include IU`() {
+        prepareTest(
+            sinceBuild = "241",
+            untilBuild = "241.14494.17",
+            types = listOf(
+                IntelliJPlatformType.IntellijIdeaCommunity,
+            ),
+            channels = listOf(
+                ProductRelease.Channel.EAP,
+            )
+        )
+
+        build(randomTaskName) {
+            assertLogValue("Product releases: ") {
+                val content = it.split(";")
+                // Should only contain IC, not IU, even though both are in the same product/channel in XML
+                assertEquals(listOf("IC-241.14494.17"), content)
+            }
+        }
+    }
+
     private fun prepareTest(
         sinceBuild: String,
         untilBuild: String,
