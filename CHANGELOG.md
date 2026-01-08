@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Include `IU` and `PY` releases when resolving Plugin Verifier compatible IDEs while requesting `IC` or `PC` for versions `2025.3` (`253`) and later.
+
 ## [2.10.5] - 2025-11-25
 
 ### Added
