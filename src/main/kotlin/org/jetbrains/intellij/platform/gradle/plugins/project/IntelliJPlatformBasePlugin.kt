@@ -8,11 +8,13 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
@@ -31,6 +33,7 @@ import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScoped
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
@@ -55,13 +58,24 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         /**
          * Configure the [IdeaPlugin] to:
-         * - set the `idea.module.downloadSources` flag to `true` to tell IDE that sources are required when working with IntelliJ Platform Gradle Plugin
-         * - exclude the [CACHE_DIRECTORY] from the IDEA module
+         * - Set the `idea.module.downloadSources` flag to `true` to tell IDE that sources are required when working with IntelliJ Platform Gradle Plugin
+         * - Exclude the [CACHE_DIRECTORY] from the IDEA module
          */
         project.pluginManager.withPlugin(Plugins.External.IDEA) {
             project.extensions.configure<IdeaModel>(Plugins.External.IDEA) {
                 module.isDownloadSources = project.providers[GradleProperties.DownloadSources].get()
                 module.excludeDirs.add(project.rootProjectPath.resolve(CACHE_DIRECTORY).toFile())
+            }
+        }
+
+        // Enable Compose compiler options for Compose Hot Reload,
+        // we can drop this when KT-76753 change is available for default runtime version in IDE plugins
+        project.pluginManager.withPlugin(Plugins.External.KOTLIN_COMPOSE) {
+            project.tasks.withType<KotlinCompile>().configureEach {
+                log.info("Enabling Compose Hot Reload compiler options for KotlinCompile")
+                compilerOptions.freeCompilerArgs.addAll(
+                    "-P", "plugin:androidx.compose.compiler.plugins.kotlin:generateFunctionKeyMetaAnnotations=true"
+                )
             }
         }
 
@@ -382,6 +396,15 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 extendsFrom(
                     this@configurations[Configurations.External.RUNTIME_CLASSPATH],
                 )
+            }
+
+            create(
+                name = Configurations.COMPOSE_HOT_RELOAD_AGENT,
+                description = "Compose Hot Reload Agent",
+            ) {
+                defaultDependencies {
+                    add(dependenciesHelper.createComposeHotReloadAgent(Constraints.COMPOSE_HOT_RELOAD_VERSION))
+                }
             }
 
             this@configurations[Configurations.External.COMPILE_ONLY].extendsFrom(

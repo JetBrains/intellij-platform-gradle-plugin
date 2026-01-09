@@ -202,6 +202,13 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         }
 
         /**
+         * The [ComposeHotReloadAware] enables auto-reload of Compose UIs after code changes.
+         */
+        if (this is ComposeHotReloadAware) {
+            composeHotReloadAgentConfiguration = configurations[Configurations.COMPOSE_HOT_RELOAD_AGENT]
+        }
+
+        /**
          * The [RunnableIdeAware] is more complex one than [RuntimeAware] as it preconfigures also the
          * [JavaForkOptions]-based tasks by setting JVM Arguments providers and classpath.
          */

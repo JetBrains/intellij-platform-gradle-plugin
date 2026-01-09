@@ -7,15 +7,18 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
+import org.gradle.api.tasks.options.Option
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.named
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
+import org.jetbrains.intellij.platform.gradle.tasks.aware.ComposeHotReloadAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 
@@ -27,10 +30,13 @@ import org.jetbrains.intellij.platform.gradle.utils.safePathString
  * To register a customized task, use [IntelliJPlatformTestingExtension.runIde].
  */
 @UntrackedTask(because = "Should always run")
-abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, IntelliJPlatformVersionAware {
+abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, IntelliJPlatformVersionAware,
+    ComposeHotReloadAware {
+
+    private val log = Logger(javaClass)
 
     /**
-     * Executes the task, configures and runs the IDE.
+     * Executes the task, configures, and runs the IDE.
      */
     @TaskAction
     override fun exec() {
@@ -38,6 +44,21 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
         validateSplitModeSupport()
 
         workingDir = platformPath.toFile()
+
+        if (composeHotReload.get()) {
+            log.info("Compose Hot Reload is enabled for `runIde` task")
+
+            val agentJar = composeHotReloadAgentConfiguration.singleOrNull()
+                ?: throw InvalidUserDataException(
+                    "Unable to resolve compose hot reload agent JAR: [${composeHotReloadAgentConfiguration.joinToString(",")}]"
+                )
+            val agentJarPath = agentJar.toPath().safePathString
+
+            systemPropertyDefault("compose.reload.devToolsEnabled", false)
+            systemPropertyDefault("compose.reload.staticsReinitializeMode", "AllDirty")
+            jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-javaagent:$agentJarPath")
+            classpath(agentJarPath)
+        }
 
         if (splitMode.get()) {
             environment("JETBRAINS_CLIENT_JDK", runtimeDirectory.asPath.safePathString)
@@ -56,6 +77,11 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
     init {
         group = Plugin.GROUP_NAME
         description = "Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded."
+    }
+
+    @Option(option = "compose-hot-reload", description = "Enables Compose Hot Reload agent via a CLI argument")
+    fun setComposeHotReloadArg(enabled: Boolean) {
+        composeHotReload.set(enabled)
     }
 
     companion object : Registrable {
