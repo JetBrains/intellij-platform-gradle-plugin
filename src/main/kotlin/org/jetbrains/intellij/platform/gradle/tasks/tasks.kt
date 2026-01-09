@@ -37,7 +37,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSigne
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 /**
  * Registers a task of type [T] with the given names
@@ -206,7 +205,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [ComposeHotReloadAware] enables auto-reload of Compose UIs after code changes.
          */
         if (this is ComposeHotReloadAware) {
-            javaAgentConfiguration = configurations[Configurations.COMPOSE_HOT_RELOAD_AGENT]
+            composeHotReloadAgentConfiguration = configurations[Configurations.COMPOSE_HOT_RELOAD_AGENT]
         }
 
         /**
@@ -390,18 +389,4 @@ internal fun DirectoryProperty.configureSandbox(
 internal interface Registrable {
 
     fun register(project: Project)
-}
-
-// add necessary compiler arguments for project options
-internal fun Project.preconfigureKotlinCompiler() {
-    // Enable Compose compiler options for Compose Hot Reload,
-    // we can drop this when KT-76753 change is available for default runtime version in IDE plugins
-    project.pluginManager.withPlugin(Plugins.External.KOTLIN_COMPOSE) {
-        tasks.withType<KotlinCompile>().configureEach {
-            project.logger.info("Enabling Compose Hot Reload compiler options for KotlinCompile")
-            compilerOptions.freeCompilerArgs.addAll(
-                "-P", "plugin:androidx.compose.compiler.plugins.kotlin:generateFunctionKeyMetaAnnotations=true"
-            )
-        }
-    }
 }
