@@ -52,11 +52,12 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
                 ?: throw InvalidUserDataException(
                     "Unable to resolve compose hot reload agent JAR: [${composeHotReloadAgentConfiguration.joinToString(",")}]"
                 )
+            val agentJarPath = agentJar.toPath().safePathString
 
             systemPropertyDefault("compose.reload.devToolsEnabled", false)
             systemPropertyDefault("compose.reload.staticsReinitializeMode", "AllDirty")
-            jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-javaagent:${agentJar.toPath().safePathString}")
-            classpath(agentJar.absolutePath)
+            jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-javaagent:$agentJarPath")
+            classpath(agentJarPath)
         }
 
         if (splitMode.get()) {
