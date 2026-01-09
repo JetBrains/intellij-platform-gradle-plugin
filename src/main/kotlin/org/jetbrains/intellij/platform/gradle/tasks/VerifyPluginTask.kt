@@ -279,7 +279,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
         args(
             listOf("check-plugin") + getOptions() + file.safePathString + ides.map {
                 when {
-                    it.isDirectory -> it.absolutePath
+                    it.isDirectory -> it.toPath().safePathString
                     else -> it.readText()
                 }
             },
