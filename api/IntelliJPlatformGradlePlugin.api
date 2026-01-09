@@ -3512,7 +3512,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ComposeHotReloadAware {
 	public abstract fun getComposeHotReload ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJavaAgentConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getComposeHotReloadAgentConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {

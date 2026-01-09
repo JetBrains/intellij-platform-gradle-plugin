@@ -18,6 +18,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.ComposeHotReloadAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 
@@ -32,6 +33,8 @@ import org.jetbrains.intellij.platform.gradle.utils.safePathString
 abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, IntelliJPlatformVersionAware,
     ComposeHotReloadAware {
 
+    private val log = Logger(javaClass)
+
     /**
      * Executes the task, configures, and runs the IDE.
      */
@@ -43,16 +46,16 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
         workingDir = platformPath.toFile()
 
         if (composeHotReload.get()) {
-            logger.info("Compose Hot Reload is enabled for `runIde` task")
+            log.info("Compose Hot Reload is enabled for `runIde` task")
 
-            val agentJar = javaAgentConfiguration.singleOrNull()
+            val agentJar = composeHotReloadAgentConfiguration.singleOrNull()
                 ?: throw InvalidUserDataException(
-                    "Unable to resolve compose hot reload agent JAR: [${javaAgentConfiguration.joinToString(",")}]"
+                    "Unable to resolve compose hot reload agent JAR: [${composeHotReloadAgentConfiguration.joinToString(",")}]"
                 )
 
             systemPropertyDefault("compose.reload.devToolsEnabled", false)
             systemPropertyDefault("compose.reload.staticsReinitializeMode", "AllDirty")
-            jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-javaagent:${agentJar.absolutePath}")
+            jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-javaagent:${agentJar.toPath().safePathString}")
             classpath(agentJar.absolutePath)
         }
 

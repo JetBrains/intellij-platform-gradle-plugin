@@ -24,5 +24,5 @@ interface ComposeHotReloadAware {
      * Hot Reload Agent configuration.
      */
     @get:Classpath
-    val javaAgentConfiguration: ConfigurableFileCollection
+    val composeHotReloadAgentConfiguration: ConfigurableFileCollection
 }
