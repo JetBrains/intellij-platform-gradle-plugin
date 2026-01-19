@@ -6,6 +6,8 @@ import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.options.Option
 
 /**
  * Provides the possibility to auto-reload Compose UI when code changes in the IDE.
@@ -18,6 +20,8 @@ interface ComposeHotReloadAware {
      * Default value: false
      */
     @get:Input
+    @get:Optional
+    @get:Option(option = "compose-hot-reload", description = "Enables Compose Hot Reload agent via a CLI argument")
     val composeHotReload: Property<Boolean>
 
     /**

@@ -205,6 +205,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * The [ComposeHotReloadAware] enables auto-reload of Compose UIs after code changes.
          */
         if (this is ComposeHotReloadAware) {
+            composeHotReload.convention(false)
             composeHotReloadAgentConfiguration = configurations[Configurations.COMPOSE_HOT_RELOAD_AGENT]
         }
 
