@@ -457,6 +457,13 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Star
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Starter;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/argumentProviders/ComposeHotReloadArgumentProvider : org/gradle/process/CommandLineArgumentProvider {
+	public fun <init> (Lorg/gradle/api/file/FileCollection;)V
+	public synthetic fun asArguments ()Ljava/lang/Iterable;
+	public fun asArguments ()Ljava/util/List;
+	public final fun getComposeHotReloadAgentConfiguration ()Lorg/gradle/api/file/FileCollection;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/argumentProviders/IntelliJPlatformArgumentProvider : org/gradle/process/CommandLineArgumentProvider {
 	public fun <init> (Lorg/gradle/api/file/FileCollection;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/process/JavaForkOptions;)V
 	public synthetic fun asArguments ()Ljava/lang/Iterable;
@@ -3298,7 +3305,6 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : 
 	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
-	public final fun setComposeHotReloadArg (Z)V
 	public fun validateIntelliJPlatformVersion ()V
 	public fun validateSplitModeSupport ()V
 }
