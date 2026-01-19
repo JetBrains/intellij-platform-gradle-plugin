@@ -264,6 +264,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     runtimeDirectory.map { it.file("lib/tools") }
                 )
 
+                systemProperty("idea.reset.classpath.from.manifest", "true")
+
                 if (this is SplitModeAware) {
                     argumentProviders.add(SplitModeArgumentProvider(splitMode))
                 }
