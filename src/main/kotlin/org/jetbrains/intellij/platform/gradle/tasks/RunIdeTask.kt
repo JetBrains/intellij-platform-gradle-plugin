@@ -7,7 +7,6 @@ import org.gradle.api.Project
 import org.gradle.api.tasks.JavaExec
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
-import org.gradle.api.tasks.options.Option
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.named
 import org.gradle.process.JavaForkOptions
@@ -77,11 +76,6 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
     init {
         group = Plugin.GROUP_NAME
         description = "Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded."
-    }
-
-    @Option(option = "compose-hot-reload", description = "Enables Compose Hot Reload agent via a CLI argument")
-    fun setComposeHotReloadArg(enabled: Boolean) {
-        composeHotReload.set(enabled)
     }
 
     companion object : Registrable {
