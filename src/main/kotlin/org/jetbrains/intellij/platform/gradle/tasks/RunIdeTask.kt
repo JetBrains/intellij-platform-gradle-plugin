@@ -12,6 +12,7 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.argumentProviders.ComposeHotReloadArgumentProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.tasks.aware.ComposeHotReloadAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
@@ -47,16 +48,10 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
         if (composeHotReload.get()) {
             log.info("Compose Hot Reload is enabled for `runIde` task")
 
-            val agentJar = composeHotReloadAgentConfiguration.singleOrNull()
-                ?: throw InvalidUserDataException(
-                    "Unable to resolve compose hot reload agent JAR: [${composeHotReloadAgentConfiguration.joinToString(",")}]"
-                )
-            val agentJarPath = agentJar.toPath().safePathString
-
             systemPropertyDefault("compose.reload.devToolsEnabled", false)
             systemPropertyDefault("compose.reload.staticsReinitializeMode", "AllDirty")
-            jvmArgs("-XX:+AllowEnhancedClassRedefinition", "-javaagent:$agentJarPath")
-            classpath(agentJarPath)
+
+            classpath(composeHotReloadAgentConfiguration)
         }
 
         if (splitMode.get()) {
@@ -106,6 +101,10 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
                         }
                     }
                 }
+
+                jvmArgumentProviders.add(
+                    ComposeHotReloadArgumentProvider(composeHotReloadAgentConfiguration)
+                )
             }
         }
 
