@@ -16,14 +16,15 @@ class PrintBundledPluginsTaskTest : IntelliJPluginTestBase() {
                 """
                 > Task :${Tasks.PRINT_BUNDLED_PLUGINS}
                 Bundled plugins for IntelliJ IDEA 2025.1.6 (251.28774.11):
+                AngularJS (Angular)
                 ByteCodeViewer (Bytecode Viewer)
                 Coverage (Code Coverage for Java)
+                Docker (Docker)
                 Git4Idea (Git)
                 HtmlTools (HTML Tools)
+                JBoss (WildFly)
+                JSIntentionPowerPack (JavaScript Intention Power Pack)
                 JUnit (JUnit)
-                PerforceDirectPlugin (Perforce Helix Core)
-                Subversion (Subversion)
-                TestNG-J (TestNG)
                 """.trimIndent(),
                 output,
             )

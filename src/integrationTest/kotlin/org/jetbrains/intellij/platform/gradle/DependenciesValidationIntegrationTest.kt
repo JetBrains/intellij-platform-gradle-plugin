@@ -47,10 +47,14 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent()
 
         build(DEPENDENCIES, "--configuration=intellijPlatformDependencyArchive") {
+            val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
+            val coordinates = requireNotNull(type.installer)
+            val artifactCoordinates = "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
+
             assertContains(
                 """
                 intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
-                \--- idea:ideaIC:$intellijPlatformVersion
+                \--- $artifactCoordinates
                 """.trimIndent(),
                 output,
             )
@@ -85,6 +89,10 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
 
     @Test
     fun `inform about missing IntelliJ Platform dependency`() {
+        val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
+        val coordinates = requireNotNull(type.installer)
+        val artifactCoordinates = "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
+
         buildFile write //language=kotlin
                 """
                 dependencies {
@@ -103,7 +111,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform
-                \--- idea:ideaIC:$intellijPlatformVersion FAILED
+                \--- $artifactCoordinates FAILED
                 """.trimIndent(),
                 output,
             )
@@ -114,7 +122,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """
                 > Failed to query the value of task ':verifyPluginProjectConfiguration' property 'runtimeDirectory'.
                    > Could not resolve all files for configuration ':intellijPlatformDependency'.
-                      > Could not find idea:ideaIC:$intellijPlatformVersion.
+                      > Could not find $artifactCoordinates.
                 """.trimIndent(),
                 output,
             )
@@ -248,32 +256,36 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         buildFile.useCache()
 
         build(DEPENDENCIES, "--configuration=compileClasspath") {
-            val coordinates = when {
+            val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
+            val coordinates = requireNotNull(type.installer)
+
+            val artifactCoordinates = when {
                 useCache -> "localIde:IC:IC-$intellijPlatformBuildNumber"
-                else -> "idea:ideaIC:$intellijPlatformVersion"
+                else -> "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
             }
+            val artifactVersion = "$intellijPlatformType-$intellijPlatformBuildNumber"
 
             assertContains(
                 """
                 compileClasspath - Compile classpath for 'main'.
-                +--- bundledPlugin:Git4Idea:IC-$intellijPlatformBuildNumber
-                |    \--- bundledModule:intellij.platform.collaborationTools:IC-$intellijPlatformBuildNumber
-                |         +--- bundledModule:intellij.platform.vcs.dvcs.impl:IC-$intellijPlatformBuildNumber
-                |         |    +--- bundledModule:intellij.platform.vcs.log.impl:IC-$intellijPlatformBuildNumber
-                |         |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-$intellijPlatformBuildNumber
-                |         |    |    |    +--- bundledModule:intellij.libraries.microba:IC-$intellijPlatformBuildNumber
-                |         |    |    |    \--- bundledModule:intellij.platform.vcs.impl.shared:IC-$intellijPlatformBuildNumber
-                |         |    |    \--- bundledModule:intellij.platform.vcs.impl.shared:IC-$intellijPlatformBuildNumber
-                |         |    +--- bundledModule:intellij.platform.vcs.impl.backend:IC-$intellijPlatformBuildNumber
-                |         |    |    +--- bundledModule:intellij.platform.kernel.backend:IC-$intellijPlatformBuildNumber
-                |         |    |    |    \--- bundledModule:intellij.platform.rpc.backend:IC-$intellijPlatformBuildNumber
-                |         |    |    +--- bundledModule:intellij.platform.vcs.impl:IC-$intellijPlatformBuildNumber (*)
-                |         |    |    \--- bundledModule:intellij.platform.vcs.impl.shared:IC-$intellijPlatformBuildNumber
-                |         |    +--- bundledModule:intellij.platform.vcs.impl.shared:IC-$intellijPlatformBuildNumber
-                |         |    \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:IC-$intellijPlatformBuildNumber
-                |         +--- bundledModule:intellij.platform.vcs.log.impl:IC-$intellijPlatformBuildNumber (*)
-                |         \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:IC-$intellijPlatformBuildNumber
-                \--- $coordinates
+                +--- bundledPlugin:Git4Idea:$artifactVersion
+                |    \--- bundledModule:intellij.platform.collaborationTools:$artifactVersion
+                |         +--- bundledModule:intellij.platform.vcs.dvcs.impl:$artifactVersion
+                |         |    +--- bundledModule:intellij.platform.vcs.log.impl:$artifactVersion
+                |         |    |    +--- bundledModule:intellij.platform.vcs.impl:$artifactVersion
+                |         |    |    |    +--- bundledModule:intellij.libraries.microba:$artifactVersion
+                |         |    |    |    \--- bundledModule:intellij.platform.vcs.impl.shared:$artifactVersion
+                |         |    |    \--- bundledModule:intellij.platform.vcs.impl.shared:$artifactVersion
+                |         |    +--- bundledModule:intellij.platform.vcs.impl.backend:$artifactVersion
+                |         |    |    +--- bundledModule:intellij.platform.kernel.backend:$artifactVersion
+                |         |    |    |    \--- bundledModule:intellij.platform.rpc.backend:$artifactVersion
+                |         |    |    +--- bundledModule:intellij.platform.vcs.impl:$artifactVersion (*)
+                |         |    |    \--- bundledModule:intellij.platform.vcs.impl.shared:$artifactVersion
+                |         |    +--- bundledModule:intellij.platform.vcs.impl.shared:$artifactVersion
+                |         |    \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:$artifactVersion
+                |         +--- bundledModule:intellij.platform.vcs.log.impl:$artifactVersion (*)
+                |         \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:$artifactVersion
+                \--- $artifactCoordinates
                 """.trimIndent(),
                 output,
             )
@@ -303,19 +315,23 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent()
 
         build(DEPENDENCIES) {
-            val coordinates = when {
-                useCache -> "localIde:IC:IC-$intellijPlatformBuildNumber"
-                else -> "idea:ideaIC:$intellijPlatformVersion"
+            val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
+            val coordinates = requireNotNull(type.installer)
+
+            val artifactCoordinates = when {
+                useCache -> "localIde:$intellijPlatformType:$intellijPlatformType-$intellijPlatformBuildNumber"
+                else -> "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
             }
+            val artifactVersion = "$intellijPlatformType-$intellijPlatformBuildNumber"
 
             assertContains(
                 """
                 compileClasspath - Compile classpath for 'main'.
-                +--- bundledPlugin:Coverage:IC-$intellijPlatformBuildNumber
-                |    +--- bundledModule:intellij.platform.coverage:IC-$intellijPlatformBuildNumber
-                |    |    \--- bundledModule:intellij.platform.coverage.agent:IC-$intellijPlatformBuildNumber
-                |    \--- bundledPlugin:com.intellij.java:IC-$intellijPlatformBuildNumber
-                \--- $coordinates
+                +--- bundledPlugin:Coverage:$artifactVersion
+                |    +--- bundledModule:intellij.platform.coverage:$artifactVersion
+                |    |    \--- bundledModule:intellij.platform.coverage.agent:$artifactVersion
+                |    \--- bundledPlugin:com.intellij.java:$artifactVersion
+                \--- $artifactCoordinates
                 """.trimIndent(),
                 output,
             )
@@ -352,7 +368,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
-                \--- bundledModule:intellij-platform-test-runtime:IC-243.21565.193
+                \--- bundledModule:intellij-platform-test-runtime:$intellijPlatformType-243.21565.193
                 """.trimIndent(),
                 output,
             )

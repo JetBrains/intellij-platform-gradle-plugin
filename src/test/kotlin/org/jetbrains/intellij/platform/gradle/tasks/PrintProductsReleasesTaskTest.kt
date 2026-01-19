@@ -37,6 +37,7 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
                 """
                 tasks {
                     ${Tasks.PRINT_PRODUCTS_RELEASES} {
+                        types = listOf(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea)
                         channels = listOf(org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.RELEASE)
                     }
                 }

@@ -21,9 +21,12 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `dependencies should contain IntelliJ Platform and Markdown plugin`() {
         build(DEPENDENCIES, projectProperties = defaultProjectProperties) {
+            val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
+            val coordinates = requireNotNull(type.installer)
+
             output containsText """
                 intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
-                \--- idea:ideaIC:$intellijPlatformVersion
+                \--- ${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion
             """.trimIndent()
 
             output containsText """

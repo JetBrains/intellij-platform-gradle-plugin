@@ -24,7 +24,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                 """.trimIndent()
 
         build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-            assertContains("Found 230 configurables", output)
+            assertContains("Found 391 configurables", output)
         }
 
         val xml = buildDirectory.resolve("tmp/${Tasks.BUILD_SEARCHABLE_OPTIONS}/p-PluginName-searchableOptions.json")
@@ -72,7 +72,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                 """.trimIndent()
 
         build(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-            assertContains("Found 230 configurables", output)
+            assertContains("Found 391 configurables", output)
         }
 
         val xml = buildDirectory.resolve("tmp/${Tasks.BUILD_SEARCHABLE_OPTIONS}/p-PluginName-searchableOptions.json")

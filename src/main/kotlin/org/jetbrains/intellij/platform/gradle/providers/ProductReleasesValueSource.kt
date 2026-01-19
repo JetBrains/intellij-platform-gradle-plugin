@@ -89,9 +89,9 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val jetbrainsIdesReleases = jetbrainsIdesContent
             ?.also { log.info("Reading JetBrains IDEs releases from URL: ${jetbrainsIdesUrl.orNull}") }
             ?.let { decode<JetBrainsIdesReleases>(it) }
-            ?.let {
+            ?.let { releases ->
                 sequence {
-                    it.products.forEach { product ->
+                    releases.products.forEach { product ->
                         product.channels.forEach channel@{ channelEntry ->
                             channelEntry.builds.forEach { build ->
                                 product.codes.forEach codes@{ code ->
@@ -110,7 +110,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
                                             version = build.version.toVersion(),
                                             id = when (channel) {
                                                 Channel.RELEASE -> with(build.version.toVersion()) {
-                                                    "$major.$minor" + ".$patch".takeIf { patch > 0 }.orEmpty()
+                                                    val id = "$major.$minor" + ".$patch".takeIf { patch > 0 }.orEmpty()
+                                                    version.takeIf { it.startsWith(id) } ?: id
                                                 }
 
                                                 else -> build.fullNumber
@@ -157,12 +158,29 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
 
         val codes = types.get().map { it.code }
         val channels = channels.get()
+        fun ProductRelease.testType(): Boolean {
+            if (type.code in codes) {
+                return true
+            }
+
+            // Allow IU if IC is present and version is 253+ (2025.3+)
+            if (type.code == "IU" && "IC" in codes && build.major >= 253) {
+                return true
+            }
+
+            // Allow PY if PC is present and version is 253+ (2025.3+)
+            if (type.code == "PY" && "PC" in codes && build.major >= 253) {
+                return true
+            }
+
+            return false
+        }
 
         log.info("Filtering releases with since='$since', until='$until', types='${codes.joinToString(",")}', channels='${channels.joinToString(",")}'")
 
         (jetbrainsIdesReleases + androidStudioReleases)
             .asSequence()
-            .filter { it.type.code in codes }
+            .filter { it.testType() }
             .filter { it.channel in channels }
             .filter { it.testVersion() }
             .groupBy { "${it.type.code}-${it.version.major}.${it.version.minor}" }
