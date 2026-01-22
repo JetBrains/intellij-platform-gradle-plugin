@@ -2,7 +2,7 @@
 # libraries
 intellijStructure = "3.320"
 intellijPluginRepositoryRestClient = "2.0.50"
-kotlinxSerialization = "1.9.0"
+kotlinxSerialization = "1.10.0"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 undertow = "2.3.22.Final"
