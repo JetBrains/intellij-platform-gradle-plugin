@@ -14,7 +14,7 @@ import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
  * @return A pair consisting of the corresponding [IntelliJPlatformType] and version string.
  * @throws IllegalArgumentException if the notation is invalid or the type-version combination is not supported
  */
-internal fun String.parseIdeNotation() = trim().split('-')
+fun String.parseIdeNotation() = trim().split('-')
     .takeIf { it.size == 2 }
     ?.let { (type, version) -> type.toIntelliJPlatformType(version) to version }
     ?: throw IllegalArgumentException("Invalid IntelliJ Platform notation: '$this'. Expected format: '<type>-<version>', like 'IU-2025.3'.")
@@ -27,7 +27,7 @@ internal fun String.parseIdeNotation() = trim().split('-')
  * @receiver The string representing the plugin version notation.
  * @return A triple consisting of the id, version, and channel.
  */
-internal fun String.parsePluginNotation() = trim()
+fun String.parsePluginNotation() = trim()
     .takeIf { it.isNotEmpty() }
     ?.split(":", "@")
     ?.run {

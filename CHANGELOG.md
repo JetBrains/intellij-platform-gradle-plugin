@@ -6,6 +6,10 @@
 
 - Add `--compose-hot-reload` argument for `RunIdeTask` task that enables Compose Hot Reload agent.
 
+### Changed
+
+Make `parseIdeNotation` and `parsePluginNotation` extension functions public
+
 ### Fixed
 
 - Fix the execution of `JavaExec` based tasks when the class path gets shortened.

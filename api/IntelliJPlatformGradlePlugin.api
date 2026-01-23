@@ -593,6 +593,11 @@ public abstract class org/jetbrains/intellij/platform/gradle/attributes/Distribu
 	public fun execute (Lorg/gradle/api/attributes/CompatibilityCheckDetails;)V
 }
 
+public final class org/jetbrains/intellij/platform/gradle/extensions/ExtensionsKt {
+	public static final fun parseIdeNotation (Ljava/lang/String;)Lkotlin/Pair;
+	public static final fun parsePluginNotation (Ljava/lang/String;)Lkotlin/Triple;
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension$Companion;
 	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;)V
