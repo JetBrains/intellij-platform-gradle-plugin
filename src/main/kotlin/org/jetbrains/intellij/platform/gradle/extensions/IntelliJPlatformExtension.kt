@@ -925,12 +925,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              */
             fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) {
                 val configuration = createConfiguration(configure)
-                dependenciesHelper.addIntelliJPlatformCacheableDependencies(
-                    configurationsProvider = dependenciesHelper.provider { listOf(configuration) },
-                    dependencyConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                    dependencyArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                    localArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
-                )
+                val configurationsProvider = dependenciesHelper.provider { listOf(configuration) }
+                createDependencies(configurationsProvider)
             }
 
             /**
@@ -987,6 +983,21 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 }
                 this.version = version
                 configure()
+            }
+
+            /**
+             * Creates and configures dependencies for IntelliJ platform components.
+             *
+             * @param configurationsProvider A provider that supplies a list of IntelliJ platform dependency configurations to be used for setting up the required dependencies.
+             */
+            private fun createDependencies(configurationsProvider: Provider<List<IntelliJPlatformDependencyConfiguration>>) {
+                dependenciesHelper.addIntelliJPlatformCacheableDependencies(
+                    configurationsProvider = configurationsProvider,
+                    dependencyConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                    dependencyArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                    localArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
+                    requiredConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+                )
             }
 
             /**

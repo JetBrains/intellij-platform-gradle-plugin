@@ -250,14 +250,26 @@ class IntelliJPlatformDependenciesHelper(
      * Creates a request for the IntelliJ Platform with the specified configuration details.
      *
      * @param configurationsProvider IntelliJ Platform dependency configuration.
+     * @param dependencyConfigurationName The name of the configuration that holds the requested IntelliJ Platform.
+     * @param dependencyArchivesConfigurationName The name of the configuration that holds the IntelliJ Platform dependencies.
+     * @param localArchivesConfigurationName The name of the configuration that holds the local IntelliJ Platform archives.
+     * @param requiredConfigurationName The name of the configuration that holds the required IntelliJ Platform to be resolved before creating a new dependency.
+     * @return A list of IntelliJ Platform requests.
      */
     internal fun addIntelliJPlatformCacheableDependencies(
         configurationsProvider: Provider<List<IntelliJPlatformDependencyConfiguration>>,
         dependencyConfigurationName: String,
         dependencyArchivesConfigurationName: String,
         localArchivesConfigurationName: String,
+        requiredConfigurationName: String? = null,
     ) {
+        val resolveConfiguration = {
+            if (requiredConfigurationName != null && requiredConfigurationName != dependencyConfigurationName) {
+                configurations[requiredConfigurationName].resolve()
+            }
+        }
         val requestsProvider = configurationsProvider.map { configurations ->
+            resolveConfiguration()
             configurations.map {
                 requestedIntelliJPlatforms.set(it, dependencyConfigurationName).get()
             }
