@@ -5,6 +5,7 @@
 ### Added
 
 - Add `--compose-hot-reload` argument for `RunIdeTask` task that enables Compose Hot Reload agent.
+- Add new provider-based API `create` methods for Plugin Verifier used IDEs configuration, a fallback `.orRecommended()` helper, and update integration tests. JetBrains/intellij-platform-gradle-plugin#2077
 
 ### Changed
 

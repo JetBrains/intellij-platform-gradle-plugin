@@ -986,6 +986,40 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             }
 
             /**
+             * Adds a dependency on the IntelliJ Platform using a [Provider].
+             *
+             * @param provider The provider of an item to be mapped to the IntelliJ Platform dependency.
+             * @param configure The configuration block to be applied to each created [IntelliJPlatformDependencyConfiguration].
+             */
+            @JvmName("createFromStringProvider")
+            fun create(
+                provider: Provider<String>,
+                configure: IntelliJPlatformDependencyConfiguration.(String) -> Unit,
+            ) = create(provider.map { listOf(it) }, configure)
+
+            /**
+             * Adds multiple dependencies on the IntelliJ Platform using a [Provider].
+             *
+             * @param provider The provider of a collection of items to be mapped to the IntelliJ Platform dependencies.
+             * @param configure The configuration block to be applied to each created [IntelliJPlatformDependencyConfiguration].
+             */
+            fun create(
+                provider: Provider<List<String>>,
+                configure: IntelliJPlatformDependencyConfiguration.(String) -> Unit = { notation ->
+                    val (type, version) = notation.parseIdeNotation()
+                    this.type = type
+                    this.version = version
+                },
+            ) {
+                val configurationsProvider = provider.map { items ->
+                    items.map { item ->
+                        createConfiguration { configure(item) }
+                    }
+                }
+                createDependencies(configurationsProvider)
+            }
+
+            /**
              * Creates and configures dependencies for IntelliJ platform components.
              *
              * @param configurationsProvider A provider that supplies a list of IntelliJ platform dependency configurations to be used for setting up the required dependencies.
@@ -1144,12 +1178,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
                 replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
             )
-            fun ides(notations: Provider<List<String>>) {
-                notations.get().forEach {
-                    val (type, version) = it.parseIdeNotation()
-                    create(type, version)
-                }
-            }
+            fun ides(notations: Provider<List<String>>) = create(notations)
 
             /**
              * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.
@@ -1202,24 +1231,18 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see ide
              * @see ProductReleasesValueSource
              */
-            fun recommended() {
-                val configurationsProvider = ProductReleasesValueSource().map { notations ->
-                    notations.map { notation ->
-                        val (type, version) = notation.parseIdeNotation()
-                        createConfiguration {
-                            this.type = type
-                            this.version = version
-                        }
-                    }
-                }
+            fun recommended() = create(ProductReleasesValueSource())
 
-                dependenciesHelper.addIntelliJPlatformCacheableDependencies(
-                    configurationsProvider = configurationsProvider,
-                    dependencyConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
-                    dependencyArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                    localArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
-                )
-            }
+            /**
+             * Helper to fall back to the [recommended] IDE list when the receiver provider is absent.
+             */
+            @JvmName("orRecommendedFromStringProvider")
+            fun Provider<String>.orRecommended() = map { listOf(it) }.orRecommended()
+
+            /**
+             * Helper to fall back to the [recommended] IDE list when the receiver provider is absent.
+             */
+            fun Provider<List<String>>.orRecommended() = orElse(ProductReleasesValueSource())
 
             /**
              * Retrieves matching IDEs using custom filter parameters.

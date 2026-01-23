@@ -1189,11 +1189,14 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun create (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;)V
 	public final fun create (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public final fun create (Lkotlin/jvm/functions/Function1;)V
+	public final fun create (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function2;)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
 	public final fun create (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Ljava/lang/Object;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
+	public final fun createFromStringProvider (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function2;)V
 	public final fun ide (Ljava/lang/String;)V
 	public final fun ide (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun ide (Ljava/lang/String;Ljava/lang/String;Z)V
@@ -1215,6 +1218,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun local (Ljava/lang/String;)V
 	public final fun local (Lorg/gradle/api/file/Directory;)V
 	public final fun local (Lorg/gradle/api/provider/Provider;)V
+	public final fun orRecommended (Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
+	public final fun orRecommendedFromStringProvider (Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
 	public final fun recommended ()V
 	public final fun select (Lkotlin/jvm/functions/Function1;)V
 	public static synthetic fun select$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
