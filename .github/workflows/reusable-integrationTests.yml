@@ -18,7 +18,7 @@ jobs:
         gradleVersion:
           - "8.13"
           - "8.14.3"
-          - "9.2.1"
+          - "9.3.0"
           - "nightly"
         os:
           - windows-latest
