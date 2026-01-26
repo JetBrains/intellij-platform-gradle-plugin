@@ -26,7 +26,7 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
                 repository.runCatching {
                     getCredentials(PasswordCredentials::class.java).let {
                         val encoded = Base64.getEncoder().encode("${it.username}:${it.password}".toByteArray())
-                        setRequestProperty("Authorization", "Basic $encoded")
+                        setRequestProperty("Authorization", "Basic ${encoded.contentToString()}")
                     }
                 }
                 repository.runCatching {

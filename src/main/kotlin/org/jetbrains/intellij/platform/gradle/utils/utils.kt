@@ -205,7 +205,6 @@ val Project.rootProjectPath
 val Project.extensionProvider
     get() = provider { the<IntelliJPlatformExtension>() }
 
-@Suppress("UnstableApiUsage")
 internal val Project.dependenciesHelper
     get() = IntelliJPlatformDependenciesHelper(
         configurations,

@@ -108,7 +108,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         // Get muted message patterns from the property
         val mutedMessagePatterns = mutedMessages.getOrElse(emptyList())
 
-        val messages = buildList {
+        buildList {
             if (!isModule) {
                 pluginXml.orNull
                     ?.let { file ->
