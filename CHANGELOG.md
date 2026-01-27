@@ -16,6 +16,7 @@ Make `parseIdeNotation` and `parsePluginNotation` extension functions public
 - Fix the execution of `JavaExec` based tasks when the class path gets shortened.
 - Include `IU` and `PY` releases when resolving Plugin Verifier compatible IDEs while requesting `IC` or `PC` for versions `2025.3` (`253`) and later.
 - Fix `ProductReleasesValueSource` to correctly handle and preserve 4-component version numbers (e.g., `2025.3.1.1`) when resolving IDE releases.
+- Fix `java.lang.NoSuchFieldError: Class okhttp3.RequestBody does not have member field 'okhttp3.RequestBody$Companion Companion'` by updating OkHttp dependency
 
 ## [2.10.5] - 2025-11-25
 
