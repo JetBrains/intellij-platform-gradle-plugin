@@ -33,6 +33,8 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.kotlin.gradle.utils.named
+import java.nio.file.Path
+import java.security.MessageDigest
 import kotlin.io.path.*
 
 /**
@@ -117,10 +119,50 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
      */
     private val content = mutableSetOf<String>()
 
+    /**
+     * Names of files that need renaming due to conflicts, set at execution time in [copy] before [Sync.copy].
+     */
+    private var conflictNames: Set<String> = emptySet()
+
     private val log = Logger(javaClass)
+
+    /**
+     * Detects name conflicts, resolves them via content hashing when there are exactly two candidates,
+     * and returns only the set of file names that require renaming.
+     */
+    private fun detectAndResolveNameConflicts(): Set<String> {
+        val fileMap = mutableMapOf<String, MutableList<Path>>()
+        val sources = (runtimeClasspath.files + setOf(pluginJar.get().asFile) + pluginsClasspath.files).map { it.toPath() }
+        sources.forEach { path ->
+            val targetName = path.fileName.toString()
+            fileMap.getOrPut(targetName) { mutableListOf() }.add(path)
+        }
+
+        val toRename = mutableSetOf<String>()
+        for ((fileName, paths) in fileMap.filterValues { it.size > 1 }) {
+            if (paths.size == 2) {
+                val hash1 = quickFileHash(paths[0])
+                val hash2 = quickFileHash(paths[1])
+                if (hash1 == hash2) {
+                    log.info("Skipping duplicate content: $fileName")
+                    continue
+                }
+            }
+            log.warn("Name conflict detected for '$fileName': ${paths.map { it.toAbsolutePath().toString() }}")
+            toRename.add(fileName)
+        }
+        return toRename
+    }
+
+    private fun quickFileHash(path: Path): String =
+        path.inputStream().use {
+            MessageDigest.getInstance("SHA-256").digest(it.readBytes()).joinToString("") { "%02x".format(it) }
+        }
 
     @TaskAction
     override fun copy() {
+        conflictNames = detectAndResolveNameConflicts()
+
         log.info("Preparing sandbox")
         log.info("sandboxConfigDirectory = ${sandboxConfigDirectory.asPath}")
         log.info("sandboxPluginsDirectory = ${sandboxPluginsDirectory.asPath}")
@@ -309,10 +351,14 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 val nameCollisionHelper = Action<FileCopyDetails> {
                     val originalName = file.toPath().nameWithoutExtension
                     val extension = file.toPath().extension
+                    val fullName = "$originalName.$extension"
                     var i = 0
 
-                    while (content.contains(relativePath.pathString)) {
-                        name = "${originalName}_${++i}.$extension"
+                    // Only apply renaming logic for genuine conflicts
+                    if (fullName in conflictNames) {
+                        while (content.contains(relativePath.pathString)) {
+                            name = "${originalName}_${++i}.$extension"
+                        }
                     }
 
                     content.add(relativePath.pathString)
