@@ -2,14 +2,12 @@
 
 ## [next]
 
+## [2.11.0] - 2026-01-26
+
 ### Added
 
 - Add `--compose-hot-reload` argument for `RunIdeTask` task that enables Compose Hot Reload agent.
 - Add new provider-based API `create` methods for Plugin Verifier used IDEs configuration, a fallback `.orRecommended()` helper, and update integration tests. JetBrains/intellij-platform-gradle-plugin#2077
-
-### Changed
-
-Make `parseIdeNotation` and `parsePluginNotation` extension functions public
 
 ### Fixed
 
@@ -1630,7 +1628,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.5...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.11.0...HEAD
+[2.11.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.5...v2.11.0
 [2.10.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.4...v2.10.5
 [2.10.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.3...v2.10.4
 [2.10.3]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.2...v2.10.3
