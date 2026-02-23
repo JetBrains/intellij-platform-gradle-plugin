@@ -6,6 +6,7 @@ package org.jetbrains.intellij.platform.gradle.utils
  * Bundled Kotlin versions for supported target platforms, synchronized with [IntelliJ Platform SDK Docs](https://jb.gg/intellij-platform-kotlin-stdlib)
  **/
 val PlatformKotlinVersions = mapOf(
+    Version(261) to Version(2, 3, 10),
     Version(253) to Version(2, 2, 20),
     Version(252) to Version(2, 1, 20),
     Version(251) to Version(2, 1, 10),

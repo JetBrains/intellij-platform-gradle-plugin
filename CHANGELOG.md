@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Updated
+
+- Update `PlatformKotlinVersions` with Kotlin 2.3.10 for version 261
+
 ## [2.11.0] - 2026-01-26
 
 ### Added
