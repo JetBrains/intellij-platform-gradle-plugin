@@ -6,6 +6,10 @@
 
 - Update `PlatformKotlinVersions` with Kotlin 2.3.10 for version 261
 
+### Fixed
+
+- Refactor the Android Studio dependency resolution to handle the new archive name convention. JetBrains/intellij-platform-gradle-plugin#2087
+
 ## [2.11.0] - 2026-01-26
 
 ### Added

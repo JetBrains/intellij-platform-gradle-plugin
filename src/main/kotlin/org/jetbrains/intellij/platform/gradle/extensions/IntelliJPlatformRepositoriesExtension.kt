@@ -190,6 +190,8 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         patterns = listOf(
             "/ide-zips/[revision]/[artifact]-[revision]-[classifier].[ext]",
             "/install/[revision]/[artifact]-[revision]-[classifier].[ext]",
+            "/ide-zips/[revision]/[artifact]-[classifier].[ext]",
+            "/install/[revision]/[artifact]-[classifier].[ext]",
         ),
         action = {
             content {

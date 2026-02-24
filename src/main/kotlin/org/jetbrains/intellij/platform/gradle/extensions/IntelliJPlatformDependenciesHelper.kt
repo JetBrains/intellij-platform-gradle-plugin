@@ -856,7 +856,11 @@ class IntelliJPlatformDependenciesHelper(
 
         val group = type.installer.groupId
         val name = type.installer.artifactId
-        val (classifier, extension) = downloadLink.substringAfter("$version-").split(".", limit = 2)
+        val (classifier, extension) = downloadLink
+            .substringAfterLast('/')
+            .substringAfter("$name-")
+            .substringAfter("$version-")
+            .split(".", limit = 2)
 
         return dependencyFactory.create(group, name, version, classifier, extension)
     }
