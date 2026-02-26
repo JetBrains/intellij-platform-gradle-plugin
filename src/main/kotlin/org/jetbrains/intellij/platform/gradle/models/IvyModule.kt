@@ -61,7 +61,7 @@ data class IvyModule(
         @XmlSerialName("org") val organization: String? = null,
         @XmlSerialName("name") val name: String,
         @XmlSerialName("rev") val version: String,
-        @XmlElement @XmlSerialName("artifact") val artifacts: List<Artifact> = emptyList(),
+        @XmlElement @XmlChildrenName("artifact") val artifacts: List<Artifact> = emptyList(),
     ) {
 
         @Serializable

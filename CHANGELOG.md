@@ -9,6 +9,7 @@
 ### Fixed
 
 - Refactor the Android Studio dependency resolution to handle the new archive name convention. JetBrains/intellij-platform-gradle-plugin#2087
+- Fix `IvyModule` XML mapping for dependency artifacts to avoid bundled plugin IVY descriptor deserialization failures in component metadata rules.
 
 ## [2.11.0] - 2026-01-26
 
