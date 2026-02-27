@@ -20,6 +20,7 @@
 
 ### Fixed
 
+- Fix `PrepareSandboxTask` to detect and resolve jar name conflicts at execution time, avoiding configuration-phase resolution of `intellijPlatformRuntimeClasspath` and fixing configuration-cache compatibility. Same-name jars with identical content are no longer treated as conflicts.
 - Fix the execution of `JavaExec` based tasks when the class path gets shortened.
 - Include `IU` and `PY` releases when resolving Plugin Verifier compatible IDEs while requesting `IC` or `PC` for versions `2025.3` (`253`) and later.
 - Fix `ProductReleasesValueSource` to correctly handle and preserve 4-component version numbers (e.g., `2025.3.1.1`) when resolving IDE releases.
