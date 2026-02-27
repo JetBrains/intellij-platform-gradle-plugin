@@ -61,7 +61,7 @@ data class IvyModule(
         @XmlSerialName("org") val organization: String? = null,
         @XmlSerialName("name") val name: String,
         @XmlSerialName("rev") val version: String,
-        @XmlElement @XmlChildrenName("artifact") val artifacts: List<Artifact> = emptyList(),
+        @XmlElement @XmlSerialName("artifact") val artifacts: List<Artifact> = emptyList(),
     ) {
 
         @Serializable
@@ -73,6 +73,17 @@ data class IvyModule(
         )
     }
 }
+
+/**
+ * Lightweight Ivy model used by [org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule].
+ *
+ * The rule only needs publications. Unknown sections are ignored by a dedicated XML parser policy.
+ */
+@Serializable
+@XmlSerialName("ivy-module")
+data class IvyModulePublicationsOnly(
+    @XmlElement @XmlChildrenName("artifact") val publications: List<IvyModule.Artifact> = emptyList(),
+)
 
 private val log = Logger(IvyModule::class.java)
 

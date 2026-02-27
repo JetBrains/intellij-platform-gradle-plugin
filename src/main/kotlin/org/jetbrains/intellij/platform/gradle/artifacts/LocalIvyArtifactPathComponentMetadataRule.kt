@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.artifacts
 
 import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
@@ -17,7 +18,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.extensions.parseIdeNotation
 import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
-import org.jetbrains.intellij.platform.gradle.models.IvyModule
+import org.jetbrains.intellij.platform.gradle.models.IvyModulePublicationsOnly
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -27,6 +28,15 @@ import java.io.File
 import java.nio.file.Path
 import javax.inject.Inject
 import kotlin.io.path.notExists
+
+private val ivyPublicationsXml = XML {
+    defaultPolicy {
+        unknownChildHandler = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+    }
+}
+
+internal fun decodeIvyModulePublications(input: String) =
+    ivyPublicationsXml.decodeFromString(IvyModulePublicationsOnly.serializer(), input).publications
 
 /**
  * This comes into play only when [org.gradle.api.initialization.resolve.RulesMode.PREFER_PROJECT] (the default) is used in Gradle's settings.
@@ -99,9 +109,12 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
          * Unfortunately, Gradle here doesn't expose anything from Ivy metadata, all we know is: group, name and version.
          * Much more is visible in debug, but all that is private.
          * So we have to read the Ivy XML again.
+         *
+         * We only need publication artifacts for path fixing. Parsing the whole Ivy module is unnecessary
+         * and may fail if dependency entries contain unexpected metadata.
          */
         val ivyXmlFile = File("$absNormalizedIvyPath/${id.version}/${id.group}-${id.name}-${id.version}.xml")
-        val ivyModule = XML.decodeFromString<IvyModule>(ivyXmlFile.readText())
+        val publications = decodeIvyModulePublications(ivyXmlFile.readText())
         val (moduleType, moduleVersion) = id.version.parseIdeNotation()
         val productInfo = Path.of(absNormalizedPlatformPath).productInfo()
 
@@ -115,7 +128,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
                 removeAllFiles()
 
                 // Add new files (i.e., artifacts) with the correct absolute path.
-                ivyModule.publications.forEach { artifact ->
+                publications.forEach { artifact ->
                     val fileName = "${artifact.name}.${artifact.ext}"
                     val absPathString = "$absNormalizedPlatformPath/${artifact.url}/$fileName"
 
