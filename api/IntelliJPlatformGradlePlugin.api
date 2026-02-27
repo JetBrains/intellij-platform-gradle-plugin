@@ -1766,6 +1766,35 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModule$Info$
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly$Companion;
+	public fun <init> ()V
+	public fun <init> (Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun copy (Ljava/util/List;)Lorg/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPublications ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly$$serializer;
+	public fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly;
+	public fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/IvyModulePublicationsOnly$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsCdnBuilds {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsCdnBuilds$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
