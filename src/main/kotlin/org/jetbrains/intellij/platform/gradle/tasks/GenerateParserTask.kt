@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream
  * This task is part of the IntelliJ Platform plugin development process and integrates
  * with Gradle for task registration and execution.
  */
+@CacheableTask
 abstract class GenerateParserTask : JavaExec() {
 
     /**

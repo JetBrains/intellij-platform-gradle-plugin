@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream
  * This task takes a Flex definition file as an input, generates the lexer, and saves it in the specified output directory.
  * It also optionally purges old files and allows specifying a custom skeleton file.
  */
+@CacheableTask
 abstract class GenerateLexerTask : JavaExec() {
 
     /**
