@@ -12,7 +12,6 @@ import org.gradle.api.file.Directory
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.assign
-import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.exclude
 import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
@@ -2644,6 +2643,42 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         dependenciesHelper.addJavaCompilerDependency(
             versionProvider = version,
         )
+
+    /**
+     * Adds a Grammar Kit dependency to generate lexer code.
+     *
+     * @param version Grammar Kit version.
+     */
+    fun grammarKit(version: String = Constraints.GRAMMAR_KIT_VERSION) = dependenciesHelper.addGrammarKitDependency(
+        versionProvider = dependenciesHelper.provider { version },
+    )
+
+    /**
+     * Adds a Grammar Kit dependency to generate lexer code.
+     *
+     * @param version JFlex version.
+     */
+    fun grammarKit(version: Provider<String>) = dependenciesHelper.addGrammarKitDependency(
+        versionProvider = version,
+    )
+
+    /**
+     * Adds a JFlex dependency to generate lexer code.
+     *
+     * @param version JFlex version.
+     */
+    fun jflex(version: String = Constraints.JFLEX_VERSION) = dependenciesHelper.addJFlexDependency(
+        versionProvider = dependenciesHelper.provider { version },
+    )
+
+    /**
+     * Adds a JFlex dependency to generate lexer code.
+     *
+     * @param version JFlex version.
+     */
+    fun jflex(version: Provider<String>) = dependenciesHelper.addJFlexDependency(
+        versionProvider = version,
+    )
 
     /**
      * Applies a set of dependencies required for running the [InstrumentCodeTask] task.

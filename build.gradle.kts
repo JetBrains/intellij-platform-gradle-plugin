@@ -216,6 +216,7 @@ gradlePlugin {
         "module" to "project.IntelliJPlatformModulePlugin",
         "settings" to "settings.IntelliJPlatformSettingsPlugin",
         "base" to "project.IntelliJPlatformBasePlugin",
+        "grammarkit" to "project.IntelliJPlatformGrammarKitPlugin",
     ).forEach { (pluginId, pluginClass) ->
         plugins.create("intellijPlatform${pluginId.replaceFirstChar { it.titlecase() }}") {
             id = "org.jetbrains.intellij.platform" + ".$pluginId".takeIf { pluginId.isNotBlank() }.orEmpty()

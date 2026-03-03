@@ -6,6 +6,11 @@
 
 - Update `PlatformKotlinVersions` with Kotlin 2.3.10 for version 261
 
+### Added
+
+- Add `org.jetbrains.intellij.platform.grammarkit` plugin with `generateLexer`/`generateParser` tasks.
+- Add `intellijPlatform.grammarKit(...)`/`intellijPlatform.jflex(...)` dependency helpers for Grammar Kit and JFlex tooling.
+
 ### Fixed
 
 - Refactor the Android Studio dependency resolution to handle the new archive name convention. JetBrains/intellij-platform-gradle-plugin#2087

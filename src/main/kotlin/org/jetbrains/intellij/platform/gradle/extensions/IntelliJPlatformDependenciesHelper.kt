@@ -11,6 +11,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.artifacts.Dependency
+import org.gradle.api.artifacts.ExternalModuleDependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.artifacts.dsl.DependencyFactory
 import org.gradle.api.artifacts.dsl.DependencyHandler
@@ -804,6 +805,42 @@ class IntelliJPlatformDependenciesHelper(
         createRobotServerPlugin(version).apply(action)
     }.cached())
 
+    /**
+     * A base method for adding a dependency on Grammar Kit.
+     *
+     * @param versionProvider The provider of the Grammar Kit version.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addGrammarKitDependency(
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_GRAMMAR_KIT,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.grammarKit` dependency helper was called with no `version` value provided." }
+
+        createJFlex(version).apply(action)
+    }.cached())
+
+    /**
+     * A base method for adding a dependency on JFlex.
+     *
+     * @param versionProvider The provider of the JFlex version.
+     * @param configurationName The name of the configuration to add the dependency to.
+     * @param action The action to be performed on the dependency. Defaults to an empty action.
+     */
+    internal fun addJFlexDependency(
+        versionProvider: Provider<String>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_JFLEX,
+        action: DependencyAction = {},
+    ) = configurations[configurationName].dependencies.addLater(provider {
+        val version = versionProvider.orNull
+        requireNotNull(version) { "The `intellijPlatform.jflex` dependency helper was called with no `version` value provided." }
+
+        createJFlex(version).apply(action)
+    }.cached())
+
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
         providers.of(ProductReleasesValueSource::class) {
             parameters.jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
@@ -1332,6 +1369,30 @@ class IntelliJPlatformDependenciesHelper(
             coordinates = Coordinates("com.intellij.remoterobot", "robot-server-plugin"),
             version = version,
             extension = "zip",
+        )
+
+    /**
+     * Adds a dependency on a Grammar Kit library required for generating Java code from Flex source files.
+     *
+     * @param version Grammar Kit version. Default value: [Constraints.GRAMMAR_KIT_VERSION]
+     */
+    internal fun createGrammarKit(version: String = Constraints.GRAMMAR_KIT_VERSION): ExternalModuleDependency {
+        val createDependency = createDependency(
+            coordinates = Coordinates("org.jetbrains", "grammar-kit"),
+            version = version,
+        )
+        return createDependency
+    }
+
+    /**
+     * Adds a dependency on a JFlex library required for generating Java code from Flex source files.
+     *
+     * @param version JFlex version. Default value: [Constraints.JFLEX_VERSION]
+     */
+    internal fun createJFlex(version: String = Constraints.JFLEX_VERSION) =
+        createDependency(
+            coordinates = Coordinates("org.jetbrains.intellij.deps.jflex", "jflex"),
+            version = version,
         )
 
     /**

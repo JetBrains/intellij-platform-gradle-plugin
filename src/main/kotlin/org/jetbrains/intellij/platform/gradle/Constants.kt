@@ -23,6 +23,7 @@ object Constants {
 
     object Plugins {
         const val BASE = "${Plugin.ID}.base"
+        const val GRAMMARKIT = "${Plugin.ID}.grammarkit"
         const val MODULE = "${Plugin.ID}.module"
         const val SETTINGS = "${Plugin.ID}.settings"
 
@@ -49,6 +50,8 @@ object Constants {
         val UNIFIED_PYCHARM_VERSION = "2025.3".toVersion()
 
         const val COMPOSE_HOT_RELOAD_VERSION = "1.1.0-alpha03"
+        const val GRAMMAR_KIT_VERSION = "2023.3"
+        const val JFLEX_VERSION = "1.9.2"
     }
 
     object Extensions {
@@ -101,7 +104,9 @@ object Constants {
         const val INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS = "intellijPlatformTestBundledPlugins"
         const val INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES = "intellijPlatformTestBundledModules"
 
+        const val INTELLIJ_PLATFORM_GRAMMAR_KIT = "intellijPlatformGrammarKit"
         const val INTELLIJ_PLATFORM_JAVA_COMPILER = "intellijPlatformJavaCompiler"
+        const val INTELLIJ_PLATFORM_JFLEX = "intellijPlatformJFlex"
         const val INTELLIJ_PLATFORM_RUNTIME_CLASSPATH = "intellijPlatformRuntimeClasspath"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES = "intellijPluginVerifierIdes"
@@ -172,7 +177,9 @@ object Constants {
         const val BUILD_PLUGIN = "buildPlugin"
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val COMPOSED_JAR = "composedJar"
+        const val GENERATE_LEXER = "generateLexer"
         const val GENERATE_MANIFEST = "generateManifest"
+        const val GENERATE_PARSER = "generateParser"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
         const val INSTRUMENT_CODE = "instrumentCode"
         const val INSTRUMENT_TEST_CODE = "instrumentTestCode"
