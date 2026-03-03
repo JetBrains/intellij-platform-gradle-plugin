@@ -212,7 +212,6 @@ gradlePlugin {
     mapOf(
         // main plugins
         "" to "project.IntelliJPlatformPlugin",
-        "migration" to "project.IntelliJPlatformMigrationPlugin",
         "module" to "project.IntelliJPlatformModulePlugin",
         "settings" to "settings.IntelliJPlatformSettingsPlugin",
         "base" to "project.IntelliJPlatformBasePlugin",

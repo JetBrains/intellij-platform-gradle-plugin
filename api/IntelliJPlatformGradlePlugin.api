@@ -2804,29 +2804,6 @@ public final class org/jetbrains/intellij/platform/gradle/performanceTest/parser
 	public final fun parse ()Lorg/jetbrains/intellij/platform/gradle/models/PerformanceTestScript;
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/plugins/project/DownloadRobotServerPluginTask : org/gradle/api/DefaultTask {
-	public fun <init> ()V
-	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
-}
-
-public abstract class org/jetbrains/intellij/platform/gradle/plugins/project/IntelliJExtension : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension {
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/provider/ProviderFactory;Ljava/nio/file/Path;)V
-	public abstract fun getDownloadSources ()Lorg/gradle/api/provider/Property;
-	public abstract fun getIdeaDependency ()Lorg/gradle/api/provider/Property;
-	public abstract fun getIntellijRepository ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJreRepository ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLocalPath ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLocalSourcesPath ()Lorg/gradle/api/provider/Property;
-	public abstract fun getPluginName ()Lorg/gradle/api/provider/Property;
-	public abstract fun getPlugins ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getPluginsRepositories ()Lorg/gradle/api/provider/Property;
-	public abstract fun getSameSinceUntilBuild ()Lorg/gradle/api/provider/Property;
-	public abstract fun getSandboxDir ()Lorg/gradle/api/provider/Property;
-	public abstract fun getType ()Lorg/gradle/api/provider/Property;
-	public abstract fun getUpdateSinceUntilBuild ()Lorg/gradle/api/provider/Property;
-	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
-}
-
 public abstract class org/jetbrains/intellij/platform/gradle/plugins/project/IntelliJPlatformBasePlugin : org/gradle/api/Plugin {
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
@@ -2834,12 +2811,6 @@ public abstract class org/jetbrains/intellij/platform/gradle/plugins/project/Int
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/plugins/project/IntelliJPlatformGrammarKitPlugin : org/gradle/api/Plugin {
-	public fun <init> ()V
-	public synthetic fun apply (Ljava/lang/Object;)V
-	public fun apply (Lorg/gradle/api/Project;)V
-}
-
-public abstract class org/jetbrains/intellij/platform/gradle/plugins/project/IntelliJPlatformMigrationPlugin : org/gradle/api/Plugin {
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/Project;)V
@@ -2855,39 +2826,6 @@ public abstract class org/jetbrains/intellij/platform/gradle/plugins/project/Int
 	public fun <init> ()V
 	public synthetic fun apply (Ljava/lang/Object;)V
 	public fun apply (Lorg/gradle/api/Project;)V
-}
-
-public abstract class org/jetbrains/intellij/platform/gradle/plugins/project/RunIdeForUiTestsTask : org/gradle/api/DefaultTask {
-	public fun <init> ()V
-	public final fun systemProperty ([Ljava/lang/Object;)V
-}
-
-public abstract class org/jetbrains/intellij/platform/gradle/plugins/project/RunPluginVerifierTask : org/gradle/api/DefaultTask {
-	public fun <init> ()V
-	public abstract fun getDistributionFile ()Lorg/gradle/api/provider/Property;
-	public abstract fun getDownloadDir ()Lorg/gradle/api/provider/Property;
-	public abstract fun getDownloadPath ()Lorg/gradle/api/provider/Property;
-	public abstract fun getExternalPrefixes ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getFailureLevel ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getFreeArgs ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getIdeDir ()Lorg/gradle/api/provider/Property;
-	public abstract fun getIdeVersions ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getIgnoredProblems ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJbrArch ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJbrVariant ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJbrVersion ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJreRepository ()Lorg/gradle/api/provider/Property;
-	public abstract fun getLocalPaths ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
-	public abstract fun getProductsReleasesFile ()Lorg/gradle/api/provider/Property;
-	public abstract fun getResolvedRuntimeDir ()Lorg/gradle/api/provider/Property;
-	public abstract fun getRuntimeDir ()Lorg/gradle/api/provider/Property;
-	public abstract fun getSubsystemsToCheck ()Lorg/gradle/api/provider/Property;
-	public abstract fun getTeamCityOutputFormat ()Lorg/gradle/api/provider/Property;
-	public abstract fun getVerificationReportsDir ()Lorg/gradle/api/provider/Property;
-	public abstract fun getVerificationReportsFormats ()Lorg/gradle/api/provider/ListProperty;
-	public abstract fun getVerifierPath ()Lorg/gradle/api/provider/Property;
-	public abstract fun getVerifierVersion ()Lorg/gradle/api/provider/Property;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/plugins/settings/IntelliJPlatformSettingsPlugin : org/gradle/api/Plugin {
@@ -3873,4 +3811,3 @@ public final class org/jetbrains/intellij/platform/gradle/utils/Version : java/l
 public final class org/jetbrains/intellij/platform/gradle/utils/Version$Companion {
 	public final fun parse (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 }
-

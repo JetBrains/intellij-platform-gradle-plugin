@@ -179,30 +179,4 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
 //            .firstOrNull()
 //            ?.let { PluginDependencyNotation(it.pluginXmlId, it.version, it.channel) }
 
-    //    private fun configureDownloadRobotServerPluginTask(project: Project) {
-//        info("Configuring robot-server download Task")
-//
-//        project.tasks.register<DownloadRobotServerPluginTask>(DOWNLOAD_ROBOT_SERVER_PLUGIN_TASK_NAME)
-//        project.tasks.withType<DownloadRobotServerPluginTask> {
-//            val taskContext = logCategory()
-//
-//            version.convention(VERSION_LATEST)
-//            outputDir.convention(project.layout.buildDirectory.dir("robotServerPlugin"))
-//            pluginArchive.convention(project.provider {
-//                val resolvedVersion = resolveRobotServerPluginVersion(version.orNull)
-//                val (group, name) = getDependency(resolvedVersion).split(':')
-//                dependenciesDownloader.downloadFromRepository(taskContext, {
-//                    create(
-//                        group = group,
-//                        name = name,
-//                        version = resolvedVersion,
-//                    )
-//                }, {
-//                    mavenRepository(INTELLIJ_DEPENDENCIES) {
-//                        content { includeGroup(group) }
-//                    }
-//                }).first()
-//            })
-//        }
-//    }
 }
