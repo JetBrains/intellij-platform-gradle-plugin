@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
@@ -17,34 +16,33 @@ import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScoped
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 
 /**
- * Prints the list of bundled plugins available within the currently targeted IntelliJ Platform.
+ * Prints the list of bundled modules available within the currently targeted IntelliJ Platform.
  */
 @UntrackedTask(because = "Prints output")
-abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionAware {
+abstract class PrintBundledModulesTask : DefaultTask(), IntelliJPlatformVersionAware {
 
     @get:Internal
     abstract val idesManager: Property<IdesManagerService>
 
     @TaskAction
-    fun printBundledPlugins() {
-        println("Bundled plugins for ${productInfo.name} ${productInfo.version} (${productInfo.buildNumber}):")
+    fun printBundledModules() {
+        println("Bundled modules for ${productInfo.name} ${productInfo.version} (${productInfo.buildNumber}):")
         val ide = idesManager.get().resolve(platformPath)
-        val items = ide.bundledPlugins.asSequence()
 
-        items.filterIsInstance<IdePlugin>()
-            .minus(items.filterIsInstance<IdeModule>().toSet())
-            .map { it.pluginId + it.pluginName?.run { " ($this)" }.orEmpty() }
+        ide.bundledPlugins.asSequence()
+            .filterIsInstance<IdeModule>()
+            .map { it.pluginId }
             .forEach { println(it) }
     }
 
     init {
         group = Plugin.GROUP_NAME
-        description = "Prints the list of bundled plugins available within the currently targeted IntelliJ Platform."
+        description = "Prints the list of bundled modules available within the currently targeted IntelliJ Platform."
     }
 
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<PrintBundledPluginsTask>(Tasks.PRINT_BUNDLED_PLUGINS) {
+            project.registerTask<PrintBundledModulesTask>(Tasks.PRINT_BUNDLED_MODULES) {
                 idesManager.convention(project.gradle.registerClassLoaderScopedBuildService(IdesManagerService::class))
             }
     }

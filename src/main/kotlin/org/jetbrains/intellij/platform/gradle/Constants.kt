@@ -191,6 +191,7 @@ object Constants {
         const val PREPARE_TEST = "prepareTest"
         const val PREPARE_TEST_SANDBOX = "prepareTestSandbox"
         const val PREPARE_TEST_IDE_PERFORMANCE_SANDBOX = "prepareTestIdePerformanceSandbox" // TODO: check
+        const val PRINT_BUNDLED_MODULES = "printBundledModules"
         const val PRINT_BUNDLED_PLUGINS = "printBundledPlugins"
         const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val PUBLISH_PLUGIN = "publishPlugin"

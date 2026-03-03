@@ -10,6 +10,7 @@
 
 - Add `org.jetbrains.intellij.platform.grammarkit` plugin with `generateLexer`/`generateParser` tasks.
 - Add `intellijPlatform.grammarKit(...)`/`intellijPlatform.jflex(...)` dependency helpers for Grammar Kit and JFlex tooling.
+- Add `printBundledModules` task to print bundled modules available within the currently targeted IntelliJ Platform.
 
 ### Fixed
 
