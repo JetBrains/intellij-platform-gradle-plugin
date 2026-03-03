@@ -32,6 +32,8 @@ abstract class PrintBundledModulesTask : DefaultTask(), IntelliJPlatformVersionA
         ide.bundledPlugins.asSequence()
             .filterIsInstance<IdeModule>()
             .map { it.pluginId }
+            .toSet()
+            .sorted()
             .forEach { println(it) }
     }
 

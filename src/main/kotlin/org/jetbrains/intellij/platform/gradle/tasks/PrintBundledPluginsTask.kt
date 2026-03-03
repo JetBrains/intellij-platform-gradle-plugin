@@ -34,6 +34,8 @@ abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionA
         items.filterIsInstance<IdePlugin>()
             .minus(items.filterIsInstance<IdeModule>().toSet())
             .map { it.pluginId + it.pluginName?.run { " ($this)" }.orEmpty() }
+            .toSet()
+            .sorted()
             .forEach { println(it) }
     }
 
