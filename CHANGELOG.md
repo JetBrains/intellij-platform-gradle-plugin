@@ -16,6 +16,7 @@
 
 - Refactor the Android Studio dependency resolution to handle the new archive name convention. JetBrains/intellij-platform-gradle-plugin#2087
 - Avoid full Ivy module deserialization in `LocalIvyArtifactPathComponentMetadataRule` and parse only publication artifacts to prevent recursive lookup failures on bundled plugin descriptors.
+- Accept `namespace` and `visibility` attributes when parsing `module-descriptor.xml` files in `ModuleDescriptorsValueSource`.
 
 ### Removed
 

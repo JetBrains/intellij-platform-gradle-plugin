@@ -10,6 +10,8 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 data class ModuleDescriptor(
     val name: String,
+    val namespace: String? = null,
+    val visibility: String? = null,
     @XmlElement @XmlChildrenName("module") val dependencies: List<Dependency>,
     @XmlElement @XmlSerialName("resources") val resources: Resources?,
 ) {
