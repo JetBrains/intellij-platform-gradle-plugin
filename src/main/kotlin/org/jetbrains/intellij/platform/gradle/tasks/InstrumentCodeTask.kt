@@ -15,6 +15,7 @@ import org.gradle.api.file.FileType
 import org.gradle.api.logging.LogLevel
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
@@ -276,7 +277,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     companion object : Registrable {
         override fun register(project: Project) {
             val instrumentCodeEnabled = project.extensionProvider.flatMap { it.instrumentCode }
-            val sourceSets = project.extensions.findByName("sourceSets") as SourceSetContainer
+            val sourceSets = project.extensions.getByType<SourceSetContainer>()
 
             sourceSets.forEach { sourceSet ->
                 val name = sourceSet.getTaskName("instrument", "code")

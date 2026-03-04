@@ -14,6 +14,7 @@ import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.named
 import org.gradle.work.DisableCachingByDefault
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -32,7 +33,6 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
-import org.jetbrains.kotlin.gradle.utils.named
 import kotlin.io.path.*
 
 /**

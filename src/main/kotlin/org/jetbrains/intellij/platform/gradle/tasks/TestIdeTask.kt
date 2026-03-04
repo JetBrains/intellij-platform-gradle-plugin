@@ -9,6 +9,7 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
@@ -85,7 +86,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("intellij.testFramework.rethrow.logged.errors", "true")
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
-            val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
+            val sourceSets = project.extensions.getByType<SourceSetContainer>()
             val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
 
             // The below is needed to simulate the behavior of com.intellij.ide.plugins.cl.PluginClassLoader

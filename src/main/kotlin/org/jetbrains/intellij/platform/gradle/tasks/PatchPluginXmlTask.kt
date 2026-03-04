@@ -10,6 +10,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
+import org.gradle.kotlin.dsl.getByType
 import org.jdom2.CDATA
 import org.jdom2.Document
 import org.jdom2.Element
@@ -330,7 +331,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
                 val vendorProvider = pluginConfigurationProvider.map { it.vendor }
 
                 inputFile.convention(project.layout.file(project.provider {
-                    val sourceSets = project.extensions.getByName("sourceSets") as SourceSetContainer
+                    val sourceSets = project.extensions.getByType<SourceSetContainer>()
 
                     sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME)
                         .resources
