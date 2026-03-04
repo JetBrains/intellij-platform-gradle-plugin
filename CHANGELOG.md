@@ -25,6 +25,8 @@
 ### Removed
 
 - Remove `org.jetbrains.intellij.platform.migration` plugin and migration-only compatibility helpers: `IntelliJExtension`, `DownloadRobotServerPluginTask`, `RunIdeForUiTestsTask`
+- Remove deprecated dependency helper overloads that accepted `useInstaller`/`productMode`; use `create(..., configure)` with a configuration lambda instead.
+- Remove deprecated compatibility aliases and helpers: `pluginVerification.ides.ide(...)`/`ides(...)`, `intellijPlatform.cachePath`, `verifyPlugin`/`VerifyPlugin`, `useCustomCache`, `instrumentationTools()`, and discontinued product helpers `aqua(...)`/`writerside(...)`.
 
 ## [2.11.0] - 2026-01-26
 

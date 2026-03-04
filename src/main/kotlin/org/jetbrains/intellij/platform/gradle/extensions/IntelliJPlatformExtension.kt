@@ -60,14 +60,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     private val intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].asLenient
 
     /**
-     * Provides read-only access to the IntelliJ Platform project cache location.
-     */
-    @Deprecated(replaceWith = ReplaceWith("caching.path"), message = "Use intelliJPlatform.caching.path instead")
-    val cachePath by lazy {
-        providers.intellijPlatformCachePath(rootProjectDirectory)
-    }
-
-    /**
      * Provides read-only access to the IntelliJ Platform dependency artifact path.
      */
     val platformPath: Path
@@ -201,32 +193,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         action.resolveStrategy = Closure.DELEGATE_FIRST
         action.call()
     }
-
-
-    @Deprecated("Use pluginVerification instead", ReplaceWith("pluginVerification(action)"))
-    val verifyPlugin
-        get() = extensions.getByType<PluginVerification>()
-
-    @Deprecated("Use pluginVerification instead", ReplaceWith("pluginVerification(action)"))
-    fun verifyPlugin(action: Action<in PluginVerification>) {
-        action.execute(pluginVerification)
-    }
-
-    @Deprecated("Use pluginVerification instead", ReplaceWith("pluginVerification(action)"))
-    fun verifyPlugin(
-        @DelegatesTo(
-            value = PluginVerification::class,
-            strategy = Closure.DELEGATE_FIRST
-        ) action: Closure<*>,
-    ) {
-        action.delegate = pluginVerification
-        action.resolveStrategy = Closure.DELEGATE_FIRST
-        action.call()
-    }
-
-    @Deprecated("Use PluginVerification instead", ReplaceWith("PluginVerification"))
-    interface VerifyPlugin : PluginConfiguration
-
 
     val pluginVerification
         get() = extensions.getByType<PluginVerification>()
@@ -1033,152 +999,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     requiredConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
                 )
             }
-
-            /**
-             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @param type The IntelliJ Platform dependency.
-             * @param version The version of the IntelliJ Platform dependency.
-             * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
-             * @param productMode Describes a mode in which a product may be started.
-             */
-            @JvmOverloads
-            @Deprecated(
-                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
-                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
-            )
-            fun ide(
-                type: IntelliJPlatformType,
-                version: String,
-                useInstaller: Boolean = true,
-                productMode: ProductMode = ProductMode.MONOLITH,
-            ) = create(type, version) {
-                this.useInstaller = useInstaller
-                this.productMode = productMode
-            }
-
-            /**
-             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @param type The IntelliJ Platform dependency.
-             * @param version The version of the IntelliJ Platform dependency.
-             * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
-             * @param productMode Describes a mode in which a product may be started.
-             */
-            @JvmOverloads
-            @Deprecated(
-                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
-                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
-            )
-            fun ide(
-                type: String,
-                version: String,
-                useInstaller: Boolean = true,
-                productMode: ProductMode = ProductMode.MONOLITH,
-            ) = create(type, version) {
-                this.useInstaller = useInstaller
-                this.productMode = productMode
-            }
-
-            /**
-             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
-             * @param version The provider for the version of the IntelliJ Platform dependency.
-             * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
-             * @param productMode Describes a mode in which a product may be started.
-             */
-            @JvmOverloads
-            @Deprecated(
-                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
-                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
-            )
-            fun ide(
-                type: Provider<*>,
-                version: Provider<String>,
-                useInstaller: Boolean = true,
-                productMode: ProductMode = ProductMode.MONOLITH,
-            ) = create(type, version) {
-                this.useInstaller = useInstaller
-                this.productMode = productMode
-            }
-
-            /**
-             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @param type The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
-             * @param version The provider for the version of the IntelliJ Platform dependency.
-             * @param useInstaller Switches between the IDE installer and archive from the IntelliJ Maven repository.
-             * @param productMode Describes a mode in which a product may be started.
-             */
-            @Deprecated(
-                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
-                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
-            )
-            fun ide(
-                type: Provider<*>,
-                version: Provider<String>,
-                useInstaller: Provider<Boolean>,
-                productMode: Provider<ProductMode>,
-            ) = create(type, version) {
-                this.useInstaller = useInstaller
-                this.productMode = productMode
-            }
-
-            /**
-             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
-             */
-            @Deprecated(
-                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
-                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
-            )
-            fun ide(notation: String) {
-                val (type, version) = notation.parseIdeNotation()
-                create(type, version)
-            }
-
-            /**
-             * Adds a dependency to a binary IDE release to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @param notation The IntelliJ Platform dependency. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
-             */
-            @Deprecated(
-                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
-                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
-            )
-            fun ide(notation: Provider<String>) {
-                val (type, version) = notation.get().parseIdeNotation()
-                create(type, version)
-            }
-
-            /**
-             * Adds dependencies to binary IDE releases to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @param notations The IntelliJ Platform dependencies. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
-             */
-            @Deprecated(
-                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
-                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
-            )
-            fun ides(notations: List<String>) {
-                notations.forEach {
-                    val (type, version) = it.parseIdeNotation()
-                    create(type, version)
-                }
-            }
-
-            /**
-             * Adds dependencies to binary IDE releases to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @param notations The IntelliJ Platform dependencies. Accepts [String] in `TYPE-VERSION` or `VERSION` format.
-             */
-            @Deprecated(
-                message = "Please use the create(type, version, configure) method with a configuration lambda instead.",
-                replaceWith = ReplaceWith("create(type, version) { this.useInstaller = useInstaller }"),
-            )
-            fun ides(notations: Provider<List<String>>) = create(notations)
 
             /**
              * Adds the local IDE to be used for testing with the IntelliJ Plugin Verifier.

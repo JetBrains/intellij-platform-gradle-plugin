@@ -47,12 +47,4 @@ abstract class IntelliJPlatformDependencyConfiguration @Inject constructor(
     val useCache = objects.property<Boolean>().convention(
         extensionProvider.flatMap { it.caching.ides.enabled },
     )
-
-    /**
-     * Switches between the Gradle cache and the custom cache directory.
-     *
-     * @see [GradleProperties.IntellijPlatformIdesCache]
-     */
-    @Deprecated("Use 'useCache' instead.", replaceWith = ReplaceWith("this.useCache"))
-    val useCustomCache = useCache
 }
