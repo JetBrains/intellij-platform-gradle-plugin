@@ -6,6 +6,7 @@ pluginManagement {
 
 plugins {
     id("com.gradle.develocity") version("4.2")
+    id("org.gradle.toolchains.foojay-resolver-convention") version("1.0.0")
     id("com.autonomousapps.build-health") version("3.4.0")
     id("org.jetbrains.kotlin.jvm") version embeddedKotlinVersion apply false
 }
