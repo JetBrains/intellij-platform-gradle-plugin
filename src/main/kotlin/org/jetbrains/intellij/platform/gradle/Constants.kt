@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.api.attributes.Attribute
-import org.gradle.api.internal.tasks.JvmConstants
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
@@ -157,17 +156,17 @@ object Constants {
          * - [The Java plugin configurations](https://docs.gradle.org/current/userguide/java_plugin.html#resolvable_configurations)
          */
         object External {
-            const val API = JvmConstants.API_CONFIGURATION_NAME
-            const val COMPILE_CLASSPATH = JvmConstants.COMPILE_CLASSPATH_CONFIGURATION_NAME
-            const val COMPILE_ONLY = JvmConstants.COMPILE_ONLY_CONFIGURATION_NAME
-            const val COMPILE_ONLY_API = JvmConstants.COMPILE_ONLY_API_CONFIGURATION_NAME
-            const val IMPLEMENTATION = JvmConstants.IMPLEMENTATION_CONFIGURATION_NAME
+            const val API = JavaPlugin.API_CONFIGURATION_NAME
+            const val COMPILE_CLASSPATH = JavaPlugin.COMPILE_CLASSPATH_CONFIGURATION_NAME
+            const val COMPILE_ONLY = JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME
+            const val COMPILE_ONLY_API = JavaPlugin.COMPILE_ONLY_API_CONFIGURATION_NAME
+            const val IMPLEMENTATION = JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME
             const val RUNTIME_CLASSPATH = JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME
             const val RUNTIME_ELEMENTS = JavaPlugin.RUNTIME_ELEMENTS_CONFIGURATION_NAME
             const val RUNTIME_ONLY = JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME
-            const val TEST_COMPILE_CLASSPATH = JvmConstants.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
-            const val TEST_COMPILE_ONLY = JvmConstants.TEST_COMPILE_ONLY_CONFIGURATION_NAME
-            const val TEST_RUNTIME_CLASSPATH = JvmConstants.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME
+            const val TEST_COMPILE_CLASSPATH = JavaPlugin.TEST_COMPILE_CLASSPATH_CONFIGURATION_NAME
+            const val TEST_COMPILE_ONLY = JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME
+            const val TEST_RUNTIME_CLASSPATH = JavaPlugin.TEST_RUNTIME_CLASSPATH_CONFIGURATION_NAME
             const val TEST_FIXTURES_COMPILE_ONLY = "testFixturesCompileOnly"
             const val TEST_FIXTURES_COMPILE_CLASSPATH = "testFixturesCompileClasspath"
         }

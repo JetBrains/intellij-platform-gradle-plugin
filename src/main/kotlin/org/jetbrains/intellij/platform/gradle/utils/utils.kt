@@ -18,6 +18,7 @@ import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.file.RegularFile
+import org.gradle.api.initialization.Settings
 import org.gradle.api.internal.GradleInternal
 import org.gradle.api.plugins.PluginManager
 import org.gradle.api.provider.Property
@@ -46,7 +47,6 @@ internal fun ConfigurationContainer.create(
     configuration: Configuration.() -> Unit = {},
 ) =
     maybeCreate(name).apply {
-        isVisible = false
         isCanBeConsumed = false
         isCanBeResolved = true
 
@@ -196,13 +196,13 @@ private fun getProblemResolver(suppressPluginProblems: Boolean): PluginCreationR
     }
 }
 
-val Project.settings
+val Project.settings: Settings
     get() = (gradle as GradleInternal).settings
 
 val Project.rootProjectPath
     get() = rootProject.rootDir.toPath().absolute()
 
-val Project.extensionProvider
+val Project.extensionProvider: Provider<IntelliJPlatformExtension>
     get() = provider { the<IntelliJPlatformExtension>() }
 
 internal val Project.dependenciesHelper

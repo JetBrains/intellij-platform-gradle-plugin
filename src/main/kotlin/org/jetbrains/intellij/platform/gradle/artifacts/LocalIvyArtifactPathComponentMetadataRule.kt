@@ -9,8 +9,8 @@ import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.dsl.DependencyHandler
+import org.gradle.api.initialization.Settings
 import org.gradle.api.initialization.resolve.RulesMode
-import org.gradle.api.internal.SettingsInternal
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.all
@@ -169,7 +169,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
             configuration: Configuration,
             dependencies: DependencyHandler,
             providers: ProviderFactory,
-            settings: SettingsInternal,
+            settings: Settings,
             rootProjectDirectory: Path
         ) {
             configuration.incoming.afterResolve {

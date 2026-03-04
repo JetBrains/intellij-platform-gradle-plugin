@@ -7,7 +7,6 @@ import nl.adaptivity.xmlutil.serialization.XmlChildrenName
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import org.gradle.api.initialization.resolve.RulesMode
-import org.gradle.api.internal.file.BaseDirFileResolver
 import org.gradle.api.provider.Provider
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
@@ -112,7 +111,7 @@ private val log = Logger(IvyModule::class.java)
  * Note that the path is built using [invariantSeparatorsPathString] due to path separator differences on Windows.
  *
  * In addition, the leading drive letter is always removed to start paths with `/` and to solve an issue with the Gradle file resolver.
- * If the artifact path doesn't start with `/`, the [BaseDirFileResolver] creates a malformed location with a Gradle base dir prepended,
+ * If the artifact path doesn't start with `/`, the base directory file resolver creates a malformed location with a Gradle base dir prepended,
  * like: `C:/Users/hsz/dir/C:/Users/hsz/path/to/artifact.jar`, so we make it `/Users/hsz/path/to/artifact.jar` explicitly.
  *
  * As we remove the drive letter, we later have to guess which drive the artifact belongs to by iterating over A:/, B:/, C:/, ...

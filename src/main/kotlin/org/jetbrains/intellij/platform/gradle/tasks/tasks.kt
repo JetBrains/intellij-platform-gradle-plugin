@@ -13,7 +13,6 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.JavaExec
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
-import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -136,7 +135,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     jetbrainsRuntime = jetbrainsRuntimeConfiguration,
                     intellijPlatform = intelliJPlatformConfiguration,
                     javaToolchainSpec = project.the<JavaPluginExtension>().toolchain,
-                    javaToolchainService = project.serviceOf<JavaToolchainService>(),
+                    javaToolchainService = project.extensions.getByType<JavaToolchainService>(),
                 )
             }
 

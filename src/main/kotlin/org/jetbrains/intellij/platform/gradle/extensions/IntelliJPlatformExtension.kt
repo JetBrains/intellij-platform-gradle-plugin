@@ -19,7 +19,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.getByName
+import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -143,7 +143,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
 
     val pluginConfiguration
-        get() = extensions.getByName<PluginConfiguration>(Extensions.PLUGIN_CONFIGURATION)
+        get() = extensions.getByType<PluginConfiguration>()
 
     fun pluginConfiguration(action: Action<in PluginConfiguration>) {
         action.execute(pluginConfiguration)
@@ -162,7 +162,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
 
     val caching
-        get() = extensions.getByName<Caching>(Extensions.CACHING)
+        get() = extensions.getByType<Caching>()
 
     fun caching(action: Action<in Caching>) {
         action.execute(caching)
@@ -176,7 +176,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
 
     val publishing
-        get() = extensions.getByName<Publishing>(Extensions.PUBLISHING)
+        get() = extensions.getByType<Publishing>()
 
     fun publishing(action: Action<in Publishing>) {
         action.execute(publishing)
@@ -190,7 +190,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
 
     val signing
-        get() = extensions.getByName<Signing>(Extensions.SIGNING)
+        get() = extensions.getByType<Signing>()
 
     fun signing(action: Action<in Signing>) {
         action.execute(signing)
@@ -205,7 +205,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
     @Deprecated("Use pluginVerification instead", ReplaceWith("pluginVerification(action)"))
     val verifyPlugin
-        get() = extensions.getByName<PluginVerification>(Extensions.PLUGIN_VERIFICATION)
+        get() = extensions.getByType<PluginVerification>()
 
     @Deprecated("Use pluginVerification instead", ReplaceWith("pluginVerification(action)"))
     fun verifyPlugin(action: Action<in PluginVerification>) {
@@ -229,7 +229,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
 
     val pluginVerification
-        get() = extensions.getByName<PluginVerification>(Extensions.PLUGIN_VERIFICATION)
+        get() = extensions.getByType<PluginVerification>()
 
     fun pluginVerification(action: Action<in PluginVerification>) {
         action.execute(pluginVerification)
@@ -255,7 +255,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * @see Ides
          */
         val ides
-            get() = extensions.getByName<Ides>(Extensions.IDES)
+            get() = extensions.getByType<Ides>()
 
         fun ides(action: Action<in Ides>) {
             action.execute(ides)
@@ -338,7 +338,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     interface PluginConfiguration : ExtensionAware {
 
         val productDescriptor
-            get() = extensions.getByName<ProductDescriptor>(Extensions.PRODUCT_DESCRIPTOR)
+            get() = extensions.getByType<ProductDescriptor>()
 
         fun productDescriptor(action: Action<in ProductDescriptor>) {
             action.execute(productDescriptor)
@@ -357,7 +357,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
 
         val ideaVersion
-            get() = extensions.getByName<IdeaVersion>(Extensions.IDEA_VERSION)
+            get() = extensions.getByType<IdeaVersion>()
 
         fun ideaVersion(action: Action<in IdeaVersion>) {
             action.execute(ideaVersion)
@@ -376,7 +376,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
 
         val vendor
-            get() = extensions.getByName<Vendor>(Extensions.VENDOR)
+            get() = extensions.getByType<Vendor>()
 
         fun vendor(action: Action<in Vendor>) {
             action.execute(vendor)
@@ -801,7 +801,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
          * @see Ides
          */
         val ides
-            get() = extensions.getByName<Ides>(Extensions.IDES)
+            get() = extensions.getByType<Ides>()
 
         fun ides(action: Action<in Ides>) {
             action.execute(ides)
