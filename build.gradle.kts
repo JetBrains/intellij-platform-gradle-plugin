@@ -113,6 +113,10 @@ tasks {
         patchManifest()
     }
 
+    assemble {
+        dependsOn(javadocJar, sourcesJar)
+    }
+
     validatePlugins {
         enableStricterValidation = true
     }
@@ -213,11 +217,6 @@ val sourcesJar by tasks.registering(Jar::class) {
     archiveClassifier = "sources"
     from(sourceSets.main.get().allSource)
     patchManifest()
-}
-
-artifacts {
-    archives(javadocJar)
-    archives(sourcesJar)
 }
 
 gradlePlugin {
