@@ -23,11 +23,9 @@ kotlin {
 configurations {
     listOf(
         "compileClasspath",
-        "compileOnlyDependenciesMetadata",
         "intellijPlatformClasspath",
         "intellijPlatformDependency",
         "intellijPlatformDependencyArchive",
-        "testCompileOnlyDependenciesMetadata",
     ).forEach {
         named(it) {
             resolutionStrategy.disableDependencyVerification()
