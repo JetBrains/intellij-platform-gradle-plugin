@@ -400,6 +400,10 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$CLion : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$CLion;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$CSS : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$CSS;
 }
@@ -3816,7 +3820,7 @@ public final class org/jetbrains/intellij/platform/gradle/utils/UtilsKt {
 	public static final fun getAsPath (Lorg/gradle/api/file/FileSystemLocation;)Ljava/nio/file/Path;
 	public static final fun getExtensionProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
 	public static final fun getRootProjectPath (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
-	public static final fun getSettings (Lorg/gradle/api/Project;)Lorg/gradle/api/internal/SettingsInternal;
+	public static final fun getSettings (Lorg/gradle/api/Project;)Lorg/gradle/api/initialization/Settings;
 	public static final fun isSpecified (Lorg/gradle/api/provider/Property;)Z
 	public static final fun platformPath (Lorg/gradle/api/file/FileCollection;Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;)Ljava/nio/file/Path;
 	public static synthetic fun platformPath$default (Lorg/gradle/api/file/FileCollection;Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;ILjava/lang/Object;)Ljava/nio/file/Path;
