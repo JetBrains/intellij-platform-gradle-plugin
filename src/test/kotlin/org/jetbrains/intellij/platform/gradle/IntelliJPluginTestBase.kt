@@ -33,8 +33,9 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                         server = "https://ge.jetbrains.com"
                     
                         buildScan {
-                            termsOfUseAgree = "yes"
-                            publishing.onlyIf { isCI }
+                            if (isCI) {
+                                termsOfUseAgree = "yes"
+                            }
                         }
                     }
                     """.trimIndent()
