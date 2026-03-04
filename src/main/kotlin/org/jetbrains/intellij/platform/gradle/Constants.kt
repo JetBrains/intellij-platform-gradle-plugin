@@ -40,7 +40,7 @@ object Constants {
         const val LATEST_VERSION = "latest"
         const val PLATFORM_VERSION = "platform"
 
-        val MINIMAL_GRADLE_VERSION: GradleVersion = GradleVersion.version("8.13")
+        val MINIMAL_GRADLE_VERSION: GradleVersion = GradleVersion.version("9.0.0")
         val MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER = "223".toVersion()
         val MINIMAL_INTELLIJ_PLATFORM_VERSION = "2022.3".toVersion()
         val MINIMAL_SPLIT_MODE_BUILD_NUMBER = "241.14473".toVersion()

@@ -2,15 +2,16 @@
 
 ## [next]
 
-### Updated
-
-- Update `PlatformKotlinVersions` with Kotlin 2.3.10 for version 261
-
 ### Added
 
 - Add `org.jetbrains.intellij.platform.grammarkit` plugin with `generateLexer`/`generateParser` tasks.
 - Add `intellijPlatform.grammarKit(...)`/`intellijPlatform.jflex(...)` dependency helpers for Grammar Kit and JFlex tooling.
 - Add `printBundledModules` task to print bundled modules available within the currently targeted IntelliJ Platform.
+
+### Changed
+
+- Update minimal supported Gradle version to `9.0.0`
+- Update `PlatformKotlinVersions` with Kotlin `2.3.10` for version `261`
 
 ### Fixed
 
