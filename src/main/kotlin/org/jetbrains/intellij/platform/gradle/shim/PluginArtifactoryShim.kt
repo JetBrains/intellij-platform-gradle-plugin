@@ -26,8 +26,8 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
             url.openConnection().run {
                 repository.runCatching {
                     getCredentials(PasswordCredentials::class).let {
-                        val encoded = Base64.getEncoder().encode("${it.username}:${it.password}".toByteArray())
-                        setRequestProperty("Authorization", "Basic ${encoded.contentToString()}")
+                        val encoded = Base64.getEncoder().encodeToString("${it.username}:${it.password}".toByteArray())
+                        setRequestProperty("Authorization", "Basic $encoded")
                     }
                 }
                 repository.runCatching {
@@ -63,10 +63,12 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
         }
     }
 
+    private val pluginsByIdAndVersion by lazy {
+        repositoryListing.associateBy { it.pluginId to it.version }
+    }
+
     private fun findPlugin(pluginId: String, pluginVersion: String) =
-        repositoryListing.find {
-            it.pluginId == pluginId && it.version == pluginVersion
-        }
+        pluginsByIdAndVersion[pluginId to pluginVersion]
 
     private val ivyDescriptorHandler = IvyDescriptorHttpHandler { groupId, artifactId, version ->
         val plugin = findPlugin(artifactId, version)
@@ -104,7 +106,7 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
             }
 
             else -> when {
-                plugin == null -> Unit
+                plugin == null -> exchange.statusCode = StatusCodes.NOT_FOUND
 
                 plugin.downloadUrl.host == repository.url.host -> proxyHandler.handleRequest(exchange)
 
