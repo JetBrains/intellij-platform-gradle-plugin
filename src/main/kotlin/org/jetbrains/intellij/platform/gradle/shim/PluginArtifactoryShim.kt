@@ -11,6 +11,7 @@ import io.undertow.util.PathTemplateMatch
 import io.undertow.util.StatusCodes
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
+import org.gradle.kotlin.dsl.getCredentials
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
@@ -24,13 +25,13 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
         repository.url.toURL().let { url ->
             url.openConnection().run {
                 repository.runCatching {
-                    getCredentials(PasswordCredentials::class.java).let {
+                    getCredentials(PasswordCredentials::class).let {
                         val encoded = Base64.getEncoder().encode("${it.username}:${it.password}".toByteArray())
                         setRequestProperty("Authorization", "Basic ${encoded.contentToString()}")
                     }
                 }
                 repository.runCatching {
-                    getCredentials(HttpHeaderCredentials::class.java).let {
+                    getCredentials(HttpHeaderCredentials::class).let {
                         setRequestProperty(it.name, it.value)
                     }
                 }
@@ -42,7 +43,7 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : S
                                 reader.readText(),
                                 url,
                                 url,
-                                repository.type
+                                repository.type,
                             )
                         }
                     }

@@ -123,26 +123,27 @@ class IntelliJPlatformRepositoriesHelper(
                 ignoreGradleMetadataRedirection()
             }
 
-            repository.runCatching {
+            action()
+
+            runCatching {
                 getCredentials(PasswordCredentials::class.java).let {
-                    credentials(PasswordCredentials::class) {
+                    repository.credentials(PasswordCredentials::class) {
                         username = it.username
                         password = it.password
                     }
                 }
             }
-            repository.runCatching {
+            runCatching {
                 getCredentials(HttpHeaderCredentials::class.java).let {
-                    credentials(HttpHeaderCredentials::class) {
+                    repository.credentials(HttpHeaderCredentials::class) {
                         name = it.name
                         value = it.value
                     }
-                    authentication {
+                    repository.authentication {
                         create<HttpHeaderAuthentication>("header")
                     }
                 }
             }
-            action()
         }
         return repository
     }
