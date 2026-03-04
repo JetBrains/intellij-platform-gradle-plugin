@@ -45,7 +45,6 @@ repositories {
 dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
-        //instrumentationTools()
         testFramework(TestFrameworkType.Platform)
 
         // This is important for bug reproduction because we need some dependencies in the test

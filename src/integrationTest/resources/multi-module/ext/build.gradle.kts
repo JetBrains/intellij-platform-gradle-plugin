@@ -26,7 +26,6 @@ dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
         bundledPlugins("com.intellij.java")
-        instrumentationTools()
 
         localPlugin(project(":base"))
         pluginModule(implementation(project(":submodule")))

@@ -24,7 +24,6 @@ repositories {
 dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
-        instrumentationTools()
     }
 }
 

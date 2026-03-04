@@ -26,7 +26,6 @@ repositories {
 dependencies {
     intellijPlatform {
         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
-        instrumentationTools()
         testFramework(TestFrameworkType.Platform)
     }
 }

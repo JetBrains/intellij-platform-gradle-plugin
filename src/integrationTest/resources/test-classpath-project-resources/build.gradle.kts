@@ -25,7 +25,6 @@ repositories {
 dependencies {
     intellijPlatform {
         create(providers.gradleProperty("intellijPlatform.type"), providers.gradleProperty("intellijPlatform.version"))
-        instrumentationTools()
     }
 
     testImplementation("junit:junit:4.13.2")

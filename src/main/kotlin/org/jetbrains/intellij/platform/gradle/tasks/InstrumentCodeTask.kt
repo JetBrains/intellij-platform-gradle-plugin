@@ -190,7 +190,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
         throw GradleException(
             """
             $message
-            Please ensure the `instrumentationTools()` entry is present in the project dependencies section along with the `intellijDependencies()` entry in the repositories section.
+            Please ensure the `intellijDependencies()` entry is present in the repositories section.
             See: https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin-dependencies-extension.html
             """.trimIndent(),
             it,

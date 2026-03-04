@@ -26,12 +26,6 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
     fun `instrument code with nullability annotations`() {
         buildFile write //language=kotlin
                 """
-                dependencies {
-                    intellijPlatform {
-                        instrumentationTools()
-                    }
-                }
-                
                 intellijPlatform {
                     instrumentCode = true
                 }
@@ -51,10 +45,6 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 dependencies {
-                    intellijPlatform {
-                        instrumentationTools()
-                    }
-                
                     testImplementation("junit:junit:4.13.2")
                 }
                 
@@ -97,12 +87,6 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         buildFile write //language=kotlin
                 """
-                dependencies {
-                    intellijPlatform {
-                        instrumentationTools()
-                    }
-                }
-                
                 intellijPlatform {
                     instrumentCode = true
                 }
@@ -135,12 +119,6 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         buildFile write //language=kotlin
                 """
-                dependencies {
-                    intellijPlatform {
-                        instrumentationTools()
-                    }
-                }
-                
                 intellijPlatform {
                     instrumentCode = true
                 }
