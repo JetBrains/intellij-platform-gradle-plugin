@@ -36,6 +36,21 @@ val additionalPluginClasspath: Configuration by configurations.creating
 dependencies {
     api(libs.undertow)
 
+    constraints {
+        api("io.smallrye.common:smallrye-common-cpu") {
+            version {
+                require("2.10.0")
+            }
+            because(
+                """
+                Request `io.smallrye.common:smallrye-common-cpu` undertow's transitive dependency in at least `2.10.0`
+                version as it causes configuration cache issue by calling `/usr/sbin/sysctl -n hw.cachelinesize`
+                when defining custom plugin repositories.
+                """.trimIndent()
+            )
+        }
+    }
+
     val commonExclusions: Action<ExternalModuleDependency> = Action {
         exclude("org.jetbrains.kotlin")
         exclude("org.jetbrains.kotlinx")

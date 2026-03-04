@@ -18,6 +18,7 @@
 - Avoid full Ivy module deserialization in `LocalIvyArtifactPathComponentMetadataRule` and parse only publication artifacts to prevent recursive lookup failures on bundled plugin descriptors.
 - Accept `namespace` and `visibility` attributes when parsing `module-descriptor.xml` files in `ModuleDescriptorsValueSource`.
 - Fixed credentials handling for custom plugin repositories.
+- Request `io.smallrye.common:smallrye-common-cpu` undertow's transitive dependency in at least `2.10.0` version as it causes configuration cache issue by calling `/usr/sbin/sysctl -n hw.cachelinesize` when defining custom plugin repositories.
 
 ### Removed
 
