@@ -372,7 +372,7 @@ class IntelliJPlatformDependenciesHelper(
             val dependencyConfiguration =
                 objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply {
                     type = productInfo.type
-                    version = productInfo.version
+                    version = productInfo.version.removePrefix("${productInfo.productCode}-")
                     useInstaller = true
                     useCache = false
                     productMode = ProductMode.MONOLITH
@@ -893,13 +893,15 @@ class IntelliJPlatformDependenciesHelper(
 
         val group = type.installer.groupId
         val name = type.installer.artifactId
-        val (classifier, extension) = downloadLink
-            .substringAfterLast('/')
+        val fileName = downloadLink.substringAfterLast('/')
+        val downloadLinkVersion = downloadLink.substringBeforeLast('/').substringAfterLast('/')
+
+        val (classifier, extension) = fileName
             .substringAfter("$name-")
             .substringAfter("$version-")
             .split(".", limit = 2)
 
-        return dependencyFactory.create(group, name, version, classifier, extension)
+        return dependencyFactory.create(group, name, downloadLinkVersion, classifier, extension)
     }
 
     /**
@@ -1007,7 +1009,7 @@ class IntelliJPlatformDependenciesHelper(
 
         val type = localProductInfo.type
         // It is crucial to use the IDE type + build number to the version.
-        // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
+        // Because if IU & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
         val version = localProductInfo.fullVersion
 

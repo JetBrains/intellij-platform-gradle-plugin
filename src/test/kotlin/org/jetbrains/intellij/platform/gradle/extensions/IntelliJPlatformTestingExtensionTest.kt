@@ -2,10 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import org.jetbrains.intellij.platform.gradle.assertContains
-import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.write
+import org.jetbrains.intellij.platform.gradle.*
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 
 class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
@@ -114,6 +112,113 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
         build("tasks", "--all") {
             // Verify the task is registered successfully
             assertContains("providerTest", output)
+        }
+    }
+
+    @Test
+    fun `custom testIde task prefers base local IntelliJ Platform dependency over computed remote archive`() {
+        val localIdePath = dir.resolve("android-studio-local")
+        localIdePath.resolve("product-info.json") write //language=json
+                """
+                {
+                    "name": "Android Studio",
+                    "version": "2024.3",
+                    "buildNumber": "243.12345.67",
+                    "productCode": "AI"
+                }
+                """.trimIndent()
+
+        buildFile overwrite //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform")
+                }
+                
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        local("${localIdePath.invariantSeparatorsPathString}")
+                    }
+                }
+                
+                intellijPlatform {
+                    caching {
+                        ides {
+                            enabled = false
+                        }
+                    }
+                }
+                
+                val customTest by intellijPlatformTesting.testIde.registering {
+                    task {
+                        enabled = false
+                    }
+                }
+                """.trimIndent()
+
+        build("dependencies", "--configuration", "intellijPlatformDependency_customTest") {
+            assertContains("localIde:AI:AI-243.12345.67", output)
+            assertNotContains("com.google.android.studio:android-studio", output)
+        }
+    }
+
+    @Test
+    fun `custom testIde task uses explicit custom IntelliJ Platform dependency over base local dependency`() {
+        val localIdePath = dir.resolve("android-studio-local")
+        localIdePath.resolve("product-info.json") write //language=json
+                """
+                {
+                    "name": "Android Studio",
+                    "version": "2024.3",
+                    "buildNumber": "243.12345.67",
+                    "productCode": "AI"
+                }
+                """.trimIndent()
+
+        buildFile overwrite //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform")
+                }
+                
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        local("${localIdePath.invariantSeparatorsPathString}")
+                    }
+                }
+                
+                intellijPlatform {
+                    caching {
+                        ides {
+                            enabled = false
+                        }
+                    }
+                }
+                
+                val customTest by intellijPlatformTesting.testIde.registering {
+                    type = org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity
+                    version = "$intellijPlatformVersion"
+                    useInstaller.set(true)
+                    task {
+                        enabled = false
+                    }
+                }
+                """.trimIndent()
+
+        build("dependencies", "--configuration", "intellijPlatformDependency_customTest") {
+            assertContains("idea:ideaIC:$intellijPlatformVersion", output)
+            assertNotContains("localIde:AI:AI-243.12345.67", output)
         }
     }
 }

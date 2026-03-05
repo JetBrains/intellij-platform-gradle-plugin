@@ -97,16 +97,16 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
 
                     defaultDependencies {
                         addAllLater(project.provider {
-                            listOf(
-                                baseIntelliJPlatformLocalConfiguration,
-                                customIntelliJPlatformDependencyConfiguration,
-                                customIntelliJPlatformLocalConfiguration,
-                            ).flatMap { it.dependencies }.takeLast(1)
-                        })
-                    }
-                    defaultDependencies {
-                        addAllLater(project.provider {
-                            customIntelliJPlatformDependencyConfiguration.dependencies
+                            val baseLocalDependencies = baseIntelliJPlatformLocalConfiguration.dependencies.toList()
+                            val customLocalDependencies = customIntelliJPlatformLocalConfiguration.dependencies.toList()
+                            val hasExplicitCustomRequest = type.isPresent || version.isPresent || useInstaller.isPresent
+
+                            when {
+                                customLocalDependencies.isNotEmpty() -> customLocalDependencies
+                                hasExplicitCustomRequest -> customIntelliJPlatformDependencyConfiguration.dependencies.toList()
+                                baseLocalDependencies.isNotEmpty() -> baseLocalDependencies
+                                else -> customIntelliJPlatformDependencyConfiguration.dependencies.toList()
+                            }.takeLast(1)
                         })
                     }
 

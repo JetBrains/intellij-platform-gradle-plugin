@@ -8,6 +8,7 @@ import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.GradleProperties
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.AndroidStudioReleases
 import org.jetbrains.intellij.platform.gradle.models.decode
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource.Parameters
@@ -53,7 +54,9 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
         }
 
         val version = parameters.androidStudioVersion.orNull
-        val item = androidStudioReleases.items.find { it.version == version }
+        val item = androidStudioReleases.items.find {
+            it.version == version || it.build == version || it.build == "${IntelliJPlatformType.AndroidStudio.code}-$version"
+        }
         requireNotNull(item) { "Failed to find Android Studio release for version: $version" }
 
         item.downloads
