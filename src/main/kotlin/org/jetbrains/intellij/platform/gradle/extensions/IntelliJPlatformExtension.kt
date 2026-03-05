@@ -108,7 +108,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     /**
      * The path to the sandbox container where tests and IDE instances read and write data.
      *
-     * Default value: [ProjectLayout.getBuildDirectory]/[Sandbox.CONTAINER]/
+     * Default value: [Constants.CACHE_DIRECTORY]/[Sandbox.CONTAINER]/
      */
     abstract val sandboxContainer: DirectoryProperty
 
@@ -1135,7 +1135,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 buildSearchableOptions.convention(true)
                 instrumentCode.convention(true)
                 projectName.convention(project.name)
-                sandboxContainer.convention(project.layout.buildDirectory.dir(Sandbox.CONTAINER))
+                sandboxContainer.convention(project.extensionProvider.flatMap { it.caching.path.dir(Sandbox.CONTAINER) })
                 splitMode.convention(false)
                 splitModeTarget.convention(SplitModeAware.SplitModeTarget.BACKEND)
             }

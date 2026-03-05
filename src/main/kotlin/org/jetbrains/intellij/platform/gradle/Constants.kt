@@ -213,7 +213,7 @@ object Constants {
     }
 
     object Sandbox {
-        const val CONTAINER = "idea-sandbox"
+        const val CONTAINER = "sandbox"
         const val CONFIG = "config"
         const val PLUGINS = "plugins"
         const val SYSTEM = "system"

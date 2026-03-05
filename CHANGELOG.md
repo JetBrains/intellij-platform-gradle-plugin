@@ -11,6 +11,7 @@
 
 ### Changed
 
+- Move sandbox directory from `build/idea-sandbox` to `.intellijPlatform/sandbox`; it's path is accessible for reading and adjusting with `intellijPlatform.sandboxContainer`
 - Update minimal supported Gradle version to `9.0.0`
 - Update `PlatformKotlinVersions` with Kotlin `2.3.10` for version `261`
 

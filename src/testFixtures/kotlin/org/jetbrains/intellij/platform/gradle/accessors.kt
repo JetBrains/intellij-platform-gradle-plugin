@@ -31,6 +31,12 @@ val IntelliJPlatformTestBase.buildDirectory: Path
     get() = dir.resolve("build")
 
 /**
+ * Resolves the path to the IntelliJ Platform cache directory: `.intellijPlatform/`.
+ */
+val IntelliJPlatformTestBase.cacheDirectory: Path
+    get() = dir.resolve(Constants.CACHE_DIRECTORY)
+
+/**
  * Resolves the path to the IntelliJ Platform plugin descriptor file: `src/main/resources/META-INF/plugin.xml`.
  */
 val IntelliJPlatformTestBase.pluginXml: Path

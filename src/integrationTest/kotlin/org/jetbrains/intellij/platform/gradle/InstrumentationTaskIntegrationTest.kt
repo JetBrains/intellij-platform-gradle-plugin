@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.appendText
 import kotlin.io.path.fileSize
@@ -66,7 +67,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertEquals(792, it.fileSize())
             }
 
-            buildDirectory.resolve("idea-sandbox/$intellijPlatformType-$intellijPlatformVersion/plugins/test/lib/test-1.0.0.jar").let { jar ->
+            buildDirectory.resolve("${Sandbox.CONTAINER}/$intellijPlatformType-$intellijPlatformVersion/plugins/test/lib/test-1.0.0.jar").let { jar ->
                 jar containsFileInArchive "Main.class"
                 assertEquals(1015, (jar readEntry "Main.class").length)
 
@@ -80,7 +81,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertEquals(1040, (jar readEntry "CustomMain.class").length)
             }
 
-            buildDirectory.resolve("idea-sandbox/$intellijPlatformType-$intellijPlatformVersion/plugins/test/lib/test.submodule.jar").let { jar ->
+            buildDirectory.resolve("${Sandbox.CONTAINER}/$intellijPlatformType-$intellijPlatformVersion/plugins/test/lib/test.submodule.jar").let { jar ->
                 jar containsFileInArchive "FormSub.class"
                 assertEquals(1278, (jar readEntry "FormSub.class").length)
 

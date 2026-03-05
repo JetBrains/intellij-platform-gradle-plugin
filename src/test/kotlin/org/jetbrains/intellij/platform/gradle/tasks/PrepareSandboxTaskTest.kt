@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     private val sandbox
-        get() = buildDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijPlatformType-$intellijPlatformVersion")
+        get() = cacheDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijPlatformType-$intellijPlatformVersion")
 
     private val updatesFile
         get() = sandbox.resolve("config/options/updates.xml")
@@ -385,7 +385,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
-                    sandboxContainer = file("${buildDirectory.resolve(Sandbox.CONTAINER).invariantSeparatorsPathString}")
+                    sandboxContainer = file("${cacheDirectory.resolve(Sandbox.CONTAINER).invariantSeparatorsPathString}")
                     splitMode = true
                     splitModeTarget = SplitModeAware.SplitModeTarget.${splitModeTarget.name}
                 }
