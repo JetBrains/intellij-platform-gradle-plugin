@@ -36,12 +36,10 @@ class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `custom task should refer to the composed jar of base module`() {
-        val ext = dir.resolve("ext")
-        val sandboxDirectory = ext.resolve(Constants.CACHE_DIRECTORY).resolve(Sandbox.CONTAINER).resolve("$intellijPlatformType-$intellijPlatformVersion")
         val suffix = "_$CUSTOM_RUN_IDE_TASK_NAME"
-        val pluginsDirectory = sandboxDirectory.resolve(Sandbox.PLUGINS + suffix)
+        val pluginsDirectory = sandboxDirectory.resolve("$intellijPlatformType-$intellijPlatformVersion").resolve(Sandbox.PLUGINS + suffix)
 
-        ext.resolve("build.gradle.kts") write //language=kotlin
+        dir.resolve("ext").resolve("build.gradle.kts") write //language=kotlin
                 """
                 intellijPlatformTesting.runIde {
                     register("$CUSTOM_RUN_IDE_TASK_NAME") {

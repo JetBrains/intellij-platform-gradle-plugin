@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.intellij.lang.annotations.Language
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import java.nio.file.Path
 import kotlin.io.path.appendText
 
@@ -35,6 +36,12 @@ val IntelliJPlatformTestBase.buildDirectory: Path
  */
 val IntelliJPlatformTestBase.cacheDirectory: Path
     get() = dir.resolve(Constants.CACHE_DIRECTORY)
+
+/**
+ * Resolves the path to the IntelliJ Platform cache directory: `.intellijPlatform/`.
+ */
+val IntelliJPlatformTestBase.sandboxDirectory: Path
+    get() = cacheDirectory.resolve(Sandbox.CONTAINER)
 
 /**
  * Resolves the path to the IntelliJ Platform plugin descriptor file: `src/main/resources/META-INF/plugin.xml`.
