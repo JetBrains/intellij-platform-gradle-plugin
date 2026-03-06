@@ -79,8 +79,8 @@ class SandboxIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 }
                 """.trimIndent()
 
-        build(Tasks.RUN_IDE, projectProperties = defaultProjectProperties) {
-            val sandbox = sandboxDirectory.resolve("$intellijPlatformType-$intellijPlatformVersion")
+        build(Tasks.PREPARE_SANDBOX, projectProperties = defaultProjectProperties) {
+            val sandbox = buildDirectory.resolve("custom-sandbox-container").resolve("$intellijPlatformType-$intellijPlatformVersion")
 
             assertExists(sandbox)
             assertExists(sandbox.resolve(Sandbox.CONFIG))
