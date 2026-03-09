@@ -215,6 +215,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox$Plug
 public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field BUILD_PLUGIN Ljava/lang/String;
 	public static final field BUILD_SEARCHABLE_OPTIONS Ljava/lang/String;
+	public static final field CLEAN_SANDBOX Ljava/lang/String;
 	public static final field COMPOSED_JAR Ljava/lang/String;
 	public static final field GENERATE_LEXER Ljava/lang/String;
 	public static final field GENERATE_MANIFEST Ljava/lang/String;
@@ -2907,6 +2908,15 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/BuildSearchab
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/BuildSearchableOptionsTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/CleanSandboxTask : org/gradle/api/tasks/Delete {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/CleanSandboxTask$Companion;
+	public fun <init> ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/CleanSandboxTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
 	public fun register (Lorg/gradle/api/Project;)V
 }
 

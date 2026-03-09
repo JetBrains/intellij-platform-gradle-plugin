@@ -201,6 +201,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             InstrumentedJarTask,
             ComposedJarTask,
             PrepareSandboxTask,
+            CleanSandboxTask,
 
             // Test Module
             PrepareTestTask,

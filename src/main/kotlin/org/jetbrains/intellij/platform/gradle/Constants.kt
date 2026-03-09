@@ -175,6 +175,7 @@ object Constants {
     object Tasks {
         const val BUILD_PLUGIN = "buildPlugin"
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
+        const val CLEAN_SANDBOX = "cleanSandbox"
         const val COMPOSED_JAR = "composedJar"
         const val GENERATE_LEXER = "generateLexer"
         const val GENERATE_MANIFEST = "generateManifest"
