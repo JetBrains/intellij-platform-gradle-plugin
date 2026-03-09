@@ -15,7 +15,7 @@ import kotlin.test.assertEquals
 class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     private val sandbox
-        get() = cacheDirectory.resolve(Sandbox.CONTAINER).resolve("$intellijPlatformType-$intellijPlatformVersion")
+        get() = cacheDirectory.resolve(Sandbox.CONTAINER).resolve("projectName").resolve("$intellijPlatformType-$intellijPlatformVersion")
 
     private val updatesFile
         get() = sandbox.resolve("config/options/updates.xml")
@@ -564,7 +564,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 "plugins/projectName/lib/joda-time-2.8.1.jar",
                 "plugins/projectName/lib/projectName-1.0.0.jar",
             ),
-            collectPaths(customSandbox.resolve("$intellijPlatformType-$intellijPlatformVersion")),
+            collectPaths(customSandbox.resolve("projectName").resolve("$intellijPlatformType-$intellijPlatformVersion")),
         )
     }
 
