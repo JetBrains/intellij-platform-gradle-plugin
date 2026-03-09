@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.12.0] - 2026-03-06
+
 ### Added
 
 - Add `org.jetbrains.intellij.platform.grammarkit` plugin with `generateLexer`/`generateParser` tasks.
@@ -1656,7 +1658,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.11.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.12.0...HEAD
+[2.12.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.11.0...v2.12.0
 [2.11.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.5...v2.11.0
 [2.10.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.4...v2.10.5
 [2.10.4]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.3...v2.10.4
