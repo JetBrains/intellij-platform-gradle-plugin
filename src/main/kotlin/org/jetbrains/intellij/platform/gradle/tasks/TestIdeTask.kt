@@ -143,22 +143,6 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             include("${Sandbox.Plugin.LIB}/**/*.jar")
         }
 
-        // TODO: Check if that's a good approach of resolving dependencies from IntelliJ Platform submodules
-        // private fun Test.getCurrentPluginLibs() = project.files(
-        //     // Main plugin libraries
-        //     sourceTask.pluginDirectory.asFileTree.matching {
-        //         include("${Sandbox.Plugin.LIB}/**/*.jar")
-        //     },
-        //     // Project dependencies that are also IntelliJ Platform plugins
-        //     project.configurations
-        //         .getByName(Configurations.IMPLEMENTATION)
-        //         .allDependencies
-        //         .filterIsInstance<org.gradle.api.artifacts.ProjectDependency>()
-        //         .map { projectDep ->
-        //             projectDep.dependencyProject.tasks.named(Tasks.PREPARE_SANDBOX).get().outputs.files
-        //         }
-        // )
-
         /**
          * Load only the contents of the lib directory because some plugins have arbitrary files in their
          * distribution zip file, which break the JVM when added to the classpath.
@@ -173,52 +157,6 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     exclude("$pluginName/**")
                 }
             }
-
-        /**
-         * Unfortunately, this is possible only during the execution phase, when all the directories in the build dir
-         * are already created.
-         *
-         * To do this in advance, during the configuration phase, we need to know the names of the directories for other
-         * plugins in the sandbox.
-         * Which can be done only if they're named using plugin id.
-         * But even then it may not work if the plugin defines an alias for its ID.
-         *
-         * Returns a list of directories in the sandbox plugins dir, omitting the current plugin,
-         * ordered according to the order of the current plugin dependencies, as returned by the IdePluginManager.
-         *
-         * In the "production" (like when running plugin in the IDE instead of tests), if the current plugin class loader doesn't resolve a class,
-         * its loading is delegated to the class loaders of other plugins it depends on.
-         *
-         * And there the order might depend on the order of the dependencies in the "plugin.xml".
-         * So here we rely on the order provided by the IdePluginManager.
-         */
-        /*
-        private fun Test.getOrderedOtherPluginsDirs(): Provider<MutableList<Path>> {
-            val currentPluginName = project.extensionProvider.flatMap { it.projectName }
-            val currentPluginDirectory = sourceTask.sandboxPluginsDirectory.dir(currentPluginName)
-            val pluginManager = IdePluginManager.createManager()
-
-            val currentPluginDependencyIds = project.providers.provider {
-                pluginManager.safelyCreatePlugin(currentPluginDirectory.get().asPath, false)
-                    .getOrThrow()
-                    .dependencies
-                    .map { it.id }
-            }
-
-             return sourceTask.sandboxPluginsDirectory.map {
-                Files.list(it.asPath) // <<< Not possible during the configuration phase.
-                    // Filter out the current plugin.
-                    .filter { it.name != currentPluginName.get() }
-                    .map { Pair(pluginManager.safelyCreatePlugin(it, false).getOrNull()?.pluginId, it) }
-                    .map { (pluginId, pluginDirPath) ->
-                        Triple(pluginId, pluginDirPath, currentPluginDependencyIds.get().indexOf(pluginId))
-                    }
-                    .sorted(Comparator.comparingInt { (_, _, orderInTheDependencies) -> orderInTheDependencies })
-                    .map { (_, pluginDirPath, _) -> pluginDirPath }
-                    .toList()
-            }
-        }
-        */
 
         override fun register(project: Project) =
             project.registerTask<TestIdeTask>(configuration = configuration)
