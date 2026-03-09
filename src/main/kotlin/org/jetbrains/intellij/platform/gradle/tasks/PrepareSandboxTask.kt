@@ -274,7 +274,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
                 sandboxDirectory.convention(project.extensionProvider.flatMap {
                     it.sandboxContainer.map { container ->
-                        container.dir("${productInfo.productCode}-${productInfo.version}")
+                        container.dir(project.name).dir("${productInfo.productCode}-${productInfo.version}")
                     }
                 })
 

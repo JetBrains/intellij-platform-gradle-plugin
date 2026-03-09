@@ -48,7 +48,6 @@ abstract class BuildPluginTask : Zip() {
                 from(prepareSandboxTaskProvider.map { it.pluginDirectory })
                 into(archiveBaseName)
 
-                project.artifacts.add(intellijPlatformDistributionConfiguration.name, this)
                 project.artifacts.add(intellijPlatformDistributionConfiguration.name, this) {
                     builtBy(jarSearchableOptionsTaskProvider, prepareSandboxTaskProvider)
                 }

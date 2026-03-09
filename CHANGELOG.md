@@ -6,6 +6,10 @@
 
 - Mark the `intellijPlatformDistribution` outgoing artifact as `builtBy` with `jarSearchableOptionsTaskProvider` and `prepareSandboxTaskProvider`
 
+### Fixed
+
+- Include `project.name` in sandbox path configuration.
+
 ## [2.12.0] - 2026-03-06
 
 ### Added
