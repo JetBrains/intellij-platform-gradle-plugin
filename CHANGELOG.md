@@ -5,6 +5,7 @@
 ### Added
 
 - Mark the `intellijPlatformDistribution` outgoing artifact as `builtBy` with `jarSearchableOptionsTaskProvider` and `prepareSandboxTaskProvider`
+- Set `rider.tests.plugin.home.path` system property to root project directory
 
 ### Fixed
 

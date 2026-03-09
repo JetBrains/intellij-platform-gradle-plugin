@@ -21,6 +21,8 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersio
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import kotlin.io.path.name
 
 /**
@@ -84,6 +86,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("idea.use.core.classloader.for.plugin.path", "true")
             systemProperty("idea.force.use.core.classloader", "true")
             systemProperty("intellij.testFramework.rethrow.logged.errors", "true")
+            systemProperty("rider.tests.plugin.home.path", project.rootProjectPath.safePathString)
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
             val sourceSets = project.extensions.getByType<SourceSetContainer>()

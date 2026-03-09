@@ -16,4 +16,23 @@ class SubmoduleSetupIntegrationTest : IntelliJPlatformIntegrationTestBase(
             assertNotContains(":submodule:runIde SKIPPED", output)
         }
     }
+
+    @Test
+    fun `submodule test task rider plugin home path points to root project`() {
+        dir.resolve("submodule/build.gradle.kts") += //language=kotlin
+                """
+                tasks.named<org.gradle.api.tasks.testing.Test>("test") {
+                    val riderPluginHomePath = systemProperties["rider.tests.plugin.home.path"]?.toString().orEmpty()
+                
+                    println("rider.tests.plugin.home.path=${'$'}riderPluginHomePath")
+                    println("rider.tests.plugin.home.path.matchesRootProjectDir=${'$'}{riderPluginHomePath == rootProject.projectDir.absolutePath}")
+                    println("rider.tests.plugin.home.path.matchesSubmoduleProjectDir=${'$'}{riderPluginHomePath == projectDir.absolutePath}")
+                }
+                """.trimIndent()
+
+        build(":submodule:help", projectProperties = defaultProjectProperties) {
+            assertContains("rider.tests.plugin.home.path.matchesRootProjectDir=true", output)
+            assertContains("rider.tests.plugin.home.path.matchesSubmoduleProjectDir=false", output)
+        }
+    }
 }
