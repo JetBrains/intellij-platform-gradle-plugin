@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Mark the `intellijPlatformDistribution` outgoing artifact as `builtBy` with `jarSearchableOptionsTaskProvider` and `prepareSandboxTaskProvider`
+
 ## [2.12.0] - 2026-03-06
 
 ### Added
