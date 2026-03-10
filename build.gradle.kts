@@ -202,7 +202,6 @@ fun Test.configureTests() {
     //       showStandardStreams = true
     //   }
 
-    outputs.dir(testGradleHome)
 }
 
 val dokkaGeneratePublicationHtml by tasks.existing(DokkaGeneratePublicationTask::class)

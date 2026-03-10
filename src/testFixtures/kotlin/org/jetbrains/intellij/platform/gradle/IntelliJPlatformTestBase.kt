@@ -18,10 +18,19 @@ import kotlin.test.assertEquals
 abstract class IntelliJPlatformTestBase {
 
     val isCI = (System.getenv("CI") ?: "false").toBoolean()
+    private val testKitDebugEnabled = System.getProperty("test.gradle.debug")
+        ?.toBoolean()
+        ?: (!isCI || java.lang.Boolean.getBoolean("org.gradle.testkit.debug"))
+    private val testKitOutputForwardingEnabled = System.getProperty("test.gradle.forwardOutput")
+        ?.toBoolean()
+        ?: false
+    private val printBuildDirectory = System.getProperty("test.gradle.printBuildDirectory")
+        ?.toBoolean()
+        ?: false
     val isDebugged by lazy {
         ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0
     }
-    var debugEnabled = !isCI
+    var debugEnabled = testKitDebugEnabled
     val gradleDefault = System.getProperty("test.gradle.default")
     val gradleScan = System.getProperty("test.gradle.scan").toBoolean()
     val gradleArguments =
@@ -45,7 +54,9 @@ abstract class IntelliJPlatformTestBase {
     @BeforeTest
     open fun setup() {
         dir = createTempDirectory("tmp")
-        println("Build directory: ${dir.toUri()}")
+        if (printBuildDirectory) {
+            println("Build directory: ${dir.toUri()}")
+        }
     }
 
     @OptIn(ExperimentalPathApi::class)
@@ -122,10 +133,15 @@ abstract class IntelliJPlatformTestBase {
         GradleRunner.create()
             .withProjectDir(dir.toFile())
             .withGradleVersion(gradleVersion)
-            .forwardOutput()
             .withPluginClasspath()
             .withDebug(debugEnabled)
             .withTestKitDir(gradleHome.toFile())
+            .run {
+                when (testKitOutputForwardingEnabled) {
+                    true -> forwardOutput()
+                    false -> this
+                }
+            }
             .withArguments(
                 "-Dorg.gradle.kotlin.dsl.scriptCompilationAvoidance=false", // workaround for https://github.com/gradle/gradle/issues/25412
                 *projectProperties
