@@ -30,7 +30,6 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
-import kotlin.Throws
 import kotlin.io.path.*
 
 private const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
@@ -170,15 +169,13 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
         }
 
         instrumentCode(instrumentNotNull) {
-            Files.walk(temporaryDirPath)
-                .filter { !it.isDirectory() }
-                .forEach { path ->
-                    val relativePath = temporaryDirPath.relativize(path)
-                    outputDirPath.resolve(relativePath).apply {
-                        parent.createDirectories()
-                        Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
-                    }
+            Files.walk(temporaryDirPath).use { stream ->
+                stream.filter { !it.isDirectory() }.forEach { path ->
+                    val target = outputDirPath.resolve(temporaryDirPath.relativize(path))
+                    target.parent.createDirectories()
+                    Files.copy(path, target, StandardCopyOption.REPLACE_EXISTING)
                 }
+            }
         }
     }.onFailure {
         val message = when (it.cause) {
