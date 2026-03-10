@@ -156,8 +156,8 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             return getComparativeVersion(since) >= since && (until?.let { getComparativeVersion(it) <= it } != false)
         }
 
-        val codes = types.get().map { it.code }
-        val channels = channels.get()
+        val codes = types.get().map { it.code }.toSet()
+        val selectedChannels = channels.get().toSet()
         fun ProductRelease.testType(): Boolean {
             if (type.code in codes) {
                 return true
@@ -176,16 +176,24 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
             return false
         }
 
-        log.info("Filtering releases with since='$since', until='$until', types='${codes.joinToString(",")}', channels='${channels.joinToString(",")}'")
+        log.info("Filtering releases with since='$since', until='$until', types='${codes.joinToString(",")}', channels='${selectedChannels.joinToString(",")}'")
 
+        val latestReleases = linkedMapOf<String, ProductRelease>()
         (jetbrainsIdesReleases + androidStudioReleases)
             .asSequence()
             .filter { it.testType() }
-            .filter { it.channel in channels }
+            .filter { it.channel in selectedChannels }
             .filter { it.testVersion() }
-            .groupBy { "${it.type.code}-${it.version.major}.${it.version.minor}" }
+            .forEach { release ->
+                val key = "${release.type.code}-${release.version.major}.${release.version.minor}"
+                val current = latestReleases[key]
+                if (current == null || release.build > current.build) {
+                    latestReleases[key] = release
+                }
+            }
+
+        latestReleases
             .values
-            .map { it.maxBy { release -> release.build } }
             .map { "${it.type.code}-${it.id}" }
             .also { log.info("Resolved values: ${it.joinToString(",")}") }
     }

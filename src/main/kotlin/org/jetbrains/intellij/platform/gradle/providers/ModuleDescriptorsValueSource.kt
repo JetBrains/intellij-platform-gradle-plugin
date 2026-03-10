@@ -45,6 +45,7 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             collectIntelliJPlatformJars(productInfo, platformPath)
                 .plus(collectBundledPluginsJars(platformPath))
                 .map { platformPath.relativize(it).invariantSeparatorsPathString }
+                .toSet()
 
         return JarFile(moduleDescriptorsFile.toFile()).use { jarFile ->
             jarFile
@@ -53,11 +54,11 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
                 .filter { it.name.endsWith(".xml") }
                 .map { jarFile.getInputStream(it) }
                 .mapNotNull { decode<ModuleDescriptor>(it) }
-                .map { it.path to Coordinates(it.groupId, it.artifactId) }
-                .groupBy(keySelector = { it.first }, valueTransform = { it.second })
-                .filterKeys { collectedJars.contains(it) }
-                .values
-                .flatten()
+                .mapNotNull { descriptor ->
+                    descriptor.path
+                        ?.takeIf { it in collectedJars }
+                        ?.let { Coordinates(descriptor.groupId, descriptor.artifactId) }
+                }
                 .toSet()
                 .plus(explicitExclusions)
         }
@@ -77,9 +78,11 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
                 }
             }
             .joinToString("-")
-            .replace(Regex("([a-z])([A-Z])"), "$1-$2")
+            .replace(camelCaseBoundaryRegex, "$1-$2")
             .lowercase()
 }
+
+private val camelCaseBoundaryRegex = Regex("([a-z])([A-Z])")
 
 private val explicitExclusions = setOf(
     Coordinates("junit", "junit"),

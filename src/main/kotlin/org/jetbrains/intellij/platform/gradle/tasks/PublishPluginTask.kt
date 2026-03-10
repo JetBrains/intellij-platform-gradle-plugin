@@ -95,34 +95,40 @@ abstract class PublishPluginTask : DefaultTask() {
 
     @TaskAction
     fun publishPlugin() {
-        if (token.orNull.isNullOrEmpty()) {
+        val resolvedToken = token.orNull
+        if (resolvedToken.isNullOrEmpty()) {
             throw GradleException("'token' property must be specified for plugin publishing")
         }
 
         val path = archiveFile.asPath
         val plugin = pluginManager.safelyCreatePlugin(path, suppressPluginProblems = false).getOrThrow()
 
-        val pluginId = plugin.pluginId
-        channels.get().forEach { channel ->
-            log.info("Uploading plugin '$pluginId' from '$path' to '${host.get()}', channel: '$channel'")
-            try {
-                val repositoryClient = when (ideServices.get()) {
-                    true -> PluginRepositoryFactory.createWithImplementationClass(
-                        host.get(),
-                        token.get(),
-                        "Automation",
-                        IdeServicesPluginRepositoryService::class.java,
-                    )
+        val resolvedHost = host.get()
+        val useIdeServices = ideServices.get()
+        val isHidden = hidden.get()
+        val resolvedChannels = channels.get()
+        val repositoryClient = when (useIdeServices) {
+            true -> PluginRepositoryFactory.createWithImplementationClass(
+                resolvedHost,
+                resolvedToken,
+                "Automation",
+                IdeServicesPluginRepositoryService::class.java,
+            )
 
-                    false -> PluginRepositoryFactory.create(host.get(), token.get())
-                }
+            false -> PluginRepositoryFactory.create(resolvedHost, resolvedToken)
+        }
+
+        val pluginId = plugin.pluginId
+        resolvedChannels.forEach { channel ->
+            log.info("Uploading plugin '$pluginId' from '$path' to '$resolvedHost', channel: '$channel'")
+            try {
                 repositoryClient.uploader.uploadUpdateByXmlIdAndFamily(
                     id = pluginId as StringPluginId,
                     family = ProductFamily.INTELLIJ,
                     file = path.toFile(),
                     channel = channel.takeIf { it != "default" },
                     notes = null,
-                    isHidden = hidden.get(),
+                    isHidden = isHidden,
                 )
                 log.info("Uploaded successfully")
             } catch (exception: Exception) {

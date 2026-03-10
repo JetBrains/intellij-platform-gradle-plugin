@@ -19,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 
 private const val baseConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY
+private val nightlyVersionPattern = Regex("(^|-)\\d{3}-SNAPSHOT|.*TRUNK-SNAPSHOT$")
 
 abstract class RequestedIntelliJPlatformsService @Inject constructor(
     private val objectFactory: ObjectFactory,
@@ -133,7 +134,7 @@ data class RequestedIntelliJPlatform(
      * commonly used for nightly or snapshot builds, such as "123-SNAPSHOT" or "*-TRUNK-SNAPSHOT".
      */
     val isNightly
-        get() = "(^|-)\\d{3}-SNAPSHOT|.*TRUNK-SNAPSHOT$".toRegex().matches(version)
+        get() = nightlyVersionPattern.matches(version)
 
     override fun toString() = "$type-$version ($installerLabel)"
 }

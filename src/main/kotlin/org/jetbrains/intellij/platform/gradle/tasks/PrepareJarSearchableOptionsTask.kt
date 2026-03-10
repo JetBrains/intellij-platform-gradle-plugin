@@ -72,11 +72,12 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
 
     @TaskAction
     fun prepareJarSearchableOptions() {
-        val pluginXml = FileSystems
+        val (pluginId, modules) = FileSystems
             .newFileSystem(composedJarFile.asPath, null as ClassLoader?)
-            .use { it.getPath("/META-INF/plugin.xml") }
-        val pluginId = pluginXml.parse { id }
-        val modules = pluginXml.parse { pluginContent.flatMap { it.modules.map { module -> module.moduleName } } }
+            .use { fileSystem ->
+                val pluginXml = fileSystem.getPath("/META-INF/plugin.xml")
+                pluginXml.parse { id } to pluginXml.parse { pluginContent.flatMap { it.modules.map { module -> module.moduleName } } }
+            }
 
         fileSystemOperations.sync {
             from(inputDirectory)

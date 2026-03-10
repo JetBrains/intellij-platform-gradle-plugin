@@ -39,64 +39,8 @@ class IntelliJPlatformArgumentProvider(
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
 
-    private val platformPath
-        get() = intellijPlatformConfiguration.platformPath()
-
-    private val productInfo
-        get() = platformPath.productInfo()
-
-    private val launch = runtimeArchProvider.map {
-        productInfo.launchFor(it)
-    }
-
     /**
-     * Adds the `lib/boot.jar` present in the IntelliJ Platform SDK to be included in the JVM boot classpath.
-     */
-    private val bootclasspath
-        get() = platformPath
-            .resolve("lib/boot.jar")
-            .takeIf { it.exists() }
-            ?.let { listOf("-Xbootclasspath/a:$it") }
-            .orEmpty()
-
-    /**
-     * Retrieves VM options from a dedicated file delivered with the IntelliJ Platform.
-     * The file path is retrieved from the [ProductInfo.Launch.vmOptionsFilePath] property.
-     * If present, the `kotlinx.coroutines.debug=off` is dropped.
-     */
-    private val vmOptions
-        get() = launch.get()
-            .vmOptionsFilePath
-            ?.removePrefix("../")
-            ?.let { platformPath.resolve(it).readLines() }
-            .orEmpty()
-            .filter { !it.contains("kotlinx.coroutines.debug=off") }
-
-    /**
-     * Applies the Java Agent pointing at the KotlinX Coroutines to enable coroutines debugging.
-     */
-    private val kotlinxCoroutinesJavaAgent
-        get() = coroutinesJavaAgentFile.orNull
-            ?.takeIf { it.asPath.exists() }
-            ?.takeIf {
-                productInfo.type in listOf(
-                    IntelliJPlatformType.IntellijIdea,
-                    IntelliJPlatformType.IntellijIdeaCommunity,
-                    IntelliJPlatformType.IntellijIdeaUltimate,
-                )
-            }
-            ?.let { "-javaagent:${coroutinesJavaAgentFile.asPath}" }
-
-    /**
-     * Retrieves the additional JVM arguments from [ProductInfo.Launch.additionalJvmArguments].
-     */
-    private val additionalJvmArguments
-        get() = launch.get()
-            .additionalJvmArguments
-            .map { it.resolveIdeHomeVariable(platformPath) }
-
-    /**
-     * Allows overriding default [vmOptions] heap size with values provided with [options].
+     * Allows overriding default heap size options with values provided with [options].
      */
     private val heapSpace
         get() = listOfNotNull(
@@ -109,7 +53,41 @@ class IntelliJPlatformArgumentProvider(
      *
      * @return The list of arguments to be passed to the platform.
      */
-    override fun asArguments() = (
-            bootclasspath + vmOptions + kotlinxCoroutinesJavaAgent + additionalJvmArguments + heapSpace
-            ).filterNot { it.isNullOrBlank() }
+    override fun asArguments(): List<String> {
+        val platformPath = intellijPlatformConfiguration.platformPath()
+        val productInfo = platformPath.productInfo()
+        val launch = productInfo.launchFor(runtimeArchProvider.get())
+
+        val bootclasspath = platformPath
+            .resolve("lib/boot.jar")
+            .takeIf { it.exists() }
+            ?.let { listOf("-Xbootclasspath/a:$it") }
+            .orEmpty()
+
+        val vmOptions = launch
+            .vmOptionsFilePath
+            ?.removePrefix("../")
+            ?.let { platformPath.resolve(it).readLines() }
+            .orEmpty()
+            .filter { !it.contains("kotlinx.coroutines.debug=off") }
+
+        val kotlinxCoroutinesJavaAgent = coroutinesJavaAgentFile.orNull
+            ?.asPath
+            ?.takeIf { it.exists() }
+            ?.takeIf {
+                productInfo.type in setOf(
+                    IntelliJPlatformType.IntellijIdea,
+                    IntelliJPlatformType.IntellijIdeaCommunity,
+                    IntelliJPlatformType.IntellijIdeaUltimate,
+                )
+            }
+            ?.let { "-javaagent:$it" }
+
+        val additionalJvmArguments = launch
+            .additionalJvmArguments
+            .map { it.resolveIdeHomeVariable(platformPath) }
+
+        return (bootclasspath + vmOptions + additionalJvmArguments + heapSpace + listOfNotNull(kotlinxCoroutinesJavaAgent))
+            .filterNot { it.isNullOrBlank() }
+    }
 }

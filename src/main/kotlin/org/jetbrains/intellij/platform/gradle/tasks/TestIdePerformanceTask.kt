@@ -47,7 +47,7 @@ import kotlin.io.path.nameWithoutExtension
 abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAware, IntelliJPlatformVersionAware {
 
     /**
-     * Path to directory with test projects and '.ijperf' files.
+     * Path to the directory with test projects and '.ijperf' files.
      */
     @get:InputDirectory
     @get:PathSensitive(PathSensitivity.RELATIVE)
@@ -62,7 +62,7 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
     abstract val artifactsDirectory: DirectoryProperty
 
     /**
-     * Name of the profiler which will be used during execution.
+     * Name of the profiler that will be used during execution.
      *
      * Default value: [ProfilerName.ASYNC]
      *
@@ -80,36 +80,43 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
         val dir = artifactsDirectory.asPath
         val testData = testDataDirectory.asPath
         val testExecutionResults = mutableListOf<PerformanceTestResult>()
+        val baseJvmArgumentProviders = jvmArgumentProviders.toList()
 
-        Files.walk(testData, 1)
-            .filter { it.extension == "ijperf" }
-            .forEach { scriptPath ->
-                val testName = scriptPath.nameWithoutExtension
-                val testScript = SimpleIJPerformanceParser(scriptPath).parse()
-                val testArtifactsDirPath = dir.resolve(testName).createDirectories()
+        Files.walk(testData, 1).use { stream ->
+            stream
+                .filter { it.extension == "ijperf" }
+                .forEach { scriptPath ->
+                    val testName = scriptPath.nameWithoutExtension
+                    val testScript = SimpleIJPerformanceParser(scriptPath).parse()
+                    val testArtifactsDirPath = dir.resolve(testName).createDirectories()
 
-                // Passing to the IDE project to open
-                args = listOf("${testDataDirectory.get()}/${testScript.projectName}")
+                    // Passing to the IDE project to open
+                    args = listOf("${testDataDirectory.get()}/${testScript.projectName}")
 
-                jvmArgumentProviders.add(
-                    PerformanceTestArgumentProvider(
-                        scriptPath,
-                        testArtifactsDirPath,
-                        profilerName,
+                    jvmArgumentProviders.clear()
+                    jvmArgumentProviders.addAll(baseJvmArgumentProviders)
+                    jvmArgumentProviders.add(
+                        PerformanceTestArgumentProvider(
+                            scriptPath,
+                            testArtifactsDirPath,
+                            profilerName,
+                        )
                     )
-                )
-                super.exec()
+                    super.exec()
 
-                IdeaLogParser(testArtifactsDirPath.resolve("idea.log").toAbsolutePath().toString())
-                    .getTestStatistic()
-                    .let { testResults ->
-                        log.info("Total time ${testResults.totalTime}ms, expected time ms ${testScript.assertionTimeout}ms")
+                    IdeaLogParser(testArtifactsDirPath.resolve("idea.log").toAbsolutePath().toString())
+                        .getTestStatistic()
+                        .let { testResults ->
+                            log.info("Total time ${testResults.totalTime}ms, expected time ms ${testScript.assertionTimeout}ms")
 
-                        if (testScript.assertionTimeout != null && testResults.totalTime!! > testScript.assertionTimeout) {
-                            testExecutionResults.add(PerformanceTestResult(testName, testResults, testScript))
+                            if (testScript.assertionTimeout != null && testResults.totalTime!! > testScript.assertionTimeout) {
+                                testExecutionResults.add(PerformanceTestResult(testName, testResults, testScript))
+                            }
                         }
-                    }
-            }
+                }
+        }
+        jvmArgumentProviders.clear()
+        jvmArgumentProviders.addAll(baseJvmArgumentProviders)
 
         if (testExecutionResults.isNotEmpty()) {
             testExecutionResults.forEach {
@@ -178,5 +185,4 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
 //            .searchCompatibleUpdates(listOf(pluginId), buildNumber, channel)
 //            .firstOrNull()
 //            ?.let { PluginDependencyNotation(it.pluginXmlId, it.version, it.channel) }
-
 }
