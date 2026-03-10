@@ -51,17 +51,30 @@ jobs:
         with:
           cache-read-only: ${{ inputs.cacheReadOnly }}
 
+      - name: Restore TestKit Gradle Home
+        uses: actions/cache@v4
+        with:
+          path: .test-gradle-home
+          key: testkit-home-v1-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties') }}
+          restore-keys: |
+            testkit-home-v1-${{ runner.os }}-${{ inputs.gradleVersion }}-
+            testkit-home-v1-${{ runner.os }}-
+
       - name: Run Tests
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           TEST_NAME: ${{ inputs.testName }}
         shell: bash
         run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            TEST_GRADLE_USER_HOME="$(pwd -W)\\.test-gradle-home"
+          else
+            TEST_GRADLE_USER_HOME="$PWD/.test-gradle-home"
+          fi
           [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
           
           ./gradlew check test \
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
-            ${{ runner.os == 'Windows' && '-PtestGradleUserHome="C:\\testGradleHome"' || '' }} \
+            -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
             $TESTS \
-            --console=plain \
-            --no-build-cache
+            --console=plain

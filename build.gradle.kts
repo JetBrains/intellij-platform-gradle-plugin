@@ -167,9 +167,9 @@ fun Test.configureTests() {
     val testGradleHome = providers.gradleProperty("testGradleUserHome")
         .map { File(it) }
         .getOrElse(
-            layout.buildDirectory.asFile
-                .map { it.resolve("testGradleHome") }
-                .get()
+            layout.projectDirectory
+                .dir(".gradle/testGradleHome")
+                .asFile
         )
 
     systemProperties["test.gradle.home"] = testGradleHome
