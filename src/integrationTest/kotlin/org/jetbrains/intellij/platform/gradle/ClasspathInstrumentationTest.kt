@@ -26,12 +26,12 @@ class ClasspathInstrumentationTest : IntelliJPlatformIntegrationTestBase(
 
             output containsText """
                 intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
-                \--- ${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion
+                No dependencies
             """.trimIndent()
 
             output containsText """
                 intellijPlatformLocal - IntelliJ Platform local
-                No dependencies
+                \--- localIde:$intellijPlatformType:$intellijPlatformType-$intellijPlatformBuildNumber
             """.trimIndent()
 
             output containsText """

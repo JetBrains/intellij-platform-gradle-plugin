@@ -26,6 +26,7 @@ configurations {
         "intellijPlatformClasspath",
         "intellijPlatformDependency",
         "intellijPlatformDependencyArchive",
+        "intellijPlatformLocal",
     ).forEach {
         named(it) {
             resolutionStrategy.disableDependencyVerification()
@@ -151,5 +152,4 @@ intellijPlatform {
     buildSearchableOptions = false
     instrumentCode = false
 }
-
 

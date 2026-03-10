@@ -13,7 +13,6 @@ private const val DEPENDENCIES = "dependencies"
 
 class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "intellij-platform-dependency-validation",
-    useCache = false,
 ) {
 
     @Test
@@ -49,7 +48,10 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         build(DEPENDENCIES, "--configuration=intellijPlatformDependencyArchive") {
             val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
             val coordinates = requireNotNull(type.installer)
-            val artifactCoordinates = "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
+            val artifactCoordinates = when {
+                useCache -> "localIde:${type.code}:${type.code}-$intellijPlatformBuildNumber"
+                else -> "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
+            }
 
             assertContains(
                 """
@@ -91,7 +93,10 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     fun `inform about missing IntelliJ Platform dependency`() {
         val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
         val coordinates = requireNotNull(type.installer)
-        val artifactCoordinates = "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
+        val artifactCoordinates = when {
+            useCache -> "localIde:${type.code}:${type.code}-$intellijPlatformBuildNumber"
+            else -> "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
+        }
 
         buildFile write //language=kotlin
                 """
@@ -260,7 +265,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             val coordinates = requireNotNull(type.installer)
 
             val artifactCoordinates = when {
-                useCache -> "localIde:IC:IC-$intellijPlatformBuildNumber"
+                useCache -> "localIde:${type.code}:${type.code}-$intellijPlatformBuildNumber"
                 else -> "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
             }
             val artifactVersion = "$intellijPlatformType-$intellijPlatformBuildNumber"
