@@ -59,7 +59,7 @@ jobs:
           cache-read-only: true
 
       - name: Restore TestKit Gradle Home
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .test-gradle-home
           key: testkit-home-v1-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ inputs.platformVersion }}-${{ hashFiles('gradle.properties') }}
