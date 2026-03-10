@@ -169,7 +169,15 @@ internal fun collectModuleDescriptorJars(
     architecture: String? = null,
 ): List<Path> = runCatching {
     val moduleDescriptorsFile = ModuleDescriptorsPathResolver(platformPath).resolve()
-    val jarFile = JarFile(moduleDescriptorsFile.toFile())
+    val modules = JarFile(moduleDescriptorsFile.toFile()).use { jarFile ->
+        jarFile
+            .entries()
+            .asSequence()
+            .filter { it.name.endsWith(".xml") }
+            .map { jarFile.getInputStream(it) }
+            .mapNotNull { decode<ModuleDescriptor>(it) }
+            .associateBy { it.name }
+    }
 
     val rootModuleName = productInfo.run {
         when (architecture) {
@@ -183,14 +191,6 @@ internal fun collectModuleDescriptorJars(
             ?.removePrefix(prefix)
             .let { requireNotNull(it) }
     }
-
-    val modules = jarFile
-        .entries()
-        .asSequence()
-        .filter { it.name.endsWith(".xml") }
-        .map { jarFile.getInputStream(it) }
-        .mapNotNull { decode<ModuleDescriptor>(it) }
-        .associateBy { it.name }
 
     val visitedModules = mutableSetOf<String>()
 
@@ -210,11 +210,11 @@ internal fun collectModuleDescriptorJars(
     }
 
     val rootModule = requireNotNull(modules[rootModuleName]?.path)
-    val rootModuleJar = JarFile(platformPath.resolve(rootModule).toFile())
-
-    val productModules = rootModuleJar.getEntry("META-INF/$rootModuleName/product-modules.xml")
-        ?.let { rootModuleJar.getInputStream(it) }
-        ?.let { decode<ProductModules>(it) }
+    val productModules = JarFile(platformPath.resolve(rootModule).toFile()).use { jarFile ->
+        jarFile.getEntry("META-INF/$rootModuleName/product-modules.xml")
+            ?.let { jarFile.getInputStream(it) }
+            ?.let { decode<ProductModules>(it) }
+    }
 
     val productModuleJars = productModules?.include?.fromModules.orEmpty()
         .flatMap { collectResourcesFromModule(it.value) }

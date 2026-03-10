@@ -46,21 +46,21 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
                 .plus(collectBundledPluginsJars(platformPath))
                 .map { platformPath.relativize(it).invariantSeparatorsPathString }
 
-        val jarFile = JarFile(moduleDescriptorsFile.toFile())
-
-        return jarFile
-            .entries()
-            .asSequence()
-            .filter { it.name.endsWith(".xml") }
-            .map { jarFile.getInputStream(it) }
-            .mapNotNull { decode<ModuleDescriptor>(it) }
-            .map { it.path to Coordinates(it.groupId, it.artifactId) }
-            .groupBy(keySelector = { it.first }, valueTransform = { it.second })
-            .filterKeys { collectedJars.contains(it) }
-            .values
-            .flatten()
-            .toSet()
-            .plus(explicitExclusions)
+        return JarFile(moduleDescriptorsFile.toFile()).use { jarFile ->
+            jarFile
+                .entries()
+                .asSequence()
+                .filter { it.name.endsWith(".xml") }
+                .map { jarFile.getInputStream(it) }
+                .mapNotNull { decode<ModuleDescriptor>(it) }
+                .map { it.path to Coordinates(it.groupId, it.artifactId) }
+                .groupBy(keySelector = { it.first }, valueTransform = { it.second })
+                .filterKeys { collectedJars.contains(it) }
+                .values
+                .flatten()
+                .toSet()
+                .plus(explicitExclusions)
+        }
     }
 
     private inline val ModuleDescriptor.groupId
