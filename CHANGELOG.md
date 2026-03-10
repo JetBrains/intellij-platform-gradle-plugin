@@ -12,6 +12,7 @@
 
 - Include `project.name` in sandbox path configuration.
 - Refactor code to optimize resource handling, improve regex reusability, and enhance readability across multiple modules.
+- Replace `createJFlex` with `createGrammarKit` in `addGrammarKitDependency` dependency helper
 
 ## [2.12.0] - 2026-03-06
 

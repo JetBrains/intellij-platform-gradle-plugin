@@ -820,7 +820,7 @@ class IntelliJPlatformDependenciesHelper(
         val version = versionProvider.orNull
         requireNotNull(version) { "The `intellijPlatform.grammarKit` dependency helper was called with no `version` value provided." }
 
-        createJFlex(version).apply(action)
+        createGrammarKit(version).apply(action)
     }.cached())
 
     /**
