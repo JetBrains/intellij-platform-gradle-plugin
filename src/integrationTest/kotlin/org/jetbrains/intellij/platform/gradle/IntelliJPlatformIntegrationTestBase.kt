@@ -63,8 +63,9 @@ open class IntelliJPlatformIntegrationTestBase(
     }
 
     infix fun Path.containsFileInArchive(path: String) {
-        val fs = FileSystems.newFileSystem(this, null as ClassLoader?)
-        assert(fs.getPath(path).exists()) { "expect archive '$this' contains file '$path'" }
+        FileSystems.newFileSystem(this, null as ClassLoader?).use { fs ->
+            assert(fs.getPath(path).exists()) { "expect archive '$this' contains file '$path'" }
+        }
     }
 
     infix fun Path.readEntry(path: String) = ZipFile(pathString).use { zip ->

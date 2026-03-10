@@ -233,6 +233,8 @@ private fun Path.containingDirPathStringRelativeTo(basePath: Path? = null): Stri
  * The contract is that we're working with absolute normalized paths here.
  */
 private fun String.removeLeadingPathSeparator() = when {
-    OperatingSystem.current().isWindows -> replaceFirst(Regex("^[a-zA-Z]:/"), "")
+    OperatingSystem.current().isWindows -> replaceFirst(windowsDrivePrefixPattern, "")
     else -> removePrefix("/")
 }
+
+private val windowsDrivePrefixPattern = Regex("^[a-zA-Z]:/")

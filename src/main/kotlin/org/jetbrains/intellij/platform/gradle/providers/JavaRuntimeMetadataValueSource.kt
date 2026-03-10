@@ -112,9 +112,13 @@ abstract class JavaRuntimeMetadataValueSource : ValueSource<Map<String, String>,
             .dropLastWhile { !it.contains(separator) }
             .joinToString("\n")
             .trimIndent()
-            .replace("\n +".toRegex(), ",")
+            .replace(lineContinuationPattern, ",")
             .lines()
             .filter { it.contains(separator) }
             .associate { it.split(separator).let { (key, value) -> key to value } }
+    }
+
+    private companion object {
+        val lineContinuationPattern = Regex("\n +")
     }
 }

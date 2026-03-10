@@ -24,8 +24,10 @@ private data class GradleRelease(
 )
 
 private val json = Json { ignoreUnknownKeys = true }
-
-fun gradleNightlyVersion() =
+private val gradleNightlyRelease by lazy {
     URL(GRADLE_NIGHTLY_JSON).readText().let {
         json.decodeFromString<GradleRelease>(it)
-    }.version
+    }
+}
+
+fun gradleNightlyVersion() = gradleNightlyRelease.version

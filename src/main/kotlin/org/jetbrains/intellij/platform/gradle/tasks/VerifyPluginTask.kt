@@ -431,10 +431,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
 
     private fun collectProblems(output: String): Map<String, Map<FailureLevel, Map<String, String>>> {
         val headingToLevel = FailureLevel.values().associateBy { it.sectionHeading }
-        val pluginLine = Regex("^Plugin .*? against (\\S+):")
 
         val lines = output.lineSequence().toList()
-        val starts = lines.mapIndexedNotNull { i, s -> pluginLine.find(s)?.let { i to it.groupValues[1] } }
+        val starts = lines.mapIndexedNotNull { i, s -> pluginLinePattern.find(s)?.let { i to it.groupValues[1] } }
 
         return buildMap {
             starts.forEachIndexed { idx, (start, ide) ->
@@ -482,6 +481,8 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     }
 
     companion object : Registrable {
+        private val pluginLinePattern = Regex("^Plugin .*? against (\\S+):")
+
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
                 val intellijPluginVerifierIdesConfiguration =
