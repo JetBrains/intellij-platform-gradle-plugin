@@ -285,10 +285,11 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             val composedJarConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR]
             kotlinxCoroutinesLibraryPresent.convention(project.provider {
                 composedJarConfiguration
-                    .resolvedConfiguration
-                    .resolvedArtifacts
+                    .incoming
+                    .resolutionResult
+                    .allComponents
                     .asSequence()
-                    .mapNotNull { it.id.componentIdentifier as? ModuleComponentIdentifier }
+                    .mapNotNull { it.id as? ModuleComponentIdentifier }
                     .any { it.group == "org.jetbrains.kotlinx" && it.module.startsWith("kotlinx-coroutines") }
             })
 
