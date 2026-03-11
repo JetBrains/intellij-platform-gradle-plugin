@@ -85,8 +85,6 @@ abstract class VerifyPluginStructureTask : DefaultTask() {
                     log.warn(it.message)
                 }
             }
-
-            else -> log.error(creationResult.toString())
         }
         val failBuild = creationResult !is PluginCreationSuccess
                 || (!ignoreUnacceptableWarnings.get() && creationResult.unacceptableWarnings.isNotEmpty())
