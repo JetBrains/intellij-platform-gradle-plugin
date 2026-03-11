@@ -25,8 +25,8 @@ class SubmoduleSetupIntegrationTest : IntelliJPlatformIntegrationTestBase(
                     val riderPluginHomePath = systemProperties["rider.tests.plugin.home.path"]?.toString().orEmpty()
                 
                     println("rider.tests.plugin.home.path=${'$'}riderPluginHomePath")
-                    println("rider.tests.plugin.home.path.matchesRootProjectDir=${'$'}{riderPluginHomePath == rootProject.projectDir.absolutePath}")
-                    println("rider.tests.plugin.home.path.matchesSubmoduleProjectDir=${'$'}{riderPluginHomePath == projectDir.absolutePath}")
+                    println("rider.tests.plugin.home.path.matchesRootProjectDir=${'$'}{riderPluginHomePath == rootProject.projectDir.invariantSeparatorsPath}")
+                    println("rider.tests.plugin.home.path.matchesSubmoduleProjectDir=${'$'}{riderPluginHomePath == projectDir.invariantSeparatorsPath}")
                 }
                 """.trimIndent()
 
