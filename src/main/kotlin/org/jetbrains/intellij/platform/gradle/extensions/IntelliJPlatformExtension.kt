@@ -1051,7 +1051,9 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * @see ide
              * @see ProductReleasesValueSource
              */
-            fun recommended() = create(ProductReleasesValueSource())
+            fun recommended() = dependenciesHelper.addIntelliJPluginVerifierIdes(
+                notationsProvider = ProductReleasesValueSource(),
+            )
 
             /**
              * Helper to fall back to the [recommended] IDE list when the receiver provider is absent.
