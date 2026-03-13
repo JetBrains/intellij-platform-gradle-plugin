@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.13.0] - 2026-03-12
+
 ### Added
 
 - Mark the `intellijPlatformDistribution` outgoing artifact as `builtBy` with `jarSearchableOptionsTaskProvider` and `prepareSandboxTaskProvider`
@@ -1671,7 +1673,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.12.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.0...HEAD
+[2.13.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.12.0...v2.13.0
 [2.12.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.11.0...v2.12.0
 [2.11.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.5...v2.11.0
 [2.10.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.4...v2.10.5
