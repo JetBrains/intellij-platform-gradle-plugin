@@ -6,5 +6,4 @@ package org.jetbrains.intellij.platform.gradle
  * Represents an annotation to mark DSL elements related to the IntelliJ Platform.
  */
 @DslMarker
-//@RequiresOptIn(message = "This API belongs to ${Plugin.ID}")
 annotation class IntelliJPlatform
