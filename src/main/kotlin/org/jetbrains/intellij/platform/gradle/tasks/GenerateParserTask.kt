@@ -16,7 +16,6 @@ import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 
 /**
@@ -98,7 +97,7 @@ abstract class GenerateParserTask : JavaExec() {
         }
     }
 
-    private fun getArguments() = listOf(targetRootOutputDir, sourceFile).map { it.asPath.safePathString }
+    private fun getArguments() = listOf(targetRootOutputDir, sourceFile).map { it.asPath.normalize().toString() }
 
     init {
         group = Constants.Plugin.GROUP_NAME

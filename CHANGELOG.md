@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Hotfix for Grammar-Kit support on Windows
+
 ## [2.13.0] - 2026-03-12
 
 ### Added
