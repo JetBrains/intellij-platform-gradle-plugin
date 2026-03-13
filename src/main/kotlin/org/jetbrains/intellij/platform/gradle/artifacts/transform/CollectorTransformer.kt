@@ -42,7 +42,6 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
     @get:Classpath
     abstract val inputArtifact: Provider<FileSystemLocation>
 
-    private val manager = IdePluginManager.createManager(createTempDirectory())
     private val log = Logger(javaClass)
 
     /**
@@ -54,6 +53,7 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
     override fun transform(outputs: TransformOutputs) {
         runCatching {
             val path = inputArtifact.asPath
+            val manager = IdePluginManager.createManager(createTempDirectory())
             val plugin by lazy {
                 val pluginPath = path.resolvePluginPath()
                 manager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()

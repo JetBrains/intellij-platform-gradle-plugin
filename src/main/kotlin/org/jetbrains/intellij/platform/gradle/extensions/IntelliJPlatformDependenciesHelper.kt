@@ -76,8 +76,6 @@ class IntelliJPlatformDependenciesHelper(
 ) {
 
     private val log = Logger(javaClass)
-    private val pluginManager by lazy { IdePluginManager.createManager() }
-    private val pluginRepository by lazy { PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE) }
     internal val requestedIntelliJPlatforms by lazy {
         gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class, projectPath) {
             parameters.useInstaller = true
@@ -434,6 +432,8 @@ class IntelliJPlatformDependenciesHelper(
         requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
 
         val productInfo = platformPath.productInfo()
+
+        val pluginRepository = PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE)
 
         plugins.map { pluginId ->
             val platformType = productInfo.productCode
@@ -1224,6 +1224,7 @@ class IntelliJPlatformDependenciesHelper(
         val artifactPath = resolvePath(localPath)
             .takeIf { it.exists() }
             .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
+        val pluginManager = IdePluginManager.createManager()
 
         val plugin by lazy {
             val pluginPath = when {
