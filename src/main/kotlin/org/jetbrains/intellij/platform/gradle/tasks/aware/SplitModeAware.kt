@@ -82,6 +82,15 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
         get() = sandboxDirectory.file("frontend.properties")
 
     /**
+     * Path to a file storing the current split-mode frontend join link.
+     *
+     * It is written by the backend task and consumed by the frontend task when both are launched separately.
+     */
+    @get:Internal
+    val splitModeFrontendJoinLinkFile: Provider<RegularFile>
+        get() = sandboxDirectory.file("split-mode-frontend.join.link")
+
+    /**
      * Validates that the resolved IntelliJ Platform supports Split Mode.
      *
      * @see ProductInfo.validateSupportedVersion

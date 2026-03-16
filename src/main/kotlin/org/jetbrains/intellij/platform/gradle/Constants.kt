@@ -196,6 +196,8 @@ object Constants {
         const val PRINT_PRODUCTS_RELEASES = "printProductsReleases"
         const val PUBLISH_PLUGIN = "publishPlugin"
         const val RUN_IDE = "runIde"
+        const val RUN_IDE_BACKEND = "runIdeBackend"
+        const val RUN_IDE_FRONTEND = "runIdeFrontend"
         const val SETUP_DEPENDENCIES = "setupDependencies"
         const val SIGN_PLUGIN = "signPlugin"
         const val TEST_IDE_PERFORMANCE = "testIdePerformance" // TODO: check

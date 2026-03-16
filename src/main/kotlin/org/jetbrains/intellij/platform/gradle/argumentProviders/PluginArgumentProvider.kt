@@ -4,11 +4,14 @@ package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Nested
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.exists
@@ -39,4 +42,24 @@ class PluginArgumentProvider(
      * @return The list of arguments to be passed to the platform.
      */
     override fun asArguments() = listOfNotNull(requiredPlugins)
+}
+
+/**
+ * Conditionally enables the required-plugin argument for a specific split-mode side.
+ */
+class SplitModePluginArgumentProvider(
+    @Nested
+    val delegate: PluginArgumentProvider,
+
+    @Input
+    val splitModeTarget: Provider<SplitModeAware.SplitModeTarget>,
+
+    @Input
+    val requiredTarget: SplitModeAware.SplitModeTarget,
+) : CommandLineArgumentProvider {
+
+    override fun asArguments() = when (splitModeTarget.get().includes(requiredTarget)) {
+        true -> delegate.asArguments()
+        false -> emptyList()
+    }
 }
