@@ -7,6 +7,7 @@ import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.file.FileCollection
 import org.gradle.internal.os.OperatingSystem
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
@@ -181,6 +182,25 @@ val ProductInfo.type
         "Could not determine IntelliJ Platform type for product '$name' with code '$productCode' and build '$buildNumber'"
     }
 
+val ProductInfo.frontendSplitRootModule
+    get() = when (type) {
+        IntelliJPlatformType.IntellijIdea,
+        IntelliJPlatformType.IntellijIdeaCommunity,
+        IntelliJPlatformType.IntellijIdeaUltimate,
+            -> "intellij.idea.frontend.split"
+
+        IntelliJPlatformType.GoLand -> "intellij.goland.frontend.split"
+        IntelliJPlatformType.PhpStorm -> "intellij.phpstorm.frontend.split"
+        IntelliJPlatformType.PyCharm,
+        IntelliJPlatformType.PyCharmCommunity,
+        IntelliJPlatformType.PyCharmProfessional,
+            -> "intellij.pycharm.frontend.split"
+
+        IntelliJPlatformType.RubyMine -> "intellij.rubymine.frontend.split"
+        IntelliJPlatformType.WebStorm -> "intellij.webstorm.frontend.split"
+        else -> "intellij.platform.frontend.split"
+    }
+
 /**
  * Validates that the resolved IntelliJ Platform is supported by checking against the minimal supported IntelliJ Platform version.
  *
@@ -222,6 +242,15 @@ internal fun ProductInfo.launchFor(architecture: String): ProductInfo.Launch {
         .let { requireNotNull(it) { "Could not find launch information for the current OS: $name ($arch)" } }
         .run { copy(additionalJvmArguments = additionalJvmArguments.map { it.trim('"') }) }
 }
+
+/**
+ * Finds a normalized [ProductInfo.Launch.CustomCommand] for the given launch [architecture] and custom [commandName].
+ */
+internal fun ProductInfo.customCommandFor(architecture: String, commandName: String) =
+    launchFor(architecture)
+        .customCommands
+        .find { commandName in it.commands }
+        ?.run { copy(additionalJvmArguments = additionalJvmArguments.map { it.trim('"') }) }
 
 /**
  * Resolves the IDE home variable in the given string by replacing placeholders, like:
