@@ -30,6 +30,9 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.OutputStream
+import java.net.InetSocketAddress
+import java.net.Socket
+import java.net.URI
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
@@ -169,7 +172,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
             ?.let { return it }
 
         val joinLinkPath = splitModeFrontendJoinLinkFile.asPath
-        readSplitModeFrontendJoinLink(joinLinkPath)?.let { return it }
+        readAvailableSplitModeFrontendJoinLink(joinLinkPath)?.let { return it }
 
         log.info("Waiting for split-mode frontend join link at '${joinLinkPath.safePathString}'.")
         val deadline = System.nanoTime() + MILLISECONDS.toNanos(SPLIT_MODE_JOIN_LINK_WAIT_TIMEOUT_MS)
@@ -181,13 +184,17 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
                 break
             }
 
-            readSplitModeFrontendJoinLink(joinLinkPath)?.let { return it }
+            readAvailableSplitModeFrontendJoinLink(joinLinkPath)?.let { return it }
         }
 
         throw InvalidUserDataException(
             "No split-mode frontend join link available after waiting ${SPLIT_MODE_JOIN_LINK_WAIT_TIMEOUT_MS / 1000}s. Start `${Tasks.RUN_IDE_BACKEND}` first or set `splitModeFrontendJoinLink` explicitly. Expected file: ${joinLinkPath.safePathString}."
         )
     }
+
+    private fun readAvailableSplitModeFrontendJoinLink(joinLinkPath: java.nio.file.Path) =
+        readSplitModeFrontendJoinLink(joinLinkPath)
+            ?.takeIf(::isSplitModeFrontendJoinLinkAvailable)
 
     private fun readSplitModeFrontendJoinLink(joinLinkPath: java.nio.file.Path) = when {
         joinLinkPath.exists() -> joinLinkPath.readText()
@@ -196,6 +203,22 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
 
         else -> null
     }
+
+    private fun isSplitModeFrontendJoinLinkAvailable(joinLink: String) = runCatching {
+        val uri = URI(joinLink)
+        val host = uri.host
+        val port = uri.port
+
+        if (uri.scheme !in setOf("tcp", "debug") || host.isNullOrBlank() || port <= 0) {
+            return@runCatching true
+        }
+
+        Socket().use { socket ->
+            socket.connect(InetSocketAddress(host, port), 200)
+        }
+
+        true
+    }.getOrDefault(false)
 
     private fun configureSplitModeFrontendLaunch() {
         configureSplitModeSharedEnvironment()

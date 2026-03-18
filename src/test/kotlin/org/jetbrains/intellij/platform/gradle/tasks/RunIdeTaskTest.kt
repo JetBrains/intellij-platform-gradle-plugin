@@ -15,6 +15,40 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
     private val isWindows = System.getProperty("os.name").startsWith("Windows")
 
+    private fun configureFrontendJoinLinkProvider(
+        delayMs: Int,
+        port: Int,
+        joinLink: String,
+    ) {
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named("${Tasks.RUN_IDE_FRONTEND}") {
+                doFirst {
+                    val joinLinkFileProvider = javaClass
+                        .getMethod("getSplitModeFrontendJoinLinkFile")
+                        .invoke(this) as org.gradle.api.provider.Provider<*>
+                    val joinLinkFile = (joinLinkFileProvider.get() as org.gradle.api.file.RegularFile).asFile
+                    Thread {
+                        Thread.sleep($delayMs)
+                        val serverSocketClass = Class.forName("java.net.ServerSocket")
+                        val serverSocket = serverSocketClass
+                            .getConstructor(Int::class.javaPrimitiveType)
+                            .newInstance($port)
+                        try {
+                            joinLinkFile.parentFile.mkdirs()
+                            joinLinkFile.writeText("$joinLink")
+                            Thread.sleep(5_000)
+                        } finally {
+                            serverSocketClass.getMethod("close").invoke(serverSocket)
+                        }
+                    }.start()
+                }
+            }
+            """.trimIndent()
+        )
+    }
+
     private fun configureFakeJavaLauncher() {
         val fakeJavaExecutable = dir.resolve("fake-jdk/bin/java" + if (isWindows) ".bat" else "")
 
@@ -146,31 +180,21 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIdeFrontend uses debug join link written by debug backend`() {
         configureFakeJavaLauncher()
-        buildFile.toFile().appendText(
-            """
-
-            tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
-                debugOptions.enabled.set(true)
-            }
-            """.trimIndent()
-        )
-
-        build(Tasks.RUN_IDE_BACKEND)
+        configureFrontendJoinLinkProvider(delayMs = 0, port = 6092, joinLink = "debug://localhost:6092#remoteId=Split%20Mode")
 
         build(Tasks.RUN_IDE_FRONTEND) {
-            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient debug://localhost:5990#remoteId=Split%20Mode", output)
+            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient debug://localhost:6092#remoteId=Split%20Mode", output)
         }
     }
 
     @Test
     fun `runIdeFrontend launches thin client with frontend properties`() {
         configureFakeJavaLauncher()
-
-        build(Tasks.RUN_IDE_BACKEND)
+        configureFrontendJoinLinkProvider(delayMs = 0, port = 6093, joinLink = "tcp://127.0.0.1:6093#cb=fake")
 
         build(Tasks.RUN_IDE_FRONTEND) {
             assertContains("ARGS=", output)
-            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:5990#cb=fake", output)
+            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:6093#cb=fake", output)
             assertContains("frontend.properties", output)
             assertContains("-Didea.platform.prefix=JetBrainsClient", output)
             assertNotContains("coroutines-javaagent", output)
@@ -184,35 +208,32 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertNotContains("-Didea.log.path=", output)
             assertNotContains("-Didea.plugins.path=", output)
             assertNotContains("-Dplugin.path=", output)
-            assertNotContains("thinClient tcp://127.0.0.1:5990#cb=fake splitMode", output)
+            assertNotContains("thinClient tcp://127.0.0.1:6093#cb=fake splitMode", output)
         }
     }
 
     @Test
     fun `runIdeFrontend waits for delayed join link file`() {
         configureFakeJavaLauncher()
-
-        buildFile.toFile().appendText(
-            """
-
-            tasks.named("${Tasks.RUN_IDE_FRONTEND}") {
-                doFirst {
-                    val joinLinkFileProvider = javaClass
-                        .getMethod("getSplitModeFrontendJoinLinkFile")
-                        .invoke(this) as org.gradle.api.provider.Provider<*>
-                    val joinLinkFile = (joinLinkFileProvider.get() as org.gradle.api.file.RegularFile).asFile
-                    Thread {
-                        Thread.sleep(500)
-                        joinLinkFile.parentFile.mkdirs()
-                        joinLinkFile.writeText("tcp://127.0.0.1:5990#cb=delayed")
-                    }.start()
-                }
-            }
-            """.trimIndent()
-        )
+        configureFrontendJoinLinkProvider(delayMs = 500, port = 6094, joinLink = "tcp://127.0.0.1:6094#cb=delayed")
 
         build(Tasks.RUN_IDE_FRONTEND) {
-            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:5990#cb=delayed", output)
+            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:6094#cb=delayed", output)
+        }
+    }
+
+    @Test
+    fun `runIdeFrontend ignores stale join link and waits for live backend`() {
+        configureFakeJavaLauncher()
+        configureFrontendJoinLinkProvider(delayMs = 500, port = 6091, joinLink = "tcp://127.0.0.1:6091#cb=fresh")
+
+        val sandboxDir = dir.resolve(".intellijPlatform/sandbox/projectName/IU-2025.1.6")
+        sandboxDir.toFile().mkdirs()
+        sandboxDir.resolve("split-mode-frontend.join.link").toFile().writeText("tcp://127.0.0.1:6090#cb=stale")
+
+        build(Tasks.RUN_IDE_FRONTEND) {
+            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:6091#cb=fresh", output)
+            assertNotContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:6090#cb=stale", output)
         }
     }
 }
