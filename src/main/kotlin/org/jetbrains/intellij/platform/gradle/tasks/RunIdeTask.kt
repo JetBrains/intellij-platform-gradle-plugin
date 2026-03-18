@@ -48,7 +48,6 @@ internal const val SPLIT_MODE_FRONTEND_MAIN_CLASS = "com.intellij.platform.runti
 private const val DEFAULT_SPLIT_MODE_SERVER_PORT = 5990
 private const val DEFAULT_JVM_DEBUG_PORT = 5005
 private const val DEFAULT_SPLIT_MODE_FRONTEND_DEBUG_PORT = 5007
-private const val SPLIT_MODE_FRONTEND_REMOTE_ID = "Split Mode"
 private const val SPLIT_MODE_JOIN_LINK_MARKER = "Join link:"
 private const val SPLIT_MODE_JOIN_LINK_WAIT_TIMEOUT_MS = 30_000L
 private const val SPLIT_MODE_JOIN_LINK_POLL_INTERVAL_MS = 200L
