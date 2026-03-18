@@ -39,17 +39,6 @@ class IntelliJPlatformArgumentProvider(
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
 
-    private fun String.isHeapSpaceOption() = startsWith("-Xmx") || startsWith("-Xms")
-
-    /**
-     * Allows overriding default heap size options with values provided with [options].
-     */
-    private val heapSpace
-        get() = listOfNotNull(
-            options.maxHeapSize?.let { "-Xmx${it}" },
-            options.minHeapSize?.let { "-Xms${it}" },
-        )
-
     /**
      * Combines various arguments related to the IntelliJ Platform configuration to create a list of arguments to be passed to the platform.
      *
@@ -59,9 +48,7 @@ class IntelliJPlatformArgumentProvider(
         val platformPath = intellijPlatformConfiguration.platformPath()
         val productInfo = platformPath.productInfo()
         val launch = productInfo.launchFor(runtimeArchProvider.get())
-        val inheritedJvmArguments = options.jvmArgs.orEmpty()
-        val overridesDefaultMaxHeap = options.maxHeapSize != null || inheritedJvmArguments.any { it.startsWith("-Xmx") }
-        val overridesDefaultMinHeap = options.minHeapSize != null || inheritedJvmArguments.any { it.startsWith("-Xms") }
+        val heapSpaceOverrides = options.heapSpaceOverrides()
 
         val bootclasspath = platformPath
             .resolve("lib/boot.jar")
@@ -75,8 +62,7 @@ class IntelliJPlatformArgumentProvider(
             ?.let { platformPath.resolve(it).readLines() }
             .orEmpty()
             .filter { !it.contains("kotlinx.coroutines.debug=off") }
-            .filterNot { overridesDefaultMaxHeap && it.startsWith("-Xmx") }
-            .filterNot { overridesDefaultMinHeap && it.startsWith("-Xms") }
+            .filterOverriddenHeapSpace(heapSpaceOverrides)
 
         val kotlinxCoroutinesJavaAgent = coroutinesJavaAgentFile.orNull
             ?.asPath
@@ -94,7 +80,7 @@ class IntelliJPlatformArgumentProvider(
             .additionalJvmArguments
             .map { it.resolveIdeHomeVariable(platformPath) }
 
-        return (bootclasspath + vmOptions + additionalJvmArguments + heapSpace + listOfNotNull(kotlinxCoroutinesJavaAgent))
+        return (bootclasspath + vmOptions + additionalJvmArguments + options.heapSpaceArguments() + listOfNotNull(kotlinxCoroutinesJavaAgent))
             .filterNot { it.isNullOrBlank() }
     }
 }
