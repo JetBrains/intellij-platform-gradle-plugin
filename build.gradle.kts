@@ -6,6 +6,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
 
+fun Project.testGradleHome() = providers.gradleProperty("testGradleUserHome")
+    .map { file(it) }
+    .getOrElse(
+        layout.projectDirectory
+            .dir(".gradle/testGradleHome")
+            .asFile
+    )
+
 plugins {
     `jvm-test-suite`
     `java-test-fixtures`
@@ -109,6 +117,12 @@ tasks {
         configureTests()
     }
 
+    register<Delete>("cleanTestGradleHome") {
+        group = "build"
+        description = "Deletes the Gradle test home directory contents (default `.gradle/testGradleHome`) used by tests."
+        delete(project.testGradleHome())
+    }
+
     jar {
         patchManifest()
     }
@@ -164,13 +178,7 @@ testing {
 }
 
 fun Test.configureTests() {
-    val testGradleHome = providers.gradleProperty("testGradleUserHome")
-        .map { File(it) }
-        .getOrElse(
-            layout.projectDirectory
-                .dir(".gradle/testGradleHome")
-                .asFile
-        )
+    val testGradleHome = project.testGradleHome()
 
     systemProperties["test.gradle.home"] = testGradleHome
     systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
