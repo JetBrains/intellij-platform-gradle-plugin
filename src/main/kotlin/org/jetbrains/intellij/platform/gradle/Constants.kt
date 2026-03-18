@@ -180,6 +180,7 @@ object Constants {
         const val GENERATE_LEXER = "generateLexer"
         const val GENERATE_MANIFEST = "generateManifest"
         const val GENERATE_PARSER = "generateParser"
+        const val GENERATE_SPLIT_MODE_RUN_CONFIGURATIONS = "generateSplitModeRunConfigurations"
         const val INITIALIZE_INTELLIJ_PLATFORM_PLUGIN = "initializeIntellijPlatformPlugin"
         const val INSTRUMENT_CODE = "instrumentCode"
         const val INSTRUMENT_TEST_CODE = "instrumentTestCode"
