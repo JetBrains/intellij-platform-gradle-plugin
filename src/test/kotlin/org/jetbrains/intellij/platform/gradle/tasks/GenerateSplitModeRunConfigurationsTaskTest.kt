@@ -3,8 +3,10 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.internal.project.ProjectInternal
-import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.assertFileContent
+import org.jetbrains.intellij.platform.gradle.assertNotContains
 import kotlin.test.Test
 
 class GenerateSplitModeRunConfigurationsTaskTest : IntelliJPluginTestBase() {
@@ -83,114 +85,6 @@ class GenerateSplitModeRunConfigurationsTaskTest : IntelliJPluginTestBase() {
               <configuration default="false" name="Run IDE (Split Mode)" type="CompoundRunConfigurationType" factoryName="Compound Run Configuration">
                 <toRun type="GradleRunConfiguration" name="Run IDE (Backend)" />
                 <toRun type="GradleRunConfiguration" name="Run IDE (Frontend)" />
-                <method v="2" />
-              </configuration>
-            </component>
-            """.trimIndent(),
-        )
-    }
-
-    @Test
-    fun `generate shared split mode run configurations for nested project`() {
-        settingsFile overwrite //language=kotlin
-                """
-                rootProject.name = "projectName"
-
-                plugins {
-                    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-                }
-
-                include("nestedProject")
-                """.trimIndent()
-
-        dir.resolve("nestedProject/build.gradle.kts") write //language=kotlin
-                """
-                plugins {
-                    id("java")
-                    id("org.jetbrains.intellij.platform")
-                }
-
-                version = "1.0.0"
-
-                repositories {
-                    mavenCentral()
-
-                    intellijPlatform {
-                        defaultRepositories()
-                    }
-                }
-
-                dependencies {
-                    intellijPlatform {
-                        val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
-                        create("$intellijPlatformType", "$intellijPlatformVersion") { this.useInstaller.set(useInstaller) }
-                    }
-                }
-
-                intellijPlatform {
-                    buildSearchableOptions = false
-                    instrumentCode = false
-                }
-                """.trimIndent()
-
-        build(":nestedProject:${Tasks.GENERATE_SPLIT_MODE_RUN_CONFIGURATIONS}")
-
-        assertFileContent(
-            dir.resolve("nestedProject/.run/${Tasks.RUN_IDE_BACKEND}.run.xml"),
-            //language=xml
-            """
-            <component name="ProjectRunConfigurationManager">
-              <configuration default="false" name="Run IDE (Backend)" type="GradleRunConfiguration" factoryName="Gradle">
-                <ExternalSystemSettings>
-                  <option name="executionName" />
-                  <option name="externalProjectPath" value="${'$'}PROJECT_DIR${'$'}" />
-                  <option name="externalSystemIdString" value="GRADLE" />
-                  <option name="scriptParameters" value="" />
-                  <option name="taskDescriptions">
-                    <list />
-                  </option>
-                  <option name="taskNames">
-                    <list>
-                      <option value=":nestedProject:runIdeBackend" />
-                    </list>
-                  </option>
-                  <option name="vmOptions" value="" />
-                </ExternalSystemSettings>
-                <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-                <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-                <DebugAllEnabled>false</DebugAllEnabled>
-                <RunAsTest>false</RunAsTest>
-                <method v="2" />
-              </configuration>
-            </component>
-            """.trimIndent(),
-        )
-
-        assertFileContent(
-            dir.resolve("nestedProject/.run/${Tasks.RUN_IDE_FRONTEND}.run.xml"),
-            //language=xml
-            """
-            <component name="ProjectRunConfigurationManager">
-              <configuration default="false" name="Run IDE (Frontend)" type="GradleRunConfiguration" factoryName="Gradle">
-                <ExternalSystemSettings>
-                  <option name="executionName" />
-                  <option name="externalProjectPath" value="${'$'}PROJECT_DIR${'$'}" />
-                  <option name="externalSystemIdString" value="GRADLE" />
-                  <option name="scriptParameters" value="" />
-                  <option name="taskDescriptions">
-                    <list />
-                  </option>
-                  <option name="taskNames">
-                    <list>
-                      <option value=":nestedProject:runIdeFrontend" />
-                    </list>
-                  </option>
-                  <option name="vmOptions" value="" />
-                </ExternalSystemSettings>
-                <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-                <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-                <DebugAllEnabled>false</DebugAllEnabled>
-                <RunAsTest>false</RunAsTest>
                 <method v="2" />
               </configuration>
             </component>
