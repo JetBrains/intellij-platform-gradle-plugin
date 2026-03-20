@@ -38,12 +38,22 @@ class JetBrainsClientArgumentProvider(
         startsWith("-Xbootclasspath/a:") ||
             startsWith("-Djava.nio.file.spi.DefaultFileSystemProvider=")
 
+    private fun String.isHeapSpaceOption() = startsWith("-Xmx") || startsWith("-Xms")
+
+    private val heapSpace
+        get() = listOfNotNull(
+            options.maxHeapSize?.let { "-Xmx$it" },
+            options.minHeapSize?.let { "-Xms$it" },
+        )
+
     override fun asArguments(): List<String> {
         val platformPath = intellijPlatformConfiguration.platformPath()
         val productInfo = platformPath.productInfo()
         val launch = productInfo.launchFor(runtimeArchProvider.get())
         val frontendCommand = productInfo.customCommandFor(runtimeArchProvider.get(), SPLIT_MODE_FRONTEND_COMMAND)
-        val heapSpaceOverrides = options.heapSpaceOverrides()
+        val inheritedJvmArguments = options.jvmArgs.orEmpty()
+        val overridesDefaultMaxHeap = options.maxHeapSize != null || inheritedJvmArguments.any { it.startsWith("-Xmx") }
+        val overridesDefaultMinHeap = options.minHeapSize != null || inheritedJvmArguments.any { it.startsWith("-Xms") }
         val jetBrainsClientVmOptionsPath = platformPath.resolve("bin/jetbrains_client.vmoptions")
         val vmOptionsPath = when {
             frontendCommand?.vmOptionsFilePath != null -> platformPath.resolve(frontendCommand.vmOptionsFilePath.removePrefix("../"))
@@ -59,7 +69,8 @@ class JetBrainsClientArgumentProvider(
             .orEmpty()
             .filter { !it.contains("kotlinx.coroutines.debug=off") }
             .filterNot { it.startsWith("-Djava.nio.file.spi.DefaultFileSystemProvider=") }
-            .filterOverriddenHeapSpace(heapSpaceOverrides)
+            .filterNot { overridesDefaultMaxHeap && it.startsWith("-Xmx") }
+            .filterNot { overridesDefaultMinHeap && it.startsWith("-Xms") }
 
         val additionalJvmArguments = (frontendCommand?.additionalJvmArguments ?: launch.additionalJvmArguments)
             .map { it.resolveIdeHomeVariable(platformPath) }
@@ -81,7 +92,7 @@ class JetBrainsClientArgumentProvider(
             else -> emptyList()
         }
 
-        return (vmOptions + additionalJvmArguments + frontendJvmArguments + options.heapSpaceArguments())
+        return (vmOptions + additionalJvmArguments + frontendJvmArguments + heapSpace)
             .filterNot { it.isBlank() }
     }
 }
