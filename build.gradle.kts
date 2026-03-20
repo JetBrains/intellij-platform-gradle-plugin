@@ -1,8 +1,6 @@
 // Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
-import org.gradle.api.tasks.testing.logging.TestExceptionFormat
-import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -211,10 +209,6 @@ fun Test.configureTests() {
     //       outputs.upToDateWhen { false }
     //       showStandardStreams = true
     //   }
-    testLogging {
-        events(TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR)
-        exceptionFormat = TestExceptionFormat.FULL
-    }
 
 }
 

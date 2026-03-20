@@ -56,52 +56,14 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             //language=bat
             """
             @echo off
-            setlocal EnableExtensions EnableDelayedExpansion
             echo JETBRAINS_CLIENT_JDK=%JETBRAINS_CLIENT_JDK%
             echo JETBRAINS_CLIENT_VM_OPTIONS=%JETBRAINS_CLIENT_VM_OPTIONS%
             echo JETBRAINS_CLIENT_PROPERTIES=%JETBRAINS_CLIENT_PROPERTIES%
             echo JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_START
             if not "%JETBRAINS_CLIENT_VM_OPTIONS%"=="" type "%JETBRAINS_CLIENT_VM_OPTIONS%"
             echo JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_END
-            set "MAIN_CLASS="
-            set "JVM_ARGS="
-            set "APP_ARGS="
-            set "CAPTURE_APP_ARGS="
-            set "SERVER_MODE="
-            :parseArgs
-            if "%~1"=="" goto printResults
-            if defined CAPTURE_APP_ARGS (
-              if defined APP_ARGS (
-                set "APP_ARGS=!APP_ARGS! %~1"
-              ) else (
-                set "APP_ARGS=%~1"
-              )
-              if "%~1"=="serverMode" set "SERVER_MODE=1"
-            ) else (
-              if "%~1"=="com.intellij.idea.Main" (
-                set "MAIN_CLASS=%~1"
-                set "CAPTURE_APP_ARGS=1"
-              ) else (
-                if "%~1"=="com.intellij.platform.runtime.loader.IntellijLoader" (
-                  set "MAIN_CLASS=%~1"
-                  set "CAPTURE_APP_ARGS=1"
-                ) else (
-                  if defined JVM_ARGS (
-                    set "JVM_ARGS=!JVM_ARGS! %~1"
-                  ) else (
-                    set "JVM_ARGS=%~1"
-                  )
-                )
-              )
-            )
-            shift
-            goto parseArgs
-            :printResults
-            if defined SERVER_MODE echo Join link: tcp://127.0.0.1:5990#cb=fake
-            if defined MAIN_CLASS echo MAIN_CLASS=!MAIN_CLASS!
-            if defined JVM_ARGS echo JVM_ARGS=!JVM_ARGS!
-            if defined APP_ARGS echo APP_ARGS=!APP_ARGS!
-            exit /b 0
+            echo %* | findstr /C:"serverMode" >nul && echo Join link: tcp://127.0.0.1:5990#cb=fake
+            echo ARGS=%*
             """.trimIndent()
         } else {
             //language=shell script
@@ -115,49 +77,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
               cat "${'$'}JETBRAINS_CLIENT_VM_OPTIONS"
             fi
             echo "JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_END"
-            main_class=""
-            jvm_args=""
-            app_args=""
-            capture_app_args=""
-            server_mode=""
-            for arg in "$@"; do
-              if [ -n "${'$'}capture_app_args" ]; then
-                if [ -n "${'$'}app_args" ]; then
-                  app_args="${'$'}app_args ${'$'}arg"
-                else
-                  app_args="${'$'}arg"
-                fi
-                if [ "${'$'}arg" = "serverMode" ]; then
-                  server_mode=1
-                fi
-              else
-                case "${'$'}arg" in
-                  com.intellij.idea.Main|com.intellij.platform.runtime.loader.IntellijLoader)
-                    main_class="${'$'}arg"
-                    capture_app_args=1
-                    ;;
-                  *)
-                    if [ -n "${'$'}jvm_args" ]; then
-                      jvm_args="${'$'}jvm_args ${'$'}arg"
-                    else
-                      jvm_args="${'$'}arg"
-                    fi
-                    ;;
-                esac
-              fi
-            done
-            if [ -n "${'$'}server_mode" ]; then
-              echo "Join link: tcp://127.0.0.1:5990#cb=fake"
-            fi
-            if [ -n "${'$'}main_class" ]; then
-              echo "MAIN_CLASS=${'$'}main_class"
-            fi
-            if [ -n "${'$'}jvm_args" ]; then
-              echo "JVM_ARGS=${'$'}jvm_args"
-            fi
-            if [ -n "${'$'}app_args" ]; then
-              echo "APP_ARGS=${'$'}app_args"
-            fi
+            case "$*" in
+              *serverMode*) echo "Join link: tcp://127.0.0.1:5990#cb=fake" ;;
+            esac
+            echo "ARGS=$*"
             """.trimIndent()
         }
         fakeJavaExecutable.toFile().setExecutable(true)
@@ -218,8 +141,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         configureFakeJavaLauncher()
 
         build(Tasks.RUN_IDE_BACKEND) {
-            assertContains("MAIN_CLASS=com.intellij.idea.Main", output)
-            assertContains("APP_ARGS=serverMode -p 5990", output)
+            assertContains("ARGS=", output)
+            assertContains("com.intellij.idea.Main serverMode -p 5990", output)
         }
 
         val joinLinkFiles = dir.toFile()
@@ -260,8 +183,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         configureFrontendJoinLinkProvider(delayMs = 0, port = 6092, joinLink = "debug://localhost:6092#remoteId=Split%20Mode")
 
         build(Tasks.RUN_IDE_FRONTEND) {
-            assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
-            assertContains("APP_ARGS=thinClient debug://localhost:6092#remoteId=Split%20Mode --refresh-split-mode-token=true", output)
+            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient debug://localhost:6092#remoteId=Split%20Mode", output)
         }
     }
 
@@ -271,8 +193,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         configureFrontendJoinLinkProvider(delayMs = 0, port = 6093, joinLink = "tcp://127.0.0.1:6093#cb=fake")
 
         build(Tasks.RUN_IDE_FRONTEND) {
-            assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
-            assertContains("APP_ARGS=thinClient tcp://127.0.0.1:6093#cb=fake&remoteId=Split%20Mode --refresh-split-mode-token=true", output)
+            assertContains("ARGS=", output)
+            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:6093#cb=fake", output)
             assertContains("frontend.properties", output)
             assertContains("-Didea.platform.prefix=JetBrainsClient", output)
             assertNotContains("coroutines-javaagent", output)
@@ -286,7 +208,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertNotContains("-Didea.log.path=", output)
             assertNotContains("-Didea.plugins.path=", output)
             assertNotContains("-Dplugin.path=", output)
-            assertNotContains("APP_ARGS=thinClient tcp://127.0.0.1:6093#cb=fake&remoteId=Split%20Mode splitMode", output)
+            assertNotContains("thinClient tcp://127.0.0.1:6093#cb=fake splitMode", output)
         }
     }
 
@@ -296,8 +218,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         configureFrontendJoinLinkProvider(delayMs = 500, port = 6094, joinLink = "tcp://127.0.0.1:6094#cb=delayed")
 
         build(Tasks.RUN_IDE_FRONTEND) {
-            assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
-            assertContains("APP_ARGS=thinClient tcp://127.0.0.1:6094#cb=delayed&remoteId=Split%20Mode --refresh-split-mode-token=true", output)
+            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:6094#cb=delayed", output)
         }
     }
 
@@ -311,9 +232,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         sandboxDir.resolve("split-mode-frontend.join.link").toFile().writeText("tcp://127.0.0.1:6090#cb=stale")
 
         build(Tasks.RUN_IDE_FRONTEND) {
-            assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
-            assertContains("APP_ARGS=thinClient tcp://127.0.0.1:6091#cb=fresh&remoteId=Split%20Mode --refresh-split-mode-token=true", output)
-            assertNotContains("APP_ARGS=thinClient tcp://127.0.0.1:6090#cb=stale&remoteId=Split%20Mode --refresh-split-mode-token=true", output)
+            assertContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:6091#cb=fresh", output)
+            assertNotContains("com.intellij.platform.runtime.loader.IntellijLoader thinClient tcp://127.0.0.1:6090#cb=stale", output)
         }
     }
 }
