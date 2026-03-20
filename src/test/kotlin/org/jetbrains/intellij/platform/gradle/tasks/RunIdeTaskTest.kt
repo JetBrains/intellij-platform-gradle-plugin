@@ -7,10 +7,7 @@ import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.assertContains
 import org.jetbrains.intellij.platform.gradle.assertNotContains
 import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.overwrite
 import org.jetbrains.intellij.platform.gradle.write
-import javax.tools.ToolProvider
-import kotlin.io.path.createDirectories
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 
@@ -53,29 +50,126 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     }
 
     private fun configureFakeJavaLauncher() {
-        val fakeJdk = dir.resolve("fake-jdk")
-        val fakeLauncherClasses = fakeJdk.resolve("fake-launcher-classes")
-        val fakeJavaExecutable = fakeJdk.resolve("bin/java${if (isWindows) ".exe" else ""}")
-        val realJavaExecutable = java.nio.file.Path.of(System.getProperty("java.home"), "bin", "java${if (isWindows) ".exe" else ""}")
+        val fakeJavaExecutable = dir.resolve("fake-jdk/bin/java" + if (isWindows) ".bat" else "")
 
-        fakeJdk.resolve("bin").createDirectories()
-        fakeJavaExecutable overwrite ""
-        compileFakeJavaLauncherClasses(fakeLauncherClasses)
-
-        val realJavaExecutablePath = realJavaExecutable.toRealPath().invariantSeparatorsPathString
-        val fakeLauncherClassesPath = fakeLauncherClasses.toRealPath().invariantSeparatorsPathString
-        val fakeJavaDebugLogPath = fakeJdk.resolve("fake-java-debug.log").invariantSeparatorsPathString
+        fakeJavaExecutable write if (isWindows) {
+            //language=bat
+            """
+            @echo off
+            setlocal EnableExtensions EnableDelayedExpansion
+            echo JETBRAINS_CLIENT_JDK=%JETBRAINS_CLIENT_JDK%
+            echo JETBRAINS_CLIENT_VM_OPTIONS=%JETBRAINS_CLIENT_VM_OPTIONS%
+            echo JETBRAINS_CLIENT_PROPERTIES=%JETBRAINS_CLIENT_PROPERTIES%
+            echo JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_START
+            if not "%JETBRAINS_CLIENT_VM_OPTIONS%"=="" type "%JETBRAINS_CLIENT_VM_OPTIONS%"
+            echo JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_END
+            set "MAIN_CLASS="
+            set "JVM_ARGS="
+            set "APP_ARGS="
+            set "CAPTURE_APP_ARGS="
+            set "SERVER_MODE="
+            :parseArgs
+            if "%~1"=="" goto printResults
+            if defined CAPTURE_APP_ARGS (
+              if defined APP_ARGS (
+                set "APP_ARGS=!APP_ARGS! %~1"
+              ) else (
+                set "APP_ARGS=%~1"
+              )
+              if "%~1"=="serverMode" set "SERVER_MODE=1"
+            ) else (
+              if "%~1"=="com.intellij.idea.Main" (
+                set "MAIN_CLASS=%~1"
+                set "CAPTURE_APP_ARGS=1"
+              ) else (
+                if "%~1"=="com.intellij.platform.runtime.loader.IntellijLoader" (
+                  set "MAIN_CLASS=%~1"
+                  set "CAPTURE_APP_ARGS=1"
+                ) else (
+                  if defined JVM_ARGS (
+                    set "JVM_ARGS=!JVM_ARGS! %~1"
+                  ) else (
+                    set "JVM_ARGS=%~1"
+                  )
+                )
+              )
+            )
+            shift
+            goto parseArgs
+            :printResults
+            if defined SERVER_MODE echo Join link: tcp://127.0.0.1:5990#cb=fake
+            if defined MAIN_CLASS echo MAIN_CLASS=!MAIN_CLASS!
+            if defined JVM_ARGS echo JVM_ARGS=!JVM_ARGS!
+            if defined APP_ARGS echo APP_ARGS=!APP_ARGS!
+            exit /b 0
+            """.trimIndent()
+        } else {
+            //language=shell script
+            """
+            #!/bin/sh
+            echo "JETBRAINS_CLIENT_JDK=${'$'}JETBRAINS_CLIENT_JDK"
+            echo "JETBRAINS_CLIENT_VM_OPTIONS=${'$'}JETBRAINS_CLIENT_VM_OPTIONS"
+            echo "JETBRAINS_CLIENT_PROPERTIES=${'$'}JETBRAINS_CLIENT_PROPERTIES"
+            echo "JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_START"
+            if [ -n "${'$'}JETBRAINS_CLIENT_VM_OPTIONS" ]; then
+              cat "${'$'}JETBRAINS_CLIENT_VM_OPTIONS"
+            fi
+            echo "JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_END"
+            main_class=""
+            jvm_args=""
+            app_args=""
+            capture_app_args=""
+            server_mode=""
+            for arg in "$@"; do
+              if [ -n "${'$'}capture_app_args" ]; then
+                if [ -n "${'$'}app_args" ]; then
+                  app_args="${'$'}app_args ${'$'}arg"
+                else
+                  app_args="${'$'}arg"
+                fi
+                if [ "${'$'}arg" = "serverMode" ]; then
+                  server_mode=1
+                fi
+              else
+                case "${'$'}arg" in
+                  com.intellij.idea.Main|com.intellij.platform.runtime.loader.IntellijLoader)
+                    main_class="${'$'}arg"
+                    capture_app_args=1
+                    ;;
+                  *)
+                    if [ -n "${'$'}jvm_args" ]; then
+                      jvm_args="${'$'}jvm_args ${'$'}arg"
+                    else
+                      jvm_args="${'$'}arg"
+                    fi
+                    ;;
+                esac
+              fi
+            done
+            if [ -n "${'$'}server_mode" ]; then
+              echo "Join link: tcp://127.0.0.1:5990#cb=fake"
+            fi
+            if [ -n "${'$'}main_class" ]; then
+              echo "MAIN_CLASS=${'$'}main_class"
+            fi
+            if [ -n "${'$'}jvm_args" ]; then
+              echo "JVM_ARGS=${'$'}jvm_args"
+            fi
+            if [ -n "${'$'}app_args" ]; then
+              echo "APP_ARGS=${'$'}app_args"
+            fi
+            """.trimIndent()
+        }
+        fakeJavaExecutable.toFile().setExecutable(true)
 
         buildFile.toFile().appendText(
             """
 
             tasks.withType<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>().configureEach {
                 val fakeJdk = layout.projectDirectory.dir("fake-jdk")
-                val realJavaExecutablePath = project.file("$realJavaExecutablePath")
-                val realJavaExecutable = project.layout.file(project.provider { realJavaExecutablePath }).get()
                 javaLauncher = provider {
                     object : org.gradle.jvm.toolchain.JavaLauncher {
-                        override fun getExecutablePath() = realJavaExecutable
+                        override fun getExecutablePath() = fakeJdk.file("bin/java${if (isWindows) ".bat" else ""}")
 
                         override fun getMetadata() = object : org.gradle.jvm.toolchain.JavaInstallationMetadata {
                             override fun getLanguageVersion() = org.gradle.jvm.toolchain.JavaLanguageVersion.of(21)
@@ -93,171 +187,9 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                         }
                     }
                 }
-                jvmArgs(
-                    "-Xbootclasspath/a:$fakeLauncherClassesPath",
-                    "-Dfake.java.debug.log=$fakeJavaDebugLogPath",
-                    "-Dfake.java.fakeLauncherClasses=$fakeLauncherClassesPath",
-                )
             }
             """.trimIndent()
         )
-    }
-
-    private fun compileFakeJavaLauncherClasses(outputDirectory: java.nio.file.Path) {
-        val sourceDirectory = dir.resolve("fake-jdk/fake-launcher-src")
-        val helperSource = sourceDirectory.resolve("fake/launcher/FakeLauncher.java")
-        val ideaMainSource = sourceDirectory.resolve("com/intellij/idea/Main.java")
-        val intellijLoaderSource = sourceDirectory.resolve("com/intellij/platform/runtime/loader/IntellijLoader.java")
-
-        helperSource.parent.createDirectories()
-        ideaMainSource.parent.createDirectories()
-        intellijLoaderSource.parent.createDirectories()
-        outputDirectory.createDirectories()
-
-        helperSource overwrite //language=java
-                """
-                package fake.launcher;
-
-                import java.lang.management.ManagementFactory;
-                import java.nio.file.Files;
-                import java.nio.file.Path;
-                import java.nio.file.StandardOpenOption;
-                import java.util.ArrayList;
-                import java.util.Arrays;
-                import java.util.List;
-
-                public final class FakeLauncher {
-                    private FakeLauncher() {}
-
-                    public static void run(String mainClass, String[] args) throws Exception {
-                        var debugLines = new ArrayList<String>();
-                        debugLines.add("=== fake java start ===");
-                        debugLines.add("MAIN_CLASS=" + mainClass);
-                        debugLines.add("CWD=" + Path.of("").toAbsolutePath());
-                        for (var arg : args) {
-                            debugLines.add("ARG=" + arg);
-                        }
-
-                        printAndLog("JETBRAINS_CLIENT_JDK=" + getenv("JETBRAINS_CLIENT_JDK"), debugLines);
-                        printAndLog("JETBRAINS_CLIENT_VM_OPTIONS=" + getenv("JETBRAINS_CLIENT_VM_OPTIONS"), debugLines);
-                        printAndLog("JETBRAINS_CLIENT_PROPERTIES=" + getenv("JETBRAINS_CLIENT_PROPERTIES"), debugLines);
-                        printAndLog("JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_START", debugLines);
-                        readVmOptions(debugLines);
-                        printAndLog("JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_END", debugLines);
-                        printAndLog("MAIN_CLASS=" + mainClass, debugLines);
-
-                        var jvmArgs = String.join(" ", filteredInputArguments());
-                        if (!jvmArgs.isBlank()) {
-                            printAndLog("JVM_ARGS=" + jvmArgs, debugLines);
-                        }
-
-                        var appArgs = String.join(" ", args);
-                        if (!appArgs.isBlank()) {
-                            printAndLog("APP_ARGS=" + appArgs, debugLines);
-                        }
-
-                        if (Arrays.asList(args).contains("serverMode")) {
-                            printAndLog("Join link: tcp://127.0.0.1:5990#cb=fake", debugLines);
-                        }
-
-                        debugLines.add("=== fake java end ===");
-                        writeDebugLog(debugLines);
-                    }
-
-                    private static String getenv(String name) {
-                        return System.getenv().getOrDefault(name, "");
-                    }
-
-                    private static void readVmOptions(List<String> debugLines) throws Exception {
-                        var vmOptions = getenv("JETBRAINS_CLIENT_VM_OPTIONS");
-                        if (vmOptions.isBlank()) {
-                            return;
-                        }
-
-                        var vmOptionsPath = Path.of(vmOptions);
-                        if (!Files.exists(vmOptionsPath)) {
-                            return;
-                        }
-
-                        for (var line : Files.readAllLines(vmOptionsPath)) {
-                            printAndLog(line, debugLines);
-                        }
-                    }
-
-                    private static List<String> filteredInputArguments() {
-                        var fakeLauncherClasses = System.getProperty("fake.java.fakeLauncherClasses", "");
-                        var filtered = new ArrayList<String>();
-                        for (var argument : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
-                            if (argument.startsWith("-Dfake.java.")) {
-                                continue;
-                            }
-                            if (argument.startsWith("-Xbootclasspath/a:") && argument.contains(fakeLauncherClasses)) {
-                                continue;
-                            }
-                            filtered.add(argument);
-                        }
-                        return filtered;
-                    }
-
-                    private static void printAndLog(String line, List<String> debugLines) {
-                        System.out.println(line);
-                        debugLines.add(line);
-                    }
-
-                    private static void writeDebugLog(List<String> debugLines) throws Exception {
-                        var debugLog = System.getProperty("fake.java.debug.log", "");
-                        if (debugLog.isBlank()) {
-                            return;
-                        }
-                        Files.write(
-                            Path.of(debugLog),
-                            debugLines,
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING,
-                            StandardOpenOption.WRITE
-                        );
-                    }
-                }
-                """.trimIndent()
-        ideaMainSource overwrite //language=java
-                """
-                package com.intellij.idea;
-
-                public final class Main {
-                    private Main() {}
-
-                    public static void main(String[] args) throws Exception {
-                        fake.launcher.FakeLauncher.run(Main.class.getName(), args);
-                    }
-                }
-                """.trimIndent()
-        intellijLoaderSource overwrite //language=java
-                """
-                package com.intellij.platform.runtime.loader;
-
-                public final class IntellijLoader {
-                    private IntellijLoader() {}
-
-                    public static void main(String[] args) throws Exception {
-                        fake.launcher.FakeLauncher.run(IntellijLoader.class.getName(), args);
-                    }
-                }
-                """.trimIndent()
-
-        val compiler = checkNotNull(ToolProvider.getSystemJavaCompiler()) {
-            "A JDK with the system Java compiler is required to run RunIdeTaskTest."
-        }
-        val result = compiler.run(
-            null,
-            null,
-            null,
-            "-d",
-            outputDirectory.toString(),
-            helperSource.toString(),
-            ideaMainSource.toString(),
-            intellijLoaderSource.toString(),
-        )
-        check(result == 0) { "Failed to compile fake Java launcher classes, exit code: $result" }
     }
 
     @Test
@@ -302,14 +234,11 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIdeBackend writes debug frontend join link when backend debugging is enabled`() {
         configureFakeJavaLauncher()
-        val debugPort = java.net.ServerSocket(0).use { it.localPort }
         buildFile.toFile().appendText(
             """
 
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
                 debugOptions.enabled.set(true)
-                debugOptions.port.set($debugPort)
-                debugOptions.suspend.set(false)
             }
             """.trimIndent()
         )
