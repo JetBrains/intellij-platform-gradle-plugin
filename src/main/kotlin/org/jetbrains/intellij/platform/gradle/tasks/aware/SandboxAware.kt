@@ -53,4 +53,31 @@ interface SandboxAware : SandboxStructure {
 
         dependsOn(sandboxProducerTaskProvider)
     }
+
+    fun Task.applyFrontendSandboxFrom(sandboxProducerTaskProvider: TaskProvider<PrepareSandboxTask>) {
+        applySandboxFrom(sandboxProducerTaskProvider)
+
+        sandboxConfigDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxConfigFrontendDirectory })
+            .finalizeValueOnRead()
+
+        sandboxPluginsDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { producer ->
+                producer.splitModeTarget.flatMap { target ->
+                    when (target) {
+                        SplitModeAware.SplitModeTarget.BOTH -> producer.sandboxPluginsDirectory
+                        else -> producer.sandboxPluginsFrontendDirectory
+                    }
+                }
+            })
+            .finalizeValueOnRead()
+
+        sandboxSystemDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxSystemFrontendDirectory })
+            .finalizeValueOnRead()
+
+        sandboxLogDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxLogFrontendDirectory })
+            .finalizeValueOnRead()
+    }
 }

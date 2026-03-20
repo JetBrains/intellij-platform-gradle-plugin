@@ -20,12 +20,14 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.PluginArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.ExecutionModeAwareIdeArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.ExecutionModeAwarePluginArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.ExecutionModeAwareSandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectModuleDescriptorJars
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
+import org.jetbrains.intellij.platform.gradle.models.customCommandFor
 import org.jetbrains.intellij.platform.gradle.models.launchFor
 import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.providers.CoroutinesJavaAgentValueSource
@@ -215,34 +217,16 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         if (this is RunnableIdeAware) {
             enableAssertions = true
 
-            jvmArgumentProviders.add(
-                IntelliJPlatformArgumentProvider(
-                    intelliJPlatformConfiguration,
-                    coroutinesJavaAgentFile,
-                    runtimeArchitecture,
-                    options = this,
-                )
-            )
-            jvmArgumentProviders.add(
-                SandboxArgumentProvider(
-                    sandboxConfigDirectory,
-                    sandboxPluginsDirectory,
-                    sandboxSystemDirectory,
-                    sandboxLogDirectory,
-                )
-            )
-            jvmArgumentProviders.add(
-                PluginArgumentProvider(
-                    pluginXml,
-                )
-            )
+            jvmArgumentProviders.add(createIdeArgumentProvider(project))
+            jvmArgumentProviders.add(createSandboxArgumentProvider(project))
+            jvmArgumentProviders.add(createPluginArgumentProvider(project))
 
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
             systemProperty("ide.native.launcher", "false")
 
             if (this is JavaExec) {
                 mainClass = runtimeArchitecture.map { architecture ->
-                    productInfo.launchFor(architecture).mainClass ?: Constants.DEFAULT_MAIN_CLASS
+                    executionProfile().resolveMainClass(this, architecture) ?: Constants.DEFAULT_MAIN_CLASS
                 }
 
                 javaLauncher = runtimeDirectory.zip(runtimeMetadata) { directory, metadata ->
@@ -251,9 +235,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
                 classpath += files(
                     runtimeArchitecture.map { architecture ->
-                        productInfo
-                            .launchFor(architecture)
-                            .bootClassPathJarNames
+                        executionProfile()
+                            .resolveBootClassPathJarNames(this, architecture)
                             .map { platformPath.resolve("lib/$it") }
                     }
                 )
@@ -358,6 +341,98 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH]
         }
     }
+}
+
+private fun RunnableIdeAware.executionProfile(): RunnableIdeExecutionProfile = when (this) {
+    is RunIdeTask -> when (executionMode.get()) {
+        RunIdeTask.ExecutionMode.STANDARD -> RunnableIdeExecutionProfile.Standard
+        RunIdeTask.ExecutionMode.SPLIT_MODE_BACKEND -> RunnableIdeExecutionProfile.SplitModeBackend
+        RunIdeTask.ExecutionMode.SPLIT_MODE_FRONTEND -> RunnableIdeExecutionProfile.SplitModeFrontend
+    }
+
+    else -> RunnableIdeExecutionProfile.Standard
+}
+
+private sealed interface RunnableIdeExecutionProfile {
+
+    fun resolveMainClass(task: RunnableIdeAware, architecture: String): String?
+
+    fun resolveBootClassPathJarNames(task: RunnableIdeAware, architecture: String): List<String>
+
+    object Standard : RunnableIdeExecutionProfile {
+        override fun resolveMainClass(task: RunnableIdeAware, architecture: String) =
+            task.productInfo.launchFor(architecture).mainClass
+
+        override fun resolveBootClassPathJarNames(task: RunnableIdeAware, architecture: String) =
+            task.productInfo.launchFor(architecture).bootClassPathJarNames
+    }
+
+    object SplitModeBackend : RunnableIdeExecutionProfile {
+        override fun resolveMainClass(task: RunnableIdeAware, architecture: String) =
+            task.productInfo.launchFor(architecture).mainClass
+
+        override fun resolveBootClassPathJarNames(task: RunnableIdeAware, architecture: String) =
+            task.productInfo.launchFor(architecture).bootClassPathJarNames
+    }
+
+    object SplitModeFrontend : RunnableIdeExecutionProfile {
+        override fun resolveMainClass(task: RunnableIdeAware, architecture: String) =
+            task.productInfo
+                .customCommandFor(architecture, SPLIT_MODE_FRONTEND_COMMAND)
+                ?.mainClass
+                ?: SPLIT_MODE_FRONTEND_MAIN_CLASS
+
+        override fun resolveBootClassPathJarNames(task: RunnableIdeAware, architecture: String) =
+            task.productInfo
+                .customCommandFor(architecture, SPLIT_MODE_FRONTEND_COMMAND)
+                ?.bootClassPathJarNames
+                ?.takeIf { it.isNotEmpty() }
+                ?: listOf("platform-loader.jar")
+    }
+}
+
+private fun RunnableIdeAware.createIdeArgumentProvider(project: Project) =
+    ExecutionModeAwareIdeArgumentProvider(
+        intellijPlatformConfiguration = intelliJPlatformConfiguration,
+        coroutinesJavaAgentFile = coroutinesJavaAgentFile,
+        runtimeArchProvider = runtimeArchitecture,
+        executionMode = executionModeProvider(project),
+        options = this,
+    )
+
+private fun RunnableIdeAware.createPluginArgumentProvider(project: Project) =
+    ExecutionModeAwarePluginArgumentProvider(
+        pluginXml = pluginXml,
+        executionMode = executionModeProvider(project),
+        splitModeTarget = splitModeTargetProvider(project),
+    )
+
+private fun RunnableIdeAware.createSandboxArgumentProvider(project: Project) = when (this) {
+    is RunIdeTask -> ExecutionModeAwareSandboxArgumentProvider(
+        sandboxConfigDirectory = sandboxConfigDirectory,
+        sandboxPluginsDirectory = sandboxPluginsDirectory,
+        sandboxSystemDirectory = sandboxSystemDirectory,
+        sandboxLogDirectory = sandboxLogDirectory,
+        frontendPropertiesFile = splitModeFrontendProperties,
+        executionMode = executionMode,
+    )
+
+    else -> SandboxArgumentProvider(
+        sandboxConfigDirectory = sandboxConfigDirectory,
+        sandboxPluginsDirectory = sandboxPluginsDirectory,
+        sandboxSystemDirectory = sandboxSystemDirectory,
+        sandboxLogDirectory = sandboxLogDirectory,
+    )
+}
+
+private fun RunnableIdeAware.executionModeProvider(project: Project) = when (this) {
+    is RunIdeTask -> executionMode
+    else -> project.provider { RunIdeTask.ExecutionMode.STANDARD }
+}
+
+private fun RunnableIdeAware.splitModeTargetProvider(project: Project) = when (this) {
+    is RunIdeTask -> splitModeTarget
+    else -> project.provider { SplitModeAware.SplitModeTarget.BACKEND }
 }
 
 /**

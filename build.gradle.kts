@@ -1,10 +1,20 @@
 // Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 import org.jetbrains.dokka.gradle.tasks.DokkaGeneratePublicationTask
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+import org.gradle.api.tasks.testing.logging.TestLogEvent
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 fun Jar.patchManifest() = manifest { attributes("Version" to project.version) }
+
+fun Project.testGradleHome() = providers.gradleProperty("testGradleUserHome")
+    .map { file(it) }
+    .getOrElse(
+        layout.projectDirectory
+            .dir(".gradle/testGradleHome")
+            .asFile
+    )
 
 plugins {
     `jvm-test-suite`
@@ -109,6 +119,12 @@ tasks {
         configureTests()
     }
 
+    register<Delete>("cleanTestGradleHome") {
+        group = "build"
+        description = "Deletes the Gradle test home directory contents (default `.gradle/testGradleHome`) used by tests."
+        delete(project.testGradleHome())
+    }
+
     jar {
         patchManifest()
     }
@@ -164,13 +180,7 @@ testing {
 }
 
 fun Test.configureTests() {
-    val testGradleHome = providers.gradleProperty("testGradleUserHome")
-        .map { File(it) }
-        .getOrElse(
-            layout.projectDirectory
-                .dir(".gradle/testGradleHome")
-                .asFile
-        )
+    val testGradleHome = project.testGradleHome()
 
     systemProperties["test.gradle.home"] = testGradleHome
     systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
@@ -201,6 +211,10 @@ fun Test.configureTests() {
     //       outputs.upToDateWhen { false }
     //       showStandardStreams = true
     //   }
+    testLogging {
+        events(TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR)
+        exceptionFormat = TestExceptionFormat.FULL
+    }
 
 }
 
