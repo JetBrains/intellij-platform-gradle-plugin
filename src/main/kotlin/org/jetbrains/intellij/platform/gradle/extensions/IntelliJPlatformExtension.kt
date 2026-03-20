@@ -265,8 +265,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             /**
              * Function that returns a cache directory name for a given IntelliJ Platform artifact.
              *
-             * By default, split-mode requests include the product mode in the directory name so backend and frontend
-             * processes do not reuse the same writable IDE home.
+             * By default, set to [RequestedIntelliJPlatform.type]-[RequestedIntelliJPlatform.version].
              */
             val name: Property<(RequestedIntelliJPlatform) -> String>
 
@@ -281,15 +280,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                                 project.providers.intellijPlatformIdesCachePath(project.rootProjectPath).map { it.toFile() }
                             )
                         )
-                        name.convention {
-                            buildString {
-                                append("${it.type}-${it.version}")
-                                if (it.productMode != ProductMode.MONOLITH) {
-                                    append("-")
-                                    append(it.productMode.name.lowercase())
-                                }
-                            }
-                        }
+                        name.convention { "${it.type}-${it.version}" }
                     }
             }
         }

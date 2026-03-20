@@ -39,8 +39,6 @@ class IntelliJPlatformArgumentProvider(
     private val options: JavaForkOptions,
 ) : CommandLineArgumentProvider {
 
-    private fun String.isHeapSpaceOption() = startsWith("-Xmx") || startsWith("-Xms")
-
     /**
      * Allows overriding default heap size options with values provided with [options].
      */
@@ -59,9 +57,6 @@ class IntelliJPlatformArgumentProvider(
         val platformPath = intellijPlatformConfiguration.platformPath()
         val productInfo = platformPath.productInfo()
         val launch = productInfo.launchFor(runtimeArchProvider.get())
-        val inheritedJvmArguments = options.jvmArgs.orEmpty()
-        val overridesDefaultMaxHeap = options.maxHeapSize != null || inheritedJvmArguments.any { it.startsWith("-Xmx") }
-        val overridesDefaultMinHeap = options.minHeapSize != null || inheritedJvmArguments.any { it.startsWith("-Xms") }
 
         val bootclasspath = platformPath
             .resolve("lib/boot.jar")
@@ -75,8 +70,6 @@ class IntelliJPlatformArgumentProvider(
             ?.let { platformPath.resolve(it).readLines() }
             .orEmpty()
             .filter { !it.contains("kotlinx.coroutines.debug=off") }
-            .filterNot { overridesDefaultMaxHeap && it.startsWith("-Xmx") }
-            .filterNot { overridesDefaultMinHeap && it.startsWith("-Xms") }
 
         val kotlinxCoroutinesJavaAgent = coroutinesJavaAgentFile.orNull
             ?.asPath

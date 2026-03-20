@@ -4,8 +4,6 @@ package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.file.FileCollection
-import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
@@ -27,9 +25,6 @@ class ComposeHotReloadArgumentProvider(
     @InputFiles
     @PathSensitive(RELATIVE)
     val composeHotReloadAgentConfiguration: FileCollection,
-
-    @Input
-    val enabled: Provider<Boolean>,
 ) : CommandLineArgumentProvider {
 
     /**
@@ -48,12 +43,8 @@ class ComposeHotReloadArgumentProvider(
      * - `-XX:+AllowEnhancedClassRedefinition`: Enables enhanced class redefinition capability
      * - `-javaagent:<path>`: Attaches the Compose hot reload agent
      */
-    override fun asArguments() = when (enabled.get()) {
-        true -> listOf(
-            "-XX:+AllowEnhancedClassRedefinition",
-            "-javaagent:${agentJar.toPath().safePathString}",
-        )
-
-        false -> emptyList()
-    }
+    override fun asArguments() = listOf(
+        "-XX:+AllowEnhancedClassRedefinition",
+        "-javaagent:${agentJar.toPath().safePathString}",
+    )
 }

@@ -49,9 +49,6 @@ import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.withLock
 import kotlin.io.path.*
 
-private fun RequestedIntelliJPlatform.requiresManagedLocalPath(splitMode: Boolean) =
-    splitMode || productMode != ProductMode.MONOLITH
-
 /**
  * Helper class for managing dependencies on the IntelliJ Platform in Gradle projects.
  *
@@ -270,7 +267,6 @@ class IntelliJPlatformDependenciesHelper(
                 configurations[requiredConfigurationName].resolve()
             }
         }
-        val splitModeProvider = extensionProvider.flatMap { it.splitMode }
         val requestsProvider = configurationsProvider.map { configurations ->
             resolveConfiguration()
             configurations.map {
@@ -279,17 +275,16 @@ class IntelliJPlatformDependenciesHelper(
         }.cached()
 
         configurations[localArchivesConfigurationName].dependencies.addAllLater(
-            requestsProvider.zip(splitModeProvider) { requests, splitMode ->
-                requests
-                    .filter { it.useCache || it.requiresManagedLocalPath(splitMode) }
-                    .map { request ->
-                        request.let {
+            requestsProvider.map { requests ->
+                requests.filter { it.useCache }
+                    .map { requests ->
+                        requests.let {
                             val localPath = cacheResolver.resolve(localArchivesConfigurationName) {
                                 type = it.type
                                 version = it.version
                                 productMode = it.productMode
                                 useInstaller = it.useInstaller
-                                useCache = it.useCache
+                                useCache = true
                             }
                             val platformPath = resolveArtifactPath(localPath)
                             createIntelliJPlatformLocal(platformPath)
@@ -299,9 +294,9 @@ class IntelliJPlatformDependenciesHelper(
         )
 
         configurations[dependencyArchivesConfigurationName].dependencies.addAllLater(
-            requestsProvider.zip(splitModeProvider) { requests, splitMode ->
+            requestsProvider.map { requests ->
                 requests
-                    .filterNot { it.useCache || it.requiresManagedLocalPath(splitMode) }
+                    .filter { !it.useCache }
                     .map { createIntelliJPlatformDependency(it) }
             }.cached()
         )

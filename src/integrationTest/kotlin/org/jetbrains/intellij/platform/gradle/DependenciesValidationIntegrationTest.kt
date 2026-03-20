@@ -45,7 +45,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        build(DEPENDENCIES) {
+        build(DEPENDENCIES, "--configuration=intellijPlatformDependencyArchive") {
             val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
             val coordinates = requireNotNull(type.installer)
             val artifactCoordinates = when {
@@ -53,63 +53,9 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 else -> "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
             }
 
-            when {
-                useCache -> {
-                    assertContains(
-                        """
-                        intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
-                        No dependencies
-                        """.trimIndent(),
-                        output,
-                    )
-                    assertContains(
-                        """
-                        intellijPlatformLocal - IntelliJ Platform local
-                        \--- $artifactCoordinates
-                        """.trimIndent(),
-                        output,
-                    )
-                }
-
-                else -> assertContains(
-                    """
-                    intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
-                    \--- $artifactCoordinates
-                    """.trimIndent(),
-                    output,
-                )
-            }
-        }
-    }
-
-    @Test
-    fun `resolve IntelliJ Platform dependency through local IDE path in split mode without global cache`() {
-        buildFile write //language=kotlin
-                """
-                repositories {
-                    intellijPlatform {
-                        defaultRepositories()
-                    }
-                }
-
-                dependencies {
-                    intellijPlatform {
-                        create("$intellijPlatformType", "$intellijPlatformVersion")
-                    }
-                }
-
-                intellijPlatform {
-                    splitMode = true
-                }
-                """.trimIndent()
-
-        build(DEPENDENCIES) {
-            val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
-            val artifactCoordinates = "localIde:${type.code}:${type.code}-$intellijPlatformBuildNumber"
-
             assertContains(
                 """
-                intellijPlatformDependency - IntelliJ Platform
+                intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
                 \--- $artifactCoordinates
                 """.trimIndent(),
                 output,
