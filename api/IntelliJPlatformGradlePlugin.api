@@ -2933,10 +2933,12 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/GenerateLexer
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/GenerateLexerTask$Companion;
 	public fun <init> ()V
 	public fun exec ()V
+	public abstract fun getPackageName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPurgeOldFiles ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSkeleton ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getSourceFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getTargetOutputDir ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getTargetRootOutputDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public final fun targetFile (Ljava/lang/String;)Lorg/gradle/api/provider/Provider;
 	public final fun targetFile (Lorg/gradle/api/provider/Provider;)Lorg/gradle/api/provider/Provider;
 }

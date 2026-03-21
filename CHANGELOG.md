@@ -2,6 +2,19 @@
 
 ## [next]
 
+### Added
+
+- Add default value for `targetRootOutputDir` of `GenerateParserTask`.
+- Add properties `targetRootOutputDir` and `packageName` (with defaults) for `GenerateLexerTask`. These properties replace `targetOutputDir` and automatically use a proper subdirectory matching the package.
+
+### Changed
+
+- Deprecate property `targetOutputDir` of `GenerateLexerTask`.
+- Deprecate properties `pathToParser` and `pathToPsiRoot` of `GenerateParserTask`.
+- Purge stale files `GenerateLexerTask` and `GenerateParserTask` by default (as soon as you stop using the deprecated properties).
+- Deprecate `targetFile(String)` and `targetFile(Provider)` of `GenerateLexerTask`.
+- Deprecate `parserFile()` and `psiDir()` of `GenerateParserTask`.
+
 ### Fixed
 
 - Hotfix for Grammar-Kit support on Windows
