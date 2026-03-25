@@ -219,4 +219,12 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
     }
 
     protected fun resourceContent(path: String) = resource(path)?.let { Path(it).readText() }
+
+    protected fun pluginTemplateEnvironment(vararg entries: Pair<String, String?>) = buildMap {
+        put(Constants.EnvironmentVariables.CERTIFICATE_CHAIN, null)
+        put(Constants.EnvironmentVariables.PRIVATE_KEY, null)
+        put(Constants.EnvironmentVariables.PRIVATE_KEY_PASSWORD, null)
+        put(Constants.EnvironmentVariables.PUBLISH_TOKEN, null)
+        putAll(entries)
+    }
 }

@@ -132,6 +132,14 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Constraints 
 	public final fun getUNIFIED_PYCHARM_VERSION ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/Constants$EnvironmentVariables {
+	public static final field CERTIFICATE_CHAIN Ljava/lang/String;
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$EnvironmentVariables;
+	public static final field PRIVATE_KEY Ljava/lang/String;
+	public static final field PRIVATE_KEY_PASSWORD Ljava/lang/String;
+	public static final field PUBLISH_TOKEN Ljava/lang/String;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/Constants$Extensions {
 	public static final field CACHING Ljava/lang/String;
 	public static final field IDEA_VERSION Ljava/lang/String;

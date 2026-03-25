@@ -23,6 +23,7 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.EnvironmentVariables
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
@@ -636,6 +637,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             override fun register(project: Project, target: Any) =
                 target.configureExtension<Publishing>(Extensions.PUBLISHING) {
                     host.convention(Locations.JETBRAINS_MARKETPLACE)
+                    token.convention(project.providers.environmentVariable(EnvironmentVariables.PUBLISH_TOKEN))
                     ideServices.convention(false)
                     channels.convention(listOf("default"))
                     hidden.convention(false)
@@ -747,7 +749,17 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
         companion object : Registrable<Signing> {
             override fun register(project: Project, target: Any) =
-                target.configureExtension<Signing>(Extensions.SIGNING)
+                target.configureExtension<Signing>(Extensions.SIGNING) {
+                    certificateChain.convention(project.providers.provider {
+                        certificateChainFile.orNull?.let { return@provider null }
+                        project.providers.environmentVariable(EnvironmentVariables.CERTIFICATE_CHAIN).orNull
+                    })
+                    privateKey.convention(project.providers.provider {
+                        privateKeyFile.orNull?.let { return@provider null }
+                        project.providers.environmentVariable(EnvironmentVariables.PRIVATE_KEY).orNull
+                    })
+                    password.convention(project.providers.environmentVariable(EnvironmentVariables.PRIVATE_KEY_PASSWORD))
+                }
         }
     }
 

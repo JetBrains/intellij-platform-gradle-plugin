@@ -41,8 +41,62 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        buildAndFail(Tasks.PUBLISH_PLUGIN) {
+        buildAndFail(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertContains("'token' property must be specified for plugin publishing", output)
+        }
+    }
+
+    @Test
+    fun `use publishing token from PUBLISH_TOKEN environment variable by default`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    publishing {}
+                }
+                
+                tasks.register("printPublishingToken") {
+                    val publishingToken = intellijPlatform.publishing.token
+                    inputs.property("publishingToken", publishingToken)
+                    
+                    doLast {
+                        println("publishingToken=${'$'}{publishingToken.orNull}")
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "printPublishingToken",
+            environment = pluginTemplateEnvironment(Constants.EnvironmentVariables.PUBLISH_TOKEN to "env-token"),
+        ) {
+            assertContains("publishingToken=env-token", output)
+        }
+    }
+
+    @Test
+    fun `prefer explicit publishing token over PUBLISH_TOKEN environment variable`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    publishing {
+                        token = "dsl-token"
+                    }
+                }
+                
+                tasks.register("printPublishingToken") {
+                    val publishingToken = intellijPlatform.publishing.token
+                    inputs.property("publishingToken", publishingToken)
+                    
+                    doLast {
+                        println("publishingToken=${'$'}{publishingToken.orNull}")
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "printPublishingToken",
+            environment = pluginTemplateEnvironment(Constants.EnvironmentVariables.PUBLISH_TOKEN to "env-token"),
+        ) {
+            assertContains("publishingToken=dsl-token", output)
         }
     }
 
@@ -63,7 +117,7 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        buildAndFail(Tasks.PUBLISH_PLUGIN) {
+        buildAndFail(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertContains("Failed to upload plugin: Upload failed: Authentication Failed: token is invalid", output)
         }
     }
@@ -89,7 +143,7 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        buildAndFail(Tasks.PUBLISH_PLUGIN) {
+        buildAndFail(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertTaskOutcome(Tasks.BUILD_PLUGIN, TaskOutcome.SUCCESS)
             assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SUCCESS)
         }
@@ -112,7 +166,7 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        buildAndFail(Tasks.PUBLISH_PLUGIN) {
+        buildAndFail(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertTaskOutcome(Tasks.BUILD_PLUGIN, TaskOutcome.SUCCESS)
             assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SKIPPED)
         }

@@ -6,6 +6,7 @@
 
 - Default `intellijPlatform.pluginConfiguration.ideaVersion.sinceBuild` to the target IntelliJ Platform `major` build instead of `major.minor`; explicitly setting it to the `major` value is now redundant and can be removed.
 - Apply `intellijPlatform.pluginVerification.ides.recommended()` by default when no IntelliJ Plugin Verifier IDEs are configured explicitly.
+- Default `intellijPlatform.signing.certificateChain`, `intellijPlatform.signing.privateKey`, `intellijPlatform.signing.password`, and `intellijPlatform.publishing.token` to the Plugin Template environment variables: `CERTIFICATE_CHAIN`, `PRIVATE_KEY`, `PRIVATE_KEY_PASSWORD`, and `PUBLISH_TOKEN`.
 
 ### Added
 
