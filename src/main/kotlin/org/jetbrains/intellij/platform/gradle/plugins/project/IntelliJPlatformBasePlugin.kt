@@ -8,7 +8,6 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
@@ -28,12 +27,12 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
+import org.jetbrains.intellij.platform.gradle.plugins.enableComposeHotReloadCompilerOptions
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
@@ -71,11 +70,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         // Enable Compose compiler options for Compose Hot Reload,
         // we can drop this when KT-76753 change is available for default runtime version in IDE plugins
         project.pluginManager.withPlugin(Plugins.External.KOTLIN_COMPOSE) {
-            project.tasks.withType<KotlinCompile>().configureEach {
-                log.info("Enabling Compose Hot Reload compiler options for KotlinCompile")
-                compilerOptions.freeCompilerArgs.addAll(
-                    "-P", "plugin:androidx.compose.compiler.plugins.kotlin:generateFunctionKeyMetaAnnotations=true"
-                )
+            project.tasks.configureEach {
+                enableComposeHotReloadCompilerOptions(log)
             }
         }
 

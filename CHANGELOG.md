@@ -4,6 +4,12 @@
 
 ### Fixed
 
+- Fix `NoClassDefFoundError: org.jetbrains.kotlin.gradle.tasks.KotlinCompile` when `org.jetbrains.kotlin.plugin.compose` is applied together with module plugin.
+
+## [2.13.1] - 2026-03-14
+
+### Fixed
+
 - Hotfix for Grammar-Kit support on Windows
 
 ## [2.13.0] - 2026-03-12
@@ -1677,7 +1683,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.1...HEAD
+[2.13.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.0...v2.13.1
 [2.13.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.12.0...v2.13.0
 [2.12.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.11.0...v2.12.0
 [2.11.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.5...v2.11.0
