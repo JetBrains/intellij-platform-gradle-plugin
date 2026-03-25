@@ -148,6 +148,14 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
     object SelfUpdateCheck : GradleProperties<Boolean>(true)
 
     /**
+     * Controls whether [IntelliJPlatformExtension.PluginVerification.Ides.recommended] IDEs should be added automatically
+     * when no IntelliJ Plugin Verifier IDEs were configured explicitly.
+     *
+     * Default value: `true`
+     */
+    object VerifyPluginDefaultRecommendedIdes : GradleProperties<Boolean>(true)
+
+    /**
      * Specifies the default Shim server port at which the local webserver is run.
      * The Shim server is used to proxy requests to the authorized custom plugin repositories registered with [IntelliJPlatformRepositoriesExtension.customPluginRepository].
      *

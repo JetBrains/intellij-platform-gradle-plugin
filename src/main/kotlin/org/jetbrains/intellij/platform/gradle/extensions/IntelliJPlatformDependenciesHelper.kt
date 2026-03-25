@@ -32,6 +32,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.models.*
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.providers.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
@@ -334,7 +335,17 @@ class IntelliJPlatformDependenciesHelper(
         notationsProvider: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(provider {
+    ) = configurations[configurationName].dependencies.addAllLater(
+        createIntelliJPluginVerifierIdeDependencies(
+            notationsProvider = notationsProvider,
+            action = action,
+        ),
+    )
+
+    internal fun createIntelliJPluginVerifierIdeDependencies(
+        notationsProvider: Provider<List<String>>,
+        action: DependencyAction = {},
+    ) = provider {
         val notations = notationsProvider.get()
 
         notations.map {
@@ -344,7 +355,19 @@ class IntelliJPlatformDependenciesHelper(
                 else -> createIntelliJPlatformInstaller(type, version)
             }.apply(action)
         }
-    }.cached())
+    }.cached()
+
+    internal fun createRecommendedPluginVerifierIdesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) =
+        createProductReleasesValueSource {
+            val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
+
+            channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
+            types.convention(extensionProvider.map { listOf(it.productInfo.type) })
+            sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
+            untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
+
+            configure()
+        }
 
     /**
      * A base method for adding a dependency on a local IntelliJ Platform instance.

@@ -114,6 +114,84 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     }
 
     @Test
+    fun `default to recommended ides when no verifier ides configured`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            sinceBuild = "231"
+                            untilBuild = "231.*"
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "dependencies",
+            "--configuration=intellijPluginVerifierIdes",
+            projectProperties = defaultProjectProperties,
+        ) {
+            assertContains("idea:ideaIU:2023.1.7", output)
+        }
+    }
+
+    @Test
+    fun `explicit verifier ides suppress default recommended ides`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            sinceBuild = "231"
+                            untilBuild = "231.*"
+                        }
+                    }
+                    pluginVerification {
+                        ides {
+                            create("IC", "2024.1")
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "dependencies",
+            "--configuration=intellijPluginVerifierIdes",
+            projectProperties = defaultProjectProperties,
+        ) {
+            assertContains("idea:ideaIC:2024.1", output)
+            assertNotContains("idea:ideaIU:2023.1.7", output)
+        }
+    }
+
+    @Test
+    fun `allow disabling default recommended ides with Gradle property`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            sinceBuild = "231"
+                            untilBuild = "231.*"
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "dependencies",
+            "--configuration=intellijPluginVerifierIdes",
+            projectProperties = defaultProjectProperties + mapOf(
+                GradleProperties.VerifyPluginDefaultRecommendedIdes.toString() to false,
+            ),
+        ) {
+            assertContains("No dependencies", output)
+            assertNotContains("idea:ideaIU:2023.1.7", output)
+        }
+    }
+
+    @Test
     fun `fallback to recommended ides when provider is absent`() {
         buildFile write //language=kotlin
                 """

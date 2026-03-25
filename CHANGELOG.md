@@ -5,6 +5,11 @@
 ### Breaking Changes
 
 - Default `intellijPlatform.pluginConfiguration.ideaVersion.sinceBuild` to the target IntelliJ Platform `major` build instead of `major.minor`; explicitly setting it to the `major` value is now redundant and can be removed.
+- Apply `intellijPlatform.pluginVerification.ides.recommended()` by default when no IntelliJ Plugin Verifier IDEs are configured explicitly.
+
+### Added
+
+- Add `org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes` Gradle property to control automatic default IDE selection for the `verifyPlugin` task.
 
 ### Fixed
 

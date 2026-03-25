@@ -27,9 +27,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
-import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
@@ -1081,16 +1079,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              */
             @Suppress("FunctionName")
             fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) =
-                dependenciesHelper.createProductReleasesValueSource {
-                    val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
-
-                    channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
-                    types.convention(extensionProvider.map { listOf(it.productInfo.type) })
-                    sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
-                    untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
-
-                    configure()
-                }
+                dependenciesHelper.createRecommendedPluginVerifierIdesValueSource(configure)
 
             companion object {
                 fun register(
