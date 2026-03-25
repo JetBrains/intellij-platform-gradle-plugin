@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Breaking Changes
+
+- Default `intellijPlatform.pluginConfiguration.ideaVersion.sinceBuild` to the target IntelliJ Platform `major` build instead of `major.minor`; explicitly setting it to the `major` value is now redundant and can be removed.
+
 ### Fixed
 
 - Fix `NoClassDefFoundError: org.jetbrains.kotlin.gradle.tasks.KotlinCompile` when `org.jetbrains.kotlin.plugin.compose` is applied together with module plugin.

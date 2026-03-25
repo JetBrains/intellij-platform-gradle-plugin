@@ -497,7 +497,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * The supplied value will be utilized as the `<idea-version since-build=""/>` element attribute.
              *
-             * The default value is set to the `MAJOR.MINOR` version based on the currently selected IntelliJ Platform, like `233.12345`.
+             * The default value is set to the `MAJOR` version based on the currently selected IntelliJ Platform, like `233`.
              *
              * @see PatchPluginXmlTask.sinceBuild
              * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version">Plugin Configuration File: `idea-version`</a>
@@ -525,7 +525,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         val buildVersion = project.extensionProvider.map {
                             it.runCatching { productInfo.buildNumber.toVersion() }.getOrDefault(Version())
                         }
-                        sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
+                        sinceBuild.convention(buildVersion.map { "${it.major}" })
                     }
             }
         }
