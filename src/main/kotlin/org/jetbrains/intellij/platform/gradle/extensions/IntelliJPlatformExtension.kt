@@ -1043,6 +1043,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             )
 
             /**
+             * Adds the currently targeted IntelliJ Platform to be used for testing with the IntelliJ Plugin Verifier.
+             */
+            fun current() = local(
+                dependenciesHelper.platformPathProvider(Configurations.INTELLIJ_PLATFORM_DEPENDENCY).map { it.toFile() },
+            )
+
+            /**
              * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
              * for IntelliJ Platform Verifier using the [ide] helper method.
              *

@@ -10,6 +10,7 @@
 ### Added
 
 - Add `org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes` Gradle property to control automatic default IDE selection for the `verifyPlugin` task.
+- Add `intellijPlatform.pluginVerification.ides.current()` helper to refer to the currently targeted IntelliJ Platform.
 
 ### Fixed
 

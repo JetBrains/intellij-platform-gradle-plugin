@@ -192,6 +192,28 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     }
 
     @Test
+    fun `current helper uses currently targeted IntelliJ Platform`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        ides {
+                            current()
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "dependencies",
+            "--configuration=intellijPluginVerifierIdes",
+            projectProperties = defaultProjectProperties,
+        ) {
+            assertContains("localIde:$intellijPlatformType:$intellijPlatformType-$intellijPlatformBuildNumber", output)
+        }
+    }
+
+    @Test
     fun `fallback to recommended ides when provider is absent`() {
         buildFile write //language=kotlin
                 """
