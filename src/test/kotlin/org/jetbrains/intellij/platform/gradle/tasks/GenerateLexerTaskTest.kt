@@ -10,9 +10,13 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
+
+    private val defaultTargetRootOutputDir
+        get() = dir.resolve("build/generated/sources/grammarkit-lexer/java/main")
 
     @Test
     fun `run lexer`() {
@@ -31,6 +35,38 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
                 adjustPath(output),
                 "Writing code to \"$generatedLexer\"",
             )
+        }
+    }
+
+    @Test
+    fun `use default target root output dir for lexer`() {
+        buildFile write //language=kotlin
+                """
+                tasks.named("generateLexer", GenerateLexerTask::class.java) {
+                    sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
+                }
+                """.trimIndent()
+
+        build(Tasks.GENERATE_LEXER) {
+            val generatedLexer = adjustPath(defaultTargetRootOutputDir.resolve("GeneratedLexer.java").toRealPath().toString())
+            assertContains(output, "> Task :${Tasks.GENERATE_LEXER}")
+            assertContains(adjustPath(output), "Writing code to \"$generatedLexer\"")
+        }
+    }
+
+    @Test
+    fun `create lexer in package subdirectory inferred from source file`() {
+        buildFile write //language=kotlin
+                """
+                tasks.named("generateLexer", GenerateLexerTask::class.java) {
+                    sourceFile = file("${resource("grammarkit/generateLexer/ExampleWithPackage.flex")}")
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
+                }
+                """.trimIndent()
+
+        build(Tasks.GENERATE_LEXER) {
+            val generatedLexer = adjustPath(dir.resolve("gen/org/jetbrains/grammarkit/lexer/GeneratedLexer.java").toRealPath().toString())
+            assertContains(adjustPath(output), "Writing code to \"$generatedLexer\"")
         }
     }
 
@@ -73,6 +109,52 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
         build(Tasks.GENERATE_LEXER, args = listOf("--build-cache")) {
             assertEquals(TaskOutcome.FROM_CACHE, task(":${Tasks.GENERATE_LEXER}")?.outcome)
         }
+    }
+
+    @Test
+    fun `purge stale files by default when using target root output dir`() {
+        val staleFile = dir.resolve("gen/StaleLexer.java")
+
+        buildFile write //language=kotlin
+                """
+                tasks.named("generateLexer", GenerateLexerTask::class.java) {
+                    sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
+                }
+                """.trimIndent()
+
+        build(Tasks.GENERATE_LEXER)
+        staleFile write "class StaleLexer {}"
+        assertTrue(staleFile.toFile().exists())
+
+        build(Tasks.GENERATE_LEXER, args = listOf("--rerun-tasks")) {
+            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_LEXER}")?.outcome)
+        }
+
+        assertFalse(staleFile.toFile().exists())
+    }
+
+    @Test
+    fun `do not purge stale files by default when using deprecated target output dir`() {
+        val staleFile = dir.resolve("gen/StaleLexer.java")
+
+        buildFile write //language=kotlin
+                """
+                tasks.named("generateLexer", GenerateLexerTask::class.java) {
+                    sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
+                    targetOutputDir = layout.projectDirectory.dir("gen")
+                }
+                """.trimIndent()
+
+        build(Tasks.GENERATE_LEXER)
+        staleFile write "class StaleLexer {}"
+        assertTrue(staleFile.toFile().exists())
+
+        build(Tasks.GENERATE_LEXER, args = listOf("--rerun-tasks")) {
+            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_LEXER}")?.outcome)
+        }
+
+        assertTrue(staleFile.toFile().exists())
     }
 
     @Test
