@@ -362,6 +362,34 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `runIdeFrontend uses shared sandbox plugins directory for BOTH target`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    splitMode = true
+                    pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
+                }
+
+                tasks.named("${Tasks.RUN_IDE_FRONTEND}") {
+                    doFirst {
+                        val sandboxPluginsDirectoryProvider = javaClass
+                            .getMethod("getSandboxPluginsDirectory")
+                            .invoke(this) as org.gradle.api.file.DirectoryProperty
+                        println("FRONTEND_SANDBOX_PLUGINS=" + sandboxPluginsDirectoryProvider.get().asFile.invariantSeparatorsPath)
+                    }
+                }
+                """.trimIndent()
+        configureFakeJavaLauncher()
+        configureFrontendJoinLinkProvider(delayMs = 0, port = 6095, joinLink = "tcp://127.0.0.1:6095#cb=both")
+
+        build(Tasks.RUN_IDE_FRONTEND) {
+            assertContains("FRONTEND_SANDBOX_PLUGINS=", output)
+            assertContains("plugins_runIdeFrontend", output)
+            assertNotContains("plugins_runIdeFrontend/frontend", output)
+        }
+    }
+
+    @Test
     fun `runIdeFrontend waits for delayed join link file`() {
         configureFakeJavaLauncher()
         configureFrontendJoinLinkProvider(delayMs = 500, port = 6094, joinLink = "tcp://127.0.0.1:6094#cb=delayed")

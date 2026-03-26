@@ -52,13 +52,13 @@ class SplitModePluginArgumentProvider(
     val delegate: PluginArgumentProvider,
 
     @Input
-    val splitModeTarget: Provider<SplitModeAware.SplitModeTarget>,
+    val pluginInstallationTarget: Provider<SplitModeAware.PluginInstallationTarget>,
 
     @Input
-    val requiredTarget: SplitModeAware.SplitModeTarget,
+    val requiredTarget: SplitModeAware.PluginInstallationTarget,
 ) : CommandLineArgumentProvider {
 
-    override fun asArguments() = when (splitModeTarget.get().includes(requiredTarget)) {
+    override fun asArguments() = when (pluginInstallationTarget.get().includes(requiredTarget)) {
         true -> delegate.asArguments()
         false -> emptyList()
     }

@@ -51,6 +51,12 @@ interface SandboxAware : SandboxStructure {
                 .finalizeValueOnRead()
         }
 
+        if (this is PluginInstallationTargetAware) {
+            pluginInstallationTarget
+                .convention(sandboxProducerTaskProvider.flatMap { it.pluginInstallationTarget })
+                .finalizeValueOnRead()
+        }
+
         dependsOn(sandboxProducerTaskProvider)
     }
 
@@ -62,14 +68,16 @@ interface SandboxAware : SandboxStructure {
             .finalizeValueOnRead()
 
         sandboxPluginsDirectory
-            .convention(sandboxProducerTaskProvider.flatMap { producer ->
-                producer.splitModeTarget.flatMap { target ->
-                    when (target) {
-                        SplitModeAware.SplitModeTarget.BOTH -> producer.sandboxPluginsDirectory
-                        else -> producer.sandboxPluginsFrontendDirectory
+            .convention(
+                sandboxProducerTaskProvider.flatMap { producer ->
+                    producer.effectivePluginInstallationTarget.flatMap { target ->
+                        when (target) {
+                            SplitModeAware.PluginInstallationTarget.BOTH -> producer.sandboxPluginsDirectory
+                            else -> producer.sandboxPluginsFrontendDirectory
+                        }
                     }
                 }
-            })
+            )
             .finalizeValueOnRead()
 
         sandboxSystemDirectory

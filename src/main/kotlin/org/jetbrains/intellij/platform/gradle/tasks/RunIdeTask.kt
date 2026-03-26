@@ -24,6 +24,7 @@ import org.jetbrains.intellij.platform.gradle.models.customCommandFor
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.tasks.aware.ComposeHotReloadAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginInstallationTargetAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -65,7 +66,7 @@ private const val SPLIT_MODE_SHARED_PASSWORD = "qwerty123"
  * To register a customized task, use [IntelliJPlatformTestingExtension.runIde].
  */
 @UntrackedTask(because = "Should always run")
-abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, IntelliJPlatformVersionAware,
+abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, PluginInstallationTargetAware, IntelliJPlatformVersionAware,
     ComposeHotReloadAware {
 
     private val log = Logger(javaClass)
@@ -329,6 +330,11 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Intell
             }
 
             project.registerTask<RunIdeTask> {
+                splitModeTarget.convention(
+                    pluginInstallationTarget
+                        .map { it.toSplitModeTarget() }
+                        .orElse(SplitModeAware.SplitModeTarget.BACKEND)
+                )
                 systemPropertyDefault("idea.classpath.index.enabled", false)
                 systemPropertyDefault("idea.is.internal", true)
                 systemPropertyDefault("idea.plugin.in.sandbox.mode", true)

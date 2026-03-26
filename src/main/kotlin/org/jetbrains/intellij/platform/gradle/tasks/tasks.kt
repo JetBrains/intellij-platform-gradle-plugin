@@ -404,7 +404,8 @@ private fun RunnableIdeAware.createPluginArgumentProvider(project: Project) =
     ExecutionModeAwarePluginArgumentProvider(
         pluginXml = pluginXml,
         executionMode = executionModeProvider(project),
-        splitModeTarget = splitModeTargetProvider(project),
+        splitMode = splitModeProvider(project),
+        pluginInstallationTarget = pluginInstallationTargetProvider(project),
     )
 
 private fun RunnableIdeAware.createSandboxArgumentProvider(project: Project) = when (this) {
@@ -430,9 +431,14 @@ private fun RunnableIdeAware.executionModeProvider(project: Project) = when (thi
     else -> project.provider { RunIdeTask.ExecutionMode.STANDARD }
 }
 
-private fun RunnableIdeAware.splitModeTargetProvider(project: Project) = when (this) {
-    is RunIdeTask -> splitModeTarget
-    else -> project.provider { SplitModeAware.SplitModeTarget.BACKEND }
+private fun RunnableIdeAware.splitModeProvider(project: Project) = when (this) {
+    is RunIdeTask -> splitMode
+    else -> project.provider { false }
+}
+
+private fun RunnableIdeAware.pluginInstallationTargetProvider(project: Project) = when (this) {
+    is RunIdeTask -> effectivePluginInstallationTarget
+    else -> project.provider { SplitModeAware.PluginInstallationTarget.BACKEND }
 }
 
 /**

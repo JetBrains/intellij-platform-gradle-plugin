@@ -63,7 +63,11 @@ class ExecutionModeAwarePluginArgumentProvider(
     @Input
     val executionMode: Provider<RunIdeTask.ExecutionMode>,
 
-    splitModeTarget: Provider<SplitModeAware.SplitModeTarget>,
+    @Input
+    val splitMode: Provider<Boolean>,
+
+    @Input
+    val pluginInstallationTarget: Provider<SplitModeAware.PluginInstallationTarget>,
 ) : CommandLineArgumentProvider {
 
     @get:Nested
@@ -72,19 +76,23 @@ class ExecutionModeAwarePluginArgumentProvider(
     @get:Nested
     val backendProvider = SplitModePluginArgumentProvider(
         delegate = PluginArgumentProvider(pluginXml),
-        splitModeTarget = splitModeTarget,
-        requiredTarget = SplitModeAware.SplitModeTarget.BACKEND,
+        pluginInstallationTarget = pluginInstallationTarget,
+        requiredTarget = SplitModeAware.PluginInstallationTarget.BACKEND,
     )
 
     @get:Nested
     val frontendProvider = SplitModePluginArgumentProvider(
         delegate = PluginArgumentProvider(pluginXml),
-        splitModeTarget = splitModeTarget,
-        requiredTarget = SplitModeAware.SplitModeTarget.FRONTEND,
+        pluginInstallationTarget = pluginInstallationTarget,
+        requiredTarget = SplitModeAware.PluginInstallationTarget.FRONTEND,
     )
 
     override fun asArguments() = when (executionMode.get()) {
-        RunIdeTask.ExecutionMode.STANDARD -> standardProvider.asArguments()
+        RunIdeTask.ExecutionMode.STANDARD -> when {
+            !splitMode.get() -> standardProvider.asArguments()
+            pluginInstallationTarget.get().includes(SplitModeAware.PluginInstallationTarget.BACKEND) -> standardProvider.asArguments()
+            else -> emptyList()
+        }
         RunIdeTask.ExecutionMode.SPLIT_MODE_BACKEND -> backendProvider.asArguments()
         RunIdeTask.ExecutionMode.SPLIT_MODE_FRONTEND -> frontendProvider.asArguments()
     }

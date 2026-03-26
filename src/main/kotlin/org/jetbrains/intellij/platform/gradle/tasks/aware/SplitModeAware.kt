@@ -8,19 +8,19 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.Optional
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
-import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import org.jetbrains.intellij.platform.gradle.utils.Version
 
 /**
  * When you develop a plugin, you may want to check how it works in remote development mode, when one machine is running the backend part and another
  * is running a frontend part (JetBrains Client) which connects to the backend.
  *
  * This property allows running the IDE with backend and frontend parts running in separate processes.
- * The developed plugin is installed in the backend part.
+ * The developed plugin installation target is configured with [pluginInstallationTarget].
  *
  * Split Mode requires the IntelliJ Platform in the version `241.14473` or later.
  */
@@ -35,11 +35,16 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
     val splitMode: Property<Boolean>
 
     /**
-     * Specifies in which part of the product the developed plugin should be installed.
+     * Deprecated alias for [pluginInstallationTarget].
      *
-     * Default value: [IntelliJPlatformExtension.splitModeTarget]
+     * Effective default value: [PluginInstallationTarget.BACKEND]
      */
+    @Deprecated(
+        message = "Use pluginInstallationTarget instead.",
+        replaceWith = ReplaceWith("pluginInstallationTarget"),
+    )
     @get:Input
+    @get:Optional
     val splitModeTarget: Property<SplitModeTarget>
 
     /**
@@ -91,6 +96,25 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
         get() = sandboxDirectory.file("split-mode-frontend.join.link")
 
     /**
+     * Resolves the effective plugin installation target.
+     *
+     * The new [PluginInstallationTargetAware.pluginInstallationTarget] property takes precedence over the deprecated [splitModeTarget]
+     * when available.
+     * If neither is configured explicitly, the effective target defaults to [PluginInstallationTarget.BACKEND].
+     */
+    @get:Internal
+    val effectivePluginInstallationTarget: Provider<PluginInstallationTarget>
+        get() = when (this) {
+            is PluginInstallationTargetAware -> pluginInstallationTarget
+                .orElse(splitModeTarget.map { it.toPluginInstallationTarget() })
+                .orElse(PluginInstallationTarget.BACKEND)
+
+            else -> splitModeTarget
+                .map { it.toPluginInstallationTarget() }
+                .orElse(PluginInstallationTarget.BACKEND)
+        }
+
+    /**
      * Validates that the resolved IntelliJ Platform supports Split Mode.
      *
      * @see ProductInfo.validateSupportedVersion
@@ -98,7 +122,7 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
      */
     @Throws(IllegalArgumentException::class)
     fun validateSplitModeSupport() {
-        val currentBuildNumber = productInfo.buildNumber.toVersion()
+        val currentBuildNumber = Version.parse(productInfo.buildNumber)
         if (splitMode.get() && currentBuildNumber < Constraints.MINIMAL_SPLIT_MODE_BUILD_NUMBER) {
             throw IllegalArgumentException("Split Mode requires the IntelliJ Platform in version '${Constraints.MINIMAL_SPLIT_MODE_BUILD_NUMBER}' or later, but '$currentBuildNumber' was provided.")
         }
@@ -107,11 +131,42 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
     /**
      * Describes a part of the product where the developed plugin can be installed when running in [splitMode].
      */
+    enum class PluginInstallationTarget {
+        BACKEND,
+        FRONTEND,
+        BOTH;
+
+        fun includes(target: PluginInstallationTarget) = this == target || this == BOTH
+
+        fun toSplitModeTarget() = SplitModeTarget.valueOf(name)
+    }
+
+    /**
+     * Deprecated compatibility alias for [PluginInstallationTarget].
+     */
+    @Deprecated(
+        message = "Use PluginInstallationTarget instead.",
+        replaceWith = ReplaceWith("PluginInstallationTarget"),
+    )
     enum class SplitModeTarget {
         BACKEND,
         FRONTEND,
         BOTH;
 
         fun includes(target: SplitModeTarget) = this == target || this == BOTH
+
+        fun toPluginInstallationTarget() = PluginInstallationTarget.valueOf(name)
     }
+}
+
+interface PluginInstallationTargetAware {
+
+    /**
+     * Specifies in which part of the product the developed plugin should be installed.
+     *
+     * Effective default value: [SplitModeAware.PluginInstallationTarget.BACKEND]
+     */
+    @get:Input
+    @get:Optional
+    val pluginInstallationTarget: Property<SplitModeAware.PluginInstallationTarget>
 }

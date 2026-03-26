@@ -9,6 +9,25 @@ import kotlin.test.Test
 class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
 
     @Test
+    fun `deprecated splitModeTarget keeps backend default in extension and testing DSL`() {
+        buildFile write //language=kotlin
+                """
+                @file:Suppress("DEPRECATION")
+
+                println("EXT_TARGET=" + intellijPlatform.splitModeTarget.get())
+
+                val customRun by intellijPlatformTesting.runIde.registering {
+                    println("CUSTOM_TARGET=" + splitModeTarget.get())
+                }
+                """.trimIndent()
+
+        build("help") {
+            assertContains("EXT_TARGET=BACKEND", output)
+            assertContains("CUSTOM_TARGET=BACKEND", output)
+        }
+    }
+
+    @Test
     fun `custom testIde task with testFramework can be registered`() {
         buildFile write //language=kotlin
                 """

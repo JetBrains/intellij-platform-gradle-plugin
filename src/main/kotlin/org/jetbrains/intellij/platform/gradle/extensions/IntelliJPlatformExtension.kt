@@ -119,7 +119,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * is running a frontend part (JetBrains Client) which connects to the backend.
      *
      * This property allows running the IDE with backend and frontend parts running in separate processes.
-     * The developed plugin is installed in the backend part by default, this can be changed via [splitModeTarget].
+     * The developed plugin installation target can be configured with [pluginInstallationTarget].
      *
      * Default value: `false`
      */
@@ -129,8 +129,19 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * Taken into account only if [splitMode] is set to `true` and specifies in which part of the IDE the plugin
      * should be installed when `runIde` task is executed: the backend process, the frontend process, or both.
      *
-     * Default value: [SplitModeAware.SplitModeTarget.BACKEND]
+     * Effective default value: [SplitModeAware.PluginInstallationTarget.BACKEND]
      */
+    abstract val pluginInstallationTarget: Property<SplitModeAware.PluginInstallationTarget>
+
+    /**
+     * Deprecated alias for [pluginInstallationTarget].
+     *
+     * Effective default value: [SplitModeAware.PluginInstallationTarget.BACKEND]
+     */
+    @Deprecated(
+        message = "Use pluginInstallationTarget instead.",
+        replaceWith = ReplaceWith("pluginInstallationTarget"),
+    )
     abstract val splitModeTarget: Property<SplitModeAware.SplitModeTarget>
 
 
@@ -1146,7 +1157,11 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 projectName.convention(project.name)
                 sandboxContainer.convention(project.extensionProvider.flatMap { it.caching.path.dir(Sandbox.CONTAINER) })
                 splitMode.convention(false)
-                splitModeTarget.convention(SplitModeAware.SplitModeTarget.BACKEND)
+                splitModeTarget.convention(
+                    pluginInstallationTarget
+                        .map { it.toSplitModeTarget() }
+                        .orElse(SplitModeAware.SplitModeTarget.BACKEND)
+                )
             }
     }
 }
