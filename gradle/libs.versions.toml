@@ -9,7 +9,7 @@ undertow = "2.3.23.Final"
 xmlutil = "0.91.3"
 
 # plugins
-dokka = "2.1.0"
+dokka = "2.2.0"
 bcv = "0.18.1"
 gradlePluginPublish = "2.1.1"
 gradleChangelogPlugin = "2.5.0"
