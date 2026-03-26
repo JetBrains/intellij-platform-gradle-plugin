@@ -14,7 +14,7 @@ on:
 
 jobs:
   integrationTests:
-    name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }} [${{ matrix.testShard }}]
+    name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -27,7 +27,6 @@ jobs:
           - windows-latest
           - ubuntu-latest
           - macos-latest
-        testShard: ${{ fromJSON(inputs.testName != '' && '["manual"]' || '["group-a","group-b","group-c"]') }}
 
     steps:
 
@@ -41,11 +40,6 @@ jobs:
 
       - name: Fetch Sources
         uses: actions/checkout@v6
-
-      - name: Validate Integration Test Shards
-        if: ${{ inputs.testName == '' && matrix.testShard == 'group-a' && matrix.os == 'ubuntu-latest' && matrix.gradleVersion == '9.4.0' }}
-        shell: bash
-        run: python3 .github/scripts/validate_integration_test_shards.py
 
       - name: Setup Java
         uses: actions/setup-java@v5
@@ -72,7 +66,6 @@ jobs:
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           TEST_NAME: ${{ inputs.testName }}
-          TEST_SHARD: ${{ matrix.testShard }}
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
@@ -81,54 +74,8 @@ jobs:
             TEST_GRADLE_USER_HOME="$PWD/.test-gradle-home"
           fi
           TESTS=()
-
           if [ -n "$TEST_NAME" ]; then
             TESTS+=(--tests "$TEST_NAME")
-          else
-            case "$TEST_SHARD" in
-              group-a)
-                TESTS+=(
-                  --tests '*AwaresIntegrationTest'
-                  --tests '*ClassPathShorteningTest'
-                  --tests '*ClasspathInstrumentationTest'
-                  --tests '*DependenciesValidationIntegrationTest'
-                  --tests '*DependencyLockingAndVerificationIntegrationTest'
-                  --tests '*InstrumentationTaskIntegrationTest'
-                  --tests '*SandboxIntegrationTest'
-                  --tests '*SettingsNotSoStrictResolutionManagementIntegrationTest'
-                  --tests '*SubmoduleSetupIntegrationTest'
-                )
-                ;;
-              group-b)
-                TESTS+=(
-                  --tests '*DependencyVerificationIgnoreIntellijIntegrationTest'
-                  --tests '*InstrumentationTaskDisabledIntegrationTest'
-                  --tests '*MultiModuleIntegrationTest'
-                  --tests '*MultiPluginIntegrationTest'
-                  --tests '*PluginXmlPatchingIntegrationTest'
-                  --tests '*SearchableOptionsIntegrationTest'
-                  --tests '*SettingsStrictResolutionManagementIntegrationTest'
-                  --tests '*SplitModeIntegrationTest'
-                  --tests '*VerifyPluginConfigurationIntegrationTest'
-                )
-                ;;
-              group-c)
-                TESTS+=(
-                  --tests '*ApplyRecommendedRepositoriesIntegrationTest'
-                  --tests '*ComposeHotReloadIntegrationTest'
-                  --tests '*DependencyLockingIntegrationTest'
-                  --tests '*ExcludeHelpersIntegrationTest'
-                  --tests '*GradlePropertiesIntegrationTest'
-                  --tests '*IdesConfigurationIntegrationTest'
-                  --tests '*JarManifestFileIntegrationTest'
-                  --tests '*TestClasspathProjectResourcesIntegrationTest'
-                )
-                ;;
-              *)
-                echo "Unknown integration test shard: $TEST_SHARD"
-                exit 1
-                ;;
-            esac
           fi
 
           ./gradlew integrationTest \

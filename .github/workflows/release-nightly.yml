@@ -22,24 +22,10 @@ jobs:
     uses: ./.github/workflows/reusable-unitTests.yml
     secrets: inherit
 
-  integrationTestShardsValidation:
-    if: ${{ !inputs.skipTests }}
-    name: Integration Test Shards Validation
-    needs: gradleValidation
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Fetch Sources
-        uses: actions/checkout@v6
-
-      - name: Validate Integration Test Shards
-        shell: bash
-        run: python3 .github/scripts/validate_integration_test_shards.py
-
   integrationTests:
     if: ${{ !inputs.skipTests }}
     name: Integration Tests
-    needs: [ gradleValidation, unitTests, integrationTestShardsValidation ]
+    needs: [ gradleValidation, unitTests ]
     uses: ./.github/workflows/reusable-integrationTests.yml
     secrets: inherit
 
@@ -62,7 +48,6 @@ jobs:
     name: Release to Gradle Plugins
     needs:
       - unitTests
-      - integrationTestShardsValidation
       - integrationTests
       #      - integrationTestsEAP
       - codeInspection
