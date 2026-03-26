@@ -15,20 +15,19 @@ kotlin {
     jvmToolchain(17)
 }
 
-// Disable dependency verification for these configuration if signature verification is being used (pgp option),
-// because they break Gradle's logic for signature generation with a very obscure error: "Invalid UTF-8 input".
-// There seems to be a few bugs in Gradle related to this error and also for generating a signature for JDK.
+// Disable dependency verification for these configurations if signature verification is being used (pgp option),
+// because some IntelliJ Platform and Plugin Verifier IDE artifacts expose invalid `.asc` payloads, which breaks
+// Gradle's signature processing with a very obscure error: "Invalid UTF-8 input".
+// There seem to be a few Gradle bugs related to this error and also to generating signatures for JDK downloads.
 // https://github.com/gradle/gradle/issues?q=%22Invalid+UTF-8+input%22
 // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1779#issuecomment-2384461002
 configurations {
-    listOf(
-        "compileClasspath",
-        "intellijPlatformClasspath",
-        "intellijPlatformDependency",
-        "intellijPlatformDependencyArchive",
-        "intellijPlatformLocal",
-    ).forEach {
-        named(it) {
+    configureEach {
+        if (
+            name == "compileClasspath" ||
+            name.startsWith("intellijPlatform") ||
+            name.startsWith("intellijPluginVerifierIdes")
+        ) {
             resolutionStrategy.disableDependencyVerification()
         }
     }
@@ -135,4 +134,3 @@ intellijPlatform {
     buildSearchableOptions = false
     instrumentCode = false
 }
-
