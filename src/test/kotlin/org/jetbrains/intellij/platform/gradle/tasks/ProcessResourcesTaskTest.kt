@@ -18,7 +18,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
     private val sinceBuild: String
         get() {
             val version = Version.parse(intellijPlatformBuildNumber)
-            return "${version.major}.${version.minor}"
+            return "${version.major}"
         }
 
     @Test

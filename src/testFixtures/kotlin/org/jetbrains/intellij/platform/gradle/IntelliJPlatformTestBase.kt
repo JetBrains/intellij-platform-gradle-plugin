@@ -69,12 +69,14 @@ abstract class IntelliJPlatformTestBase {
         vararg tasksList: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
         args: List<String> = emptyList(),
         block: BuildResult.() -> Unit = {},
     ) = build(
         tasks = tasksList,
         projectProperties = projectProperties,
         systemProperties = systemProperties,
+        environment = environment,
         args = args,
         block = block,
     )
@@ -83,6 +85,7 @@ abstract class IntelliJPlatformTestBase {
         vararg tasksList: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
         args: List<String> = emptyList(),
         block: BuildResult.() -> Unit = {},
     ) = build(
@@ -90,6 +93,7 @@ abstract class IntelliJPlatformTestBase {
         tasks = tasksList,
         projectProperties = projectProperties,
         systemProperties = systemProperties,
+        environment = environment,
         args = args,
         block = block,
     )
@@ -101,6 +105,7 @@ abstract class IntelliJPlatformTestBase {
         vararg tasks: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
         args: List<String> = emptyList(),
         block: BuildResult.() -> Unit = {},
     ): BuildResult = builder(
@@ -108,6 +113,7 @@ abstract class IntelliJPlatformTestBase {
         tasks = tasks,
         projectProperties = projectProperties,
         systemProperties = systemProperties,
+        environment = environment,
         args = args,
     )
         .run {
@@ -128,17 +134,35 @@ abstract class IntelliJPlatformTestBase {
         vararg tasks: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
         args: List<String> = emptyList(),
     ) =
         GradleRunner.create()
             .withProjectDir(dir.toFile())
             .withGradleVersion(gradleVersion)
             .withPluginClasspath()
-            .withDebug(debugEnabled)
+            // Gradle TestKit forks the build process when the environment is customized.
+            .withDebug(debugEnabled && environment.isEmpty())
             .withTestKitDir(gradleHome.toFile())
             .run {
                 when (testKitOutputForwardingEnabled) {
                     true -> forwardOutput()
+                    false -> this
+                }
+            }
+            .run {
+                when (environment.isNotEmpty()) {
+                    true -> withEnvironment(
+                        System.getenv().toMutableMap().apply {
+                            environment.forEach { (key, value) ->
+                                when (value) {
+                                    null -> remove(key)
+                                    else -> put(key, value)
+                                }
+                            }
+                        },
+                    )
+
                     false -> this
                 }
             }

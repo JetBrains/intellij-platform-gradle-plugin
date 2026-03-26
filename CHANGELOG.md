@@ -2,8 +2,16 @@
 
 ## [next]
 
+### Breaking Changes
+
+- Default `intellijPlatform.pluginConfiguration.ideaVersion.sinceBuild` to the target IntelliJ Platform `major` build instead of `major.minor`; explicitly setting it to the `major` value is now redundant and can be removed.
+- Apply `intellijPlatform.pluginVerification.ides.recommended()` by default when no IntelliJ Plugin Verifier IDEs are configured explicitly.
+- Default `intellijPlatform.signing.certificateChain`, `intellijPlatform.signing.privateKey`, `intellijPlatform.signing.password`, and `intellijPlatform.publishing.token` to the Plugin Template environment variables: `CERTIFICATE_CHAIN`, `PRIVATE_KEY`, `PRIVATE_KEY_PASSWORD`, and `PUBLISH_TOKEN`.
+
 ### Added
 
+- Add `org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes` Gradle property to control automatic default IDE selection for the `verifyPlugin` task.
+- Add `intellijPlatform.pluginVerification.ides.current()` helper to refer to the currently targeted IntelliJ Platform.
 - Add default value for `targetRootOutputDir` of `GenerateParserTask`.
 - Add properties `targetRootOutputDir` and `packageName` (with defaults) for `GenerateLexerTask`. These properties replace `targetOutputDir` and automatically use a proper subdirectory matching the package.
 
@@ -14,6 +22,12 @@
 - Purge stale files `GenerateLexerTask` and `GenerateParserTask` by default (as soon as you stop using the deprecated properties).
 - Deprecate `targetFile(String)` and `targetFile(Provider)` of `GenerateLexerTask`.
 - Deprecate `parserFile()` and `psiDir()` of `GenerateParserTask`.
+
+### Fixed
+
+- Fix `NoClassDefFoundError: org.jetbrains.kotlin.gradle.tasks.KotlinCompile` when `org.jetbrains.kotlin.plugin.compose` is applied together with module plugin.
+
+## [2.13.1] - 2026-03-14
 
 ### Fixed
 
@@ -1690,7 +1704,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.1...HEAD
+[2.13.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.0...v2.13.1
 [2.13.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.12.0...v2.13.0
 [2.12.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.11.0...v2.12.0
 [2.11.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.5...v2.11.0

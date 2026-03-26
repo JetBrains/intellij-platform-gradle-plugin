@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.models.type
@@ -209,7 +210,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             if (isEmpty) {
                 val label = "No IDE versions configured for verification"
                 val details = "The IntelliJ Plugin Verifier requires at least one IDE version to verify the plugin against, but none were configured. IDE versions are specified through the intellijPlatform.pluginVerification.ides block."
-                val solution = "Configure IDE versions in the intellijPlatform.pluginVerification.ides block (e.g., ides { recommended() }) and ensure defaultRepositories() or at least localPlatformArtifacts() is present in the repositories section to resolve IDE artifacts."
+                val solution = "Configure IDE versions in the intellijPlatform.pluginVerification.ides block (e.g., ides { recommended() }) or enable the default recommended IDEs fallback with '${GradleProperties.VerifyPluginDefaultRecommendedIdes}=true'. Ensure defaultRepositories() or at least localPlatformArtifacts() is present in the repositories section to resolve IDE artifacts."
 
                 throw problems.reporter.reportError(
                     GradleException("$label $details $solution"),

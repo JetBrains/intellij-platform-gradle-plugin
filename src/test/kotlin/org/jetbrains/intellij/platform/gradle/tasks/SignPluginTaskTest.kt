@@ -36,7 +36,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build(Tasks.SIGN_PLUGIN, args = listOf("--debug")) {
+        build(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment(), args = listOf("--debug")) {
             val message = "'Marketplace ZIP Signer specified with dependencies' resolved as: "
             val line = output.lines().find { it.contains(message) }
             assertNotNull(line)
@@ -66,7 +66,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build(Tasks.SIGN_PLUGIN, args = listOf("--debug")) {
+        build(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment(), args = listOf("--debug")) {
             assertContains("marketplace-zip-signer-0.1.21-cli.jar", output)
         }
     }
@@ -89,7 +89,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        buildAndFail(Tasks.SIGN_PLUGIN) {
+        buildAndFail(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertContains("Can't read private key. Password is missing", output)
         }
     }
@@ -113,7 +113,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        buildAndFail(Tasks.SIGN_PLUGIN) {
+        buildAndFail(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertContains("unable to read encrypted data", output)
         }
     }
@@ -137,7 +137,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build(Tasks.SIGN_PLUGIN)
+        build(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment())
     }
 
     @Test
@@ -159,7 +159,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build(Tasks.SIGN_PLUGIN, "--info") {
+        build(Tasks.SIGN_PLUGIN, "--info", environment = pluginTemplateEnvironment()) {
             assertContains("marketplace-zip-signer-0.1.21-cli.jar", output)
         }
     }
@@ -175,9 +175,113 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build(Tasks.SIGN_PLUGIN) {
+        build(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SKIPPED)
         }
+    }
+
+    @Test
+    fun `use signing values from environment variables by default`() {
+        buildFile write //language=kotlin
+                """
+                tasks.register("printSigningConfiguration") {
+                    val certificateChain = intellijPlatform.signing.certificateChain
+                    val privateKey = intellijPlatform.signing.privateKey
+                    val password = intellijPlatform.signing.password
+                    inputs.property("certificateChain", certificateChain)
+                    inputs.property("privateKey", privateKey)
+                    inputs.property("password", password)
+                    
+                    doLast {
+                        println("certificateChain=${'$'}{certificateChain.orNull}")
+                        println("privateKey=${'$'}{privateKey.orNull}")
+                        println("password=${'$'}{password.orNull}")
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "printSigningConfiguration",
+            environment = pluginTemplateEnvironment(
+                Constants.EnvironmentVariables.CERTIFICATE_CHAIN to "env-certificate-chain",
+                Constants.EnvironmentVariables.PRIVATE_KEY to "env-private-key",
+                Constants.EnvironmentVariables.PRIVATE_KEY_PASSWORD to "env-private-key-password",
+            ),
+        ) {
+            assertContains("certificateChain=env-certificate-chain", output)
+            assertContains("privateKey=env-private-key", output)
+            assertContains("password=env-private-key-password", output)
+        }
+    }
+
+    @Test
+    fun `prefer explicit signing values over environment variables`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    signing {
+                        certificateChain = "dsl-certificate-chain"
+                        privateKey = "dsl-private-key"
+                        password = "dsl-private-key-password"
+                    }
+                }
+                
+                tasks.register("printSigningConfiguration") {
+                    val certificateChain = intellijPlatform.signing.certificateChain
+                    val privateKey = intellijPlatform.signing.privateKey
+                    val password = intellijPlatform.signing.password
+                    inputs.property("certificateChain", certificateChain)
+                    inputs.property("privateKey", privateKey)
+                    inputs.property("password", password)
+                    
+                    doLast {
+                        println("certificateChain=${'$'}{certificateChain.orNull}")
+                        println("privateKey=${'$'}{privateKey.orNull}")
+                        println("password=${'$'}{password.orNull}")
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "printSigningConfiguration",
+            environment = pluginTemplateEnvironment(
+                Constants.EnvironmentVariables.CERTIFICATE_CHAIN to "env-certificate-chain",
+                Constants.EnvironmentVariables.PRIVATE_KEY to "env-private-key",
+                Constants.EnvironmentVariables.PRIVATE_KEY_PASSWORD to "env-private-key-password",
+            ),
+        ) {
+            assertContains("certificateChain=dsl-certificate-chain", output)
+            assertContains("privateKey=dsl-private-key", output)
+            assertContains("password=dsl-private-key-password", output)
+        }
+    }
+
+    @Test
+    fun `prefer signing files over environment variables`() {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner()
+                    }
+                }
+                
+                intellijPlatform {
+                    signing {
+                        certificateChainFile = file("${resource("certificates/cert.crt")}")
+                        privateKeyFile = file("${resource("certificates/cert.key")}")
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            Tasks.SIGN_PLUGIN,
+            environment = pluginTemplateEnvironment(
+                Constants.EnvironmentVariables.CERTIFICATE_CHAIN to "env-certificate-chain",
+                Constants.EnvironmentVariables.PRIVATE_KEY to "env-private-key",
+                Constants.EnvironmentVariables.PRIVATE_KEY_PASSWORD to "env-private-key-password",
+            ),
+        )
     }
 
     @Test
@@ -203,6 +307,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
             fail = true,
             assertValidConfigurationCache = false,
             Tasks.SIGN_PLUGIN,
+            environment = pluginTemplateEnvironment(),
         ) {
             assertContains("No Marketplace ZIP Signer executable found.", output)
         }
@@ -226,6 +331,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
             fail = true,
             assertValidConfigurationCache = false,
             Tasks.SIGN_PLUGIN,
+            environment = pluginTemplateEnvironment(),
         ) {
             assertContains("Marketplace ZIP Signer not found at:", output)
             assertContains("No Marketplace ZIP Signer executable found.", output)
@@ -250,7 +356,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build(Tasks.SIGN_PLUGIN)
+        build(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment())
 
         val distributionFolder = buildDirectory.resolve("distributions")
         assertTrue(distributionFolder.listDirectoryEntries().any {

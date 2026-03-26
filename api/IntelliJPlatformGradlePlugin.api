@@ -132,6 +132,14 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Constraints 
 	public final fun getUNIFIED_PYCHARM_VERSION ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/Constants$EnvironmentVariables {
+	public static final field CERTIFICATE_CHAIN Ljava/lang/String;
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$EnvironmentVariables;
+	public static final field PRIVATE_KEY Ljava/lang/String;
+	public static final field PRIVATE_KEY_PASSWORD Ljava/lang/String;
+	public static final field PUBLISH_TOKEN Ljava/lang/String;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/Constants$Extensions {
 	public static final field CACHING Ljava/lang/String;
 	public static final field IDEA_VERSION Ljava/lang/String;
@@ -315,6 +323,10 @@ public final class org/jetbrains/intellij/platform/gradle/GradleProperties$ShimS
 
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$UseCacheRedirector : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$UseCacheRedirector;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/GradleProperties$VerifyPluginDefaultRecommendedIdes : org/jetbrains/intellij/platform/gradle/GradleProperties {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$VerifyPluginDefaultRecommendedIdes;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$VerifyPluginProjectConfigurationMutedMessages : org/jetbrains/intellij/platform/gradle/GradleProperties {
@@ -1053,6 +1065,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function2;ILjava/lang/Object;)V
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun createFromStringProvider (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function2;)V
+	public final fun current ()V
 	public final fun local (Ljava/io/File;)V
 	public final fun local (Ljava/lang/String;)V
 	public final fun local (Lorg/gradle/api/file/Directory;)V

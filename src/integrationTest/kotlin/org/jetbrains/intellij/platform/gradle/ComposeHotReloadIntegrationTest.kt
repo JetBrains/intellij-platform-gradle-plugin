@@ -10,6 +10,40 @@ class ComposeHotReloadIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "compose-hot-reload",
 ) {
     @Test
+    fun `apply compose plugin to module project`() {
+        buildFile write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
+                    id("org.jetbrains.kotlin.plugin.compose") version "$kotlinPluginVersion"
+                    id("org.jetbrains.intellij.platform.module")
+                }
+                
+                kotlin {
+                    jvmToolchain(21)
+                }
+                
+                repositories {
+                    mavenCentral()
+                
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                    }
+                }
+                """.trimIndent()
+
+        build("tasks", projectProperties = defaultProjectProperties) {
+            assertContains("Tasks runnable from root project 'test'", output)
+        }
+    }
+
+    @Test
     @Ignore("${Tasks.RUN_IDE} task never finishes")
     fun `run IDE with agent enabled`() {
         buildFile write //language=kotlin
