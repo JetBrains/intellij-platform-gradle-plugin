@@ -16,7 +16,7 @@ interface ModuleAware {
      *
      * Used to determine if the task should be executed in a plugin module context.
      *
-     * Default value: [PluginManager.isModule]
+     * Default value: `project.pluginManager.isModule`
      */
     @get:Internal
     val module: Property<Boolean>

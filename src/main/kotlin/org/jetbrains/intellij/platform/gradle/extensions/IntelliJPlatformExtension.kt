@@ -1063,9 +1063,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
             /**
              * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
-             * for IntelliJ Platform Verifier using the [ide] helper method.
+             * for IntelliJ Platform Verifier.
              *
-             * @see ide
              * @see ProductReleasesValueSource
              */
             fun recommended() = dependenciesHelper.addIntelliJPluginVerifierIdes(
@@ -1086,7 +1085,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             /**
              * Retrieves matching IDEs using custom filter parameters.
              *
-             * @see ide
              * @see ProductReleasesValueSource
              */
             fun select(configure: FilterParameters.() -> Unit = {}) = dependenciesHelper.addIntelliJPluginVerifierIdes(

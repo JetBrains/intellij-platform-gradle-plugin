@@ -77,7 +77,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         }
 
         /**
-         * The [ModuleAware] resolves and provides the [PluginManager.isModule] flag.
+         * The [ModuleAware] resolves and provides the `project.pluginManager.isModule` flag.
          */
         if (this is ModuleAware) {
             module = project.provider { project.pluginManager.isModule }

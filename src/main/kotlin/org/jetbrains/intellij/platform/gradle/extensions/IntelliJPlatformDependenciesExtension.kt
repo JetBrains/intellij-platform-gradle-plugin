@@ -70,7 +70,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
      * adds an IntelliJ Platform dependency based on the provided configuration.
      *
-     * @param configure IntelliJ Platform dependency configuration.
+     * @param configuration IntelliJ Platform dependency configuration.
      */
     fun create(configuration: IntelliJPlatformDependencyConfiguration) =
         create(listOf(configuration))
@@ -79,7 +79,10 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Creates and configures an instance of [IntelliJPlatformDependencyConfiguration] and
      * adds an IntelliJ Platform dependency based on the provided configuration.
      *
-     * @param configure IntelliJ Platform dependency configuration.
+     * @param configurations IntelliJ Platform dependency configurations.
+     * @param dependencyConfigurationName The name of the configuration that holds the requested IntelliJ Platform.
+     * @param dependencyArchivesConfigurationName The name of the configuration that holds the IntelliJ Platform dependencies.
+     * @param localArchivesConfigurationName The name of the configuration that holds the local IntelliJ Platform archives.
      */
     internal fun create(
         configurations: List<IntelliJPlatformDependencyConfiguration>,
@@ -1657,6 +1660,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
  *
  * @see kotlinStdlib
  */
+@Suppress("unused")
 fun ModuleDependency.excludeKotlinStdlib() {
     kotlinStdlib.forEach { coordinates ->
         exclude(coordinates.groupId, coordinates.artifactId)
@@ -1686,6 +1690,7 @@ fun ModuleDependency.excludeKotlinStdlib() {
  *
  * @see coroutines
  */
+@Suppress("unused")
 fun ModuleDependency.excludeCoroutines() {
     coroutines.forEach { coordinates ->
         exclude(coordinates.groupId, coordinates.artifactId)
