@@ -1165,7 +1165,11 @@ class IntelliJPlatformDependenciesHelper(
 
         val modulesIds = modulesDescriptors.asSequence().filter { it.moduleDefinition.loadingRule.required }.map { it.name }
         val dependenciesIds = dependsList.asSequence().filter { !it.isOptional }.map { it.pluginId }
-        val ids = (modulesIds + dependenciesIds).mapNotNull { ide.findPluginById(it) }
+        val pluginMainModuleIds = pluginMainModuleDependencies.asSequence().map { it.pluginId }
+        val contentModuleIds = contentModuleDependencies.asSequence().map { it.moduleName }
+        val ids = (modulesIds + dependenciesIds + pluginMainModuleIds + contentModuleIds)
+            .distinct()
+            .mapNotNull { ide.findPluginById(it) ?: ide.findPluginByModule(it) }
 
         return ids
             .mapTo(ArrayList()) {
