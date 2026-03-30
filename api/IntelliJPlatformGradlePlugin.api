@@ -2852,6 +2852,10 @@ public final class org/jetbrains/intellij/platform/gradle/services/RequestedInte
 public abstract class org/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatformsService : org/gradle/api/services/BuildService {
 	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;)V
 	public final fun get (Ljava/lang/String;)Lorg/gradle/api/provider/Provider;
+	public final fun hasExplicit (Ljava/lang/String;)Z
+	public static synthetic fun hasExplicit$default (Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatformsService;Ljava/lang/String;ILjava/lang/Object;)Z
+	public final fun markExplicit (Ljava/lang/String;)V
+	public static synthetic fun markExplicit$default (Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatformsService;Ljava/lang/String;ILjava/lang/Object;)V
 	public final fun set (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration;Ljava/lang/String;)Lorg/gradle/api/provider/Provider;
 	public static synthetic fun set$default (Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatformsService;Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration;Ljava/lang/String;ILjava/lang/Object;)Lorg/gradle/api/provider/Provider;
 }
