@@ -52,16 +52,6 @@ jobs:
         with:
           cache-read-only: true
 
-      - name: Restore TestKit Gradle Home
-        uses: actions/cache@v5
-        with:
-          path: .test-gradle-home
-          key: testkit-home-v1-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ inputs.platformVersion }}-${{ hashFiles('gradle.properties') }}
-          restore-keys: |
-            testkit-home-v1-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ inputs.platformVersion }}-
-            testkit-home-v1-${{ runner.os }}-${{ matrix.gradleVersion }}-
-            testkit-home-v1-${{ runner.os }}-
-
       - name: Run Tests
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
@@ -82,4 +72,5 @@ jobs:
             -PtestGradleVersion="${{ matrix.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
             "${TESTS[@]}" \
-            --console=plain
+            --console=plain \
+            --no-build-cache
