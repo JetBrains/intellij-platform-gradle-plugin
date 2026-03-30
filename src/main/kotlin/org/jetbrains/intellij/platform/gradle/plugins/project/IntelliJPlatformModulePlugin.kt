@@ -5,12 +5,14 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.attributes.*
 import org.gradle.api.attributes.java.TargetJvmVersion
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.Plugin.ID
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.attributes.ComposedJarRule
 import org.jetbrains.intellij.platform.gradle.attributes.DistributionRule
@@ -185,6 +187,35 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                     compatibilityRules.add(DistributionRule::class)
                 }
             }
+        }
+
+        val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
+        val addInferredPluginModuleDependency: (ProjectDependency) -> Unit = { dependency ->
+            val dependencyProject = project.project(dependency.path)
+
+            dependencyProject.pluginManager.withPlugin(Plugins.MODULE) {
+                if (dependencyProject.plugins.hasPlugin(ID)) {
+                    return@withPlugin
+                }
+
+                val alreadyPresent = intellijPlatformPluginModuleConfiguration.dependencies
+                    .withType(ProjectDependency::class.java)
+                    .any { it.path == dependency.path }
+
+                if (!alreadyPresent) {
+                    project.dependenciesHelper.addIntelliJPlatformPluginModuleDependency(dependency)
+                }
+            }
+        }
+
+        listOf(
+            Configurations.External.API,
+            Configurations.External.IMPLEMENTATION,
+            Configurations.External.RUNTIME_ONLY,
+        ).forEach { configurationName ->
+            project.configurations[configurationName].dependencies
+                .withType(ProjectDependency::class.java)
+                .all(addInferredPluginModuleDependency)
         }
 
         IntelliJPlatformTestingExtension.register(

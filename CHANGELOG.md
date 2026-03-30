@@ -18,6 +18,7 @@
 
 ### Changed
 
+- Automatically package project dependencies on `org.jetbrains.intellij.platform.module` subprojects to `lib/modules`; explicit `pluginModule(implementation(project(...)))` is no longer required in the common case.
 - Deprecate property `targetOutputDir` of `GenerateLexerTask`.
 - Deprecate properties `pathToParser` and `pathToPsiRoot` of `GenerateParserTask`.
 - Purge stale files `GenerateLexerTask` and `GenerateParserTask` by default (as soon as you stop using the deprecated properties).

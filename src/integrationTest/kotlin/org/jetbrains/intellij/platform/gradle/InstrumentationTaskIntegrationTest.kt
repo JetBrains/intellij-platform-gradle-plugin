@@ -80,7 +80,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertEquals(1040, (jar readEntry "CustomMain.class").length)
             }
 
-            sandboxDirectory.resolve("test/$intellijPlatformType-$intellijPlatformVersion/plugins/test/lib/test.submodule.jar").let { jar ->
+            sandboxDirectory.resolve("test/$intellijPlatformType-$intellijPlatformVersion/plugins/test/lib/modules/test.submodule.jar").let { jar ->
                 jar containsFileInArchive "FormSub.class"
                 assertEquals(1278, (jar readEntry "FormSub.class").length)
 
