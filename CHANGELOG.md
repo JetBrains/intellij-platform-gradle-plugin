@@ -14,6 +14,7 @@
 - Add `intellijPlatform.pluginVerification.ides.current()` helper to refer to the currently targeted IntelliJ Platform.
 - Add default value for `targetRootOutputDir` of `GenerateParserTask`.
 - Add properties `targetRootOutputDir` and `packageName` (with defaults) for `GenerateLexerTask`. These properties replace `targetOutputDir` and automatically use a proper subdirectory matching the package.
+- Default the Java toolchain language version to the Java version required by the targeted IntelliJ Platform, so common Kotlin JVM projects no longer need to repeat `kotlin { jvmToolchain(...) }`.
 
 ### Changed
 

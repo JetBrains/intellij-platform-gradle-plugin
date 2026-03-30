@@ -14,4 +14,7 @@ val PlatformJavaVersions = mapOf(
     Version(0) to JavaVersion.VERSION_1_8,
 )
 
+internal fun Version.toPlatformJavaVersion() =
+    PlatformJavaVersions.entries.first { this >= it.key }.value
+
 internal fun String.toJavaVersion() = JavaVersion.toVersion(this)

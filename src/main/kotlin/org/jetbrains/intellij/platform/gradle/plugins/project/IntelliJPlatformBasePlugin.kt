@@ -5,9 +5,12 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.get
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
@@ -26,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.enableComposeHotReloadCompilerOptions
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
@@ -479,6 +483,21 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     .attribute(Attributes.extracted, true)
                     .attribute(Attributes.collected, true)
             }
+        }
+
+        project.extensions.configure<JavaPluginExtension> {
+            toolchain.languageVersion.convention(
+                project.cachedProvider {
+                    project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY]
+                        .asLenient
+                        .productInfo()
+                        .buildNumber
+                        .toVersion()
+                        .toPlatformJavaVersion()
+                        .majorVersion
+                        .toInt()
+                }.map(JavaLanguageVersion::of)
+            )
         }
 
         IntelliJPlatformExtension.register(project, target = project).let { intelliJPlatform ->
