@@ -59,9 +59,12 @@ jobs:
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            TEST_GRADLE_USER_HOME="$(pwd -W)\\.test-gradle-home"
+            TEST_INTELLIJ_PLATFORM_IDES_CACHE_DIR="$RUNNER_TEMP/intellij-platform-ides-cache-${{ matrix.gradleVersion }}"
+            mkdir -p "$TEST_INTELLIJ_PLATFORM_IDES_CACHE_DIR"
+            TEST_INTELLIJ_PLATFORM_IDES_CACHE="$(cygpath -w "$TEST_INTELLIJ_PLATFORM_IDES_CACHE_DIR")"
           else
-            TEST_GRADLE_USER_HOME="$PWD/.test-gradle-home"
+            TEST_INTELLIJ_PLATFORM_IDES_CACHE="$RUNNER_TEMP/intellij-platform-ides-cache-${{ matrix.gradleVersion }}"
+            mkdir -p "$TEST_INTELLIJ_PLATFORM_IDES_CACHE"
           fi
           TESTS=()
           if [ -n "$TEST_NAME" ]; then
@@ -70,7 +73,7 @@ jobs:
 
           ./gradlew integrationTest \
             -PtestGradleVersion="${{ matrix.gradleVersion }}" \
-            -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
+            -PtestIntellijPlatformIdesCachePath="$TEST_INTELLIJ_PLATFORM_IDES_CACHE" \
             "${TESTS[@]}" \
             --console=plain \
             --no-build-cache

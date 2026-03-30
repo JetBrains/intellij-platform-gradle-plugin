@@ -37,7 +37,14 @@ abstract class IntelliJPlatformTestBase {
         System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
     val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
-    val gradleHome = Path(System.getProperty("test.gradle.home"))
+    val intellijPlatformIdesCachePath = System.getProperty("test.intellijPlatform.ides.cache.path")
+        .takeUnless { it.isNullOrEmpty() }
+        ?.let(::Path)
+        ?: System.getProperty("test.gradle.home")
+            .takeUnless { it.isNullOrEmpty() }
+            ?.let(::Path)
+            ?.resolve("ides")
+        ?: Path(".gradle/testIntellijPlatformIdesCache").toAbsolutePath()
 
     val intellijPlatformType = System.getProperty("test.intellijPlatform.type").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellijPlatform.type' isn't provided")
@@ -54,6 +61,7 @@ abstract class IntelliJPlatformTestBase {
     @BeforeTest
     open fun setup() {
         dir = createTempDirectory("tmp")
+        testKitDir.toFile().mkdirs()
         if (printBuildDirectory) {
             println("Build directory: ${dir.toUri()}")
         }
@@ -143,7 +151,7 @@ abstract class IntelliJPlatformTestBase {
             .withPluginClasspath()
             // Gradle TestKit forks the build process when the environment is customized.
             .withDebug(debugEnabled && environment.isEmpty())
-            .withTestKitDir(gradleHome.toFile())
+            .withTestKitDir(testKitDir.toFile())
             .run {
                 when (testKitOutputForwardingEnabled) {
                     true -> forwardOutput()
@@ -184,6 +192,9 @@ abstract class IntelliJPlatformTestBase {
                 *gradleArguments.toTypedArray(),
                 *args.toTypedArray(),
             )
+
+    private val testKitDir: Path
+        get() = dir.resolve(".test-kit")
 
     /**
      * Disables debugging by setting the [debugEnabled] to `false`.

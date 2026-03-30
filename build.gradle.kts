@@ -164,15 +164,19 @@ testing {
 }
 
 fun Test.configureTests() {
-    val testGradleHome = providers.gradleProperty("testGradleUserHome")
-        .map { File(it) }
+    val testIntellijPlatformIdesCachePath = providers.gradleProperty("testIntellijPlatformIdesCachePath")
+        .orElse(
+            providers.gradleProperty("testGradleUserHome")
+                .map { File(it).resolve("ides").path }
+        )
+        .map(::File)
         .getOrElse(
             layout.projectDirectory
-                .dir(".gradle/testGradleHome")
+                .dir(".gradle/testIntellijPlatformIdesCache")
                 .asFile
         )
 
-    systemProperties["test.gradle.home"] = testGradleHome
+    systemProperties["test.intellijPlatform.ides.cache.path"] = testIntellijPlatformIdesCachePath
     systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan
     systemProperties["test.gradle.default"] = providers.gradleProperty("gradleVersion").get()
     systemProperties["test.gradle.version"] = providers.gradleProperty("testGradleVersion").map { gradleVersion ->
