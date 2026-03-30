@@ -443,9 +443,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 
                 dependencies {
                     intellijPlatform {
-                        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty) {
-                            useInstaller = false
-                        }
+                        create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
                     }
                 }
                 """.trimIndent()
