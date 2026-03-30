@@ -22,12 +22,6 @@ repositories {
     }
 }
 
-dependencies {
-    intellijPlatform {
-        create(providers.gradleProperty("intellijPlatform.type"), providers.gradleProperty("intellijPlatform.version"))
-    }
-}
-
 intellijPlatform {
     instrumentCode = false
 }

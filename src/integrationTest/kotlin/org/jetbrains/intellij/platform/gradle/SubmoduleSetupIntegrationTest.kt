@@ -5,6 +5,8 @@ package org.jetbrains.intellij.platform.gradle
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
+private const val DEPENDENCIES = "dependencies"
+
 class SubmoduleSetupIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "submodule-setup",
 ) {
@@ -14,6 +16,49 @@ class SubmoduleSetupIntegrationTest : IntelliJPlatformIntegrationTestBase(
         build(Tasks.RUN_IDE, projectProperties = defaultProjectProperties, args = listOf("--dry-run")) {
             assertContains(":runIde SKIPPED", output)
             assertNotContains(":submodule:runIde SKIPPED", output)
+        }
+    }
+
+    @Test
+    fun `submodule inherits root IntelliJ Platform dependency`() {
+        build(":submodule:$DEPENDENCIES", "--configuration=intellijPlatformDependency", projectProperties = defaultProjectProperties) {
+            assertContains(
+                """
+                intellijPlatformDependency - IntelliJ Platform
+                \--- localIde:$intellijPlatformType:$intellijPlatformType-$intellijPlatformBuildNumber
+                """.trimIndent(),
+                output,
+            )
+        }
+    }
+
+    @Test
+    fun `explicit submodule IntelliJ Platform dependency overrides inherited root dependency`() {
+        dir.resolve("submodule/build.gradle.kts") += //language=kotlin
+                """
+
+                dependencies {
+                    intellijPlatform {
+                        create(providers.gradleProperty("intellijPlatform.type"), providers.gradleProperty("intellijPlatform.version")) {
+                            useCache = false
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
+        val coordinates = requireNotNull(type.installer)
+        val artifactCoordinates = "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
+
+        build(":submodule:$DEPENDENCIES", "--configuration=intellijPlatformDependency", projectProperties = defaultProjectProperties) {
+            assertContains(
+                """
+                intellijPlatformDependency - IntelliJ Platform
+                \--- $artifactCoordinates
+                """.trimIndent(),
+                output,
+            )
+            assertNotContains("localIde:$intellijPlatformType:$intellijPlatformType-$intellijPlatformBuildNumber", output)
         }
     }
 

@@ -18,6 +18,7 @@
 
 ### Changed
 
+- Automatically inherit the root project's targeted IntelliJ Platform in `org.jetbrains.intellij.platform.module` subprojects when they do not declare their own platform dependency explicitly.
 - Automatically package project dependencies on `org.jetbrains.intellij.platform.module` subprojects to `lib/modules`; explicit `pluginModule(implementation(project(...)))` is no longer required in the common case.
 - Deprecate property `targetOutputDir` of `GenerateLexerTask`.
 - Deprecate properties `pathToParser` and `pathToPsiRoot` of `GenerateParserTask`.

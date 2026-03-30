@@ -263,6 +263,8 @@ class IntelliJPlatformDependenciesHelper(
         localArchivesConfigurationName: String,
         requiredConfigurationName: String? = null,
     ) {
+        markIntelliJPlatformDependencyExplicit(dependencyConfigurationName)
+
         val resolveConfiguration = {
             if (requiredConfigurationName != null && requiredConfigurationName != dependencyConfigurationName) {
                 configurations[requiredConfigurationName].resolve()
@@ -383,8 +385,13 @@ class IntelliJPlatformDependenciesHelper(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        isExplicit: Boolean = true,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(provider {
+        if (isExplicit) {
+            markIntelliJPlatformDependencyExplicit(intellijPlatformConfigurationName)
+        }
+
         buildList {
             val localPath = localPathProvider.orNull ?: return@buildList
             val platformPath = resolveArtifactPath(localPath)
@@ -403,6 +410,13 @@ class IntelliJPlatformDependenciesHelper(
             createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
         }
     }.cached())
+
+    internal fun hasExplicitIntelliJPlatformDependency(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) =
+        requestedIntelliJPlatforms.hasExplicit(configurationName)
+
+    internal fun markIntelliJPlatformDependencyExplicit(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) {
+        requestedIntelliJPlatforms.markExplicit(configurationName)
+    }
 
     /**
      * A base method for adding a dependency on a plugin for IntelliJ Platform.

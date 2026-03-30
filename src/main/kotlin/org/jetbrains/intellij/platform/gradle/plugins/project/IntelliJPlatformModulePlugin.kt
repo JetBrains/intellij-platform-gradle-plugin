@@ -189,6 +189,23 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             }
         }
 
+        if (project != project.rootProject) {
+            project.dependenciesHelper.addIntelliJPlatformLocalDependency(
+                localPathProvider = project.provider {
+                    when {
+                        project.dependenciesHelper.hasExplicitIntelliJPlatformDependency() -> null
+                        !project.rootProject.pluginManager.hasPlugin(ID) -> null
+                        !project.rootProject.dependenciesHelper.hasExplicitIntelliJPlatformDependency() -> null
+                        else -> project.rootProject.dependenciesHelper
+                            .platformPathProvider(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
+                            .orNull
+                            ?.toFile()
+                    }
+                },
+                isExplicit = false,
+            )
+        }
+
         val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
         val addInferredPluginModuleDependency: (ProjectDependency) -> Unit = { dependency ->
             val dependencyProject = project.project(dependency.path)

@@ -32,7 +32,15 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
     }
 
     private val map = ConcurrentHashMap<String, Provider<RequestedIntelliJPlatform>>()
+    private val explicitConfigurations = ConcurrentHashMap.newKeySet<String>()
     private val base = objectFactory.property<RequestedIntelliJPlatform>()
+
+    fun markExplicit(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) {
+        explicitConfigurations += configurationName
+    }
+
+    fun hasExplicit(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) =
+        configurationName in explicitConfigurations
 
     fun set(
         configuration: IntelliJPlatformDependencyConfiguration,
