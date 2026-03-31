@@ -17,6 +17,11 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPlatformTestBase {
 
+    companion object {
+        private const val DELETE_RETRY_DELAY_MS = 250L
+        private const val DELETE_RETRY_ATTEMPTS = 5
+    }
+
     val isCI = (System.getenv("CI") ?: "false").toBoolean()
     private val testKitDebugEnabled = System.getProperty("test.gradle.debug")
         ?.toBoolean()
@@ -57,11 +62,12 @@ abstract class IntelliJPlatformTestBase {
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
 
     lateinit var dir: Path
+    private lateinit var testKitDir: Path
 
     @BeforeTest
     open fun setup() {
         dir = createTempDirectory("tmp")
-        testKitDir.toFile().mkdirs()
+        testKitDir = createTempDirectory("tmp-test-kit")
         if (printBuildDirectory) {
             println("Build directory: ${dir.toUri()}")
         }
@@ -70,7 +76,12 @@ abstract class IntelliJPlatformTestBase {
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
     open fun tearDown() {
-        dir.deleteRecursively()
+        if (this::dir.isInitialized) {
+            deleteRecursively(dir, "build directory")
+        }
+        if (this::testKitDir.isInitialized) {
+            deleteRecursively(testKitDir, "TestKit directory")
+        }
     }
 
     protected inline fun build(
@@ -193,9 +204,6 @@ abstract class IntelliJPlatformTestBase {
                 *args.toTypedArray(),
             )
 
-    private val testKitDir: Path
-        get() = dir.resolve(".test-kit")
-
     /**
      * Disables debugging by setting the [debugEnabled] to `false`.
      * Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation.
@@ -220,5 +228,23 @@ abstract class IntelliJPlatformTestBase {
                     .trim()
                     .also(block)
             }
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    private fun deleteRecursively(path: Path, description: String) {
+        repeat(DELETE_RETRY_ATTEMPTS) { attempt ->
+            runCatching {
+                path.deleteRecursively()
+            }.onSuccess {
+                return
+            }.onFailure { exception ->
+                if (attempt == DELETE_RETRY_ATTEMPTS - 1) {
+                    System.err.println("Failed to delete $description at '$path': ${exception.message}")
+                    exception.printStackTrace(System.err)
+                    return
+                }
+                Thread.sleep(DELETE_RETRY_DELAY_MS * (attempt + 1))
+            }
+        }
     }
 }
