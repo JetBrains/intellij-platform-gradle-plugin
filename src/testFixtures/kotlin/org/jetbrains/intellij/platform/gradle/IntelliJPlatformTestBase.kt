@@ -17,11 +17,6 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPlatformTestBase {
 
-    companion object {
-        private const val DELETE_RETRY_DELAY_MS = 250L
-        private const val DELETE_RETRY_ATTEMPTS = 5
-    }
-
     val isCI = (System.getenv("CI") ?: "false").toBoolean()
     private val testKitDebugEnabled = System.getProperty("test.gradle.debug")
         ?.toBoolean()
@@ -42,14 +37,7 @@ abstract class IntelliJPlatformTestBase {
         System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
     val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
-    val intellijPlatformIdesCachePath = System.getProperty("test.intellijPlatform.ides.cache.path")
-        .takeUnless { it.isNullOrEmpty() }
-        ?.let(::Path)
-        ?: System.getProperty("test.gradle.home")
-            .takeUnless { it.isNullOrEmpty() }
-            ?.let(::Path)
-            ?.resolve("ides")
-        ?: Path(".gradle/testIntellijPlatformIdesCache").toAbsolutePath()
+    val gradleHome = Path(System.getProperty("test.gradle.home"))
 
     val intellijPlatformType = System.getProperty("test.intellijPlatform.type").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellijPlatform.type' isn't provided")
@@ -62,12 +50,10 @@ abstract class IntelliJPlatformTestBase {
         ?: throw GradleException("'test.markdownPlugin.version' isn't provided")
 
     lateinit var dir: Path
-    private lateinit var testKitDir: Path
 
     @BeforeTest
     open fun setup() {
         dir = createTempDirectory("tmp")
-        testKitDir = createTempDirectory("tmp-test-kit")
         if (printBuildDirectory) {
             println("Build directory: ${dir.toUri()}")
         }
@@ -76,12 +62,7 @@ abstract class IntelliJPlatformTestBase {
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
     open fun tearDown() {
-        if (this::dir.isInitialized) {
-            deleteRecursively(dir, "build directory")
-        }
-        if (this::testKitDir.isInitialized) {
-            deleteRecursively(testKitDir, "TestKit directory")
-        }
+        dir.deleteRecursively()
     }
 
     protected inline fun build(
@@ -162,7 +143,7 @@ abstract class IntelliJPlatformTestBase {
             .withPluginClasspath()
             // Gradle TestKit forks the build process when the environment is customized.
             .withDebug(debugEnabled && environment.isEmpty())
-            .withTestKitDir(testKitDir.toFile())
+            .withTestKitDir(gradleHome.toFile())
             .run {
                 when (testKitOutputForwardingEnabled) {
                     true -> forwardOutput()
@@ -230,21 +211,4 @@ abstract class IntelliJPlatformTestBase {
             }
     }
 
-    @OptIn(ExperimentalPathApi::class)
-    private fun deleteRecursively(path: Path, description: String) {
-        repeat(DELETE_RETRY_ATTEMPTS) { attempt ->
-            runCatching {
-                path.deleteRecursively()
-            }.onSuccess {
-                return
-            }.onFailure { exception ->
-                if (attempt == DELETE_RETRY_ATTEMPTS - 1) {
-                    System.err.println("Failed to delete $description at '$path': ${exception.message}")
-                    exception.printStackTrace(System.err)
-                    return
-                }
-                Thread.sleep(DELETE_RETRY_DELAY_MS * (attempt + 1))
-            }
-        }
-    }
 }
