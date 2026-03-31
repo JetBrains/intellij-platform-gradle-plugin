@@ -82,6 +82,9 @@ class IntelliJPlatformDependenciesHelper(
             parameters.useInstaller = true
         }.get()
     }
+    internal val intellijPlatformProjects by lazy {
+        gradle.registerClassLoaderScopedBuildService(IntelliJPlatformProjectsService::class)
+    }
     private val extractorServiceProvider by lazy {
         gradle.registerClassLoaderScopedBuildService(ExtractorService::class)
     }
@@ -199,15 +202,18 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun platformPathProvider(configurationName: String) =
         requestedIntelliJPlatformPaths.computeIfAbsent(configurationName) {
-            val configuration = configurations[configurationName].apply {
-                resolve()
-                incoming.files
-            }
-            val requestedPlatform = requestedIntelliJPlatforms[configurationName]
-            requestedPlatform.map {
-                configuration.platformPath(it)
+            provider {
+                val configuration = configurations[configurationName].apply {
+                    resolve()
+                    incoming.files
+                }
+                configuration.platformPath(requestedIntelliJPlatforms[configurationName].orNull)
             }
         }
+
+    internal fun registerPlatformPathProvider(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) {
+        intellijPlatformProjects.get().setPlatformPathProvider(projectPath, platformPathProvider(configurationName))
+    }
 
     internal fun ide(platformPath: Path) = gradle.registerClassLoaderScopedBuildService(IdesManagerService::class)
         .map { it.resolve(platformPath) }

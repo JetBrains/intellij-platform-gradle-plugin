@@ -75,4 +75,23 @@ class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
             assert(pluginsDirectory.resolve("base/lib/base-1.0.0.jar").exists())
         }
     }
+
+    @Test
+    fun `module project packaging works with isolated projects enabled`() {
+        gradleProperties += //language=properties
+                """
+                org.gradle.unsafe.isolated-projects=true
+                """.trimIndent()
+
+        val pluginDirectory = sandboxDirectory
+            .resolve("ext")
+            .resolve("$intellijPlatformType-$intellijPlatformVersion")
+            .resolve(Sandbox.PLUGINS)
+            .resolve("ext")
+
+        build(":ext:" + Tasks.PREPARE_SANDBOX, projectProperties = defaultProjectProperties) {
+            assertTrue(pluginDirectory.resolve("${Sandbox.Plugin.LIB_MODULES}/test.submodule.jar").exists())
+            assertTrue(pluginDirectory.resolve("${Sandbox.Plugin.LIB}/test.submodule.jar").notExists())
+        }
+    }
 }

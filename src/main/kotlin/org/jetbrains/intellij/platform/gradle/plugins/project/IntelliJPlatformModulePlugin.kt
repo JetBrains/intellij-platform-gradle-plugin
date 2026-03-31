@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.attributes.*
 import org.gradle.api.attributes.java.TargetJvmVersion
@@ -12,28 +13,44 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin.ID
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.attributes.ComposedJarRule
 import org.jetbrains.intellij.platform.gradle.attributes.DistributionRule
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
+import org.jetbrains.intellij.platform.gradle.services.IntelliJPlatformProjectsService
+import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatformsService
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
 import org.jetbrains.intellij.platform.gradle.tasks.companion.TestCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.dependenciesHelper
+import java.util.concurrent.ConcurrentHashMap
 
 abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
     private val log = Logger(javaClass)
 
+    companion object {
+        private const val ROOT_PROJECT_PATH = ":"
+    }
+
     override fun apply(project: Project) {
         log.info("Configuring plugin: ${Plugins.MODULE}")
+
+        val dependenciesHelper = project.dependenciesHelper
 
         with(project.plugins) {
             apply(IntelliJPlatformBasePlugin::class)
         }
+
+        dependenciesHelper.registerPlatformPathProvider()
+
+        val intellijPlatformProjects = project.gradle
+            .registerClassLoaderScopedBuildService(IntelliJPlatformProjectsService::class)
+            .get()
+            .also { it.markModuleProject(project.path) }
 
         // To understand what is going on below read & watch this:
         // https://youtu.be/2gPJD0mAres?t=461
@@ -189,17 +206,20 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             }
         }
 
-        if (project != project.rootProject) {
-            project.dependenciesHelper.addIntelliJPlatformLocalDependency(
+        if (project.path != ROOT_PROJECT_PATH) {
+            val rootRequestedIntelliJPlatforms = project.gradle
+                .registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class, ROOT_PROJECT_PATH) {
+                    parameters.useInstaller = true
+                }
+                .get()
+
+            dependenciesHelper.addIntelliJPlatformLocalDependency(
                 localPathProvider = project.provider {
                     when {
-                        project.dependenciesHelper.hasExplicitIntelliJPlatformDependency() -> null
-                        !project.rootProject.pluginManager.hasPlugin(ID) -> null
-                        !project.rootProject.dependenciesHelper.hasExplicitIntelliJPlatformDependency() -> null
-                        else -> project.rootProject.dependenciesHelper
-                            .platformPathProvider(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
-                            .orNull
-                            ?.toFile()
+                        dependenciesHelper.hasExplicitIntelliJPlatformDependency() -> null
+                        !intellijPlatformProjects.isPluginProject(ROOT_PROJECT_PATH) -> null
+                        !rootRequestedIntelliJPlatforms.hasExplicit() -> null
+                        else -> intellijPlatformProjects.getPlatformPathProvider(ROOT_PROJECT_PATH)?.orNull?.toFile()
                     }
                 },
                 isExplicit = false,
@@ -207,22 +227,16 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
         }
 
         val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
-        val addInferredPluginModuleDependency: (ProjectDependency) -> Unit = { dependency ->
-            val dependencyProject = project.project(dependency.path)
-
-            dependencyProject.pluginManager.withPlugin(Plugins.MODULE) {
-                if (dependencyProject.plugins.hasPlugin(ID)) {
-                    return@withPlugin
-                }
-
-                val alreadyPresent = intellijPlatformPluginModuleConfiguration.dependencies
-                    .withType(ProjectDependency::class.java)
-                    .any { it.path == dependency.path }
-
-                if (!alreadyPresent) {
-                    project.dependenciesHelper.addIntelliJPlatformPluginModuleDependency(dependency)
-                }
+        val pluginModuleDependencyPaths = ConcurrentHashMap.newKeySet<String>()
+        intellijPlatformPluginModuleConfiguration.dependencies.whenObjectAdded(Unit.closureOf<Dependency> {
+            if (this is ProjectDependency) {
+                pluginModuleDependencyPaths += path
             }
+        })
+
+        val inferredPluginModuleDependencies = ConcurrentHashMap<String, ProjectDependency>()
+        fun addInferredPluginModuleDependency(dependency: ProjectDependency) {
+            inferredPluginModuleDependencies.putIfAbsent(dependency.path, dependency)
         }
 
         listOf(
@@ -232,12 +246,22 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
         ).forEach { configurationName ->
             project.configurations[configurationName].dependencies
                 .withType(ProjectDependency::class.java)
-                .all(addInferredPluginModuleDependency)
+                .all(::addInferredPluginModuleDependency)
+        }
+
+        project.gradle.projectsEvaluated {
+            inferredPluginModuleDependencies.values.forEach { dependency ->
+                when {
+                    dependency.path in pluginModuleDependencyPaths -> Unit
+                    !intellijPlatformProjects.isPureModuleProject(dependency.path) -> Unit
+                    else -> intellijPlatformPluginModuleConfiguration.dependencies.add(dependency)
+                }
+            }
         }
 
         IntelliJPlatformTestingExtension.register(
             project = project,
-            dependenciesHelper = project.dependenciesHelper,
+            dependenciesHelper = dependenciesHelper,
             target = project,
         )
 
