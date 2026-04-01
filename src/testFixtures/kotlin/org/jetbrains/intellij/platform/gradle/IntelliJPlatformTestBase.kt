@@ -54,6 +54,7 @@ abstract class IntelliJPlatformTestBase {
     @BeforeTest
     open fun setup() {
         dir = createTempDirectory("tmp")
+        testKitDir.toFile().mkdirs()
         if (printBuildDirectory) {
             println("Build directory: ${dir.toUri()}")
         }
@@ -143,7 +144,7 @@ abstract class IntelliJPlatformTestBase {
             .withPluginClasspath()
             // Gradle TestKit forks the build process when the environment is customized.
             .withDebug(debugEnabled && environment.isEmpty())
-            .withTestKitDir(gradleHome.toFile())
+            .withTestKitDir(testKitDir.toFile())
             .run {
                 when (testKitOutputForwardingEnabled) {
                     true -> forwardOutput()
@@ -184,6 +185,9 @@ abstract class IntelliJPlatformTestBase {
                 *gradleArguments.toTypedArray(),
                 *args.toTypedArray(),
             )
+
+    private val testKitDir: Path
+        get() = dir.resolve(".test-kit")
 
     /**
      * Disables debugging by setting the [debugEnabled] to `false`.
