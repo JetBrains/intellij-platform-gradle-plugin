@@ -14,6 +14,7 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
+    open val enableCaching = true
     val randomTaskName = "task_" + (1..1000).random()
 
     @BeforeTest
@@ -93,13 +94,6 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
-                    
-                    caching {
-                        ides {
-                            enabled = false
-                            path = File("${gradleHome.invariantSeparatorsPathString}", "ides")
-                        }
-                    }
                 }
                 
                 tasks {
@@ -108,6 +102,20 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                     }
                 }
                 """.trimIndent()
+
+        if (enableCaching) {
+            buildFile write //language=kotlin
+                    """
+                    intellijPlatform {
+                        caching {
+                            ides {
+                                enabled = true
+                                path = File("${idesCacheDir.invariantSeparatorsPathString}")
+                            }
+                        }
+                    }
+                    """.trimIndent()
+        }
 
         gradleProperties write //language=properties
                 """

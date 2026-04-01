@@ -6,11 +6,8 @@ import org.gradle.api.GradleException
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import java.lang.management.ManagementFactory
-import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.Path
-import kotlin.io.path.deleteRecursively
+import kotlin.io.path.*
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -37,7 +34,9 @@ abstract class IntelliJPlatformTestBase {
         System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
     val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
-    val gradleHome = Path(System.getProperty("test.gradle.home"))
+    val gradleHome = Path(System.getProperty("test.gradle.home")).createDirectories()
+    val testKitDir = gradleHome.resolve(".testKit").createDirectories()
+    val idesCacheDir = gradleHome.resolve(".ides").createDirectories()
 
     val intellijPlatformType = System.getProperty("test.intellijPlatform.type").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellijPlatform.type' isn't provided")
@@ -53,8 +52,7 @@ abstract class IntelliJPlatformTestBase {
 
     @BeforeTest
     open fun setup() {
-        dir = createTempDirectory("tmp")
-        testKitDir.toFile().mkdirs()
+        dir = createTempDirectory(gradleHome).createDirectories()
         if (printBuildDirectory) {
             println("Build directory: ${dir.toUri()}")
         }
@@ -186,9 +184,6 @@ abstract class IntelliJPlatformTestBase {
                 *args.toTypedArray(),
             )
 
-    private val testKitDir: Path
-        get() = dir.resolve(".test-kit")
-
     /**
      * Disables debugging by setting the [debugEnabled] to `false`.
      * Gradle runs Ant with another Java, that leads to NoSuchMethodError during the instrumentation.
@@ -214,5 +209,4 @@ abstract class IntelliJPlatformTestBase {
                     .also(block)
             }
     }
-
 }

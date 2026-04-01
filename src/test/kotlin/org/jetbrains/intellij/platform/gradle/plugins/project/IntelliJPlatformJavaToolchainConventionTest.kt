@@ -8,6 +8,7 @@ import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.overwrite
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.toPlatformJavaVersion
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertContains
 
@@ -72,36 +73,48 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         """
         import org.gradle.api.plugins.JavaPluginExtension
         import org.gradle.kotlin.dsl.the
-
+        
         import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
-
+        
         version = "1.0.0"
-
+        
         plugins {
             id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
             id("$pluginId")
         }
-
+        
         repositories {
             mavenCentral()
-
+        
             intellijPlatform {
                 defaultRepositories()
             }
         }
-
+        
         dependencies {
             intellijPlatform {
                 create("$intellijPlatformType", "$intellijPlatformVersion")
             }
         }
-
+        
+        intellijPlatform {
+            buildSearchableOptions = false
+            instrumentCode = false
+            
+            caching {
+                ides {
+                    enabled = true
+                    path = File("${idesCacheDir.invariantSeparatorsPathString}")
+                }
+            }
+        }
+        
         $additionalConfiguration
-
+        
         val java = the<JavaPluginExtension>()
         val compileKotlinJvmTarget = tasks.named<KotlinJvmCompile>("compileKotlin").flatMap { it.compilerOptions.jvmTarget }
         val compileTestKotlinJvmTarget = tasks.named<KotlinJvmCompile>("compileTestKotlin").flatMap { it.compilerOptions.jvmTarget }
-
+        
         println("javaToolchain=" + java.toolchain.languageVersion.orNull)
         println("sourceCompatibility=" + java.sourceCompatibility)
         println("targetCompatibility=" + java.targetCompatibility)

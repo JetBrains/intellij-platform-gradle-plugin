@@ -9,6 +9,8 @@ import kotlin.test.Test
 
 class IntelliJPlatformIdesCacheEnabledTest : IntelliJPluginTestBase() {
 
+    override val enableCaching = false
+
     @BeforeTest
     override fun setup() {
         super.setup()
