@@ -29,6 +29,7 @@
 ### Fixed
 
 - Fix `NoClassDefFoundError: org.jetbrains.kotlin.gradle.tasks.KotlinCompile` when `org.jetbrains.kotlin.plugin.compose` is applied together with module plugin.
+- Update module descriptor parsing to support additional dependency attributes, adjust tests accordingly, and configure XML decoding to ignore unknown child elements.
 
 ## [2.13.1] - 2026-03-14
 
