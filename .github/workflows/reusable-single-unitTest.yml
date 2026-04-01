@@ -51,6 +51,22 @@ jobs:
         with:
           cache-read-only: ${{ inputs.cacheReadOnly }}
 
+      - name: Cache test IDEs
+        uses: actions/cache@v4
+        with:
+          path: .gradle/testGradleHome/.ides
+          key: test-gradle-home-v1-ides-${{ runner.os }}-${{ hashFiles('gradle.properties') }}
+          restore-keys: |
+            test-gradle-home-v1-ides-${{ runner.os }}-
+
+      - name: Cache Gradle TestKit
+        uses: actions/cache@v4
+        with:
+          path: .gradle/testGradleHome/.testKit
+          key: test-gradle-home-v1-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          restore-keys: |
+            test-gradle-home-v1-testkit-${{ runner.os }}-
+
       - name: Run Tests
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
@@ -58,9 +74,9 @@ jobs:
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            TEST_GRADLE_USER_HOME="$(pwd -W)\\.test-gradle-home"
+            TEST_GRADLE_USER_HOME="$(pwd -W)\\.gradle\\testGradleHome"
           else
-            TEST_GRADLE_USER_HOME="$PWD/.test-gradle-home"
+            TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
           fi
           [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
           
