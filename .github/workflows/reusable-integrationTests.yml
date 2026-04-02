@@ -53,7 +53,7 @@ jobs:
           cache-read-only: true
 
       - name: Cache test IDEs
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .gradle/testGradleHome/.ides
           key: test-gradle-home-v1-ides-${{ runner.os }}-${{ hashFiles('gradle.properties') }}
@@ -61,7 +61,7 @@ jobs:
             test-gradle-home-v1-ides-${{ runner.os }}-
 
       - name: Cache Gradle TestKit
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: .gradle/testGradleHome/.testKit
           key: test-gradle-home-v1-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
