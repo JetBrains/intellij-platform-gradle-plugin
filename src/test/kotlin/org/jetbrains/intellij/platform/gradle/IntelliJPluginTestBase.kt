@@ -14,7 +14,8 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
-    open val enableCaching = true
+    // Shared IDE cache adds heavy per-build overhead in TestKit suites, so only cache-specific tests should opt in.
+    open val enableCaching = false
     val randomTaskName = "task_" + (1..1000).random()
 
     @BeforeTest
