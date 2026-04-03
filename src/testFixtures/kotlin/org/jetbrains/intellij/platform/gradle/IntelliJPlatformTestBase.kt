@@ -52,7 +52,7 @@ abstract class IntelliJPlatformTestBase {
 
     @BeforeTest
     open fun setup() {
-        dir = createTempDirectory(gradleHome).createDirectories()
+        dir = createTempDirectory("tmp")
         if (printBuildDirectory) {
             println("Build directory: ${dir.toUri()}")
         }
