@@ -1066,6 +1066,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public static synthetic fun create$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun createFromStringProvider (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function2;)V
 	public final fun current ()V
+	public final fun latest (Lkotlin/jvm/functions/Function1;)V
+	public static synthetic fun latest$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)V
 	public final fun local (Ljava/io/File;)V
 	public final fun local (Ljava/lang/String;)V
 	public final fun local (Lorg/gradle/api/file/Directory;)V

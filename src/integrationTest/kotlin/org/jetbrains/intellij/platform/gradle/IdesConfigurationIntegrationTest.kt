@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import java.nio.file.Paths
 import kotlin.test.Test
 
 class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
@@ -210,6 +212,59 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
             projectProperties = defaultProjectProperties,
         ) {
             assertContains("localIde:$intellijPlatformType:$intellijPlatformType-$intellijPlatformBuildNumber", output)
+        }
+    }
+
+    @Test
+    fun `latest helper resolves the newest selected ide type`() {
+        val jetbrainsIdesUrl = Paths.get("src", "test", "resources", "products-releases", "idea-releases-list.xml")
+            .toAbsolutePath()
+            .toUri()
+            .toString()
+        val androidStudioUrl = Paths.get("src", "test", "resources", "products-releases", "android-studio-releases-list.xml")
+            .toAbsolutePath()
+            .toUri()
+            .toString()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        ides {
+                            latest {
+                                sinceBuild = "223"
+                                untilBuild = "233.*"
+                                types = listOf(
+                                    org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea,
+                                    org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.PhpStorm,
+                                )
+                            }
+                        }
+                    }
+                }
+                
+                tasks.register("printLatestIdes") {
+                    val ides = provider {
+                        configurations["${Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES}"].incoming.dependencies.joinToString()
+                    }
+                    
+                    inputs.property("ides", ides)
+                    
+                    doLast {
+                        println("ides = ${'$'}{ides.get()}")
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "printLatestIdes",
+            projectProperties = defaultProjectProperties + mapOf(
+                GradleProperties.ProductsReleasesJetBrainsIdesUrl.toString() to jetbrainsIdesUrl,
+                GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to androidStudioUrl,
+            ),
+        ) {
+            assertContains("ides = idea:ideaIU:2023.3.4, webide:PhpStorm:2023.3.5", output)
+            assertNotContains("idea:ideaIU:2023.2.6", output)
         }
     }
 

@@ -12,6 +12,7 @@
 
 - Add `org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes` Gradle property to control automatic default IDE selection for the `verifyPlugin` task.
 - Add `intellijPlatform.pluginVerification.ides.current()` helper to refer to the currently targeted IntelliJ Platform.
+- Add `intellijPlatform.pluginVerification.ides.latest()` helper to resolve the latest IDE release for each selected type.
 - Add default value for `targetRootOutputDir` of `GenerateParserTask`.
 - Add properties `targetRootOutputDir` and `packageName` (with defaults) for `GenerateLexerTask`. These properties replace `targetOutputDir` and automatically use a proper subdirectory matching the package.
 - Default the Java toolchain language version to the Java version required by the targeted IntelliJ Platform, so common Kotlin JVM projects no longer need to repeat `kotlin { jvmToolchain(...) }`.

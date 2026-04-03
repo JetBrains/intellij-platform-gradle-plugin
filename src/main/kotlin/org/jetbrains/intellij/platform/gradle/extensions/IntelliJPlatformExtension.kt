@@ -1056,9 +1056,26 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
             /**
              * Adds the currently targeted IntelliJ Platform to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @see ProductReleasesValueSource
              */
             fun current() = local(
                 dependenciesHelper.platformPathProvider(Configurations.INTELLIJ_PLATFORM_DEPENDENCY).map { it.toFile() },
+            )
+
+
+            /**
+             * Adds the latest available IntelliJ Platform of the currently used type to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @see ProductReleasesValueSource
+             */
+            fun latest(configure: FilterParameters.() -> Unit = {}) = dependenciesHelper.addIntelliJPluginVerifierIdes(
+                notationsProvider = ProductReleasesValueSource(configure).map { notations ->
+                    notations
+                        .map { it.parseIdeNotation() }
+                        .distinctBy { (type, _) -> type.code }
+                        .map { (type, version) -> "${type.code}-$version" }
+                },
             )
 
             /**
