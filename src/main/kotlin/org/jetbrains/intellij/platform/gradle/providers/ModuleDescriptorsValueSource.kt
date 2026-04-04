@@ -52,33 +52,47 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             .values
             .asSequence()
             .mapNotNull { descriptor ->
-                descriptor.path
+                descriptor
+                    .takeIf { it.namespace in supportedModuleDescriptorNamespaces }
+                    ?.path
                     ?.takeIf { it in collectedJars }
-                    ?.let { Coordinates(descriptor.groupId, descriptor.artifactId) }
+                    ?.let { descriptor.toCoordinatesOrNull() }
             }
             .toSet()
             .plus(explicitExclusions)
     }
-
-    private inline val ModuleDescriptor.groupId
-        get() = name.split('.').take(2).joinToString(".", prefix = "com.jetbrains.")
-
-    private inline val ModuleDescriptor.artifactId: String
-        get() = name
-            .split('.')
-            .drop(1)
-            .let {
-                when (it.first()) {
-                    in setOf("platform", "vcs", "cloud") -> it.drop(1)
-                    else -> it
-                }
-            }
-            .joinToString("-")
-            .replace(camelCaseBoundaryRegex, "$1-$2")
-            .lowercase()
 }
 
 private val camelCaseBoundaryRegex = Regex("([a-z])([A-Z])")
+private val supportedModuleDescriptorNamespaces = setOf("jetbrains", "jps")
+
+internal fun ModuleDescriptor.toCoordinatesOrNull(): Coordinates? {
+    val nameParts = name.split('.')
+    if (nameParts.size < 2) {
+        return null
+    }
+
+    val artifactIdParts = nameParts
+        .drop(1)
+        .let {
+            when (it.firstOrNull()) {
+                in setOf("platform", "vcs", "cloud") -> it.drop(1)
+                else -> it
+            }
+        }
+
+    if (artifactIdParts.isEmpty()) {
+        return null
+    }
+
+    return Coordinates(
+        groupId = nameParts.take(2).joinToString(".", prefix = "com.jetbrains."),
+        artifactId = artifactIdParts
+            .joinToString("-")
+            .replace(camelCaseBoundaryRegex, "$1-$2")
+            .lowercase(),
+    )
+}
 
 private val explicitExclusions = setOf(
     Coordinates("junit", "junit"),

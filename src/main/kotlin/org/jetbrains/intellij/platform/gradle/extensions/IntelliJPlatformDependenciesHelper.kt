@@ -85,6 +85,9 @@ class IntelliJPlatformDependenciesHelper(
     internal val intellijPlatformProjects by lazy {
         gradle.registerClassLoaderScopedBuildService(IntelliJPlatformProjectsService::class)
     }
+    private val moduleDescriptorCoordinatesService by lazy {
+        gradle.registerClassLoaderScopedBuildService(ModuleDescriptorCoordinatesService::class)
+    }
     private val extractorServiceProvider by lazy {
         gradle.registerClassLoaderScopedBuildService(ExtractorService::class)
     }
@@ -1661,16 +1664,19 @@ class IntelliJPlatformDependenciesHelper(
         version: String,
         platformPath: Path,
     ) = createDependency(coordinates, version).apply {
-        val moduleDescriptors = providers.of(ModuleDescriptorsValueSource::class) {
-            parameters {
-                intellijPlatformPath = layout.dir(provider { platformPath.toFile() })
-            }
-        }.get()
-
-        moduleDescriptors.forEach {
+        moduleDescriptorCoordinates(platformPath).forEach {
             exclude(it.groupId, it.artifactId)
         }
     }
+
+    private fun moduleDescriptorCoordinates(platformPath: Path) =
+        moduleDescriptorCoordinatesService.get().resolve(platformPath) {
+            providers.of(ModuleDescriptorsValueSource::class) {
+                parameters {
+                    intellijPlatformPath = layout.dir(provider { platformPath.toFile() })
+                }
+            }.get()
+        }
 
     internal fun buildJetBrainsRuntimeVersion(
         version: String,
