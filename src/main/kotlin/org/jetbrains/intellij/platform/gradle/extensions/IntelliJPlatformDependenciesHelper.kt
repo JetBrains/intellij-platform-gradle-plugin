@@ -1624,16 +1624,21 @@ class IntelliJPlatformDependenciesHelper(
         val ivyFile = providers.localPlatformArtifactsPath(rootProjectDirectory).get().resolve(fileName)
 
         val newIvyModule = block()
+        val newIvyModuleContent = XML {
+            indentString = "  "
+        }.encodeToString(newIvyModule)
+
         IVY_MODULE_WRITE_LOCK.withLock {
-            ivyFile
-                .apply { parent.createDirectories() }
-                .apply { deleteIfExists() }
-                .createFile()
-                .writeText(
-                    XML {
-                        indentString = "  "
-                    }.encodeToString(newIvyModule),
-                )
+            ivyFile.parent.createDirectories()
+
+            val shouldRewrite = when {
+                ivyFile.exists() -> ivyFile.readText() != newIvyModuleContent
+                else -> true
+            }
+
+            if (shouldRewrite) {
+                ivyFile.writeText(newIvyModuleContent)
+            }
         }
 
         writtenIvyModules[fileName] = when (artifactPath) {

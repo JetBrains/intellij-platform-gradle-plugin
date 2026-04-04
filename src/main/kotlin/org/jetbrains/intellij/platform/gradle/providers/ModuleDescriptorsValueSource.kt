@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.providers
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.loadModuleDescriptors
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectBundledPluginsJars
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectIntelliJPlatformJars
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
@@ -47,21 +48,16 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
                 .map { platformPath.relativize(it).invariantSeparatorsPathString }
                 .toSet()
 
-        return JarFile(moduleDescriptorsFile.toFile()).use { jarFile ->
-            jarFile
-                .entries()
-                .asSequence()
-                .filter { it.name.endsWith(".xml") }
-                .map { jarFile.getInputStream(it) }
-                .mapNotNull { decode<ModuleDescriptor>(it) }
-                .mapNotNull { descriptor ->
-                    descriptor.path
-                        ?.takeIf { it in collectedJars }
-                        ?.let { Coordinates(descriptor.groupId, descriptor.artifactId) }
-                }
-                .toSet()
-                .plus(explicitExclusions)
-        }
+        return loadModuleDescriptors(moduleDescriptorsFile)
+            .values
+            .asSequence()
+            .mapNotNull { descriptor ->
+                descriptor.path
+                    ?.takeIf { it in collectedJars }
+                    ?.let { Coordinates(descriptor.groupId, descriptor.artifactId) }
+            }
+            .toSet()
+            .plus(explicitExclusions)
     }
 
     private inline val ModuleDescriptor.groupId

@@ -23,6 +23,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPa
 import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarFile
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
@@ -53,26 +54,15 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
     override fun transform(outputs: TransformOutputs) {
         runCatching {
             val path = inputArtifact.asPath
-            val manager = IdePluginManager.createManager(createTempDirectory())
-            val plugin by lazy {
-                val pluginPath = path.resolvePluginPath()
-                manager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
-            }
-
-            val productInfo = runCatching { path.resolvePlatformPath().productInfo() }.getOrNull()
-            val isIntelliJPlatform = productInfo != null
-            val isPlugin = !isIntelliJPlatform && runCatching { plugin }.isSuccess
+            val platformPath = runCatching { path.resolvePlatformPath() }.getOrNull()
+            val productInfo = platformPath?.let { runCatching { it.productInfo() }.getOrNull() }
 
             when {
-                isIntelliJPlatform -> {
-                    requireNotNull(productInfo)
-
+                productInfo != null -> {
                     when (productInfo.type) {
-                        IntelliJPlatformType.JetBrainsClient -> collectModuleDescriptorJars(productInfo, path)
-                        else -> collectIntelliJPlatformJars(productInfo, path)
-                    }.forEach {
-                        outputs.file(it)
-                    }
+                        IntelliJPlatformType.JetBrainsClient -> collectModuleDescriptorJars(productInfo, platformPath)
+                        else -> collectIntelliJPlatformJars(productInfo, platformPath)
+                    }.forEach(outputs::file)
                 }
 
                 /**
@@ -82,16 +72,23 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
                  * For other plugins, we never (usually?) get into this block because their Ivy artifacts already list jars,
                  * instead of pointing to a directory, see: [org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule]
                  */
-                isPlugin -> {
+                else -> {
+                    val manager = IdePluginManager.createManager(createTempDirectory())
+                    val plugin = runCatching {
+                        val pluginPath = path.resolvePluginPath()
+                        manager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
+                    }.getOrNull()
+
+                    if (plugin == null) {
+                        log.warn("Unknown input: $path")
+                        return@runCatching
+                    }
+
                     plugin.originalFile?.let { pluginPath ->
                         val jars = collectJars(pluginPath)
-                        jars.forEach {
-                            outputs.file(it)
-                        }
+                        jars.forEach(outputs::file)
                     }
                 }
-
-                else -> log.warn("Unknown input: $path")
             }
         }.onFailure {
             log.error("${javaClass.canonicalName} execution failed.", it)
@@ -169,15 +166,7 @@ internal fun collectModuleDescriptorJars(
     architecture: String? = null,
 ): List<Path> = runCatching {
     val moduleDescriptorsFile = ModuleDescriptorsPathResolver(platformPath).resolve()
-    val modules = JarFile(moduleDescriptorsFile.toFile()).use { jarFile ->
-        jarFile
-            .entries()
-            .asSequence()
-            .filter { it.name.endsWith(".xml") }
-            .map { jarFile.getInputStream(it) }
-            .mapNotNull { decode<ModuleDescriptor>(it) }
-            .associateBy { it.name }
-    }
+    val modules = loadModuleDescriptors(moduleDescriptorsFile)
 
     val rootModuleName = productInfo.run {
         when (architecture) {
@@ -221,3 +210,18 @@ internal fun collectModuleDescriptorJars(
 
     collectResourcesFromModule(rootModuleName) + productModuleJars
 }.getOrDefault(emptyList())
+
+private val moduleDescriptorsCache = ConcurrentHashMap<String, Map<String, ModuleDescriptor>>()
+
+internal fun loadModuleDescriptors(moduleDescriptorsFile: Path) =
+    moduleDescriptorsCache.computeIfAbsent(moduleDescriptorsFile.safePathString) {
+        JarFile(moduleDescriptorsFile.toFile()).use { jarFile ->
+            jarFile
+                .entries()
+                .asSequence()
+                .filter { it.name.endsWith(".xml") }
+                .map { jarFile.getInputStream(it) }
+                .mapNotNull { decode<ModuleDescriptor>(it) }
+                .associateBy { it.name }
+        }
+    }
