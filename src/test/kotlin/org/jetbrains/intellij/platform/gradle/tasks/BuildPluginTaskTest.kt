@@ -460,4 +460,21 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
             }
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyPluginName</name>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.BUILD_PLUGIN)
+
+        buildWithConfigurationCache(Tasks.BUILD_PLUGIN) {
+            assertConfigurationCacheReused()
+        }
+    }
 }

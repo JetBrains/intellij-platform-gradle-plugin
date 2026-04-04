@@ -636,4 +636,20 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
             assertNotContains("IDEs that will be used for verification:", output)
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN, args = listOf("--list-ides")) {
+            assertContains("IDEs that will be used for verification:", output)
+        }
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN, args = listOf("--list-ides")) {
+            assertConfigurationCacheReused()
+            assertContains("IDEs that will be used for verification:", output)
+        }
+    }
 }

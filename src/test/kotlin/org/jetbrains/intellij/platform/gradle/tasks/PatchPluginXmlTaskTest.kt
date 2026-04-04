@@ -420,4 +420,18 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
             )
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.PATCH_PLUGIN_XML)
+
+        buildWithConfigurationCache(Tasks.PATCH_PLUGIN_XML) {
+            assertConfigurationCacheReused()
+        }
+    }
 }

@@ -220,4 +220,33 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
             assertNotContains("Plugin verification", output)
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    verifyPluginStructure {
+                        ignoreWarnings = false
+                    }
+                }
+                """.trimIndent()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>Verification test</name>
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <vendor>JetBrains</vendor>
+                    <depends>com.intellij.modules.lang</depends>
+                </idea-plugin>
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_STRUCTURE)
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_STRUCTURE) {
+            assertConfigurationCacheReused()
+            assertNotContains("Plugin verification", output)
+        }
+    }
 }

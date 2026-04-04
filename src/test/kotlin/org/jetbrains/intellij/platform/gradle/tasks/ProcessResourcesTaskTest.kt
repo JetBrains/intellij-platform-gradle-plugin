@@ -89,4 +89,19 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
             )
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildWithConfigurationCache(PROCESS_RESOURCES)
+
+        buildWithConfigurationCache(PROCESS_RESOURCES) {
+            assertConfigurationCacheReused()
+            assertTaskOutcome(PROCESS_RESOURCES, TaskOutcome.UP_TO_DATE)
+        }
+    }
 }

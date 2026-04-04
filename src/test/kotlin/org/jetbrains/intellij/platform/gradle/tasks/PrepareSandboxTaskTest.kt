@@ -976,4 +976,18 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertExists(buildDirectory.resolve("custom-sandbox/log-foo"))
         assertExists(buildDirectory.resolve("custom-sandbox/system-foo"))
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.PREPARE_SANDBOX)
+
+        buildWithConfigurationCache(Tasks.PREPARE_SANDBOX) {
+            assertConfigurationCacheReused()
+        }
+    }
 }

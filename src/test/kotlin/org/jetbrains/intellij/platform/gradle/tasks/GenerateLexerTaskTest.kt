@@ -14,7 +14,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
-
     private val defaultTargetRootOutputDir
         get() = dir.resolve("build/generated/sources/grammarkit-lexer/java/main")
 
@@ -67,26 +66,6 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
         build(Tasks.GENERATE_LEXER) {
             val generatedLexer = adjustPath(dir.resolve("gen/org/jetbrains/grammarkit/lexer/GeneratedLexer.java").toRealPath().toString())
             assertContains(adjustPath(output), "Writing code to \"$generatedLexer\"")
-        }
-    }
-
-    @Test
-    fun `reuse configuration cache`() {
-        buildFile write //language=kotlin
-                """
-                tasks.named("generateLexer", GenerateLexerTask::class.java) {
-                    sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
-                    targetOutputDir = layout.projectDirectory.dir("gen/org/jetbrains/grammarkit/lexer")
-                }
-                """.trimIndent()
-
-        build(Tasks.GENERATE_LEXER) {
-            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_LEXER}")?.outcome)
-        }
-
-        build(Tasks.GENERATE_LEXER) {
-            assertContains(output, "Reusing configuration cache.")
-            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.GENERATE_LEXER}")?.outcome)
         }
     }
 
@@ -173,6 +152,26 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
 
         buildAndFail(Tasks.External.COMPILE_JAVA) {
             assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_LEXER}")?.outcome)
+        }
+    }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildFile write //language=kotlin
+                """
+                tasks.named("generateLexer", GenerateLexerTask::class.java) {
+                    sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
+                    targetOutputDir = layout.projectDirectory.dir("gen/org/jetbrains/grammarkit/lexer")
+                }
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.GENERATE_LEXER) {
+            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_LEXER}")?.outcome)
+        }
+
+        buildWithConfigurationCache(Tasks.GENERATE_LEXER) {
+            assertConfigurationCacheReused()
+            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.GENERATE_LEXER}")?.outcome)
         }
     }
 }

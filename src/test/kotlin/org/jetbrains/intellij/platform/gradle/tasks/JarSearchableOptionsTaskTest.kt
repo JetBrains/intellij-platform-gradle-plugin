@@ -85,4 +85,23 @@ class JarSearchableOptionsTaskTest : SearchableOptionsTestBase() {
             assertEquals(setOf("projectName-1.0.0-base.jar", "projectName-1.0.0.jar"), collectPaths(it))
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write getPluginXmlWithSearchableConfigurable()
+        getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    buildSearchableOptions = true
+                }
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.JAR_SEARCHABLE_OPTIONS)
+
+        buildWithConfigurationCache(Tasks.JAR_SEARCHABLE_OPTIONS) {
+            assertConfigurationCacheReused()
+        }
+    }
 }

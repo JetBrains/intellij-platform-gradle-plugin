@@ -129,4 +129,13 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
             assertTaskOutcome(CLASSES, TaskOutcome.UP_TO_DATE)
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildWithConfigurationCache(ASSEMBLE, args = defaultArgs)
+
+        buildWithConfigurationCache(ASSEMBLE, args = defaultArgs) {
+            assertConfigurationCacheReused()
+        }
+    }
 }

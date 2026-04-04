@@ -363,4 +363,25 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
             it.name == "projectName-1.0.0-signed.zip"
         })
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner()
+                    }
+                }
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment()) {
+            assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SKIPPED)
+        }
+
+        buildWithConfigurationCache(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment()) {
+            assertConfigurationCacheReused()
+            assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SKIPPED)
+        }
+    }
 }

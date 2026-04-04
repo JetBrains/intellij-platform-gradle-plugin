@@ -19,4 +19,14 @@ class PrintBundledModulesTaskTest : IntelliJPluginTestBase() {
             assertContains("intellij.platform.vcs.impl", output)
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildWithConfigurationCache(Tasks.PRINT_BUNDLED_MODULES)
+
+        buildWithConfigurationCache(Tasks.PRINT_BUNDLED_MODULES) {
+            assertConfigurationCacheReused()
+            assertContains("Bundled modules for IntelliJ IDEA", output)
+        }
+    }
 }

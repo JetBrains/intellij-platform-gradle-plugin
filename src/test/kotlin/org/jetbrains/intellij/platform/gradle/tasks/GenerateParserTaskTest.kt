@@ -14,7 +14,6 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class GenerateParserTaskTest : GrammarKitPluginTestBase() {
-
     private val defaultTargetRootOutputDir
         get() = dir.resolve("build/generated/sources/grammarkit-parser/java/main")
 
@@ -54,28 +53,6 @@ class GenerateParserTaskTest : GrammarKitPluginTestBase() {
             assertContains(output, "> Task :${Tasks.GENERATE_PARSER}")
             assertContains(adjustPath(output), "Example.bnf parser generated to $generatedParserRoot")
             assertTrue(collectPaths(defaultTargetRootOutputDir).isNotEmpty())
-        }
-    }
-
-    @Test
-    fun `reuse configuration cache`() {
-        buildFile write //language=kotlin
-                """
-                tasks.named("generateParser", GenerateParserTask::class.java) {
-                    sourceFile = file("${resource("grammarkit/generateParser/Example.bnf")}")
-                    targetRootOutputDir = layout.projectDirectory.dir("gen")
-                    pathToParser = "/org/jetbrains/grammarkit/IgnoreParser.java"
-                    pathToPsiRoot = "/org/jetbrains/grammarkit/psi"
-                }
-                """.trimIndent()
-
-        build(Tasks.GENERATE_PARSER) {
-            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_PARSER}")?.outcome)
-        }
-
-        build(Tasks.GENERATE_PARSER) {
-            assertContains(output, "Reusing configuration cache.")
-            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.GENERATE_PARSER}")?.outcome)
         }
     }
 
@@ -203,6 +180,28 @@ class GenerateParserTaskTest : GrammarKitPluginTestBase() {
         build(Tasks.External.COMPILE_JAVA) {
             assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_PARSER}")?.outcome)
             assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.External.COMPILE_JAVA}")?.outcome)
+        }
+    }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildFile write //language=kotlin
+                """
+                tasks.named("generateParser", GenerateParserTask::class.java) {
+                    sourceFile = file("${resource("grammarkit/generateParser/Example.bnf")}")
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
+                    pathToParser = "/org/jetbrains/grammarkit/IgnoreParser.java"
+                    pathToPsiRoot = "/org/jetbrains/grammarkit/psi"
+                }
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.GENERATE_PARSER) {
+            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_PARSER}")?.outcome)
+        }
+
+        buildWithConfigurationCache(Tasks.GENERATE_PARSER) {
+            assertConfigurationCacheReused()
+            assertEquals(TaskOutcome.UP_TO_DATE, task(":${Tasks.GENERATE_PARSER}")?.outcome)
         }
     }
 }

@@ -171,4 +171,29 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
             assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SKIPPED)
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner()
+                    }
+                }
+                
+                intellijPlatform {
+                    publishing {}
+                }
+                """.trimIndent()
+
+        buildAndFailWithConfigurationCache(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
+            assertContains("'token' property must be specified for plugin publishing", output)
+        }
+
+        buildAndFailWithConfigurationCache(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
+            assertConfigurationCacheReused()
+            assertContains("'token' property must be specified for plugin publishing", output)
+        }
+    }
 }

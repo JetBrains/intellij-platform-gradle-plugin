@@ -85,4 +85,19 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
             assertNotContains("${Plugin.NAME} is outdated: 0.0.0.", output)
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        gradleProperties write //language=properties
+                """
+                org.jetbrains.intellij.platform.selfUpdateCheck = false
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
+
+        buildWithConfigurationCache(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
+            assertConfigurationCacheReused()
+            assertNotContains("${Plugin.NAME} is outdated: 0.0.0.", output)
+        }
+    }
 }
