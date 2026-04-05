@@ -12,7 +12,6 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.util.jar.JarFile
 import kotlin.io.path.invariantSeparatorsPathString
 
 /**
@@ -53,7 +52,7 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             .asSequence()
             .mapNotNull { descriptor ->
                 descriptor
-                    .takeIf { it.namespace in supportedModuleDescriptorNamespaces }
+                    .takeIf { it.namespace == null || it.namespace in supportedModuleDescriptorNamespaces }
                     ?.path
                     ?.takeIf { it in collectedJars }
                     ?.let { descriptor.toCoordinatesOrNull() }

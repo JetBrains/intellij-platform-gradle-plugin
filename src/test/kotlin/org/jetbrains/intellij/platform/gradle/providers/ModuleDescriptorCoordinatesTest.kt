@@ -39,6 +39,22 @@ class ModuleDescriptorCoordinatesTest {
         )
     }
 
+    @Test
+    fun `convert descriptor without namespace into coordinates`() {
+        val descriptor = ModuleDescriptor(
+            name = "intellij.platform.boot",
+            namespace = null,
+            visibility = "public",
+            dependencies = emptyList(),
+            resources = resources("../lib/platform-loader.jar"),
+        )
+
+        assertEquals(
+            Coordinates("com.jetbrains.intellij.platform", "boot"),
+            descriptor.toCoordinatesOrNull(),
+        )
+    }
+
     private fun resources(path: String) = ModuleDescriptor.Resources(
         resourceRoot = ModuleDescriptor.Resources.ResourceRoot(path = path),
     )
