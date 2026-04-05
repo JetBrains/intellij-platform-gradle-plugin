@@ -13,6 +13,7 @@ private const val DEPENDENCIES = "dependencies"
 
 class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "intellij-platform-dependency-validation",
+    useCache = false,
 ) {
 
     @Test
@@ -26,6 +27,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform
+                [org.jetbrains.intellij.platform] Configuration 'intellijPlatformDependency' is empty. LocalIvyArtifactPathComponentMetadataRule will not be registered.
                 No dependencies
                 """.trimIndent(),
                 output,
@@ -122,6 +124,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform
+                [org.jetbrains.intellij.platform] Configuration 'intellijPlatformDependency' has some resolution errors. LocalIvyArtifactPathComponentMetadataRule will not be registered.
                 \--- $artifactCoordinates FAILED
                 """.trimIndent(),
                 output,
@@ -271,7 +274,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             val coordinates = requireNotNull(type.installer)
 
             val artifactCoordinates = when {
-                useCache -> "localIde:${type.code}:${type.code}-$intellijPlatformBuildNumber"
+                useCache -> "localIde:${type.code}:${type.code}-$intellijPlatformVersion"
                 else -> "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
             }
             val artifactVersion = "$intellijPlatformType-$intellijPlatformBuildNumber"
@@ -297,7 +300,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 |         |    \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:$artifactVersion
                 |         +--- bundledModule:intellij.platform.vcs.log.impl:$artifactVersion (*)
                 |         \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:$artifactVersion
-                \--- $artifactCoordinates
+                \--- localIde:IU:IU-251.28774.11
                 """.trimIndent(),
                 output,
             )
@@ -452,6 +455,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
+                Failed to read bundled plugin 'plugins/fullLine': Plugin 'plugins/fullLine' is invalid: The plugin descriptor 'plugin.xml' is not found.
                 \--- bundledModule:intellij-platform-test-runtime:RD-241.19072.30
                 """.trimIndent(),
                 output,
