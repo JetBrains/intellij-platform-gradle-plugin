@@ -268,14 +268,12 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        buildFile.useCache()
-
         build(DEPENDENCIES, "--configuration=compileClasspath") {
             val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
             val coordinates = requireNotNull(type.installer)
 
             val artifactCoordinates = when {
-                useCache -> "localIde:${type.code}:${type.code}-$intellijPlatformVersion"
+                useCache -> "localIde:${type.code}:${type.code}-$intellijPlatformBuildNumber"
                 else -> "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
             }
             val artifactVersion = "$intellijPlatformType-$intellijPlatformBuildNumber"
@@ -301,7 +299,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 |         |    \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:$artifactVersion
                 |         +--- bundledModule:intellij.platform.vcs.log.impl:$artifactVersion (*)
                 |         \--- bundledModule:intellij.platform.vcs.dvcs.impl.shared:$artifactVersion
-                \--- localIde:IU:IU-251.28774.11
+                \--- $artifactCoordinates
                 """.trimIndent(),
                 output,
             )
