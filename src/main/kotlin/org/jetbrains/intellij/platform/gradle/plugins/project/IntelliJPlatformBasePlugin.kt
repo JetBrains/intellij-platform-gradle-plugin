@@ -5,10 +5,12 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.get
-import org.gradle.kotlin.dsl.withType
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
@@ -27,13 +29,14 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
+import org.jetbrains.intellij.platform.gradle.plugins.enableComposeHotReloadCompilerOptions
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
@@ -71,11 +74,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         // Enable Compose compiler options for Compose Hot Reload,
         // we can drop this when KT-76753 change is available for default runtime version in IDE plugins
         project.pluginManager.withPlugin(Plugins.External.KOTLIN_COMPOSE) {
-            project.tasks.withType<KotlinCompile>().configureEach {
-                log.info("Enabling Compose Hot Reload compiler options for KotlinCompile")
-                compilerOptions.freeCompilerArgs.addAll(
-                    "-P", "plugin:androidx.compose.compiler.plugins.kotlin:generateFunctionKeyMetaAnnotations=true"
-                )
+            project.tasks.configureEach {
+                enableComposeHotReloadCompilerOptions(log)
             }
         }
 
@@ -278,6 +278,23 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     attribute(Attributes.extracted, true)
                 }
 
+                defaultDependencies {
+                    addAllLater(
+                        project.providers[GradleProperties.VerifyPluginDefaultRecommendedIdes].flatMap { enabled ->
+                            when {
+                                enabled &&
+                                    intellijPluginVerifierIdesDependencyConfiguration.dependencies.isEmpty() &&
+                                    intellijPluginVerifierIdesLocalConfiguration.dependencies.isEmpty() ->
+                                    dependenciesHelper.createIntelliJPluginVerifierIdeDependencies(
+                                        dependenciesHelper.createRecommendedPluginVerifierIdesValueSource(),
+                                    )
+
+                                else -> project.provider { emptyList() }
+                            }
+                        },
+                    )
+                }
+
                 extendsFrom(intellijPluginVerifierIdesDependencyConfiguration)
                 extendsFrom(intellijPluginVerifierIdesLocalConfiguration)
             }
@@ -466,6 +483,21 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     .attribute(Attributes.extracted, true)
                     .attribute(Attributes.collected, true)
             }
+        }
+
+        project.extensions.configure<JavaPluginExtension> {
+            toolchain.languageVersion.convention(
+                project.cachedProvider {
+                    project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY]
+                        .asLenient
+                        .productInfo()
+                        .buildNumber
+                        .toVersion()
+                        .toPlatformJavaVersion()
+                        .majorVersion
+                        .toInt()
+                }.map(JavaLanguageVersion::of)
+            )
         }
 
         IntelliJPlatformExtension.register(project, target = project).let { intelliJPlatform ->

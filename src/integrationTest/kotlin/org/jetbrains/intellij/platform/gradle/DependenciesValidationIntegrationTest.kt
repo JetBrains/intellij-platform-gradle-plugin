@@ -17,6 +17,11 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
 
     @Test
     fun `allow for no IntelliJ Platform dependency if not running tasks`() {
+        gradleProperties write //language=properties
+                """
+                org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes = false
+                """.trimIndent()
+
         build(DEPENDENCIES) {
             assertContains(
                 """
@@ -91,13 +96,13 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
                     }
                 }
-
+                
                 intellijPlatform {
                     splitMode = true
                 }
@@ -164,6 +169,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         gradleProperties write //language=properties
                 """
                 org.jetbrains.intellij.platform.addDefaultIntelliJPlatformDependencies = false
+                org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes = false
                 """.trimIndent()
 
         build(DEPENDENCIES) {
@@ -328,6 +334,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """
                 compileClasspath - Compile classpath for 'main'.
                 +--- bundledPlugin:Git4Idea:$artifactVersion
+                |    +--- bundledPlugin:com.intellij:$artifactVersion
                 |    \--- bundledModule:intellij.platform.collaborationTools:$artifactVersion
                 |         +--- bundledModule:intellij.platform.vcs.dvcs.impl:$artifactVersion
                 |         |    +--- bundledModule:intellij.platform.vcs.log.impl:$artifactVersion
@@ -387,9 +394,10 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """
                 compileClasspath - Compile classpath for 'main'.
                 +--- bundledPlugin:Coverage:$artifactVersion
-                |    +--- bundledModule:intellij.platform.coverage:$artifactVersion
-                |    |    \--- bundledModule:intellij.platform.coverage.agent:$artifactVersion
-                |    \--- bundledPlugin:com.intellij.java:$artifactVersion
+                |    +--- bundledPlugin:com.intellij.java:$artifactVersion
+                |    |    \--- bundledPlugin:com.intellij:$artifactVersion
+                |    \--- bundledModule:intellij.platform.coverage:$artifactVersion
+                |         \--- bundledModule:intellij.platform.coverage.agent:$artifactVersion
                 \--- $artifactCoordinates
                 """.trimIndent(),
                 output,

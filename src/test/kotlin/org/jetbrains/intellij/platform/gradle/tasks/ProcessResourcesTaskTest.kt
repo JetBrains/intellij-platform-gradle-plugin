@@ -18,7 +18,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
     private val sinceBuild: String
         get() {
             val version = Version.parse(intellijPlatformBuildNumber)
-            return "${version.major}.${version.minor}"
+            return "${version.major}"
         }
 
     @Test
@@ -87,6 +87,21 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
                 </idea-plugin>
                 """.trimIndent()
             )
+        }
+    }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildWithConfigurationCache(PROCESS_RESOURCES)
+
+        buildWithConfigurationCache(PROCESS_RESOURCES) {
+            assertConfigurationCacheReused()
+            assertTaskOutcome(PROCESS_RESOURCES, TaskOutcome.UP_TO_DATE)
         }
     }
 }

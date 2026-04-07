@@ -16,7 +16,6 @@ import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 
 /**
@@ -48,31 +47,70 @@ abstract class GenerateParserTask : JavaExec() {
     abstract val targetRootOutputDir: DirectoryProperty
 
     /**
-     * Required.
      * The location of the generated parser class, relative to the [targetRootOutputDir].
+     * For backwards compatibility, setting this property changes the default of [purgeOldFiles] to `false`.
+     * Otherwise, the value of this property is only used when [purgeOldFiles] is set to `true`.
+     * When this property is set, only the given file or directory is deleted before re-generating the parser.
      */
+    @Deprecated(
+        message = "The property is removed without replacement. " +
+                "Be aware that the task may delete all files in `targetRootOutputDir` after unsetting this property. " +
+                "You may set `purgeOldFiles = false` to avoid deleting the files. " +
+                "When this property and `pathToPsiRoot` is not set, `purgeOldFiles` gets enabled by default. " +
+                "This property is only relevant when the directory at `targetRootOutputDir` overlaps with other files. " +
+                "Note that overlapping task outputs are discouraged by Gradle and can cause issues with the build cache.",
+        level = DeprecationLevel.WARNING,
+    )
     @get:Input
+    @get:Optional
     abstract val pathToParser: Property<String>
 
     /**
-     * Required.
-     * The location of the generated PSI files, relative to the [targetRoot].
+     * The location of the generated PSI files, relative to the [targetRootOutputDir].
+     * For backwards compatibility, setting this property changes the default of [purgeOldFiles] to `false`.
+     * Otherwise, the value of this property is only used when [purgeOldFiles] is set to `true`.
+     * When this property is set, only the given file or directory is deleted before re-generating the parser.
      */
+    @Deprecated(
+        message = "The property is removed without replacement. " +
+                "Be aware that the task may delete all files in `targetRootOutputDir` after unsetting this property. " +
+                "You may set `purgeOldFiles = false` to avoid deleting the files. " +
+                "When this property and `pathToParser` is not set, `purgeOldFiles` gets enabled by default. " +
+                "This property is only relevant when the directory at `targetRootOutputDir` overlaps with other files. " +
+                "Note that overlapping task outputs are discouraged by Gradle and can cause issues with the build cache.",
+        level = DeprecationLevel.WARNING,
+    )
     @get:Input
+    @get:Optional
     abstract val pathToPsiRoot: Property<String>
 
     /**
      * The output parser file computed from the [pathToParser] property.
      */
+    @Deprecated(
+        message = "The method will be removed together with `pathToParser`.",
+        replaceWith = ReplaceWith("targetRootOutputDir.file(pathToParser)"),
+        level = DeprecationLevel.WARNING,
+    )
     fun parserFile(): Provider<RegularFile> = targetRootOutputDir.file(pathToParser)
 
     /**
      * The output PSI directory computed from the [pathToPsiRoot] property.
      */
+    @Deprecated(
+        message = "The method will be removed together with `pathToPsiRoot`.",
+        replaceWith = ReplaceWith("targetRootOutputDir.dir(pathToPsiRoot)"),
+        level = DeprecationLevel.WARNING,
+    )
     fun psiDir(): Provider<Directory> = targetRootOutputDir.dir(pathToPsiRoot)
 
     /**
-     * Purge old files from the target directory before generating the lexer.
+     * Purge old files from the target directory before generating the parser.
+     * By default, old files are purged unless [pathToParser] and [pathToPsiRoot] have been specified.
+     * If you want to disable this option because the output directory is shared with another task,
+     * note that you may run into issues with stale files. Also note that
+     * [overlapping task outputs are discouraged by Gradle](https://docs.gradle.org/current/userguide/organizing_gradle_projects.html#avoid_overlapping_task_outputs)
+     * and may cause issues when using the build cache.
      */
     @get:Input
     @get:Optional
@@ -80,10 +118,22 @@ abstract class GenerateParserTask : JavaExec() {
 
     @TaskAction
     override fun exec() {
-        if (purgeOldFiles.orNull == true) {
-            targetRootOutputDir.get().asFile.apply {
-                resolve(pathToParser.get()).deleteRecursively()
-                resolve(pathToPsiRoot.get()).deleteRecursively()
+        if (pathToParser.isPresent && !pathToPsiRoot.isPresent) {
+            throw GradleException("'pathToParser' has a configured value, but 'pathToPsiRoot' has not. You must either remove or keep both properties.")
+        } else if (pathToPsiRoot.isPresent && !pathToParser.isPresent) {
+            throw GradleException("'pathToPsiRoot' has a configured value, but 'pathToParser' has not. You must either remove or keep both properties.")
+        }
+        purgeOldFiles.orNull.also { purge ->
+            if (purge == false) {
+                // Do nothing as `purgeOldFiles` is explicitly disabled
+            } else if (!pathToParser.isPresent && !pathToPsiRoot.isPresent) {
+                targetRootOutputDir.get().asFile.deleteRecursively()
+            } else if (purge == true) {
+                // Delete only the directories specified by `pathToParser` and `pathToPsiRoot` for backwards compatibility.
+                targetRootOutputDir.get().asFile.apply {
+                    resolve(pathToParser.get()).deleteRecursively()
+                    resolve(pathToPsiRoot.get()).deleteRecursively()
+                }
             }
         }
         ByteArrayOutputStream().use { os ->
@@ -98,7 +148,7 @@ abstract class GenerateParserTask : JavaExec() {
         }
     }
 
-    private fun getArguments() = listOf(targetRootOutputDir, sourceFile).map { it.asPath.safePathString }
+    private fun getArguments() = listOf(targetRootOutputDir, sourceFile).map { it.asPath.normalize().toString() }
 
     init {
         group = Constants.Plugin.GROUP_NAME
@@ -112,6 +162,7 @@ abstract class GenerateParserTask : JavaExec() {
                 val intellijPlatformGrammarKitConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_GRAMMAR_KIT]
                 val intellijPlatformClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH]
 
+                targetRootOutputDir.convention(project.layout.buildDirectory.dir("generated/sources/grammarkit-parser/java/main"))
                 classpath += intellijPlatformGrammarKitConfiguration + intellijPlatformClasspathConfiguration
             }
     }

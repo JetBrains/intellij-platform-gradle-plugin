@@ -107,4 +107,23 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
             assertTaskOutcome(Tasks.JAR_SEARCHABLE_OPTIONS, TaskOutcome.SKIPPED)
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write getPluginXmlWithSearchableConfigurable()
+        getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    buildSearchableOptions = true
+                }
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.BUILD_SEARCHABLE_OPTIONS)
+
+        buildWithConfigurationCache(Tasks.BUILD_SEARCHABLE_OPTIONS) {
+            assertConfigurationCacheReused()
+        }
+    }
 }

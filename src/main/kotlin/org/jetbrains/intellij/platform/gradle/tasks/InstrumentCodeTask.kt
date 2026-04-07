@@ -41,7 +41,7 @@ private const val LOADER_REF = "java2.loader"
  * The code instrumentation scans the compiled Java and Kotlin classes for JetBrains Annotations usages to replace them with their relevant functionalities.
  *
  * The task is controlled with the [IntelliJPlatformExtension.instrumentCode] extension property, enabled by default.
- * To properly run the instrumentation, it is required to add [IntelliJPlatformDependenciesExtension.instrumentationTools] dependencies to the project.
+ * To properly run the instrumentation, it is required to add the [IntelliJPlatformDependenciesExtension.javaCompiler] dependency to the project.
  *
  * This dependency is available via the [IntelliJPlatformRepositoriesExtension.intellijDependencies] repository, which can be added separately
  * or using the [IntelliJPlatformRepositoriesExtension.defaultRepositories] helper.

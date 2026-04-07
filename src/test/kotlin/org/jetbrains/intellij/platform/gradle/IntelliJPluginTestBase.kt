@@ -14,6 +14,8 @@ import kotlin.test.assertEquals
 
 abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
+    // Shared IDE cache adds heavy per-build overhead in TestKit suites, so only cache-specific tests should opt in.
+    open val enableCaching = false
     val randomTaskName = "task_" + (1..1000).random()
 
     @BeforeTest
@@ -93,13 +95,6 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
-                    
-                    caching {
-                        ides {
-                            enabled = false
-                            path = File("${gradleHome.invariantSeparatorsPathString}", "ides")
-                        }
-                    }
                 }
                 
                 tasks {
@@ -108,6 +103,20 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                     }
                 }
                 """.trimIndent()
+
+        if (enableCaching) {
+            buildFile write //language=kotlin
+                    """
+                    intellijPlatform {
+                        caching {
+                            ides {
+                                enabled = true
+                                path = File("${idesCacheDir.invariantSeparatorsPathString}")
+                            }
+                        }
+                    }
+                    """.trimIndent()
+        }
 
         gradleProperties write //language=properties
                 """
@@ -219,4 +228,12 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
     }
 
     protected fun resourceContent(path: String) = resource(path)?.let { Path(it).readText() }
+
+    protected fun pluginTemplateEnvironment(vararg entries: Pair<String, String?>) = buildMap {
+        put(Constants.EnvironmentVariables.CERTIFICATE_CHAIN, null)
+        put(Constants.EnvironmentVariables.PRIVATE_KEY, null)
+        put(Constants.EnvironmentVariables.PRIVATE_KEY_PASSWORD, null)
+        put(Constants.EnvironmentVariables.PUBLISH_TOKEN, null)
+        putAll(entries)
+    }
 }

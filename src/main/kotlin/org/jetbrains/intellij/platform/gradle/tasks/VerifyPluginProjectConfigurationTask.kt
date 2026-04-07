@@ -54,7 +54,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     /**
      * IntelliJ Platform cache directory.
      *
-     * Default value: [IntelliJPlatformExtension.cachePath]
+     * Default value: `intellijPlatform.caching.path`
      */
     @get:Internal
     abstract val intellijPlatformCache: DirectoryProperty
@@ -93,7 +93,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         val isModule = module.get()
         val platformBuild = productInfo.buildNumber.toVersion()
         val platformVersion = productInfo.version.toVersion()
-        val platformJavaVersion = getPlatformJavaVersion(platformBuild)
+        val platformJavaVersion = platformBuild.toPlatformJavaVersion()
         val sourceCompatibilityJavaVersion = sourceCompatibility.get().toJavaVersion()
         val targetCompatibilityJavaVersion = targetCompatibility.get().toJavaVersion()
         val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.toJavaVersion()
@@ -113,7 +113,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 pluginXml.orNull
                     ?.let { file ->
                         val sinceBuild = file.parse { ideaVersion.sinceBuild.toVersion() }
-                        val sinceBuildJavaVersion = getPlatformJavaVersion(sinceBuild)
+                        val sinceBuildJavaVersion = sinceBuild.toPlatformJavaVersion()
                         val sinceBuildKotlinApiVersion =
                             getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
 
@@ -323,9 +323,6 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             spec()
         }
     }
-
-    private fun getPlatformJavaVersion(buildNumber: Version) =
-        PlatformJavaVersions.entries.firstOrNull { buildNumber >= it.key }?.value
 
     private fun getPlatformKotlinVersion(buildNumber: Version) =
         PlatformKotlinVersions.entries.firstOrNull { buildNumber >= it.key }?.value

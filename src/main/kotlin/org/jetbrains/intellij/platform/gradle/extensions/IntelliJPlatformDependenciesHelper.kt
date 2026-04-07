@@ -32,6 +32,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.models.*
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.providers.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
@@ -79,12 +80,13 @@ class IntelliJPlatformDependenciesHelper(
 ) {
 
     private val log = Logger(javaClass)
-    private val pluginManager by lazy { IdePluginManager.createManager() }
-    private val pluginRepository by lazy { PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE) }
     internal val requestedIntelliJPlatforms by lazy {
         gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class, projectPath) {
             parameters.useInstaller = true
         }.get()
+    }
+    internal val intellijPlatformProjects by lazy {
+        gradle.registerClassLoaderScopedBuildService(IntelliJPlatformProjectsService::class)
     }
     private val extractorServiceProvider by lazy {
         gradle.registerClassLoaderScopedBuildService(ExtractorService::class)
@@ -203,15 +205,18 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun platformPathProvider(configurationName: String) =
         requestedIntelliJPlatformPaths.computeIfAbsent(configurationName) {
-            val configuration = configurations[configurationName].apply {
-                resolve()
-                incoming.files
-            }
-            val requestedPlatform = requestedIntelliJPlatforms[configurationName]
-            requestedPlatform.map {
-                configuration.platformPath(it)
+            provider {
+                val configuration = configurations[configurationName].apply {
+                    resolve()
+                    incoming.files
+                }
+                configuration.platformPath(requestedIntelliJPlatforms[configurationName].orNull)
             }
         }
+
+    internal fun registerPlatformPathProvider(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) {
+        intellijPlatformProjects.get().setPlatformPathProvider(projectPath, platformPathProvider(configurationName))
+    }
 
     internal fun ide(platformPath: Path) = gradle.registerClassLoaderScopedBuildService(IdesManagerService::class)
         .map { it.resolve(platformPath) }
@@ -267,6 +272,8 @@ class IntelliJPlatformDependenciesHelper(
         localArchivesConfigurationName: String,
         requiredConfigurationName: String? = null,
     ) {
+        markIntelliJPlatformDependencyExplicit(dependencyConfigurationName)
+
         val resolveConfiguration = {
             if (requiredConfigurationName != null && requiredConfigurationName != dependencyConfigurationName) {
                 configurations[requiredConfigurationName].resolve()
@@ -341,7 +348,17 @@ class IntelliJPlatformDependenciesHelper(
         notationsProvider: Provider<List<String>>,
         configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(provider {
+    ) = configurations[configurationName].dependencies.addAllLater(
+        createIntelliJPluginVerifierIdeDependencies(
+            notationsProvider = notationsProvider,
+            action = action,
+        ),
+    )
+
+    internal fun createIntelliJPluginVerifierIdeDependencies(
+        notationsProvider: Provider<List<String>>,
+        action: DependencyAction = {},
+    ) = provider {
         val notations = notationsProvider.get()
 
         notations.map {
@@ -351,7 +368,19 @@ class IntelliJPlatformDependenciesHelper(
                 else -> createIntelliJPlatformInstaller(type, version)
             }.apply(action)
         }
-    }.cached())
+    }.cached()
+
+    internal fun createRecommendedPluginVerifierIdesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) =
+        createProductReleasesValueSource {
+            val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
+
+            channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
+            types.convention(extensionProvider.map { listOf(it.productInfo.type) })
+            sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
+            untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
+
+            configure()
+        }
 
     /**
      * A base method for adding a dependency on a local IntelliJ Platform instance.
@@ -367,8 +396,13 @@ class IntelliJPlatformDependenciesHelper(
         localPathProvider: Provider<*>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        isExplicit: Boolean = true,
         action: DependencyAction = {},
     ) = configurations[configurationName].dependencies.addAllLater(provider {
+        if (isExplicit) {
+            markIntelliJPlatformDependencyExplicit(intellijPlatformConfigurationName)
+        }
+
         buildList {
             val localPath = localPathProvider.orNull ?: return@buildList
             val platformPath = resolveArtifactPath(localPath)
@@ -387,6 +421,13 @@ class IntelliJPlatformDependenciesHelper(
             createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
         }
     }.cached())
+
+    internal fun hasExplicitIntelliJPlatformDependency(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) =
+        requestedIntelliJPlatforms.hasExplicit(configurationName)
+
+    internal fun markIntelliJPlatformDependencyExplicit(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) {
+        requestedIntelliJPlatforms.markExplicit(configurationName)
+    }
 
     /**
      * A base method for adding a dependency on a plugin for IntelliJ Platform.
@@ -439,6 +480,8 @@ class IntelliJPlatformDependenciesHelper(
         requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
 
         val productInfo = platformPath.productInfo()
+
+        val pluginRepository = PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE)
 
         plugins.map { pluginId ->
             val platformType = productInfo.productCode
@@ -1145,9 +1188,13 @@ class IntelliJPlatformDependenciesHelper(
         val id = requireNotNull(pluginId)
         val version = ide.version.toString()
 
-        val modulesIds = modulesDescriptors.asSequence().filter { it.loadingRule.required }.map { it.name }
-        val dependenciesIds = dependencies.asSequence().filter { !it.isOptional }.map { it.id }
-        val ids = (modulesIds + dependenciesIds).mapNotNull { ide.findPluginById(it) }
+        val modulesIds = modulesDescriptors.asSequence().filter { it.moduleDefinition.loadingRule.required }.map { it.name }
+        val dependenciesIds = dependsList.asSequence().filter { !it.isOptional }.map { it.pluginId }
+        val pluginMainModuleIds = pluginMainModuleDependencies.asSequence().map { it.pluginId }
+        val contentModuleIds = contentModuleDependencies.asSequence().map { it.moduleName }
+        val ids = (modulesIds + dependenciesIds + pluginMainModuleIds + contentModuleIds)
+            .distinct()
+            .mapNotNull { ide.findPluginById(it) ?: ide.findPluginByModule(it) }
 
         return ids
             .mapTo(ArrayList()) {
@@ -1229,6 +1276,7 @@ class IntelliJPlatformDependenciesHelper(
         val artifactPath = resolvePath(localPath)
             .takeIf { it.exists() }
             .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
+        val pluginManager = IdePluginManager.createManager()
 
         val plugin by lazy {
             val pluginPath = when {

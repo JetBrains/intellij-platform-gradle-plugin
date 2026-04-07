@@ -7,11 +7,8 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.UnexpectedBuildResultException
 import java.lang.management.ManagementFactory
-import java.nio.file.Files.createTempDirectory
 import java.nio.file.Path
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.Path
-import kotlin.io.path.deleteRecursively
+import kotlin.io.path.*
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
@@ -38,7 +35,9 @@ abstract class IntelliJPlatformTestBase {
         System.getProperty("test.gradle.arguments", "").split(' ').filter(String::isNotEmpty).toMutableList()
     val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
-    val gradleHome = Path(System.getProperty("test.gradle.home"))
+    val gradleHome = Path(System.getProperty("test.gradle.home")).createDirectories()
+    val testKitDir = gradleHome.resolve(".testKit").createDirectories()
+    val idesCacheDir = gradleHome.resolve(".ides").createDirectories()
 
     val intellijPlatformType = System.getProperty("test.intellijPlatform.type").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellijPlatform.type' isn't provided")
@@ -66,24 +65,27 @@ abstract class IntelliJPlatformTestBase {
         dir.deleteRecursively()
     }
 
-    protected inline fun build(
+    protected fun build(
         vararg tasksList: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
         args: List<String> = emptyList(),
         block: BuildResult.() -> Unit = {},
     ) = build(
         tasks = tasksList,
         projectProperties = projectProperties,
         systemProperties = systemProperties,
+        environment = environment,
         args = args,
         block = block,
     )
 
-    protected inline fun buildAndFail(
+    protected fun buildAndFail(
         vararg tasksList: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
         args: List<String> = emptyList(),
         block: BuildResult.() -> Unit = {},
     ) = build(
@@ -91,20 +93,56 @@ abstract class IntelliJPlatformTestBase {
         tasks = tasksList,
         projectProperties = projectProperties,
         systemProperties = systemProperties,
+        environment = environment,
         args = args,
         block = block,
     )
 
-    protected inline fun build(
+    protected fun buildWithConfigurationCache(
+        vararg tasksList: String,
+        projectProperties: Map<String, Any> = emptyMap(),
+        systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
+        args: List<String> = emptyList(),
+        block: BuildResult.() -> Unit = {},
+    ) = build(
+        tasks = tasksList,
+        projectProperties = projectProperties,
+        systemProperties = systemProperties,
+        environment = environment,
+        args = withConfigurationCache(args),
+        block = block,
+    )
+
+    protected fun buildAndFailWithConfigurationCache(
+        vararg tasksList: String,
+        projectProperties: Map<String, Any> = emptyMap(),
+        systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
+        args: List<String> = emptyList(),
+        block: BuildResult.() -> Unit = {},
+    ) = build(
+        fail = true,
+        tasks = tasksList,
+        projectProperties = projectProperties,
+        systemProperties = systemProperties,
+        environment = environment,
+        args = withConfigurationCache(args),
+        block = block,
+    )
+
+    protected fun build(
         gradleVersion: String = this.gradleVersion,
         fail: Boolean = false,
         assertValidConfigurationCache: Boolean = true,
         vararg tasks: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
         args: List<String> = emptyList(),
         block: BuildResult.() -> Unit = {},
     ): BuildResult {
+        val configurationCacheEnabled = (gradleArguments + args).contains(CONFIGURATION_CACHE_ARGUMENT)
         var buildResult: BuildResult? = null
 
         return runCatching {
@@ -113,6 +151,7 @@ abstract class IntelliJPlatformTestBase {
                 tasks = tasks,
                 projectProperties = projectProperties,
                 systemProperties = systemProperties,
+                environment = environment,
                 args = args,
             )
                 .run {
@@ -124,7 +163,7 @@ abstract class IntelliJPlatformTestBase {
 
             buildResult!!
                 .also {
-                    if (assertValidConfigurationCache) {
+                    if (configurationCacheEnabled && assertValidConfigurationCache) {
                         assertNotContains("Configuration cache problems found in this build.", it.output)
                     }
                 }
@@ -149,17 +188,35 @@ abstract class IntelliJPlatformTestBase {
         vararg tasks: String,
         projectProperties: Map<String, Any> = emptyMap(),
         systemProperties: Map<String, Any> = emptyMap(),
+        environment: Map<String, String?> = emptyMap(),
         args: List<String> = emptyList(),
     ) =
         GradleRunner.create()
             .withProjectDir(dir.toFile())
             .withGradleVersion(gradleVersion)
             .withPluginClasspath()
-            .withDebug(debugEnabled)
-            .withTestKitDir(gradleHome.toFile())
+            // Gradle TestKit forks the build process when the environment is customized.
+            .withDebug(debugEnabled && environment.isEmpty())
+            .withTestKitDir(testKitDir.toFile())
             .run {
                 when (testKitOutputForwardingEnabled) {
                     true -> forwardOutput()
+                    false -> this
+                }
+            }
+            .run {
+                when (environment.isNotEmpty()) {
+                    true -> withEnvironment(
+                        System.getenv().toMutableMap().apply {
+                            environment.forEach { (key, value) ->
+                                when (value) {
+                                    null -> remove(key)
+                                    else -> put(key, value)
+                                }
+                            }
+                        },
+                    )
+
                     false -> this
                 }
             }
@@ -175,12 +232,15 @@ abstract class IntelliJPlatformTestBase {
                 *tasks,
                 *listOfNotNull(
                     "--stacktrace",
-                    "--configuration-cache".takeIf { !isDebugged },
                     "--scan".takeIf { gradleScan },
                 ).toTypedArray(),
                 *gradleArguments.toTypedArray(),
                 *args.toTypedArray(),
             )
+
+    protected fun BuildResult.assertConfigurationCacheReused() {
+        assertContains("Reusing configuration cache.", output)
+    }
 
     /**
      * Disables debugging by setting the [debugEnabled] to `false`.
@@ -206,6 +266,16 @@ abstract class IntelliJPlatformTestBase {
                     .trim()
                     .also(block)
             }
+    }
+
+    private fun withConfigurationCache(args: List<String>) =
+        when {
+            args.contains(CONFIGURATION_CACHE_ARGUMENT) -> args
+            else -> listOf(CONFIGURATION_CACHE_ARGUMENT) + args
+        }
+
+    private companion object {
+        const val CONFIGURATION_CACHE_ARGUMENT = "--configuration-cache"
     }
 
     @PublishedApi

@@ -120,4 +120,25 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
             assertContains("Provided zip archive is not signed", output)
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        zipSigner()
+                    }
+                }
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_SIGNATURE) {
+            assertTaskOutcome(Tasks.VERIFY_PLUGIN_SIGNATURE, TaskOutcome.NO_SOURCE)
+        }
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_SIGNATURE) {
+            assertConfigurationCacheReused()
+            assertTaskOutcome(Tasks.VERIFY_PLUGIN_SIGNATURE, TaskOutcome.NO_SOURCE)
+        }
+    }
 }

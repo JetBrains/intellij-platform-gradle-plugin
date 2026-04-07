@@ -9,6 +9,7 @@ import kotlin.io.path.notExists
 import kotlin.test.BeforeTest
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 private const val CUSTOM_RUN_IDE_TASK_NAME = "customRunIde"
 
@@ -35,6 +36,22 @@ class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
     }
 
     @Test
+    fun `module project dependency is packaged to lib modules automatically`() {
+        val pluginDirectory = sandboxDirectory
+            .resolve("ext")
+            .resolve("$intellijPlatformType-$intellijPlatformVersion")
+            .resolve(Sandbox.PLUGINS)
+            .resolve("ext")
+
+        build(":ext:" + Tasks.PREPARE_SANDBOX, projectProperties = defaultProjectProperties) {
+            assertTrue(pluginDirectory.resolve("${Sandbox.Plugin.LIB_MODULES}/test.submodule.jar").exists())
+            assertTrue(pluginDirectory.resolve("${Sandbox.Plugin.LIB}/test.submodule.jar").notExists())
+            assertTrue(pluginDirectory.resolve("${Sandbox.Plugin.LIB}/dummy-0.1.2.jar").exists())
+            assertTrue(pluginDirectory.resolve("${Sandbox.Plugin.LIB}/raw-1.0.0.jar").exists())
+        }
+    }
+
+    @Test
     fun `custom task should refer to the composed jar of base module`() {
         val suffix = "_$CUSTOM_RUN_IDE_TASK_NAME"
         val pluginsDirectory = sandboxDirectory
@@ -56,6 +73,25 @@ class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
         build(":ext:customRunIde", projectProperties = defaultProjectProperties) {
             assert(pluginsDirectory.resolve("base-base.jar").notExists())
             assert(pluginsDirectory.resolve("base/lib/base-1.0.0.jar").exists())
+        }
+    }
+
+    @Test
+    fun `module project packaging works with isolated projects enabled`() {
+        gradleProperties += //language=properties
+                """
+                org.gradle.unsafe.isolated-projects=true
+                """.trimIndent()
+
+        val pluginDirectory = sandboxDirectory
+            .resolve("ext")
+            .resolve("$intellijPlatformType-$intellijPlatformVersion")
+            .resolve(Sandbox.PLUGINS)
+            .resolve("ext")
+
+        build(":ext:" + Tasks.PREPARE_SANDBOX, projectProperties = defaultProjectProperties) {
+            assertTrue(pluginDirectory.resolve("${Sandbox.Plugin.LIB_MODULES}/test.submodule.jar").exists())
+            assertTrue(pluginDirectory.resolve("${Sandbox.Plugin.LIB}/test.submodule.jar").notExists())
         }
     }
 }

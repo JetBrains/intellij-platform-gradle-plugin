@@ -24,7 +24,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     private val sinceBuild: String
         get() {
             val version = Version.parse(intellijPlatformBuildNumber)
-            return "${version.major}.${version.minor}"
+            return "${version.major}"
         }
 
     @Test
@@ -1069,5 +1069,19 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertExists(buildDirectory.resolve("custom-sandbox/plugins-foo"))
         assertExists(buildDirectory.resolve("custom-sandbox/log-foo"))
         assertExists(buildDirectory.resolve("custom-sandbox/system-foo"))
+    }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.PREPARE_SANDBOX)
+
+        buildWithConfigurationCache(Tasks.PREPARE_SANDBOX) {
+            assertConfigurationCacheReused()
+        }
     }
 }

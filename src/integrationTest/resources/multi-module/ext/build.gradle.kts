@@ -28,9 +28,9 @@ dependencies {
         bundledPlugins("com.intellij.java")
 
         localPlugin(project(":base"))
-        pluginModule(implementation(project(":submodule")))
     }
 
+    implementation(project(":submodule"))
     implementation(project(":raw"))
     implementation("org.jetbrains:markdown:0.7.3")
 }

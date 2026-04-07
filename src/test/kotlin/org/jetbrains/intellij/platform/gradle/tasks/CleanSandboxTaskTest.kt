@@ -59,4 +59,17 @@ class CleanSandboxTaskTest : IntelliJPluginTestBase() {
         assertTrue(defaultProjectSandbox.exists())
         assertTrue(otherProjectSandbox.exists())
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        val currentSandbox = sandboxDirectory.resolve("projectName").resolve("$intellijPlatformType-$intellijPlatformVersion").createDirectories()
+
+        buildWithConfigurationCache(Tasks.CLEAN_SANDBOX)
+
+        buildWithConfigurationCache(Tasks.CLEAN_SANDBOX) {
+            assertConfigurationCacheReused()
+        }
+
+        assertTrue(currentSandbox.notExists())
+    }
 }

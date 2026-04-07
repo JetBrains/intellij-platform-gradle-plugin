@@ -6,6 +6,7 @@ import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import nl.adaptivity.xmlutil.serialization.XML
+import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.gradle.api.GradleException
 import org.jdom2.Document
 import org.jdom2.output.Format
@@ -20,7 +21,11 @@ import kotlin.io.path.readText
 import kotlin.io.path.writeText
 
 internal val json = Json { ignoreUnknownKeys = true }
-internal val xml = XML
+internal val xml = XML {
+    defaultPolicy {
+        unknownChildHandler = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
+    }
+}
 
 /**
  * @throws GradleException

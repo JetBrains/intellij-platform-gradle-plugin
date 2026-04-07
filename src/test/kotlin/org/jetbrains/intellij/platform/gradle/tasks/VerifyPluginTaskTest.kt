@@ -18,7 +18,12 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `warn about no IDE picked for verification`() {
         writePluginVerifierDependency()
 
-        buildAndFail(Tasks.VERIFY_PLUGIN) {
+        buildAndFail(
+            Tasks.VERIFY_PLUGIN,
+            projectProperties = mapOf(
+                GradleProperties.VerifyPluginDefaultRecommendedIdes.toString() to false,
+            ),
+        ) {
             assertContains("No IDE resolved for verification with the IntelliJ Plugin Verifier.", output)
         }
     }
@@ -616,13 +621,35 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `list ides mode fails when no IDEs configured`() {
+    fun `list ides mode fails when no IDEs configured and default recommended ides are disabled`() {
         writePluginXmlFile()
         writePluginVerifierDependency()
 
-        buildAndFail(Tasks.VERIFY_PLUGIN, "--list-ides") {
+        buildAndFail(
+            Tasks.VERIFY_PLUGIN,
+            projectProperties = mapOf(
+                GradleProperties.VerifyPluginDefaultRecommendedIdes.toString() to false,
+            ),
+            args = listOf("--list-ides"),
+        ) {
             assertContains("No IDE versions configured for verification", output)
             assertNotContains("IDEs that will be used for verification:", output)
+        }
+    }
+
+    @Test
+    fun `reuses configuration cache`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN, args = listOf("--list-ides")) {
+            assertContains("IDEs that will be used for verification:", output)
+        }
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN, args = listOf("--list-ides")) {
+            assertConfigurationCacheReused()
+            assertContains("IDEs that will be used for verification:", output)
         }
     }
 }

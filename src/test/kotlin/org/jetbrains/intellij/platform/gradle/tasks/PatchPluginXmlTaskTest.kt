@@ -16,7 +16,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
     private val sinceBuild: String
         get() {
             val version = Version.parse(intellijPlatformBuildNumber)
-            return "${version.major}.${version.minor}"
+            return "${version.major}"
         }
 
     @Test
@@ -418,6 +418,20 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 </idea-plugin>
                 """.trimIndent(),
             )
+        }
+    }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.PATCH_PLUGIN_XML)
+
+        buildWithConfigurationCache(Tasks.PATCH_PLUGIN_XML) {
+            assertConfigurationCacheReused()
         }
     }
 }

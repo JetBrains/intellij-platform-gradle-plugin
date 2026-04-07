@@ -23,13 +23,12 @@ import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.EnvironmentVariables
 import org.jetbrains.intellij.platform.gradle.Constants.Extensions
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
-import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
@@ -517,7 +516,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              *
              * The supplied value will be utilized as the `<idea-version since-build=""/>` element attribute.
              *
-             * The default value is set to the `MAJOR.MINOR` version based on the currently selected IntelliJ Platform, like `233.12345`.
+             * The default value is set to the `MAJOR` version based on the currently selected IntelliJ Platform, like `233`.
              *
              * @see PatchPluginXmlTask.sinceBuild
              * @see <a href="https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html#idea-plugin__idea-version">Plugin Configuration File: `idea-version`</a>
@@ -545,7 +544,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         val buildVersion = project.extensionProvider.map {
                             it.runCatching { productInfo.buildNumber.toVersion() }.getOrDefault(Version())
                         }
-                        sinceBuild.convention(buildVersion.map { "${it.major}.${it.minor}" })
+                        sinceBuild.convention(buildVersion.map { "${it.major}" })
                     }
             }
         }
@@ -658,6 +657,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             override fun register(project: Project, target: Any) =
                 target.configureExtension<Publishing>(Extensions.PUBLISHING) {
                     host.convention(Locations.JETBRAINS_MARKETPLACE)
+                    token.convention(project.providers.environmentVariable(EnvironmentVariables.PUBLISH_TOKEN))
                     ideServices.convention(false)
                     channels.convention(listOf("default"))
                     hidden.convention(false)
@@ -769,7 +769,17 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
         companion object : Registrable<Signing> {
             override fun register(project: Project, target: Any) =
-                target.configureExtension<Signing>(Extensions.SIGNING)
+                target.configureExtension<Signing>(Extensions.SIGNING) {
+                    certificateChain.convention(project.providers.provider {
+                        certificateChainFile.orNull?.let { return@provider null }
+                        project.providers.environmentVariable(EnvironmentVariables.CERTIFICATE_CHAIN).orNull
+                    })
+                    privateKey.convention(project.providers.provider {
+                        privateKeyFile.orNull?.let { return@provider null }
+                        project.providers.environmentVariable(EnvironmentVariables.PRIVATE_KEY).orNull
+                    })
+                    password.convention(project.providers.environmentVariable(EnvironmentVariables.PRIVATE_KEY_PASSWORD))
+                }
         }
     }
 
@@ -1065,13 +1075,38 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             )
 
             /**
-             * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
-             * for IntelliJ Platform Verifier using the [ide] helper method.
+             * Adds the currently targeted IntelliJ Platform to be used for testing with the IntelliJ Plugin Verifier.
              *
-             * @see ide
              * @see ProductReleasesValueSource
              */
-            fun recommended() = create(ProductReleasesValueSource())
+            fun current() = local(
+                dependenciesHelper.platformPathProvider(Configurations.INTELLIJ_PLATFORM_DEPENDENCY).map { it.toFile() },
+            )
+
+
+            /**
+             * Adds the latest available IntelliJ Platform of the currently used type to be used for testing with the IntelliJ Plugin Verifier.
+             *
+             * @see ProductReleasesValueSource
+             */
+            fun latest(configure: FilterParameters.() -> Unit = {}) = dependenciesHelper.addIntelliJPluginVerifierIdes(
+                notationsProvider = ProductReleasesValueSource(configure).map { notations ->
+                    notations
+                        .map { it.parseIdeNotation() }
+                        .distinctBy { (type, _) -> type.code }
+                        .map { (type, version) -> "${type.code}-$version" }
+                },
+            )
+
+            /**
+             * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
+             * for IntelliJ Platform Verifier.
+             *
+             * @see ProductReleasesValueSource
+             */
+            fun recommended() = dependenciesHelper.addIntelliJPluginVerifierIdes(
+                notationsProvider = ProductReleasesValueSource(),
+            )
 
             /**
              * Helper to fall back to the [recommended] IDE list when the receiver provider is absent.
@@ -1087,7 +1122,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             /**
              * Retrieves matching IDEs using custom filter parameters.
              *
-             * @see ide
              * @see ProductReleasesValueSource
              */
             fun select(configure: FilterParameters.() -> Unit = {}) = dependenciesHelper.addIntelliJPluginVerifierIdes(
@@ -1099,16 +1133,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              */
             @Suppress("FunctionName")
             fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) =
-                dependenciesHelper.createProductReleasesValueSource {
-                    val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
-
-                    channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
-                    types.convention(extensionProvider.map { listOf(it.productInfo.type) })
-                    sinceBuild.convention(ideaVersionProvider.flatMap { it.sinceBuild })
-                    untilBuild.convention(ideaVersionProvider.flatMap { it.untilBuild })
-
-                    configure()
-                }
+                dependenciesHelper.createRecommendedPluginVerifierIdesValueSource(configure)
 
             companion object {
                 fun register(

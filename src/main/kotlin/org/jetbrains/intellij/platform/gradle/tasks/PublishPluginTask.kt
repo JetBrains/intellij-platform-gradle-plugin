@@ -90,7 +90,6 @@ abstract class PublishPluginTask : DefaultTask() {
     @get:Optional
     abstract val ideServices: Property<Boolean>
 
-    private val pluginManager = IdePluginManager.createManager()
     private val log = Logger(javaClass)
 
     @TaskAction
@@ -101,6 +100,7 @@ abstract class PublishPluginTask : DefaultTask() {
         }
 
         val path = archiveFile.asPath
+        val pluginManager = IdePluginManager.createManager()
         val plugin = pluginManager.safelyCreatePlugin(path, suppressPluginProblems = false).getOrThrow()
 
         val resolvedHost = host.get()

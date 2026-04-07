@@ -30,4 +30,14 @@ class PrintBundledPluginsTaskTest : IntelliJPluginTestBase() {
             )
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildWithConfigurationCache(Tasks.PRINT_BUNDLED_PLUGINS)
+
+        buildWithConfigurationCache(Tasks.PRINT_BUNDLED_PLUGINS) {
+            assertConfigurationCacheReused()
+            assertContains("Bundled plugins for IntelliJ IDEA", output)
+        }
+    }
 }

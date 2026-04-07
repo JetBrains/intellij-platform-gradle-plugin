@@ -47,18 +47,25 @@ jobs:
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v5
+        uses: gradle/actions/setup-gradle@v6
         with:
           cache-read-only: ${{ inputs.cacheReadOnly }}
 
-      - name: Restore TestKit Gradle Home
-        uses: actions/cache@v4
+      - name: Cache test IDEs
+        uses: actions/cache@v5
         with:
-          path: .test-gradle-home
-          key: testkit-home-v1-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties') }}
+          path: .gradle/testGradleHome/.ides
+          key: test-gradle-home-v1-ides-${{ runner.os }}-${{ hashFiles('gradle.properties') }}
           restore-keys: |
-            testkit-home-v1-${{ runner.os }}-${{ inputs.gradleVersion }}-
-            testkit-home-v1-${{ runner.os }}-
+            test-gradle-home-v1-ides-${{ runner.os }}-
+
+      - name: Cache Gradle TestKit
+        uses: actions/cache@v5
+        with:
+          path: .gradle/testGradleHome/.testKit
+          key: test-gradle-home-v1-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          restore-keys: |
+            test-gradle-home-v1-testkit-${{ runner.os }}-
 
       - name: Run Tests
         env:
@@ -67,9 +74,9 @@ jobs:
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            TEST_GRADLE_USER_HOME="$(pwd -W)\\.test-gradle-home"
+            TEST_GRADLE_USER_HOME="$(pwd -W)\\.gradle\\testGradleHome"
           else
-            TEST_GRADLE_USER_HOME="$PWD/.test-gradle-home"
+            TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
           fi
           [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
           
@@ -77,4 +84,5 @@ jobs:
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
             $TESTS \
-            --console=plain
+            --console=plain \
+            --no-build-cache

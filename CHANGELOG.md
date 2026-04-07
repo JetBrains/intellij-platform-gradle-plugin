@@ -2,6 +2,44 @@
 
 ## [next]
 
+### Breaking Changes
+
+- Default `intellijPlatform.pluginConfiguration.ideaVersion.sinceBuild` to the target IntelliJ Platform `major` build instead of `major.minor`; explicitly setting it to the `major` value is now redundant and can be removed.
+- Apply `intellijPlatform.pluginVerification.ides.recommended()` by default when no IntelliJ Plugin Verifier IDEs are configured explicitly.
+- Default `intellijPlatform.signing.certificateChain`, `intellijPlatform.signing.privateKey`, `intellijPlatform.signing.password`, and `intellijPlatform.publishing.token` to the Plugin Template environment variables: `CERTIFICATE_CHAIN`, `PRIVATE_KEY`, `PRIVATE_KEY_PASSWORD`, and `PUBLISH_TOKEN`.
+
+### Added
+
+- Add `org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes` Gradle property to control automatic default IDE selection for the `verifyPlugin` task.
+- Add `intellijPlatform.pluginVerification.ides.current()` helper to refer to the currently targeted IntelliJ Platform.
+- Add `intellijPlatform.pluginVerification.ides.latest()` helper to resolve the latest IDE release for each selected type.
+- Add default value for `targetRootOutputDir` of `GenerateParserTask`.
+- Add properties `targetRootOutputDir` and `packageName` (with defaults) for `GenerateLexerTask`. These properties replace `targetOutputDir` and automatically use a proper subdirectory matching the package.
+- Default the Java toolchain language version to the Java version required by the targeted IntelliJ Platform, so common Kotlin JVM projects no longer need to repeat `kotlin { jvmToolchain(...) }`.
+
+### Changed
+
+- Automatically inherit the root project's targeted IntelliJ Platform in `org.jetbrains.intellij.platform.module` subprojects when they do not declare their own platform dependency explicitly.
+- Automatically package project dependencies on `org.jetbrains.intellij.platform.module` subprojects to `lib/modules`; explicit `pluginModule(implementation(project(...)))` is no longer required in the common case.
+- Deprecate property `targetOutputDir` of `GenerateLexerTask`.
+- Deprecate properties `pathToParser` and `pathToPsiRoot` of `GenerateParserTask`.
+- Purge stale files `GenerateLexerTask` and `GenerateParserTask` by default (as soon as you stop using the deprecated properties).
+- Deprecate `targetFile(String)` and `targetFile(Provider)` of `GenerateLexerTask`.
+- Deprecate `parserFile()` and `psiDir()` of `GenerateParserTask`.
+
+### Fixed
+
+- Fix `NoClassDefFoundError: org.jetbrains.kotlin.gradle.tasks.KotlinCompile` when `org.jetbrains.kotlin.plugin.compose` is applied together with module plugin.
+- Update module descriptor parsing to support additional dependency attributes, adjust tests accordingly, and configure XML decoding to ignore unknown child elements.
+
+## [2.13.1] - 2026-03-14
+
+### Fixed
+
+- Hotfix for Grammar-Kit support on Windows
+
+## [2.13.0] - 2026-03-12
+
 ### Added
 
 - Mark the `intellijPlatformDistribution` outgoing artifact as `builtBy` with `jarSearchableOptionsTaskProvider` and `prepareSandboxTaskProvider`
@@ -13,6 +51,7 @@
 - Include `project.name` in sandbox path configuration.
 - Refactor code to optimize resource handling, improve regex reusability, and enhance readability across multiple modules.
 - Replace `createJFlex` with `createGrammarKit` in `addGrammarKitDependency` dependency helper
+- Update `recommended` helper to use `addIntelliJPluginVerifierIdes` to always resolve IDE installers.
 
 ## [2.12.0] - 2026-03-06
 
@@ -1670,7 +1709,9 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.12.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.1...HEAD
+[2.13.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.0...v2.13.1
+[2.13.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.12.0...v2.13.0
 [2.12.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.11.0...v2.12.0
 [2.11.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.5...v2.11.0
 [2.10.5]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.10.4...v2.10.5

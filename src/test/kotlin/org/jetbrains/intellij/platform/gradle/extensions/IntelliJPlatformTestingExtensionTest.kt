@@ -166,6 +166,9 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 }
                 
                 intellijPlatform {
+                    buildSearchableOptions = false
+                    instrumentCode = false
+                    
                     caching {
                         ides {
                             enabled = false
@@ -218,6 +221,9 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 }
                 
                 intellijPlatform {
+                    buildSearchableOptions = false
+                    instrumentCode = false
+                    
                     caching {
                         ides {
                             enabled = false
@@ -228,14 +234,21 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 val customTest by intellijPlatformTesting.testIde.registering {
                     type = org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity
                     version = "$intellijPlatformVersion"
-                    useInstaller.set(true)
+                    useInstaller = true
+                    
                     task {
                         enabled = false
                     }
                 }
+                
+                configurations.named("intellijPlatformDependency_customTest") {
+                    withDependencies {
+                        throw Exception(toList().joinToString())
+                    }
+                }
                 """.trimIndent()
 
-        build("dependencies", "--configuration", "intellijPlatformDependency_customTest") {
+        buildAndFail("customTest") {
             assertContains("idea:ideaIC:$intellijPlatformVersion", output)
             assertNotContains("localIde:AI:AI-243.12345.67", output)
         }

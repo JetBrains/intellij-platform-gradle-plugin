@@ -50,4 +50,24 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
             )
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    ${Tasks.PRINT_PRODUCTS_RELEASES} {
+                        types = listOf(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea)
+                        channels = listOf(org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.RELEASE)
+                    }
+                }
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.PRINT_PRODUCTS_RELEASES)
+
+        buildWithConfigurationCache(Tasks.PRINT_PRODUCTS_RELEASES) {
+            assertConfigurationCacheReused()
+            assertContains("> Task :${Tasks.PRINT_PRODUCTS_RELEASES}", output)
+        }
+    }
 }

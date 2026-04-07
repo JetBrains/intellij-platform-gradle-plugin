@@ -386,4 +386,24 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
             assertNotContains("Invalid since-build version format The since-build='211.*'", output)
         }
     }
+
+    @Test
+    fun `reuses configuration cache`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="212" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION)
+
+        buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertConfigurationCacheReused()
+            assertNotContains(HEADER, output)
+        }
+    }
 }

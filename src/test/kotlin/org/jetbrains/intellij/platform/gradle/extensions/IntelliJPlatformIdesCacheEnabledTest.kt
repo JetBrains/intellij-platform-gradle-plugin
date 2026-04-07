@@ -3,17 +3,16 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.jetbrains.intellij.platform.gradle.*
-import kotlin.io.path.readText
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 class IntelliJPlatformIdesCacheEnabledTest : IntelliJPluginTestBase() {
 
+    override val enableCaching = false
+
     @BeforeTest
     override fun setup() {
         super.setup()
-
-        buildFile overwrite buildFile.readText().replace("enabled = false", "")
 
         buildFile write //language=kotlin
                 """

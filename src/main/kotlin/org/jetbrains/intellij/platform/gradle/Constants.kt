@@ -68,6 +68,13 @@ object Constants {
         const val VENDOR = "vendor"
     }
 
+    object EnvironmentVariables {
+        const val CERTIFICATE_CHAIN = "CERTIFICATE_CHAIN"
+        const val PRIVATE_KEY = "PRIVATE_KEY"
+        const val PRIVATE_KEY_PASSWORD = "PRIVATE_KEY_PASSWORD"
+        const val PUBLISH_TOKEN = "PUBLISH_TOKEN"
+    }
+
     object Components {
         const val INTELLIJ_PLATFORM = "intellijPlatform"
     }
