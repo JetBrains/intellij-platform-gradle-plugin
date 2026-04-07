@@ -6,6 +6,7 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
+import java.nio.file.Path
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -13,6 +14,7 @@ private const val DEPENDENCIES = "dependencies"
 
 class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "intellij-platform-dependency-validation",
+    useCache = false,
 ) {
 
     @Test
@@ -26,6 +28,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform
+                [org.jetbrains.intellij.platform] Configuration 'intellijPlatformDependency' is empty. LocalIvyArtifactPathComponentMetadataRule will not be registered.
                 No dependencies
                 """.trimIndent(),
                 output,
@@ -122,6 +125,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform
+                [org.jetbrains.intellij.platform] Configuration 'intellijPlatformDependency' has some resolution errors. LocalIvyArtifactPathComponentMetadataRule will not be registered.
                 \--- $artifactCoordinates FAILED
                 """.trimIndent(),
                 output,
@@ -263,8 +267,6 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                     }
                 }
                 """.trimIndent()
-
-        buildFile.useCache()
 
         build(DEPENDENCIES, "--configuration=compileClasspath") {
             val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
@@ -428,6 +430,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     @Test
     fun `do not fail when default IntelliJ Platform dependencies are absent in old IntelliJ Platform releases`() {
         val properties = defaultProjectProperties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)
+        val fullLineBundledPluginPath = Path.of("plugins", "fullLine")
 
         // Test with default dependencies enabled (default behavior)
         buildFile write //language=kotlin
@@ -452,6 +455,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
             assertContains(
                 """
                 intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
+                Failed to read bundled plugin '$fullLineBundledPluginPath': Plugin '$fullLineBundledPluginPath' is invalid: The plugin descriptor 'plugin.xml' is not found.
                 \--- bundledModule:intellij-platform-test-runtime:RD-241.19072.30
                 """.trimIndent(),
                 output,

@@ -5,13 +5,13 @@ package org.jetbrains.intellij.platform.gradle.providers
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.loadModuleDescriptors
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectBundledPluginsJars
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectIntelliJPlatformJars
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import java.util.jar.JarFile
 import kotlin.io.path.invariantSeparatorsPathString
 
 /**
@@ -47,42 +47,51 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
                 .map { platformPath.relativize(it).invariantSeparatorsPathString }
                 .toSet()
 
-        return JarFile(moduleDescriptorsFile.toFile()).use { jarFile ->
-            jarFile
-                .entries()
-                .asSequence()
-                .filter { it.name.endsWith(".xml") }
-                .map { jarFile.getInputStream(it) }
-                .mapNotNull { decode<ModuleDescriptor>(it) }
-                .mapNotNull { descriptor ->
-                    descriptor.path
-                        ?.takeIf { it in collectedJars }
-                        ?.let { Coordinates(descriptor.groupId, descriptor.artifactId) }
-                }
-                .toSet()
-                .plus(explicitExclusions)
-        }
-    }
-
-    private inline val ModuleDescriptor.groupId
-        get() = name.split('.').take(2).joinToString(".", prefix = "com.jetbrains.")
-
-    private inline val ModuleDescriptor.artifactId: String
-        get() = name
-            .split('.')
-            .drop(1)
-            .let {
-                when (it.first()) {
-                    in setOf("platform", "vcs", "cloud") -> it.drop(1)
-                    else -> it
-                }
+        return loadModuleDescriptors(moduleDescriptorsFile)
+            .values
+            .asSequence()
+            .mapNotNull { descriptor ->
+                descriptor
+                    .takeIf { it.namespace == null || it.namespace in supportedModuleDescriptorNamespaces }
+                    ?.path
+                    ?.takeIf { it in collectedJars }
+                    ?.let { descriptor.toCoordinatesOrNull() }
             }
-            .joinToString("-")
-            .replace(camelCaseBoundaryRegex, "$1-$2")
-            .lowercase()
+            .toSet()
+            .plus(explicitExclusions)
+    }
 }
 
 private val camelCaseBoundaryRegex = Regex("([a-z])([A-Z])")
+private val supportedModuleDescriptorNamespaces = setOf("jetbrains", "jps")
+
+internal fun ModuleDescriptor.toCoordinatesOrNull(): Coordinates? {
+    val nameParts = name.split('.')
+    if (nameParts.size < 2) {
+        return null
+    }
+
+    val artifactIdParts = nameParts
+        .drop(1)
+        .let {
+            when (it.firstOrNull()) {
+                in setOf("platform", "vcs", "cloud") -> it.drop(1)
+                else -> it
+            }
+        }
+
+    if (artifactIdParts.isEmpty()) {
+        return null
+    }
+
+    return Coordinates(
+        groupId = nameParts.take(2).joinToString(".", prefix = "com.jetbrains."),
+        artifactId = artifactIdParts
+            .joinToString("-")
+            .replace(camelCaseBoundaryRegex, "$1-$2")
+            .lowercase(),
+    )
+}
 
 private val explicitExclusions = setOf(
     Coordinates("junit", "junit"),

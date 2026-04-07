@@ -26,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.File
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.io.path.notExists
 
@@ -114,7 +115,9 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
          * and may fail if dependency entries contain unexpected metadata.
          */
         val ivyXmlFile = File("$absNormalizedIvyPath/${id.version}/${id.group}-${id.name}-${id.version}.xml")
-        val publications = decodeIvyModulePublications(ivyXmlFile.readText())
+        val publications = ivyPublicationsCache.computeIfAbsent(ivyXmlFile.path) {
+            decodeIvyModulePublications(ivyXmlFile.readText())
+        }
         val (moduleType, moduleVersion) = id.version.parseIdeNotation()
         val productInfo = Path.of(absNormalizedPlatformPath).productInfo()
 
@@ -165,6 +168,8 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
     }
 
     companion object {
+        private val ivyPublicationsCache = ConcurrentHashMap<String, List<org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact>>()
+
         internal fun register(
             configuration: Configuration,
             dependencies: DependencyHandler,

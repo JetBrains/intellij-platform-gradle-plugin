@@ -6,22 +6,34 @@ import java.nio.file.FileSystems
 import java.nio.file.Path
 import java.util.zip.ZipFile
 import kotlin.io.path.*
+import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
 @OptIn(ExperimentalPathApi::class)
 open class IntelliJPlatformIntegrationTestBase(
     private val resourceName: String? = null,
-    protected val useCache: Boolean = true,
+    protected val useCache: Boolean = false,
 ) : IntelliJPlatformTestBase() {
+    protected open val reuseProjectState = true
 
     protected open val defaultProjectProperties: Map<String, Any> = mapOf(
         "intellijPlatform.version" to intellijPlatformVersion,
         "intellijPlatform.type" to intellijPlatformType,
+        GradleProperties.SelfUpdateCheck.toString() to false,
     )
 
     @BeforeTest
     override fun setup() {
         super.setup()
+
+        if (reuseProjectState) {
+            val initialDir = dir
+            dir = reusableProjectDirectory()
+            if (initialDir != dir) {
+                initialDir.deleteRecursively()
+            }
+            prepareReusableProjectDirectory()
+        }
 
         if (resourceName != null) {
             use(resourceName)
@@ -29,6 +41,13 @@ open class IntelliJPlatformIntegrationTestBase(
 
         if (useCache) {
             buildFile.useCache()
+        }
+    }
+
+    @AfterTest
+    override fun tearDown() {
+        if (!reuseProjectState) {
+            super.tearDown()
         }
     }
 
@@ -76,8 +95,9 @@ open class IntelliJPlatformIntegrationTestBase(
     /**
      * Configures caching for IntelliJ Platform integration tests within the provided file path context.
      *
-     * Usage of this method is intended to prepare the test environment for scenarios requiring IDEs caching to
-     * be enabled.
+     * Usage of this method is intended to prepare the test environment for scenarios explicitly covering IDE cache
+     * behavior. Most integration tests should rely on the shared TestKit Gradle home instead, which already reuses
+     * downloaded and transformed IntelliJ Platform artifacts without paying the extra local-IDE indirection cost.
      *
      * The changes applied by this method are written directly to the file represented by the receiver [Path].
      */
@@ -93,5 +113,25 @@ open class IntelliJPlatformIntegrationTestBase(
                     }
                 }
                 """.trimIndent()
+    }
+
+    private fun reusableProjectDirectory() =
+        gradleHome
+            .resolve(".integrationTestProjects")
+            .resolve(
+                listOfNotNull(
+                    this::class.qualifiedName,
+                    resourceName,
+                ).joinToString("_")
+                    .replace(Regex("[^A-Za-z0-9._-]"), "_")
+            )
+            .createDirectories()
+
+    private fun prepareReusableProjectDirectory() {
+        dir.listDirectoryEntries().forEach {
+            if (it.name != ".gradle") {
+                it.deleteRecursively()
+            }
+        }
     }
 }
