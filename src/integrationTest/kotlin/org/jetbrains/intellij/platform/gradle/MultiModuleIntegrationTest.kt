@@ -68,8 +68,9 @@ class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `module project packaging works with isolated projects enabled`() {
-        gradleProperties += //language=properties
+        gradleProperties overwrite //language=properties
                 """
+                kotlin.stdlib.default.dependency = false
                 org.gradle.unsafe.isolated-projects=true
                 """.trimIndent()
 

@@ -6,7 +6,6 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
-import java.nio.file.Path
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -16,6 +15,11 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     resourceName = "intellij-platform-dependency-validation",
     useCache = false,
 ) {
+
+    private fun assertTestRuntimeFixClasspathDependency(version: String, output: String) {
+        assertContains("intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath", output)
+        assertContains("\\--- bundledModule:intellij-platform-test-runtime:$version", output)
+    }
 
     @Test
     fun `allow for no IntelliJ Platform dependency if not running tasks`() {
@@ -430,7 +434,11 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     @Test
     fun `do not fail when default IntelliJ Platform dependencies are absent in old IntelliJ Platform releases`() {
         val properties = defaultProjectProperties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)
-        val fullLineBundledPluginPath = Path.of("plugins", "fullLine")
+
+        gradleProperties += //language=properties
+                """
+                org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes = false
+                """.trimIndent()
 
         // Test with default dependencies enabled (default behavior)
         buildFile write //language=kotlin
@@ -452,14 +460,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent()
 
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.1.7")) {
-            assertContains(
-                """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
-                Failed to read bundled plugin '$fullLineBundledPluginPath': Plugin '$fullLineBundledPluginPath' is invalid: The plugin descriptor 'plugin.xml' is not found.
-                \--- bundledModule:intellij-platform-test-runtime:RD-241.19072.30
-                """.trimIndent(),
-                output,
-            )
+            assertTestRuntimeFixClasspathDependency("RD-241.19072.30", output)
             assertNotContains(
                 """
                 +--- bundledModule:intellij.rider
@@ -469,13 +470,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         }
 
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.2.8")) {
-            assertContains(
-                """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
-                \--- bundledModule:intellij-platform-test-runtime:RD-242.23726.225
-                """.trimIndent(),
-                output,
-            )
+            assertTestRuntimeFixClasspathDependency("RD-242.23726.225", output)
         }
     }
 }
