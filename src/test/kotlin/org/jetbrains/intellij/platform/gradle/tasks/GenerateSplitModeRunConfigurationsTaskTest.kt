@@ -92,14 +92,8 @@ class GenerateSplitModeRunConfigurationsTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `generate shared split mode run configurations for nested project`() {
-        settingsFile overwrite //language=kotlin
+        settingsFile write //language=kotlin
                 """
-                rootProject.name = "projectName"
-
-                plugins {
-                    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
-                }
-
                 include("nestedProject")
                 """.trimIndent()
 
@@ -109,24 +103,24 @@ class GenerateSplitModeRunConfigurationsTaskTest : IntelliJPluginTestBase() {
                     id("java")
                     id("org.jetbrains.intellij.platform")
                 }
-
+                
                 version = "1.0.0"
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
                         create("$intellijPlatformType", "$intellijPlatformVersion") { this.useInstaller.set(useInstaller) }
                     }
                 }
-
+                
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false

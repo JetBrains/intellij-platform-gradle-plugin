@@ -4,17 +4,14 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
-import org.gradle.api.file.Directory
-import org.gradle.api.file.ProjectLayout
-import org.gradle.api.file.RegularFile
-import org.gradle.api.model.ObjectFactory
+import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import javax.inject.Inject
 import kotlin.io.path.createDirectories
 import kotlin.io.path.writeText
 
@@ -24,57 +21,48 @@ import kotlin.io.path.writeText
  * The task is intentionally left ungrouped so it can be invoked directly without polluting the standard Gradle tasks listing.
  */
 @DisableCachingByDefault(because = "Small utility task that writes shared IntelliJ IDEA run configuration files.")
-abstract class GenerateSplitModeRunConfigurationsTask @Inject constructor(
-    objects: ObjectFactory,
-    private val projectLayout: ProjectLayout,
-) : DefaultTask() {
-
-    private val projectPathProperty = objects.property(String::class.java)
+abstract class GenerateSplitModeRunConfigurationsTask : DefaultTask() {
 
     @get:Input
-    val projectPath: String
-        get() = projectPathProperty.get()
+    abstract val projectPath: Property<String>
 
     @get:OutputFile
-    val backendConfigurationFile: RegularFile
-        get() = runConfigurationFile(Tasks.RUN_IDE_BACKEND)
+    abstract val backendConfigurationFile: RegularFileProperty
 
     @get:OutputFile
-    val frontendConfigurationFile: RegularFile
-        get() = runConfigurationFile(Tasks.RUN_IDE_FRONTEND)
+    abstract val frontendConfigurationFile: RegularFileProperty
 
     @get:OutputFile
-    val compoundConfigurationFile: RegularFile
-        get() = runConfigurationFile(RUN_IDE_SPLIT_MODE_CONFIGURATION_FILE_NAME)
+    abstract val compoundConfigurationFile: RegularFileProperty
 
     @TaskAction
     fun generate() {
-        runConfigurationsDirectory.asPath.createDirectories()
-
-        backendConfigurationFile.asPath.writeText(
-            gradleRunConfigurationXml(
-                configurationName = BACKEND_CONFIGURATION_NAME,
-                taskPath = qualifiedTaskPath(Tasks.RUN_IDE_BACKEND),
+        backendConfigurationFile.asPath.apply {
+            parent.createDirectories()
+            writeText(
+                gradleRunConfigurationXml(
+                    configurationName = BACKEND_CONFIGURATION_NAME,
+                    taskPath = qualifiedTaskPath(Tasks.RUN_IDE_BACKEND),
+                ),
             )
-        )
-        frontendConfigurationFile.asPath.writeText(
-            gradleRunConfigurationXml(
-                configurationName = FRONTEND_CONFIGURATION_NAME,
-                taskPath = qualifiedTaskPath(Tasks.RUN_IDE_FRONTEND),
+        }
+        frontendConfigurationFile.asPath.apply {
+            parent.createDirectories()
+            writeText(
+                gradleRunConfigurationXml(
+                    configurationName = FRONTEND_CONFIGURATION_NAME,
+                    taskPath = qualifiedTaskPath(Tasks.RUN_IDE_FRONTEND),
+                ),
             )
-        )
-        compoundConfigurationFile.asPath.writeText(
-            compoundRunConfigurationXml()
-        )
+        }
+        compoundConfigurationFile.asPath.apply {
+            parent.createDirectories()
+            writeText(compoundRunConfigurationXml())
+        }
     }
 
-    private val runConfigurationsDirectory: Directory
-        get() = projectLayout.projectDirectory.dir(RUN_CONFIGURATIONS_DIRECTORY)
-
-    private fun gradleRunConfigurationXml(
-        configurationName: String,
-        taskPath: String,
-    ) = """
+    private fun gradleRunConfigurationXml(configurationName: String, taskPath: String) =
+        """
         <component name="ProjectRunConfigurationManager">
           <configuration default="false" name="$configurationName" type="GradleRunConfiguration" factoryName="Gradle">
             <ExternalSystemSettings>
@@ -99,9 +87,10 @@ abstract class GenerateSplitModeRunConfigurationsTask @Inject constructor(
             <method v="2" />
           </configuration>
         </component>
-    """.trimIndent() + "\n"
+        """.trimIndent() + "\n"
 
-    private fun compoundRunConfigurationXml() = """
+    private fun compoundRunConfigurationXml() = //language=XML
+        """
         <component name="ProjectRunConfigurationManager">
           <configuration default="false" name="$RUN_IDE_SPLIT_MODE_CONFIGURATION_NAME" type="CompoundRunConfigurationType" factoryName="Compound Run Configuration">
             <toRun type="GradleRunConfiguration" name="$BACKEND_CONFIGURATION_NAME" />
@@ -109,15 +98,9 @@ abstract class GenerateSplitModeRunConfigurationsTask @Inject constructor(
             <method v="2" />
           </configuration>
         </component>
-    """.trimIndent() + "\n"
+        """.trimIndent() + "\n"
 
-    private fun runConfigurationFile(name: String) =
-        runConfigurationsDirectory.file("$name$RUN_CONFIGURATION_FILE_SUFFIX")
-
-    private fun qualifiedTaskPath(taskName: String) = when (projectPath) {
-        ":" -> ":$taskName"
-        else -> "$projectPath:$taskName"
-    }
+    private fun qualifiedTaskPath(taskName: String) = "${projectPath.get()}:$taskName".replace("::", ":")
 
     companion object : Registrable {
         private const val BACKEND_CONFIGURATION_NAME = "Run IDE (Backend)"
@@ -128,12 +111,22 @@ abstract class GenerateSplitModeRunConfigurationsTask @Inject constructor(
         private const val RUN_CONFIGURATION_FILE_SUFFIX = ".run.xml"
         private const val PROJECT_DIR_MACRO = $$"$PROJECT_DIR$"
 
+        private fun Project.runConfigurationFile(name: String) =
+            layout.projectDirectory.file("$RUN_CONFIGURATIONS_DIRECTORY/$name$RUN_CONFIGURATION_FILE_SUFFIX")
+
         override fun register(project: Project) =
             project.registerTask<GenerateSplitModeRunConfigurationsTask>(
                 Tasks.GENERATE_SPLIT_MODE_RUN_CONFIGURATIONS,
                 configureWithType = false,
             ) {
-                projectPathProperty.convention(project.path)
+                projectPath.convention(project.path)
+                backendConfigurationFile.convention(project.runConfigurationFile(Tasks.RUN_IDE_BACKEND))
+                frontendConfigurationFile.convention(project.runConfigurationFile(Tasks.RUN_IDE_FRONTEND))
+                compoundConfigurationFile.convention(
+                    project.runConfigurationFile(
+                        RUN_IDE_SPLIT_MODE_CONFIGURATION_FILE_NAME,
+                    ),
+                )
             }
     }
 }
