@@ -16,6 +16,7 @@ class MultiModuleIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "multi-module",
     useCache = false,
 ) {
+    override val reuseProjectState = false
 
     @Ignore
     @Test

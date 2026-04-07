@@ -15,6 +15,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     resourceName = "intellij-platform-dependency-validation",
     useCache = false,
 ) {
+    override val reuseProjectState = false
 
     private fun assertTestRuntimeFixClasspathDependency(version: String, output: String) {
         assertContains("intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath", output)
