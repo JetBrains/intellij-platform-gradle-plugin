@@ -26,6 +26,7 @@
 - Purge stale files `GenerateLexerTask` and `GenerateParserTask` by default (as soon as you stop using the deprecated properties).
 - Deprecate `targetFile(String)` and `targetFile(Provider)` of `GenerateLexerTask`.
 - Deprecate `parserFile()` and `psiDir()` of `GenerateParserTask`.
+- Update minimal IntelliJ platform version to 2023.3 and build number to 233
 
 ### Fixed
 
