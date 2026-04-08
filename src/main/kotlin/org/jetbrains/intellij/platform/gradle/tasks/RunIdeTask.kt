@@ -6,12 +6,7 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.Internal
-import org.gradle.api.tasks.JavaExec
-import org.gradle.api.tasks.Optional
-import org.gradle.api.tasks.TaskAction
-import org.gradle.api.tasks.UntrackedTask
+import org.gradle.api.tasks.*
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.named
 import org.gradle.process.JavaForkOptions
@@ -22,11 +17,7 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumen
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.models.customCommandFor
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
-import org.jetbrains.intellij.platform.gradle.tasks.aware.ComposeHotReloadAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginInstallationTargetAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
@@ -35,12 +26,7 @@ import java.net.InetSocketAddress
 import java.net.Socket
 import java.net.URI
 import java.util.concurrent.TimeUnit.MILLISECONDS
-import kotlin.io.path.Path
-import kotlin.io.path.createDirectories
-import kotlin.io.path.deleteIfExists
-import kotlin.io.path.exists
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
+import kotlin.io.path.*
 
 internal const val SPLIT_MODE_FRONTEND_COMMAND = "thinClient"
 private const val SPLIT_MODE_BACKEND_COMMAND = "serverMode"
@@ -330,11 +316,6 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
             }
 
             project.registerTask<RunIdeTask> {
-                splitModeTarget.convention(
-                    pluginInstallationTarget
-                        .map { it.toSplitModeTarget() }
-                        .orElse(SplitModeAware.SplitModeTarget.BACKEND)
-                )
                 systemPropertyDefault("idea.classpath.index.enabled", false)
                 systemPropertyDefault("idea.is.internal", true)
                 systemPropertyDefault("idea.plugin.in.sandbox.mode", true)
@@ -356,6 +337,11 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                     }
                 }
 
+                splitModeTarget.convention(
+                    pluginInstallationTarget
+                        .map { it.toSplitModeTarget() }
+                        .orElse(SplitModeAware.SplitModeTarget.BACKEND)
+                )
                 jvmArgumentProviders.add(
                     ComposeHotReloadArgumentProvider(
                         composeHotReloadAgentConfiguration = composeHotReloadAgentConfiguration,

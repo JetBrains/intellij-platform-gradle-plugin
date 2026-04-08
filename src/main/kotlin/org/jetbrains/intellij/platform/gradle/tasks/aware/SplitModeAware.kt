@@ -159,14 +159,3 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
     }
 }
 
-interface PluginInstallationTargetAware {
-
-    /**
-     * Specifies in which part of the product the developed plugin should be installed.
-     *
-     * Effective default value: [SplitModeAware.PluginInstallationTarget.BACKEND]
-     */
-    @get:Input
-    @get:Optional
-    val pluginInstallationTarget: Property<SplitModeAware.PluginInstallationTarget>
-}

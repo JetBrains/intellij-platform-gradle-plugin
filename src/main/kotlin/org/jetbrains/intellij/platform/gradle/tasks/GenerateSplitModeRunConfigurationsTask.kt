@@ -61,7 +61,7 @@ abstract class GenerateSplitModeRunConfigurationsTask : DefaultTask() {
         }
     }
 
-    private fun gradleRunConfigurationXml(configurationName: String, taskPath: String) =
+    private fun gradleRunConfigurationXml(configurationName: String, taskPath: String) = //language=XML
         """
         <component name="ProjectRunConfigurationManager">
           <configuration default="false" name="$configurationName" type="GradleRunConfiguration" factoryName="Gradle">
