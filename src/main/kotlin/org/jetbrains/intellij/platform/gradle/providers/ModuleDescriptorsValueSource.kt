@@ -6,13 +6,14 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.loadModuleDescriptors
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectBundledPluginsJars
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectIntelliJPlatformJars
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
-import org.jetbrains.intellij.platform.gradle.models.*
+import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.models.ModuleDescriptor
+import org.jetbrains.intellij.platform.gradle.models.coroutines
+import org.jetbrains.intellij.platform.gradle.models.kotlinStdlib
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.invariantSeparatorsPathString
+import java.nio.file.Path
 
 /**
  * Obtains the list of coordinates from module descriptors provided by the IntelliJ Platform.
@@ -29,7 +30,6 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
     }
 
     override fun obtain(): Set<Coordinates> {
-        val productInfo = parameters.intellijPlatformPath.asPath.productInfo()
         val platformPath = parameters.intellijPlatformPath.asPath
 
         val moduleDescriptorsFile = ModuleDescriptorsPathResolver(platformPath)
@@ -41,29 +41,16 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
             return fallbackExclusions + explicitExclusions
         }
 
-        val collectedJars =
-            collectIntelliJPlatformJars(productInfo, platformPath)
-                .plus(collectBundledPluginsJars(platformPath))
-                .map { platformPath.relativize(it).invariantSeparatorsPathString }
-                .toSet()
-
-        return loadModuleDescriptors(moduleDescriptorsFile)
-            .values
-            .asSequence()
-            .mapNotNull { descriptor ->
-                descriptor
-                    .takeIf { it.namespace == null || it.namespace in supportedModuleDescriptorNamespaces }
-                    ?.path
-                    ?.takeIf { it in collectedJars }
-                    ?.let { descriptor.toCoordinatesOrNull() }
-            }
-            .toSet()
-            .plus(explicitExclusions)
+        return loadModuleDescriptorCoordinates(moduleDescriptorsFile) + explicitExclusions
     }
 }
 
 private val camelCaseBoundaryRegex = Regex("([a-z])([A-Z])")
-private val supportedModuleDescriptorNamespaces = setOf("jetbrains", "jps")
+internal fun loadModuleDescriptorCoordinates(moduleDescriptorsFile: Path) = loadModuleDescriptors(moduleDescriptorsFile)
+    .values
+    .asSequence()
+    .mapNotNull(ModuleDescriptor::toCoordinatesOrNull)
+    .toSet()
 
 internal fun ModuleDescriptor.toCoordinatesOrNull(): Coordinates? {
     val nameParts = name.split('.')

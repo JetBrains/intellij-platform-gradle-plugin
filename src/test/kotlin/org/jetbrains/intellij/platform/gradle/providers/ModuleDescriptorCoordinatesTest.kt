@@ -4,8 +4,18 @@ package org.jetbrains.intellij.platform.gradle.providers
 
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.ModuleDescriptor
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.outputStream
+import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 import kotlin.test.assertNull
 
 class ModuleDescriptorCoordinatesTest {
@@ -55,7 +65,76 @@ class ModuleDescriptorCoordinatesTest {
         )
     }
 
+    @OptIn(ExperimentalPathApi::class)
+    @Test
+    fun `load module descriptor coordinates from bundled resources present on disk`() {
+        val platformPath = createTempDirectory("platform")
+
+        try {
+            val libPath = platformPath.resolve("lib").createDirectories()
+            libPath.resolve("util-8.jar").writeText("")
+            libPath.resolve("pdfbox3.jar").writeText("")
+
+            val moduleDescriptorsPath = platformPath.resolve("modules").createDirectories().resolve("module-descriptors.jar")
+            moduleDescriptorsPath.writeModuleDescriptorsJar(
+                "intellij.platform.util.xml" to """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <module name="intellij.platform.util" namespace="jps" visibility="public">
+                      <resources>
+                        <resource-root path="../lib/util-8.jar"/>
+                      </resources>
+                    </module>
+                """.trimIndent(),
+                "jaxb-api.xml" to """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <module name="jaxb-api" namespace="${'$'}legacy_jps_library" visibility="public">
+                      <resources>
+                        <resource-root path="../lib/jaxb-api.jar"/>
+                      </resources>
+                    </module>
+                """.trimIndent(),
+                "apache.pdfbox3.xml" to """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <module name="apache.pdfbox3" namespace="${'$'}legacy_jps_library" visibility="public">
+                      <resources>
+                        <resource-root path="../lib/pdfbox3.jar"/>
+                      </resources>
+                    </module>
+                """.trimIndent(),
+                "intellij.platform.boot.xml" to """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <module name="intellij.platform.boot" visibility="public">
+                      <resources>
+                        <resource-root path="../lib/platform-loader.jar"/>
+                      </resources>
+                    </module>
+                """.trimIndent(),
+            )
+
+            val coordinates = loadModuleDescriptorCoordinates(moduleDescriptorsPath)
+
+            assertTrue(Coordinates("com.jetbrains.intellij.platform", "util") in coordinates)
+            assertTrue(Coordinates("com.jetbrains.apache.pdfbox3", "pdfbox3") in coordinates)
+            assertTrue(Coordinates("com.jetbrains.intellij.platform", "boot") in coordinates)
+            assertFalse(coordinates.any { it.artifactId == "jaxb-api" })
+        } finally {
+            platformPath.deleteRecursively()
+        }
+    }
+
     private fun resources(path: String) = ModuleDescriptor.Resources(
         resourceRoot = ModuleDescriptor.Resources.ResourceRoot(path = path),
     )
+
+    private fun java.nio.file.Path.writeModuleDescriptorsJar(vararg entries: Pair<String, String>) {
+        outputStream().use { outputStream ->
+            ZipOutputStream(outputStream).use { zip ->
+                entries.forEach { (entryName, content) ->
+                    zip.putNextEntry(ZipEntry(entryName))
+                    zip.write(content.toByteArray())
+                    zip.closeEntry()
+                }
+            }
+        }
+    }
 }
