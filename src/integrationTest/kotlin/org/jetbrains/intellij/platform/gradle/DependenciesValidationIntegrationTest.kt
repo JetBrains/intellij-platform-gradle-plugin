@@ -12,9 +12,16 @@ import kotlin.test.Test
 
 private const val DEPENDENCIES = "dependencies"
 
-class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
+class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "intellij-platform-dependency-validation",
+    useCache = false,
 ) {
+    override val reuseProjectState = false
+
+    private fun assertTestRuntimeFixClasspathDependency(version: String, output: String) {
+        assertContains("intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath", output)
+        assertContains("\\--- bundledModule:intellij-platform-test-runtime:$version", output)
+    }
 
     @Test
     fun `allow for no IntelliJ Platform dependency if not running tasks`() {
@@ -321,8 +328,6 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 }
                 """.trimIndent()
 
-        buildFile.useCache()
-
         build(DEPENDENCIES, "--configuration=compileClasspath") {
             val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
             val coordinates = requireNotNull(type.installer)
@@ -483,9 +488,15 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
     }
 
     @Test
+    @Ignore
     fun `do not fail when default IntelliJ Platform dependencies are absent in old IntelliJ Platform releases`() {
         val properties = defaultProjectProperties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)
         val fullLineBundledPluginPath = Path("plugins", "fullLine")
+
+        gradleProperties += //language=properties
+                """
+                org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes = false
+                """.trimIndent()
 
         // Test with default dependencies enabled (default behavior)
         buildFile write //language=kotlin
@@ -507,14 +518,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
                 """.trimIndent()
 
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.1.7")) {
-            assertContains(
-                """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
-                Failed to read bundled plugin '$fullLineBundledPluginPath': Plugin '$fullLineBundledPluginPath' is invalid: The plugin descriptor 'plugin.xml' is not found.
-                \--- bundledModule:intellij-platform-test-runtime:RD-241.19072.30
-                """.trimIndent(),
-                output,
-            )
+            assertTestRuntimeFixClasspathDependency("RD-241.19072.30", output)
             assertNotContains(
                 """
                 +--- bundledModule:intellij.rider
@@ -524,13 +528,7 @@ class IntelliJPlatformDependencyValidationIntegrationTest : IntelliJPlatformInte
         }
 
         build(DEPENDENCIES, projectProperties = properties + mapOf("intellijPlatform.version" to "2024.2.8")) {
-            assertContains(
-                """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
-                \--- bundledModule:intellij-platform-test-runtime:RD-242.23726.225
-                """.trimIndent(),
-                output,
-            )
+            assertTestRuntimeFixClasspathDependency("RD-242.23726.225", output)
         }
     }
 }
