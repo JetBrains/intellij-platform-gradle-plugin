@@ -15,7 +15,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.ComposeHotReloadArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
-import org.jetbrains.intellij.platform.gradle.models.customCommandFor
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -213,14 +212,6 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         systemProperties.remove("compose.reload.staticsReinitializeMode")
         systemProperties.remove("idea.reset.classpath.from.manifest")
         systemProperties.remove("java.nio.file.spi.DefaultFileSystemProvider")
-
-        val frontendCommand = productInfo.customCommandFor(runtimeArchitecture.get(), SPLIT_MODE_FRONTEND_COMMAND)
-
-        mainClass.set(frontendCommand?.mainClass ?: SPLIT_MODE_FRONTEND_MAIN_CLASS)
-        splitModeFrontendBootstrapClasspath.setFrom(
-            (frontendCommand?.bootClassPathJarNames?.takeIf { it.isNotEmpty() } ?: listOf("platform-loader.jar"))
-                .map { platformPath.resolve("lib/$it").toFile() }
-        )
         classpath = splitModeFrontendBootstrapClasspath
     }
 
@@ -337,11 +328,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                     }
                 }
 
-                splitModeTarget.convention(
-                    pluginInstallationTarget
-                        .map { it.toSplitModeTarget() }
-                        .orElse(SplitModeAware.SplitModeTarget.BACKEND)
-                )
+                splitModeTarget.conventionFrom(pluginInstallationTarget)
                 jvmArgumentProviders.add(
                     ComposeHotReloadArgumentProvider(
                         composeHotReloadAgentConfiguration = composeHotReloadAgentConfiguration,

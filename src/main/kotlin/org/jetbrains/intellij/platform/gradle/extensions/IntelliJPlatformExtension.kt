@@ -40,6 +40,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.conventionFrom
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Path
@@ -1182,11 +1183,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 projectName.convention(project.name)
                 sandboxContainer.convention(project.extensionProvider.flatMap { it.caching.path.dir(Sandbox.CONTAINER) })
                 splitMode.convention(false)
-                splitModeTarget.convention(
-                    pluginInstallationTarget
-                        .map { it.toSplitModeTarget() }
-                        .orElse(SplitModeAware.SplitModeTarget.BACKEND)
-                )
+                splitModeTarget.conventionFrom(pluginInstallationTarget)
             }
     }
 }

@@ -254,6 +254,18 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     runtimeDirectory.map { it.file("lib/tools") }
                 )
 
+                if (this is RunIdeTask) {
+                    splitModeFrontendBootstrapClasspath.from(
+                        files(
+                            runtimeArchitecture.map { architecture ->
+                                RunnableIdeExecutionProfile.SplitModeFrontend
+                                    .resolveBootClassPathJarNames(this, architecture)
+                                    .map { platformPath.resolve("lib/$it") }
+                            }
+                        )
+                    )
+                }
+
                 systemProperty("idea.reset.classpath.from.manifest", "true")
 
                 if (this is SplitModeAware) {

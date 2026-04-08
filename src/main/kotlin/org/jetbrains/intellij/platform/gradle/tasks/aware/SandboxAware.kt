@@ -68,16 +68,7 @@ interface SandboxAware : SandboxStructure {
             .finalizeValueOnRead()
 
         sandboxPluginsDirectory
-            .convention(
-                sandboxProducerTaskProvider.flatMap { producer ->
-                    producer.effectivePluginInstallationTarget.flatMap { target ->
-                        when (target) {
-                            SplitModeAware.PluginInstallationTarget.BOTH -> producer.sandboxPluginsDirectory
-                            else -> producer.sandboxPluginsFrontendDirectory
-                        }
-                    }
-                }
-            )
+            .convention(sandboxProducerTaskProvider.flatMap { it.frontendProcessPluginsDirectory() })
             .finalizeValueOnRead()
 
         sandboxSystemDirectory

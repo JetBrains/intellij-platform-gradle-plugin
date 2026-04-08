@@ -74,7 +74,7 @@ class SandboxArgumentProvider(
 /**
  * Provides the frontend sandbox via a properties file, matching the standalone JetBrains Client launcher contract.
  */
-class FrontendSandboxArgumentProvider(
+internal class FrontendSandboxArgumentProvider(
     @Internal
     val frontendPropertiesFile: Provider<RegularFile>,
 ) : CommandLineArgumentProvider {

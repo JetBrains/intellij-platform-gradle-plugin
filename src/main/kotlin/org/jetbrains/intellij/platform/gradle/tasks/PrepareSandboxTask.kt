@@ -30,6 +30,9 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginInstallationTarg
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxStructure
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.conventionFrom
+import org.jetbrains.intellij.platform.gradle.tasks.aware.frontendProcessPluginsDirectory
+import org.jetbrains.intellij.platform.gradle.tasks.aware.pluginInstallationDirectory
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
@@ -218,19 +221,14 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         }
         log.info("Preparing sandbox for a Split Mode.")
 
-        val pluginsDirectory = effectivePluginInstallationTarget.flatMap {
-            when (it) {
-                SplitModeAware.PluginInstallationTarget.BOTH -> sandboxPluginsDirectory
-                else -> sandboxPluginsFrontendDirectory
-            }
-        }
+        val pluginsDirectory = frontendProcessPluginsDirectory().get().asPath
 
         splitModeFrontendProperties.asPath.writeText(
             """
             idea.config.path=${sandboxConfigFrontendDirectory.asPath.safePathString}
             idea.system.path=${sandboxSystemFrontendDirectory.asPath.safePathString}
             idea.log.path=${sandboxLogFrontendDirectory.asPath.safePathString}
-            idea.plugins.path=${pluginsDirectory.asPath.safePathString}
+            idea.plugins.path=${pluginsDirectory.safePathString}
             """.trimIndent()
         )
     }
@@ -261,14 +259,6 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
             .listFiles()
             ?.filterNot { it.toPath() == frontendPluginsDirectory }
             ?.forEach { it.deleteRecursively() }
-    }
-
-    private fun pluginDestinationDirectoryProvider() = splitMode.zip(effectivePluginInstallationTarget) { isSplitMode, target ->
-        when {
-            !isSplitMode -> sandboxPluginsDirectory.get()
-            target == SplitModeAware.PluginInstallationTarget.FRONTEND -> sandboxPluginsFrontendDirectory.get()
-            else -> sandboxPluginsDirectory.get()
-        }
     }
 
     init {
@@ -328,7 +318,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 sandboxLogFrontendDirectory.convention(sandboxLogDirectory.map { it.dir("frontend") })
 
                 pluginJar.convention(composedJarTaskProvider.flatMap { it.archiveFile })
-                defaultDestinationDirectory.convention(pluginDestinationDirectoryProvider())
+                defaultDestinationDirectory.convention(pluginInstallationDirectory())
                 pluginName.convention(project.extensionProvider.flatMap { it.projectName })
                 pluginDirectory.convention(defaultDestinationDirectory.dir(pluginName))
                 pluginsClasspath.from(intelliJPlatformPluginConfiguration)
@@ -336,11 +326,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
                 splitMode.convention(project.extensionProvider.flatMap { it.splitMode })
                 pluginInstallationTarget.convention(project.extensionProvider.flatMap { it.pluginInstallationTarget })
-                splitModeTarget.convention(
-                    pluginInstallationTarget
-                        .map { it.toSplitModeTarget() }
-                        .orElse(project.extensionProvider.flatMap { it.splitModeTarget })
-                )
+                splitModeTarget.conventionFrom(pluginInstallationTarget, project.extensionProvider.flatMap { it.splitModeTarget })
 
                 val lib = pluginName.map { "$it/${Sandbox.Plugin.LIB}" }
                 val libModules = pluginName.map { "$it/${Sandbox.Plugin.LIB_MODULES}" }

@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
  * Selects the correct JVM argument provider for a [RunIdeTask.ExecutionMode]
  * while keeping the nested provider inputs visible to Gradle.
  */
-class ExecutionModeAwareIdeArgumentProvider(
+internal class ExecutionModeAwareIdeArgumentProvider(
     intellijPlatformConfiguration: FileCollection,
     coroutinesJavaAgentFile: Provider<RegularFile>,
     runtimeArchProvider: Provider<String>,
@@ -57,7 +57,7 @@ class ExecutionModeAwareIdeArgumentProvider(
  * Selects the correct plugin requirement arguments for a [RunIdeTask.ExecutionMode]
  * while keeping nested provider inputs visible to Gradle.
  */
-class ExecutionModeAwarePluginArgumentProvider(
+internal class ExecutionModeAwarePluginArgumentProvider(
     pluginXml: Provider<RegularFile>,
 
     @Input
@@ -101,7 +101,7 @@ class ExecutionModeAwarePluginArgumentProvider(
 /**
  * Selects the correct sandbox argument provider for a [RunIdeTask.ExecutionMode].
  */
-class ExecutionModeAwareSandboxArgumentProvider(
+internal class ExecutionModeAwareSandboxArgumentProvider(
     sandboxConfigDirectory: DirectoryProperty,
     sandboxPluginsDirectory: DirectoryProperty,
     sandboxSystemDirectory: DirectoryProperty,

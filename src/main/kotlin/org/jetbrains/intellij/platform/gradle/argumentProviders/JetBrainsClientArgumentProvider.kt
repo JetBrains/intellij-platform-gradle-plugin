@@ -23,7 +23,7 @@ import kotlin.io.path.readLines
 /**
  * Provides the minimal JVM arguments required to launch JetBrains Client directly from a full IDE distribution.
  */
-class JetBrainsClientArgumentProvider(
+internal class JetBrainsClientArgumentProvider(
     @InputFiles
     @PathSensitive(RELATIVE)
     val intellijPlatformConfiguration: FileCollection,

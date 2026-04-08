@@ -106,11 +106,11 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
     val effectivePluginInstallationTarget: Provider<PluginInstallationTarget>
         get() = when (this) {
             is PluginInstallationTargetAware -> pluginInstallationTarget
-                .orElse(splitModeTarget.map { it.toPluginInstallationTarget() })
+                .orElse(splitModeTarget.asPluginInstallationTarget())
                 .orElse(PluginInstallationTarget.BACKEND)
 
             else -> splitModeTarget
-                .map { it.toPluginInstallationTarget() }
+                .asPluginInstallationTarget()
                 .orElse(PluginInstallationTarget.BACKEND)
         }
 
@@ -158,4 +158,3 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
         fun toPluginInstallationTarget() = PluginInstallationTarget.valueOf(name)
     }
 }
-

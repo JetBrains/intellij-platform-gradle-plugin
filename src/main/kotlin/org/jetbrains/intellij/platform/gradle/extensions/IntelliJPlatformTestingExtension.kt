@@ -26,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.conventionFrom
 import org.jetbrains.intellij.platform.gradle.utils.*
 import javax.inject.Inject
 
@@ -323,11 +324,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         internal val testDependenciesConfigurationName: Property<String> = project.objects.property(String::class.java)
 
         init {
-            splitModeTarget.convention(
-                pluginInstallationTarget
-                    .map { it.toSplitModeTarget() }
-                    .orElse(SplitModeTarget.BACKEND)
-            )
+            splitModeTarget.conventionFrom(pluginInstallationTarget)
         }
 
         fun plugins(configuration: Action<IntelliJPlatformPluginsExtension>) {
