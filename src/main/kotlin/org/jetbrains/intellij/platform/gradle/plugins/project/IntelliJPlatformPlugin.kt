@@ -44,6 +44,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             TestIdePerformanceTask,
 
             // Run
+            GenerateSplitModeRunConfigurationsTask,
             RunIdeTask,
 
             // Verify

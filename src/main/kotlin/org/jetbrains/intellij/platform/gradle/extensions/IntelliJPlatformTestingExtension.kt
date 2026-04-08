@@ -23,8 +23,10 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.SplitModeTarget
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.conventionFrom
 import org.jetbrains.intellij.platform.gradle.utils.*
 import javax.inject.Inject
 
@@ -268,6 +270,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
 
                     sandboxDirectory = this@all.sandboxDirectory.orElse(basePrepareSandboxTask.flatMap { it.sandboxDirectory })
                     splitMode = this@all.splitMode.orElse(basePrepareSandboxTask.flatMap { it.splitMode })
+                    pluginInstallationTarget = this@all.pluginInstallationTarget.orElse(basePrepareSandboxTask.flatMap { it.pluginInstallationTarget })
                     splitModeTarget = this@all.splitModeTarget.orElse(basePrepareSandboxTask.flatMap { it.splitModeTarget })
                     disabledPlugins = plugins.disabled
                 }
@@ -310,9 +313,19 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         abstract val sandboxDirectory: DirectoryProperty
         abstract val localPath: DirectoryProperty
         abstract val splitMode: Property<Boolean>
+        abstract val pluginInstallationTarget: Property<PluginInstallationTarget>
+
+        @Deprecated(
+            message = "Use pluginInstallationTarget instead.",
+            replaceWith = ReplaceWith("pluginInstallationTarget"),
+        )
         abstract val splitModeTarget: Property<SplitModeTarget>
 
         internal val testDependenciesConfigurationName: Property<String> = project.objects.property(String::class.java)
+
+        init {
+            splitModeTarget.conventionFrom(pluginInstallationTarget)
+        }
 
         fun plugins(configuration: Action<IntelliJPlatformPluginsExtension>) {
             configuration.execute(the<IntelliJPlatformPluginsExtension>())

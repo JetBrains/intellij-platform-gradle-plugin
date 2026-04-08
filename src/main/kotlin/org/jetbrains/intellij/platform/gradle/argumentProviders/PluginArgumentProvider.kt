@@ -18,7 +18,7 @@ import kotlin.io.path.exists
  *
  * @property pluginXml The plugin.xml file.
  */
-class PluginArgumentProvider(
+internal class PluginArgumentProvider(
     @InputFile
     @PathSensitive(RELATIVE)
     @Optional

@@ -6,6 +6,7 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
+import kotlin.io.path.Path
 import kotlin.test.Ignore
 import kotlin.test.Test
 
@@ -58,13 +59,67 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
                 }
                 """.trimIndent()
 
-        build(DEPENDENCIES, "--configuration=intellijPlatformDependency") {
+        build(DEPENDENCIES) {
             val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
             val coordinates = requireNotNull(type.installer)
             val artifactCoordinates = when {
                 useCache -> "localIde:${type.code}:${type.code}-$intellijPlatformBuildNumber"
                 else -> "${coordinates.groupId}:${coordinates.artifactId}:$intellijPlatformVersion"
             }
+
+            when {
+                useCache -> {
+                    assertContains(
+                        """
+                        intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
+                        No dependencies
+                        """.trimIndent(),
+                        output,
+                    )
+                    assertContains(
+                        """
+                        intellijPlatformLocal - IntelliJ Platform local
+                        \--- $artifactCoordinates
+                        """.trimIndent(),
+                        output,
+                    )
+                }
+
+                else -> assertContains(
+                    """
+                    intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
+                    \--- $artifactCoordinates
+                    """.trimIndent(),
+                    output,
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `resolve IntelliJ Platform dependency through local IDE path in split mode without global cache`() {
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                    }
+                }
+                
+                intellijPlatform {
+                    splitMode = true
+                }
+                """.trimIndent()
+
+        build(DEPENDENCIES) {
+            val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
+            val artifactCoordinates = "localIde:${type.code}:${type.code}-$intellijPlatformBuildNumber"
 
             assertContains(
                 """
@@ -436,6 +491,7 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
     @Ignore
     fun `do not fail when default IntelliJ Platform dependencies are absent in old IntelliJ Platform releases`() {
         val properties = defaultProjectProperties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider)
+        val fullLineBundledPluginPath = Path("plugins", "fullLine")
 
         gradleProperties += //language=properties
                 """

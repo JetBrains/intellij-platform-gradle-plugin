@@ -228,6 +228,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field GENERATE_LEXER Ljava/lang/String;
 	public static final field GENERATE_MANIFEST Ljava/lang/String;
 	public static final field GENERATE_PARSER Ljava/lang/String;
+	public static final field GENERATE_SPLIT_MODE_RUN_CONFIGURATIONS Ljava/lang/String;
 	public static final field INITIALIZE_INTELLIJ_PLATFORM_PLUGIN Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Tasks;
 	public static final field INSTRUMENTED_JAR Ljava/lang/String;
@@ -245,6 +246,8 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field PRINT_PRODUCTS_RELEASES Ljava/lang/String;
 	public static final field PUBLISH_PLUGIN Ljava/lang/String;
 	public static final field RUN_IDE Ljava/lang/String;
+	public static final field RUN_IDE_BACKEND Ljava/lang/String;
+	public static final field RUN_IDE_FRONTEND Ljava/lang/String;
 	public static final field SETUP_DEPENDENCIES Ljava/lang/String;
 	public static final field SIGN_PLUGIN Ljava/lang/String;
 	public static final field TEST_IDE_PERFORMANCE Ljava/lang/String;
@@ -486,10 +489,11 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Star
 }
 
 public final class org/jetbrains/intellij/platform/gradle/argumentProviders/ComposeHotReloadArgumentProvider : org/gradle/process/CommandLineArgumentProvider {
-	public fun <init> (Lorg/gradle/api/file/FileCollection;)V
+	public fun <init> (Lorg/gradle/api/file/FileCollection;Lorg/gradle/api/provider/Provider;)V
 	public synthetic fun asArguments ()Ljava/lang/Iterable;
 	public fun asArguments ()Ljava/util/List;
 	public final fun getComposeHotReloadAgentConfiguration ()Lorg/gradle/api/file/FileCollection;
+	public final fun getEnabled ()Lorg/gradle/api/provider/Provider;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/argumentProviders/IntelliJPlatformArgumentProvider : org/gradle/process/CommandLineArgumentProvider {
@@ -507,13 +511,6 @@ public final class org/jetbrains/intellij/platform/gradle/argumentProviders/Perf
 	public fun asArguments ()Ljava/util/List;
 	public final fun getScriptPath ()Ljava/nio/file/Path;
 	public final fun getTestArtifactsDirectory ()Ljava/nio/file/Path;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/argumentProviders/PluginArgumentProvider : org/gradle/process/CommandLineArgumentProvider {
-	public fun <init> (Lorg/gradle/api/provider/Provider;)V
-	public synthetic fun asArguments ()Ljava/lang/Iterable;
-	public fun asArguments ()Ljava/util/List;
-	public final fun getPluginXml ()Lorg/gradle/api/provider/Provider;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/argumentProviders/SandboxArgumentProvider : org/gradle/process/CommandLineArgumentProvider {
@@ -899,6 +896,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public abstract fun getInstrumentCode ()Lorg/gradle/api/provider/Property;
 	public final fun getPlatformPath ()Ljava/nio/file/Path;
 	public final fun getPluginConfiguration ()Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginConfiguration;
+	public abstract fun getPluginInstallationTarget ()Lorg/gradle/api/provider/Property;
 	public final fun getPluginVerification ()Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification;
 	public final fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getProjectName ()Lorg/gradle/api/provider/Property;
@@ -1228,6 +1226,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public synthetic fun getBuildDependencies ()Lorg/gradle/api/tasks/TaskDependency;
 	public abstract fun getLocalPath ()Lorg/gradle/api/file/DirectoryProperty;
 	public fun getName ()Ljava/lang/String;
+	public abstract fun getPluginInstallationTarget ()Lorg/gradle/api/provider/Property;
 	public final fun getPrepareSandboxTask ()Lorg/gradle/api/tasks/TaskProvider;
 	public abstract fun getSandboxDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSplitMode ()Lorg/gradle/api/provider/Property;
@@ -2432,6 +2431,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductInfo$Lay
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductInfoKt {
+	public static final fun getFrontendSplitRootModule (Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;)Ljava/lang/String;
 	public static final fun getFullVersion (Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;)Ljava/lang/String;
 	public static final fun getType (Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public static final fun productInfo (Ljava/nio/file/Path;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
@@ -2936,6 +2936,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/BuildPluginTask$
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/BuildSearchableOptionsTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/BuildSearchableOptionsTask$Companion;
 	public fun <init> ()V
+	public fun applyFrontendSandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun exec ()V
 	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
@@ -3014,6 +3015,20 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/GenerateParse
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/GenerateParserTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/GenerateSplitModeRunConfigurationsTask : org/gradle/api/DefaultTask {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/GenerateSplitModeRunConfigurationsTask$Companion;
+	public fun <init> ()V
+	public final fun generate ()V
+	public abstract fun getBackendConfigurationFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getCompoundConfigurationFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getFrontendConfigurationFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getProjectPath ()Lorg/gradle/api/provider/Property;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/GenerateSplitModeRunConfigurationsTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
@@ -3115,7 +3130,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PrepareJarSearch
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandboxTask : org/gradle/api/tasks/Sync, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure, org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandboxTask : org/gradle/api/tasks/Sync, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginInstallationTargetAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure, org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/PrepareSandboxTask$Companion;
 	public fun <init> ()V
 	public synthetic fun configure (Lgroovy/lang/Closure;)Ljava/lang/Object;
@@ -3124,6 +3139,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandbo
 	public abstract fun getDefaultDestinationDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public fun getDestinationDir ()Ljava/io/File;
 	public abstract fun getDisabledPlugins ()Lorg/gradle/api/provider/SetProperty;
+	public fun getEffectivePluginInstallationTarget ()Lorg/gradle/api/provider/Provider;
 	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public abstract fun getPluginDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getPluginJar ()Lorg/gradle/api/file/RegularFileProperty;
@@ -3132,6 +3148,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandbo
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getSandboxSuffix ()Lorg/gradle/api/provider/Property;
+	public fun getSplitModeFrontendJoinLinkFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
 	public fun validateIntelliJPlatformVersion ()V
 	public fun validateSplitModeSupport ()V
@@ -3144,6 +3161,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandboxTa
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareTestTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/PrepareTestTask$Companion;
 	public fun <init> ()V
+	public fun applyFrontendSandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
@@ -3209,20 +3227,36 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PublishPluginTas
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/ComposeHotReloadAware, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/ComposeHotReloadAware, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginInstallationTargetAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$Companion;
 	public fun <init> ()V
+	public fun applyFrontendSandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun exec ()V
+	public fun getEffectivePluginInstallationTarget ()Lorg/gradle/api/provider/Provider;
+	public abstract fun getExecutionMode ()Lorg/gradle/api/provider/Property;
 	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public abstract fun getSplitModeFrontendBootstrapClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getSplitModeFrontendJoinLink ()Lorg/gradle/api/provider/Property;
+	public fun getSplitModeFrontendJoinLinkFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
+	public abstract fun getSplitModeServerPort ()Lorg/gradle/api/provider/Property;
 	public fun validateIntelliJPlatformVersion ()V
 	public fun validateSplitModeSupport ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
 	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$ExecutionMode : java/lang/Enum {
+	public static final field SPLIT_MODE_BACKEND Lorg/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$ExecutionMode;
+	public static final field SPLIT_MODE_FRONTEND Lorg/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$ExecutionMode;
+	public static final field STANDARD Lorg/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$ExecutionMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$ExecutionMode;
+	public static fun values ()[Lorg/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$ExecutionMode;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/SetupDependenciesTask : org/gradle/api/DefaultTask {
@@ -3260,6 +3294,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/SignPluginTask$C
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/TestIdePerformanceTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/TestIdePerformanceTask$Companion;
 	public fun <init> ()V
+	public fun applyFrontendSandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun exec ()V
 	public abstract fun getArtifactsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
@@ -3277,6 +3312,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/TestIdePerforman
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask : org/gradle/api/tasks/testing/Test, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/TestIdeTask$Companion;
 	public fun <init> ()V
+	public fun applyFrontendSandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun executeTests ()V
 	public fun getPlatformPath ()Ljava/nio/file/Path;
@@ -3291,6 +3327,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask$Comp
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/TestIdeUiTask : org/gradle/api/tasks/testing/Test, org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/TestIdeUiTask$Companion;
 	public fun <init> ()V
+	public fun applyFrontendSandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun executeTests ()V
 	public abstract fun getArchiveFile ()Lorg/gradle/api/file/RegularFileProperty;
@@ -3489,6 +3526,10 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAwar
 	public static final fun parse (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
 }
 
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginInstallationTargetAware {
+	public abstract fun getPluginInstallationTarget ()Lorg/gradle/api/provider/Property;
+}
+
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginVerifierAware {
 	public abstract fun getPluginVerifierExecutable ()Lorg/gradle/api/file/RegularFileProperty;
 }
@@ -3501,6 +3542,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware$DefaultImpls {
+	public static fun applyFrontendSandboxFrom (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware;Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public static fun applySandboxFrom (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware;Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware;)Ljava/nio/file/Path;
 	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
@@ -3522,10 +3564,12 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAwa
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware : org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure {
+	public fun applyFrontendSandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware$DefaultImpls {
+	public static fun applyFrontendSandboxFrom (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware;Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public static fun applySandboxFrom (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware;Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 }
 
@@ -3543,22 +3587,37 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure {
+	public fun getEffectivePluginInstallationTarget ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getSandboxConfigFrontendDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSandboxLogFrontendDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSandboxPluginsFrontendDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSandboxSystemFrontendDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSplitMode ()Lorg/gradle/api/provider/Property;
+	public fun getSplitModeFrontendJoinLinkFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getSplitModeTarget ()Lorg/gradle/api/provider/Property;
 	public fun validateSplitModeSupport ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$DefaultImpls {
+	public static fun getEffectivePluginInstallationTarget (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/gradle/api/provider/Provider;
 	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Ljava/nio/file/Path;
 	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public static fun getSplitModeFrontendJoinLinkFile (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/gradle/api/provider/Provider;
 	public static fun getSplitModeFrontendProperties (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/gradle/api/provider/Provider;
 	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)V
 	public static fun validateSplitModeSupport (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$PluginInstallationTarget : java/lang/Enum {
+	public static final field BACKEND Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$PluginInstallationTarget;
+	public static final field BOTH Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$PluginInstallationTarget;
+	public static final field FRONTEND Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$PluginInstallationTarget;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun includes (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$PluginInstallationTarget;)Z
+	public final fun toSplitModeTarget ()Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget;
+	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$PluginInstallationTarget;
+	public static fun values ()[Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$PluginInstallationTarget;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget : java/lang/Enum {
@@ -3567,6 +3626,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeA
 	public static final field FRONTEND Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun includes (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget;)Z
+	public final fun toPluginInstallationTarget ()Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$PluginInstallationTarget;
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget;
 	public static fun values ()[Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget;
 }
@@ -3579,6 +3639,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware$DefaultImpls {
+	public static fun applyFrontendSandboxFrom (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware;Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public static fun applySandboxFrom (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware;Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware;)Ljava/nio/file/Path;
 	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;

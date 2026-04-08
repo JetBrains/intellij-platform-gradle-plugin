@@ -3,6 +3,8 @@
 package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.RegularFile
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Internal
 import org.gradle.process.CommandLineArgumentProvider
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -67,4 +69,17 @@ class SandboxArgumentProvider(
      * @return The result of the block execution, or null if the directory does not exist.
      */
     private fun <T> DirectoryProperty.ifExists(block: (Path) -> T) = orNull?.asPath?.takeIf { it.exists() }?.run(block)
+}
+
+/**
+ * Provides the frontend sandbox via a properties file, matching the standalone JetBrains Client launcher contract.
+ */
+internal class FrontendSandboxArgumentProvider(
+    @Internal
+    val frontendPropertiesFile: Provider<RegularFile>,
+) : CommandLineArgumentProvider {
+
+    override fun asArguments() = listOfNotNull(
+        frontendPropertiesFile.orNull?.asPath?.takeIf { it.exists() }?.let { "-Didea.properties.file=${it.safePathString}" },
+    )
 }

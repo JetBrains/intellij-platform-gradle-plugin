@@ -11,6 +11,7 @@ import kotlin.io.path.*
 import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 
 class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
@@ -328,8 +329,13 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `prepare sandbox for splitMode with plugin installed on frontend`() {
-        buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.FRONTEND)
+    fun `prepare sandbox for splitMode with plugin installed on frontend via deprecated target`() {
+        buildSandboxForSplitMode(
+            """
+            @Suppress("DEPRECATION")
+            splitModeTarget = SplitModeAware.SplitModeTarget.FRONTEND
+            """.trimIndent()
+        )
         assertFileContent(
             sandbox.resolve("frontend.properties"),
             """
@@ -339,11 +345,13 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             idea.plugins.path=${sandbox.resolve("plugins/frontend").invariantSeparatorsPathString}
             """.trimIndent()
         )
+        assertExists(sandbox.resolve("plugins/frontend/projectName/lib/projectName-1.0.0.jar"))
+        assertFalse(sandbox.resolve("plugins/projectName/lib/projectName-1.0.0.jar").exists())
     }
 
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend`() {
-        buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BACKEND)
+        buildSandboxForSplitMode("pluginInstallationTarget = SplitModeAware.PluginInstallationTarget.BACKEND")
         assertFileContent(
             sandbox.resolve("frontend.properties"),
             """
@@ -353,11 +361,13 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             idea.plugins.path=${sandbox.resolve("plugins/frontend").invariantSeparatorsPathString}
             """.trimIndent()
         )
+        assertExists(sandbox.resolve("plugins/projectName/lib/projectName-1.0.0.jar"))
+        assertFalse(sandbox.resolve("plugins/frontend/projectName/lib/projectName-1.0.0.jar").exists())
     }
 
     @Test
     fun `prepare sandbox for splitMode with plugin installed on backend and frontend`() {
-        buildSandboxForSplitMode(SplitModeAware.SplitModeTarget.BOTH)
+        buildSandboxForSplitMode("pluginInstallationTarget = SplitModeAware.PluginInstallationTarget.BOTH")
         assertFileContent(
             sandbox.resolve("frontend.properties"),
             """
@@ -367,9 +377,19 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             idea.plugins.path=${sandbox.resolve("plugins").invariantSeparatorsPathString}
             """.trimIndent()
         )
+        assertExists(sandbox.resolve("plugins/projectName/lib/projectName-1.0.0.jar"))
+        assertFalse(sandbox.resolve("plugins/frontend/projectName/lib/projectName-1.0.0.jar").exists())
     }
 
-    private fun buildSandboxForSplitMode(splitModeTarget: SplitModeAware.SplitModeTarget) {
+    @Test
+    fun `prepare sandbox for splitMode defaults plugin installation target to backend`() {
+        buildSandboxForSplitMode()
+
+        assertExists(sandbox.resolve("plugins/projectName/lib/projectName-1.0.0.jar"))
+        assertFalse(sandbox.resolve("plugins/frontend/projectName/lib/projectName-1.0.0.jar").exists())
+    }
+
+    private fun buildSandboxForSplitMode(splitModeConfiguration: String = "") {
         writeJavaFile()
 
         pluginXml write //language=xml
@@ -387,7 +407,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     sandboxContainer = file("${cacheDirectory.resolve(Sandbox.CONTAINER).invariantSeparatorsPathString}")
                     splitMode = true
-                    splitModeTarget = SplitModeAware.SplitModeTarget.${splitModeTarget.name}
+                    $splitModeConfiguration
                 }
                 """.trimIndent()
 
@@ -428,6 +448,80 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             ),
             collectPaths(sandbox),
         )
+    }
+
+    @Test
+    fun `prepare sandbox for splitMode installs external jar-type plugin on backend by default`() {
+        writeJavaFile()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        marketplace()
+                    }
+                }
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.jetbrains.postfixCompletion", "0.8-beta")
+                    }
+                }
+                intellijPlatform {
+                    splitMode = true
+                }
+                """.trimIndent()
+
+        build(Tasks.PREPARE_SANDBOX)
+
+        assertExists(sandbox.resolve("plugins/projectName/lib/projectName-1.0.0.jar"))
+        assertExists(sandbox.resolve("plugins/org.jetbrains.postfixCompletion-0.8-beta.jar"))
+        assertFalse(sandbox.resolve("plugins/frontend/projectName/lib/projectName-1.0.0.jar").exists())
+        assertFalse(sandbox.resolve("plugins/frontend/org.jetbrains.postfixCompletion-0.8-beta.jar").exists())
+    }
+
+    @Test
+    fun `prepare sandbox for splitMode installs external jar-type plugin in shared plugins dir when requested on both sides`() {
+        writeJavaFile()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildFile prepend // language=kotlin
+                """
+                import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        marketplace()
+                    }
+                }
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.jetbrains.postfixCompletion", "0.8-beta")
+                    }
+                }
+                intellijPlatform {
+                    splitMode = true
+                    pluginInstallationTarget = SplitModeAware.PluginInstallationTarget.BOTH
+                }
+                """.trimIndent()
+
+        build(Tasks.PREPARE_SANDBOX)
+
+        assertExists(sandbox.resolve("plugins/projectName/lib/projectName-1.0.0.jar"))
+        assertExists(sandbox.resolve("plugins/org.jetbrains.postfixCompletion-0.8-beta.jar"))
+        assertFalse(sandbox.resolve("plugins/frontend/projectName/lib/projectName-1.0.0.jar").exists())
+        assertFalse(sandbox.resolve("plugins/frontend/org.jetbrains.postfixCompletion-0.8-beta.jar").exists())
     }
 
     @Test

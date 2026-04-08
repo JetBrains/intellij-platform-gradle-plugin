@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle
 import org.gradle.api.GradleException
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.UnexpectedBuildResultException
 import java.lang.management.ManagementFactory
 import java.nio.file.Path
 import kotlin.io.path.*
@@ -142,27 +143,44 @@ abstract class IntelliJPlatformTestBase {
         block: BuildResult.() -> Unit = {},
     ): BuildResult {
         val configurationCacheEnabled = (gradleArguments + args).contains(CONFIGURATION_CACHE_ARGUMENT)
+        var buildResult: BuildResult? = null
 
-        return builder(
-            gradleVersion = gradleVersion,
-            tasks = tasks,
-            projectProperties = projectProperties,
-            systemProperties = systemProperties,
-            environment = environment,
-            args = args,
-        )
-        .run {
-            when (fail) {
-                true -> buildAndFail()
-                false -> build()
-            }
+        return runCatching {
+            buildResult = builder(
+                gradleVersion = gradleVersion,
+                tasks = tasks,
+                projectProperties = projectProperties,
+                systemProperties = systemProperties,
+                environment = environment,
+                args = args,
+            )
+                .run {
+                    when (fail) {
+                        true -> buildAndFail()
+                        false -> build()
+                    }
+                }
+
+            buildResult!!
+                .also {
+                    if (configurationCacheEnabled && assertValidConfigurationCache) {
+                        assertNotContains("Configuration cache problems found in this build.", it.output)
+                    }
+                }
+                .also(block)
+        }.getOrElse { throwable ->
+            val diagnosticBuildResult = buildResult ?: (throwable as? UnexpectedBuildResultException)?.buildResult
+            printBuildFailureDiagnostics(
+                throwable = throwable,
+                gradleVersion = gradleVersion,
+                tasks = tasks.toList(),
+                projectProperties = projectProperties,
+                systemProperties = systemProperties,
+                args = args,
+                buildResult = diagnosticBuildResult,
+            )
+            throw throwable
         }
-        .also {
-            if (configurationCacheEnabled && assertValidConfigurationCache) {
-                assertNotContains("Configuration cache problems found in this build.", it.output)
-            }
-        }
-        .also(block)
     }
 
     protected fun builder(
@@ -258,5 +276,67 @@ abstract class IntelliJPlatformTestBase {
 
     private companion object {
         const val CONFIGURATION_CACHE_ARGUMENT = "--configuration-cache"
+    }
+
+    @PublishedApi
+    internal fun printBuildFailureDiagnostics(
+        throwable: Throwable,
+        gradleVersion: String,
+        tasks: List<String>,
+        projectProperties: Map<String, Any>,
+        systemProperties: Map<String, Any>,
+        args: List<String>,
+        buildResult: BuildResult?,
+    ) {
+        val diagnostics = buildString {
+            appendLine()
+            appendLine("=== TestKit Failure Diagnostics Start ===")
+            appendLine("Directory: $dir")
+            appendLine("Gradle version: $gradleVersion")
+            appendLine("Tasks: ${tasks.joinToString(separator = " ")}")
+            if (projectProperties.isNotEmpty()) {
+                appendLine("Project properties: $projectProperties")
+            }
+            if (systemProperties.isNotEmpty()) {
+                appendLine("System properties: $systemProperties")
+            }
+            if (args.isNotEmpty()) {
+                appendLine("Additional arguments: ${args.joinToString(separator = " ")}")
+            }
+            appendLine("Failure: ${throwable::class.qualifiedName}: ${throwable.message}")
+
+            collectDiagnosticFiles().takeIf { it.isNotEmpty() }?.let { files ->
+                appendLine("Relevant files:")
+                files.forEach { (path, content) ->
+                    appendLine("  - $path")
+                    appendLine(content.prependIndent("      "))
+                }
+            }
+
+            buildResult?.output?.takeIf { it.isNotBlank() }?.let { output ->
+                appendLine("--- Nested Gradle Output Start ---")
+                appendLine(output)
+                appendLine("--- Nested Gradle Output End ---")
+            }
+            appendLine("=== TestKit Failure Diagnostics End ===")
+        }
+
+        System.err.println(diagnostics)
+    }
+
+    @PublishedApi
+    internal fun collectDiagnosticFiles(): List<Pair<Path, String>> {
+        val interestingNames = setOf("split-mode-frontend.join.link", "frontend.properties", "java", "java.bat")
+
+        return dir.toFile()
+            .walkTopDown()
+            .filter { it.isFile && it.name in interestingNames }
+            .map { file ->
+                val content = runCatching { file.readText() }
+                    .getOrElse { "<unreadable: ${it.message}>" }
+                    .ifBlank { "<empty>" }
+                file.toPath() to content
+            }
+            .toList()
     }
 }

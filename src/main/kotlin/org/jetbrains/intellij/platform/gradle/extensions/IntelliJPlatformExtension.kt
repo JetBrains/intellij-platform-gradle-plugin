@@ -40,6 +40,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SigningAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.conventionFrom
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
 import java.nio.file.Path
@@ -118,7 +119,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * is running a frontend part (JetBrains Client) which connects to the backend.
      *
      * This property allows running the IDE with backend and frontend parts running in separate processes.
-     * The developed plugin is installed in the backend part by default, this can be changed via [splitModeTarget].
+     * The developed plugin installation target can be configured with [pluginInstallationTarget].
      *
      * Default value: `false`
      */
@@ -128,8 +129,19 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * Taken into account only if [splitMode] is set to `true` and specifies in which part of the IDE the plugin
      * should be installed when `runIde` task is executed: the backend process, the frontend process, or both.
      *
-     * Default value: [SplitModeAware.SplitModeTarget.BACKEND]
+     * Effective default value: [SplitModeAware.PluginInstallationTarget.BACKEND]
      */
+    abstract val pluginInstallationTarget: Property<SplitModeAware.PluginInstallationTarget>
+
+    /**
+     * Deprecated alias for [pluginInstallationTarget].
+     *
+     * Effective default value: [SplitModeAware.PluginInstallationTarget.BACKEND]
+     */
+    @Deprecated(
+        message = "Use pluginInstallationTarget instead.",
+        replaceWith = ReplaceWith("pluginInstallationTarget"),
+    )
     abstract val splitModeTarget: Property<SplitModeAware.SplitModeTarget>
 
 
@@ -264,7 +276,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             /**
              * Function that returns a cache directory name for a given IntelliJ Platform artifact.
              *
-             * By default, set to [RequestedIntelliJPlatform.type]-[RequestedIntelliJPlatform.version].
+             * By default, split-mode requests include the product mode in the directory name so backend and frontend
+             * processes do not reuse the same writable IDE home.
              */
             val name: Property<(RequestedIntelliJPlatform) -> String>
 
@@ -279,7 +292,15 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                                 project.providers.intellijPlatformIdesCachePath(project.rootProjectPath).map { it.toFile() }
                             )
                         )
-                        name.convention { "${it.type}-${it.version}" }
+                        name.convention {
+                            buildString {
+                                append("${it.type}-${it.version}")
+                                if (it.productMode != ProductMode.MONOLITH) {
+                                    append("-")
+                                    append(it.productMode.name.lowercase())
+                                }
+                            }
+                        }
                     }
             }
         }
@@ -1162,7 +1183,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 projectName.convention(project.name)
                 sandboxContainer.convention(project.extensionProvider.flatMap { it.caching.path.dir(Sandbox.CONTAINER) })
                 splitMode.convention(false)
-                splitModeTarget.convention(SplitModeAware.SplitModeTarget.BACKEND)
+                splitModeTarget.conventionFrom(pluginInstallationTarget)
             }
     }
 }

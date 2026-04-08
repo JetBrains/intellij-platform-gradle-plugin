@@ -51,6 +51,32 @@ interface SandboxAware : SandboxStructure {
                 .finalizeValueOnRead()
         }
 
+        if (this is PluginInstallationTargetAware) {
+            pluginInstallationTarget
+                .convention(sandboxProducerTaskProvider.flatMap { it.pluginInstallationTarget })
+                .finalizeValueOnRead()
+        }
+
         dependsOn(sandboxProducerTaskProvider)
+    }
+
+    fun Task.applyFrontendSandboxFrom(sandboxProducerTaskProvider: TaskProvider<PrepareSandboxTask>) {
+        applySandboxFrom(sandboxProducerTaskProvider)
+
+        sandboxConfigDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxConfigFrontendDirectory })
+            .finalizeValueOnRead()
+
+        sandboxPluginsDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.frontendProcessPluginsDirectory() })
+            .finalizeValueOnRead()
+
+        sandboxSystemDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxSystemFrontendDirectory })
+            .finalizeValueOnRead()
+
+        sandboxLogDirectory
+            .convention(sandboxProducerTaskProvider.flatMap { it.sandboxLogFrontendDirectory })
+            .finalizeValueOnRead()
     }
 }
