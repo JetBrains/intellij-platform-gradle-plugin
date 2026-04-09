@@ -1680,9 +1680,7 @@ class IntelliJPlatformDependenciesHelper(
                 parameters {
                     intellijPlatformPath = layout.dir(provider { platformPath.toFile() })
                 }
-            }.get().also {
-                println("it = \n${it.joinToString("\n")}")
-            }
+            }.get()
         }
 
     internal fun buildJetBrainsRuntimeVersion(
