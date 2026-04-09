@@ -91,6 +91,9 @@ class IntelliJPlatformDependenciesHelper(
     private val moduleDescriptorCoordinatesService by lazy {
         gradle.registerClassLoaderScopedBuildService(ModuleDescriptorCoordinatesService::class)
     }
+    private val productReleasesService by lazy {
+        gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class)
+    }
     private val extractorServiceProvider by lazy {
         gradle.registerClassLoaderScopedBuildService(ExtractorService::class)
     }
@@ -893,11 +896,15 @@ class IntelliJPlatformDependenciesHelper(
     }.cached())
 
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
-        providers.of(ProductReleasesValueSource::class) {
-            parameters.jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
-            parameters.androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
+        objects.newInstance(ProductReleasesValueSource.Parameters::class.java).apply {
+            jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
+            androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
 
-            parameters(configure)
+            configure()
+        }.let { parameters ->
+            provider { productReleasesService.get().resolve(parameters) }
+                .cached<String>()
+                .map { it.toList() }
         }
 
     //</editor-fold>
