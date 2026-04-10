@@ -2,6 +2,11 @@
 
 ## [next]
 
+### Changed
+
+- Reduce `CollectorTransformer` and module descriptor processing overhead by replacing generic `module-descriptors.jar` XML deserialization with a lightweight shared parser.
+- Introduce `ProductReleasesService`, add caching for release resolution, and refactor release filtering logic.
+
 ## [2.14.0] - 2026-04-09
 
 ### Breaking Changes

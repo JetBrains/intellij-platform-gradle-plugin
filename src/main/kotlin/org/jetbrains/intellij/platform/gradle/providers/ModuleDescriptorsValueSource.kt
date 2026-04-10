@@ -5,13 +5,14 @@ package org.jetbrains.intellij.platform.gradle.providers
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
-import org.jetbrains.intellij.platform.gradle.artifacts.transform.loadModuleDescriptors
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.ModuleDescriptor
 import org.jetbrains.intellij.platform.gradle.models.coroutines
 import org.jetbrains.intellij.platform.gradle.models.kotlinStdlib
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPathResolver
+import org.jetbrains.intellij.platform.gradle.utils.CollectedModuleDescriptor
+import org.jetbrains.intellij.platform.gradle.utils.ModuleDescriptorsParser
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import java.nio.file.Path
 
@@ -46,14 +47,18 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
 }
 
 private val camelCaseBoundaryRegex = Regex("([a-z])([A-Z])")
-internal fun loadModuleDescriptorCoordinates(moduleDescriptorsFile: Path) = loadModuleDescriptors(moduleDescriptorsFile)
+internal fun loadModuleDescriptorCoordinates(moduleDescriptorsFile: Path) = ModuleDescriptorsParser.load(moduleDescriptorsFile)
     .values
     .asSequence()
-    .mapNotNull(ModuleDescriptor::toCoordinatesOrNull)
+    .mapNotNull(CollectedModuleDescriptor::toCoordinatesOrNull)
     .toSet()
 
-internal fun ModuleDescriptor.toCoordinatesOrNull(): Coordinates? {
-    val nameParts = name.split('.')
+internal fun CollectedModuleDescriptor.toCoordinatesOrNull() = name.toCoordinatesOrNull()
+
+internal fun ModuleDescriptor.toCoordinatesOrNull() = name.toCoordinatesOrNull()
+
+private fun String.toCoordinatesOrNull(): Coordinates? {
+    val nameParts = split('.')
     if (nameParts.size < 2) {
         return null
     }

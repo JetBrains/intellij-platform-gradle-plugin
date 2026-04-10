@@ -24,3 +24,16 @@ develocity {
         }
     }
 }
+
+//includeBuild("/Users/hsz/Projects/JetBrains/intellij-plugin-verifier/intellij-plugin-structure") {
+//    dependencySubstitution {
+//        substitute(module("org.jetbrains.intellij.plugins:structure-base"))
+//            .using(project(":structure-base"))
+//
+//        substitute(module("org.jetbrains.intellij.plugins:structure-ide"))
+//            .using(project(":structure-ide"))
+//
+//        substitute(module("org.jetbrains.intellij.plugins:structure-intellij"))
+//            .using(project(":structure-intellij"))
+//    }
+//}
