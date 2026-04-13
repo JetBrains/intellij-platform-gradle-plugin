@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Added
+- Apply Gradle Changelog Plugin conventions automatically when `org.jetbrains.changelog` is present, including default changelog extension values, `changeNotes`, and `publishPlugin` wiring.
+
 ## [2.14.0] - 2026-04-09
 
 ### Breaking Changes
