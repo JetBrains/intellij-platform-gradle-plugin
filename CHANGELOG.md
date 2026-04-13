@@ -2,6 +2,9 @@
 
 ## [next]
 
+### Added
+- Apply Gradle Changelog Plugin conventions automatically when `org.jetbrains.changelog` is present, including default changelog extension values, `changeNotes`, and `publishPlugin` wiring.
+
 ### Changed
 
 - Reduce `CollectorTransformer` and module descriptor processing overhead by replacing generic `module-descriptors.jar` XML deserialization with a lightweight shared parser.

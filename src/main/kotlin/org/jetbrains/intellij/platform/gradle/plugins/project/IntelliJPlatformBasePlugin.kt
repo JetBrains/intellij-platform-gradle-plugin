@@ -5,12 +5,12 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.plugins.JavaLibraryPlugin
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.get
-import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
@@ -32,6 +32,7 @@ import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.enableComposeHotReloadCompilerOptions
+import org.jetbrains.intellij.platform.gradle.plugins.setupChangelogConventions
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.*
@@ -77,6 +78,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             project.tasks.configureEach {
                 enableComposeHotReloadCompilerOptions(log)
             }
+        }
+
+        project.pluginManager.withPlugin(Plugins.External.CHANGELOG) {
+            project.setupChangelogConventions()
         }
 
         with(project.configurations) configurations@{
