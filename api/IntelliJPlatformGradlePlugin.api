@@ -197,6 +197,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Plugins {
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Plugins$External {
+	public static final field CHANGELOG Ljava/lang/String;
 	public static final field IDEA Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Plugins$External;
 	public static final field JAVA_TEST_FIXTURES Ljava/lang/String;
