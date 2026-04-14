@@ -9,6 +9,7 @@
 
 - Reduce `CollectorTransformer` and module descriptor processing overhead by replacing generic `module-descriptors.jar` XML deserialization with a lightweight shared parser.
 - Introduce `ProductReleasesService`, add caching for release resolution, and refactor release filtering logic.
+- Refactor `GenerateManifestTask` to replace `ProductInfo` with explicit platform properties (`platformType`, `platformVersion`, `platformBuild`)
 
 ## [2.14.0] - 2026-04-09
 

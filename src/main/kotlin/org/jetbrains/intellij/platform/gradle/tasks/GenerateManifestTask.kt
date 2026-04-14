@@ -17,7 +17,6 @@ import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.tasks.aware.KotlinMetadataAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -46,11 +45,14 @@ abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
     @get:Input
     abstract val gradleVersion: Property<String>
 
-    /**
-     * The [ProductInfo] instance of the current IntelliJ Platform.
-     */
     @get:Input
-    abstract val productInfo: Property<ProductInfo>
+    abstract val platformType: Property<String>
+
+    @get:Input
+    abstract val platformVersion: Property<String>
+
+    @get:Input
+    abstract val platformBuild: Property<String>
 
     /**
      * Plugin version.
@@ -74,9 +76,9 @@ abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
             Build-OS: ${OperatingSystem.current()}
             Build-Plugin: ${Plugin.NAME}
             Build-Plugin-Version: ${pluginVersion.get()}
-            Platform-Type: ${productInfo.map { it.type }.get()}
-            Platform-Version: ${productInfo.map { it.version }.get()}
-            Platform-Build: ${productInfo.map { it.buildNumber }.get()}
+            Platform-Type: ${platformType.get()}
+            Platform-Version: ${platformVersion.get()}
+            Platform-Build: ${platformBuild.get()}
             Kotlin-Available: ${kotlinPluginAvailable.get()}
             Kotlin-Stdlib-Bundled: ${kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull != false}
             Kotlin-Version: ${kotlinVersion.orNull}
@@ -95,7 +97,9 @@ abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
                 val initializeIntelliJPlatformPluginTaskProvider =
                     project.tasks.named<InitializeIntelliJPlatformPluginTask>(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
 
-                productInfo.convention(project.extensionProvider.map { it.productInfo })
+                platformType.convention(project.extensionProvider.map { it.productInfo.type.code })
+                platformVersion.convention(project.extensionProvider.map { it.productInfo.version })
+                platformBuild.convention(project.extensionProvider.map { it.productInfo.buildNumber })
                 pluginVersion.convention(initializeIntelliJPlatformPluginTaskProvider.flatMap { it.pluginVersion })
                 gradleVersion.convention(project.provider { project.gradle.gradleVersion })
                 version.convention(project.extensionProvider.flatMap { it.pluginConfiguration.version })
