@@ -89,7 +89,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
                 val buildSearchableOptionsEnabledProvider = project.extensionProvider.flatMap { it.buildSearchableOptions }
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-                val pluginXmlService = project.pluginXmlService()
+                val pluginXmlServiceProvider = project.pluginXmlService()
                 val pluginXmlProvider = pluginXml
                 applySandboxFrom(prepareSandboxTaskProvider)
 
@@ -98,10 +98,10 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                         temporaryDir
                     })
                 )
-                pluginXmlService.convention(pluginXmlService)
+                pluginXmlService.convention(pluginXmlServiceProvider)
                 showPaidPluginWarning.convention(
                     project.providers[GradleProperties.PaidPluginSearchableOptionsWarning].map { enabled ->
-                        enabled && pluginXmlProvider.orNull?.let { pluginXmlService.get().resolve(it.asPath).productDescriptor } != null
+                        enabled && pluginXmlProvider.orNull?.let { pluginXmlServiceProvider.get().resolve(it.asPath).productDescriptor } != null
                     }
                 )
 

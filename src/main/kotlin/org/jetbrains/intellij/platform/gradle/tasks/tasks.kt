@@ -75,7 +75,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
     val log = Logger(javaClass)
 
     with(task) task@{
-        if (name != Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN) {
+        if (name != Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN && !project.pluginManager.isModule) {
             dependsOn(Tasks.INITIALIZE_INTELLIJ_PLATFORM_PLUGIN)
         }
 
