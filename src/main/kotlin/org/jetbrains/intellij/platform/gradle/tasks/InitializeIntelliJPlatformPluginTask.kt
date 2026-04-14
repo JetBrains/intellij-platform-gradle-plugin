@@ -89,11 +89,10 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), ModuleAware
             return
         }
 
-        val lastUpdate = runCatching {
-            LocalDate.parse(selfUpdateLock.asPath.readText().trim())
-        }.getOrNull()
+        val today = LocalDate.now().toString()
+        val lastUpdate = runCatching { selfUpdateLock.asPath.readText().trim() }.getOrNull()
 
-        if (lastUpdate == LocalDate.now()) {
+        if (lastUpdate == today) {
             return
         }
 
@@ -106,7 +105,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), ModuleAware
             }
 
             with(selfUpdateLock.asPath) {
-                writeText(LocalDate.now().toString())
+                writeText(today)
             }
         } catch (e: Exception) {
             log.error(e.message.orEmpty(), e)
