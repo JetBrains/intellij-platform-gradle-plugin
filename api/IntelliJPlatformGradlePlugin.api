@@ -2826,6 +2826,10 @@ public final class org/jetbrains/intellij/platform/gradle/resolvers/path/Product
 	public fun getSubjectInput ()Ljava/nio/file/Path;
 }
 
+public abstract class org/jetbrains/intellij/platform/gradle/services/AndroidStudioDownloadLinkService : org/gradle/api/services/BuildService {
+	public fun <init> ()V
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/services/ExtractorService : org/gradle/api/services/BuildService {
 	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/file/FileSystemOperations;)V
 	public final fun extract (Ljava/nio/file/Path;Ljava/nio/file/Path;)V
@@ -2849,6 +2853,16 @@ public abstract class org/jetbrains/intellij/platform/gradle/services/IntelliJPl
 public abstract class org/jetbrains/intellij/platform/gradle/services/ModuleDescriptorCoordinatesService : org/gradle/api/services/BuildService {
 	public fun <init> ()V
 	public final fun resolve (Ljava/nio/file/Path;Lkotlin/jvm/functions/Function0;)Ljava/util/Set;
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/services/PluginXmlService : org/gradle/api/services/BuildService {
+	public fun <init> ()V
+	public final fun resolve (Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;)Lcom/jetbrains/plugin/structure/intellij/beans/PluginBean;
+	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/services/PluginXmlService;Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcom/jetbrains/plugin/structure/intellij/beans/PluginBean;
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/services/ProductReleaseBuildService : org/gradle/api/services/BuildService {
+	public fun <init> ()V
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/services/ProductReleasesService : org/gradle/api/services/BuildService {
@@ -2946,6 +2960,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/BuildSearchab
 	public fun exec ()V
 	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public abstract fun getPluginXmlService ()Lorg/gradle/api/provider/Property;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getShowPaidPluginWarning ()Lorg/gradle/api/provider/Property;
 	public fun validateIntelliJPlatformVersion ()V
@@ -2997,8 +3012,10 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/GenerateManif
 	public final fun generate ()V
 	public abstract fun getGeneratedManifest ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getGradleVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPlatformBuild ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPlatformType ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPlatformVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPluginVersion ()Lorg/gradle/api/provider/Property;
-	public abstract fun getProductInfo ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
 }
 
@@ -3037,18 +3054,15 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/GenerateSplitMod
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask$Companion;
 	public fun <init> ()V
 	public abstract fun getLatestPluginVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
-	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public abstract fun getPluginVersion ()Lorg/gradle/api/provider/Property;
-	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getSelfUpdateCheck ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSelfUpdateLock ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun initialize ()V
-	public fun validateIntelliJPlatformVersion ()V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/InitializeIntelliJPlatformPluginTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
@@ -3128,6 +3142,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareJarSea
 	public abstract fun getInputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getLibContainer ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getPluginXmlService ()Lorg/gradle/api/provider/Property;
 	public final fun prepareJarSearchableOptions ()V
 }
 
@@ -3352,6 +3367,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginP
 	public abstract fun getIntellijPlatformCache ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getMutedMessages ()Lorg/gradle/api/provider/ListProperty;
 	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public abstract fun getPluginXmlService ()Lorg/gradle/api/provider/Property;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getRootDirectory ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSourceCompatibility ()Lorg/gradle/api/provider/Property;
