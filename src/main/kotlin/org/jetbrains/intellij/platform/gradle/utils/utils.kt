@@ -140,6 +140,19 @@ internal val Path.safePathString
     get() = absolute().normalize().invariantSeparatorsPathString
 
 /**
+ * Writes the given text to the file if it differs from the current content.
+ * Returns `true` if the file was written, `false` if the content was unchanged.
+ */
+internal fun Path.writeTextIfChanged(text: String): Boolean {
+    if (exists() && readText() == text) {
+        return false
+    }
+
+    writeText(text)
+    return true
+}
+
+/**
  * A property extension for `String` that expands the tilde (`~`) representing the user's home directory
  * into its absolute path.
  *

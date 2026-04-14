@@ -21,7 +21,7 @@ import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.tasks.aware.KotlinMetadataAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import kotlin.io.path.writeText
+import org.jetbrains.intellij.platform.gradle.utils.writeTextIfChanged
 
 /**
  * Generates the `MANIFEST.MF` file with all relevant information about the project configuration.
@@ -68,7 +68,7 @@ abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
 
     @TaskAction
     fun generate() {
-        generatedManifest.asPath.writeText(
+        generatedManifest.asPath.writeTextIfChanged(
             """
             Created-By: ${gradleVersion.map { "Gradle $it" }.get()}
             Version: ${version.get()}

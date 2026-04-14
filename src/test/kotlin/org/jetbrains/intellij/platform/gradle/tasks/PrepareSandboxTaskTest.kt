@@ -21,6 +21,12 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     private val updatesFile
         get() = sandbox.resolve("config/options/updates.xml")
 
+    private val disabledPluginsFile
+        get() = sandbox.resolve("config/disabled_plugins.txt")
+
+    private val splitModeFrontendPropertiesFile
+        get() = sandbox.resolve("frontend.properties")
+
     private val sinceBuild: String
         get() {
             val version = Version.parse(intellijPlatformBuildNumber)
@@ -700,6 +706,35 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
             </application>
             """.trimIndent(),
         )
+    }
+
+    @Test
+    fun `prepare sandbox does not rewrite unchanged config files`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    splitMode = true
+                }
+                """.trimIndent()
+
+        build(Tasks.PREPARE_SANDBOX)
+
+        val updatesLastModifiedTime = updatesFile.getLastModifiedTime()
+        val disabledPluginsLastModifiedTime = disabledPluginsFile.getLastModifiedTime()
+        val splitModeFrontendPropertiesLastModifiedTime = splitModeFrontendPropertiesFile.getLastModifiedTime()
+
+        Thread.sleep(1_100)
+
+        build(Tasks.PREPARE_SANDBOX, args = listOf("--rerun-tasks"))
+
+        assertEquals(updatesLastModifiedTime, updatesFile.getLastModifiedTime())
+        assertEquals(disabledPluginsLastModifiedTime, disabledPluginsFile.getLastModifiedTime())
+        assertEquals(splitModeFrontendPropertiesLastModifiedTime, splitModeFrontendPropertiesFile.getLastModifiedTime())
     }
 
     @Test
