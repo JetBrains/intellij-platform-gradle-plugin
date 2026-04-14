@@ -38,44 +38,56 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
     private val log = Logger(javaClass)
 
     override fun obtain() = runCatching {
-        val androidStudioReleases = parameters.androidStudioUrl.orNull
-            ?.also { log.info("Reading Android Studio releases from: $it") }
-            ?.let { URL(it).readText() }
-            ?.let { decode<AndroidStudioReleases>(it) }
+        val androidStudioReleases = loadAndroidStudioReleases(
+            androidStudioUrl = parameters.androidStudioUrl.orNull,
+            loader = { URL(it).readText() },
+            log = log,
+        )
         requireNotNull(androidStudioReleases) { "Failed to decode Android Studio releases from: ${parameters.androidStudioUrl.orNull}" }
-
-        val os = with(OperatingSystem.current()) {
-            when {
-                isMacOsX -> "mac"
-                isLinux -> "linux"
-                isWindows -> "windows"
-                else -> throw GradleException("Failed to obtain platform OS for: $this")
-            }
-        }
-
-        val version = parameters.androidStudioVersion.orNull
-        val item = androidStudioReleases.items.find {
-            it.version == version || it.build == version || it.build == "${IntelliJPlatformType.AndroidStudio.code}-$version"
-        }
-        requireNotNull(item) { "Failed to find Android Studio release for version: $version" }
-
-        val arch = when {
-            os == "mac" && System.getProperty("os.arch") == "aarch64" -> "_arm"
-            else -> ""
-        }
-
-        val candidates = item.downloads
-            .asSequence()
-            .map { it.link }
-            .filter { link -> link.substringAfterLast('/').contains(os) }
-            .filterNot { link -> link.endsWith(".deb") || link.endsWith(".exe") } // Extracting of .deb and .exe archives is not supported.
-            .toList()
-
-        candidates.firstOrNull { link ->
-            link.substringAfterLast('/').contains("$os$arch.")
-        } ?: candidates.firstOrNull()
-            ?: throw GradleException("Failed to obtain download link for version: $version")
+        androidStudioReleases.resolveDownloadLink(parameters.androidStudioVersion.orNull)
     }.onFailure {
         log.error("${javaClass.canonicalName} execution failed.", it)
     }.getOrNull()
+}
+
+internal fun loadAndroidStudioReleases(androidStudioUrl: String?, loader: (String) -> String?, log: Logger) =
+    androidStudioUrl
+        ?.also { log.info("Reading Android Studio releases from: $it") }
+        ?.let(loader)
+        ?.let { decode<AndroidStudioReleases>(it) }
+
+internal fun AndroidStudioReleases.resolveDownloadLink(version: String?): String {
+    val operatingSystem = OperatingSystem.current()
+    val architecture = System.getProperty("os.arch")
+
+    val os = with(operatingSystem) {
+        when {
+            isMacOsX -> "mac"
+            isLinux -> "linux"
+            isWindows -> "windows"
+            else -> throw GradleException("Failed to obtain platform OS for: $this")
+        }
+    }
+
+    val item = items.find {
+        it.version == version || it.build == version || it.build == "${IntelliJPlatformType.AndroidStudio.code}-$version"
+    }
+    requireNotNull(item) { "Failed to find Android Studio release for version: $version" }
+
+    val arch = when {
+        os == "mac" && architecture == "aarch64" -> "_arm"
+        else -> ""
+    }
+
+    val candidates = item.downloads
+        .asSequence()
+        .map { it.link }
+        .filter { link -> link.substringAfterLast('/').contains(os) }
+        .filterNot { link -> link.endsWith(".deb") || link.endsWith(".exe") } // Extracting of .deb and .exe archives is not supported.
+        .toList()
+
+    return candidates.firstOrNull { link ->
+        link.substringAfterLast('/').contains("$os$arch.")
+    } ?: candidates.firstOrNull()
+    ?: throw GradleException("Failed to obtain download link for version: $version")
 }
