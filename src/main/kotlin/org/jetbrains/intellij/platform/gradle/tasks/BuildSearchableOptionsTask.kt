@@ -13,9 +13,10 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.services.PluginXmlService
+import org.jetbrains.intellij.platform.gradle.services.pluginXmlService
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask.Companion.systemPropertyDefault
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
@@ -48,6 +49,9 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
      */
     @get:Internal
     abstract val showPaidPluginWarning: Property<Boolean>
+
+    @get:Internal
+    abstract val pluginXmlService: Property<PluginXmlService>
 
     private val log = Logger(javaClass)
 
@@ -85,6 +89,8 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
                 val buildSearchableOptionsEnabledProvider = project.extensionProvider.flatMap { it.buildSearchableOptions }
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
+                val pluginXmlService = project.pluginXmlService()
+                val pluginXmlProvider = pluginXml
                 applySandboxFrom(prepareSandboxTaskProvider)
 
                 outputDirectory.convention(
@@ -92,9 +98,10 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                         temporaryDir
                     })
                 )
+                pluginXmlService.convention(pluginXmlService)
                 showPaidPluginWarning.convention(
-                    project.providers[GradleProperties.PaidPluginSearchableOptionsWarning].map {
-                        it && pluginXml.orNull?.parse { productDescriptor } != null
+                    project.providers[GradleProperties.PaidPluginSearchableOptionsWarning].map { enabled ->
+                        enabled && pluginXmlProvider.orNull?.let { pluginXmlService.get().resolve(it.asPath).productDescriptor } != null
                     }
                 )
 

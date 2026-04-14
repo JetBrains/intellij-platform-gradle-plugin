@@ -10,6 +10,7 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Nested
 import org.gradle.process.CommandLineArgumentProvider
 import org.gradle.process.JavaForkOptions
+import org.jetbrains.intellij.platform.gradle.services.PluginXmlService
 import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 
@@ -59,6 +60,7 @@ internal class ExecutionModeAwareIdeArgumentProvider(
  */
 internal class ExecutionModeAwarePluginArgumentProvider(
     pluginXml: Provider<RegularFile>,
+    pluginXmlService: Provider<PluginXmlService>,
 
     @Input
     val executionMode: Provider<RunIdeTask.ExecutionMode>,
@@ -71,18 +73,18 @@ internal class ExecutionModeAwarePluginArgumentProvider(
 ) : CommandLineArgumentProvider {
 
     @get:Nested
-    val standardProvider = PluginArgumentProvider(pluginXml)
+    val standardProvider = PluginArgumentProvider(pluginXml, pluginXmlService)
 
     @get:Nested
     val backendProvider = SplitModePluginArgumentProvider(
-        delegate = PluginArgumentProvider(pluginXml),
+        delegate = PluginArgumentProvider(pluginXml, pluginXmlService),
         pluginInstallationTarget = pluginInstallationTarget,
         requiredTarget = SplitModeAware.PluginInstallationTarget.BACKEND,
     )
 
     @get:Nested
     val frontendProvider = SplitModePluginArgumentProvider(
-        delegate = PluginArgumentProvider(pluginXml),
+        delegate = PluginArgumentProvider(pluginXml, pluginXmlService),
         pluginInstallationTarget = pluginInstallationTarget,
         requiredTarget = SplitModeAware.PluginInstallationTarget.FRONTEND,
     )

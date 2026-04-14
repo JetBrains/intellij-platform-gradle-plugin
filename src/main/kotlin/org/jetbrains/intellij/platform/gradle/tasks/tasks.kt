@@ -36,6 +36,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.IntelliJPluginVerif
 import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSignerPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
+import org.jetbrains.intellij.platform.gradle.services.pluginXmlService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 
@@ -415,6 +416,7 @@ private fun RunnableIdeAware.createIdeArgumentProvider(project: Project) =
 private fun RunnableIdeAware.createPluginArgumentProvider(project: Project) =
     ExecutionModeAwarePluginArgumentProvider(
         pluginXml = pluginXml,
+        pluginXmlService = project.pluginXmlService(),
         executionMode = executionModeProvider(project),
         splitMode = splitModeProvider(project),
         pluginInstallationTarget = pluginInstallationTargetProvider(project),
