@@ -46,15 +46,22 @@ abstract class ProductReleaseBuildValueSource : ValueSource<String, ProductRelea
     private val log = Logger(javaClass)
 
     override fun obtain() = with(parameters) {
-        val cdnBuildsContent = productsReleasesCdnBuildsUrl.orNull
-            ?.replace("{type}", type.get().code)
-            ?.let { URI(it).toURL().readText() }
-        val jetbrainsIdesReleases = cdnBuildsContent
-            ?.also { log.info("Reading JetBrains IDEs releases from URL: ${productsReleasesCdnBuildsUrl.orNull}") }
-            ?.let { decode<List<JetBrainsCdnBuilds>>(it, stringFormat = json) }
-            ?.firstOrNull()
-            ?: return@with null
-
-        jetbrainsIdesReleases.releases.find { it.version == version.get() }?.build
+        loadProductReleaseBuilds(
+            productsReleasesCdnBuildsUrl = productsReleasesCdnBuildsUrl.orNull?.replace("{type}", type.get().code),
+            loader = { URI(it).toURL().readText() },
+            log = log,
+        )?.resolveBuild(version.get())
     }
 }
+
+internal fun loadProductReleaseBuilds(productsReleasesCdnBuildsUrl: String?, loader: (String) -> String?, log: Logger) =
+    productsReleasesCdnBuildsUrl
+        ?.let(loader)
+        ?.also { log.info("Reading JetBrains IDEs releases from URL: $productsReleasesCdnBuildsUrl") }
+        ?.let { decode<List<JetBrainsCdnBuilds>>(it, stringFormat = json) }
+
+internal fun List<JetBrainsCdnBuilds>.resolveBuild(version: String) =
+    firstOrNull()
+        ?.releases
+        ?.find { it.version == version }
+        ?.build

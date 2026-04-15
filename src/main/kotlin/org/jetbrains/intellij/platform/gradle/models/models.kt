@@ -13,12 +13,12 @@ import org.jdom2.output.Format
 import org.jdom2.output.XMLOutputter
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.writeTextIfChanged
 import java.io.InputStream
 import java.io.StringWriter
 import java.net.URL
 import java.nio.file.Path
 import kotlin.io.path.readText
-import kotlin.io.path.writeText
 
 internal val json = Json { ignoreUnknownKeys = true }
 internal val xml = XML {
@@ -91,6 +91,6 @@ internal fun transformXml(document: Document, path: Path) {
 
     StringWriter().use {
         xmlOutput.output(document, it)
-        path.writeText(it.toString())
+        path.writeTextIfChanged(it.toString())
     }
 }

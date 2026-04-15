@@ -7,16 +7,17 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.ProjectLayout
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
+import org.jetbrains.intellij.platform.gradle.services.PluginXmlService
+import org.jetbrains.intellij.platform.gradle.services.pluginXmlService
+import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import java.nio.file.FileSystems
 import javax.inject.Inject
 import kotlin.io.path.exists
 
@@ -30,7 +31,7 @@ internal const val SEARCHABLE_OPTIONS_SUFFIX_JSON = "-searchableOptions.json"
 @CacheableTask
 abstract class PrepareJarSearchableOptionsTask @Inject constructor(
     private val fileSystemOperations: FileSystemOperations,
-) : DefaultTask() {
+) : DefaultTask(), PluginAware {
 
     /**
      * Specifies the directory where the prepared searchable options are read from.
@@ -60,24 +61,14 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val libContainer: DirectoryProperty
 
-    /**
-     * Specifies the final composed Jar archive with the plugin content.
-     *
-     * Default value: [ComposedJarTask.archiveFile]
-     */
-    @get:InputFile
-    @get:SkipWhenEmpty
-    @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val composedJarFile: RegularFileProperty
+    @get:Internal
+    abstract val pluginXmlService: Property<PluginXmlService>
 
     @TaskAction
     fun prepareJarSearchableOptions() {
-        val (pluginId, modules) = FileSystems
-            .newFileSystem(composedJarFile.asPath, null as ClassLoader?)
-            .use { fileSystem ->
-                val pluginXml = fileSystem.getPath("/META-INF/plugin.xml")
-                pluginXml.parse { id } to pluginXml.parse { pluginContent.flatMap { it.modules.map { module -> module.moduleName } } }
-            }
+        val pluginBean = pluginXmlService.get().resolve(pluginXml.asPath)
+        val pluginId = pluginBean.id
+        val modules = pluginBean.pluginContent.flatMap { it.modules.map { module -> module.moduleName } }
 
         fileSystemOperations.sync {
             from(inputDirectory)
@@ -111,11 +102,10 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
             project.registerTask<PrepareJarSearchableOptionsTask>(Tasks.PREPARE_JAR_SEARCHABLE_OPTIONS) {
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
                 val buildSearchableOptionsEnabledProvider = project.extensionProvider.flatMap { it.buildSearchableOptions }
-                val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
 
+                pluginXmlService.convention(project.pluginXmlService())
                 inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
-                composedJarFile.convention(composedJarTaskProvider.flatMap { it.archiveFile })
                 libContainer.convention(prepareSandboxTaskProvider.flatMap { it.pluginDirectory.dir(Sandbox.Plugin.LIB) })
                 outputDirectory.convention(
                     project.layout.dir(project.provider {
