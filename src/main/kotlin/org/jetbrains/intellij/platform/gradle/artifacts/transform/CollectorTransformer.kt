@@ -219,7 +219,7 @@ internal fun loadModuleDescriptors(moduleDescriptorsFile: Path) =
             jarFile
                 .entries()
                 .asSequence()
-                .filter { it.name.endsWith(".xml") }
+                .filter { it.name.endsWith(".xml") && !it.name.contains('/') }
                 .map { jarFile.getInputStream(it) }
                 .mapNotNull { decode<ModuleDescriptor>(it) }
                 .associateBy { it.name }
