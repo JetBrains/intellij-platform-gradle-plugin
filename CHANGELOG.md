@@ -4,6 +4,7 @@
 
 ### Added
 - Apply Gradle Changelog Plugin conventions automatically when `org.jetbrains.changelog` is present, including default changelog extension values, `changeNotes`, and `publishPlugin` wiring.
+- Supported upcoming changes in module-descriptors.jar format in 262.* IDEs.
 
 ## [2.14.0] - 2026-04-09
 
