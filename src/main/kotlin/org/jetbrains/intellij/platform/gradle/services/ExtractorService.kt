@@ -16,6 +16,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathReso
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.resolvePlatformPath
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import javax.inject.Inject
 import kotlin.io.path.*
 
@@ -76,9 +77,9 @@ abstract class ExtractorService @Inject constructor(
         if (platformPath != targetDirectory) {
             log.info("Copying the content from '$platformPath' to '$targetDirectory'.")
             platformPath.listDirectoryEntries().forEach { file ->
-                val destination = targetDirectory.resolve(platformPath.relativize(file))
+                val destination = targetDirectory.resolve(file.name)
                 destination.parent.createDirectories()
-                file.moveTo(destination)
+                file.moveTo(destination, REPLACE_EXISTING)
             }
 
             // Remove an empty directory.

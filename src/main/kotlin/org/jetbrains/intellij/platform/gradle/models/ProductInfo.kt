@@ -16,6 +16,7 @@ import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.Path
 
 /**
@@ -275,7 +276,7 @@ internal fun String.resolveIdeHomeVariable(platformPath: Path) =
             .replace("%IDE_HOME%", it)
     }
 
-private val productInfoCache = mutableMapOf<Path, ProductInfo>()
+private val productInfoCache = ConcurrentHashMap<Path, ProductInfo>()
 
 /**
  * Retrieves the [ProductInfo] for the IntelliJ Platform from the root directory.
@@ -285,10 +286,15 @@ private val productInfoCache = mutableMapOf<Path, ProductInfo>()
  * @throws IllegalArgumentException
  */
 @Throws(IllegalArgumentException::class)
-fun Path.productInfo() = productInfoCache.getOrPut(this) {
-    ProductInfoPathResolver(this)
+fun Path.productInfo(): ProductInfo {
+    val productInfoPath = ProductInfoPathResolver(this)
         .resolve()
-        .let { decode<ProductInfo>(it) }
+        .toAbsolutePath()
+        .normalize()
+
+    return productInfoCache.computeIfAbsent(productInfoPath) {
+        decode<ProductInfo>(it)
+    }
 }
 
 /**

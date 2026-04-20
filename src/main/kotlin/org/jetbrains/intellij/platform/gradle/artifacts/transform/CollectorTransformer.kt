@@ -23,7 +23,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.ModuleDescriptorsPa
 import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.nio.file.Path
-import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarFile
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
@@ -166,7 +165,7 @@ internal fun collectModuleDescriptorJars(
     architecture: String? = null,
 ): List<Path> = runCatching {
     val moduleDescriptorsFile = ModuleDescriptorsPathResolver(platformPath).resolve()
-    val modules = loadModuleDescriptors(moduleDescriptorsFile)
+    val modules = ModuleDescriptorsParser.load(moduleDescriptorsFile)
 
     val rootModuleName = productInfo.run {
         when (architecture) {
@@ -210,18 +209,3 @@ internal fun collectModuleDescriptorJars(
 
     collectResourcesFromModule(rootModuleName) + productModuleJars
 }.getOrDefault(emptyList())
-
-private val moduleDescriptorsCache = ConcurrentHashMap<String, Map<String, ModuleDescriptor>>()
-
-internal fun loadModuleDescriptors(moduleDescriptorsFile: Path) =
-    moduleDescriptorsCache.computeIfAbsent(moduleDescriptorsFile.safePathString) {
-        JarFile(moduleDescriptorsFile.toFile()).use { jarFile ->
-            jarFile
-                .entries()
-                .asSequence()
-                .filter { it.name.endsWith(".xml") }
-                .map { jarFile.getInputStream(it) }
-                .mapNotNull { decode<ModuleDescriptor>(it) }
-                .associateBy { it.name }
-        }
-    }

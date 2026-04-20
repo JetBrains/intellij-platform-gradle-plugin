@@ -4,12 +4,13 @@ package org.jetbrains.intellij.platform.gradle.argumentProviders
 
 import org.gradle.api.file.RegularFile
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.PathSensitive
 import org.gradle.api.tasks.PathSensitivity.RELATIVE
 import org.gradle.process.CommandLineArgumentProvider
-import org.jetbrains.intellij.platform.gradle.tasks.aware.parse
+import org.jetbrains.intellij.platform.gradle.services.PluginXmlService
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import kotlin.io.path.exists
 
@@ -23,6 +24,9 @@ internal class PluginArgumentProvider(
     @PathSensitive(RELATIVE)
     @Optional
     val pluginXml: Provider<RegularFile>,
+
+    @get:Internal
+    val pluginXmlService: Provider<PluginXmlService>,
 ) : CommandLineArgumentProvider {
 
     /**
@@ -31,7 +35,7 @@ internal class PluginArgumentProvider(
     private val requiredPlugins
         get() = pluginXml.orNull
             ?.takeIf { it.asPath.exists() }
-            ?.let { "-Didea.required.plugins.id=${it.parse { id }}" }
+            ?.let { "-Didea.required.plugins.id=${pluginXmlService.get().resolve(it.asPath).id}" }
 
     /**
      * Combines various arguments related to the IntelliJ Platform configuration to create a list of arguments to be passed to the platform.

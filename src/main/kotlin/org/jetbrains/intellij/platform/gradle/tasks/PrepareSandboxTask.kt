@@ -16,6 +16,7 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.work.DisableCachingByDefault
+import org.jdom2.Document
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
@@ -25,18 +26,8 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
-import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginInstallationTargetAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SandboxStructure
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
-import org.jetbrains.intellij.platform.gradle.tasks.aware.conventionFrom
-import org.jetbrains.intellij.platform.gradle.tasks.aware.frontendProcessPluginsDirectory
-import org.jetbrains.intellij.platform.gradle.tasks.aware.pluginInstallationDirectory
-import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
-import org.jetbrains.intellij.platform.gradle.utils.safePathString
+import org.jetbrains.intellij.platform.gradle.tasks.aware.*
+import org.jetbrains.intellij.platform.gradle.utils.*
 import kotlin.io.path.*
 
 /**
@@ -168,48 +159,40 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
             .resolve("options")
             .createDirectories()
             .resolve("updates.xml")
-            .apply {
-                if (notExists()) {
-                    createFile()
+
+        val document = when {
+            updatesConfig.notExists() || updatesConfig.readText().trim().isEmpty() -> Document(Element("application"))
+            else -> updatesConfig.inputStream().use(JDOMUtil::loadDocument)
+        }
+        val application = document.rootElement.takeIf { it.name == "application" }
+        requireNotNull(application) { "Invalid content of '$updatesConfig' – '<application>' root element was expected." }
+
+        val updatesConfigurable = application
+            .getChildren("component")
+            .find { it.getAttributeValue("name") == "UpdatesConfigurable" }
+            ?: Element("component")
+                .apply {
+                    setAttribute("name", "UpdatesConfigurable")
+                    application.addContent(this)
                 }
-            }
 
-        if (updatesConfig.readText().trim().isEmpty()) {
-            updatesConfig.writeText("<application/>")
-        }
+        val option = updatesConfigurable
+            .getChildren("option")
+            .find { it.getAttributeValue("name") == "CHECK_NEEDED" }
+            ?: Element("option")
+                .apply {
+                    setAttribute("name", "CHECK_NEEDED")
+                    updatesConfigurable.addContent(this)
+                }
 
-        updatesConfig.inputStream().use { inputStream ->
-            val document = JDOMUtil.loadDocument(inputStream)
-            val application = document.rootElement.takeIf { it.name == "application" }
-            requireNotNull(application) { "Invalid content of '$updatesConfig' – '<application>' root element was expected." }
-
-            val updatesConfigurable = application
-                .getChildren("component")
-                .find { it.getAttributeValue("name") == "UpdatesConfigurable" }
-                ?: Element("component")
-                    .apply {
-                        setAttribute("name", "UpdatesConfigurable")
-                        application.addContent(this)
-                    }
-
-            val option = updatesConfigurable
-                .getChildren("option")
-                .find { it.getAttributeValue("name") == "CHECK_NEEDED" }
-                ?: Element("option")
-                    .apply {
-                        setAttribute("name", "CHECK_NEEDED")
-                        updatesConfigurable.addContent(this)
-                    }
-
-            option.setAttribute("value", "false")
-            transformXml(document, updatesConfig)
-        }
+        option.setAttribute("value", "false")
+        transformXml(document, updatesConfig)
     }
 
     private fun disabledPlugins(configDirectory: DirectoryProperty) {
         configDirectory.asPath
             .resolve("disabled_plugins.txt")
-            .writeLines(disabledPlugins.get())
+            .writeTextIfChanged(disabledPlugins.get().joinToString(System.lineSeparator()))
     }
 
     /**
@@ -223,7 +206,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
         val pluginsDirectory = frontendProcessPluginsDirectory().get().asPath
 
-        splitModeFrontendProperties.asPath.writeText(
+        splitModeFrontendProperties.asPath.writeTextIfChanged(
             """
             idea.config.path=${sandboxConfigFrontendDirectory.asPath.safePathString}
             idea.system.path=${sandboxSystemFrontendDirectory.asPath.safePathString}
