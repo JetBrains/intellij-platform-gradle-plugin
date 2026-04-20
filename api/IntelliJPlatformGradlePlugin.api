@@ -3135,10 +3135,9 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PatchPluginXmlTa
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareJarSearchableOptionsTask : org/gradle/api/DefaultTask {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareJarSearchableOptionsTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/PrepareJarSearchableOptionsTask$Companion;
 	public fun <init> (Lorg/gradle/api/file/FileSystemOperations;)V
-	public abstract fun getComposedJarFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getInputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getLibContainer ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
