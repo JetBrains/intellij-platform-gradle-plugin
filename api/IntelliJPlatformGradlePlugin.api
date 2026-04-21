@@ -281,6 +281,10 @@ public final class org/jetbrains/intellij/platform/gradle/GradleProperties$Downl
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$DownloadSources;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/GradleProperties$ForceBuildSearchableOptions : org/jetbrains/intellij/platform/gradle/GradleProperties {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$ForceBuildSearchableOptions;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$IntellijPlatformCache : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$IntellijPlatformCache;
 }

@@ -19,7 +19,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask.Companion.systemP
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RunnableIdeAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 
 /**
@@ -27,6 +26,8 @@ import org.jetbrains.intellij.platform.gradle.utils.safePathString
  * This task runs a headless IDE instance to collect all the available options provided by the plugin's [Settings](https://plugins.jetbrains.com/docs/intellij/settings.html).
  *
  * If the plugin doesn't implement custom settings, it is recommended to disable this task via [IntelliJPlatformExtension.buildSearchableOptions] flag.
+ * The task is also skipped automatically when no Configurable extension points are found in the main plugin descriptor
+ * or plugin module descriptors. Use [GradleProperties.ForceBuildSearchableOptions] to bypass this optimization.
  *
  * In the case of running the task for the plugin that has [IntelliJPlatformExtension.PluginConfiguration.ProductDescriptor] defined,
  * a warning will be logged regarding potential issues with running headless IDE for paid plugins.
@@ -87,7 +88,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
     companion object : Registrable {
         override fun register(project: Project) =
             project.registerTask<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS) {
-                val buildSearchableOptionsEnabledProvider = project.extensionProvider.flatMap { it.buildSearchableOptions }
+                val buildSearchableOptionsEnabledProvider = project.buildSearchableOptionsEnabledProvider()
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
                 val pluginXmlServiceProvider = project.pluginXmlService()
                 val pluginXmlProvider = pluginXml
@@ -108,6 +109,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                 systemPropertyDefault("idea.l10n.keys", "only")
 
                 inputs.property("intellijPlatform.buildSearchableOptions", buildSearchableOptionsEnabledProvider)
+                inputs.property("intellijPlatform.forceBuildSearchableOptions", project.providers[GradleProperties.ForceBuildSearchableOptions])
 
                 onlyIf {
                     buildSearchableOptionsEnabledProvider.get()

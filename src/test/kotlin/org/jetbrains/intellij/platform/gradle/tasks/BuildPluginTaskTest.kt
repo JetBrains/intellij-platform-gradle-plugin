@@ -24,6 +24,11 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
     override fun setup() {
         super.setup()
 
+        gradleProperties write //language=properties
+                """
+                ${GradleProperties.ForceBuildSearchableOptions} = true
+                """.trimIndent()
+
         buildFile write //language=kotlin
                 """
                 intellijPlatform {

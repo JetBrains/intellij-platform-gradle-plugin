@@ -102,6 +102,14 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
     object NoSearchableOptionsWarning : GradleProperties<Boolean>(true)
 
     /**
+     * Forces [BuildSearchableOptionsTask] to run even when the plugin descriptor analysis does not find any Configurable extension points.
+     * This overrides both the automatic skip optimization and [IntelliJPlatformExtension.buildSearchableOptions].
+     *
+     * Default value: `false`
+     */
+    object ForceBuildSearchableOptions : GradleProperties<Boolean>(false)
+
+    /**
      * Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin.
      * As paid plugins require providing a valid license and presenting a UI dialog, it is impossible to handle such a case, and the task will fail.
      * This feature flag displays the given warning when the task is run by a paid plugin.

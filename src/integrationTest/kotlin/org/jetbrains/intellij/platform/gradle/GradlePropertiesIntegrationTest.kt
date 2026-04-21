@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
 
@@ -12,6 +13,10 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 ) {
 
     private val defaultArgs = listOf("--info")
+    private val forcedSearchableOptionsProjectProperties
+        get() = defaultProjectProperties + mapOf(
+            GradleProperties.ForceBuildSearchableOptions.toString() to true,
+        )
 
     override val defaultProjectProperties
         get() = super.defaultProjectProperties + mapOf(
@@ -40,7 +45,7 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             Tasks.JAR_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(property to false),
+            projectProperties = forcedSearchableOptionsProjectProperties + mapOf(property to false),
             args = defaultArgs,
         ) {
             output containsText "Read Gradle property: $property=false"
@@ -54,11 +59,26 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             Tasks.JAR_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(property to true),
+            projectProperties = forcedSearchableOptionsProjectProperties + mapOf(property to true),
             args = defaultArgs,
         ) {
             output containsText "Read Gradle property: $property=true"
             output containsText "No searchable options found."
+        }
+    }
+
+    @Test
+    fun `forceBuildSearchableOptions is enabled`() {
+        val property = GradleProperties.ForceBuildSearchableOptions.toString()
+
+        build(
+            Tasks.JAR_SEARCHABLE_OPTIONS,
+            projectProperties = forcedSearchableOptionsProjectProperties + mapOf("buildSearchableOptions" to false),
+            args = defaultArgs,
+        ) {
+            output containsText "Read Gradle property: $property=true"
+            assertTaskOutcome(Tasks.BUILD_SEARCHABLE_OPTIONS, TaskOutcome.SUCCESS)
+            assertTaskOutcome(Tasks.JAR_SEARCHABLE_OPTIONS, TaskOutcome.SUCCESS)
         }
     }
 
@@ -68,7 +88,7 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             Tasks.BUILD_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(property to false),
+            projectProperties = forcedSearchableOptionsProjectProperties + mapOf(property to false),
             args = defaultArgs,
         ) {
             output containsText "Read Gradle property: $property=false"
@@ -81,7 +101,7 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         build(
             Tasks.BUILD_SEARCHABLE_OPTIONS,
-            projectProperties = defaultProjectProperties + mapOf(property to true),
+            projectProperties = forcedSearchableOptionsProjectProperties + mapOf(property to true),
             args = defaultArgs,
         ) {
             output containsText "Due to IDE limitations, it is impossible to run the IDE in headless mode to collect searchable options for a paid plugin."

@@ -5,6 +5,15 @@ package org.jetbrains.intellij.platform.gradle
 abstract class SearchableOptionsTestBase : IntelliJPluginTestBase() {
 
     //language=xml
+    fun getPluginXmlWithoutSearchableConfigurable() = """
+        <idea-plugin>
+           <name>PluginName</name>
+           <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit. A amet perspiciatis quasi.</description>
+           <vendor>PluginVendor</vendor>
+        </idea-plugin>
+        """.trimIndent()
+
+    //language=xml
     fun getPluginXmlWithSearchableConfigurable() = """
         <idea-plugin>
            <name>PluginName</name>

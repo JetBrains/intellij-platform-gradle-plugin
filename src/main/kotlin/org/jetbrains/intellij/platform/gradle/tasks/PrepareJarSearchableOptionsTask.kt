@@ -13,11 +13,12 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.services.PluginXmlService
 import org.jetbrains.intellij.platform.gradle.services.pluginXmlService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginAware
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import javax.inject.Inject
 import kotlin.io.path.exists
 
@@ -101,7 +102,7 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
         override fun register(project: Project) =
             project.registerTask<PrepareJarSearchableOptionsTask>(Tasks.PREPARE_JAR_SEARCHABLE_OPTIONS) {
                 val buildSearchableOptionsTaskProvider = project.tasks.named<BuildSearchableOptionsTask>(Tasks.BUILD_SEARCHABLE_OPTIONS)
-                val buildSearchableOptionsEnabledProvider = project.extensionProvider.flatMap { it.buildSearchableOptions }
+                val buildSearchableOptionsEnabledProvider = project.buildSearchableOptionsEnabledProvider()
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
 
                 pluginXmlService.convention(project.pluginXmlService())
@@ -112,6 +113,9 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
                         temporaryDir
                     })
                 )
+
+                inputs.property("intellijPlatform.buildSearchableOptions", buildSearchableOptionsEnabledProvider)
+                inputs.property("intellijPlatform.forceBuildSearchableOptions", project.providers[GradleProperties.ForceBuildSearchableOptions])
 
                 onlyIf {
                     buildSearchableOptionsEnabledProvider.get()

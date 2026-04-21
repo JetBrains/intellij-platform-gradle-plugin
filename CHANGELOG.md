@@ -4,6 +4,8 @@
 
 ### Added
 - Apply Gradle Changelog Plugin conventions automatically when `org.jetbrains.changelog` is present, including default changelog extension values, `changeNotes`, and `publishPlugin` wiring.
+- Skip `buildSearchableOptions` when the main plugin descriptor and included module descriptors do not declare Configurable extension points.
+- Add `org.jetbrains.intellij.platform.forceBuildSearchableOptions` Gradle property to force `buildSearchableOptions` to run even when automatic detection would skip it.
 
 ### Changed
 
