@@ -6,6 +6,7 @@ import org.gradle.api.attributes.Attribute
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import kotlin.enums.enumEntries
 
 object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
@@ -142,9 +143,9 @@ object Constants {
                 override fun toString() = name.replace('_', '.').lowercase()
 
                 companion object {
-                    val Archives = enumValues<ArtifactType>().toList() - DIRECTORY
+                    val Archives = enumEntries<ArtifactType>() - DIRECTORY
 
-                    fun from(value: String) = enumValues<ArtifactType>().find { it.toString() == value }
+                    fun from(value: String) = enumEntries<ArtifactType>().find { it.toString() == value }
                 }
             }
         }

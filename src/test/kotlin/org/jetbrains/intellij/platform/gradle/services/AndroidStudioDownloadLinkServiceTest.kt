@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.services
 
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.kotlin.dsl.newInstance
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource
 import kotlin.test.Test
@@ -23,11 +24,11 @@ class AndroidStudioDownloadLinkServiceTest {
         var loads = 0
         val objects = ProjectBuilder.builder().build().objects
 
-        val firstParameters = objects.newInstance(AndroidStudioDownloadLinkValueSource.Parameters::class.java).apply {
+        val firstParameters = objects.newInstance<AndroidStudioDownloadLinkValueSource.Parameters>().apply {
             androidStudioUrl.set("androidStudio")
             androidStudioVersion.set("2023.3.1.13")
         }
-        val secondParameters = objects.newInstance(AndroidStudioDownloadLinkValueSource.Parameters::class.java).apply {
+        val secondParameters = objects.newInstance<AndroidStudioDownloadLinkValueSource.Parameters>().apply {
             androidStudioUrl.set("androidStudio")
             androidStudioVersion.set("2023.3.1.12")
         }

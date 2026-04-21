@@ -902,7 +902,7 @@ class IntelliJPlatformDependenciesHelper(
     }.cached())
 
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
-        objects.newInstance(ProductReleasesValueSource.Parameters::class.java).apply {
+        objects.newInstance<ProductReleasesValueSource.Parameters>().apply {
             jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
             androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
 
@@ -945,7 +945,7 @@ class IntelliJPlatformDependenciesHelper(
         val type = IntelliJPlatformType.AndroidStudio
         runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
 
-        val parameters = objects.newInstance(AndroidStudioDownloadLinkValueSource.Parameters::class.java).apply {
+        val parameters = objects.newInstance<AndroidStudioDownloadLinkValueSource.Parameters>().apply {
             androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
             androidStudioVersion = version
         }
@@ -977,7 +977,7 @@ class IntelliJPlatformDependenciesHelper(
         runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
         runCatching { IntelliJPlatformType.JetBrainsClient.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
 
-        val parameters = objects.newInstance(ProductReleaseBuildValueSource.Parameters::class.java).apply {
+        val parameters = objects.newInstance<ProductReleaseBuildValueSource.Parameters>().apply {
             productsReleasesCdnBuildsUrl = providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
             this.version = version
             this.type = type
