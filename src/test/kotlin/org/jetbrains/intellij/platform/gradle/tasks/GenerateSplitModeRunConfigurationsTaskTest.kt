@@ -24,7 +24,7 @@ class GenerateSplitModeRunConfigurationsTaskTest : IntelliJPluginTestBase() {
                   <option name="executionName" />
                   <option name="externalProjectPath" value="${'$'}PROJECT_DIR${'$'}" />
                   <option name="externalSystemIdString" value="GRADLE" />
-                  <option name="scriptParameters" value="" />
+                  <option name="scriptParameters" value="--purge-old-log-directories" />
                   <option name="taskDescriptions">
                     <list />
                   </option>
@@ -56,7 +56,7 @@ class GenerateSplitModeRunConfigurationsTaskTest : IntelliJPluginTestBase() {
                   <option name="executionName" />
                   <option name="externalProjectPath" value="${'$'}PROJECT_DIR${'$'}" />
                   <option name="externalSystemIdString" value="GRADLE" />
-                  <option name="scriptParameters" value="" />
+                  <option name="scriptParameters" value="--purge-old-log-directories" />
                   <option name="taskDescriptions">
                     <list />
                   </option>
@@ -142,7 +142,7 @@ class GenerateSplitModeRunConfigurationsTaskTest : IntelliJPluginTestBase() {
                   <option name="executionName" />
                   <option name="externalProjectPath" value="${'$'}PROJECT_DIR${'$'}" />
                   <option name="externalSystemIdString" value="GRADLE" />
-                  <option name="scriptParameters" value="" />
+                  <option name="scriptParameters" value="--purge-old-log-directories" />
                   <option name="taskDescriptions">
                     <list />
                   </option>
@@ -174,7 +174,7 @@ class GenerateSplitModeRunConfigurationsTaskTest : IntelliJPluginTestBase() {
                   <option name="executionName" />
                   <option name="externalProjectPath" value="${'$'}PROJECT_DIR${'$'}" />
                   <option name="externalSystemIdString" value="GRADLE" />
-                  <option name="scriptParameters" value="" />
+                  <option name="scriptParameters" value="--purge-old-log-directories" />
                   <option name="taskDescriptions">
                     <list />
                   </option>
