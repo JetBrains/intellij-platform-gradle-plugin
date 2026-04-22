@@ -44,8 +44,13 @@ abstract class ComposedJarTask : Jar(), ModuleAware {
         override fun register(project: Project) =
             project.registerTask<ComposedJarTask>(Tasks.COMPOSED_JAR) {
                 archiveBaseName.convention(module.map {
+                    val moduleName = project.path
+                        .removePrefix(":")
+                        .replace(':', '.')
+                        .ifBlank { project.name }
+
                     when (it) {
-                        true -> "${project.rootProject.name}.${project.name}"
+                        true -> "${project.rootProject.name}.$moduleName"
                         false -> project.name
                     }
                 })
