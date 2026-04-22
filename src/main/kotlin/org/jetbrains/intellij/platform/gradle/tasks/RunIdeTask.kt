@@ -78,6 +78,14 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
     abstract val splitModeFrontendBootstrapClasspath: ConfigurableFileCollection
 
     /**
+     * Removes stale log directories before launching `runIde`, `runIdeBackend`, or `runIdeFrontend`.
+     *
+     * Default value: `false`
+     */
+    @get:Input
+    abstract val purgeOldLogDirectories: Property<Boolean>
+
+    /**
      * Executes the task, configures, and runs the IDE.
      */
     @TaskAction
@@ -86,6 +94,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         validateSplitModeSupport()
 
         workingDir = platformPath.toFile()
+        purgeOldLogDirectoriesIfRequested()
 
         if (composeHotReload.get() && executionMode.get() != ExecutionMode.SPLIT_MODE_FRONTEND) {
             log.info("Compose Hot Reload is enabled for `runIde` task")
@@ -205,6 +214,25 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         true
     }.getOrDefault(false)
 
+    private fun purgeOldLogDirectoriesIfRequested() {
+        if (!purgeOldLogDirectories.get()) {
+            return
+        }
+
+        when (executionMode.get()) {
+            ExecutionMode.STANDARD,
+            ExecutionMode.SPLIT_MODE_BACKEND, ExecutionMode.SPLIT_MODE_FRONTEND -> {
+                val sandboxLogPath = sandboxLogDirectory.asPath
+                if (sandboxLogPath.exists()) {
+                    log.info("Removing existing sandbox log directory at '${sandboxLogPath.safePathString}'.")
+                    sandboxLogPath.toFile().deleteRecursively()
+                    check(sandboxLogPath.notExists()) { "Failed to remove existing sandbox log directory: ${sandboxLogPath.safePathString}" }
+                }
+                sandboxLogPath.createDirectories()
+            }
+        }
+    }
+
     private fun configureSplitModeFrontendLaunch() {
         configureSplitModeSharedEnvironment()
         configureSplitModeFrontendDebugPort()
@@ -270,6 +298,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         description = "Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded."
         executionMode.convention(ExecutionMode.STANDARD)
         splitModeServerPort.convention(DEFAULT_SPLIT_MODE_SERVER_PORT)
+        purgeOldLogDirectories.convention(false)
     }
 
     companion object : Registrable {
