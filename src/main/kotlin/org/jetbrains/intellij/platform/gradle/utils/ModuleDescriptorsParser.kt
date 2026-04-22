@@ -29,7 +29,7 @@ internal object ModuleDescriptorsParser {
                     val entries = jarFile.entries()
                     while (entries.hasMoreElements()) {
                         val entry = entries.nextElement()
-                        if (!entry.name.endsWith(".xml")) {
+                        if (!entry.name.endsWith(".xml") || entry.name.contains('/')) {
                             continue
                         }
 
