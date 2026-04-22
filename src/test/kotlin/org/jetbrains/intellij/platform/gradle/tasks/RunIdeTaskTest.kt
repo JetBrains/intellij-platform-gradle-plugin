@@ -2,21 +2,29 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.assertContains
 import org.jetbrains.intellij.platform.gradle.assertNotContains
 import org.jetbrains.intellij.platform.gradle.buildFile
+import org.jetbrains.intellij.platform.gradle.cacheDirectory
 import org.jetbrains.intellij.platform.gradle.overwrite
 import org.jetbrains.intellij.platform.gradle.write
 import javax.tools.ToolProvider
 import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class RunIdeTaskTest : IntelliJPluginTestBase() {
 
     private val isWindows = System.getProperty("os.name").startsWith("Windows")
+    private val sandbox
+        get() = cacheDirectory.resolve(Sandbox.CONTAINER).resolve("projectName")
+            .resolve("$intellijPlatformType-$intellijPlatformVersion")
 
     private fun configureFrontendJoinLinkProvider(
         delayMs: Int,
@@ -282,6 +290,41 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `runIde keeps old log directories by default`() {
+        configureFakeJavaLauncher()
+        val staleLogFile = sandbox.resolve("${Sandbox.LOG}/old-session/idea.log")
+        staleLogFile.parent.createDirectories()
+        staleLogFile.toFile().writeText("stale")
+
+        build(Tasks.RUN_IDE)
+
+        assertTrue(staleLogFile.exists())
+    }
+
+    @Test
+    fun `runIde removes old log directories when requested`() {
+        configureFakeJavaLauncher()
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<RunIdeTask>("${Tasks.RUN_IDE}") {
+                purgeOldLogDirectories.set(true)
+            }
+            """.trimIndent()
+        )
+
+        val logDirectory = sandbox.resolve(Sandbox.LOG)
+        val staleLogFile = logDirectory.resolve("old-session/idea.log")
+        staleLogFile.parent.createDirectories()
+        staleLogFile.toFile().writeText("stale")
+
+        build(Tasks.RUN_IDE)
+
+        assertFalse(staleLogFile.exists())
+        assertTrue(logDirectory.exists())
+    }
+
+    @Test
     fun `runIdeBackend launches serverMode on configured port`() {
         configureFakeJavaLauncher()
 
@@ -322,17 +365,62 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             .toList()
 
         kotlin.test.assertEquals(1, joinLinkFiles.size)
-        kotlin.test.assertEquals("debug://localhost:5990#remoteId=Split%20Mode", joinLinkFiles.single().readText().trim())
+        kotlin.test.assertEquals(
+            "debug://localhost:5990#remoteId=Split%20Mode",
+            joinLinkFiles.single().readText().trim()
+        )
+    }
+
+    @Test
+    fun `runIdeBackend keeps old log directories by default`() {
+        configureFakeJavaLauncher()
+        val staleLogFile = sandbox.resolve("log_${Tasks.RUN_IDE_BACKEND}/old-session/idea.log")
+        staleLogFile.parent.createDirectories()
+        staleLogFile.toFile().writeText("stale")
+
+        build(Tasks.RUN_IDE_BACKEND)
+
+        assertTrue(staleLogFile.exists())
+    }
+
+    @Test
+    fun `runIdeBackend removes old log directories when requested`() {
+        configureFakeJavaLauncher()
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
+                purgeOldLogDirectories.set(true)
+            }
+            """.trimIndent()
+        )
+
+        val backendLogDirectory = sandbox.resolve("log_${Tasks.RUN_IDE_BACKEND}")
+        val staleLogFile = backendLogDirectory.resolve("old-session/idea.log")
+        staleLogFile.parent.createDirectories()
+        staleLogFile.toFile().writeText("stale")
+
+        build(Tasks.RUN_IDE_BACKEND)
+
+        assertFalse(staleLogFile.exists())
+        assertTrue(backendLogDirectory.exists())
     }
 
     @Test
     fun `runIdeFrontend uses debug join link written by debug backend`() {
         configureFakeJavaLauncher()
-        configureFrontendJoinLinkProvider(delayMs = 0, port = 6092, joinLink = "debug://localhost:6092#remoteId=Split%20Mode")
+        configureFrontendJoinLinkProvider(
+            delayMs = 0,
+            port = 6092,
+            joinLink = "debug://localhost:6092#remoteId=Split%20Mode"
+        )
 
         build(Tasks.RUN_IDE_FRONTEND) {
             assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
-            assertContains("APP_ARGS=thinClient debug://localhost:6092#remoteId=Split%20Mode --refresh-split-mode-token=true", output)
+            assertContains(
+                "APP_ARGS=thinClient debug://localhost:6092#remoteId=Split%20Mode --refresh-split-mode-token=true",
+                output
+            )
         }
     }
 
@@ -343,7 +431,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.RUN_IDE_FRONTEND) {
             assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
-            assertContains("APP_ARGS=thinClient tcp://127.0.0.1:6093#cb=fake&remoteId=Split%20Mode --refresh-split-mode-token=true", output)
+            assertContains(
+                "APP_ARGS=thinClient tcp://127.0.0.1:6093#cb=fake&remoteId=Split%20Mode --refresh-split-mode-token=true",
+                output
+            )
             assertContains("frontend.properties", output)
             assertContains("-Didea.platform.prefix=JetBrainsClient", output)
             assertNotContains("coroutines-javaagent", output)
@@ -357,8 +448,39 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertNotContains("-Didea.log.path=", output)
             assertNotContains("-Didea.plugins.path=", output)
             assertNotContains("-Dplugin.path=", output)
-            assertNotContains("APP_ARGS=thinClient tcp://127.0.0.1:6093#cb=fake&remoteId=Split%20Mode splitMode", output)
+            assertNotContains(
+                "APP_ARGS=thinClient tcp://127.0.0.1:6093#cb=fake&remoteId=Split%20Mode splitMode",
+                output
+            )
         }
+    }
+
+    @Test
+    fun `runIdeFrontend removes old frontend log directories when requested`() {
+        configureFakeJavaLauncher()
+        configureFrontendJoinLinkProvider(delayMs = 0, port = 6096, joinLink = "tcp://127.0.0.1:6096#cb=fake")
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<RunIdeTask>("${Tasks.RUN_IDE_FRONTEND}") {
+                purgeOldLogDirectories.set(true)
+            }
+            """.trimIndent()
+        )
+
+        val frontendLogDirectory = sandbox.resolve("log_${Tasks.RUN_IDE_FRONTEND}/frontend")
+        val staleLogDirectoryOne = frontendLogDirectory.resolve("client-1")
+        val staleLogDirectoryTwo = frontendLogDirectory.resolve("client-2")
+        staleLogDirectoryOne.createDirectories()
+        staleLogDirectoryTwo.createDirectories()
+        staleLogDirectoryOne.resolve("idea.log").toFile().writeText("stale-1")
+        staleLogDirectoryTwo.resolve("idea.log").toFile().writeText("stale-2")
+
+        build(Tasks.RUN_IDE_FRONTEND)
+
+        assertFalse(staleLogDirectoryOne.exists())
+        assertFalse(staleLogDirectoryTwo.exists())
+        assertTrue(frontendLogDirectory.exists())
     }
 
     @Test
@@ -396,7 +518,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.RUN_IDE_FRONTEND) {
             assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
-            assertContains("APP_ARGS=thinClient tcp://127.0.0.1:6094#cb=delayed&remoteId=Split%20Mode --refresh-split-mode-token=true", output)
+            assertContains(
+                "APP_ARGS=thinClient tcp://127.0.0.1:6094#cb=delayed&remoteId=Split%20Mode --refresh-split-mode-token=true",
+                output
+            )
         }
     }
 
@@ -411,8 +536,14 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.RUN_IDE_FRONTEND) {
             assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
-            assertContains("APP_ARGS=thinClient tcp://127.0.0.1:6091#cb=fresh&remoteId=Split%20Mode --refresh-split-mode-token=true", output)
-            assertNotContains("APP_ARGS=thinClient tcp://127.0.0.1:6090#cb=stale&remoteId=Split%20Mode --refresh-split-mode-token=true", output)
+            assertContains(
+                "APP_ARGS=thinClient tcp://127.0.0.1:6091#cb=fresh&remoteId=Split%20Mode --refresh-split-mode-token=true",
+                output
+            )
+            assertNotContains(
+                "APP_ARGS=thinClient tcp://127.0.0.1:6090#cb=stale&remoteId=Split%20Mode --refresh-split-mode-token=true",
+                output
+            )
         }
     }
 }
