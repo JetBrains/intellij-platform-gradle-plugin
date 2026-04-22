@@ -249,15 +249,14 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 .all(::addInferredPluginModuleDependency)
         }
 
-        project.gradle.projectsEvaluated {
-            inferredPluginModuleDependencies.values.forEach { dependency ->
-                when {
-                    dependency.path in pluginModuleDependencyPaths -> Unit
-                    !intellijPlatformProjects.isPureModuleProject(dependency.path) -> Unit
-                    else -> intellijPlatformPluginModuleConfiguration.dependencies.add(dependency)
-                }
-            }
-        }
+        intellijPlatformPluginModuleConfiguration.dependencies.addAllLater(project.provider {
+            inferredPluginModuleDependencies.values
+                .asSequence()
+                .filterNot { it.path in pluginModuleDependencyPaths }
+                .filter { intellijPlatformProjects.isPureModuleProject(it.path) }
+                .sortedBy { it.path }
+                .toList()
+        })
 
         IntelliJPlatformTestingExtension.register(
             project = project,
