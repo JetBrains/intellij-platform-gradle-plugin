@@ -17,7 +17,6 @@ import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource
 import org.jetbrains.intellij.platform.gradle.providers.LatestPluginVersionValueSource
-import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.ModuleAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
@@ -38,7 +37,7 @@ private const val CLEAN = "clean"
  * The self-update check can be disabled via [GradleProperties.SelfUpdateCheck] Gradle property.
  */
 @UntrackedTask(because = "Should always run")
-abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPlatformVersionAware, ModuleAware {
+abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), ModuleAware {
 
     /**
      * Determines if the operation is running in offline mode and depends on Gradle start parameters.
@@ -90,11 +89,10 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
             return
         }
 
-        val lastUpdate = runCatching {
-            LocalDate.parse(selfUpdateLock.asPath.readText().trim())
-        }.getOrNull()
+        val today = LocalDate.now().toString()
+        val lastUpdate = runCatching { selfUpdateLock.asPath.readText().trim() }.getOrNull()
 
-        if (lastUpdate == LocalDate.now()) {
+        if (lastUpdate == today) {
             return
         }
 
@@ -107,7 +105,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), IntelliJPla
             }
 
             with(selfUpdateLock.asPath) {
-                writeText(LocalDate.now().toString())
+                writeText(today)
             }
         } catch (e: Exception) {
             log.error(e.message.orEmpty(), e)

@@ -32,12 +32,17 @@ interface PluginAware : ModuleAware {
 }
 
 /**
- * Parses the `plugin.xml` file and provides access to the [PluginBean] object through the [block].
+ * Parses the `plugin.xml` file and returns the [PluginBean].
  */
-fun <T : Any> Path.parse(block: PluginBean.() -> T) = inputStream().use {
+internal fun Path.parsePluginXml() = inputStream().use {
     val document = JDOMUtil.loadDocument(it)
     PluginBeanExtractor.extractPluginBean(document)
-}.block()
+}
+
+/**
+ * Parses the `plugin.xml` file and provides access to the [PluginBean] object through the [block].
+ */
+fun <T : Any> Path.parse(block: PluginBean.() -> T) = parsePluginXml().block()
 
 /**
  * Parses the `plugin.xml` file and provides access to the [PluginBean] object through the [block].

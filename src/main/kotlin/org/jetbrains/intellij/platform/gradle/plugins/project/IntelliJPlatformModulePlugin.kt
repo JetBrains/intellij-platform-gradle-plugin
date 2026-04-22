@@ -245,7 +245,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             Configurations.External.RUNTIME_ONLY,
         ).forEach { configurationName ->
             project.configurations[configurationName].dependencies
-                .withType(ProjectDependency::class.java)
+                .withType<ProjectDependency>()
                 .all(::addInferredPluginModuleDependency)
         }
 

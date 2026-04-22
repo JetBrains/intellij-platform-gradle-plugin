@@ -19,9 +19,10 @@ import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTE
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
-import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.problems.Problems
+import org.jetbrains.intellij.platform.gradle.services.PluginXmlService
+import org.jetbrains.intellij.platform.gradle.services.pluginXmlService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
@@ -86,6 +87,9 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     @get:Internal
     abstract val mutedMessages: ListProperty<String>
 
+    @get:Internal
+    abstract val pluginXmlService: Property<PluginXmlService>
+
     private val log = Logger(javaClass)
 
     @TaskAction
@@ -112,7 +116,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
             if (!isModule) {
                 pluginXml.orNull
                     ?.let { file ->
-                        val sinceBuild = file.parse { ideaVersion.sinceBuild.toVersion() }
+                        val pluginBean = pluginXmlService.get().resolve(file.asPath)
+                        val sinceBuild = pluginBean.ideaVersion.sinceBuild.toVersion()
                         val sinceBuildJavaVersion = sinceBuild.toPlatformJavaVersion()
                         val sinceBuildKotlinApiVersion =
                             getPlatformKotlinVersion(sinceBuild)?.run { "$major.$minor".toVersion() }
@@ -137,7 +142,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                             }
                             add("$label $details $solution")
                         }
-                        if (sinceBuild.major >= 243 && file.parse { ideaVersion.untilBuild != null }) {
+                        if (sinceBuild.major >= 243 && pluginBean.ideaVersion.untilBuild != null) {
                             val label = "until-build property should be removed"
                             val details = "For IntelliJ Platform 2024.3+ (build 243+), the until-build property restricts plugin compatibility with future IDE versions. This prevents users from installing your plugin when they update to newer IDE versions."
                             val solution = "Remove the until-build property from plugin.xml to allow forward compatibility with future IDE versions."
@@ -349,6 +354,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 gitignoreFile.convention(project.layout.file(project.provider {
                     project.rootProject.rootDir.resolve(".gitignore").takeIf { it.exists() }
                 }))
+                pluginXmlService.convention(project.pluginXmlService())
                 sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
                 targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
                 mutedMessages.convention(

@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins
 import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
@@ -26,7 +27,7 @@ internal fun Project.setupChangelogConventions() {
         },
     )
 
-    tasks.withType(PublishPluginTask::class.java).configureEach {
+    tasks.withType<PublishPluginTask>().configureEach {
         dependsOn(CHANGELOG_PATCH_TASK_NAME)
     }
 }
