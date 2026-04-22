@@ -7,6 +7,7 @@
 - Supported upcoming changes in module-descriptors.jar format in 262.* IDEs.
 - Skip `buildSearchableOptions` when the main plugin descriptor and included module descriptors do not declare Configurable extension points.
 - Add `org.jetbrains.intellij.platform.forceBuildSearchableOptions` Gradle property to force `buildSearchableOptions` to run even when automatic detection would skip it.
+- Added support for testing Jupyter and Notebooks by introducing new test frameworks: `TestFrameworkType.Plugin.Jupyter` and `TestFrameworkType.Plugin.Notebook`
 
 ### Changed
 
