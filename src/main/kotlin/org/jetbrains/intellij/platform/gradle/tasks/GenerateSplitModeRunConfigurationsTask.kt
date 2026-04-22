@@ -61,10 +61,19 @@ abstract class GenerateSplitModeRunConfigurationsTask : DefaultTask() {
         }
     }
 
+    private fun additionalLogsTab(configurationName: String): String {
+        return when (configurationName) {
+            FRONTEND_CONFIGURATION_NAME -> "<log_file alias=\"Frontend IDE logs\" path=\"\$PROJECT_DIR\$/.intellijPlatform/sandbox/*/*/log_runIdeFrontend/frontend/*/idea.log\" show_all=\"true\" skipped=\"false\" />"
+            BACKEND_CONFIGURATION_NAME -> "<log_file alias=\"Backend IDE logs\" path=\"\$PROJECT_DIR\$/.intellijPlatform/sandbox/*/*/log_runIdeBackend/idea.log\" show_all=\"true\" skipped=\"false\" />"
+            else -> ""
+        }
+    }
+
     private fun gradleRunConfigurationXml(configurationName: String, taskPath: String) = //language=XML
         """
         <component name="ProjectRunConfigurationManager">
           <configuration default="false" name="$configurationName" type="GradleRunConfiguration" factoryName="Gradle">
+            ${additionalLogsTab(configurationName)}
             <ExternalSystemSettings>
               <option name="executionName" />
               <option name="externalProjectPath" value="$PROJECT_DIR_MACRO" />
