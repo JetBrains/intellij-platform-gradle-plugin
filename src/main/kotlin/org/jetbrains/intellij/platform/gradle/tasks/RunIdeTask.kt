@@ -7,6 +7,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
+import org.gradle.api.tasks.options.Option
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.named
 import org.gradle.process.JavaForkOptions
@@ -42,6 +43,7 @@ private const val SPLIT_MODE_HOST_PASSWORD_ENV = "CWM_HOST_PASSWORD"
 private const val SPLIT_MODE_CLIENT_PASSWORD_ENV = "CWM_CLIENT_PASSWORD"
 private const val SPLIT_MODE_NO_TIMEOUTS_ENV = "CWM_NO_TIMEOUTS"
 private const val SPLIT_MODE_SHARED_PASSWORD = "qwerty123"
+internal const val PURGE_OLD_LOG_DIRECTORIES_OPTION = "purge-old-log-directories"
 
 /**
  * Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded.
@@ -84,6 +86,14 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
      */
     @get:Input
     abstract val purgeOldLogDirectories: Property<Boolean>
+
+    @Option(
+        option = PURGE_OLD_LOG_DIRECTORIES_OPTION,
+        description = "Removes stale sandbox log directories before launching the IDE."
+    )
+    fun setPurgeOldLogDirectoriesOption(value: Boolean) {
+        purgeOldLogDirectories.set(value)
+    }
 
     /**
      * Executes the task, configures, and runs the IDE.

@@ -78,7 +78,7 @@ abstract class GenerateSplitModeRunConfigurationsTask : DefaultTask() {
               <option name="executionName" />
               <option name="externalProjectPath" value="$PROJECT_DIR_MACRO" />
               <option name="externalSystemIdString" value="GRADLE" />
-              <option name="scriptParameters" value="" />
+              <option name="scriptParameters" value="--$PURGE_OLD_LOG_DIRECTORIES_OPTION" />
               <option name="taskDescriptions">
                 <list />
               </option>

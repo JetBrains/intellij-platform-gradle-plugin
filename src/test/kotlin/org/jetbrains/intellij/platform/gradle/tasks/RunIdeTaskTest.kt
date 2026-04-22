@@ -64,7 +64,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         val fakeJdk = dir.resolve("fake-jdk")
         val fakeLauncherClasses = fakeJdk.resolve("fake-launcher-classes")
         val fakeJavaExecutable = fakeJdk.resolve("bin/java${if (isWindows) ".exe" else ""}")
-        val realJavaExecutable = java.nio.file.Path.of(System.getProperty("java.home"), "bin", "java${if (isWindows) ".exe" else ""}")
+        val realJavaExecutable =
+            java.nio.file.Path.of(System.getProperty("java.home"), "bin", "java${if (isWindows) ".exe" else ""}")
 
         fakeJdk.resolve("bin").createDirectories()
         fakeJavaExecutable overwrite ""
@@ -402,6 +403,25 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.RUN_IDE_BACKEND)
 
+        assertFalse(staleLogFile.exists())
+        assertTrue(backendLogDirectory.exists())
+    }
+
+    @Test
+    fun `runIdeBackend removes old log directories when requested via task option`() {
+        configureFakeJavaLauncher()
+        val backendLogDirectory = sandbox.resolve("log_${Tasks.RUN_IDE_BACKEND}")
+        val staleLogFile = backendLogDirectory.resolve("old-session/idea.log")
+        staleLogFile.parent.createDirectories()
+        staleLogFile.toFile().writeText("stale")
+
+        val result = builder(
+            gradleVersion,
+            Tasks.RUN_IDE_BACKEND,
+            "--$PURGE_OLD_LOG_DIRECTORIES_OPTION",
+        ).build()
+
+        assertContains("APP_ARGS=serverMode -p 5990", result.output)
         assertFalse(staleLogFile.exists())
         assertTrue(backendLogDirectory.exists())
     }
