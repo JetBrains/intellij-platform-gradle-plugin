@@ -8,8 +8,9 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.UnexpectedBuildResultException
 import java.lang.management.ManagementFactory
 import java.nio.file.Path
-import kotlin.io.path.*
-import kotlin.test.AfterTest
+import kotlin.io.path.Path
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createTempDirectory
 import kotlin.test.BeforeTest
 import kotlin.test.assertEquals
 
@@ -59,11 +60,11 @@ abstract class IntelliJPlatformTestBase {
         }
     }
 
-    @OptIn(ExperimentalPathApi::class)
-    @AfterTest
-    open fun tearDown() {
-        dir.deleteRecursively()
-    }
+//    @OptIn(ExperimentalPathApi::class)
+//    @AfterTest
+//    open fun tearDown() {
+//        dir.deleteRecursively()
+//    }
 
     protected fun build(
         vararg tasksList: String,
