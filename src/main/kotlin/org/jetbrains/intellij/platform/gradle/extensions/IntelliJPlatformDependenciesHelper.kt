@@ -471,7 +471,7 @@ class IntelliJPlatformDependenciesHelper(
 
     /**
      * A base method for adding a dependency on plugins compatible with the current IntelliJ Platform version.
-     * Each plugin ID is used to resolve the latest available version of the plugin using JetBrains Marketplace API.
+     * Each plugin ID is used to resolve the latest compatible update of the plugin using JetBrains Marketplace API.
      *
      * @param pluginsProvider The provider of the list containing plugin identifiers.
      * @param configurationName The name of the configuration to add the dependency to.
@@ -492,6 +492,7 @@ class IntelliJPlatformDependenciesHelper(
         requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
 
         val productInfo = platformPath.productInfo()
+        val build = "${productInfo.productCode}-${productInfo.buildNumber}"
 
         val pluginRepository = PluginRepositoryFactory.create(Locations.JETBRAINS_MARKETPLACE)
 
@@ -500,7 +501,7 @@ class IntelliJPlatformDependenciesHelper(
             val platformVersion = productInfo.buildNumber
 
             val plugin = pluginRepository.pluginManager.searchCompatibleUpdates(
-                build = "$platformType-$platformVersion",
+                build = build,
                 xmlIds = listOf(pluginId),
             ).firstOrNull()
                 ?: throw GradleException("No plugin update with id='$pluginId' compatible with '$platformType-$platformVersion' found in JetBrains Marketplace")
