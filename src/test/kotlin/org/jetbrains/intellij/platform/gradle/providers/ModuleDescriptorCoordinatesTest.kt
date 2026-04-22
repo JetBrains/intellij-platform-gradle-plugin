@@ -11,7 +11,6 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.outputStream
-import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -67,14 +66,10 @@ class ModuleDescriptorCoordinatesTest {
 
     @OptIn(ExperimentalPathApi::class)
     @Test
-    fun `load module descriptor coordinates from bundled resources present on disk`() {
+    fun `load module descriptor coordinates only from supported namespaces and collected jars`() {
         val platformPath = createTempDirectory("platform")
 
         try {
-            val libPath = platformPath.resolve("lib").createDirectories()
-            libPath.resolve("util-8.jar").writeText("")
-            libPath.resolve("pdfbox3.jar").writeText("")
-
             val moduleDescriptorsPath = platformPath.resolve("modules").createDirectories().resolve("module-descriptors.jar")
             moduleDescriptorsPath.writeModuleDescriptorsJar(
                 "intellij.platform.util.xml" to """
@@ -109,6 +104,14 @@ class ModuleDescriptorCoordinatesTest {
                       </resources>
                     </module>
                 """.trimIndent(),
+                "intellij.platform.lang.xml" to """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <module name="intellij.platform.lang" namespace="jetbrains" visibility="public">
+                      <resources>
+                        <resource-root path="../lib/lang.jar"/>
+                      </resources>
+                    </module>
+                """.trimIndent(),
                 "plugins/intellij.devkit.xml" to """
                     <?xml version="1.0" encoding="UTF-8"?>
                     <plugin id="DevKit">
@@ -118,11 +121,15 @@ class ModuleDescriptorCoordinatesTest {
                 """.trimIndent()
             )
 
-            val coordinates = loadModuleDescriptorCoordinates(moduleDescriptorsPath)
+            val coordinates = loadModuleDescriptorCoordinates(
+                moduleDescriptorsPath,
+                setOf("lib/util-8.jar", "lib/platform-loader.jar", "lib/pdfbox3.jar"),
+            )
 
             assertTrue(Coordinates("com.jetbrains.intellij.platform", "util") in coordinates)
-            assertTrue(Coordinates("com.jetbrains.apache.pdfbox3", "pdfbox3") in coordinates)
             assertTrue(Coordinates("com.jetbrains.intellij.platform", "boot") in coordinates)
+            assertFalse(Coordinates("com.jetbrains.apache.pdfbox3", "pdfbox3") in coordinates)
+            assertFalse(Coordinates("com.jetbrains.intellij.platform", "lang") in coordinates)
             assertFalse(coordinates.any { it.artifactId == "jaxb-api" })
         } finally {
             platformPath.deleteRecursively()

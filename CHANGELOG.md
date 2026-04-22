@@ -19,6 +19,10 @@
 - Avoid rewriting unchanged sandbox and generated XML/manifest files when their content stays the same.
 - Refactor `GenerateManifestTask` to replace `ProductInfo` with explicit platform properties (`platformType`, `platformVersion`, `platformBuild`)
 
+### Fixed
+
+- Fixed incorrectly calculated module descriptor coordinates used for excluding transitive dependencies. JetBrains/intellij-platform-gradle-plugin#2127 
+
 ## [2.14.0] - 2026-04-09
 
 ### Breaking Changes

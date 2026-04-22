@@ -53,8 +53,10 @@ class CollectorTransformerTest {
                 listOf("intellij.platform.core", "intellij.platform.util.base"),
                 util.dependencies.map { it.name },
             )
+            assertEquals("jps", util.namespace)
             assertEquals("lib/util.jar", util.path)
             assertEquals(emptyList(), legacy.dependencies)
+            assertEquals("${'$'}legacy_jps_library", legacy.namespace)
             assertEquals("lib/jaxb-api.jar", legacy.path)
         } finally {
             moduleDescriptorsPath.parent.deleteRecursively()

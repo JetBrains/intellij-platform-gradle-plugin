@@ -44,6 +44,7 @@ internal object ModuleDescriptorsParser {
     private fun parse(inputStream: InputStream): CollectedModuleDescriptor? {
         val reader = xmlInputFactory.get().createXMLStreamReader(inputStream)
         var name: String? = null
+        var namespace: String? = null
         var path: String? = null
         var inDependencies = false
         val dependencies = mutableListOf<CollectedModuleDescriptor.Dependency>()
@@ -56,7 +57,10 @@ internal object ModuleDescriptorsParser {
                             val moduleName = reader.getAttributeValue(null, "name") ?: continue
                             when {
                                 inDependencies -> dependencies += CollectedModuleDescriptor.Dependency(moduleName)
-                                name == null -> name = moduleName
+                                name == null -> {
+                                    name = moduleName
+                                    namespace = reader.getAttributeValue(null, "namespace")
+                                }
                             }
                         }
 
@@ -72,7 +76,7 @@ internal object ModuleDescriptorsParser {
                 }
             }
 
-            name?.let { CollectedModuleDescriptor(it, dependencies, path) }
+            name?.let { CollectedModuleDescriptor(it, namespace, dependencies, path) }
         } finally {
             reader.close()
         }
@@ -81,6 +85,7 @@ internal object ModuleDescriptorsParser {
 
 internal data class CollectedModuleDescriptor(
     val name: String,
+    val namespace: String?,
     val dependencies: List<Dependency>,
     val path: String?,
 ) {
