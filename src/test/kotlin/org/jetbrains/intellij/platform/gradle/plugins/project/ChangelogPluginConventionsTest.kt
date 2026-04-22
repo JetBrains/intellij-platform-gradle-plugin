@@ -44,6 +44,66 @@ class ChangelogPluginConventionsTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `apply changelog conventions when changelog plugin is already applied`() {
+        pluginXml overwrite //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+        writeChangelog()
+
+        buildFile overwrite //language=kotlin
+                """
+                import org.jetbrains.intellij.platform.gradle.*
+                
+                version = "1.0.0"
+                
+                plugins {
+                    id("${Constants.Plugins.External.CHANGELOG}") version "$CHANGELOG_PLUGIN_VERSION"
+                    id("java")
+                    id("org.jetbrains.intellij.platform")
+                    id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
+                }
+                
+                kotlin {
+                    jvmToolchain(21)
+                }
+                
+                repositories {
+                    mavenCentral()
+                    
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
+                        val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
+                        val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
+                        
+                        create(type, version) { this.useInstaller.set(useInstaller) }
+                    }
+                }
+                
+                intellijPlatform {
+                    buildSearchableOptions = false
+                    instrumentCode = false
+                }
+                
+                tasks.register("printChangelogConventions") {
+                    doLast {
+                        println("changeNotes=${'$'}{intellijPlatform.pluginConfiguration.changeNotes.get()}")
+                    }
+                }
+                """.trimIndent()
+
+        build("printChangelogConventions") {
+            assertContains("<li>Initial release</li>", output)
+        }
+    }
+
+    @Test
     fun `allow overriding changelog conventions`() {
         pluginXml overwrite //language=xml
                 """

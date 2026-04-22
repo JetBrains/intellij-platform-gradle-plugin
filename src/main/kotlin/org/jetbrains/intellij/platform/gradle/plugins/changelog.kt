@@ -6,14 +6,13 @@ import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.withType
+import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.tasks.PublishPluginTask
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 private const val CHANGELOG_EXTENSION_NAME = "changelog"
 private const val CHANGELOG_PATCH_TASK_NAME = "patchChangelog"
 
-internal fun Project.setupChangelogConventions() {
-    val pluginConfiguration = project.extensionProvider.map { it.pluginConfiguration }.get()
+internal fun Project.setupChangelogConventions(pluginConfiguration: IntelliJPlatformExtension.PluginConfiguration) {
     val changelog = extensions.getByName(CHANGELOG_EXTENSION_NAME)
 
     changelog.listProperty("getGroups").convention(emptyList())

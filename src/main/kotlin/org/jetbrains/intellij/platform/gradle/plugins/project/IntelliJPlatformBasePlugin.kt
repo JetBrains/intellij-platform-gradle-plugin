@@ -80,10 +80,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
         }
 
-        project.pluginManager.withPlugin(Plugins.External.CHANGELOG) {
-            project.setupChangelogConventions()
-        }
-
         with(project.configurations) configurations@{
             val intellijPlatformDependencyConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
@@ -513,6 +509,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 ProductDescriptor.register(project, target = pluginConfiguration)
                 IdeaVersion.register(project, target = pluginConfiguration)
                 Vendor.register(project, target = pluginConfiguration)
+
+                project.pluginManager.withPlugin(Plugins.External.CHANGELOG) {
+                    project.setupChangelogConventions(pluginConfiguration)
+                }
             }
 
             PluginVerification.register(project, target = intelliJPlatform).let { pluginVerification ->
