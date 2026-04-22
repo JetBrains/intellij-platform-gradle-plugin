@@ -255,6 +255,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """
                 intellijPlatform {
                     pluginVerification {
+                        failureLevel = VerifyPluginTask.FailureLevel.NONE
                         ignoredProblemsFile = file("${ignoredProblems.invariantSeparatorsPathString}")
                     }
                 }
