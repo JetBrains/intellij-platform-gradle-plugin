@@ -10,6 +10,7 @@
 
 ### Changed
 
+- Expand default `failureLevel` list in `PluginVerification` to include internal and override-only API usages.
 - Reduce `CollectorTransformer` and module descriptor processing overhead by replacing generic `module-descriptors.jar` XML deserialization with a lightweight shared parser.
 - Introduce `ProductReleasesService`, add caching for release resolution, and refactor release filtering logic.
 - Cache Android Studio download-link and JetBrains Client build-number value source lookups across repeated resolution in the same build.

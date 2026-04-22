@@ -1155,7 +1155,11 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         companion object : Registrable<PluginVerification> {
             override fun register(project: Project, target: Any) =
                 target.configureExtension<PluginVerification>(Extensions.PLUGIN_VERIFICATION) {
-                    failureLevel.convention(listOf(FailureLevel.COMPATIBILITY_PROBLEMS))
+                    failureLevel.convention(listOf(
+                        FailureLevel.COMPATIBILITY_PROBLEMS,
+                        FailureLevel.INTERNAL_API_USAGES,
+                        FailureLevel.OVERRIDE_ONLY_API_USAGES,
+                ))
                     verificationReportsDirectory.convention(project.layout.buildDirectory.dir("reports/pluginVerifier"))
                     verificationReportsFormats.convention(
                         listOf(
