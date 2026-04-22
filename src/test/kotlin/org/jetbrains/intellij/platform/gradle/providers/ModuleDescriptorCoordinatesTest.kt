@@ -109,6 +109,13 @@ class ModuleDescriptorCoordinatesTest {
                       </resources>
                     </module>
                 """.trimIndent(),
+                "plugins/intellij.devkit.xml" to """
+                    <?xml version="1.0" encoding="UTF-8"?>
+                    <plugin id="DevKit">
+                      <plugin-descriptor-module name="intellij.devkit" namespace="${'$'}legacy_jps_module"/>
+                      <module name="intellij.devkit.core" namespace="jetbrains" loading="optional"/>
+                    </plugin>
+                """.trimIndent()
             )
 
             val coordinates = loadModuleDescriptorCoordinates(moduleDescriptorsPath)
