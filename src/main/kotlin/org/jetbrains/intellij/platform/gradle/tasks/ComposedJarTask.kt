@@ -24,7 +24,7 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  * Composes a final Jar archive by combining the output of base [Tasks.External.JAR] or [Tasks.INSTRUMENTED_JAR] tasks,
  * depending on if code instrumentation is enabled with [IntelliJPlatformExtension.instrumentCode].
  *
- * The final Jar is also combined with plugin modules marked using the [IntelliJPlatformDependenciesExtension.pluginModule] dependencies helper.
+ * The final Jar is also combined with plugin modules marked using the [IntelliJPlatformDependenciesExtension.pluginComposedModule] dependencies helper.
  *
  * To understand what is going on in this class read and watch:
  * - [Understanding Gradle #13 – Aggregating Custom Artifacts](https://youtu.be/2gPJD0mAres?t=461)

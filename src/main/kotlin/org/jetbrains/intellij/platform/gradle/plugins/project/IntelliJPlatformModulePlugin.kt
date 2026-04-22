@@ -227,10 +227,17 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
         }
 
         val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
+        val intellijPlatformPluginComposedModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE]
         val pluginModuleDependencyPaths = ConcurrentHashMap.newKeySet<String>()
         intellijPlatformPluginModuleConfiguration.dependencies.whenObjectAdded(Unit.closureOf<Dependency> {
             if (this is ProjectDependency) {
                 pluginModuleDependencyPaths += path
+            }
+        })
+        val pluginComposedModuleDependencyPaths = ConcurrentHashMap.newKeySet<String>()
+        intellijPlatformPluginComposedModuleConfiguration.dependencies.whenObjectAdded(Unit.closureOf<Dependency> {
+            if (this is ProjectDependency) {
+                pluginComposedModuleDependencyPaths += path
             }
         })
 
@@ -253,6 +260,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             inferredPluginModuleDependencies.values
                 .asSequence()
                 .filterNot { it.path in pluginModuleDependencyPaths }
+                .filterNot { it.path in pluginComposedModuleDependencyPaths }
                 .filter { intellijPlatformProjects.isPureModuleProject(it.path) }
                 .sortedBy { it.path }
                 .toList()

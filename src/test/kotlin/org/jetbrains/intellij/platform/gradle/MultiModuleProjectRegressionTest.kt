@@ -4,19 +4,21 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
 
     @Test
-    fun `build plugin succeeds for composed multi-module project`() {
+    fun `build plugin composes pluginComposedModule dependencies into the main jar`() {
         settingsFile overwrite //language=kotlin
                 """
                 rootProject.name = "projectName"
-
+                
                 plugins {
                     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
                 }
-
+                
                 include("core", "rider", "clion")
                 """.trimIndent()
 
@@ -47,29 +49,29 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         dir.resolve("core/build.gradle.kts") write //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.*
-
+                
                 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-
+                
                 version = "1.0.0"
-
+                
                 plugins {
                     id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform")
                 }
-
+                
                 kotlin {
                     jvmToolchain(21)
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
@@ -78,7 +80,7 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                         zipSigner()
                     }
                 }
-
+                
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
@@ -93,40 +95,44 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                     <depends>com.intellij.modules.platform</depends>
                 </idea-plugin>
                 """.trimIndent()
+        dir.resolve("core/src/main/java/CoreFeature.java") write //language=java
+                """
+                class CoreFeature {}
+                """.trimIndent()
 
         val moduleBuildFile = //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.*
-
+                
                 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-
+                
                 version = "1.0.0"
-
+                
                 plugins {
                     id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 kotlin {
                     jvmToolchain(21)
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
                         pluginModule(implementation(project(":core")))
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -134,7 +140,27 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
 
         dir.resolve("rider/build.gradle.kts") write moduleBuildFile
         dir.resolve("clion/build.gradle.kts") write moduleBuildFile
+        dir.resolve("rider/src/main/java/RiderFeature.java") write //language=java
+                """
+                class RiderFeature {}
+                """.trimIndent()
+        dir.resolve("clion/src/main/java/ClionFeature.java") write //language=java
+                """
+                class ClionFeature {}
+                """.trimIndent()
 
         build(Tasks.BUILD_PLUGIN)
+
+        buildDirectory.resolve("distributions/projectName-1.0.0.zip").toZip().use { zip ->
+            assertFalse(collectPaths(zip).any { "/lib/modules/" in it }, "Composed modules must not be packaged to lib/modules")
+
+            zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                val jarPaths = collectPaths(jar)
+
+                assertTrue("CoreFeature.class" in jarPaths)
+                assertTrue("RiderFeature.class" in jarPaths)
+                assertTrue("ClionFeature.class" in jarPaths)
+            }
+        }
     }
 }
