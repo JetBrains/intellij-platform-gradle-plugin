@@ -30,7 +30,9 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.resolvers.path.findEntry
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.*
@@ -91,9 +93,7 @@ fun FileCollection.platformPath(requestedPlatform: RequestedIntelliJPlatform? = 
 
 private fun Path.deepResolve(block: Path.() -> Path?) = generateSequence(this) { parent ->
     val entry = parent
-        .listDirectoryEntries()
-        .singleOrNull{ !it.isHidden() } // pick an entry if it is a singleton in a directory, exclude hidden entries
-        ?.takeIf { it.isDirectory() } // and this entry is a directory
+        .singleVisibleDirectoryEntryOrNull()
         ?: return@generateSequence null
     block(entry)
 }.last()
@@ -102,19 +102,18 @@ internal fun Path.resolvePlatformPath() = deepResolve {
     when {
         // eliminate `/Application Name.app/Contents/...`
         name.endsWith(".app")
-            -> this.listDirectoryEntries("Contents").firstOrNull()
+            -> findEntry("Contents")
 
         // set the root to the directory containing `product-info.json`
-        listDirectoryEntries("product-info.json").isNotEmpty()
+        findEntry("product-info.json") != null
             -> this
 
         // set the root to the directory containing `Resources/product-info.json`
-        listDirectoryEntries("Resources").firstOrNull()?.listDirectoryEntries("product-info.json").orEmpty()
-            .isNotEmpty()
+        findEntry("Resources")?.findEntry("product-info.json") != null
             -> this
 
         // stop when `lib/` is inside, even if it's a singleton
-        listDirectoryEntries(Sandbox.Plugin.LIB).isNotEmpty()
+        findEntry(Sandbox.Plugin.LIB) != null
             -> null
 
         else
@@ -125,13 +124,32 @@ internal fun Path.resolvePlatformPath() = deepResolve {
 internal fun Path.resolvePluginPath() = deepResolve {
     when {
         // set the root to the directory containing `lib/`
-        listDirectoryEntries(Sandbox.Plugin.LIB).isNotEmpty()
+        findEntry(Sandbox.Plugin.LIB) != null
             -> this
 
         else
             -> null
     }
 }
+
+private fun Path.singleVisibleDirectoryEntryOrNull() = runCatching {
+    Files.newDirectoryStream(this).use { entries ->
+        var candidate: Path? = null
+
+        for (entry in entries) {
+            if (entry.isHidden()) {
+                continue
+            }
+            if (candidate != null) {
+                return@use null
+            }
+
+            candidate = entry
+        }
+
+        candidate?.takeIf { it.isDirectory() }
+    }
+}.getOrNull()
 
 /**
  * Shorthand for an absolute and normalized path with invariant separators.

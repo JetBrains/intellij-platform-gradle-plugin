@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.resolvers.path
 import org.gradle.api.GradleException
 import org.jetbrains.intellij.platform.gradle.resolvers.Resolver
 import java.nio.file.Path
-import kotlin.io.path.listDirectoryEntries
+import java.nio.file.Files
 
 /**
  * Interface for resolving a [Path] to executables or other files of any kind.
@@ -31,10 +31,22 @@ abstract class PathResolver : Resolver<Path>() {
  * Calling `Path.exists()` method simply fails.
  */
 internal fun Path.takeIfExists() = takeIf {
-    runCatching { parent.listDirectoryEntries().contains(this) }.getOrDefault(false)
+    parent.findEntry(fileName.toString()) != null
 }
+
+internal fun Path.findEntry(name: String) = runCatching {
+    Files.newDirectoryStream(this).use { entries ->
+        entries.firstOrNull { it.fileName.toString() == name }
+    }
+}.getOrNull()
 
 /**
  * Resolves the fist matching entry using provided [glob].
  */
-internal fun Path?.resolveEntry(glob: String = "*") = this?.listDirectoryEntries(glob)?.firstOrNull()
+internal fun Path?.resolveEntry(glob: String = "*") = this?.let { path ->
+    runCatching {
+        Files.newDirectoryStream(path, glob).use { entries ->
+            entries.firstOrNull()
+        }
+    }.getOrNull()
+}
