@@ -15,6 +15,7 @@ import org.gradle.api.tasks.Classpath
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
+import org.jetbrains.intellij.platform.gradle.Constants.IDEA_CORE
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
@@ -140,7 +141,7 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
         )
         .plus(
             productInfo.layout
-                .filter { it.name == "com.intellij" }
+                .filter { it.name == IDEA_CORE }
                 .flatMap { it.classPath }
         )
         // exclude tests-related jars from the list as JUnit and Test Framework shouldn't be in the classpath

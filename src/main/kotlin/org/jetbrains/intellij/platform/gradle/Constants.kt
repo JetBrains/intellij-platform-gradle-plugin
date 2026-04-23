@@ -14,6 +14,7 @@ object Constants {
     const val CACHE_DIRECTORY_IDES = "ides"
     const val DEFAULT_MAIN_CLASS = "com.intellij.idea.Main"
     const val TOOLBOX_IGNORE = ".toolbox-ignore"
+    const val IDEA_CORE = "com.intellij"
 
     object Plugin {
         const val ID = "org.jetbrains.intellij.platform"

@@ -29,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
+import org.jetbrains.intellij.platform.gradle.Constants.IDEA_CORE
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
 import org.jetbrains.intellij.platform.gradle.models.*
@@ -1213,6 +1214,7 @@ class IntelliJPlatformDependenciesHelper(
         val ids = (modulesIds + dependenciesIds + pluginMainModuleIds + contentModuleIds)
             .distinct()
             .mapNotNull { ide.findPluginById(it) ?: ide.findPluginByModule(it) }
+            .filterNot { it.pluginId == IDEA_CORE }
             .toSet()
 
         return ids
@@ -1516,7 +1518,7 @@ class IntelliJPlatformDependenciesHelper(
         val id = "intellij-platform-test-runtime"
         val ide = ide(platformPath)
 
-        val classpath = ide.findPluginById("com.intellij")
+        val classpath = ide.findPluginById(IDEA_CORE)
             ?.classpath
             ?.paths
             .orEmpty()
