@@ -1213,6 +1213,7 @@ class IntelliJPlatformDependenciesHelper(
         val ids = (modulesIds + dependenciesIds + pluginMainModuleIds + contentModuleIds)
             .distinct()
             .mapNotNull { ide.findPluginById(it) ?: ide.findPluginByModule(it) }
+            .toSet()
 
         return ids
             .mapTo(ArrayList()) {
