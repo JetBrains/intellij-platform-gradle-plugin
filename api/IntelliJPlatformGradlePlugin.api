@@ -3256,11 +3256,13 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : 
 	public abstract fun getExecutionMode ()Lorg/gradle/api/provider/Property;
 	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public abstract fun getPurgeOldLogDirectories ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSplitModeFrontendBootstrapClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getSplitModeFrontendJoinLink ()Lorg/gradle/api/provider/Property;
 	public fun getSplitModeFrontendJoinLinkFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getSplitModeServerPort ()Lorg/gradle/api/provider/Property;
+	public final fun setPurgeOldLogDirectoriesOption (Z)V
 	public fun validateIntelliJPlatformVersion ()V
 	public fun validateSplitModeSupport ()V
 }
