@@ -342,7 +342,6 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
                 """
                 compileClasspath - Compile classpath for 'main'.
                 +--- bundledPlugin:Git4Idea:$artifactVersion
-                |    +--- bundledPlugin:com.intellij:$artifactVersion
                 |    \--- bundledModule:intellij.platform.collaborationTools:$artifactVersion
                 |         +--- bundledModule:intellij.platform.vcs.dvcs.impl:$artifactVersion
                 |         |    +--- bundledModule:intellij.platform.vcs.log.impl:$artifactVersion
@@ -403,7 +402,6 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
                 compileClasspath - Compile classpath for 'main'.
                 +--- bundledPlugin:Coverage:$artifactVersion
                 |    +--- bundledPlugin:com.intellij.java:$artifactVersion
-                |    |    \--- bundledPlugin:com.intellij:$artifactVersion
                 |    \--- bundledModule:intellij.platform.coverage:$artifactVersion
                 |         \--- bundledModule:intellij.platform.coverage.agent:$artifactVersion
                 \--- $artifactCoordinates
