@@ -2,7 +2,10 @@
 
 ## [next]
 
+## [2.15.0] - 2026-04-24
+
 ### Added
+
 - Apply Gradle Changelog Plugin conventions automatically when `org.jetbrains.changelog` is present, including default changelog extension values, `changeNotes`, and `publishPlugin` wiring.
 - Supported upcoming changes in module-descriptors.jar format in 262.* IDEs.
 - Skip `buildSearchableOptions` when the main plugin descriptor and included module descriptors do not declare Configurable extension points.
@@ -1738,7 +1741,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.14.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.15.0...HEAD
+[2.15.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.14.0...v2.15.0
 [2.14.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.1...v2.14.0
 [2.13.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.0...v2.13.1
 [2.13.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.12.0...v2.13.0
