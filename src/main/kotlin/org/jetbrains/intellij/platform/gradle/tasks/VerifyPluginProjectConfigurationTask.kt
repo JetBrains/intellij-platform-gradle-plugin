@@ -355,8 +355,8 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                     project.rootProject.rootDir.resolve(".gitignore").takeIf { it.exists() }
                 }))
                 pluginXmlService.convention(project.pluginXmlService())
-                sourceCompatibility.convention(compileJavaTaskProvider.map { it.sourceCompatibility })
-                targetCompatibility.convention(compileJavaTaskProvider.map { it.targetCompatibility })
+                sourceCompatibility.convention(compileJavaTaskProvider.map { it.options.release.orNull?.toString() ?: it.sourceCompatibility })
+                targetCompatibility.convention(compileJavaTaskProvider.map { it.options.release.orNull?.toString() ?: it.targetCompatibility })
                 mutedMessages.convention(
                     project.providers[GradleProperties.VerifyPluginProjectConfigurationMutedMessages]
                         .map { it.split(',').map(String::trim).filter(String::isNotEmpty) }

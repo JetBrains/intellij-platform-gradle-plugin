@@ -16,9 +16,10 @@ import kotlin.test.assertEquals
 abstract class IntelliJPlatformTestBase {
 
     val isCI = (System.getenv("CI") ?: "false").toBoolean()
+    // Keep TestKit debugging opt-in. Enabling it for every local run adds significant overhead.
     private val testKitDebugEnabled = System.getProperty("test.gradle.debug")
         ?.toBoolean()
-        ?: (!isCI || java.lang.Boolean.getBoolean("org.gradle.testkit.debug"))
+        ?: false
     private val testKitOutputForwardingEnabled = System.getProperty("test.gradle.forwardOutput")
         ?.toBoolean()
         ?: false

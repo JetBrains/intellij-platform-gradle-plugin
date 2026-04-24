@@ -4,16 +4,18 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.JavaVersion
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.attributes.*
 import org.gradle.api.attributes.java.TargetJvmVersion
-import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.attributes.ComposedJarRule
 import org.jetbrains.intellij.platform.gradle.attributes.DistributionRule
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
@@ -57,6 +59,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
         // https://www.youtube.com/watch?v=8z5KFCLZDd0
         // https://docs.gradle.org/current/userguide/variant_attributes.html#sec:standard_attributes
         // https://docs.gradle.org/current/userguide/cross_project_publications.html#sec:variant-aware-sharing
+        val compileJavaTaskProvider = project.tasks.named<JavaCompile>(Tasks.External.COMPILE_JAVA)
         with(project.configurations) configurations@{
             fun Configuration.applyVariantCommonAttributes(block: AttributeContainer.() -> Unit = {}) {
                 attributes {
@@ -67,9 +70,12 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                     // https://docs.gradle.org/current/userguide/cross_project_publications.html#targeting-different-platforms
                     // > By default, the org.gradle.jvm.version is set to the value of the release property
                     // > (or as fallback to the targetCompatibility value) of the main compilation task of the source set.
-                    attributeProvider(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, project.provider {
-                        project.the<JavaPluginExtension>().targetCompatibility.majorVersion.toInt()
-                    })
+                    attributeProvider(
+                        TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE,
+                        compileJavaTaskProvider.map { task ->
+                            task.options.release.orNull ?: JavaVersion.toVersion(task.targetCompatibility).majorVersion.toInt()
+                        }
+                    )
 
                     attributes.attribute(Attributes.jvmEnvironment, "standard-jvm")
                     attributes.attribute(Attributes.kotlinJPlatformType, "jvm")

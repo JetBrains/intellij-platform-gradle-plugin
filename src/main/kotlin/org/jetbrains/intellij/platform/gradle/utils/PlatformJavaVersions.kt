@@ -15,6 +15,12 @@ val PlatformJavaVersions = mapOf(
 )
 
 internal fun Version.toPlatformJavaVersion() =
-    PlatformJavaVersions.entries.first { this >= it.key }.value
+    PlatformJavaVersions.entries.first { toPlatformBuildVersion() >= it.key }.value
+
+private fun Version.toPlatformBuildVersion() = when {
+    isBuildNumber() -> this
+    major >= 2000 && minor > 0 -> Version((major - 2000) * 10 + minor)
+    else -> this
+}
 
 internal fun String.toJavaVersion() = JavaVersion.toVersion(this)

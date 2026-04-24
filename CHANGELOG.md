@@ -25,7 +25,8 @@
 
 - Fixed incorrectly calculated module descriptor coordinates used for excluding transitive dependencies. JetBrains/intellij-platform-gradle-plugin#2127 
 - Refactor `ComposedJarTask` module naming logic and remove redundant test method from `IntelliJPlatformTestingExtensionTest`. JetBrains/intellij-platform-gradle-plugin#2124
-  Replace hardcoded `"com.intellij"` with centralized `IDEA_CORE` constant in dependency resolution and filtering logic. JetBrains/intellij-platform-gradle-plugin#2137
+- Replace hardcoded `"com.intellij"` with centralized `IDEA_CORE` constant in dependency resolution and filtering logic. JetBrains/intellij-platform-gradle-plugin#2137
+- Refactor IntelliJ Gradle plugin to improve Java and Kotlin toolchain configuration handling, ensuring proper defaults and streamlined overrides. JetBrains/intellij-platform-gradle-plugin#2120
 
 ## [2.14.0] - 2026-04-09
 
