@@ -65,11 +65,20 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `report too low Java sourceCompatibility`() {
+    fun `report too low Java release`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="211" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
         buildFile write //language=kotlin
                 """
-                java {
-                    sourceCompatibility = JavaVersion.VERSION_1_8
+                tasks.named<org.gradle.api.tasks.compile.JavaCompile>("compileJava") {
+                    options.release = 8
                 }
                 """.trimIndent()
 
@@ -82,11 +91,20 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `report too high Java targetCompatibility`() {
+    fun `report too high Java release`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
+
         buildFile write //language=kotlin
                 """
-                java {
-                    targetCompatibility = JavaVersion.VERSION_25
+                tasks.named<org.gradle.api.tasks.compile.JavaCompile>("compileJava") {
+                    options.release = 25
                 }
                 """.trimIndent()
 
@@ -106,7 +124,6 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                     <name>PluginName</name>
                     <description>Lorem ipsum.</description>
                     <vendor>JetBrains</vendor>
-                    <idea-version since-build="211" until-build='212.*' />
                 </idea-plugin>
                 """.trimIndent()
 

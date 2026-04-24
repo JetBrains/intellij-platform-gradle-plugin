@@ -33,7 +33,7 @@ import kotlin.io.path.readLines
  * Validates the plugin project configuration:
  *
  * - The [PatchPluginXmlTask.sinceBuild] property can't be lower than the target IntelliJ Platform major version.
- * - The Java/Kotlin `sourceCompatibility` and `targetCompatibility` properties should align Java versions required by [PatchPluginXmlTask.sinceBuild] and the currently used IntelliJ Platform.
+ * - The effective Java/Kotlin compilation level should align Java versions required by [PatchPluginXmlTask.sinceBuild] and the currently used IntelliJ Platform.
  * - The Kotlin API version should align the version required by [PatchPluginXmlTask.sinceBuild] and the currently used IntelliJ Platform.
  * - The used IntelliJ Platform version must be equal or higher than the minimum supported version `2022.3` (`223`) defined in [MINIMAL_INTELLIJ_PLATFORM_VERSION].
  * - The dependency on the [Kotlin Standard Library](https://jb.gg/intellij-platform-kotlin-stdlib) should be excluded.
@@ -69,13 +69,13 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     abstract val gitignoreFile: RegularFileProperty
 
     /**
-     * [JavaCompile.sourceCompatibility] property defined in the build script.
+     * Effective Java source compatibility used for verification.
      */
     @get:Internal
     abstract val sourceCompatibility: Property<String>
 
     /**
-     * [JavaCompile.targetCompatibility] property defined in the build script.
+     * Effective Java target compatibility used for verification.
      */
     @get:Internal
     abstract val targetCompatibility: Property<String>
