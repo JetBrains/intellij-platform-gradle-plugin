@@ -8,6 +8,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IDES
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IVY
+import org.jetbrains.intellij.platform.gradle.Constants.LAYOUT_INDEX
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
@@ -218,7 +219,7 @@ inline operator fun <reified T : Any> ProviderFactory.get(property: GradleProper
  */
 internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Path) =
     get(GradleProperties.IntellijPlatformCache).resolvePath()
-        .orElse(provider { rootProjectDirectory.resolve(CACHE_DIRECTORY) }) as Provider<Path>
+        .orElse(provider { rootProjectDirectory.resolve(CACHE_DIRECTORY) })
 
 /**
  * Represents the local platform artifacts directory path which contains Ivy XML files.
@@ -227,7 +228,7 @@ internal fun ProviderFactory.intellijPlatformCachePath(rootProjectDirectory: Pat
  */
 internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Path) =
     get(GradleProperties.LocalPlatformArtifacts).resolvePath()
-        .orElse(intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_IVY) }) as Provider<Path>
+        .orElse(intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_IVY) })
 
 /**
  * Represents an alternative location where extracted IDEs are stored, as an alternative to the Gradle cache.
@@ -236,7 +237,7 @@ internal fun ProviderFactory.localPlatformArtifactsPath(rootProjectDirectory: Pa
  */
 internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory: Path) =
     get(GradleProperties.IntellijPlatformIdesCache).resolvePath()
-        .orElse(intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_IDES) }) as Provider<Path>
+        .orElse(intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_IDES) })
 
 /**
  * Directory used to persist serialized IDE layout indices next to extracted IDE distributions.
@@ -245,7 +246,7 @@ internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory:
  * lifetime and invalidation rules match the source data it describes.
  */
 internal fun ProviderFactory.intellijPlatformIdeLayoutIndicesCachePath(rootProjectDirectory: Path) =
-    intellijPlatformIdesCachePath(rootProjectDirectory).map { it.resolve("layout-index") } as Provider<Path>
+    intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(LAYOUT_INDEX) }
 
 /**
  * Resolves the directory path from the given provider.
