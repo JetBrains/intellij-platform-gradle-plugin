@@ -33,6 +33,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.plugins.configureKotlinJvmToolchainConventions
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.enableComposeHotReloadCompilerOptions
@@ -42,8 +43,6 @@ import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScoped
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import kotlin.getValue
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
@@ -521,16 +520,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }
 
         project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
-            val javaLauncher = javaToolchainService.launcherFor {
-                languageVersion = requestedJavaLanguageVersion
-                vendor = javaExtension.toolchain.vendor
-                implementation = javaExtension.toolchain.implementation
-            }
-
-            project.tasks.withType<KotlinJvmCompile>().configureEach {
-                compilerOptions.jvmTarget.convention(requestedJavaLanguageVersion.map { JvmTarget.fromTarget(it.toString()) })
-                kotlinJavaToolchain.toolchain.use(javaLauncher)
-            }
+            project.configureKotlinJvmToolchainConventions(
+                requestedJavaLanguageVersion = requestedJavaLanguageVersion,
+                javaExtension = javaExtension,
+                javaToolchainService = javaToolchainService,
+            )
         }
 
         IntelliJPlatformExtension.register(project, target = project).let { intelliJPlatform ->

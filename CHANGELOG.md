@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Refactor Kotlin JVM toolchain configuration into a dedicated utility and add isolation test for Kotlin Gradle API links.
+
 ## [2.15.0] - 2026-04-24
 
 ### Added
