@@ -2,9 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
-import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.GradleException
@@ -103,6 +101,9 @@ class IntelliJPlatformDependenciesHelper(
     }
     private val extractorServiceProvider by lazy {
         gradle.registerClassLoaderScopedBuildService(ExtractorService::class)
+    }
+    private val ideLayoutIndexService by lazy {
+        gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
     }
 
     /**
@@ -231,9 +232,16 @@ class IntelliJPlatformDependenciesHelper(
         intellijPlatformProjects.get().setPlatformPathProvider(projectPath, platformPathProvider(configurationName))
     }
 
-    internal fun ide(platformPath: Path) = gradle.registerClassLoaderScopedBuildService(IdesManagerService::class)
-        .map { it.resolve(platformPath) }
-        .get()
+    /**
+     * Resolves the serialized IDE layout index for the extracted platform distribution.
+     *
+     * The returned index is cached both in-memory and on disk, so callers can reuse bundled
+     * plugin/module metadata without reconstructing a live plugin-structure IDE model.
+     */
+    private fun ideLayoutIndex(platformPath: Path) = ideLayoutIndexService.get().resolve(
+        platformPath = platformPath,
+        cacheDirectory = providers.intellijPlatformIdeLayoutIndicesCachePath(rootProjectDirectory).get(),
+    )
 
     //</editor-fold>
 
@@ -1121,14 +1129,15 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency for an IntelliJ platform bundled plugin.
      *
+     * Looks up the bundled plugin in the cached layout index, writes an Ivy descriptor for its
+     * archive, and expands its required bundled plugin/module dependencies transitively.
+     *
      * @param id The ID of the bundled plugin.
      */
     private fun createIntelliJPlatformBundledPlugin(platformPath: Path, id: String): Dependency {
         val productInfo = platformPath.productInfo()
-        val ide = ide(platformPath)
-        val plugin = ide.findPluginById(id) ?: ide.findPluginByModule(id)
-
-        requireNotNull(plugin) {
+        val ideLayoutIndex = ideLayoutIndex(platformPath)
+        val plugin = requireNotNull(ideLayoutIndex.findById(id) ?: ideLayoutIndex.findByModuleId(id)) {
             val unresolvedPluginId = when (id) {
                 "copyright" -> "Use correct plugin ID 'com.intellij.copyright' instead of 'copyright'."
                 "css", "css-impl" -> "Use correct plugin ID 'com.intellij.css' instead of 'css'/'css-impl'."
@@ -1145,7 +1154,7 @@ class IntelliJPlatformDependenciesHelper(
             "$unresolvedPluginId See https://jb.gg/ij-plugin-dependencies."
         }
 
-        val artifactPath = requireNotNull(plugin.originalFile) {
+        val artifactPath = requireNotNull(plugin.resolveArtifactPath(platformPath)) {
             "The '$id' entry refers to a bundled plugin, but it is actually a bundled module. " +
                     "Use bundledModule(\"$id\") instead of bundledPlugin(\"$id\")."
         }
@@ -1163,7 +1172,7 @@ class IntelliJPlatformDependenciesHelper(
                     revision = version,
                 ),
                 publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath),
-                dependencies = plugin.collectDependencies(platformPath),
+                dependencies = collectBundledDependencies(plugin, ideLayoutIndex, platformPath),
             )
         }
 
@@ -1175,27 +1184,36 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Creates a dependency for an IntelliJ platform bundled module.
      *
+     * Bundled modules are represented as synthetic Ivy modules built from their resolved classpath,
+     * because they do not necessarily have a standalone archive to publish.
+     *
      * @param id The ID of the bundled module.
      * @param platformPath The path to the current IntelliJ Platform.
      */
     private fun createIntelliJPlatformBundledModule(id: String, platformPath: Path): Dependency {
-        val bundledModule = ide(platformPath).findPluginById(id)
-        requireNotNull(bundledModule) { "Specified bundledModule '$id' doesn't exist." }
+        val bundledModule = requireNotNull(ideLayoutIndex(platformPath).findById(id)) { "Specified bundledModule '$id' doesn't exist." }
 
-        val classpath = bundledModule.classpath.paths.map { it.safePathString }
+        val classpath = bundledModule.resolveClasspath(platformPath).map { it.safePathString }
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
 
         return dependencyFactory.create(group, name, version)
     }
 
     /**
-     * Collects all dependencies on plugins or modules of the current [IdePlugin].
-     * The [alreadyProcessedOrProcessing] parameter is a list of already traversed entities, used to avoid circular dependencies when walking recursively.
+     * Collects required bundled plugin/module dependencies for the given indexed [entry].
      *
+     * Dependency edges are stored by exact index key, then resolved back to entries to preserve the
+     * original dependency target even when IDs or aliases are duplicated in the IDE model. The
+     * [alreadyProcessedOrProcessing] parameter tracks the current recursion path to avoid cycles.
+     *
+     * @param entry The indexed bundled plugin or module whose dependencies should be traversed.
+     * @param ideLayoutIndex The cached layout index used for exact dependency resolution.
      * @param platformPath The path to the current IntelliJ Platform.
      * @param alreadyProcessedOrProcessing IDs of already traversed plugins or modules.
      */
-    private fun IdePlugin.collectDependencies(
+    private fun collectBundledDependencies(
+        entry: IdeLayoutIndex.Entry,
+        ideLayoutIndex: IdeLayoutIndex,
         platformPath: Path,
         alreadyProcessedOrProcessing: List<String> = emptyList(),
     ): List<IvyModule.Dependency> {
@@ -1203,44 +1221,37 @@ class IntelliJPlatformDependenciesHelper(
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
         // Should be the same as [createIntelliJPlatformBundledPlugin]
-        val ide = ide(platformPath)
-        val id = requireNotNull(pluginId)
-        val version = ide.version.toString()
-
-        val modulesIds = modulesDescriptors.asSequence().filter { it.moduleDefinition.loadingRule.required }.map { it.name }
-        val dependenciesIds = dependsList.asSequence().filter { !it.isOptional }.map { it.pluginId }
-        val pluginMainModuleIds = pluginMainModuleDependencies.asSequence().map { it.pluginId }
-        val contentModuleIds = contentModuleDependencies.asSequence().map { it.moduleName }
-        val ids = (modulesIds + dependenciesIds + pluginMainModuleIds + contentModuleIds)
-            .distinct()
-            .mapNotNull { ide.findPluginById(it) ?: ide.findPluginByModule(it) }
-            .filterNot { it.pluginId == IDEA_CORE }
-            .toSet()
-
-        return ids
-            .mapTo(ArrayList()) {
-                val name = requireNotNull(it.pluginId)
+        val id = entry.id
+        val version = ideLayoutIndex.fullVersion
+        return entry.dependencies
+            .asSequence()
+            // Dependencies are stored by entry key, not by ID, so duplicate aliases still resolve exactly.
+            .mapNotNull(ideLayoutIndex::findByKey)
+            .distinctBy { it.id }
+            .mapTo(ArrayList()) { dependency ->
+                val name = dependency.id
                 val group = when {
-                    it is IdeModule -> Dependencies.BUNDLED_MODULE_GROUP
+                    dependency.isModule -> Dependencies.BUNDLED_MODULE_GROUP
                     else -> Dependencies.BUNDLED_PLUGIN_GROUP
                 }
+                val artifactPath = dependency.resolveArtifactPath(platformPath)
                 val publications = when {
-                    it is IdeModule -> it.classpath.paths.flatMap { path ->
+                    dependency.isModule -> dependency.resolveClasspath(platformPath).flatMap { path ->
                         path.toIvyArtifacts(metadataRulesModeProvider, platformPath)
                     }
 
-                    else -> requireNotNull(it.originalFile).toIvyArtifacts(metadataRulesModeProvider, platformPath)
+                    else -> requireNotNull(artifactPath).toIvyArtifacts(metadataRulesModeProvider, platformPath)
                 }
 
-                val doesNotDependOnSelf = id != it.pluginId
-                val hasNeverBeenSeen = it.pluginId !in alreadyProcessedOrProcessing
+                val doesNotDependOnSelf = id != dependency.id
+                val hasNeverBeenSeen = dependency.id !in alreadyProcessedOrProcessing
 
                 if (doesNotDependOnSelf && hasNeverBeenSeen) {
-                    writeIvyModule(group, name, version, it.originalFile) {
+                    writeIvyModule(group, name, version, artifactPath) {
                         IvyModule(
                             info = IvyModule.Info(group, name, version),
                             publications = publications,
-                            dependencies = it.collectDependencies(platformPath, alreadyProcessedOrProcessing + id),
+                            dependencies = collectBundledDependencies(dependency, ideLayoutIndex, platformPath, alreadyProcessedOrProcessing + id),
                         )
                     }
                 }
@@ -1508,7 +1519,8 @@ class IntelliJPlatformDependenciesHelper(
     /**
      * Collects all required jars into a single artificial dependency to satisfy the test runtime.
      * Due to the tests classpath loader, it is required to provide explicitly all dependencies on
-     * bundled plugins and modules so tests can run with all runtime elements loaded.
+     * bundled plugins and modules so tests can run with all runtime elements loaded. The classpath
+     * is derived from the cached layout-index entry for [IDEA_CORE].
      *
      * See https://youtrack.jetbrains.com/issue/IJPL-180516/Gradle-tests-fail-without-transitive-modules-jars-of-com.intellij-in-classpath
      *
@@ -1516,17 +1528,25 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun createIntelliJPlatformTestRuntime(platformPath: Path): Dependency {
         val id = "intellij-platform-test-runtime"
-        val ide = ide(platformPath)
-
-        val classpath = ide.findPluginById(IDEA_CORE)
-            ?.classpath
-            ?.paths
+        val classpath = ideLayoutIndex(platformPath).findById(IDEA_CORE)
+            ?.resolveClasspath(platformPath)
             .orEmpty()
-            .map { it.safePathString }.toSet()
+            .map { it.safePathString }
+            .toSet()
 
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
         return dependencyFactory.create(group, name, version)
     }
+
+    /**
+     * Rehydrates the bundled plugin archive path stored in the layout index.
+     */
+    private fun IdeLayoutIndex.Entry.resolveArtifactPath(platformPath: Path) = originalFile?.let(platformPath::resolve)
+
+    /**
+     * Rehydrates bundled module/plugin classpath entries stored in the layout index.
+     */
+    private fun IdeLayoutIndex.Entry.resolveClasspath(platformPath: Path) = classpath.map(platformPath::resolve)
 
     /**
      * Creates a dependency.

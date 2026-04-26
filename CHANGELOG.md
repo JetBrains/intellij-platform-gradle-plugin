@@ -2,9 +2,13 @@
 
 ## [next]
 
+### Changed
+
+- Cache a serialized IDE layout index and reuse it for bundled plugin/module dependency resolution, test runtime classpath collection, and `printBundledPlugins`/`printBundledModules`.
+
 ### Fixed
 
-- Refactor Kotlin JVM toolchain configuration into a dedicated utility and add isolation test for Kotlin Gradle API links.
+- Refactor Kotlin JVM toolchain configuration into a dedicated utility and add an isolation test for Kotlin Gradle API links.
 
 ## [2.15.0] - 2026-04-24
 

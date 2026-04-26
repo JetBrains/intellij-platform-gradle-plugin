@@ -239,6 +239,15 @@ internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory:
         .orElse(intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_IDES) }) as Provider<Path>
 
 /**
+ * Directory used to persist serialized IDE layout indices next to extracted IDE distributions.
+ *
+ * The layout index is derived from an extracted IDE, so keeping it under the IDE cache makes the
+ * lifetime and invalidation rules match the source data it describes.
+ */
+internal fun ProviderFactory.intellijPlatformIdeLayoutIndicesCachePath(rootProjectDirectory: Path) =
+    intellijPlatformIdesCachePath(rootProjectDirectory).map { it.resolve("layout-index") } as Provider<Path>
+
+/**
  * Resolves the directory path from the given provider.
  */
 internal fun Provider<String>.resolvePath() = map {
