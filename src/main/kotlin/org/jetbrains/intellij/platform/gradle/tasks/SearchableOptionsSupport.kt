@@ -8,7 +8,9 @@ import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
+import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.get
+import org.gradle.kotlin.dsl.withType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.get
@@ -92,12 +94,12 @@ private fun Project.relevantSearchableOptionsModuleProjects(): List<Project> = l
 ).flatMap { configurationName ->
     configurations[configurationName]
         .allDependencies
-        .withType(ProjectDependency::class.java)
+        .withType<ProjectDependency>()
         .mapNotNull { dependency: ProjectDependency -> rootProject.findProject(dependency.path) }
 }.distinctBy { moduleProject: Project -> moduleProject.path }
 
 private fun Project.mainProjectSearchableOptionsDescriptorFiles(): List<File> {
-    val sourceSets = extensions.findByType(SourceSetContainer::class.java) ?: return emptyList()
+    val sourceSets = extensions.findByType<SourceSetContainer>() ?: return emptyList()
 
     return sourceSets.findByName(SourceSet.MAIN_SOURCE_SET_NAME)
         ?.resources
