@@ -51,13 +51,13 @@ jobs:
         with:
           cache-read-only: ${{ inputs.cacheReadOnly }}
 
-      - name: Cache test IDEs
+      - name: Cache IntelliJ Platform test cache
         uses: actions/cache@v5
         with:
-          path: .gradle/testGradleHome/.ides
-          key: test-gradle-home-v1-ides-${{ runner.os }}-${{ hashFiles('gradle.properties') }}
+          path: .gradle/testGradleHome/.intellijPlatform
+          key: test-gradle-home-v2-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}
           restore-keys: |
-            test-gradle-home-v1-ides-${{ runner.os }}-
+            test-gradle-home-v2-intellij-platform-${{ runner.os }}-
 
       - name: Cache Gradle TestKit
         uses: actions/cache@v5

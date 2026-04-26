@@ -8,6 +8,7 @@ import org.jetbrains.intellij.platform.gradle.assertContains
 import kotlin.test.Test
 
 class PrintBundledModulesTaskTest : IntelliJPluginTestBase() {
+    override val enableIntelliJPlatformCache = true
 
     @Test
     fun `print bundled modules`() {

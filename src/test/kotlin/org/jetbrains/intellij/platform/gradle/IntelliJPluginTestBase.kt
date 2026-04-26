@@ -16,6 +16,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
     // Shared IDE cache adds heavy per-build overhead in TestKit suites, so only cache-specific tests should opt in.
     open val enableCaching = false
+    open val enableIntelliJPlatformCache = false
     val randomTaskName = "task_" + (1..1000).random()
 
     @BeforeTest
@@ -119,10 +120,14 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
         }
 
         gradleProperties write //language=properties
-                """
-                kotlin.stdlib.default.dependency = false
-                org.jetbrains.intellij.platform.selfUpdateCheck = false
-                """.trimIndent()
+                buildList {
+                    add("kotlin.stdlib.default.dependency = false")
+                    add("org.jetbrains.intellij.platform.selfUpdateCheck = false")
+
+                    if (enableIntelliJPlatformCache) {
+                        add("${GradleProperties.IntellijPlatformCache}=${intellijPlatformCacheDir.invariantSeparatorsPathString}")
+                    }
+                }.joinToString("\n")
     }
 
     fun writeTestFile() = dir.resolve("src/test/java/AppTest.java") write //language=java

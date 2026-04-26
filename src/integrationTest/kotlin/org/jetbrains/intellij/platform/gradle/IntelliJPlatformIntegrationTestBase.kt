@@ -20,6 +20,7 @@ open class IntelliJPlatformIntegrationTestBase(
         "intellijPlatform.version" to intellijPlatformVersion,
         "intellijPlatform.type" to intellijPlatformType,
         GradleProperties.SelfUpdateCheck.toString() to false,
+        GradleProperties.IntellijPlatformCache.toString() to intellijPlatformCacheDir.invariantSeparatorsPathString,
     )
 
     @BeforeTest
@@ -108,7 +109,7 @@ open class IntelliJPlatformIntegrationTestBase(
                     caching {
                         ides {
                             enabled = true
-                            path = File("${gradleHome.invariantSeparatorsPathString}", "ides")
+                            path = File("${idesCacheDir.invariantSeparatorsPathString}")
                         }
                     }
                 }

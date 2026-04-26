@@ -2,12 +2,16 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.Constants.LAYOUT_INDEX
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.assertContains
+import kotlin.io.path.exists
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class PrintBundledPluginsTaskTest : IntelliJPluginTestBase() {
+    override val enableIntelliJPlatformCache = true
 
     @Test
     fun `print bundled plugins`() {
@@ -29,6 +33,15 @@ class PrintBundledPluginsTaskTest : IntelliJPluginTestBase() {
                 output,
             )
         }
+    }
+
+    @Test
+    fun `stores layout index in shared IntelliJ Platform cache`() {
+        val layoutIndexDir = intellijPlatformCacheDir.resolve(LAYOUT_INDEX)
+
+        build(Tasks.PRINT_BUNDLED_PLUGINS)
+
+        assertTrue(layoutIndexDir.exists())
     }
 
     @Test

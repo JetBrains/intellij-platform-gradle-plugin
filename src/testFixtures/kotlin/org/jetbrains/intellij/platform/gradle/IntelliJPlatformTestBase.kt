@@ -38,7 +38,8 @@ abstract class IntelliJPlatformTestBase {
     val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
     val gradleHome = Path(System.getProperty("test.gradle.home")).createDirectories()
     val testKitDir = gradleHome.resolve(".testKit").createDirectories()
-    val idesCacheDir = gradleHome.resolve(".ides").createDirectories()
+    val intellijPlatformCacheDir = gradleHome.resolve(".intellijPlatform").createDirectories()
+    val idesCacheDir = intellijPlatformCacheDir.resolve("ides").createDirectories()
 
     val intellijPlatformType = System.getProperty("test.intellijPlatform.type").takeUnless { it.isNullOrEmpty() }
         ?: throw GradleException("'test.intellijPlatform.type' isn't provided")
