@@ -38,14 +38,10 @@ val IntelliJPlatformTestBase.cacheDirectory: Path
     get() = dir.resolve(Constants.CACHE_DIRECTORY)
 
 /**
- * Resolves the path to the sandbox container used by integration tests.
- *
- * Integration builds route `org.jetbrains.intellij.platform.intellijPlatformCache` to the shared
- * TestKit cache root, so sandbox content is produced there instead of under the temporary project
- * directory.
+ * Resolves the path to the IntelliJ Platform sandbox container under the current test project.
  */
 val IntelliJPlatformTestBase.sandboxDirectory: Path
-    get() = intellijPlatformCacheDir.resolve(Sandbox.CONTAINER)
+    get() = cacheDirectory.resolve(Sandbox.CONTAINER)
 
 /**
  * Resolves the path to the IntelliJ Platform plugin descriptor file: `src/main/resources/META-INF/plugin.xml`.
