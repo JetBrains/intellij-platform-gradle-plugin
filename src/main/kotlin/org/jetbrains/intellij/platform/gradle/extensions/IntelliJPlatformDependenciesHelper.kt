@@ -1235,12 +1235,8 @@ class IntelliJPlatformDependenciesHelper(
                     else -> Dependencies.BUNDLED_PLUGIN_GROUP
                 }
                 val artifactPath = dependency.resolveArtifactPath(platformPath)
-                val publications = when {
-                    dependency.isModule -> dependency.resolveClasspath(platformPath).flatMap { path ->
-                        path.toIvyArtifacts(metadataRulesModeProvider, platformPath)
-                    }
-
-                    else -> requireNotNull(artifactPath).toIvyArtifacts(metadataRulesModeProvider, platformPath)
+                val publications = dependency.resolvePublicationPaths(platformPath).flatMap { path ->
+                    path.toIvyArtifacts(metadataRulesModeProvider, platformPath)
                 }
 
                 val doesNotDependOnSelf = id != dependency.id
@@ -1539,16 +1535,6 @@ class IntelliJPlatformDependenciesHelper(
     }
 
     /**
-     * Rehydrates the bundled plugin archive path stored in the layout index.
-     */
-    private fun IdeLayoutIndex.Entry.resolveArtifactPath(platformPath: Path) = originalFile?.let(platformPath::resolve)
-
-    /**
-     * Rehydrates bundled module/plugin classpath entries stored in the layout index.
-     */
-    private fun IdeLayoutIndex.Entry.resolveClasspath(platformPath: Path) = classpath.map(platformPath::resolve)
-
-    /**
      * Creates a dependency.
      *
      * @param coordinates Dependency coordinates.
@@ -1790,3 +1776,25 @@ class IntelliJPlatformDependenciesHelper(
 }
 
 internal typealias DependencyAction = (Dependency.() -> Unit)
+
+/**
+ * Rehydrates the bundled plugin archive path stored in the layout index.
+ */
+private fun IdeLayoutIndex.Entry.resolveArtifactPath(platformPath: Path) = originalFile?.let(platformPath::resolve)
+
+/**
+ * Rehydrates bundled module/plugin classpath entries stored in the layout index.
+ */
+private fun IdeLayoutIndex.Entry.resolveClasspath(platformPath: Path) = classpath.map(platformPath::resolve)
+
+/**
+ * Resolves publishable files for a bundled entry.
+ *
+ * Some bundled plugins are classpath-backed and do not expose an archive path in the IDE model.
+ * Those must fall back to their classpath entries instead of failing during transitive Ivy module
+ * generation.
+ */
+internal fun IdeLayoutIndex.Entry.resolvePublicationPaths(platformPath: Path) = when {
+    isModule -> resolveClasspath(platformPath)
+    else -> resolveArtifactPath(platformPath)?.let(::listOf) ?: resolveClasspath(platformPath)
+}
