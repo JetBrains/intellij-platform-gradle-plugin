@@ -13,8 +13,33 @@ on:
         type: string
 
 jobs:
+  primeUbuntuIntellijPlatformTestCache:
+    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
+    secrets: inherit
+    with:
+      gradleVersion: "9.4.0"
+      os: ubuntu-latest
+
+  primeWindowsIntellijPlatformTestCache:
+    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
+    secrets: inherit
+    with:
+      gradleVersion: "9.4.0"
+      os: windows-latest
+
+  primeMacosIntellijPlatformTestCache:
+    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
+    secrets: inherit
+    with:
+      gradleVersion: "9.4.0"
+      os: macos-latest
+
   integrationTests:
     name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
+    needs:
+      - primeUbuntuIntellijPlatformTestCache
+      - primeWindowsIntellijPlatformTestCache
+      - primeMacosIntellijPlatformTestCache
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -52,13 +77,15 @@ jobs:
         with:
           cache-read-only: true
 
-      - name: Cache IntelliJ Platform test cache
-        uses: actions/cache@v5
+      - name: Restore IntelliJ Platform test cache
+        id: intellij-platform-cache
+        uses: actions/cache/restore@v5
         with:
           path: .gradle/testGradleHome/.intellijPlatform
-          key: test-gradle-home-v2-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}
+          key: test-gradle-home-v4-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
-            test-gradle-home-v2-intellij-platform-${{ runner.os }}-
+            test-gradle-home-v4-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}-
+            test-gradle-home-v4-intellij-platform-${{ runner.os }}-
 
       - name: Cache Gradle TestKit
         uses: actions/cache@v5

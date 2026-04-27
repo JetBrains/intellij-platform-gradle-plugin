@@ -1,4 +1,4 @@
-name: Single Unit Test
+name: Prime IntelliJ Platform Test Cache
 
 on:
   workflow_call:
@@ -6,24 +6,20 @@ on:
       gradleVersion:
         type: string
         required: true
-        description: 'Gradle version – see: https://github.com/gradle/gradle/releases'
+        description: 'Gradle version used to warm up the shared test cache'
       os:
         type: string
         required: true
-        description: 'Operation system'
-      cacheReadOnly:
-        type: boolean
-        default: false
-        required: false
-        description: 'Controls writing the Gradle cache'
+        description: 'Operating system'
       testName:
         type: string
         required: false
-        description: 'Optional test name to run'
+        default: org.jetbrains.intellij.platform.gradle.tasks.PrintBundledPluginsTaskTest
+        description: 'Test filter used to populate the shared IntelliJ Platform test cache'
 
 jobs:
-  unitTests:
-    name: Gradle ${{ inputs.gradleVersion }} @ ${{ inputs.os }}
+  primeCache:
+    name: Prime cache @ ${{ inputs.os }}
     runs-on: ${{ inputs.os }}
     permissions:
       checks: write
@@ -48,8 +44,6 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v6
-        with:
-          cache-read-only: ${{ inputs.cacheReadOnly }}
 
       - name: Restore IntelliJ Platform test cache
         id: intellij-platform-cache
@@ -69,7 +63,8 @@ jobs:
           restore-keys: |
             test-gradle-home-v1-testkit-${{ runner.os }}-
 
-      - name: Run Tests
+      - name: Prime IntelliJ Platform test cache
+        if: ${{ steps.intellij-platform-cache.outputs.cache-hit != 'true' }}
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           TEST_NAME: ${{ inputs.testName }}
@@ -80,17 +75,16 @@ jobs:
           else
             TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
           fi
-          [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
-          
-          ./gradlew check test \
+
+          ./gradlew test \
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
-            $TESTS \
+            --tests "$TEST_NAME" \
             --console=plain \
             --no-build-cache
 
       - name: Check IntelliJ Platform test cache
-        if: ${{ always() && !cancelled() && !inputs.cacheReadOnly && steps.intellij-platform-cache.outputs.cache-hit != 'true' }}
+        if: ${{ always() && !cancelled() && steps.intellij-platform-cache.outputs.cache-hit != 'true' }}
         id: intellij-platform-cache-path
         shell: bash
         run: |
@@ -101,7 +95,7 @@ jobs:
           fi
 
       - name: Save IntelliJ Platform test cache
-        if: ${{ always() && !cancelled() && !inputs.cacheReadOnly && steps.intellij-platform-cache.outputs.cache-hit != 'true' && steps.intellij-platform-cache-path.outputs.present == 'true' }}
+        if: ${{ always() && !cancelled() && steps.intellij-platform-cache.outputs.cache-hit != 'true' && steps.intellij-platform-cache-path.outputs.present == 'true' }}
         uses: actions/cache/save@v5
         with:
           path: .gradle/testGradleHome/.intellijPlatform
