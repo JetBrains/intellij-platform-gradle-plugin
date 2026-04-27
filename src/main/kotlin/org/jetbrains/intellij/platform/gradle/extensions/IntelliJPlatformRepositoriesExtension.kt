@@ -167,7 +167,7 @@ abstract class IntelliJPlatformRepositoriesExtension @Inject constructor(
         ),
         action = {
             content {
-                IntelliJPlatformType.values()
+                IntelliJPlatformType.entries
                     .filter { it != IntelliJPlatformType.AndroidStudio }
                     .mapNotNull { it.installer }
                     .forEach {

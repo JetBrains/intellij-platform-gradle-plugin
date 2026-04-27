@@ -431,7 +431,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     }
 
     private fun collectProblems(output: String): Map<String, Map<FailureLevel, Map<String, String>>> {
-        val headingToLevel = FailureLevel.values().associateBy { it.sectionHeading }
+        val headingToLevel = FailureLevel.entries.associateBy { it.sectionHeading }
 
         val lines = output.lineSequence().toList()
         val starts = lines.mapIndexedNotNull { i, s -> pluginLinePattern.find(s)?.let { i to it.groupValues[1] } }

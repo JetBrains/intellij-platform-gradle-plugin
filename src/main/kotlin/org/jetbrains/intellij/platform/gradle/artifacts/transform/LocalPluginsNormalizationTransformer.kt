@@ -68,7 +68,7 @@ abstract class LocalPluginsNormalizationTransformers @Inject constructor(
 
     companion object {
         internal fun register(dependencies: DependencyHandler) {
-            Attributes.ArtifactType.values().forEach {
+            Attributes.ArtifactType.entries.forEach {
                 dependencies.artifactTypes.maybeCreate(it.toString())
                     .attributes.attribute(Attributes.localPluginsNormalized, false)
             }
