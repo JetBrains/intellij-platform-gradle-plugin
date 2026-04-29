@@ -8,9 +8,40 @@ jobs:
     name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
+  primeUbuntuIntellijPlatformTestCache:
+    name: Prime IntelliJ Platform test cache @ ubuntu-latest
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
+    secrets: inherit
+    with:
+      gradleVersion: "9.4.0"
+      os: ubuntu-latest
+
+  primeWindowsIntellijPlatformTestCache:
+    name: Prime IntelliJ Platform test cache @ windows-latest
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
+    secrets: inherit
+    with:
+      gradleVersion: "9.4.0"
+      os: windows-latest
+
+  primeMacosIntellijPlatformTestCache:
+    name: Prime IntelliJ Platform test cache @ macos-latest
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
+    secrets: inherit
+    with:
+      gradleVersion: "9.4.0"
+      os: macos-latest
+
   integrationTests:
     name: Integration Tests
-    needs: gradleValidation
+    needs:
+      - gradleValidation
+      - primeUbuntuIntellijPlatformTestCache
+      - primeWindowsIntellijPlatformTestCache
+      - primeMacosIntellijPlatformTestCache
     uses: ./.github/workflows/reusable-integrationTests.yml
     secrets: inherit
 

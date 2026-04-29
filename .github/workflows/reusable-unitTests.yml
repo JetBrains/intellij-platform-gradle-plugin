@@ -1,45 +1,10 @@
 name: Reusable Unit Tests
 
-on:
-  workflow_call:
-    inputs:
-      primeCache:
-        required: false
-        default: true
-        type: boolean
+on: [ workflow_call ]
 
 jobs:
-  primeUbuntuIntellijPlatformTestCache:
-    if: ${{ inputs.primeCache }}
-    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
-    secrets: inherit
-    with:
-      gradleVersion: "9.4.0"
-      os: ubuntu-latest
-
-  primeWindowsIntellijPlatformTestCache:
-    if: ${{ inputs.primeCache }}
-    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
-    secrets: inherit
-    with:
-      gradleVersion: "9.4.0"
-      os: windows-latest
-
-  primeMacosIntellijPlatformTestCache:
-    if: ${{ inputs.primeCache }}
-    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
-    secrets: inherit
-    with:
-      gradleVersion: "9.4.0"
-      os: macos-latest
-
   unitTests:
     name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
-    if: ${{ always() && !cancelled() && !failure() }}
-    needs:
-      - primeUbuntuIntellijPlatformTestCache
-      - primeWindowsIntellijPlatformTestCache
-      - primeMacosIntellijPlatformTestCache
     uses: ./.github/workflows/reusable-single-unitTest.yml
     secrets: inherit
     permissions:

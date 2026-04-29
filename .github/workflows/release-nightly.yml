@@ -55,8 +55,6 @@ jobs:
       - primeMacosIntellijPlatformTestCache
     uses: ./.github/workflows/reusable-unitTests.yml
     secrets: inherit
-    with:
-      primeCache: false
 
   integrationTests:
     if: ${{ !inputs.skipTests }}
@@ -68,8 +66,6 @@ jobs:
       - primeMacosIntellijPlatformTestCache
     uses: ./.github/workflows/reusable-integrationTests.yml
     secrets: inherit
-    with:
-      primeCache: false
 
   #  integrationTestsEAP:
   #    name: Integration Tests EAP

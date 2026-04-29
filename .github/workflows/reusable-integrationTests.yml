@@ -11,43 +11,10 @@ on:
         required: false
         default: ""
         type: string
-      primeCache:
-        required: false
-        default: true
-        type: boolean
 
 jobs:
-  primeUbuntuIntellijPlatformTestCache:
-    if: ${{ inputs.primeCache }}
-    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
-    secrets: inherit
-    with:
-      gradleVersion: "9.4.0"
-      os: ubuntu-latest
-
-  primeWindowsIntellijPlatformTestCache:
-    if: ${{ inputs.primeCache }}
-    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
-    secrets: inherit
-    with:
-      gradleVersion: "9.4.0"
-      os: windows-latest
-
-  primeMacosIntellijPlatformTestCache:
-    if: ${{ inputs.primeCache }}
-    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
-    secrets: inherit
-    with:
-      gradleVersion: "9.4.0"
-      os: macos-latest
-
   integrationTests:
     name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
-    if: ${{ always() && !cancelled() && !failure() }}
-    needs:
-      - primeUbuntuIntellijPlatformTestCache
-      - primeWindowsIntellijPlatformTestCache
-      - primeMacosIntellijPlatformTestCache
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
