@@ -4,35 +4,19 @@ package org.jetbrains.intellij.platform.gradle.plugins
 
 import org.gradle.api.Project
 import org.gradle.api.Task
-import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Provider
 import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.jvm.toolchain.JavaToolchainService
-import org.gradle.kotlin.dsl.assign
 
 // Reflection is used to avoid binary incompatibility when the Kotlin Gradle Plugin version at
 // runtime differs from the version this plugin was compiled against.
-internal fun Project.configureKotlinJvmToolchainConventions(
-    requestedJavaLanguageVersion: Provider<JavaLanguageVersion>,
-    javaExtension: JavaPluginExtension,
-    javaToolchainService: JavaToolchainService,
-) {
-    val javaLauncher = javaToolchainService.launcherFor {
-        languageVersion = requestedJavaLanguageVersion
-        vendor = javaExtension.toolchain.vendor
-        implementation = javaExtension.toolchain.implementation
-    }
-
-    @Suppress("UNCHECKED_CAST")
-    val kotlinJvmCompileClass = runCatching {
-        Thread.currentThread().contextClassLoader
-            .loadClass("org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile") as Class<Task>
+internal fun Project.configureKotlinJvmToolchainConventions(requestedJavaLanguageVersion: Provider<JavaLanguageVersion>) {
+    @Suppress("UNCHECKED_CAST") val kotlinJvmCompileClass = runCatching {
+        Thread.currentThread().contextClassLoader.loadClass("org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile") as Class<Task>
     }.getOrNull() ?: return
 
     tasks.withType(kotlinJvmCompileClass).configureEach {
-        fun Any.invokeNoArgsMethod(name: String) = javaClass.methods
-            .firstOrNull { it.name == name && it.parameterCount == 0 }
-            ?.invoke(this)
+        fun Any.invokeNoArgsMethod(name: String) =
+            javaClass.methods.firstOrNull { it.name == name && it.parameterCount == 0 }?.invoke(this)
 
         runCatching {
             val jvmTargetClass = Class.forName(
@@ -44,18 +28,14 @@ internal fun Project.configureKotlinJvmToolchainConventions(
                 ?: return@runCatching
             val compilerOptions = invokeNoArgsMethod("getCompilerOptions") ?: return@runCatching
             val jvmTargetProp = compilerOptions.invokeNoArgsMethod("getJvmTarget") ?: return@runCatching
-            val conventionMethod = jvmTargetProp.javaClass.methods
-                .firstOrNull { it.name == "convention" && it.parameterCount == 1 && it.parameterTypes[0] == Provider::class.java }
-                ?: return@runCatching
-            conventionMethod.invoke(jvmTargetProp, requestedJavaLanguageVersion.map { fromTarget.invoke(null, it.toString()) })
-        }
+            val conventionMethod =
+                jvmTargetProp.javaClass.methods.firstOrNull { it.name == "convention" && it.parameterCount == 1 && it.parameterTypes[0] == Provider::class.java }
+                    ?: return@runCatching
 
-        runCatching {
-            val kotlinJavaToolchain = invokeNoArgsMethod("getKotlinJavaToolchain") ?: return@runCatching
-            val toolchain = kotlinJavaToolchain.invokeNoArgsMethod("getToolchain") ?: return@runCatching
-            toolchain.javaClass.methods
-                .firstOrNull { it.name == "use" && it.parameterCount == 1 }
-                ?.invoke(toolchain, javaLauncher)
+            conventionMethod.invoke(
+                jvmTargetProp,
+                requestedJavaLanguageVersion.map { fromTarget.invoke(null, it.toString()) },
+            )
         }
     }
 }

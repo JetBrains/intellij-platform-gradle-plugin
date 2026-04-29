@@ -9,7 +9,6 @@ import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.jvm.toolchain.JavaLanguageVersion
-import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
@@ -504,24 +503,29 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }.map(JavaLanguageVersion::of)
         val javaExtension = project.extensions.getByType<JavaPluginExtension>()
         val requestedJavaLanguageVersion = javaExtension.toolchain.languageVersion.orElse(intellijPlatformJavaLanguageVersion)
-        val javaToolchainService = project.extensions.getByType<JavaToolchainService>()
+        val intellijPlatformDependencies = project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].dependencies
+
+        fun configureJavaToolchainConvention() {
+            javaExtension.toolchain.languageVersion.convention(intellijPlatformJavaLanguageVersion)
+        }
+
+        if (!intellijPlatformDependencies.isEmpty()) {
+            configureJavaToolchainConvention()
+        }
+        intellijPlatformDependencies.whenObjectAdded {
+            configureJavaToolchainConvention()
+        }
+        project.afterEvaluate {
+            configureJavaToolchainConvention()
+        }
 
         project.tasks.withType<JavaCompile>().configureEach {
             options.release.convention(requestedJavaLanguageVersion.map { it.toString().toInt() })
-            javaCompiler.convention(
-                javaToolchainService.compilerFor {
-                    languageVersion = requestedJavaLanguageVersion
-                    vendor = javaExtension.toolchain.vendor
-                    implementation = javaExtension.toolchain.implementation
-                }
-            )
         }
 
         project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
             project.configureKotlinJvmToolchainConventions(
                 requestedJavaLanguageVersion = requestedJavaLanguageVersion,
-                javaExtension = javaExtension,
-                javaToolchainService = javaToolchainService,
             )
         }
 

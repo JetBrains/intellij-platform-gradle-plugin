@@ -25,6 +25,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         buildFile overwrite buildScript("org.jetbrains.intellij.platform")
 
         build(inspectTask) {
+            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
@@ -36,6 +37,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         buildFile overwrite buildScript("org.jetbrains.intellij.platform.module")
 
         build(inspectTask) {
+            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
@@ -55,6 +57,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
 
         build(inspectTask) {
             assertContains(output, "early.targetCompatibility=")
+            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
@@ -252,6 +255,10 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         println("compileJava.release=" + compileJavaRelease.orNull)
         println("compileKotlin.jvmTarget=" + compileKotlinJvmTarget.orNull)
         println("compileTestKotlin.jvmTarget=" + compileTestKotlinJvmTarget.orNull)
+        
+        gradle.projectsEvaluated {
+            println("javaToolchainAfterEvaluate=" + java.toolchain.languageVersion.orNull)
+        }
         """.trimIndent()
 
     private fun expectedJvmTarget(javaVersion: JavaVersion) = when (javaVersion) {
