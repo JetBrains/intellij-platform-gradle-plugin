@@ -56,17 +56,19 @@ internal inline fun <reified T : Task> Project.registerTask(
     configureWithType: Boolean = true,
     noinline configuration: T.() -> Unit = {},
 ) {
-    // Register new tasks of the T type if it does not exist yet
     val log = Logger(javaClass)
 
-    names.forEach { name ->
-        log.info("Configuring task: $name")
-        tasks.maybeCreate<T>(name)
+    val taskProviders = names.map { name ->
+        log.info("Registering task: $name")
+        when (name) {
+            in tasks.names -> tasks.named<T>(name)
+            else -> tasks.register<T>(name)
+        }
     }
 
     when (configureWithType) {
         true -> tasks.withType<T>().configureEach(configuration)
-        false -> names.forEach { tasks.named<T>(it).configure(configuration) }
+        false -> taskProviders.forEach { it.configure(configuration) }
     }
 }
 
