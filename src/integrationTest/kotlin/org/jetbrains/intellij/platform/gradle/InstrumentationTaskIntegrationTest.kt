@@ -101,7 +101,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
         )
 
         build(
-            Tasks.External.JAR,
+            Tasks.INSTRUMENTED_JAR,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {
@@ -112,7 +112,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
         dir.resolve("src/main/kotlin/MainKt.kt").appendText("// foo\n")
 
         build(
-            Tasks.External.JAR,
+            Tasks.INSTRUMENTED_JAR,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {
@@ -123,7 +123,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
         dir.resolve("src/main/java/Main.java").appendText("// foo\n")
 
         build(
-            Tasks.External.JAR,
+            Tasks.INSTRUMENTED_JAR,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {
@@ -134,7 +134,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
         dir.resolve("src/main/java/Form.form").appendText("<!-- foo -->\n")
 
         build(
-            Tasks.External.JAR,
+            Tasks.INSTRUMENTED_JAR,
             args = defaultArgs,
             projectProperties = defaultProjectProperties,
         ) {

@@ -75,7 +75,7 @@ class SubmoduleSetupIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 }
                 """.trimIndent()
 
-        build(":submodule:help", projectProperties = defaultProjectProperties) {
+        build(":submodule:test", projectProperties = defaultProjectProperties, args = listOf("--dry-run")) {
             assertContains("rider.tests.plugin.home.path.matchesRootProjectDir=true", output)
             assertContains("rider.tests.plugin.home.path.matchesSubmoduleProjectDir=false", output)
         }

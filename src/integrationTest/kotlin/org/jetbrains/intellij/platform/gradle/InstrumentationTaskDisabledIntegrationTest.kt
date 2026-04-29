@@ -17,13 +17,13 @@ class InstrumentationTaskDisabledIntegrationTest : IntelliJPlatformIntegrationTe
     private val defaultArgs = listOf("--configuration-cache")
 
     @Test
-    fun `skip instrumentCode task if disabled`() {
+    fun `do not schedule instrumentCode task if disabled`() {
         build(
             Tasks.BUILD_PLUGIN,
             args = defaultArgs,
             projectProperties = defaultProjectProperties + mapOf("instrumentCode" to false),
         ) {
-            output containsText "> Task :instrumentCode SKIPPED"
+            output notContainsText "> Task :instrumentCode"
 
             buildDirectory containsFile "libs/test-1.0.0.jar"
             buildDirectory notContainsFile "libs/instrumented-test-1.0.0.jar"
