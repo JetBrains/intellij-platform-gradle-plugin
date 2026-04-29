@@ -7,10 +7,10 @@ import org.gradle.api.Task
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.plugins.PluginManager
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.JavaExec
+import org.gradle.jvm.toolchain.JavaLauncher
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.process.JavaForkOptions
@@ -20,11 +20,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.argumentProviders.ExecutionModeAwareIdeArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.ExecutionModeAwarePluginArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.ExecutionModeAwareSandboxArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
-import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
+import org.jetbrains.intellij.platform.gradle.argumentProviders.*
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectModuleDescriptorJars
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.customCommandFor
@@ -105,27 +101,31 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
          * @see CoroutinesJavaAgentAware
          */
         if (this is CoroutinesJavaAgentAware) {
-            coroutinesJavaAgentFile.fileProvider(providers.of(CoroutinesJavaAgentValueSource::class) {
-                parameters {
-                    intelliJPlatformConfiguration = this@task.intelliJPlatformConfiguration
-                    targetDirectory = extensionProvider.flatMap { it.caching.path }
-                }
-            })
+            coroutinesJavaAgentFile.fileProvider(
+                providers.of(CoroutinesJavaAgentValueSource::class) {
+                    parameters {
+                        intelliJPlatformConfiguration = this@task.intelliJPlatformConfiguration
+                        targetDirectory = extensionProvider.flatMap { it.caching.path }
+                    }
+                },
+            )
         }
 
         /**
          * The [PluginAware] resolves and parses the `plugin.xml` file for easy access in other tasks.
          */
         if (this is PluginAware) {
-            pluginXml.convention(module.flatMap {
-                when (it) {
-                    true -> provider { null }
-                    false -> {
-                        val patchPluginXmlTaskProvider = tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
-                        patchPluginXmlTaskProvider.flatMap { task -> task.outputFile }
+            pluginXml.convention(
+                module.flatMap {
+                    when (it) {
+                        true -> provider { null }
+                        false -> {
+                            val patchPluginXmlTaskProvider = tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
+                            patchPluginXmlTaskProvider.flatMap { task -> task.outputFile }
+                        }
                     }
-                }
-            })
+                },
+            )
         }
 
         /**
@@ -144,17 +144,29 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 )
             }
 
-            runtimeDirectory = layout.dir(project.cachedProvider {
-                javaRuntimePathResolver.resolve().toFile()
-            }.map { it })
+            runtimeDirectory = layout.dir(
+                project.cachedProvider {
+                    javaRuntimePathResolver.resolve().toFile()
+                }.map { it },
+            )
             runtimeMetadata = providers.of(JavaRuntimeMetadataValueSource::class) {
                 parameters {
                     executable = layout.file(
-                        runtimeDirectory.map { it.asPath.resolveJavaRuntimeExecutable().toFile() }
+                        runtimeDirectory.map { it.asPath.resolveJavaRuntimeExecutable().toFile() },
                     )
                 }
             }
             runtimeArchitecture = providers.systemProperty("os.arch")
+            runtimeLauncher.convention(
+                runtimeDirectory.map { directory ->
+                    IntelliJPlatformJavaLauncher(
+                        directory,
+                        mutableMapOf(
+                            "java.specification.version" to productInfo.toPlatformJavaVersion().majorVersion,
+                        ),
+                    )
+                },
+            )
         }
 
         /**
@@ -166,12 +178,16 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 localPath = extensionProvider.flatMap { it.pluginVerification.cliPath },
             )
 
-            pluginVerifierExecutable.convention(layout.file(provider {
-                intelliJPluginVerifierPathResolver
-                    .runCatching { resolve().toFile() }
-                    .onFailure { log.error(it.message ?: "Failed to resolve IntelliJ Plugin Verifier") }
-                    .getOrNull()
-            }))
+            pluginVerifierExecutable.convention(
+                layout.file(
+                    provider {
+                        intelliJPluginVerifierPathResolver
+                            .runCatching { resolve().toFile() }
+                            .onFailure { log.error(it.message ?: "Failed to resolve IntelliJ Plugin Verifier") }
+                            .getOrNull()
+                    },
+                ),
+            )
         }
 
         /**
@@ -183,12 +199,16 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 localPath = extensionProvider.flatMap { it.signing.cliPath },
             )
 
-            zipSignerExecutable.convention(layout.file(provider {
-                marketplaceZipSignerPathResolver
-                    .runCatching { resolve().toFile() }
-                    .onFailure { log.error(it.message ?: "Failed to resolve Marketplace ZIP Signer") }
-                    .getOrNull()
-            }))
+            zipSignerExecutable.convention(
+                layout.file(
+                    provider {
+                        marketplaceZipSignerPathResolver
+                            .runCatching { resolve().toFile() }
+                            .onFailure { log.error(it.message ?: "Failed to resolve Marketplace ZIP Signer") }
+                            .getOrNull()
+                    },
+                ),
+            )
         }
 
         /**
@@ -232,13 +252,18 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     executionProfile().resolveMainClass(this, architecture) ?: Constants.DEFAULT_MAIN_CLASS
                 }
 
-                javaLauncher = runtimeDirectory.map { directory ->
-                    IntelliJPlatformJavaLauncher(
-                        directory,
-                        mutableMapOf(
-                            "java.specification.version" to productInfo.toPlatformJavaVersion().majorVersion,
-                        ),
+                if (this is BuildSearchableOptionsTask) {
+                    val buildSearchableOptionsEnabledProvider = project.buildSearchableOptionsEnabledProvider()
+                    javaLauncher.convention(
+                        buildSearchableOptionsEnabledProvider.flatMap { enabled ->
+                            when {
+                                enabled -> runtimeLauncher
+                                else -> providers.provider<JavaLauncher> { null }
+                            }
+                        },
                     )
+                } else {
+                    javaLauncher = runtimeLauncher
                 }
 
                 classpath += files(
@@ -246,20 +271,25 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                         executionProfile()
                             .resolveBootClassPathJarNames(this, architecture)
                             .map { platformPath.resolve("lib/$it") }
-                    }
+                    },
                 )
 
                 classpath += files(
                     runtimeArchitecture.map { architecture ->
                         when (productInfo.type) {
-                            IntelliJPlatformType.JetBrainsClient -> collectModuleDescriptorJars(productInfo, platformPath, architecture)
+                            IntelliJPlatformType.JetBrainsClient -> collectModuleDescriptorJars(
+                                productInfo,
+                                platformPath,
+                                architecture,
+                            )
+
                             else -> emptyList()
                         }
-                    }
+                    },
                 )
 
                 classpath += files(
-                    runtimeDirectory.map { it.file("lib/tools") }
+                    runtimeDirectory.map { it.file("lib/tools") },
                 )
 
                 if (this is RunIdeTask) {
@@ -269,8 +299,8 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                                 RunnableIdeExecutionProfile.SplitModeFrontend
                                     .resolveBootClassPathJarNames(this, architecture)
                                     .map { platformPath.resolve("lib/$it") }
-                            }
-                        )
+                            },
+                        ),
                     )
                 }
 
@@ -286,15 +316,17 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
             kotlinPluginAvailable.convention(false)
 
             val composedJarConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR]
-            kotlinxCoroutinesLibraryPresent.convention(project.provider {
-                composedJarConfiguration
-                    .incoming
-                    .resolutionResult
-                    .allComponents
-                    .asSequence()
-                    .mapNotNull { it.id as? ModuleComponentIdentifier }
-                    .any { it.group == "org.jetbrains.kotlinx" && it.module.startsWith("kotlinx-coroutines") }
-            })
+            kotlinxCoroutinesLibraryPresent.convention(
+                project.provider {
+                    composedJarConfiguration
+                        .incoming
+                        .resolutionResult
+                        .allComponents
+                        .asSequence()
+                        .mapNotNull { it.id as? ModuleComponentIdentifier }
+                        .any { it.group == "org.jetbrains.kotlinx" && it.module.startsWith("kotlinx-coroutines") }
+                },
+            )
 
             project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
                 val kotlinPluginVersion = project.extensions.getByName("kotlin")
@@ -316,26 +348,32 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
                 kotlinPluginAvailable.convention(true)
 
-                kotlinJvmTarget.convention(compilerOptionsProvider.flatMap {
-                    it.withGroovyBuilder { getProperty("jvmTarget") as Property<*> }
-                        .map { jvmTarget -> jvmTarget.withGroovyBuilder { getProperty("target") } }
-                        .map { value -> value as String }
-                })
-                kotlinApiVersion.convention(compilerOptionsProvider.flatMap {
-                    it.withGroovyBuilder { getProperty("apiVersion") as Property<*> }
-                        .map { apiVersion -> apiVersion.withGroovyBuilder { getProperty("version") } }
-                        .map { value -> value as String }
-                })
-                kotlinLanguageVersion.convention(compilerOptionsProvider.flatMap {
-                    it.withGroovyBuilder { getProperty("languageVersion") as Property<*> }
-                        .map { languageVersion -> languageVersion.withGroovyBuilder { getProperty("version") } }
-                        .map { value -> value as String }
-                })
+                kotlinJvmTarget.convention(
+                    compilerOptionsProvider.flatMap {
+                        it.withGroovyBuilder { getProperty("jvmTarget") as Property<*> }
+                            .map { jvmTarget -> jvmTarget.withGroovyBuilder { getProperty("target") } }
+                            .map { value -> value as String }
+                    },
+                )
+                kotlinApiVersion.convention(
+                    compilerOptionsProvider.flatMap {
+                        it.withGroovyBuilder { getProperty("apiVersion") as Property<*> }
+                            .map { apiVersion -> apiVersion.withGroovyBuilder { getProperty("version") } }
+                            .map { value -> value as String }
+                    },
+                )
+                kotlinLanguageVersion.convention(
+                    compilerOptionsProvider.flatMap {
+                        it.withGroovyBuilder { getProperty("languageVersion") as Property<*> }
+                            .map { languageVersion -> languageVersion.withGroovyBuilder { getProperty("version") } }
+                            .map { value -> value as String }
+                    },
+                )
                 kotlinVersion.convention(kotlinPluginVersion)
                 kotlinStdlibDefaultDependency.convention(
                     project.providers
                         .gradleProperty("kotlin.stdlib.default.dependency")
-                        .map { it.toBoolean() }
+                        .map { it.toBoolean() },
                 )
             }
 
@@ -344,7 +382,9 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 "kotlinApiVersion" to project.provider { kotlinApiVersion.orNull.orEmpty() },
                 "kotlinLanguageVersion" to project.provider { kotlinLanguageVersion.orNull.orEmpty() },
                 "kotlinVersion" to project.provider { kotlinVersion.orNull.orEmpty() },
-                "kotlinStdlibDefaultDependency" to project.provider { kotlinStdlibDefaultDependency.orNull?.toString().toBoolean() },
+                "kotlinStdlibDefaultDependency" to project.provider {
+                    kotlinStdlibDefaultDependency.orNull?.toString().toBoolean()
+                },
             )
         }
 
@@ -478,9 +518,11 @@ internal fun DirectoryProperty.configureSandbox(
     suffixProvider: Provider<String>,
     name: String,
 ) {
-    convention(sandboxContainer.zip(suffixProvider) { container, suffix ->
-        container.dir(name + suffix)
-    })
+    convention(
+        sandboxContainer.zip(suffixProvider) { container, suffix ->
+            container.dir(name + suffix)
+        },
+    )
 }
 
 /**
