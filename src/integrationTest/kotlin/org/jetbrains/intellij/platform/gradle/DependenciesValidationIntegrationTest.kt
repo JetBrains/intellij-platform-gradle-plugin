@@ -195,9 +195,9 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
         buildAndFail(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(
                 """
-                > Failed to query the value of task ':verifyPluginProjectConfiguration' property 'runtimeDirectory'.
-                   > Could not resolve all files for configuration ':intellijPlatformDependency'.
-                      > Could not find $artifactCoordinates.
+                Execution failed for task ':verifyPluginProjectConfiguration'.
+                > Could not resolve all files for configuration ':intellijPlatformDependency'.
+                   > Could not find $artifactCoordinates.
                 """.trimIndent(),
                 output,
             )
