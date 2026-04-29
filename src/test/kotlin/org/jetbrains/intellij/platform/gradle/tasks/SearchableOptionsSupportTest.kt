@@ -24,11 +24,83 @@ class SearchableOptionsSupportTest {
             )
         }
 
-        assertTrue(pluginXml.hasConfigurableExtensionPoint())
+        assertTrue(pluginXml.hasSearchableOptionsContent())
     }
 
     @Test
-    fun `ignore plugin xml without configurable EPs`() {
+    fun `detect qualified configurable EP`() {
+        val pluginXml = createTempFile("plugin", ".xml").apply {
+            writeText(
+                """
+                <idea-plugin>
+                  <extensions>
+                    <com.intellij.applicationConfigurable instance="example.Configurable" />
+                  </extensions>
+                </idea-plugin>
+                """.trimIndent()
+            )
+        }
+
+        assertTrue(pluginXml.hasSearchableOptionsContent())
+    }
+
+    @Test
+    fun `detect custom configurable extension`() {
+        val pluginXml = createTempFile("plugin", ".xml").apply {
+            writeText(
+                """
+                <idea-plugin>
+                  <extensions defaultExtensionNs="com.perl5">
+                    <settings.configurable.extension implementation="example.ConfigurableExtension" />
+                  </extensions>
+                </idea-plugin>
+                """.trimIndent()
+            )
+        }
+
+        assertTrue(pluginXml.hasSearchableOptionsContent())
+    }
+
+    @Test
+    fun `detect custom configurable extension point declaration`() {
+        val pluginXml = createTempFile("plugin", ".xml").apply {
+            writeText(
+                """
+                <idea-plugin>
+                  <extensionPoints>
+                    <extensionPoint qualifiedName="com.perl5.settings.configurable.extension"
+                                    interface="example.SettingsConfigurableExtension" />
+                  </extensionPoints>
+                </idea-plugin>
+                """.trimIndent()
+            )
+        }
+
+        assertTrue(pluginXml.hasSearchableOptionsContent())
+    }
+
+    @Test
+    fun `detect action declarations`() {
+        val pluginXml = createTempFile("plugin", ".xml").apply {
+            writeText(
+                """
+                <idea-plugin>
+                  <actions>
+                    <action id="Example.Action"
+                            class="example.Action"
+                            text="Example Action"
+                            description="Example action description" />
+                  </actions>
+                </idea-plugin>
+                """.trimIndent()
+            )
+        }
+
+        assertTrue(pluginXml.hasSearchableOptionsContent())
+    }
+
+    @Test
+    fun `ignore plugin xml without searchable options content`() {
         val pluginXml = createTempFile("plugin", ".xml").apply {
             writeText(
                 """
@@ -39,7 +111,7 @@ class SearchableOptionsSupportTest {
             )
         }
 
-        assertFalse(pluginXml.hasConfigurableExtensionPoint())
+        assertFalse(pluginXml.hasSearchableOptionsContent())
     }
 
     @Test
@@ -48,6 +120,6 @@ class SearchableOptionsSupportTest {
             writeText("")
         }
 
-        assertFalse(pluginXml.hasConfigurableExtensionPoint())
+        assertFalse(pluginXml.hasSearchableOptionsContent())
     }
 }

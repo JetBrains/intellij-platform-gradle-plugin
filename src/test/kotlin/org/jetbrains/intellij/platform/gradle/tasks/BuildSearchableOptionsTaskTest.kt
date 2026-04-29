@@ -158,25 +158,25 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                     id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 kotlin {
                     jvmToolchain(21)
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
                         val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                         val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-
+                
                         create(type, version) { this.useInstaller.set(useInstaller) }
                     }
                 }
@@ -186,7 +186,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                 }
                 """.trimIndent()
 
-        dir.resolve("submodule/src/main/resources/META-INF/submodule.xml") write //language=xml
+        dir.resolve("submodule/src/main/resources/submodule.xml") write //language=xml
                 """
                 <idea-plugin>
                     <extensions defaultExtensionNs="com.intellij">
@@ -201,34 +201,34 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                 import org.jetbrains.annotations.Nls;
                 import org.jetbrains.annotations.NotNull;
                 import org.jetbrains.annotations.Nullable;
-
+                
                 import javax.swing.*;
-
+                
                 public class SubmoduleSearchableConfigurable implements SearchableConfigurable {
-
+                
                     @NotNull
                     @Override
                     public String getId() {
                         return "submodule.searchable.configurable";
                     }
-
+                
                     @Nls(capitalization = Nls.Capitalization.Title)
                     @Override
                     public String getDisplayName() {
                         return "Submodule Searchable Configurable";
                     }
-
+                
                     @Nullable
                     @Override
                     public JComponent createComponent() {
                         return new JLabel("Label for Submodule Searchable Configurable");
                     }
-
+                
                     @Override
                     public boolean isModified() {
                         return false;
                     }
-
+                
                     @Override
                     public void apply() {
                     }
