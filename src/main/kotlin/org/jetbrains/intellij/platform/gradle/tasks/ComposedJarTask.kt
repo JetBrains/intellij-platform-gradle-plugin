@@ -10,6 +10,7 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.support.serviceOf
+import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.jetbrains.intellij.platform.gradle.Constants.Components
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
@@ -89,6 +90,10 @@ abstract class ComposedJarTask : Jar(), ModuleAware {
             }
 
             val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
+            project.tasks.named(LifecycleBasePlugin.ASSEMBLE_TASK_NAME) {
+                dependsOn(composedJarTaskProvider)
+            }
+
             val softwareComponentFactory = project.serviceOf<SoftwareComponentFactory>()
             val intellijPlatformComposedJarConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR]
             // TODO: a possible fix for #1892
