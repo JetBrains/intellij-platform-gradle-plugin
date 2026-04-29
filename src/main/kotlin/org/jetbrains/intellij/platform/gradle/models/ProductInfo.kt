@@ -30,6 +30,7 @@ import kotlin.io.path.Path
  * @property productCode The product code, like "IU".
  * @property envVarBaseName The base name for environment variables.
  * @property dataDirectoryName The directory name of the product data.
+ * @property minRequiredJavaVersion The minimum Java version required by the product.
  * @property svgIconPath The path to the SVG icon of the product.
  * @property productVendor The vendor of the product.
  * @property launch The list of OS- and arch-specific launch configurations for the product.
@@ -47,6 +48,7 @@ data class ProductInfo(
     val productCode: String = "",
     val envVarBaseName: String? = null,
     val dataDirectoryName: String? = null,
+    val minRequiredJavaVersion: Int? = null,
     val svgIconPath: String? = null,
     val productVendor: String? = null,
     val launch: List<Launch> = mutableListOf(),
