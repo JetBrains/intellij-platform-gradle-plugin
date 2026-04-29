@@ -2,8 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.api.JavaVersion
 import org.jetbrains.intellij.platform.gradle.extensions.parseIdeNotation
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.toPlatformJavaVersion
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -47,5 +50,17 @@ class VersionTest {
         assertEquals("PS-2025.3".parseIdeNotation(), IntelliJPlatformType.PhpStorm to "2025.3")
         assertEquals("IU-2025.3".parseIdeNotation(), IntelliJPlatformType.IntellijIdea to "2025.3")
         assertEquals("IU-2025.2".parseIdeNotation(), IntelliJPlatformType.IntellijIdeaUltimate to "2025.2")
+    }
+
+    @Test
+    fun `product info minimum Java version overrides build number mapping`() {
+        val productInfo = ProductInfo(
+            version = "2026.1",
+            buildNumber = "261.1",
+            productCode = "IC",
+            minRequiredJavaVersion = 25,
+        )
+
+        assertEquals(JavaVersion.toVersion(25), productInfo.toPlatformJavaVersion())
     }
 }

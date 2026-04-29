@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.utils
 
 import org.gradle.api.JavaVersion
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 
 /**
  * Java versions list used in IntelliJ Platform synchronized with [IntelliJ Platform SDK Docs](https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html#intellij-platform-based-products-of-recent-ide-versions)
@@ -16,6 +17,11 @@ val PlatformJavaVersions = mapOf(
 
 internal fun Version.toPlatformJavaVersion() =
     PlatformJavaVersions.entries.first { toPlatformBuildVersion() >= it.key }.value
+
+internal fun ProductInfo.toPlatformJavaVersion() =
+    minRequiredJavaVersion
+        ?.let(JavaVersion::toVersion)
+        ?: buildNumber.toVersion().toPlatformJavaVersion()
 
 private fun Version.toPlatformBuildVersion() = when {
     isBuildNumber() -> this

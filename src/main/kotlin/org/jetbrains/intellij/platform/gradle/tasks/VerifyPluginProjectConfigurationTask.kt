@@ -97,7 +97,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
         val isModule = module.get()
         val platformBuild = productInfo.buildNumber.toVersion()
         val platformVersion = productInfo.version.toVersion()
-        val platformJavaVersion = platformBuild.toPlatformJavaVersion()
+        val platformJavaVersion = productInfo.toPlatformJavaVersion()
         val sourceCompatibilityJavaVersion = sourceCompatibility.get().toJavaVersion()
         val targetCompatibilityJavaVersion = targetCompatibility.get().toJavaVersion()
         val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.toJavaVersion()

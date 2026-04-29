@@ -498,8 +498,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY]
                 .asLenient
                 .productInfo()
-                .buildNumber
-                .toVersion()
                 .toPlatformJavaVersion()
                 .majorVersion
                 .toInt()
