@@ -41,7 +41,7 @@ abstract class ComposedJarTask : Jar(), ModuleAware {
     }
 
     companion object : Registrable {
-        override fun register(project: Project) =
+        override fun register(project: Project) {
             project.registerTask<ComposedJarTask>(Tasks.COMPOSED_JAR) {
                 archiveBaseName.convention(module.map {
                     val moduleName = project.path
@@ -61,13 +61,9 @@ abstract class ComposedJarTask : Jar(), ModuleAware {
                     }
                 })
 
-                val softwareComponentFactory = project.serviceOf<SoftwareComponentFactory>()
                 val jarTaskProvider = project.tasks.named<Jar>(Tasks.External.JAR)
                 val instrumentedJarTaskProvider = project.tasks.named<Jar>(Tasks.INSTRUMENTED_JAR)
                 val intellijPlatformPluginComposedModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE]
-                val intellijPlatformComposedJarConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR]
-                // TODO: a possible fix for #1892
-                // val intellijPlatformComposedJarApiConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API]
 
                 val sourceTaskProvider = project.extensionProvider.flatMap {
                     it.instrumentCode.flatMap { value ->
@@ -90,16 +86,23 @@ abstract class ComposedJarTask : Jar(), ModuleAware {
 
                 duplicatesStrategy = DuplicatesStrategy.EXCLUDE
                 JarCompanion.applyPluginManifest(this)
+            }
 
-                intellijPlatformComposedJarConfiguration.outgoing.artifact(this)
-                // TODO: a possible fix for #1892
-                // intellijPlatformComposedJarApiConfiguration.outgoing.artifact(this)
-                softwareComponentFactory.adhoc(Components.INTELLIJ_PLATFORM).apply {
-                    project.components.add(this)
-                    addVariantsFromConfiguration(intellijPlatformComposedJarConfiguration) {
-                        mapToMavenScope("runtime")
-                    }
+            val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
+            val softwareComponentFactory = project.serviceOf<SoftwareComponentFactory>()
+            val intellijPlatformComposedJarConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR]
+            // TODO: a possible fix for #1892
+            // val intellijPlatformComposedJarApiConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_COMPOSED_JAR_API]
+
+            intellijPlatformComposedJarConfiguration.outgoing.artifact(composedJarTaskProvider)
+            // TODO: a possible fix for #1892
+            // intellijPlatformComposedJarApiConfiguration.outgoing.artifact(composedJarTaskProvider)
+            softwareComponentFactory.adhoc(Components.INTELLIJ_PLATFORM).apply {
+                project.components.add(this)
+                addVariantsFromConfiguration(intellijPlatformComposedJarConfiguration) {
+                    mapToMavenScope("runtime")
                 }
             }
+        }
     }
 }

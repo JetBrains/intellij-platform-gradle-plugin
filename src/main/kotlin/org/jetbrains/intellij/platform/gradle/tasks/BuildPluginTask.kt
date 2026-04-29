@@ -33,13 +33,12 @@ abstract class BuildPluginTask : Zip() {
     }
 
     companion object : Registrable {
-        override fun register(project: Project) =
-            project.registerTask<BuildPluginTask>(Tasks.BUILD_PLUGIN) {
-                val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)
-                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-                val projectNameProvider = project.extensionProvider.flatMap { it.projectName }
-                val intellijPlatformDistributionConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_DISTRIBUTION]
+        override fun register(project: Project) {
+            val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)
+            val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
+            val projectNameProvider = project.extensionProvider.flatMap { it.projectName }
 
+            project.registerTask<BuildPluginTask>(Tasks.BUILD_PLUGIN) {
                 archiveBaseName.convention(projectNameProvider)
 
                 from(jarSearchableOptionsTaskProvider) {
@@ -47,10 +46,13 @@ abstract class BuildPluginTask : Zip() {
                 }
                 from(prepareSandboxTaskProvider.map { it.pluginDirectory })
                 into(archiveBaseName)
-
-                project.artifacts.add(intellijPlatformDistributionConfiguration.name, this) {
-                    builtBy(jarSearchableOptionsTaskProvider, prepareSandboxTaskProvider)
-                }
             }
+
+            val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
+            val intellijPlatformDistributionConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_DISTRIBUTION]
+            project.artifacts.add(intellijPlatformDistributionConfiguration.name, buildPluginTaskProvider) {
+                builtBy(buildPluginTaskProvider, jarSearchableOptionsTaskProvider, prepareSandboxTaskProvider)
+            }
+        }
     }
 }

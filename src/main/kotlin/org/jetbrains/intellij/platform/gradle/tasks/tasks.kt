@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Task
 import org.gradle.api.artifacts.component.ModuleComponentIdentifier
@@ -10,7 +11,7 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.JavaExec
-import org.gradle.jvm.toolchain.JavaLauncher
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.jvm.toolchain.JavaToolchainService
 import org.gradle.kotlin.dsl.*
 import org.gradle.process.JavaForkOptions
@@ -254,11 +255,15 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
 
                 if (this is BuildSearchableOptionsTask) {
                     val buildSearchableOptionsEnabledProvider = project.buildSearchableOptionsEnabledProvider()
+                    val currentJavaLauncher = project.extensions.getByType<JavaToolchainService>().launcherFor {
+                        languageVersion = JavaLanguageVersion.of(JavaVersion.current().majorVersion)
+                    }
+
                     javaLauncher.convention(
                         buildSearchableOptionsEnabledProvider.flatMap { enabled ->
                             when {
                                 enabled -> runtimeLauncher
-                                else -> providers.provider<JavaLauncher> { null }
+                                else -> currentJavaLauncher
                             }
                         },
                     )

@@ -61,12 +61,11 @@ abstract class JarSearchableOptionsTask : Jar() {
     }
 
     companion object : Registrable {
-        override fun register(project: Project) =
+        override fun register(project: Project) {
+            val buildSearchableOptionsEnabledProvider = project.buildSearchableOptionsEnabledProvider()
             project.registerTask<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS) {
                 val prepareJarSearchableOptionsTask =
                     project.tasks.named<PrepareJarSearchableOptionsTask>(Tasks.PREPARE_JAR_SEARCHABLE_OPTIONS)
-                val buildSearchableOptionsEnabledProvider = project.buildSearchableOptionsEnabledProvider()
-                val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
 
                 archiveClassifier.convention("searchableOptions")
                 destinationDirectory.convention(project.layout.buildDirectory.dir("libs"))
@@ -80,13 +79,16 @@ abstract class JarSearchableOptionsTask : Jar() {
                 onlyIf {
                     buildSearchableOptionsEnabledProvider.get()
                 }
-
-                runtimeElementsConfiguration.outgoing.artifacts(buildSearchableOptionsEnabledProvider.map { enabled ->
-                    when {
-                        enabled -> listOf(archiveFile.get())
-                        else -> emptyList()
-                    }
-                }) { builtBy(this@registerTask) }
             }
+
+            val jarSearchableOptionsTaskProvider = project.tasks.named<JarSearchableOptionsTask>(Tasks.JAR_SEARCHABLE_OPTIONS)
+            val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
+            runtimeElementsConfiguration.outgoing.artifacts(buildSearchableOptionsEnabledProvider.map { enabled ->
+                when {
+                    enabled -> listOf(jarSearchableOptionsTaskProvider.flatMap { it.archiveFile }.get())
+                    else -> emptyList()
+                }
+            }) { builtBy(jarSearchableOptionsTaskProvider) }
+        }
     }
 }

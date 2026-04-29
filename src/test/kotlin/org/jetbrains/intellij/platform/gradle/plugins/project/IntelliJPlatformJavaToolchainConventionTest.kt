@@ -26,7 +26,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
 
         build(inspectTask) {
             assertContains(output, "javaToolchain=null")
-            assertContains(output, "javaToolchainAfterEvaluate=null")
+            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
@@ -39,7 +39,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
 
         build(inspectTask) {
             assertContains(output, "javaToolchain=null")
-            assertContains(output, "javaToolchainAfterEvaluate=null")
+            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
@@ -60,7 +60,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         build(inspectTask) {
             assertContains(output, "early.targetCompatibility=")
             assertContains(output, "javaToolchain=null")
-            assertContains(output, "javaToolchainAfterEvaluate=null")
+            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
