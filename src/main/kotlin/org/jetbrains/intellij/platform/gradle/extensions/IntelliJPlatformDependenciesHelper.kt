@@ -1234,15 +1234,16 @@ class IntelliJPlatformDependenciesHelper(
                     dependency.isModule -> Dependencies.BUNDLED_MODULE_GROUP
                     else -> Dependencies.BUNDLED_PLUGIN_GROUP
                 }
-                val artifactPath = dependency.resolveArtifactPath(platformPath)
-                val publications = dependency.resolvePublicationPaths(platformPath).flatMap { path ->
-                    path.toIvyArtifacts(metadataRulesModeProvider, platformPath)
-                }
 
                 val doesNotDependOnSelf = id != dependency.id
                 val hasNeverBeenSeen = dependency.id !in alreadyProcessedOrProcessing
 
                 if (doesNotDependOnSelf && hasNeverBeenSeen) {
+                    val artifactPath = dependency.resolveArtifactPath(platformPath)
+                    val publications = dependency.resolvePublicationPaths(platformPath).flatMap { path ->
+                        path.toIvyArtifacts(metadataRulesModeProvider, platformPath)
+                    }
+
                     writeIvyModule(group, name, version, artifactPath) {
                         IvyModule(
                             info = IvyModule.Info(group, name, version),
