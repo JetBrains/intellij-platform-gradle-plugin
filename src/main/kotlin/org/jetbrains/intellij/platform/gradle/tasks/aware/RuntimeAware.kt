@@ -22,15 +22,13 @@ interface RuntimeAware : IntelliJPlatformVersionAware {
      * Holds the [Configurations.JETBRAINS_RUNTIME] configuration with the JetBrains Runtime dependency added.
      * It should not be directly accessed.
      */
-    @get:InputFiles
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Internal
     val jetbrainsRuntimeConfiguration: ConfigurableFileCollection
 
     /**
      * Java Runtime parent directory.
      */
-    @get:InputDirectory
-    @get:PathSensitive(PathSensitivity.RELATIVE)
+    @get:Internal
     val runtimeDirectory: DirectoryProperty
 
     /**

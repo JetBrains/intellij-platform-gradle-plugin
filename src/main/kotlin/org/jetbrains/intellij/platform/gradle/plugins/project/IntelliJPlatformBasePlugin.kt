@@ -492,7 +492,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
         }
 
-        // Setup a default Java language based on the IntelliJ Platform dependency
+        // Setup default bytecode targets based on the IntelliJ Platform dependency.
+        // Avoid configuring Java toolchains here: Gradle resolves/probes toolchains during the build,
+        // while JBR is only required for IDE/test execution tasks.
         val intellijPlatformJavaLanguageVersion = project.cachedProvider {
             project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY]
                 .asLenient
@@ -503,21 +505,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         }.map(JavaLanguageVersion::of)
         val javaExtension = project.extensions.getByType<JavaPluginExtension>()
         val requestedJavaLanguageVersion = javaExtension.toolchain.languageVersion.orElse(intellijPlatformJavaLanguageVersion)
-        val intellijPlatformDependencies = project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].dependencies
-
-        fun configureJavaToolchainConvention() {
-            javaExtension.toolchain.languageVersion.convention(intellijPlatformJavaLanguageVersion)
-        }
-
-        if (!intellijPlatformDependencies.isEmpty()) {
-            configureJavaToolchainConvention()
-        }
-        intellijPlatformDependencies.whenObjectAdded {
-            configureJavaToolchainConvention()
-        }
-        project.afterEvaluate {
-            configureJavaToolchainConvention()
-        }
 
         project.tasks.withType<JavaCompile>().configureEach {
             options.release.convention(requestedJavaLanguageVersion.map { it.toString().toInt() })

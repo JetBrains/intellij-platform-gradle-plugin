@@ -21,11 +21,12 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         get() = Version.parse(intellijPlatformBuildNumber).toPlatformJavaVersion()
 
     @Test
-    fun `default Java toolchain follows target platform for root plugin`() {
+    fun `default Java targets follow target platform for root plugin without configuring toolchain`() {
         buildFile overwrite buildScript("org.jetbrains.intellij.platform")
 
         build(inspectTask) {
-            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
+            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchainAfterEvaluate=null")
             assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
@@ -33,11 +34,12 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `default Java toolchain follows target platform for module plugin`() {
+    fun `default Java targets follow target platform for module plugin without configuring toolchain`() {
         buildFile overwrite buildScript("org.jetbrains.intellij.platform.module")
 
         build(inspectTask) {
-            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
+            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchainAfterEvaluate=null")
             assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
@@ -57,7 +59,8 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
 
         build(inspectTask) {
             assertContains(output, "early.targetCompatibility=")
-            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
+            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchainAfterEvaluate=null")
             assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")

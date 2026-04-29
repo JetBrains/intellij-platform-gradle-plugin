@@ -152,7 +152,7 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     )
                 }
             }
-            runtimeArchitecture = runtimeMetadata.map { it["os.arch"].orEmpty() }
+            runtimeArchitecture = providers.systemProperty("os.arch")
         }
 
         /**
@@ -230,8 +230,13 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     executionProfile().resolveMainClass(this, architecture) ?: Constants.DEFAULT_MAIN_CLASS
                 }
 
-                javaLauncher = runtimeDirectory.zip(runtimeMetadata) { directory, metadata ->
-                    IntelliJPlatformJavaLauncher(directory, metadata)
+                javaLauncher = runtimeDirectory.map { directory ->
+                    IntelliJPlatformJavaLauncher(
+                        directory,
+                        mutableMapOf(
+                            "java.specification.version" to productInfo.toPlatformJavaVersion().majorVersion,
+                        ),
+                    )
                 }
 
                 classpath += files(
