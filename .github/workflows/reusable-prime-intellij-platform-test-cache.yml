@@ -50,13 +50,13 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .gradle/testGradleHome/.intellijPlatform
-          key: test-gradle-home-v4-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: test-gradle-home-v5-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml', 'src/test/**/*.kt', 'src/test/resources/**', 'src/testFixtures/**/*.kt', 'src/integrationTest/**/*.kt', 'src/integrationTest/resources/**') }}
           restore-keys: |
-            test-gradle-home-v4-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}-
-            test-gradle-home-v4-intellij-platform-${{ runner.os }}-
+            test-gradle-home-v5-intellij-platform-${{ runner.os }}-
 
-      - name: Cache Gradle TestKit
-        uses: actions/cache@v5
+      - name: Restore Gradle TestKit cache
+        id: gradle-testkit-cache
+        uses: actions/cache/restore@v5
         with:
           path: .gradle/testGradleHome/.testKit
           key: test-gradle-home-v1-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
@@ -100,3 +100,21 @@ jobs:
         with:
           path: .gradle/testGradleHome/.intellijPlatform
           key: ${{ steps.intellij-platform-cache.outputs.cache-primary-key }}
+
+      - name: Check Gradle TestKit cache
+        if: ${{ always() && !cancelled() && steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
+        id: gradle-testkit-cache-path
+        shell: bash
+        run: |
+          if [ -d .gradle/testGradleHome/.testKit ] && [ -n "$(find .gradle/testGradleHome/.testKit -mindepth 1 -print -quit)" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save Gradle TestKit cache
+        if: ${{ always() && !cancelled() && steps.gradle-testkit-cache.outputs.cache-hit != 'true' && steps.gradle-testkit-cache-path.outputs.present == 'true' }}
+        uses: actions/cache/save@v5
+        with:
+          path: .gradle/testGradleHome/.testKit
+          key: ${{ steps.gradle-testkit-cache.outputs.cache-primary-key }}

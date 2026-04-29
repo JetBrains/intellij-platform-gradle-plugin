@@ -20,19 +20,58 @@ jobs:
     name: Gradle Validation
     uses: ./.github/workflows/reusable-gradleValidation.yml
 
+  primeUbuntuIntellijPlatformTestCache:
+    name: Prime IntelliJ Platform test cache @ ubuntu-latest
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
+    secrets: inherit
+    with:
+      gradleVersion: "9.4.0"
+      os: ubuntu-latest
+
+  primeWindowsIntellijPlatformTestCache:
+    name: Prime IntelliJ Platform test cache @ windows-latest
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
+    secrets: inherit
+    with:
+      gradleVersion: "9.4.0"
+      os: windows-latest
+
+  primeMacosIntellijPlatformTestCache:
+    name: Prime IntelliJ Platform test cache @ macos-latest
+    needs: gradleValidation
+    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
+    secrets: inherit
+    with:
+      gradleVersion: "9.4.0"
+      os: macos-latest
+
   unitTests:
     name: Unit Tests
-    needs: gradleValidation
+    needs:
+      - gradleValidation
+      - primeUbuntuIntellijPlatformTestCache
+      - primeWindowsIntellijPlatformTestCache
+      - primeMacosIntellijPlatformTestCache
     uses: ./.github/workflows/reusable-unitTests.yml
     secrets: inherit
     permissions:
       checks: write
+    with:
+      primeCache: false
 
   integrationTests:
     name: Integration Tests
-    needs: [ gradleValidation, unitTests ]
+    needs:
+      - gradleValidation
+      - primeUbuntuIntellijPlatformTestCache
+      - primeWindowsIntellijPlatformTestCache
+      - primeMacosIntellijPlatformTestCache
     uses: ./.github/workflows/reusable-integrationTests.yml
     secrets: inherit
+    with:
+      primeCache: false
 
   #  integrationTestsEAP:
   #    name: Integration Tests EAP
@@ -44,13 +83,12 @@ jobs:
 
   codeInspection:
     name: Code Inspection
-    needs: integrationTests
+    needs: gradleValidation
     uses: ./.github/workflows/reusable-codeInspection.yml
 
   build:
     name: Build
-    needs:
-      - unitTests
+    needs: gradleValidation
     # - integrationTests
     # - integrationTestsEAP
     # - codeInspection
@@ -85,7 +123,9 @@ jobs:
   releaseDraft:
     name: Release Draft
     if: github.event_name != 'pull_request'
-    needs: build
+    needs:
+      - build
+      - unitTests
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -11,9 +11,14 @@ on:
         required: false
         default: ""
         type: string
+      primeCache:
+        required: false
+        default: true
+        type: boolean
 
 jobs:
   primeUbuntuIntellijPlatformTestCache:
+    if: ${{ inputs.primeCache }}
     uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
     secrets: inherit
     with:
@@ -21,6 +26,7 @@ jobs:
       os: ubuntu-latest
 
   primeWindowsIntellijPlatformTestCache:
+    if: ${{ inputs.primeCache }}
     uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
     secrets: inherit
     with:
@@ -28,6 +34,7 @@ jobs:
       os: windows-latest
 
   primeMacosIntellijPlatformTestCache:
+    if: ${{ inputs.primeCache }}
     uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
     secrets: inherit
     with:
@@ -36,6 +43,7 @@ jobs:
 
   integrationTests:
     name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
+    if: ${{ always() && !cancelled() && !failure() }}
     needs:
       - primeUbuntuIntellijPlatformTestCache
       - primeWindowsIntellijPlatformTestCache
@@ -82,13 +90,12 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .gradle/testGradleHome/.intellijPlatform
-          key: test-gradle-home-v4-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          key: test-gradle-home-v5-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml', 'src/test/**/*.kt', 'src/test/resources/**', 'src/testFixtures/**/*.kt', 'src/integrationTest/**/*.kt', 'src/integrationTest/resources/**') }}
           restore-keys: |
-            test-gradle-home-v4-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties') }}-
-            test-gradle-home-v4-intellij-platform-${{ runner.os }}-
+            test-gradle-home-v5-intellij-platform-${{ runner.os }}-
 
-      - name: Cache Gradle TestKit
-        uses: actions/cache@v5
+      - name: Restore Gradle TestKit cache
+        uses: actions/cache/restore@v5
         with:
           path: .gradle/testGradleHome/.testKit
           key: test-gradle-home-v1-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
