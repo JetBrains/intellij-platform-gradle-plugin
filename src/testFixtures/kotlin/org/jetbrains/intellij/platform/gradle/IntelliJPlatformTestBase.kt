@@ -26,6 +26,9 @@ abstract class IntelliJPlatformTestBase {
     private val printBuildDirectory = System.getProperty("test.gradle.printBuildDirectory")
         ?.toBoolean()
         ?: false
+    private val cleanupBuildDirectories = System.getProperty("test.gradle.cleanupBuildDirectories")
+        ?.toBoolean()
+        ?: true
     val isDebugged by lazy {
         ManagementFactory.getRuntimeMXBean().inputArguments.toString().indexOf("-agentlib:jdwp") > 0
     }
@@ -64,7 +67,9 @@ abstract class IntelliJPlatformTestBase {
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
     open fun tearDown() {
-        dir.deleteRecursively()
+        if (cleanupBuildDirectories) {
+            dir.deleteRecursively()
+        }
     }
 
     protected fun build(

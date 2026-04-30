@@ -74,13 +74,16 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
             TEST_GRADLE_USER_HOME="$(pwd -W)\\.gradle\\testGradleHome"
+            TEST_CLEANUP_BUILD_DIRECTORIES=false
           else
             TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
+            TEST_CLEANUP_BUILD_DIRECTORIES=true
           fi
 
           ./gradlew test \
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
+            -PtestCleanupBuildDirectories="$TEST_CLEANUP_BUILD_DIRECTORIES" \
             --tests "$TEST_NAME" \
             --console=plain \
             --no-build-cache

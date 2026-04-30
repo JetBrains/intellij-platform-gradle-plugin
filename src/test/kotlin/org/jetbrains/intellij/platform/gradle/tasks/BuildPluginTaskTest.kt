@@ -14,30 +14,11 @@ import kotlin.test.*
 
 class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
-    override val enableKotlinPlugin = true
-
     private val sinceBuild: String
         get() {
             val version = Version.parse(intellijPlatformBuildNumber)
             return "${version.major}"
         }
-
-    @BeforeTest
-    override fun setup() {
-        super.setup()
-
-        gradleProperties write //language=properties
-                """
-                ${GradleProperties.ForceBuildSearchableOptions} = true
-                """.trimIndent()
-
-        buildFile write //language=kotlin
-                """
-                intellijPlatform {
-                    buildSearchableOptions = true
-                }
-                """.trimIndent()
-    }
 
     @Test
     fun `build plugin distribution`() {
@@ -85,7 +66,6 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         "projectName/lib/",
                         "projectName/lib/joda-time-2.8.1.jar",
                         "projectName/lib/projectName-1.0.0.jar",
-                        "projectName/lib/projectName-1.0.0-searchableOptions.jar",
                     ),
                     collectPaths(zip)
                 )
@@ -114,53 +94,6 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         </idea-plugin>
                         """.trimIndent(),
                         fileText(jar, "META-INF/plugin.xml"),
-                    )
-                }
-            }
-        }
-    }
-
-    @Test
-    fun `build plugin distribution with Kotlin`() {
-        writeJavaFile()
-        writeKotlinUIFile()
-
-        pluginXml write //language=xml
-                """
-                <idea-plugin>
-                    <name>MyPluginName</name>
-                    <vendor>JetBrains</vendor>
-                </idea-plugin>
-                """.trimIndent()
-
-        build(Tasks.BUILD_PLUGIN)
-
-        buildDirectory.resolve("distributions/projectName-1.0.0.zip").let { distribution ->
-            assertExists(distribution)
-
-            distribution.toZip().use { zip ->
-                assertEquals(
-                    setOf(
-                        "projectName/",
-                        "projectName/lib/",
-                        "projectName/lib/projectName-1.0.0.jar",
-                        "projectName/lib/projectName-1.0.0-searchableOptions.jar",
-                    ),
-                    collectPaths(zip),
-                )
-
-                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
-                    assertEquals(
-                        setOf(
-                            "App.class",
-                            "pack/",
-                            "pack/AppKt.class",
-                            "META-INF/",
-                            "META-INF/MANIFEST.MF",
-                            "META-INF/plugin.xml",
-                            "META-INF/projectName.kotlin_module",
-                        ),
-                        collectPaths(jar),
                     )
                 }
             }
@@ -217,7 +150,6 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         "projectName/lib/",
                         "projectName/lib/joda-time-2.8.1.jar",
                         "projectName/lib/projectName-1.0.0.jar",
-                        "projectName/lib/projectName-1.0.0-searchableOptions.jar",
                     ),
                     collectPaths(zip)
                 )
@@ -366,7 +298,6 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                         "projectName/",
                         "projectName/lib/",
                         "projectName/lib/projectName-1.0.0.jar",
-                        "projectName/lib/projectName-1.0.0-searchableOptions.jar",
                     ),
                     collectPaths(zip)
                 )
@@ -387,6 +318,8 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `include only relevant searchableOptions_jar`() {
+        enableSearchableOptions()
+
         pluginXml write //language=xml
                 """
                 <idea-plugin>
@@ -483,5 +416,19 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         buildWithConfigurationCache(Tasks.BUILD_PLUGIN) {
             assertConfigurationCacheReused()
         }
+    }
+
+    private fun enableSearchableOptions() {
+        gradleProperties write //language=properties
+                """
+                ${GradleProperties.ForceBuildSearchableOptions} = true
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    buildSearchableOptions = true
+                }
+                """.trimIndent()
     }
 }

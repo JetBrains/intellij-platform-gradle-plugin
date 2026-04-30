@@ -194,6 +194,8 @@ fun Test.configureTests() {
             else -> gradleVersion
         }
     }.get()
+    systemProperties["test.gradle.cleanupBuildDirectories"] = providers.gradleProperty("testCleanupBuildDirectories")
+        .getOrElse("true")
     systemProperties["test.gradle.arguments"] = providers.gradleProperty("testGradleArguments").get()
     systemProperties["test.intellijPlatform.type"] = providers.gradleProperty("testIntellijPlatformType").get()
     systemProperties["test.intellijPlatform.version"] = providers.gradleProperty("testIntellijPlatformVersion").get()
