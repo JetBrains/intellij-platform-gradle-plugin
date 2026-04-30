@@ -1517,7 +1517,8 @@ class IntelliJPlatformDependenciesHelper(
      * Collects all required jars into a single artificial dependency to satisfy the test runtime.
      * Due to the tests classpath loader, it is required to provide explicitly all dependencies on
      * bundled plugins and modules so tests can run with all runtime elements loaded. The classpath
-     * is derived from the cached layout-index entry for [IDEA_CORE].
+     * is derived from product-info, which avoids scanning every bundled plugin while resolving the
+     * test task graph.
      *
      * See https://youtrack.jetbrains.com/issue/IJPL-180516/Gradle-tests-fail-without-transitive-modules-jars-of-com.intellij-in-classpath
      *
@@ -1525,9 +1526,12 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun createIntelliJPlatformTestRuntime(platformPath: Path): Dependency {
         val id = "intellij-platform-test-runtime"
-        val classpath = ideLayoutIndex(platformPath).findById(IDEA_CORE)
-            ?.resolveClasspath(platformPath)
-            .orEmpty()
+        val classpath = platformPath.productInfo()
+            .layout
+            .asSequence()
+            .filter { it.name == IDEA_CORE }
+            .flatMap { it.classPath }
+            .map { platformPath.resolve(it) }
             .map { it.safePathString }
             .toSet()
 
