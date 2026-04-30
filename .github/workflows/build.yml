@@ -26,7 +26,7 @@ jobs:
     uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
     secrets: inherit
     with:
-      gradleVersion: "9.4.0"
+      gradleVersion: "9.5.0"
       os: ubuntu-latest
 
   primeWindowsIntellijPlatformTestCache:
@@ -35,7 +35,7 @@ jobs:
     uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
     secrets: inherit
     with:
-      gradleVersion: "9.4.0"
+      gradleVersion: "9.5.0"
       os: windows-latest
 
   primeMacosIntellijPlatformTestCache:
@@ -44,7 +44,7 @@ jobs:
     uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
     secrets: inherit
     with:
-      gradleVersion: "9.4.0"
+      gradleVersion: "9.5.0"
       os: macos-latest
 
   unitTests:

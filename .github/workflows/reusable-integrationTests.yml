@@ -21,7 +21,7 @@ jobs:
       matrix:
         gradleVersion:
           - "9.0.0"
-          - "9.4.0"
+          - "9.5.0"
           - "nightly"
         os:
           - windows-latest
