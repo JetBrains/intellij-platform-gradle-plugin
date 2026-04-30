@@ -203,9 +203,10 @@ fun Test.configureTests() {
     systemProperties["test.kotlin.version"] = providers.gradleProperty("testKotlinVersion").get()
     systemProperties["test.markdownPlugin.version"] = providers.gradleProperty("testMarkdownPluginVersion").get()
     providers.gradleProperty("testJavaIoTmpDir").orNull?.let { testJavaIoTmpDir ->
-        systemProperties["java.io.tmpdir"] = testJavaIoTmpDir
+        val testJavaIoTmpDirFile = file(testJavaIoTmpDir)
+        systemProperties["java.io.tmpdir"] = testJavaIoTmpDirFile.absolutePath
         doFirst {
-            project.file(testJavaIoTmpDir).mkdirs()
+            testJavaIoTmpDirFile.mkdirs()
         }
     }
 
