@@ -42,6 +42,7 @@ import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformCacheResolve
 import org.jetbrains.intellij.pluginRepository.PluginRepositoryFactory
 import java.io.File
 import java.io.FileReader
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -1526,14 +1527,7 @@ class IntelliJPlatformDependenciesHelper(
      */
     internal fun createIntelliJPlatformTestRuntime(platformPath: Path): Dependency {
         val id = "intellij-platform-test-runtime"
-        val classpath = platformPath.productInfo()
-            .layout
-            .asSequence()
-            .filter { it.name == IDEA_CORE }
-            .flatMap { it.classPath }
-            .map { platformPath.resolve(it) }
-            .map { it.safePathString }
-            .toSet()
+        val classpath = platformPath.productInfo().testRuntimeClasspath(platformPath)
 
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
         return dependencyFactory.create(group, name, version)
@@ -1791,6 +1785,21 @@ private fun IdeLayoutIndex.Entry.resolveArtifactPath(platformPath: Path) = origi
  * Rehydrates bundled module/plugin classpath entries stored in the layout index.
  */
 private fun IdeLayoutIndex.Entry.resolveClasspath(platformPath: Path) = classpath.map(platformPath::resolve)
+
+/**
+ * Resolves runtime classpath for a product info layout.
+ *
+ * Filters out non-core modules and product modules, then flattens classpath entries,
+ * resolves them with the platform path, filters out non-existent files, and converts to a set of safe path strings.
+ */
+internal fun ProductInfo.testRuntimeClasspath(platformPath: Path) = layout
+    .asSequence()
+    .filter { it.name == IDEA_CORE || it.kind == ProductInfo.LayoutItemKind.productModuleV2 }
+    .flatMap { it.classPath }
+    .map { platformPath.resolve(it) }
+    .filter(Files::exists)
+    .map { it.safePathString }
+    .toSet()
 
 /**
  * Resolves publishable files for a bundled entry.
