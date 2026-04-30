@@ -184,10 +184,10 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
                 val rulesMode = settings.dependencyResolutionManagement.rulesMode.get()
 
                 if (RulesMode.PREFER_PROJECT == rulesMode) {
-                    if (configuration.resolvedConfiguration.hasError()) {
-                        log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' has some resolution errors. $ruleName will not be registered.")
-                    } else if (configuration.isEmpty) {
+                    if (configuration.allDependencies.isEmpty()) {
                         log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' is empty. $ruleName will not be registered.")
+                    } else if (configuration.resolvedConfiguration.hasError()) {
+                        log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' has some resolution errors. $ruleName will not be registered.")
                     } else {
                         val artifactLocationPath = configuration.platformPath().safePathString
                         val ivyLocationPath = providers.localPlatformArtifactsPath(rootProjectDirectory).get().safePathString
