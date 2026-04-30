@@ -7,6 +7,11 @@ on:
         type: string
         required: true
         description: 'Gradle version used to warm up the shared test cache'
+      gradleVersions:
+        type: string
+        required: false
+        default: ''
+        description: 'Space-separated Gradle versions used to warm up the shared TestKit cache'
       os:
         type: string
         required: true
@@ -61,12 +66,12 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .gradle/testGradleHome/.testKit
-          key: test-gradle-home-v1-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          key: test-gradle-home-v2-testkit-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v1-testkit-${{ runner.os }}-
+            test-gradle-home-v2-testkit-${{ runner.os }}-
 
       - name: Prime IntelliJ Platform test cache
-        if: ${{ steps.intellij-platform-cache.outputs.cache-hit != 'true' }}
+        if: ${{ steps.intellij-platform-cache.outputs.cache-hit != 'true' || steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           TEST_NAME: ${{ inputs.testName }}
@@ -74,19 +79,29 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
             TEST_GRADLE_USER_HOME="$(pwd -W)\\.gradle\\testGradleHome"
-            TEST_CLEANUP_BUILD_DIRECTORIES=false
+            TEST_JAVA_IO_TMPDIR="$(pwd -W)\\.gradle\\testTmp"
           else
             TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
-            TEST_CLEANUP_BUILD_DIRECTORIES=true
+            TEST_JAVA_IO_TMPDIR="$PWD/.gradle/testTmp"
+          fi
+          mkdir -p .gradle/testTmp
+
+          GRADLE_VERSIONS="${{ inputs.gradleVersions }}"
+          if [ -z "$GRADLE_VERSIONS" ]; then
+            GRADLE_VERSIONS="${{ inputs.gradleVersion }}"
           fi
 
-          ./gradlew test \
-            -PtestGradleVersion="${{ inputs.gradleVersion }}" \
-            -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
-            -PtestCleanupBuildDirectories="$TEST_CLEANUP_BUILD_DIRECTORIES" \
-            --tests "$TEST_NAME" \
-            --console=plain \
-            --no-build-cache
+          for TEST_GRADLE_VERSION in $GRADLE_VERSIONS; do
+            echo "::group::Prime Gradle $TEST_GRADLE_VERSION"
+            ./gradlew test \
+              -PtestGradleVersion="$TEST_GRADLE_VERSION" \
+              -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
+              -PtestJavaIoTmpDir="$TEST_JAVA_IO_TMPDIR" \
+              --tests "$TEST_NAME" \
+              --console=plain \
+              --no-build-cache
+            echo "::endgroup::"
+          done
 
       - name: Check IntelliJ Platform test cache
         if: ${{ always() && !cancelled() && steps.intellij-platform-cache.outputs.cache-hit != 'true' }}

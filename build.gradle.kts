@@ -202,6 +202,12 @@ fun Test.configureTests() {
     systemProperties["test.intellijPlatform.buildNumber"] = providers.gradleProperty("testIntellijPlatformBuildNumber").get()
     systemProperties["test.kotlin.version"] = providers.gradleProperty("testKotlinVersion").get()
     systemProperties["test.markdownPlugin.version"] = providers.gradleProperty("testMarkdownPluginVersion").get()
+    providers.gradleProperty("testJavaIoTmpDir").orNull?.let { testJavaIoTmpDir ->
+        systemProperties["java.io.tmpdir"] = testJavaIoTmpDir
+        doFirst {
+            project.file(testJavaIoTmpDir).mkdirs()
+        }
+    }
 
     jvmArgs(
         "-Xmx4G",
