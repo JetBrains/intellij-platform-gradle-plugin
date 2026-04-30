@@ -14,6 +14,8 @@ import kotlin.test.*
 
 class BuildPluginTaskTest : IntelliJPluginTestBase() {
 
+    override val enableKotlinPlugin = true
+
     private val sinceBuild: String
         get() {
             val version = Version.parse(intellijPlatformBuildNumber)

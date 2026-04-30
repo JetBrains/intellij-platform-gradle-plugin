@@ -13,6 +13,8 @@ private const val CLASSES = "classes"
 
 class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
+    override val enableKotlinPlugin = true
+
     private val defaultArgs = listOf("--info")
 
     @BeforeTest

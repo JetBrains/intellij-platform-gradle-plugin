@@ -14,6 +14,8 @@ private const val HEADER = "The following plugin configuration issues were found
 
 class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
+    override val enableKotlinPlugin = true
+
     @Test
     fun `do not show errors when configuration is valid`() {
         pluginXml write //language=xml
