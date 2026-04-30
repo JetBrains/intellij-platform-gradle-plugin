@@ -2,12 +2,13 @@
 
 ## [next]
 
-### Changed
+### Added
 
 - Cache a serialized IDE layout index and reuse it for bundled plugin/module dependency resolution, test runtime classpath collection, and `printBundledPlugins`/`printBundledModules`.
 
 ### Fixed
 
+- Avoid resolving the JetBrains Runtime for `buildSearchableOptions` when searchable options are skipped, while keeping JBR resolution for tests and IDE run tasks.
 - Refactor Kotlin JVM toolchain configuration into a dedicated utility and add an isolation test for Kotlin Gradle API links.
 - Dependency verification fails because of a "corrupted" asc because of ivy misconfiguration JetBrains/intellij-platform-gradle-plugin#2140
 - Include `$legacy_jps_module` namespace in module descriptor handling and update related tests
