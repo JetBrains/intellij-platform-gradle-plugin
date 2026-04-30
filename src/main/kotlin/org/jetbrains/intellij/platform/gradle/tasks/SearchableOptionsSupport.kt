@@ -22,7 +22,6 @@ import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 
 private const val IDEA_PLUGIN_ROOT = "idea-plugin"
-private const val ACTIONS = "actions"
 private const val EXTENSION_POINTS = "extensionPoints"
 private const val EXTENSION_POINT = "extensionPoint"
 private const val EXTENSIONS = "extensions"
@@ -73,8 +72,7 @@ internal fun Path.hasSearchableOptionsContent(): Boolean {
         inputStream().use { inputStream ->
             val rootElement = JDOMUtil.loadDocument(inputStream).rootElement
             val hasSearchableOptionsContent = rootElement.hasConfigurableExtensionPointDeclaration() ||
-                    rootElement.hasConfigurableExtension() ||
-                    rootElement.hasActionDeclarations()
+                    rootElement.hasConfigurableExtension()
 
             rootElement.name == IDEA_PLUGIN_ROOT && hasSearchableOptionsContent
         }
@@ -132,9 +130,6 @@ private fun Element.hasConfigurableExtension() = getChildren(EXTENSIONS)
                     qualifiedExtensionPointName.contains(CONFIGURABLE_MARKER, ignoreCase = true)
         }
     }
-
-private fun Element.hasActionDeclarations() = getChildren(ACTIONS)
-    .any { actions -> actions.children.isNotEmpty() }
 
 private fun String.toQualifiedExtensionPointName(defaultExtensionNamespace: String?) = when {
     contains('.') -> this

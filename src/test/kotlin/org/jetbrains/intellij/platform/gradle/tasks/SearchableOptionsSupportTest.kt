@@ -80,7 +80,7 @@ class SearchableOptionsSupportTest {
     }
 
     @Test
-    fun `detect action declarations`() {
+    fun `ignore action declarations`() {
         val pluginXml = createTempFile("plugin", ".xml").apply {
             writeText(
                 """
@@ -96,7 +96,7 @@ class SearchableOptionsSupportTest {
             )
         }
 
-        assertTrue(pluginXml.hasSearchableOptionsContent())
+        assertFalse(pluginXml.hasSearchableOptionsContent())
     }
 
     @Test
