@@ -181,6 +181,9 @@ testing {
 
 fun Test.configureTests() {
     val testGradleHome = project.testGradleHome()
+    maxParallelForks = providers.gradleProperty("testMaxParallelForks")
+        .map(String::toInt)
+        .getOrElse(1)
 
     systemProperties["test.gradle.home"] = testGradleHome
     systemProperties["test.gradle.scan"] = project.gradle.startParameter.isBuildScan

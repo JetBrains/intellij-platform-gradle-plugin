@@ -81,10 +81,16 @@ jobs:
             TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
           fi
           [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
+          if [ "$RUNNER_OS" = "Windows" ] && [ -z "$TEST_NAME" ]; then
+            TEST_MAX_PARALLEL_FORKS=2
+          else
+            TEST_MAX_PARALLEL_FORKS=1
+          fi
           
           ./gradlew test \
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
+            -PtestMaxParallelForks="$TEST_MAX_PARALLEL_FORKS" \
             $TESTS \
             --console=plain \
             --no-build-cache
