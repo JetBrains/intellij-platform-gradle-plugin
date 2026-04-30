@@ -195,7 +195,6 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
         buildAndFail(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertContains(
                 """
-                Execution failed for task ':verifyPluginProjectConfiguration'.
                 > Could not resolve all files for configuration ':intellijPlatformDependency'.
                    > Could not find $artifactCoordinates.
                 """.trimIndent(),
