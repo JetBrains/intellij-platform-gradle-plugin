@@ -92,6 +92,7 @@ jobs:
             -PtestGradleVersion="${{ matrix.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
             -PtestJavaIoTmpDir="$TEST_JAVA_IO_TMPDIR" \
+            -PtestLogProgress=true \
             "${TESTS[@]}" \
             --console=plain \
             --no-build-cache

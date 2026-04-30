@@ -97,6 +97,7 @@ jobs:
               -PtestGradleVersion="$TEST_GRADLE_VERSION" \
               -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
               -PtestJavaIoTmpDir="$TEST_JAVA_IO_TMPDIR" \
+              -PtestLogProgress=true \
               --tests "$TEST_NAME" \
               --console=plain \
               --no-build-cache

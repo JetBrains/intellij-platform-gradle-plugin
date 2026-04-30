@@ -224,7 +224,17 @@ fun Test.configureTests() {
     //       showStandardStreams = true
     //   }
     testLogging {
-        events(TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR)
+        events(
+            *buildList {
+                add(TestLogEvent.FAILED)
+                add(TestLogEvent.STANDARD_ERROR)
+                if (providers.gradleProperty("testLogProgress").map(String::toBoolean).getOrElse(false)) {
+                    add(TestLogEvent.STARTED)
+                    add(TestLogEvent.PASSED)
+                    add(TestLogEvent.SKIPPED)
+                }
+            }.toTypedArray()
+        )
         exceptionFormat = TestExceptionFormat.FULL
     }
 
