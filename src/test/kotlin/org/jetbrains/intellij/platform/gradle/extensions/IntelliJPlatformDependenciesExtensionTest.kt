@@ -49,6 +49,7 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
         build("dependencies", "--configuration=intellijPlatformTestDependencies") {
             assertContains("com.jetbrains.intellij.platform:test-framework", output)
             assertNotContains("com.jetbrains.intellij.platform:boot", output)
+            assertNotContains("com.jetbrains.intellij.platform:util", output)
             assertNotContains("com.jetbrains.intellij.platform:lang-impl", output)
             assertNotContains("com.jetbrains.intellij.platform:ide-impl", output)
             assertNotContains("com.jetbrains.intellij.platform:core-ui", output)

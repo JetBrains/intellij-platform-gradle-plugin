@@ -50,7 +50,7 @@ abstract class ModuleDescriptorsValueSource : ValueSource<Set<Coordinates>, Modu
 }
 
 private val camelCaseBoundaryRegex = Regex("([a-z])([A-Z])")
-private val supportedModuleDescriptorNamespaces = setOf("jetbrains", "jps")
+private val supportedModuleDescriptorNamespaces = setOf("jetbrains", "jps", "\$legacy_jps_module")
 
 private fun collectModuleDescriptorResourcePaths(platformPath: Path): Set<String> {
     val productInfo = platformPath.productInfo()

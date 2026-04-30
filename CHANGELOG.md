@@ -10,6 +10,7 @@
 
 - Refactor Kotlin JVM toolchain configuration into a dedicated utility and add an isolation test for Kotlin Gradle API links.
 - Dependency verification fails because of a "corrupted" asc because of ivy misconfiguration JetBrains/intellij-platform-gradle-plugin#2140
+- Include `$legacy_jps_module` namespace in module descriptor handling and update related tests
 
 ## [2.15.0] - 2026-04-24
 

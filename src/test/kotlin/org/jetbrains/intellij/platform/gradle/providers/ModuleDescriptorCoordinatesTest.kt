@@ -74,7 +74,7 @@ class ModuleDescriptorCoordinatesTest {
             moduleDescriptorsPath.writeModuleDescriptorsJar(
                 "intellij.platform.util.xml" to """
                     <?xml version="1.0" encoding="UTF-8"?>
-                    <module name="intellij.platform.util" namespace="jps" visibility="public">
+                    <module name="intellij.platform.util" namespace="${'$'}legacy_jps_module" visibility="public">
                       <resources>
                         <resource-root path="../lib/util-8.jar"/>
                       </resources>
