@@ -70,7 +70,7 @@ class ChangelogPluginConventionsTest : IntelliJPluginTestBase() {
                 
                 repositories {
                     mavenCentral()
-                    
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
@@ -81,7 +81,7 @@ class ChangelogPluginConventionsTest : IntelliJPluginTestBase() {
                         val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
                         val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                         val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-                        
+                
                         create(type, version) { this.useInstaller.set(useInstaller) }
                     }
                 }
@@ -182,7 +182,7 @@ class ChangelogPluginConventionsTest : IntelliJPluginTestBase() {
                     gradlePluginPortal()
                     mavenCentral()
                 }
-                
+
                 dependencies {
                     classpath("org.jetbrains.intellij.plugins:gradle-changelog-plugin:$CHANGELOG_PLUGIN_VERSION")
                 }

@@ -12,6 +12,7 @@ class JarSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `jar searchable options produces archive`() {
         pluginXml write getPluginXmlWithSearchableConfigurable()
+        stubSearchableOptionsBuilderExecution()
 
         buildFile write //language=kotlin
                 """
@@ -33,6 +34,7 @@ class JarSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `jar searchable options produces archive if enabled via property and explicitly configured`() {
         pluginXml write getPluginXmlWithSearchableConfigurable()
+        stubSearchableOptionsBuilderExecution()
 
         gradleProperties write //language=properties
                 """
@@ -89,6 +91,7 @@ class JarSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `reuses configuration cache`() {
         pluginXml write getPluginXmlWithSearchableConfigurable()
+        stubSearchableOptionsBuilderExecution()
         getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
 
         buildFile write //language=kotlin

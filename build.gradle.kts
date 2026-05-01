@@ -194,12 +194,21 @@ fun Test.configureTests() {
             else -> gradleVersion
         }
     }.get()
+    systemProperties["test.gradle.cleanupBuildDirectories"] = providers.gradleProperty("testCleanupBuildDirectories")
+        .getOrElse("true")
     systemProperties["test.gradle.arguments"] = providers.gradleProperty("testGradleArguments").get()
     systemProperties["test.intellijPlatform.type"] = providers.gradleProperty("testIntellijPlatformType").get()
     systemProperties["test.intellijPlatform.version"] = providers.gradleProperty("testIntellijPlatformVersion").get()
     systemProperties["test.intellijPlatform.buildNumber"] = providers.gradleProperty("testIntellijPlatformBuildNumber").get()
     systemProperties["test.kotlin.version"] = providers.gradleProperty("testKotlinVersion").get()
     systemProperties["test.markdownPlugin.version"] = providers.gradleProperty("testMarkdownPluginVersion").get()
+    providers.gradleProperty("testJavaIoTmpDir").orNull?.let { testJavaIoTmpDir ->
+        val testJavaIoTmpDirFile = file(testJavaIoTmpDir)
+        systemProperties["java.io.tmpdir"] = testJavaIoTmpDirFile.absolutePath
+        doFirst {
+            testJavaIoTmpDirFile.mkdirs()
+        }
+    }
 
     jvmArgs(
         "-Xmx4G",
@@ -215,7 +224,17 @@ fun Test.configureTests() {
     //       showStandardStreams = true
     //   }
     testLogging {
-        events(TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR)
+        events(
+            *buildList {
+                add(TestLogEvent.FAILED)
+                add(TestLogEvent.STANDARD_ERROR)
+                if (providers.gradleProperty("testLogProgress").map(String::toBoolean).getOrElse(false)) {
+                    add(TestLogEvent.STARTED)
+                    add(TestLogEvent.PASSED)
+                    add(TestLogEvent.SKIPPED)
+                }
+            }.toTypedArray()
+        )
         exceptionFormat = TestExceptionFormat.FULL
     }
 

@@ -6,7 +6,11 @@ import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
+import java.nio.file.Files
 import java.util.*
+import java.util.jar.JarEntry
+import java.util.jar.JarOutputStream
+import javax.tools.ToolProvider
 import kotlin.io.path.*
 import kotlin.test.*
 
@@ -137,7 +141,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `set verification reports directory`() {
         writeJavaFile()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildFile write //language=kotlin
@@ -159,7 +163,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `set verification reports output formats`() {
         writeJavaFile()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildFile write //language=kotlin
@@ -188,7 +192,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `set verification reports with empty set of output formats`() {
         writeJavaFile()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildFile write //language=kotlin
@@ -217,7 +221,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `set verification reports with default settings`() {
         writeJavaFile()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildFile write //language=kotlin
@@ -245,7 +249,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `set ignored problems file`() {
         writeJavaFileWithPluginProblems(classNameSuffix = UUID.randomUUID().toString().replace("-", ""))
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         val lines = listOf("MyName:1.0.0:Reference to a missing property.*")
@@ -287,7 +291,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `fail on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildFile write //language=kotlin
@@ -309,7 +313,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `pass on Deprecated API usages`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         build(Tasks.VERIFY_PLUGIN) {
@@ -322,7 +326,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `fail on incorrect ide version`() {
         writeJavaFile()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
 
         buildFile write //language=kotlin
                 """
@@ -345,7 +349,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `fail on incorrect ide type`() {
         writeJavaFile()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
 
         buildFile write //language=kotlin
                 """
@@ -396,7 +400,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `fail on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildFile write //language=kotlin
@@ -418,7 +422,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `pass on any failureLevel`() {
         writeJavaFileWithDeprecation()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildFile write //language=kotlin
@@ -465,7 +469,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginVerification {
                         verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
-                        freeArgs = listOf("-verification-reports-formats", "plain") 
+                        freeArgs = listOf("-verification-reports-formats", "plain")
                     }
                 }
                 """.trimIndent()
@@ -486,20 +490,21 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     fun `pass on CLI arguments the internal API usage mode as a free arg`() {
         writeJavaFileWithInternalApiUsage()
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
                     pluginVerification {
-                        freeArgs = listOf("-suppress-internal-api-usages", "jetbrains-plugins") 
+                        freeArgs = listOf("-suppress-internal-api-usages", "jetbrains-plugins")
                     }
                 }
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
-            assertNotContains("Internal API usages (2):", output)
+            assertContains("ARG=-suppress-internal-api-usages", output)
+            assertContains("ARG=jetbrains-plugins", output)
         }
     }
 
@@ -526,6 +531,96 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                     }
                 }
                 """.trimIndent()
+    }
+
+    private fun writeFakePluginVerifier() {
+        val jar = fakePluginVerifierJar()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        cliPath = file("${jar.invariantSeparatorsPathString}")
+                    }
+                }
+                """.trimIndent()
+    }
+
+    private fun fakePluginVerifierJar() = synchronized(fakePluginVerifierLock) {
+        val jar = gradleHome.resolve("fake-plugin-verifier/fake-plugin-verifier-v3.jar")
+        if (jar.exists()) {
+            return@synchronized jar
+        }
+
+        val sourceRoot = gradleHome.resolve("fake-plugin-verifier/src").createDirectories()
+        val classesRoot = gradleHome.resolve("fake-plugin-verifier/classes").createDirectories()
+        val source = sourceRoot.resolve("com/jetbrains/pluginverifier/PluginVerifierMain.java")
+
+        source overwrite //language=java
+                """
+                package com.jetbrains.pluginverifier;
+                
+                import java.io.File;
+                import java.nio.file.Files;
+                import java.util.Arrays;
+                import java.util.List;
+                
+                public class PluginVerifierMain {
+                    public static void main(String[] args) throws Exception {
+                        List<String> arguments = Arrays.asList(args);
+                        String reportsDirectory = option(arguments, "-verification-reports-dir");
+                        String formats = option(arguments, "-verification-reports-formats");
+                
+                        for (String argument : args) {
+                            System.out.println("ARG=" + argument);
+                        }
+                
+                        if (reportsDirectory != null) {
+                            File ideReportDirectory = new File(reportsDirectory, "IC-FAKE");
+                            ideReportDirectory.mkdirs();
+                            if (formats != null && !formats.isBlank()) {
+                                if (formats.contains("MARKDOWN") || formats.contains("markdown")) {
+                                    Files.writeString(new File(ideReportDirectory, "report.md").toPath(), "fake report");
+                                }
+                                if (formats.contains("HTML") || formats.contains("html")) {
+                                    Files.writeString(new File(ideReportDirectory, "report.html").toPath(), "fake report");
+                                }
+                            }
+                            System.out.println("Verification reports directory: " + new File(reportsDirectory).getCanonicalPath());
+                        }
+                
+                        System.out.println("Plugin MyName:1.0.0 against IC-FAKE: Compatible. 1 usage of scheduled for removal API and 2 usages of deprecated API. 1 usage of internal API");
+                        System.out.println("Deprecated API usages (1):");
+                        System.out.println("  #Deprecated API usages");
+                        System.out.println("  Fake deprecated API usage");
+                
+                    }
+                
+                    private static String option(List<String> arguments, String name) {
+                        int index = arguments.indexOf(name);
+                        return index >= 0 && index + 1 < arguments.size() ? arguments.get(index + 1) : null;
+                    }
+                }
+                """.trimIndent()
+
+        val compiler = ToolProvider.getSystemJavaCompiler()
+        assertNotNull(compiler, "JDK compiler is required to compile the fake Plugin Verifier")
+        assertEquals(0, compiler.run(null, null, null, "-d", classesRoot.toString(), source.toString()))
+
+        JarOutputStream(Files.newOutputStream(jar)).use { output ->
+            Files.walk(classesRoot).use { paths ->
+                paths
+                    .filter { it.isRegularFile() }
+                    .forEach { file ->
+                        val entryName = classesRoot.relativize(file).invariantSeparatorsPathString
+                        output.putNextEntry(JarEntry(entryName))
+                        Files.copy(file, output)
+                        output.closeEntry()
+                    }
+            }
+        }
+
+        jar
     }
 
     private fun writeJavaFileWithDeprecation() {
@@ -555,9 +650,9 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 
                     public static void main(String[] args) {
                         App$classNameSuffix.message("somemessage", "someparam1");
-                    
+                
                         System.out.println(com.intellij.openapi.project.ProjectCoreUtil.theOnlyOpenProject());
-                        
+                
                         System.out.println(com.intellij.openapi.project.Project.DIRECTORY_STORE_FOLDER);
                         com.intellij.openapi.components.ServiceManager.getService(String.class);
                     }
@@ -591,7 +686,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `list ides mode prints IDE list without performing verification`() {
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         build(Tasks.VERIFY_PLUGIN, "--list-ides") {
@@ -607,7 +702,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `list ides mode with multiple IDEs`() {
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
         writePluginVerifierIde("PS", "2022.3")
 
@@ -624,7 +719,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `list ides mode fails when no IDEs configured and default recommended ides are disabled`() {
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
 
         buildAndFail(
             Tasks.VERIFY_PLUGIN,
@@ -641,7 +736,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `reuses configuration cache`() {
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildWithConfigurationCache(Tasks.VERIFY_PLUGIN, args = listOf("--list-ides")) {
@@ -652,5 +747,9 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
             assertConfigurationCacheReused()
             assertContains("IDEs that will be used for verification:", output)
         }
+    }
+
+    private companion object {
+        private val fakePluginVerifierLock = Any()
     }
 }

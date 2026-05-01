@@ -108,27 +108,27 @@ class InitializeIntelliJPlatformPluginTaskTest : IntelliJPluginTestBase() {
                 import org.jetbrains.intellij.platform.gradle.*
                 import org.jetbrains.intellij.platform.gradle.tasks.*
                 import org.jetbrains.kotlin.gradle.dsl.*
-
+                
                 version = "1.0.0"
-
+                
                 plugins {
                     id("java")
                     id("org.jetbrains.intellij.platform.module")
                     id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
                 }
-
+                
                 kotlin {
                     jvmToolchain(21)
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")

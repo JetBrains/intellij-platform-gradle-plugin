@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.utils
 
 import com.jetbrains.plugin.structure.base.utils.exists
 import com.jetbrains.plugin.structure.base.utils.listFiles
+import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.DirectoryProperty
@@ -19,8 +20,15 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
+import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import java.nio.channels.FileChannel
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.StandardOpenOption.WRITE
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 /**
  * Resolves IntelliJ Platform dependencies from configured repositories and extracts them to a shared cache directory.
@@ -41,6 +49,10 @@ class IntelliJPlatformCacheResolver internal constructor(
     private val extractorService: Provider<ExtractorService>,
     private val objects: ObjectFactory,
 ) {
+
+    private companion object {
+        private val cacheLocks = ConcurrentHashMap<Path, ReentrantLock>()
+    }
 
     interface Parameters {
 
@@ -148,9 +160,19 @@ class IntelliJPlatformCacheResolver internal constructor(
                 parameters.name.get().invoke(it)
             },
         ).asPath
-        if (targetDirectory.exists() && targetDirectory.listFiles().isNotEmpty()) {
-            return targetDirectory
+
+        return withCacheLock(targetDirectory) {
+            targetDirectory.resolveCachedPlatformPathOrNull()
+                ?: extractPlatform(targetDirectory, dependenciesHelper, requestedProvider)
         }
+    }
+
+    private fun extractPlatform(
+        targetDirectory: Path,
+        dependenciesHelper: IntelliJPlatformDependenciesHelper,
+        requestedProvider: Provider<RequestedIntelliJPlatform>,
+    ): Path {
+        targetDirectory.toFile().deleteRecursively()
 
         val configuration = configurations.create(Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withRandomSuffix)
         dependenciesHelper.addIntelliJPlatformDependency(
@@ -163,6 +185,30 @@ class IntelliJPlatformCacheResolver internal constructor(
             targetDirectory = targetDirectory,
         )
 
-        return targetDirectory
+        return targetDirectory.resolveCachedPlatformPathOrNull()
+            ?: throw GradleException("Cannot resolve 'product-info.json' in IntelliJ Platform cache: '$targetDirectory'")
+    }
+
+    private fun Path.resolveCachedPlatformPathOrNull() = takeIf {
+        it.exists() && it.listFiles().isNotEmpty()
+    }?.let {
+        runCatching {
+            resolvePlatformPath()
+                .also { platformPath -> ProductInfoPathResolver(platformPath).resolve() }
+        }.getOrNull()
+    }
+
+    private fun <T> withCacheLock(targetDirectory: Path, action: () -> T): T {
+        val lockFile = targetDirectory.parent.resolve("${targetDirectory.fileName}.lock")
+        lockFile.parent.toFile().mkdirs()
+
+        val localLock = cacheLocks.computeIfAbsent(lockFile.toAbsolutePath().normalize()) { ReentrantLock() }
+        return localLock.withLock {
+            FileChannel.open(lockFile, CREATE, WRITE).use { channel ->
+                channel.lock().use {
+                    action()
+                }
+            }
+        }
     }
 }

@@ -76,9 +76,9 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 
                 version = "1.0.0"
                 
-                repositories { 
+                repositories {
                     mavenCentral()
-                    
+                
                     intellijPlatform {
                         releases()
                     }
@@ -173,7 +173,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                     intellijPlatform {
                         instrumentCode = false
                         pluginConfiguration {
-                            name = "myNestedPluginName"            
+                            name = "myNestedPluginName"
                         }
                     }
                 }
@@ -240,9 +240,6 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 }
                 dependencies {
                     implementation("joda-time:joda-time:2.8.1")
-                    intellijPlatform {
-                        bundledPlugin("com.intellij.copyright")
-                    }
                 }
                 """.trimIndent()
 
@@ -288,9 +285,6 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 }
                 dependencies {
                     implementation("joda-time:joda-time:2.8.1")
-                    intellijPlatform {
-                        bundledPlugin("com.intellij.copyright")
-                    }
                 }
                 """.trimIndent()
 
@@ -396,7 +390,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     }
 
     private fun buildSandboxForSplitMode(splitModeConfiguration: String = "") {
-        writeJavaFile()
+        useSharedIntelliJPlatformCache()
 
         pluginXml write //language=xml
                 """
@@ -458,7 +452,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `prepare sandbox for splitMode installs external jar-type plugin on backend by default`() {
-        writeJavaFile()
+        useSharedIntelliJPlatformCache()
 
         pluginXml write //language=xml
                 """
@@ -478,6 +472,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                     }
                 }
                 intellijPlatform {
+                    sandboxContainer = file("${cacheDirectory.resolve(Sandbox.CONTAINER).invariantSeparatorsPathString}")
                     splitMode = true
                 }
                 """.trimIndent()
@@ -492,7 +487,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `prepare sandbox for splitMode installs external jar-type plugin in shared plugins dir when requested on both sides`() {
-        writeJavaFile()
+        useSharedIntelliJPlatformCache()
 
         pluginXml write //language=xml
                 """
@@ -517,6 +512,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                     }
                 }
                 intellijPlatform {
+                    sandboxContainer = file("${cacheDirectory.resolve(Sandbox.CONTAINER).invariantSeparatorsPathString}")
                     splitMode = true
                     pluginInstallationTarget = SplitModeAware.PluginInstallationTarget.BOTH
                 }
@@ -646,9 +642,6 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     implementation("joda-time:joda-time:2.8.1")
-                    intellijPlatform {
-                        bundledPlugin("com.intellij.copyright")
-                    }
                 }
                 intellijPlatform {
                     sandboxContainer = file("${customSandbox.invariantSeparatorsPathString}")
@@ -710,6 +703,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `prepare sandbox does not rewrite unchanged config files`() {
+        useSharedIntelliJPlatformCache()
         pluginXml write //language=xml
                 """
                 <idea-plugin />
@@ -718,6 +712,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
+                    sandboxContainer = file("${cacheDirectory.resolve(Sandbox.CONTAINER).invariantSeparatorsPathString}")
                     splitMode = true
                 }
                 """.trimIndent()
@@ -735,6 +730,13 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         assertEquals(updatesLastModifiedTime, updatesFile.getLastModifiedTime())
         assertEquals(disabledPluginsLastModifiedTime, disabledPluginsFile.getLastModifiedTime())
         assertEquals(splitModeFrontendPropertiesLastModifiedTime, splitModeFrontendPropertiesFile.getLastModifiedTime())
+    }
+
+    private fun useSharedIntelliJPlatformCache() {
+        gradleProperties write //language=properties
+                """
+                ${GradleProperties.IntellijPlatformCache}=${intellijPlatformCacheDir.invariantSeparatorsPathString}
+                """.trimIndent()
     }
 
     @Test

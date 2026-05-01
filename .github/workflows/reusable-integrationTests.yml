@@ -65,9 +65,9 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .gradle/testGradleHome/.testKit
-          key: test-gradle-home-v1-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          key: test-gradle-home-v2-testkit-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v1-testkit-${{ runner.os }}-
+            test-gradle-home-v2-testkit-${{ runner.os }}-
 
       - name: Run Tests
         env:
@@ -77,9 +77,12 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
             TEST_GRADLE_USER_HOME="$(pwd -W)\\.gradle\\testGradleHome"
+            TEST_JAVA_IO_TMPDIR="$(pwd -W)\\.gradle\\testTmp"
           else
             TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
+            TEST_JAVA_IO_TMPDIR="$PWD/.gradle/testTmp"
           fi
+          mkdir -p .gradle/testTmp
           TESTS=()
           if [ -n "$TEST_NAME" ]; then
             TESTS+=(--tests "$TEST_NAME")
@@ -88,6 +91,8 @@ jobs:
           ./gradlew integrationTest \
             -PtestGradleVersion="${{ matrix.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
+            -PtestJavaIoTmpDir="$TEST_JAVA_IO_TMPDIR" \
+            -PtestLogProgress=true \
             "${TESTS[@]}" \
             --console=plain \
             --no-build-cache

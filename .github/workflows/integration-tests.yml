@@ -15,6 +15,7 @@ jobs:
     secrets: inherit
     with:
       gradleVersion: "9.5.0"
+      gradleVersions: "9.0.0 9.5.0 nightly"
       os: ubuntu-latest
 
   primeWindowsIntellijPlatformTestCache:
@@ -24,6 +25,7 @@ jobs:
     secrets: inherit
     with:
       gradleVersion: "9.5.0"
+      gradleVersions: "9.0.0 9.5.0 nightly"
       os: windows-latest
 
   primeMacosIntellijPlatformTestCache:
@@ -33,6 +35,7 @@ jobs:
     secrets: inherit
     with:
       gradleVersion: "9.5.0"
+      gradleVersions: "9.0.0 9.5.0 nightly"
       os: macos-latest
 
   integrationTests:

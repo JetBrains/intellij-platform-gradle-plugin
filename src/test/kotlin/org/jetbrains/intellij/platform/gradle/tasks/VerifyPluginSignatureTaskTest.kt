@@ -18,7 +18,7 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 """.trimIndent()
 
@@ -34,7 +34,7 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -55,7 +55,7 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -76,7 +76,7 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner()
-                    }            
+                    }
                 }
                 
                 intellijPlatform {
@@ -98,7 +98,7 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         zipSigner("0.1.21")
-                    }            
+                    }
                 }
                 
                 intellijPlatform {

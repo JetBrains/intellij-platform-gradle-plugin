@@ -17,7 +17,7 @@ class CurrentPluginVersionValueSourceTest : IntelliJPluginTestBase() {
                 tasks {
                     val currentPluginVersion = providers.of(org.jetbrains.intellij.platform.gradle.providers.CurrentPluginVersionValueSource::class) {
                     }
-                    
+                
                     register("$randomTaskName") {
                         doLast {
                             println("Version: " + currentPluginVersion.get())

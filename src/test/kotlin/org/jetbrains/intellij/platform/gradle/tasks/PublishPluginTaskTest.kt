@@ -57,7 +57,7 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 tasks.register("printPublishingToken") {
                     val publishingToken = intellijPlatform.publishing.token
                     inputs.property("publishingToken", publishingToken)
-                    
+                
                     doLast {
                         println("publishingToken=${'$'}{publishingToken.orNull}")
                     }
@@ -85,7 +85,7 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 tasks.register("printPublishingToken") {
                     val publishingToken = intellijPlatform.publishing.token
                     inputs.property("publishingToken", publishingToken)
-                    
+                
                     doLast {
                         println("publishingToken=${'$'}{publishingToken.orNull}")
                     }

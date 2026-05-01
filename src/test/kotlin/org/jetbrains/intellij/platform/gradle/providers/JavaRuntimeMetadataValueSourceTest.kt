@@ -25,7 +25,7 @@ class JavaRuntimeMetadataValueSourceTest : IntelliJPluginTestBase() {
                             executable = file("$executablePath")
                         }
                     }
-                    
+                
                     register("$randomTaskName") {
                         doLast {
                             println("Runtime Metadata: " + runtimeMetadata.get()["os.arch"])

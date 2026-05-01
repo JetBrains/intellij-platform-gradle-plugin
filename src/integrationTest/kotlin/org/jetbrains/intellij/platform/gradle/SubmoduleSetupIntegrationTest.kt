@@ -36,7 +36,7 @@ class SubmoduleSetupIntegrationTest : IntelliJPlatformIntegrationTestBase(
     fun `explicit submodule IntelliJ Platform dependency overrides inherited root dependency`() {
         dir.resolve("submodule/build.gradle.kts") += //language=kotlin
                 """
-
+                
                 dependencies {
                     intellijPlatform {
                         create(providers.gradleProperty("intellijPlatform.type"), providers.gradleProperty("intellijPlatform.version")) {

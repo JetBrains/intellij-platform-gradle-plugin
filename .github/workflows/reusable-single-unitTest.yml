@@ -65,9 +65,9 @@ jobs:
         uses: actions/cache/restore@v5
         with:
           path: .gradle/testGradleHome/.testKit
-          key: test-gradle-home-v1-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          key: test-gradle-home-v2-testkit-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v1-testkit-${{ runner.os }}-
+            test-gradle-home-v2-testkit-${{ runner.os }}-
 
       - name: Run Tests
         env:
@@ -77,10 +77,21 @@ jobs:
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
             TEST_GRADLE_USER_HOME="$(pwd -W)\\.gradle\\testGradleHome"
+            TEST_JAVA_IO_TMPDIR="$(pwd -W)\\.gradle\\testTmp"
           else
             TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
+            TEST_JAVA_IO_TMPDIR="$PWD/.gradle/testTmp"
           fi
-          [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
+          mkdir -p .gradle/testTmp
+          TESTS=()
+          if [ -n "$TEST_NAME" ]; then
+            TESTS+=(--tests "$TEST_NAME")
+          fi
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            TEST_CLEANUP_BUILD_DIRECTORIES=false
+          else
+            TEST_CLEANUP_BUILD_DIRECTORIES=true
+          fi
           if [ "$RUNNER_OS" = "Windows" ] && [ -z "$TEST_NAME" ]; then
             TEST_MAX_PARALLEL_FORKS=2
           else
@@ -90,8 +101,11 @@ jobs:
           ./gradlew test \
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
+            -PtestJavaIoTmpDir="$TEST_JAVA_IO_TMPDIR" \
             -PtestMaxParallelForks="$TEST_MAX_PARALLEL_FORKS" \
-            $TESTS \
+            -PtestCleanupBuildDirectories="$TEST_CLEANUP_BUILD_DIRECTORIES" \
+            -PtestLogProgress=true \
+            "${TESTS[@]}" \
             --console=plain \
             --no-build-cache
 

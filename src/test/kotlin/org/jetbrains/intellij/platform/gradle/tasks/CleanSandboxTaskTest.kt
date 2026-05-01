@@ -40,7 +40,7 @@ class CleanSandboxTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     sandboxContainer = layout.buildDirectory.dir("custom-sandbox-container")
                 }
-
+                
                 tasks {
                     prepareSandbox {
                         sandboxDirectory = intellijPlatform.sandboxContainer.map { it.dir("custom-directory") }

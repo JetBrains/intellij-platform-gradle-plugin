@@ -17,6 +17,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
     // Shared IDE cache adds heavy per-build overhead in TestKit suites, so only cache-specific tests should opt in.
     open val enableCaching = false
     open val enableIntelliJPlatformCache = false
+    open val enableKotlinPlugin = false
     val randomTaskName = "task_" + (1..1000).random()
 
     @BeforeTest
@@ -25,7 +26,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
         if (gradleScan) {
             settingsFile write //language=kotlin
-                    """                    
+                    """
                     plugins {
                         id("com.gradle.develocity") version "3.17.5"
                     }
@@ -53,6 +54,18 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 }
                 """.trimIndent()
 
+        val kotlinImport = "import org.jetbrains.kotlin.gradle.dsl.*".takeIf { enableKotlinPlugin }.orEmpty()
+        val kotlinPlugin = "id(\"org.jetbrains.kotlin.jvm\") version \"$kotlinPluginVersion\""
+            .takeIf { enableKotlinPlugin }
+            .orEmpty()
+        val kotlinToolchain = """
+            kotlin {
+                jvmToolchain(21)
+            }
+        """.trimIndent()
+            .takeIf { enableKotlinPlugin }
+            .orEmpty()
+
         buildFile write //language=kotlin
                 """
                 import java.util.*
@@ -60,24 +73,21 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 import org.jetbrains.intellij.platform.gradle.models.*
                 import org.jetbrains.intellij.platform.gradle.tasks.*
                 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
-                import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask.*
-                import org.jetbrains.kotlin.gradle.dsl.*
+                $kotlinImport
                 
                 version = "1.0.0"
                 
                 plugins {
                     id("java")
                     id("org.jetbrains.intellij.platform")
-                    id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
+                    $kotlinPlugin
                 }
                 
-                kotlin {
-                    jvmToolchain(21)
-                }
+                $kotlinToolchain
                 
                 repositories {
                     mavenCentral()
-                    
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
@@ -88,11 +98,11 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                         val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
                         val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                         val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-                        
+                
                         create(type, version) { this.useInstaller.set(useInstaller) }
                     }
                 }
-                            
+                
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false

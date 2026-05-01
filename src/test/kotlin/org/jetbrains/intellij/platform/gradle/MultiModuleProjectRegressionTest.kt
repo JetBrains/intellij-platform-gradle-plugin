@@ -29,10 +29,6 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                         pluginComposedModule(implementation(project(":core")))
                         pluginComposedModule(implementation(project(":rider")))
                         pluginComposedModule(implementation(project(":clion")))
-                        jetbrainsRuntime()
-                        testFramework(TestFrameworkType.Bundled)
-                        pluginVerifier()
-                        zipSigner()
                     }
                 }
                 """.trimIndent()
@@ -56,12 +52,7 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 version = "1.0.0"
                 
                 plugins {
-                    id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform")
-                }
-                
-                kotlin {
-                    jvmToolchain(21)
                 }
                 
                 repositories {
@@ -75,9 +66,6 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 dependencies {
                     intellijPlatform {
                         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
-                        testFramework(TestFrameworkType.Bundled)
-                        pluginVerifier()
-                        zipSigner()
                     }
                 }
                 
@@ -103,36 +91,31 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         val moduleBuildFile = //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.*
-                
+
                 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-                
+
                 version = "1.0.0"
-                
+
                 plugins {
-                    id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform.module")
                 }
-                
-                kotlin {
-                    jvmToolchain(21)
-                }
-                
+
                 repositories {
                     mavenCentral()
-                
+
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
                         pluginModule(implementation(project(":core")))
                     }
                 }
-                
+
                 intellijPlatform {
                     instrumentCode = false
                 }

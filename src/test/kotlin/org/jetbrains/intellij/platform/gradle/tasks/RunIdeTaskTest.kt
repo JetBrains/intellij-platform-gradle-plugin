@@ -126,7 +126,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         helperSource overwrite //language=java
                 """
                 package fake.launcher;
-
+                
                 import java.lang.management.ManagementFactory;
                 import java.nio.file.Files;
                 import java.nio.file.Path;
@@ -134,10 +134,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 import java.util.ArrayList;
                 import java.util.Arrays;
                 import java.util.List;
-
+                
                 public final class FakeLauncher {
                     private FakeLauncher() {}
-
+                
                     public static void run(String mainClass, String[] args) throws Exception {
                         var debugLines = new ArrayList<String>();
                         debugLines.add("=== fake java start ===");
@@ -146,7 +146,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                         for (var arg : args) {
                             debugLines.add("ARG=" + arg);
                         }
-
+                
                         printAndLog("JETBRAINS_CLIENT_JDK=" + getenv("JETBRAINS_CLIENT_JDK"), debugLines);
                         printAndLog("JETBRAINS_CLIENT_VM_OPTIONS=" + getenv("JETBRAINS_CLIENT_VM_OPTIONS"), debugLines);
                         printAndLog("JETBRAINS_CLIENT_PROPERTIES=" + getenv("JETBRAINS_CLIENT_PROPERTIES"), debugLines);
@@ -154,45 +154,45 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                         readVmOptions(debugLines);
                         printAndLog("JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_END", debugLines);
                         printAndLog("MAIN_CLASS=" + mainClass, debugLines);
-
+                
                         var jvmArgs = String.join(" ", filteredInputArguments());
                         if (!jvmArgs.isBlank()) {
                             printAndLog("JVM_ARGS=" + jvmArgs, debugLines);
                         }
-
+                
                         var appArgs = String.join(" ", args);
                         if (!appArgs.isBlank()) {
                             printAndLog("APP_ARGS=" + appArgs, debugLines);
                         }
-
+                
                         if (Arrays.asList(args).contains("serverMode")) {
                             printAndLog("Join link: tcp://127.0.0.1:5990#cb=fake", debugLines);
                         }
-
+                
                         debugLines.add("=== fake java end ===");
                         writeDebugLog(debugLines);
                     }
-
+                
                     private static String getenv(String name) {
                         return System.getenv().getOrDefault(name, "");
                     }
-
+                
                     private static void readVmOptions(List<String> debugLines) throws Exception {
                         var vmOptions = getenv("JETBRAINS_CLIENT_VM_OPTIONS");
                         if (vmOptions.isBlank()) {
                             return;
                         }
-
+                
                         var vmOptionsPath = Path.of(vmOptions);
                         if (!Files.exists(vmOptionsPath)) {
                             return;
                         }
-
+                
                         for (var line : Files.readAllLines(vmOptionsPath)) {
                             printAndLog(line, debugLines);
                         }
                     }
-
+                
                     private static List<String> filteredInputArguments() {
                         var fakeLauncherClasses = System.getProperty("fake.java.fakeLauncherClasses", "");
                         var filtered = new ArrayList<String>();
@@ -207,12 +207,12 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                         }
                         return filtered;
                     }
-
+                
                     private static void printAndLog(String line, List<String> debugLines) {
                         System.out.println(line);
                         debugLines.add(line);
                     }
-
+                
                     private static void writeDebugLog(List<String> debugLines) throws Exception {
                         var debugLog = System.getProperty("fake.java.debug.log", "");
                         if (debugLog.isBlank()) {
@@ -231,10 +231,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         ideaMainSource overwrite //language=java
                 """
                 package com.intellij.idea;
-
+                
                 public final class Main {
                     private Main() {}
-
+                
                     public static void main(String[] args) throws Exception {
                         fake.launcher.FakeLauncher.run(Main.class.getName(), args);
                     }
@@ -243,10 +243,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         intellijLoaderSource overwrite //language=java
                 """
                 package com.intellij.platform.runtime.loader;
-
+                
                 public final class IntellijLoader {
                     private IntellijLoader() {}
-
+                
                     public static void main(String[] args) throws Exception {
                         fake.launcher.FakeLauncher.run(IntellijLoader.class.getName(), args);
                     }
@@ -511,7 +511,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                     splitMode = true
                     pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
                 }
-
+                
                 tasks.named("${Tasks.RUN_IDE_FRONTEND}") {
                     doFirst {
                         val sandboxPluginsDirectoryProvider = javaClass

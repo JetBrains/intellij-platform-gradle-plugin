@@ -13,6 +13,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `build searchable options produces XML`() {
         pluginXml write getPluginXmlWithSearchableConfigurable()
+        stubSearchableOptionsBuilderExecution()
 
         getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
 
@@ -72,6 +73,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `build searchable options if forced via property without Configurable EPs`() {
         pluginXml write getPluginXmlWithoutSearchableConfigurable()
+        stubSearchableOptionsBuilderExecution()
 
         gradleProperties write //language=properties
                 """
@@ -94,6 +96,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `build searchable options produces XML if enabled via property and explicitly configured`() {
         pluginXml write getPluginXmlWithSearchableConfigurable()
+        stubSearchableOptionsBuilderExecution()
 
         getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
 
@@ -127,15 +130,16 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `build searchable options when Configurable EP is declared in submodule xml`() {
         pluginXml write getPluginXmlWithoutSearchableConfigurable()
+        stubSearchableOptionsBuilderExecution()
 
         settingsFile overwrite //language=kotlin
                 """
                 rootProject.name = "projectName"
-
+                
                 plugins {
                     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
                 }
-
+                
                 include("submodule")
                 """.trimIndent()
 
@@ -146,7 +150,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                         pluginComposedModule(implementation(project(":submodule")))
                     }
                 }
-
+                
                 intellijPlatform {
                     buildSearchableOptions = true
                 }
@@ -155,12 +159,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
         dir.resolve("submodule/build.gradle.kts") write //language=kotlin
                 """
                 plugins {
-                    id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform.module")
-                }
-                
-                kotlin {
-                    jvmToolchain(21)
                 }
                 
                 repositories {
@@ -180,7 +179,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                         create(type, version) { this.useInstaller.set(useInstaller) }
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -267,6 +266,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `reuses configuration cache`() {
         pluginXml write getPluginXmlWithSearchableConfigurable()
+        stubSearchableOptionsBuilderExecution()
         getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
 
         buildFile write //language=kotlin

@@ -22,7 +22,7 @@ class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
                             androidStudioVersion = "2023.3.1.9"
                         }
                     }
-                    
+                
                     register("$randomTaskName") {
                         doLast {
                             println("Download Link: " + androidStudioDownloadLink.get())
