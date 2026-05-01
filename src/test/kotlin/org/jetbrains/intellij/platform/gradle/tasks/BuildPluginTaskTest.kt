@@ -47,10 +47,6 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     implementation("joda-time:joda-time:2.8.1")
-                    
-                    intellijPlatform {
-                        bundledPlugin("com.intellij.copyright")
-                    }
                 }
                 """.trimIndent()
 
@@ -128,9 +124,6 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     implementation("joda-time:joda-time:2.8.1")
-                    intellijPlatform {
-                        bundledPlugin("com.intellij.copyright")
-                    }
                 }
                 
                 intellijPlatform { 
