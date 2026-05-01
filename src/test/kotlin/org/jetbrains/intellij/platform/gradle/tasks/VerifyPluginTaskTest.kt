@@ -503,7 +503,8 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
-            assertNotContains("Internal API usages (2):", output)
+            assertContains("ARG=-suppress-internal-api-usages", output)
+            assertContains("ARG=jetbrains-plugins", output)
         }
     }
 
@@ -546,7 +547,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     private fun fakePluginVerifierJar() = synchronized(fakePluginVerifierLock) {
-        val jar = gradleHome.resolve("fake-plugin-verifier/fake-plugin-verifier-v2.jar")
+        val jar = gradleHome.resolve("fake-plugin-verifier/fake-plugin-verifier-v3.jar")
         if (jar.exists()) {
             return@synchronized jar
         }
@@ -569,6 +570,10 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                         List<String> arguments = Arrays.asList(args);
                         String reportsDirectory = option(arguments, "-verification-reports-dir");
                         String formats = option(arguments, "-verification-reports-formats");
+                
+                        for (String argument : args) {
+                            System.out.println("ARG=" + argument);
+                        }
                 
                         if (reportsDirectory != null) {
                             File ideReportDirectory = new File(reportsDirectory, "IC-FAKE");

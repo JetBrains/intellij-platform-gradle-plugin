@@ -83,7 +83,10 @@ jobs:
             TEST_JAVA_IO_TMPDIR="$PWD/.gradle/testTmp"
           fi
           mkdir -p .gradle/testTmp
-          [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
+          TESTS=()
+          if [ -n "$TEST_NAME" ]; then
+            TESTS+=(--tests "$TEST_NAME")
+          fi
           if [ "$RUNNER_OS" = "Windows" ]; then
             TEST_CLEANUP_BUILD_DIRECTORIES=false
           else
@@ -102,7 +105,7 @@ jobs:
             -PtestMaxParallelForks="$TEST_MAX_PARALLEL_FORKS" \
             -PtestCleanupBuildDirectories="$TEST_CLEANUP_BUILD_DIRECTORIES" \
             -PtestLogProgress=true \
-            $TESTS \
+            "${TESTS[@]}" \
             --console=plain \
             --no-build-cache
 

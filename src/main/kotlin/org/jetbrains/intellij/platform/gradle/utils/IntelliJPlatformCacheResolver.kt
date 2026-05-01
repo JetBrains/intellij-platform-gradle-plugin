@@ -51,7 +51,7 @@ class IntelliJPlatformCacheResolver internal constructor(
 ) {
 
     private companion object {
-        val cacheLocks = ConcurrentHashMap<Path, ReentrantLock>()
+        private val cacheLocks = ConcurrentHashMap<Path, ReentrantLock>()
     }
 
     interface Parameters {
@@ -162,24 +162,31 @@ class IntelliJPlatformCacheResolver internal constructor(
         ).asPath
 
         return withCacheLock(targetDirectory) {
-            targetDirectory.resolveCachedPlatformPathOrNull() ?: run {
-                targetDirectory.toFile().deleteRecursively()
-
-                val configuration = configurations.create(Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withRandomSuffix)
-                dependenciesHelper.addIntelliJPlatformDependency(
-                    requestedIntelliJPlatformProvider = requestedProvider,
-                    configurationName = configuration.name,
-                )
-
-                extractorService.get().extract(
-                    path = configuration.files.single().toPath(),
-                    targetDirectory = targetDirectory,
-                )
-
-                targetDirectory.resolveCachedPlatformPathOrNull()
-                    ?: throw GradleException("Cannot resolve 'product-info.json' in IntelliJ Platform cache: '$targetDirectory'")
-            }
+            targetDirectory.resolveCachedPlatformPathOrNull()
+                ?: extractPlatform(targetDirectory, dependenciesHelper, requestedProvider)
         }
+    }
+
+    private fun extractPlatform(
+        targetDirectory: Path,
+        dependenciesHelper: IntelliJPlatformDependenciesHelper,
+        requestedProvider: Provider<RequestedIntelliJPlatform>,
+    ): Path {
+        targetDirectory.toFile().deleteRecursively()
+
+        val configuration = configurations.create(Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withRandomSuffix)
+        dependenciesHelper.addIntelliJPlatformDependency(
+            requestedIntelliJPlatformProvider = requestedProvider,
+            configurationName = configuration.name,
+        )
+
+        extractorService.get().extract(
+            path = configuration.files.single().toPath(),
+            targetDirectory = targetDirectory,
+        )
+
+        return targetDirectory.resolveCachedPlatformPathOrNull()
+            ?: throw GradleException("Cannot resolve 'product-info.json' in IntelliJ Platform cache: '$targetDirectory'")
     }
 
     private fun Path.resolveCachedPlatformPathOrNull() = takeIf {
