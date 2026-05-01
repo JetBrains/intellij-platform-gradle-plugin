@@ -681,7 +681,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `list ides mode prints IDE list without performing verification`() {
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         build(Tasks.VERIFY_PLUGIN, "--list-ides") {
@@ -697,7 +697,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `list ides mode with multiple IDEs`() {
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
         writePluginVerifierIde("PS", "2022.3")
 
@@ -714,7 +714,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `list ides mode fails when no IDEs configured and default recommended ides are disabled`() {
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
 
         buildAndFail(
             Tasks.VERIFY_PLUGIN,
@@ -731,7 +731,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `reuses configuration cache`() {
         writePluginXmlFile()
-        writePluginVerifierDependency()
+        writeFakePluginVerifier()
         writePluginVerifierIde()
 
         buildWithConfigurationCache(Tasks.VERIFY_PLUGIN, args = listOf("--list-ides")) {

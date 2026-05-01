@@ -319,6 +319,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `include only relevant searchableOptions_jar`() {
         enableSearchableOptions()
+        configureFakeSearchableOptionsBuilder(pluginId = "MyPluginName")
 
         pluginXml write //language=xml
                 """

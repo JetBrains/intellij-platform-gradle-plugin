@@ -397,7 +397,6 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
     private fun buildSandboxForSplitMode(splitModeConfiguration: String = "") {
         useSharedIntelliJPlatformCache()
-        writeJavaFile()
 
         pluginXml write //language=xml
                 """
@@ -460,7 +459,6 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `prepare sandbox for splitMode installs external jar-type plugin on backend by default`() {
         useSharedIntelliJPlatformCache()
-        writeJavaFile()
 
         pluginXml write //language=xml
                 """
@@ -496,7 +494,6 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `prepare sandbox for splitMode installs external jar-type plugin in shared plugins dir when requested on both sides`() {
         useSharedIntelliJPlatformCache()
-        writeJavaFile()
 
         pluginXml write //language=xml
                 """

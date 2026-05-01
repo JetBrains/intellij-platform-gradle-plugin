@@ -72,6 +72,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `build searchable options if forced via property without Configurable EPs`() {
         pluginXml write getPluginXmlWithoutSearchableConfigurable()
+        configureFakeSearchableOptionsBuilder()
 
         gradleProperties write //language=properties
                 """
@@ -94,6 +95,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `build searchable options produces XML if enabled via property and explicitly configured`() {
         pluginXml write getPluginXmlWithSearchableConfigurable()
+        configureFakeSearchableOptionsBuilder()
 
         getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
 
@@ -127,6 +129,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `build searchable options when Configurable EP is declared in submodule xml`() {
         pluginXml write getPluginXmlWithoutSearchableConfigurable()
+        configureFakeSearchableOptionsBuilder()
 
         settingsFile overwrite //language=kotlin
                 """
@@ -155,12 +158,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
         dir.resolve("submodule/build.gradle.kts") write //language=kotlin
                 """
                 plugins {
-                    id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform.module")
-                }
-                
-                kotlin {
-                    jvmToolchain(21)
                 }
                 
                 repositories {
@@ -267,6 +265,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     @Test
     fun `reuses configuration cache`() {
         pluginXml write getPluginXmlWithSearchableConfigurable()
+        configureFakeSearchableOptionsBuilder()
         getTestSearchableConfigurableJava() write getSearchableConfigurableCode()
 
         buildFile write //language=kotlin

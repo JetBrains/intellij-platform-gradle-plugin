@@ -44,9 +44,22 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
                         testFramework(TestFrameworkType.Platform)
                     }
                 }
+
+                tasks.register("printIntelliJPlatformTestDependencyComponents") {
+                    val testDependencies = configurations.named("intellijPlatformTestDependencies")
+
+                    doLast {
+                        testDependencies.get().incoming.resolutionResult.allComponents
+                            .mapNotNull { it.moduleVersion }
+                            .map { "${'$'}{it.group}:${'$'}{it.name}" }
+                            .distinct()
+                            .sorted()
+                            .forEach(::println)
+                    }
+                }
                 """.trimIndent()
 
-        build("dependencies", "--configuration=intellijPlatformTestDependencies") {
+        build("printIntelliJPlatformTestDependencyComponents") {
             assertContains("com.jetbrains.intellij.platform:test-framework", output)
             assertNotContains("com.jetbrains.intellij.platform:boot", output)
             assertNotContains("com.jetbrains.intellij.platform:util", output)
