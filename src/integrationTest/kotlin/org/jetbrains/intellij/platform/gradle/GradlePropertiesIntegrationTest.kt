@@ -42,6 +42,7 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `noSearchableOptionsWarning is disabled`() {
         val property = GradleProperties.NoSearchableOptionsWarning.toString()
+        stubSearchableOptionsBuilderExecution()
 
         build(
             Tasks.JAR_SEARCHABLE_OPTIONS,
@@ -56,6 +57,7 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `noSearchableOptionsWarning is enabled`() {
         val property = GradleProperties.NoSearchableOptionsWarning.toString()
+        stubSearchableOptionsBuilderExecution()
 
         build(
             Tasks.JAR_SEARCHABLE_OPTIONS,
@@ -70,6 +72,7 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `forceBuildSearchableOptions is enabled`() {
         val property = GradleProperties.ForceBuildSearchableOptions.toString()
+        stubSearchableOptionsBuilderExecution()
 
         build(
             Tasks.JAR_SEARCHABLE_OPTIONS,
@@ -85,6 +88,7 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `paidPluginSearchableOptionsWarning is disabled`() {
         val property = GradleProperties.PaidPluginSearchableOptionsWarning.toString()
+        stubSearchableOptionsBuilderExecution()
 
         build(
             Tasks.BUILD_SEARCHABLE_OPTIONS,
@@ -98,6 +102,7 @@ class GradlePropertiesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `paidPluginSearchableOptionsWarning is enabled`() {
         val property = GradleProperties.PaidPluginSearchableOptionsWarning.toString()
+        stubSearchableOptionsBuilderExecution()
 
         build(
             Tasks.BUILD_SEARCHABLE_OPTIONS,

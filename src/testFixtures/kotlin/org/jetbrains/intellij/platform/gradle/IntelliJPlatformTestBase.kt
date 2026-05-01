@@ -8,6 +8,7 @@ import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.UnexpectedBuildResultException
 import java.lang.management.ManagementFactory
 import java.nio.file.Path
+import javax.tools.ToolProvider
 import kotlin.io.path.*
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -62,6 +63,71 @@ abstract class IntelliJPlatformTestBase {
         if (printBuildDirectory) {
             println("Build directory: ${dir.toUri()}")
         }
+    }
+
+    /**
+     * Exercises BSO task wiring without traversing a real IDE UI.
+     *
+     * Real searchable-options generation is covered by the searchable-options integration test.
+     */
+    protected fun stubSearchableOptionsBuilderExecution(
+        pluginId: String = "PluginName",
+        configurableId: String = "test.searchable.configurable",
+        displayName: String = "Test Searchable Configurable",
+        hit: String = "Label for Test Searchable Configurable",
+    ) {
+        val fakeBuilderRoot = dir.resolve("fake-searchable-options-builder")
+        val sourceRoot = fakeBuilderRoot.resolve("src")
+        val classesRoot = fakeBuilderRoot.resolve("classes")
+        val source = sourceRoot.resolve("com/intellij/idea/Main.java")
+
+        source.parent.createDirectories()
+        classesRoot.createDirectories()
+        source overwrite //language=java
+                """
+                package com.intellij.idea;
+
+                import java.nio.file.Files;
+                import java.nio.file.Path;
+
+                public final class Main {
+                    private Main() {}
+
+                    public static void main(String[] args) throws Exception {
+                        if (args.length < 2 || !"traverseUI".equals(args[0])) {
+                            throw new IllegalArgumentException("Expected traverseUI arguments");
+                        }
+
+                        Path outputDirectory = Path.of(args[1]);
+                        Files.createDirectories(outputDirectory);
+                        Files.writeString(
+                            outputDirectory.resolve("p-$pluginId-searchableOptions.json"),
+                            "[{\"configurable\":\"$configurableId\",\"displayName\":\"$displayName\",\"hit\":\"$hit\"}]"
+                        );
+                        System.out.println("Found 391 configurables");
+                    }
+                }
+                """.trimIndent()
+
+        val compiler = ToolProvider.getSystemJavaCompiler()
+        checkNotNull(compiler) { "JDK compiler is required to compile the fake searchable options builder" }
+        check(compiler.run(null, null, null, "-d", classesRoot.toString(), source.toString()) == 0) {
+            "Failed to compile the fake searchable options builder"
+        }
+
+        buildFile write //language=kotlin
+                """
+                tasks.withType<org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask>().configureEach {
+                    javaLauncher.set(javaToolchains.launcherFor {
+                        languageVersion.set(
+                            org.gradle.jvm.toolchain.JavaLanguageVersion.of(
+                                org.gradle.api.JavaVersion.current().majorVersion
+                            )
+                        )
+                    })
+                    jvmArgs("-Xbootclasspath/a:${classesRoot.invariantSeparatorsPathString}")
+                }
+                """.trimIndent()
     }
 
     @OptIn(ExperimentalPathApi::class)
