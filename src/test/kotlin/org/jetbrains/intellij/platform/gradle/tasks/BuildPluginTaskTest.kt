@@ -126,7 +126,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                     implementation("joda-time:joda-time:2.8.1")
                 }
                 
-                intellijPlatform { 
+                intellijPlatform {
                     sandboxContainer = file("$sandboxPath")
                 }
                 """.trimIndent()

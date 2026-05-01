@@ -191,7 +191,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                     inputs.property("certificateChain", certificateChain)
                     inputs.property("privateKey", privateKey)
                     inputs.property("password", password)
-                    
+                
                     doLast {
                         println("certificateChain=${'$'}{certificateChain.orNull}")
                         println("privateKey=${'$'}{privateKey.orNull}")
@@ -233,7 +233,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                     inputs.property("certificateChain", certificateChain)
                     inputs.property("privateKey", privateKey)
                     inputs.property("password", password)
-                    
+                
                     doLast {
                         println("certificateChain=${'$'}{certificateChain.orNull}")
                         println("privateKey=${'$'}{privateKey.orNull}")
@@ -312,7 +312,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
             assertContains("No Marketplace ZIP Signer executable found.", output)
         }
     }
-    
+
     @Test
     fun `run Marketplace ZIP Signer and fail on invalid CLI path`() {
         buildFile write //language=kotlin

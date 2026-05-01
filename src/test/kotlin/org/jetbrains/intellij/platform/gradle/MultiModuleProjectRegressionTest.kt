@@ -91,31 +91,31 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         val moduleBuildFile = //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.*
-                
+
                 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-                
+
                 version = "1.0.0"
-                
+
                 plugins {
                     id("org.jetbrains.intellij.platform.module")
                 }
-                
+
                 repositories {
                     mavenCentral()
-                
+
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
                         pluginModule(implementation(project(":core")))
                     }
                 }
-                
+
                 intellijPlatform {
                     instrumentCode = false
                 }

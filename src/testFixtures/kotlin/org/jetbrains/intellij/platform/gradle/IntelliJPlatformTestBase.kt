@@ -86,18 +86,18 @@ abstract class IntelliJPlatformTestBase {
         source overwrite //language=java
                 """
                 package com.intellij.idea;
-
+                
                 import java.nio.file.Files;
                 import java.nio.file.Path;
-
+                
                 public final class Main {
                     private Main() {}
-
+                
                     public static void main(String[] args) throws Exception {
                         if (args.length < 2 || !"traverseUI".equals(args[0])) {
                             throw new IllegalArgumentException("Expected traverseUI arguments");
                         }
-
+                
                         Path outputDirectory = Path.of(args[1]);
                         Files.createDirectories(outputDirectory);
                         Files.writeString(

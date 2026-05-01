@@ -76,9 +76,9 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 
                 version = "1.0.0"
                 
-                repositories { 
+                repositories {
                     mavenCentral()
-                    
+                
                     intellijPlatform {
                         releases()
                     }
@@ -173,7 +173,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                     intellijPlatform {
                         instrumentCode = false
                         pluginConfiguration {
-                            name = "myNestedPluginName"            
+                            name = "myNestedPluginName"
                         }
                     }
                 }

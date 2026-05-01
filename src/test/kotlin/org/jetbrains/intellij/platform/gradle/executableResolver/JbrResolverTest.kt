@@ -51,9 +51,9 @@ class JbrResolverTest : IntelliJPluginTestBase() {
                     jbrVersion = "$version"
                     ${"jbrVariant = \"$variant\"".takeIf { variant != null }.orEmpty()}
                 }
-                    
+                
                 def projectExecutableProvider = tasks.named("runIde").flatMap { it.projectExecutable }
-                            
+                
                 task $TASK_NAME {
                     doLast {
                         println(projectExecutableProvider.get())

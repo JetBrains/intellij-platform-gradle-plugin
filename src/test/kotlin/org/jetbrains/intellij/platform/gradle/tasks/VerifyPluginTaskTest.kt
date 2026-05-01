@@ -469,7 +469,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginVerification {
                         verificationReportsDirectory = project.layout.buildDirectory.dir("foo")
-                        freeArgs = listOf("-verification-reports-formats", "plain") 
+                        freeArgs = listOf("-verification-reports-formats", "plain")
                     }
                 }
                 """.trimIndent()
@@ -497,7 +497,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """
                 intellijPlatform {
                     pluginVerification {
-                        freeArgs = listOf("-suppress-internal-api-usages", "jetbrains-plugins") 
+                        freeArgs = listOf("-suppress-internal-api-usages", "jetbrains-plugins")
                     }
                 }
                 """.trimIndent()
@@ -645,9 +645,9 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 
                     public static void main(String[] args) {
                         App$classNameSuffix.message("somemessage", "someparam1");
-                    
+                
                         System.out.println(com.intellij.openapi.project.ProjectCoreUtil.theOnlyOpenProject());
-                        
+                
                         System.out.println(com.intellij.openapi.project.Project.DIRECTORY_STORE_FOLDER);
                         com.intellij.openapi.components.ServiceManager.getService(String.class);
                     }

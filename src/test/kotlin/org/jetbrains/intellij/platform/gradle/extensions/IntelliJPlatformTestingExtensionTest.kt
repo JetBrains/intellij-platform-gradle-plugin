@@ -16,9 +16,9 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 @file:Suppress("DEPRECATION")
-
+                
                 println("EXT_TARGET=" + intellijPlatform.splitModeTarget.get())
-
+                
                 val customRun by intellijPlatformTesting.runIde.registering {
                     println("CUSTOM_TARGET=" + splitModeTarget.get())
                 }
@@ -171,7 +171,7 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
-                    
+                
                     caching {
                         ides {
                             enabled = false
@@ -226,7 +226,7 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
-                    
+                
                     caching {
                         ides {
                             enabled = false
@@ -238,7 +238,7 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                     type = org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity
                     version = "$intellijPlatformVersion"
                     useInstaller = true
-                    
+                
                     task {
                         enabled = false
                     }

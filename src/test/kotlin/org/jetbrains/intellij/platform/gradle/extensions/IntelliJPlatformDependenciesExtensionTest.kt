@@ -44,10 +44,10 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
                         testFramework(TestFrameworkType.Platform)
                     }
                 }
-
+                
                 tasks.register("printIntelliJPlatformTestDependencyComponents") {
                     val testDependencies = configurations.named("intellijPlatformTestDependencies")
-
+                
                     doLast {
                         testDependencies.get().incoming.resolutionResult.allComponents
                             .mapNotNull { it.moduleVersion }

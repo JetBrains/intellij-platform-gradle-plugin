@@ -33,7 +33,7 @@ class SplitModeIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Test
     fun `fail when applying custom arguments to the task with args`() {
         buildFile write //language=kotlin
-                """            
+                """
                 tasks {
                     runIde {
                         splitMode = splitModeProperty
@@ -51,7 +51,7 @@ class SplitModeIntegrationTest : IntelliJPlatformIntegrationTestBase(
     @Ignore("${Tasks.RUN_IDE} task never finishes")
     fun `accept arguments provided with argumentProviders`() {
         buildFile write //language=kotlin
-                """            
+                """
                 tasks {
                     runIde {
                         splitMode = splitModeProperty

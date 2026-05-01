@@ -135,11 +135,11 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
         settingsFile overwrite //language=kotlin
                 """
                 rootProject.name = "projectName"
-
+                
                 plugins {
                     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
                 }
-
+                
                 include("submodule")
                 """.trimIndent()
 
@@ -150,7 +150,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                         pluginComposedModule(implementation(project(":submodule")))
                     }
                 }
-
+                
                 intellijPlatform {
                     buildSearchableOptions = true
                 }
@@ -179,7 +179,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                         create(type, version) { this.useInstaller.set(useInstaller) }
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }

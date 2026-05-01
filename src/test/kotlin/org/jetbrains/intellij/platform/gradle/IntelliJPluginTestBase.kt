@@ -26,7 +26,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
         if (gradleScan) {
             settingsFile write //language=kotlin
-                    """                    
+                    """
                     plugins {
                         id("com.gradle.develocity") version "3.17.5"
                     }
@@ -88,7 +88,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 
                 repositories {
                     mavenCentral()
-                    
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
@@ -99,11 +99,11 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                         val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
                         val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                         val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-                        
+                
                         create(type, version) { this.useInstaller.set(useInstaller) }
                     }
                 }
-                            
+                
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false

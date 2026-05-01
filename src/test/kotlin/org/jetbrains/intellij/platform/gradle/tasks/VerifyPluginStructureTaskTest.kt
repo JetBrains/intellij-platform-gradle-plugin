@@ -200,8 +200,8 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 tasks {
-                    verifyPluginStructure { 
-                        ignoreWarnings = false 
+                    verifyPluginStructure {
+                        ignoreWarnings = false
                     }
                 }
                 """.trimIndent()

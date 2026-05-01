@@ -247,9 +247,9 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
                     val ides = provider {
                         configurations["${Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES}"].incoming.dependencies.joinToString()
                     }
-                    
+                
                     inputs.property("ides", ides)
-                    
+                
                     doLast {
                         println("ides = ${'$'}{ides.get()}")
                     }
