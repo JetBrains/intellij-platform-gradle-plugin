@@ -5,6 +5,8 @@
 ### Added
 
 - Cache a serialized IDE layout index and reuse it for bundled plugin/module dependency resolution, test runtime classpath collection, and `printBundledPlugins`/`printBundledModules`.
+- Added support for unit-testing of Kotlin plugin by introducing `TestFrameworkType.Plugin.Kotlin`.
+- Provided utilities for UI testing of debugger and Jupyter Notebook: `TestFrameworkType.UiUtil.Debugger` and `TestFrameworkType.UiUtil.Jupyter`.
 
 ### Fixed
 

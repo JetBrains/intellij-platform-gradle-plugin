@@ -28,6 +28,15 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
         Coordinates("com.jetbrains.intellij.driver","driver-model"),
     )
 
+    /**
+     * Different utility methods for tests that use the UI Driver framework
+     * The APIs in these modules may be unstable and subject to change without notice.
+     */
+    object UiUtil {
+        object Debugger : TestFrameworkType(Coordinates("com.jetbrains.intellij.debugger", "debugger-ui-test-util"))
+        object Jupyter : TestFrameworkType(Coordinates("com.jetbrains.intellij.jupyter", "jupyter-ui-test-util"))
+    }
+
     object Plugin {
         object CLion : TestFrameworkType(Coordinates("com.jetbrains.intellij.clion", "clion-merged-test-framework"))
         object CSS : TestFrameworkType(Coordinates("com.jetbrains.intellij.css", "css-test-framework"))
@@ -38,6 +47,7 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
         object Java : TestFrameworkType(Coordinates("com.jetbrains.intellij.java", "java-test-framework"))
         object JavaScript : TestFrameworkType(Coordinates("com.jetbrains.intellij.javascript", "javascript-test-framework"))
         object Jupyter : TestFrameworkType(Coordinates("com.jetbrains.intellij.jupyter", "jupyter-test-framework"))
+        object Kotlin : TestFrameworkType(Coordinates("com.jetbrains.intellij.kotlin", "kotlin-base-test-framework"))
         object LSP : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "lsp-test-framework"))
         object Maven : TestFrameworkType(Coordinates("com.jetbrains.intellij.maven", "maven-test-framework"))
         object Notebooks : TestFrameworkType(Coordinates("com.jetbrains.intellij.notebooks", "notebooks-visualization-test-framework"))
