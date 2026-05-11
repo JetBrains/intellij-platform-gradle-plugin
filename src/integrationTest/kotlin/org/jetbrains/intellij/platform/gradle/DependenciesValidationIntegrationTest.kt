@@ -365,6 +365,30 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
     }
 
     @Test
+    fun `resolve bundled module by module alias`() {
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                        bundledModule("com.intellij.modules.vcs")
+                    }
+                }
+                """.trimIndent()
+
+        build(DEPENDENCIES, "--configuration=compileClasspath") {
+            val artifactVersion = "$intellijPlatformType-$intellijPlatformBuildNumber"
+
+            assertContains("bundledModule:com.intellij.modules.vcs:$artifactVersion", output)
+        }
+    }
+
+    @Test
     fun `resolve all transitive dependencies on bundled modules for Coverage`() {
         buildFile write //language=kotlin
                 """

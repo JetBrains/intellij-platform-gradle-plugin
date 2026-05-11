@@ -41,6 +41,8 @@ internal data class IdeLayoutIndex(
 
     fun findById(id: String) = entriesById[id]
 
+    fun findByIdOrModuleId(id: String) = findById(id) ?: findByModuleId(id)
+
     /**
      * Returns the exact serialized entry referenced by [Entry.dependencies].
      */
