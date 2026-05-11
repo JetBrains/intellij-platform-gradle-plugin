@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Regression. Resolve bundled modules by module aliases, so entries like `bundledModule("com.intellij.modules.vcs")` are accepted. JetBrains/intellij-platform-gradle-plugin#2144
+
 ## [2.16.0] - 2026-05-01
 
 ### Added

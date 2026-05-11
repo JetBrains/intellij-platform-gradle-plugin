@@ -34,7 +34,9 @@ class IdeLayoutIndexTest {
 
         assertSame(first, ideLayoutIndex.findById("com.intellij.example"))
         assertSame(first, ideLayoutIndex.findByModuleId("example.alias"))
+        assertSame(first, ideLayoutIndex.findByIdOrModuleId("example.alias"))
         assertSame(second, ideLayoutIndex.findByModuleId("example.alias.2"))
+        assertSame(second, ideLayoutIndex.findByIdOrModuleId("example.alias.2"))
         assertSame(third, ideLayoutIndex.findByKey("entry-2"))
     }
 

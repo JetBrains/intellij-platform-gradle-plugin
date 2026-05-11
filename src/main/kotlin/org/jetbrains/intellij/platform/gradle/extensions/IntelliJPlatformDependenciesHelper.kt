@@ -1138,7 +1138,7 @@ class IntelliJPlatformDependenciesHelper(
     private fun createIntelliJPlatformBundledPlugin(platformPath: Path, id: String): Dependency {
         val productInfo = platformPath.productInfo()
         val ideLayoutIndex = ideLayoutIndex(platformPath)
-        val plugin = requireNotNull(ideLayoutIndex.findById(id) ?: ideLayoutIndex.findByModuleId(id)) {
+        val plugin = requireNotNull(ideLayoutIndex.findByIdOrModuleId(id)) {
             val unresolvedPluginId = when (id) {
                 "copyright" -> "Use correct plugin ID 'com.intellij.copyright' instead of 'copyright'."
                 "css", "css-impl" -> "Use correct plugin ID 'com.intellij.css' instead of 'css'/'css-impl'."
@@ -1192,7 +1192,9 @@ class IntelliJPlatformDependenciesHelper(
      * @param platformPath The path to the current IntelliJ Platform.
      */
     private fun createIntelliJPlatformBundledModule(id: String, platformPath: Path): Dependency {
-        val bundledModule = requireNotNull(ideLayoutIndex(platformPath).findById(id)) { "Specified bundledModule '$id' doesn't exist." }
+        val bundledModule = requireNotNull(ideLayoutIndex(platformPath).findByIdOrModuleId(id)) {
+            "Specified bundledModule '$id' doesn't exist."
+        }
 
         val classpath = bundledModule.resolveClasspath(platformPath).map { it.safePathString }
         val (group, name, version) = writeBundledModuleDependency(id, classpath, platformPath)
