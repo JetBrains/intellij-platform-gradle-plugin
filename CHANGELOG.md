@@ -2,12 +2,6 @@
 
 ## [next]
 
-### Fixed
-
-- Regression. Resolve bundled modules by module aliases, so entries like `bundledModule("com.intellij.modules.vcs")` are accepted. JetBrains/intellij-platform-gradle-plugin#2144
-
-## [2.16.0] - 2026-05-01
-
 ### Added
 
 - Added support for unit-testing of Kotlin plugin by introducing `TestFrameworkType.Plugin.Kotlin`.
@@ -16,6 +10,7 @@
 ### Fixed
 
 - Regression. Resolve bundled modules by module aliases, so entries like `bundledModule("com.intellij.modules.vcs")` are accepted. JetBrains/intellij-platform-gradle-plugin#2144
+- Avoid failing `prepareJarSearchableOptions` in composed multi-module builds when the root project does not define `plugin.xml`. JetBrains/intellij-platform-gradle-plugin#2146
 
 ## [2.16.0] - 2026-05-01
 

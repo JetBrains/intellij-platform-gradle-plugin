@@ -2,8 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.intellij.beans.PluginBean
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileSystemOperations
 import org.gradle.api.file.ProjectLayout
@@ -65,11 +67,14 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
     @get:Internal
     abstract val pluginXmlService: Property<PluginXmlService>
 
+    @get:InputFiles
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.RELATIVE)
+    abstract val searchableOptionsDescriptors: ConfigurableFileCollection
+
     @TaskAction
     fun prepareJarSearchableOptions() {
-        val pluginBean = pluginXmlService.get().resolve(pluginXml.asPath)
-        val pluginId = pluginBean.id
-        val modules = pluginBean.pluginContent.flatMap { it.modules.map { module -> module.moduleName } }
+        val searchableOptionsIds = resolveSearchableOptionsIds()
 
         fileSystemOperations.sync {
             from(inputDirectory)
@@ -77,9 +82,7 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
             include {
                 when {
                     it.isDirectory -> true
-                    it.name.endsWith(pluginId + SEARCHABLE_OPTIONS_SUFFIX_JSON) -> true
-                    it.name.substringAfter('-').removeSuffix(SEARCHABLE_OPTIONS_SUFFIX_JSON) in modules -> true
-                    it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_JSON) -> false
+                    it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_JSON) -> it.name.searchableOptionsId() in searchableOptionsIds
                     !it.name.endsWith(SEARCHABLE_OPTIONS_SUFFIX_XML) -> false
                     else -> libContainer.asPath.resolve(it.name.removeSuffix(SEARCHABLE_OPTIONS_SUFFIX_XML)).exists()
                 }
@@ -90,6 +93,21 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
                     else -> "search/$name"
                 }
             }
+        }
+    }
+
+    private fun resolveSearchableOptionsIds(): Set<String> {
+        val service = pluginXmlService.get()
+        val mainPluginXml = pluginXml.orNull?.asPath
+        return buildSet {
+            mainPluginXml?.let { addAll(service.resolve(it).searchableOptionsIds()) }
+
+            searchableOptionsDescriptors.files
+                .map { it.toPath() }
+                .distinct()
+                .filterNot { it == mainPluginXml }
+                .mapNotNull { runCatching { service.resolve(it) }.getOrNull() }
+                .forEach { addAll(it.searchableOptionsIds()) }
         }
     }
 
@@ -108,6 +126,7 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
                 pluginXmlService.convention(project.pluginXmlService())
                 inputDirectory.convention(buildSearchableOptionsTaskProvider.flatMap { it.outputDirectory })
                 libContainer.convention(prepareSandboxTaskProvider.flatMap { it.pluginDirectory.dir(Sandbox.Plugin.LIB) })
+                searchableOptionsDescriptors.from(project.searchableOptionsDescriptorFiles())
                 outputDirectory.convention(
                     project.layout.dir(project.provider {
                         temporaryDir
@@ -123,3 +142,9 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
             }
     }
 }
+
+private fun PluginBean.searchableOptionsIds() = sequenceOf(id) +
+        pluginContent.asSequence()
+            .flatMap { content -> content.modules.asSequence().map { module -> module.moduleName } }
+
+private fun String.searchableOptionsId() = substringAfter('-').removeSuffix(SEARCHABLE_OPTIONS_SUFFIX_JSON)

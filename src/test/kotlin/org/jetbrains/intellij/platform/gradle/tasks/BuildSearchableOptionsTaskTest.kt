@@ -125,9 +125,7 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
     }
 
     @Test
-    fun `build searchable options when Configurable EP is declared in submodule xml`() {
-        pluginXml write getPluginXmlWithoutSearchableConfigurable()
-
+    fun `build searchable options when Configurable EP is declared in composed module xml without root plugin xml`() {
         settingsFile overwrite //language=kotlin
                 """
                 rootProject.name = "projectName"
@@ -155,28 +153,22 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
         dir.resolve("submodule/build.gradle.kts") write //language=kotlin
                 """
                 plugins {
-                    id("org.jetbrains.kotlin.jvm")
+                    id("java")
                     id("org.jetbrains.intellij.platform.module")
                 }
-                
-                kotlin {
-                    jvmToolchain(21)
-                }
-                
                 repositories {
                     mavenCentral()
-                
+
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-                
                 dependencies {
                     intellijPlatform {
                         val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
                         val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                         val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-                
+
                         create(type, version) { this.useInstaller.set(useInstaller) }
                     }
                 }
@@ -186,9 +178,13 @@ class BuildSearchableOptionsTaskTest : SearchableOptionsTestBase() {
                 }
                 """.trimIndent()
 
-        dir.resolve("submodule/src/main/resources/submodule.xml") write //language=xml
+        dir.resolve("submodule/src/main/resources/META-INF/plugin.xml") write //language=xml
                 """
                 <idea-plugin>
+                    <id>org.jetbrains.plugins.integration-tests.searchable-options.submodule</id>
+                    <name>Searchable Options Submodule</name>
+                    <vendor>JetBrains</vendor>
+
                     <extensions defaultExtensionNs="com.intellij">
                         <projectConfigurable instance="SubmoduleSearchableConfigurable"/>
                     </extensions>
