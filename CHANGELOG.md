@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.16.0] - 2026-05-01
+
 ### Added
 
 - Cache a serialized IDE layout index and reuse it for bundled plugin/module dependency resolution, test runtime classpath collection, and `printBundledPlugins`/`printBundledModules`.
@@ -1754,7 +1756,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.15.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.16.0...HEAD
+[2.16.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.15.0...v2.16.0
 [2.15.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.14.0...v2.15.0
 [2.14.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.1...v2.14.0
 [2.13.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.0...v2.13.1
