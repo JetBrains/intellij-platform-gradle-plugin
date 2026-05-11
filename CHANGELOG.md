@@ -10,6 +10,17 @@
 
 ### Added
 
+- Added support for unit-testing of Kotlin plugin by introducing `TestFrameworkType.Plugin.Kotlin`.
+- Provided utilities for UI testing of debugger and Jupyter Notebook: `TestFrameworkType.UiUtil.Debugger` and `TestFrameworkType.UiUtil.Jupyter`.
+
+### Fixed
+
+- Regression. Resolve bundled modules by module aliases, so entries like `bundledModule("com.intellij.modules.vcs")` are accepted. JetBrains/intellij-platform-gradle-plugin#2144
+
+## [2.16.0] - 2026-05-01
+
+### Added
+
 - Cache a serialized IDE layout index and reuse it for bundled plugin/module dependency resolution, test runtime classpath collection, and `printBundledPlugins`/`printBundledModules`.
 
 ### Fixed

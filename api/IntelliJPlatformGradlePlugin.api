@@ -455,6 +455,10 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Jupyter;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Kotlin : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Kotlin;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$LSP : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$LSP;
 }
@@ -501,6 +505,18 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Starter : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Starter;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$UiUtil {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$UiUtil;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$UiUtil$Debugger : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$UiUtil$Debugger;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$UiUtil$Jupyter : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$UiUtil$Jupyter;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/argumentProviders/ComposeHotReloadArgumentProvider : org/gradle/process/CommandLineArgumentProvider {
