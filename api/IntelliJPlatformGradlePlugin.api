@@ -3169,6 +3169,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareJarSea
 	public abstract fun getLibContainer ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getOutputDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getPluginXmlService ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSearchableOptionsDescriptors ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public final fun prepareJarSearchableOptions ()V
 }
 
