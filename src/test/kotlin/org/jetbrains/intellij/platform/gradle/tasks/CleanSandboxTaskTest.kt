@@ -2,8 +2,10 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.assertTaskOutcome
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.buildDirectory
 import org.jetbrains.intellij.platform.gradle.sandboxDirectory
@@ -31,6 +33,19 @@ class CleanSandboxTaskTest : IntelliJPluginTestBase() {
         assertTrue(currentSandbox.notExists())
         assertTrue(anotherProjectSandbox.exists())
         assertTrue(anotherVersionSandbox.exists())
+    }
+
+    @Test
+    fun `clean runs cleanSandbox`() {
+        val currentSandbox = sandboxDirectory.resolve("projectName").resolve("$intellijPlatformType-$intellijPlatformVersion").createDirectories()
+
+        assertTrue(currentSandbox.exists())
+
+        build(Tasks.External.CLEAN) {
+            assertTaskOutcome(Tasks.CLEAN_SANDBOX, TaskOutcome.SUCCESS)
+        }
+
+        assertTrue(currentSandbox.notExists())
     }
 
     @Test
