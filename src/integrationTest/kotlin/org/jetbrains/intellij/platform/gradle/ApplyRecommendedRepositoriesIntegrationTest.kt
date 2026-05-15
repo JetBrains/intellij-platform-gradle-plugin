@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle
 import kotlin.test.Test
 import kotlin.test.assertContains
 
-private const val CLEAN = "clean"
+private const val HELP = "help"
 
 class ApplyRecommendedRepositoriesIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "apply-recommended-repositories",
@@ -13,7 +13,7 @@ class ApplyRecommendedRepositoriesIntegrationTest : IntelliJPlatformIntegrationT
 
     @Test
     fun `attach bundled plugin sources`() {
-        build(CLEAN) {
+        build(HELP) {
             assertLogValue("repositories = ") {
                 val repositories = it.split(";")
 
