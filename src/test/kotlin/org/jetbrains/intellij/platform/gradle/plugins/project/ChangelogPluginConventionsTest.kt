@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.io.path.readText
 import kotlin.test.Test
 
 class ChangelogPluginConventionsTest : IntelliJPluginTestBase() {
@@ -38,7 +39,7 @@ class ChangelogPluginConventionsTest : IntelliJPluginTestBase() {
         ) {
             assertContains("groups=[]", output)
             assertContains("repositoryUrl=https://example.com/repository", output)
-            assertContains("versionPrefix=", output)
+            assertContains("versionPrefix=v", output)
             assertContains("<li>Initial release</li>", output)
         }
     }
@@ -147,6 +148,31 @@ class ChangelogPluginConventionsTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `patch changelog preserves changelog plugin default version prefix`() {
+        pluginXml overwrite //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+        writeChangelogWithReleasedVersion()
+        applyChangelogPlugin()
+
+        buildFile write //language=kotlin
+                """
+                version = "1.2.3"
+
+                extensions.getByType(org.jetbrains.changelog.ChangelogPluginExtension::class.java).apply {
+                    repositoryUrl.set("https://github.com/example/example")
+                }
+                """.trimIndent()
+
+        build("patchChangelog", args = listOf("--release-note=Release notes"))
+
+        val changelog = dir.resolve("CHANGELOG.md").readText()
+        assertContains("[Unreleased]: https://github.com/example/example/compare/v1.2.3...HEAD", changelog)
+        assertContains("[1.2.3]: https://github.com/example/example/compare/v1.2.2...v1.2.3", changelog)
+    }
+
+    @Test
     fun `publish plugin depends on patch changelog when plugin is present`() {
         pluginXml overwrite //language=xml
                 """
@@ -204,6 +230,26 @@ class ChangelogPluginConventionsTest : IntelliJPluginTestBase() {
                 
                 ### Added
                 - Initial release
+                """.trimIndent()
+    }
+
+    private fun writeChangelogWithReleasedVersion() {
+        dir.resolve("CHANGELOG.md") overwrite //language=markdown
+                """
+                # Changelog
+                
+                ## [Unreleased]
+                
+                ### Added
+                - Next change
+                
+                ## [1.2.2]
+                
+                ### Added
+                - Previous release
+                
+                [Unreleased]: https://github.com/example/example/compare/v1.2.2...HEAD
+                [1.2.2]: https://github.com/example/example/compare/v1.2.1...v1.2.2
                 """.trimIndent()
     }
 

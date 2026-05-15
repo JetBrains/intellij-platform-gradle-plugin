@@ -17,7 +17,6 @@ internal fun Project.setupChangelogConventions(pluginConfiguration: IntelliJPlat
 
     changelog.listProperty("getGroups").convention(emptyList())
     changelog.stringProperty("getRepositoryUrl").convention(providers.gradleProperty("pluginRepositoryUrl"))
-    changelog.stringProperty("getVersionPrefix").convention("")
 
     // Use reflection to avoid coupling the plugin runtime to a specific changelog-plugin classloader/version.
     pluginConfiguration.changeNotes.convention(
