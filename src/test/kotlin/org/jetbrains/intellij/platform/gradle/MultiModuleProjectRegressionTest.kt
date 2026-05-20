@@ -3,11 +3,66 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
+
+    @Test
+    fun `module local IntelliJ Platform dependency overrides inherited root local dependency before variant attributes are queried`() {
+        settingsFile write //language=kotlin
+                """
+                include("clion")
+                """.trimIndent()
+
+        val clionIdePath = dir.resolve("clion-ide")
+        clionIdePath.resolve("product-info.json") write //language=json
+                """
+                {
+                    "name": "CLion",
+                    "version": "$intellijPlatformVersion",
+                    "buildNumber": "$intellijPlatformBuildNumber",
+                    "productCode": "CL"
+                }
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        pluginComposedModule(runtimeOnly(project(":clion")))
+                    }
+                }
+                """.trimIndent()
+
+        dir.resolve("clion/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform.module")
+                }
+                
+                repositories {
+                    mavenCentral()
+                
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+                
+                dependencies {
+                    intellijPlatform {
+                        local("${clionIdePath.invariantSeparatorsPathString}")
+                    }
+                }
+                """.trimIndent()
+
+        build("dependencies", "--configuration", "intellijPlatformRuntimeClasspath") {
+            assertContains(output, "project :clion")
+        }
+    }
 
     @Test
     fun `build plugin composes pluginComposedModule dependencies into the main jar`() {

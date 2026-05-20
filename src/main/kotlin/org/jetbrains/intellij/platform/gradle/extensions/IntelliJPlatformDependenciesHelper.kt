@@ -420,29 +420,31 @@ class IntelliJPlatformDependenciesHelper(
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         isExplicit: Boolean = true,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(provider {
+    ) {
         if (isExplicit) {
             markIntelliJPlatformDependencyExplicit(intellijPlatformConfigurationName)
         }
 
-        buildList {
-            val localPath = localPathProvider.orNull ?: return@buildList
-            val platformPath = resolveArtifactPath(localPath)
-            val productInfo = platformPath.productInfo()
+        configurations[configurationName].dependencies.addAllLater(provider {
+            buildList {
+                val localPath = localPathProvider.orNull ?: return@buildList
+                val platformPath = resolveArtifactPath(localPath)
+                val productInfo = platformPath.productInfo()
 
-            val dependencyConfiguration =
-                objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply {
-                    type = productInfo.type
-                    version = productInfo.version.removePrefix("${productInfo.productCode}-")
-                    useInstaller = true
-                    useCache = false
-                    productMode = ProductMode.MONOLITH
-                }
-            requestedIntelliJPlatforms.set(dependencyConfiguration, intellijPlatformConfigurationName)
+                val dependencyConfiguration =
+                    objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply {
+                        type = productInfo.type
+                        version = productInfo.version.removePrefix("${productInfo.productCode}-")
+                        useInstaller = true
+                        useCache = false
+                        productMode = ProductMode.MONOLITH
+                    }
+                requestedIntelliJPlatforms.set(dependencyConfiguration, intellijPlatformConfigurationName)
 
-            createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
-        }
-    }.cached())
+                createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
+            }
+        }.cached())
+    }
 
     internal fun hasExplicitIntelliJPlatformDependency(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) =
         requestedIntelliJPlatforms.hasExplicit(configurationName)

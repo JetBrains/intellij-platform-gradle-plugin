@@ -48,22 +48,27 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
     ) =
         map.compute(configurationName) { key, previous ->
             when (key) {
-                baseConfigurationName -> base.apply {
-                    check(previous == null) {
-                        "The '$key' configuration already contains the following IntelliJ Platform dependency: ${previous?.get()}"
+                baseConfigurationName -> {
+                    val request = zip(
+                        configuration.type,
+                        configuration.version,
+                        configuration.useInstaller.orElse(parameters.useInstaller),
+                        configuration.useCache,
+                        configuration.productMode,
+                    ) { type, version, useInstaller, useCache, productMode ->
+                        RequestedIntelliJPlatform(type, version, useInstaller, useCache, productMode)
                     }
 
-                    set(
-                        zip(
-                            configuration.type,
-                            configuration.version,
-                            configuration.useInstaller.orElse(parameters.useInstaller),
-                            configuration.useCache,
-                            configuration.productMode,
-                        ) { type, version, useInstaller, useCache, productMode ->
-                            RequestedIntelliJPlatform(type, version, useInstaller, useCache, productMode)
-                        },
-                    )
+                    when (previous) {
+                        null -> base.apply { set(request) }
+                        else -> previous.also {
+                            val previousRequest = it.get()
+                            val requestedRequest = request.get()
+                            check(previousRequest == requestedRequest) {
+                                "The '$key' configuration already contains the following IntelliJ Platform dependency: $previousRequest. Requested: $requestedRequest. Existing: $previousRequest"
+                            }
+                        }
+                    }
                 }
 
                 else -> {
@@ -144,5 +149,5 @@ data class RequestedIntelliJPlatform(
     val isNightly
         get() = nightlyVersionPattern.matches(version)
 
-    override fun toString() = "$type-$version ($installerLabel)"
+    override fun toString() = "$type-$version [useInstaller=$useInstaller, useCache=$useCache, productMode=$productMode]"
 }

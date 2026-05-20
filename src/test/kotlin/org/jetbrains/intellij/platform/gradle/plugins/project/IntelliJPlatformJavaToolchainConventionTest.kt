@@ -7,8 +7,10 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.overwrite
+import org.jetbrains.intellij.platform.gradle.write
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.toPlatformJavaVersion
+import kotlin.io.path.createDirectories
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -36,6 +38,36 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
     @Test
     fun `default Java targets follow target platform for module plugin without configuring toolchain`() {
         buildFile overwrite buildScript("org.jetbrains.intellij.platform.module")
+
+        build(inspectTask) {
+            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
+            assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
+            assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
+            assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
+        }
+    }
+
+    @Test
+    fun `default Java targets follow local target platform when toolchain is queried during import`() {
+        val localIdePath = dir.resolve("idea-local").createDirectories()
+        localIdePath.resolve("product-info.json") write //language=json
+                """
+                {
+                    "name": "IntelliJ IDEA",
+                    "version": "$intellijPlatformVersion",
+                    "buildNumber": "$intellijPlatformBuildNumber",
+                    "productCode": "$intellijPlatformType"
+                }
+                """.trimIndent()
+
+        buildFile overwrite buildScript(
+            pluginId = "org.jetbrains.intellij.platform",
+            dependenciesConfiguration =
+                """
+                local("${localIdePath.invariantSeparatorsPathString}")
+                """.trimIndent(),
+        )
 
         build(inspectTask) {
             assertContains(output, "javaToolchain=null")
@@ -203,6 +235,10 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
     private fun buildScript(
         pluginId: String,
         preDependenciesConfiguration: String = "",
+        dependenciesConfiguration: String =
+            """
+            create("$intellijPlatformType", "$intellijPlatformVersion")
+            """.trimIndent(),
         additionalConfiguration: String = "",
     ) = //language=kotlin
         """
@@ -231,7 +267,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         
         dependencies {
             intellijPlatform {
-                create("$intellijPlatformType", "$intellijPlatformVersion")
+                $dependenciesConfiguration
             }
         }
         

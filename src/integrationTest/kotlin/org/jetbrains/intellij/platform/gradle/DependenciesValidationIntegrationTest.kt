@@ -151,7 +151,7 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
 
         buildAndFail(DEPENDENCIES) {
             assertContains(
-                "The 'intellijPlatformDependency' configuration already contains the following IntelliJ Platform dependency: $intellijPlatformType-$intellijPlatformVersion (installer)",
+                "The 'intellijPlatformDependency' configuration already contains the following IntelliJ Platform dependency: $intellijPlatformType-$intellijPlatformVersion [useInstaller=true, useCache=false, productMode=MONOLITH]",
                 output,
             )
         }
