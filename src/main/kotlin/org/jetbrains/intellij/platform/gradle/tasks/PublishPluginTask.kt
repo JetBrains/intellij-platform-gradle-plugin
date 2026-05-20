@@ -132,9 +132,23 @@ abstract class PublishPluginTask : DefaultTask() {
                 )
                 log.info("Uploaded successfully")
             } catch (exception: Exception) {
-                throw GradleException("Failed to upload plugin: ${exception.message}", exception)
+                if (useIdeServices && exception.isIdeServicesUploadResponseParsingFailure()) {
+                    log.warn("Uploaded successfully; ignoring IDE Services upload response parsing failure.")
+                    log.debug("IDE Services upload response parsing failure", exception)
+                } else {
+                    throw GradleException("Failed to upload plugin: ${exception.message}", exception)
+                }
             }
         }
+    }
+
+    private fun Throwable.isIdeServicesUploadResponseParsingFailure(): Boolean {
+        val message = message.orEmpty()
+        return (javaClass.name == "com.fasterxml.jackson.databind.exc.InvalidFormatException" &&
+                "Cannot deserialize value of type `int` from String" in message &&
+                """PluginUpdateBean["id"]""" in message) ||
+                cause?.isIdeServicesUploadResponseParsingFailure() == true ||
+                suppressed.any { it.isIdeServicesUploadResponseParsingFailure() }
     }
 
     init {

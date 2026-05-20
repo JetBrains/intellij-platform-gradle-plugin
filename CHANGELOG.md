@@ -12,6 +12,7 @@
 - Regression. Resolve bundled modules by module aliases, so entries like `bundledModule("com.intellij.modules.vcs")` are accepted. JetBrains/intellij-platform-gradle-plugin#2144
 - Preserve the Gradle Changelog Plugin's default `versionPrefix` convention when applying IntelliJ Platform Gradle Plugin changelog conventions. JetBrains/intellij-platform-gradle-plugin#2151
 - Avoid failing `prepareJarSearchableOptions` in composed multi-module builds when the root project does not define `plugin.xml`. JetBrains/intellij-platform-gradle-plugin#2146
+- Avoid failing `publishPlugin` for IDE Services when upload succeeds, but the response contains a string plugin ID. JetBrains/intellij-platform-gradle-plugin#2152
 
 ## [2.16.0] - 2026-05-01
 

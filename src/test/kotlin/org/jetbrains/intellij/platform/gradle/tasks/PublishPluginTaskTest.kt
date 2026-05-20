@@ -2,11 +2,15 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.sun.net.httpserver.HttpServer
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import java.net.InetSocketAddress
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class PublishPluginTaskTest : IntelliJPluginTestBase() {
 
@@ -123,6 +127,53 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `ignore IDE Services upload response parsing failure`() {
+        pluginXml overwrite //language=xml
+                """
+                <idea-plugin>
+                    <id>org.example.plugin</id>
+                    <name>PluginName</name>
+                    <version>0.0.1</version>
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <vendor>JetBrains</vendor>
+                    <depends>com.intellij.modules.platform</depends>
+                </idea-plugin>
+                """.trimIndent()
+
+        withIdeServicesUploadResponse(
+            """
+            {
+              "id" : "org.example.plugin",
+              "name" : "PluginName",
+              "vendor" : "JetBrains",
+              "minVersion" : "1.0",
+              "maxVersion" : "1.4.0",
+              "isPrivate" : true
+            }
+            """.trimIndent()
+        ) { serverUrl, requests ->
+            buildFile write //language=kotlin
+                    """
+                    intellijPlatform {
+                        publishing {
+                            token = "ide-services-token"
+                            host = "$serverUrl"
+                            ideServices = true
+                            channels = listOf("Stable")
+                        }
+                    }
+                    """.trimIndent()
+
+            build(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
+                assertTaskOutcome(Tasks.PUBLISH_PLUGIN, TaskOutcome.SUCCESS)
+                assertContains("Uploaded successfully; ignoring IDE Services upload response parsing failure.", output)
+            }
+
+            assertEquals(1, requests.get())
+        }
+    }
+
+    @Test
     fun `use signed artifact for publication`() {
         buildFile write //language=kotlin
                 """
@@ -194,6 +245,28 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
         buildAndFailWithConfigurationCache(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertConfigurationCacheReused()
             assertContains("'token' property must be specified for plugin publishing", output)
+        }
+    }
+
+    private fun withIdeServicesUploadResponse(responseBody: String, block: (String, AtomicInteger) -> Unit) {
+        val requests = AtomicInteger()
+        val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
+            createContext("/api/plugins") { exchange ->
+                requests.incrementAndGet()
+                exchange.requestBody.use { it.readBytes() }
+
+                val bytes = responseBody.toByteArray()
+                exchange.responseHeaders.add("Content-Type", "application/json")
+                exchange.sendResponseHeaders(200, bytes.size.toLong())
+                exchange.responseBody.use { it.write(bytes) }
+            }
+            start()
+        }
+
+        try {
+            block("http://127.0.0.1:${server.address.port}", requests)
+        } finally {
+            server.stop(0)
         }
     }
 }
