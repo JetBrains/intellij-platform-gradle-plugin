@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.api.Project
 import org.gradle.api.tasks.Delete
 import org.gradle.kotlin.dsl.named
-import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -22,17 +21,11 @@ abstract class CleanSandboxTask : Delete() {
     }
 
     companion object : Registrable {
-        override fun register(project: Project) {
+        override fun register(project: Project) =
             project.registerTask<CleanSandboxTask>(Tasks.CLEAN_SANDBOX) {
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
 
                 delete(prepareSandboxTaskProvider.flatMap { it.sandboxDirectory })
             }
-
-            val cleanSandboxTaskProvider = project.tasks.named<CleanSandboxTask>(Tasks.CLEAN_SANDBOX)
-            project.tasks.named(LifecycleBasePlugin.CLEAN_TASK_NAME) {
-                dependsOn(cleanSandboxTaskProvider)
-            }
-        }
     }
 }
