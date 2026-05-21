@@ -351,6 +351,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                 systemPropertyDefault("idea.plugin.in.sandbox.mode", true)
                 systemPropertyDefault("idea.vendor.name", "JetBrains")
                 systemPropertyDefault("ide.no.platform.update", false)
+                systemPropertyDefault("intellij.console.log.level", "warning")
                 systemPropertyDefault("jdk.module.illegalAccess.silent", true)
 
                 with(OperatingSystem.current()) {

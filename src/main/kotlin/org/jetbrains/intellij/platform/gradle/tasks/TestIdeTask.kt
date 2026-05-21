@@ -85,6 +85,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("java.system.class.loader", "com.intellij.util.lang.PathClassLoader")
             systemProperty("idea.use.core.classloader.for.plugin.path", "true")
             systemProperty("idea.force.use.core.classloader", "true")
+            systemProperty("intellij.console.log.level", "warning")
             systemProperty("intellij.testFramework.rethrow.logged.errors", "true")
             systemProperty("rider.tests.plugin.home.path", project.rootProjectPath.safePathString)
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
