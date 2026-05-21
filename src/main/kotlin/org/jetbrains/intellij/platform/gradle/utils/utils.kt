@@ -13,7 +13,7 @@ import com.jetbrains.plugin.structure.intellij.problems.JetBrainsPluginCreationR
 import com.jetbrains.plugin.structure.intellij.problems.PluginCreationResultResolver
 import com.jetbrains.plugin.structure.intellij.problems.remapping.JsonUrlProblemLevelRemappingManager
 import com.jetbrains.plugin.structure.intellij.problems.remapping.RemappingSet.JETBRAINS_PLUGIN_REMAPPING_SET
-import com.jetbrains.plugin.structure.jar.CachingJarFileSystemProvider
+import com.jetbrains.plugin.structure.jar.DefaultJarFileSystemProvider
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -189,20 +189,18 @@ internal val String.expandUserHome: String
     }
 
 /**
- * Creates an [IdePluginManager] with scoped archive and JAR file system caches.
+ * Creates an [IdePluginManager] with scoped archive and JAR file system resources.
  */
 internal inline fun <T> withIdePluginManager(
     extractDirectory: Path,
     block: (IdePluginManager) -> T,
 ): T = PluginArchiveManager(extractDirectory).use { pluginArchiveManager ->
-    CachingJarFileSystemProvider().use { fileSystemProvider ->
-        block(
-            createIdePluginManager {
-                this.pluginArchiveManager = pluginArchiveManager
-                this.fileSystemProvider = fileSystemProvider
-            },
-        )
-    }
+    block(
+        createIdePluginManager {
+            this.pluginArchiveManager = pluginArchiveManager
+            this.fileSystemProvider = DefaultJarFileSystemProvider()
+        },
+    )
 }
 
 /**
