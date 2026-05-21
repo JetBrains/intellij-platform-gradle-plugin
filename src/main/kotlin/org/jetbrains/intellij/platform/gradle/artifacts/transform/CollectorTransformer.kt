@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
-import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.GradleException
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.artifacts.transform.InputArtifact
@@ -73,21 +72,26 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
                  * instead of pointing to a directory, see: [org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule]
                  */
                 else -> {
-                    val manager = IdePluginManager.createManager(createTempDirectory())
-                    val plugin = runCatching {
-                        val pluginPath = path.resolvePluginPath()
-                        manager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
-                    }.getOrNull()
+                    val extractDirectory = createTempDirectory()
+                    val jars = try {
+                        withIdePluginManager(extractDirectory) { manager ->
+                            val plugin = runCatching {
+                                val pluginPath = path.resolvePluginPath()
+                                manager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
+                            }.getOrNull()
 
-                    if (plugin == null) {
+                            plugin?.originalFile?.let(::collectJars) ?: plugin?.let { emptyList() }
+                        }
+                    } finally {
+                        extractDirectory.toFile().deleteRecursively()
+                    }
+
+                    if (jars == null) {
                         log.warn("Unknown input: $path")
                         return@runCatching
                     }
 
-                    plugin.originalFile?.let { pluginPath ->
-                        val jars = collectJars(pluginPath)
-                        jars.forEach(outputs::file)
-                    }
+                    jars.forEach(outputs::file)
                 }
             }
         }.onFailure {

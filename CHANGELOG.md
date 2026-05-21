@@ -14,6 +14,7 @@
 - Avoid failing `prepareJarSearchableOptions` in composed multi-module builds when the root project does not define `plugin.xml`. JetBrains/intellij-platform-gradle-plugin#2146
 - Avoid failing `publishPlugin` for IDE Services when upload succeeds, but the response contains a string plugin ID. JetBrains/intellij-platform-gradle-plugin#2152
 - Ensure explicit local IntelliJ Platform dependencies in module projects override inherited root platform dependencies before variant attributes are queried. JetBrains/intellij-platform-gradle-plugin#2154
+- Avoid retaining JAR file-system handles after plugin structure metadata parsing, fixing temporary project cleanup failures in `verifyPluginStructure` and related plugin inspection flows.
 
 ## [2.16.0] - 2026-05-01
 

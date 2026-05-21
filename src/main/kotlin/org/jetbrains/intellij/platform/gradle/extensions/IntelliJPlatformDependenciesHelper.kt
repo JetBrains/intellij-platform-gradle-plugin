@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
-import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.GradleException
@@ -1310,22 +1309,27 @@ class IntelliJPlatformDependenciesHelper(
         val artifactPath = resolvePath(localPath)
             .takeIf { it.exists() }
             .let { requireNotNull(it) { "Specified localPath '$localPath' doesn't exist." } }
-        val pluginManager = IdePluginManager.createManager()
 
-        val plugin by lazy {
+        val extractDirectory = providers.intellijPlatformCachePath(rootProjectDirectory)
+            .get()
+            .resolve("extracted-plugins")
+            .createDirectories()
+        val (pluginVersion, pluginName) = withIdePluginManager(extractDirectory) { pluginManager ->
             val pluginPath = when {
                 artifactPath.isDirectory() -> artifactPath.resolvePluginPath()
                 else -> artifactPath
             }
-            pluginManager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
+            val plugin = pluginManager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
+
+            plugin.pluginVersion to (plugin.pluginId ?: artifactPath.name)
         }
 
         // It is crucial to use the IDE type + build number to the version.
         // Because if UI & IC are used by different submodules in the same build, they might rewrite each other's Ivy
         // XML files, which might have different optional transitive dependencies defined due to IC having fewer plugins.
-        val version = productInfo.fullVersion + "-" + (plugin.pluginVersion ?: "0.0.0")
+        val version = productInfo.fullVersion + "-" + (pluginVersion ?: "0.0.0")
         val group = Dependencies.LOCAL_PLUGIN_GROUP
-        val name = plugin.pluginId ?: artifactPath.name
+        val name = pluginName
 
         writeIvyModule(Dependencies.LOCAL_PLUGIN_GROUP, name, version, artifactPath) {
             IvyModule(

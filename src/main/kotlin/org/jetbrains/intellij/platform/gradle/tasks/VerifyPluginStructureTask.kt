@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.base.problems.PluginProblem
-import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -18,6 +17,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.withIdePluginManager
 
 /**
  * Validates completeness and contents of `plugin.xml` descriptors as well as plugin archive structure.
@@ -66,7 +66,9 @@ abstract class VerifyPluginStructureTask : DefaultTask() {
 
     @TaskAction
     fun verifyPlugin() {
-        val creationResult = IdePluginManager.createManager().createPlugin(pluginDirectory.asPath)
+        val creationResult = withIdePluginManager(temporaryDir.toPath()) {
+            it.createPlugin(pluginDirectory.asPath)
+        }
 
         when (creationResult) {
             is PluginCreationSuccess -> {

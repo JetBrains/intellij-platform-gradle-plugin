@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
@@ -100,8 +99,9 @@ abstract class PublishPluginTask : DefaultTask() {
         }
 
         val path = archiveFile.asPath
-        val pluginManager = IdePluginManager.createManager()
-        val plugin = pluginManager.safelyCreatePlugin(path, suppressPluginProblems = false).getOrThrow()
+        val pluginId = withIdePluginManager(temporaryDir.toPath()) {
+            it.safelyCreatePlugin(path, suppressPluginProblems = false).getOrThrow().pluginId
+        }
 
         val resolvedHost = host.get()
         val useIdeServices = ideServices.get()
@@ -118,7 +118,6 @@ abstract class PublishPluginTask : DefaultTask() {
             false -> PluginRepositoryFactory.create(resolvedHost, resolvedToken)
         }
 
-        val pluginId = plugin.pluginId
         resolvedChannels.forEach { channel ->
             log.info("Uploading plugin '$pluginId' from '$path' to '$resolvedHost', channel: '$channel'")
             try {

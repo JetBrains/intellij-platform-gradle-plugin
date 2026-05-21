@@ -5,12 +5,15 @@ package org.jetbrains.intellij.platform.gradle.utils
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationFail
 import com.jetbrains.plugin.structure.base.plugin.PluginCreationSuccess
 import com.jetbrains.plugin.structure.intellij.plugin.IdePluginManager
+import com.jetbrains.plugin.structure.intellij.plugin.PluginArchiveManager
+import com.jetbrains.plugin.structure.intellij.plugin.createIdePluginManager
 import com.jetbrains.plugin.structure.intellij.problems.AnyProblemToWarningPluginCreationResultResolver
 import com.jetbrains.plugin.structure.intellij.problems.IntelliJPluginCreationResultResolver
 import com.jetbrains.plugin.structure.intellij.problems.JetBrainsPluginCreationResultResolver
 import com.jetbrains.plugin.structure.intellij.problems.PluginCreationResultResolver
 import com.jetbrains.plugin.structure.intellij.problems.remapping.JsonUrlProblemLevelRemappingManager
 import com.jetbrains.plugin.structure.intellij.problems.remapping.RemappingSet.JETBRAINS_PLUGIN_REMAPPING_SET
+import com.jetbrains.plugin.structure.jar.CachingJarFileSystemProvider
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
@@ -184,6 +187,23 @@ internal val String.expandUserHome: String
         startsWith("~/") || startsWith("~\\") -> System.getProperty("user.home") + substring(1)
         else -> this
     }
+
+/**
+ * Creates an [IdePluginManager] with scoped archive and JAR file system caches.
+ */
+internal inline fun <T> withIdePluginManager(
+    extractDirectory: Path,
+    block: (IdePluginManager) -> T,
+): T = PluginArchiveManager(extractDirectory).use { pluginArchiveManager ->
+    CachingJarFileSystemProvider().use { fileSystemProvider ->
+        block(
+            createIdePluginManager {
+                this.pluginArchiveManager = pluginArchiveManager
+                this.fileSystemProvider = fileSystemProvider
+            },
+        )
+    }
+}
 
 /**
  * Safely creates a plugin from the given path using the `IdePluginManager`. Handles plugin creation failures
