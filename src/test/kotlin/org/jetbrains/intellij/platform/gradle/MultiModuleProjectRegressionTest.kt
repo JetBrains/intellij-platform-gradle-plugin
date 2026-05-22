@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
@@ -59,8 +60,13 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
+        val expectedProjectDependency = when {
+            GradleVersion.version(gradleVersion) >= GradleVersion.version("9.6.0") -> "project ':clion'"
+            else -> "project :clion"
+        }
+
         build("dependencies", "--configuration", "intellijPlatformRuntimeClasspath") {
-            assertContains(output, "project :clion")
+            assertContains(output, expectedProjectDependency)
         }
     }
 
