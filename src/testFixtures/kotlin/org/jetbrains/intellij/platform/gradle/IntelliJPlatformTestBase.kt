@@ -7,6 +7,7 @@ import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.UnexpectedBuildResultException
 import java.lang.management.ManagementFactory
+import java.nio.file.FileSystemException
 import java.nio.file.Path
 import kotlin.io.path.*
 import kotlin.test.AfterTest
@@ -64,7 +65,17 @@ abstract class IntelliJPlatformTestBase {
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
     open fun tearDown() {
-        dir.deleteRecursively()
+        repeat(5) { attempt ->
+            try {
+                dir.deleteRecursively()
+                return
+            } catch (exception: FileSystemException) {
+                if (attempt == 4) {
+                    throw exception
+                }
+                Thread.sleep(100)
+            }
+        }
     }
 
     protected fun build(
