@@ -422,7 +422,6 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
 
             assertContains(
                 """
-                compileClasspath - Compile classpath for 'main'.
                 +--- bundledPlugin:Coverage:$artifactVersion
                 |    +--- bundledPlugin:com.intellij.java:$artifactVersion
                 |    \--- bundledModule:intellij.platform.coverage:$artifactVersion
