@@ -31,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import kotlin.io.path.*
+import org.apache.tools.ant.types.Path as AntPath
 
 private const val FILTER_ANNOTATION_REGEXP_CLASS = "com.intellij.ant.ClassFilterAnnotationRegexp"
 private const val LOADER_REF = "java2.loader"
@@ -100,6 +101,8 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     @TaskAction
     @OptIn(ExperimentalPathApi::class)
     fun instrumentCode(inputChanges: InputChanges) = runCatching {
+        prepareAntClassLoader()
+
         ant.invokeMethod(
             "taskdef",
             mapOf(
@@ -194,6 +197,22 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
         )
     }
 
+    private fun prepareAntClassLoader() {
+        if (ant.project.hasReference(LOADER_REF)) {
+            return
+        }
+
+        val classpath = AntPath(ant.project, javaCompilerConfiguration.asPath)
+        ant.project.createClassLoader(classpath).apply {
+            // Javac2 ships patched relocated ASM classes that must take precedence over Gradle/Kotlin classes.
+            setParentFirst(false)
+            addJavaLibraries()
+            addSystemPackageRoot("org.apache.tools.ant")
+        }.also {
+            ant.project.addReference(LOADER_REF, it)
+        }
+    }
+
     /**
      * @throws Exception
      */
@@ -205,8 +224,8 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                 "name" to "skip",
                 "classpath" to javaCompilerConfiguration.joinToString(":"),
                 "loaderref" to LOADER_REF,
-                "classname" to FILTER_ANNOTATION_REGEXP_CLASS
-            )
+                "classname" to FILTER_ANNOTATION_REGEXP_CLASS,
+            ),
         )
         true
     }.getOrElse { e: Throwable ->
@@ -231,29 +250,25 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                 if (instrumentationLogs.get()) {
                     ant.lifecycleLogLevel = org.gradle.api.AntBuilder.AntMessagePriority.INFO
                 }
-                ant.invokeMethod("instrumentIdeaExtensions", arrayOf(
-                    mapOf(
-                        "srcdir" to dirs.joinToString(":"),
-                        "destdir" to temporaryDir,
-                        "classpath" to (sourceSetCompileClasspath + classesDirs).joinToString(":"),
-                        "includeantruntime" to false,
-                        "instrumentNotNull" to instrumentNotNull
-                    ),
-                    object : Closure<Any>(this, this) {
-                        @Suppress("unused") // Groovy calls using reflection inside Closure
-                        fun doCall() = when {
-                            instrumentNotNull -> {
-                                ant.invokeMethod(
-                                    "skip", mapOf(
-                                        "pattern" to "kotlin/Metadata"
-                                    )
-                                )
+                ant.invokeMethod(
+                    "instrumentIdeaExtensions",
+                    arrayOf(
+                        mapOf(
+                            "srcdir" to dirs.joinToString(":"),
+                            "destdir" to temporaryDir,
+                            "classpath" to (sourceSetCompileClasspath + classesDirs).joinToString(":"),
+                            "includeantruntime" to false,
+                            "instrumentNotNull" to instrumentNotNull,
+                        ),
+                        object : Closure<Any>(this, this) {
+                            @Suppress("unused") // Groovy calls using reflection inside Closure
+                            fun doCall() = when {
+                                instrumentNotNull -> ant.invokeMethod("skip", mapOf("pattern" to "kotlin/Metadata"))
+                                else -> null
                             }
-
-                            else -> null
-                        }
-                    }
-                ))
+                        },
+                    ),
+                )
             }
         } finally {
             block()
@@ -283,23 +298,31 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                     outputDirectory.convention(project.layout.buildDirectory.map { it.dir("instrumented").dir(name) })
                     instrumentationLogs.convention(project.gradle.startParameter.logLevel == LogLevel.INFO)
 
-                    sourceDirs.from(project.provider {
-                        sourceSet.allJava.srcDirs
-                    })
-                    formsDirs.from(project.provider {
-                        sourceDirs.asFileTree.filter {
-                            it.toPath().extension == "form"
-                        }
-                    })
-                    classesDirs.from(project.provider {
-                        (sourceSet.output.classesDirs as ConfigurableFileCollection).from.run {
-                            project.files(this).filter { it.exists() }
-                        }
-                    })
+                    sourceDirs.from(
+                        project.provider {
+                            sourceSet.allJava.srcDirs
+                        },
+                    )
+                    formsDirs.from(
+                        project.provider {
+                            sourceDirs.asFileTree.filter {
+                                it.toPath().extension == "form"
+                            }
+                        },
+                    )
+                    classesDirs.from(
+                        project.provider {
+                            (sourceSet.output.classesDirs as ConfigurableFileCollection).from.run {
+                                project.files(this).filter { it.exists() }
+                            }
+                        },
+                    )
 
-                    sourceSetCompileClasspath.from(project.provider {
-                        sourceSet.compileClasspath
-                    })
+                    sourceSetCompileClasspath.from(
+                        project.provider {
+                            sourceSet.compileClasspath
+                        },
+                    )
 
                     dependsOn(sourceSet.classesTaskName)
                     onlyIf { instrumentCodeEnabled.get() }
