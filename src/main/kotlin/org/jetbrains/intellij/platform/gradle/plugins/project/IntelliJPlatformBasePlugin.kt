@@ -8,9 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
-import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.apply
-import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.withType
@@ -32,9 +30,8 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.get
-import org.jetbrains.intellij.platform.gradle.plugins.configureKotlinJvmToolchainConventions
-import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
+import org.jetbrains.intellij.platform.gradle.plugins.configureKotlinJvmToolchainConventions
 import org.jetbrains.intellij.platform.gradle.plugins.enableComposeHotReloadCompilerOptions
 import org.jetbrains.intellij.platform.gradle.plugins.setupChangelogConventions
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
@@ -42,7 +39,6 @@ import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScoped
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
-import kotlin.getValue
 
 abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
@@ -494,14 +490,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         // Setup default JVM targets based on the IntelliJ Platform dependency.
         // This only sets the Java toolchain language version convention; launchers are still resolved by Gradle lazily.
-        val intellijPlatformJavaLanguageVersion = project.cachedProvider {
-            project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY]
-                .asLenient
-                .productInfo()
-                .toPlatformJavaVersion()
-                .majorVersion
-                .toInt()
-        }.map(JavaLanguageVersion::of)
+        val intellijPlatformJavaLanguageVersion = dependenciesHelper.intellijPlatformJavaLanguageVersionProvider()
         val javaExtension = project.extensions.getByType<JavaPluginExtension>()
         fun configureJavaToolchainConvention() {
             javaExtension.toolchain.languageVersion.convention(intellijPlatformJavaLanguageVersion)

@@ -32,6 +32,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
     }
 
     private val map = ConcurrentHashMap<String, Provider<RequestedIntelliJPlatform>>()
+    private val conventions = ConcurrentHashMap<String, Provider<RequestedIntelliJPlatform>>()
     private val explicitConfigurations = ConcurrentHashMap.newKeySet<String>()
     private val base = objectFactory.property<RequestedIntelliJPlatform>()
 
@@ -45,61 +46,89 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
     fun set(
         configuration: IntelliJPlatformDependencyConfiguration,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+    ) = set(request(configuration, configurationName), configurationName)
+
+    internal fun set(
+        request: Provider<RequestedIntelliJPlatform>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
     ) =
         map.compute(configurationName) { key, previous ->
             when (key) {
                 baseConfigurationName -> {
-                    val request = zip(
-                        configuration.type,
-                        configuration.version,
-                        configuration.useInstaller.orElse(parameters.useInstaller),
-                        configuration.useCache,
-                        configuration.productMode,
-                    ) { type, version, useInstaller, useCache, productMode ->
-                        RequestedIntelliJPlatform(type, version, useInstaller, useCache, productMode)
-                    }
-
                     when (previous) {
-                        null -> base.apply { set(request) }
-                        else -> previous.also {
-                            val previousRequest = it.get()
-                            val requestedRequest = request.get()
+                        null -> request.also { base.set(it) }
+                        else -> previous.zip(request) { previousRequest, requestedRequest ->
                             check(previousRequest == requestedRequest) {
                                 "The '$key' configuration already contains the following IntelliJ Platform dependency: $previousRequest. Requested: $requestedRequest. Existing: $previousRequest"
                             }
+                            previousRequest
+                        }.also {
+                            base.set(it)
                         }
                     }
                 }
 
                 else -> {
-                    val errorProvider = { type: String ->
-                        providerFactory.provider {
-                            error("The '$key' configuration does not specify the $type of the IntelliJ Platform dependency nor can be resolved from the base configuration.")
-                        }
-                    }
-
-                    zip(
-                        configuration.type
-                            .orElse(base.map { it.type })
-                            .orElse(errorProvider("type")),
-                        configuration.version
-                            .orElse(base.map { it.version })
-                            .orElse(errorProvider("version")),
-                        configuration.useInstaller
-                            .orElse(base.map { it.useInstaller })
-                            .orElse(errorProvider("useInstaller")),
-                        configuration.useCache
-                            .orElse(base.map { it.useCache })
-                            .orElse(errorProvider("useCache")),
-                        configuration.productMode
-                            .orElse(base.map { it.productMode })
-                            .orElse(errorProvider("productMode")),
-                    ) { type, version, useInstaller, useCache, productMode ->
-                        RequestedIntelliJPlatform(type, version, useInstaller, useCache, productMode)
-                    }
+                    request
                 }
             }
         }.let(::requireNotNull)
+
+    internal fun convention(
+        request: Provider<RequestedIntelliJPlatform>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+    ) =
+        conventions.putIfAbsent(configurationName, request) ?: request.also {
+            if (configurationName == baseConfigurationName) {
+                base.convention(request)
+            }
+        }
+
+    internal fun request(configuration: IntelliJPlatformDependencyConfiguration) =
+        zip(
+            configuration.type,
+            configuration.version,
+            configuration.useInstaller.orElse(parameters.useInstaller),
+            configuration.useCache,
+            configuration.productMode,
+        ) { type, version, useInstaller, useCache, productMode ->
+            RequestedIntelliJPlatform(type, version, useInstaller, useCache, productMode)
+        }
+
+    internal fun request(
+        configuration: IntelliJPlatformDependencyConfiguration,
+        configurationName: String,
+    ): Provider<RequestedIntelliJPlatform> =
+        when (configurationName) {
+            baseConfigurationName -> request(configuration)
+            else -> {
+                val errorProvider = { type: String ->
+                    providerFactory.provider {
+                        error("The '$configurationName' configuration does not specify the $type of the IntelliJ Platform dependency nor can be resolved from the base configuration.")
+                    }
+                }
+
+                zip(
+                    configuration.type
+                        .orElse(base.map { it.type })
+                        .orElse(errorProvider("type")),
+                    configuration.version
+                        .orElse(base.map { it.version })
+                        .orElse(errorProvider("version")),
+                    configuration.useInstaller
+                        .orElse(base.map { it.useInstaller })
+                        .orElse(errorProvider("useInstaller")),
+                    configuration.useCache
+                        .orElse(base.map { it.useCache })
+                        .orElse(errorProvider("useCache")),
+                    configuration.productMode
+                        .orElse(base.map { it.productMode })
+                        .orElse(errorProvider("productMode")),
+                ) { type, version, useInstaller, useCache, productMode ->
+                    RequestedIntelliJPlatform(type, version, useInstaller, useCache, productMode)
+                }
+            }
+        }
 
     /**
      * Retrieves the value associated with the given configuration name.
@@ -112,7 +141,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
     operator fun get(configurationName: String) =
         when (configurationName) {
             baseConfigurationName -> base
-            else -> map[configurationName] ?: error("Unknown configuration: $configurationName")
+            else -> map[configurationName] ?: conventions[configurationName] ?: error("Unknown configuration: $configurationName")
         }
 }
 

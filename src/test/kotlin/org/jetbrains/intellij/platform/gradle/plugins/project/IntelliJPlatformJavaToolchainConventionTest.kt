@@ -49,6 +49,29 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `querying default compile targets during configuration does not resolve IntelliJ Platform dependency`() {
+        buildFile overwrite buildScript(
+            pluginId = "org.jetbrains.intellij.platform",
+            additionalConfiguration =
+                """
+                configurations.named("intellijPlatformDependency") {
+                    incoming.beforeResolve {
+                        throw org.gradle.api.GradleException("intellijPlatformDependency was resolved during configuration")
+                    }
+                }
+                """.trimIndent(),
+        )
+
+        build(inspectTask) {
+            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchainAfterEvaluate=${expectedPlatformJavaVersion.majorVersion}")
+            assertContains(output, "compileJava.release=${expectedPlatformJavaVersion.majorVersion}")
+            assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
+            assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
+        }
+    }
+
+    @Test
     fun `default Java targets follow local target platform when toolchain is queried during import`() {
         val localIdePath = dir.resolve("idea-local").createDirectories()
         localIdePath.resolve("product-info.json") write //language=json

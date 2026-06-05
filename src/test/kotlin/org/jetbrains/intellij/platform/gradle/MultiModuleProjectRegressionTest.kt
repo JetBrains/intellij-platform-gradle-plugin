@@ -4,6 +4,8 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.util.GradleVersion
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.toPlatformJavaVersion
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Test
 import kotlin.test.assertContains
@@ -11,6 +13,46 @@ import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
 class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
+
+    private val expectedPlatformJavaVersion
+        get() = Version.parse(intellijPlatformBuildNumber).toPlatformJavaVersion()
+
+    @Test
+    fun `module default compile target follows root request without resolving inherited platform path`() {
+        settingsFile write //language=kotlin
+                """
+                include("backend")
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                configurations.named("intellijPlatformDependency") {
+                    incoming.beforeResolve {
+                        throw org.gradle.api.GradleException("root intellijPlatformDependency was resolved during configuration")
+                    }
+                }
+                """.trimIndent()
+
+        dir.resolve("backend/build.gradle.kts") write //language=kotlin
+                """
+                import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
+                
+                plugins {
+                    id("org.jetbrains.kotlin.jvm")
+                    id("org.jetbrains.intellij.platform.module")
+                }
+                
+                val compileKotlinJvmTarget = tasks.named<KotlinJvmCompile>("compileKotlin").flatMap {
+                    it.compilerOptions.jvmTarget
+                }
+                
+                println("backend.compileKotlin.jvmTarget=" + compileKotlinJvmTarget.orNull)
+                """.trimIndent()
+
+        build(":backend:help") {
+            assertContains(output, "backend.compileKotlin.jvmTarget=JVM_${expectedPlatformJavaVersion.majorVersion}")
+        }
+    }
 
     @Test
     fun `module local IntelliJ Platform dependency overrides inherited root local dependency before variant attributes are queried`() {

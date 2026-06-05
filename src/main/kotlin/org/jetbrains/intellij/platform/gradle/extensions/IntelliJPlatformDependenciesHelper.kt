@@ -19,6 +19,7 @@ import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.*
@@ -51,6 +52,20 @@ import kotlin.io.path.*
 
 private fun RequestedIntelliJPlatform.requiresManagedLocalPath(splitMode: Boolean) =
     splitMode || productMode != ProductMode.MONOLITH
+
+private data class LocalIntelliJPlatform(
+    val platformPath: Path,
+    val productInfo: ProductInfo,
+) {
+    val request
+        get() = RequestedIntelliJPlatform(
+            type = productInfo.type,
+            version = productInfo.version.removePrefix("${productInfo.productCode}-"),
+            useInstaller = true,
+            useCache = false,
+            productMode = ProductMode.MONOLITH,
+        )
+}
 
 /**
  * Helper class for managing dependencies on the IntelliJ Platform in Gradle projects.
@@ -232,6 +247,25 @@ class IntelliJPlatformDependenciesHelper(
         intellijPlatformProjects.get().setPlatformPathProvider(projectPath, platformPathProvider(configurationName))
     }
 
+    internal fun registerIntelliJPlatformRequestProvider(
+        requestProvider: Provider<RequestedIntelliJPlatform>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+        isExplicit: Boolean = true,
+    ) {
+        if (isExplicit) {
+            markIntelliJPlatformDependencyExplicit(configurationName)
+            requestedIntelliJPlatforms.set(requestProvider, configurationName)
+        } else {
+            requestedIntelliJPlatforms.convention(requestProvider, configurationName)
+        }
+    }
+
+    internal fun intellijPlatformJavaLanguageVersionProvider(
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+    ) = requestedIntelliJPlatforms[configurationName]
+        .map { it.version.toVersion().toPlatformJavaVersion().majorVersion.toInt() }
+        .map(JavaLanguageVersion::of)
+
     /**
      * Resolves the serialized IDE layout index for the extracted platform distribution.
      *
@@ -304,9 +338,19 @@ class IntelliJPlatformDependenciesHelper(
         val requestsProvider = configurationsProvider.map { configurations ->
             resolveConfiguration()
             configurations.map {
-                requestedIntelliJPlatforms.set(it, dependencyConfigurationName).get()
+                requestedIntelliJPlatforms.request(it, dependencyConfigurationName).get()
             }
         }.cached()
+
+        requestedIntelliJPlatforms.set(
+            requestsProvider.map { requests ->
+                when (requests.size) {
+                    1 -> requests.single()
+                    else -> error("The '$dependencyConfigurationName' configuration must contain exactly one IntelliJ Platform dependency request, but ${requests.size} were found.")
+                }
+            },
+            dependencyConfigurationName,
+        )
 
         configurations[localArchivesConfigurationName].dependencies.addAllLater(
             requestsProvider.zip(splitModeProvider) { requests, splitMode ->
@@ -424,23 +468,24 @@ class IntelliJPlatformDependenciesHelper(
             markIntelliJPlatformDependencyExplicit(intellijPlatformConfigurationName)
         }
 
+        val localIntelliJPlatformProvider = providers.provider {
+            val localPath = localPathProvider.orNull ?: return@provider null
+            val platformPath = resolveArtifactPath(localPath)
+            val productInfo = platformPath.productInfo()
+
+            LocalIntelliJPlatform(platformPath, productInfo)
+        }.cached()
+
+        registerIntelliJPlatformRequestProvider(
+            requestProvider = localIntelliJPlatformProvider.map { it.request },
+            configurationName = intellijPlatformConfigurationName,
+            isExplicit = isExplicit,
+        )
+
         configurations[configurationName].dependencies.addAllLater(provider {
             buildList {
-                val localPath = localPathProvider.orNull ?: return@buildList
-                val platformPath = resolveArtifactPath(localPath)
-                val productInfo = platformPath.productInfo()
-
-                val dependencyConfiguration =
-                    objects.newInstance<IntelliJPlatformDependencyConfiguration>(objects, extensionProvider).apply {
-                        type = productInfo.type
-                        version = productInfo.version.removePrefix("${productInfo.productCode}-")
-                        useInstaller = true
-                        useCache = false
-                        productMode = ProductMode.MONOLITH
-                    }
-                requestedIntelliJPlatforms.set(dependencyConfiguration, intellijPlatformConfigurationName)
-
-                createIntelliJPlatformLocal(platformPath).apply(::add).apply(action)
+                val localIntelliJPlatform = localIntelliJPlatformProvider.orNull ?: return@buildList
+                createIntelliJPlatformLocal(localIntelliJPlatform.platformPath).apply(::add).apply(action)
             }
         }.cached())
     }

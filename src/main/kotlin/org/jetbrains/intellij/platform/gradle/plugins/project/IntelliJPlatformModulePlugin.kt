@@ -219,6 +219,18 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 }
                 .get()
 
+            dependenciesHelper.registerIntelliJPlatformRequestProvider(
+                requestProvider = project.provider {
+                    when {
+                        dependenciesHelper.hasExplicitIntelliJPlatformDependency() -> null
+                        !intellijPlatformProjects.isPluginProject(ROOT_PROJECT_PATH) -> null
+                        !rootRequestedIntelliJPlatforms.hasExplicit() -> null
+                        else -> rootRequestedIntelliJPlatforms[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].orNull
+                    }
+                },
+                isExplicit = false,
+            )
+
             dependenciesHelper.addIntelliJPlatformLocalDependency(
                 localPathProvider = project.provider {
                     when {

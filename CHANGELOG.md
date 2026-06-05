@@ -14,6 +14,7 @@
 - Avoid failing `prepareJarSearchableOptions` in composed multi-module builds when the root project does not define `plugin.xml`. JetBrains/intellij-platform-gradle-plugin#2146
 - Avoid failing `publishPlugin` for IDE Services when upload succeeds, but the response contains a string plugin ID. JetBrains/intellij-platform-gradle-plugin#2152
 - Ensure explicit local IntelliJ Platform dependencies in module projects override inherited root platform dependencies before variant attributes are queried. JetBrains/intellij-platform-gradle-plugin#2154
+- Avoid resolving `intellijPlatformDependency` while Gradle tooling models query Java and Kotlin compile target conventions during IDE sync. JetBrains/intellij-platform-gradle-plugin#2157
 - Avoid retaining JAR file-system handles after plugin structure metadata parsing, fixing temporary project cleanup failures in `verifyPluginStructure` and related plugin inspection flows.
 - Keep warning-level IDE console logging enabled for `runIde` and `testIde` by setting `intellij.console.log.level=warning` explicitly, as 262+ IDEs disable it by default.
 
