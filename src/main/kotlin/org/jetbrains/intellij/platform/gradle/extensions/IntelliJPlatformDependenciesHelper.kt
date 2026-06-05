@@ -1232,6 +1232,8 @@ class IntelliJPlatformDependenciesHelper(
             // Dependencies are stored by entry key, not by ID, so duplicate aliases still resolve exactly.
             .mapNotNull(ideLayoutIndex::findByKey)
             .distinctBy { it.id }
+            // Keep mixed plugin/module dependencies stable across IDE layouts while preserving order within each kind.
+            .sortedBy { it.isModule }
             .mapTo(ArrayList()) { dependency ->
                 val name = dependency.id
                 val group = when {
