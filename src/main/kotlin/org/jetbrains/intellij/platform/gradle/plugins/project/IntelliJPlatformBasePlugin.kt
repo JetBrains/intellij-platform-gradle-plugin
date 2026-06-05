@@ -109,6 +109,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 )
 
                 incoming.beforeResolve {
+                    // Realize the requested platform provider first to report duplicate DSL declarations precisely.
+                    dependenciesHelper.requestedIntelliJPlatforms[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].orNull
+
                     val message = when (dependencies.size) {
                         0 -> null
                         1 -> null
