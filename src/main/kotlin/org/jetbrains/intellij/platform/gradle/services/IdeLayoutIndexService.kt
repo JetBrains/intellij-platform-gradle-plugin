@@ -3,10 +3,24 @@
 package org.jetbrains.intellij.platform.gradle.services
 
 import com.jetbrains.plugin.structure.ide.Ide
+import com.jetbrains.plugin.structure.ide.ProductInfoBasedIde
+import com.jetbrains.plugin.structure.ide.ProductInfoBasedIdeManager
+import com.jetbrains.plugin.structure.ide.ProductInfoLayoutBasedPluginCollectionProvider
+import com.jetbrains.plugin.structure.ide.ProductInfoLayoutComponentsPluginCollectionSource
+import com.jetbrains.plugin.structure.ide.ProductInfoPluginCollectionSource
+import com.jetbrains.plugin.structure.ide.ProductInfoPluginReaderPluginCollectionProvider
+import com.jetbrains.plugin.structure.ide.UndeclaredInLayoutPluginReader
 import com.jetbrains.plugin.structure.ide.createIde
+import com.jetbrains.plugin.structure.ide.layout.LayoutComponentNameSource
+import com.jetbrains.plugin.structure.ide.layout.LayoutComponents
 import com.jetbrains.plugin.structure.ide.layout.MissingLayoutFileMode.SKIP_SILENTLY
+import com.jetbrains.plugin.structure.ide.resolver.ValidatingLayoutComponentsProvider
+import com.jetbrains.plugin.structure.intellij.platform.ProductInfo
+import com.jetbrains.plugin.structure.intellij.platform.ProductInfoParser
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
+import com.jetbrains.plugin.structure.intellij.version.IdeVersion
+import com.jetbrains.plugin.structure.jar.CachingJarFileSystemProvider
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.gradle.api.services.BuildService
@@ -17,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.models.IdeLayoutIndex
 import org.jetbrains.intellij.platform.gradle.models.fullVersion
 import org.jetbrains.intellij.platform.gradle.models.json
 import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.writeTextIfChanged
@@ -42,6 +57,7 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
     private val log = Logger(javaClass)
     private val indices = ConcurrentHashMap<String, IdeLayoutIndex>()
     private val hexFormat = HexFormat.of()
+    private val productInfoBasedIdeManager = ProductInfoBasedIdeManager(SKIP_SILENTLY)
 
     /**
      * Resolves an index for [platformPath], preferring the in-memory instance, then the serialized
@@ -69,12 +85,42 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
 
     private fun create(platformPath: Path): IdeLayoutIndex {
         log.info("Creating IDE layout index from: $platformPath")
-        val ide = createIde {
-            missingLayoutFileMode = SKIP_SILENTLY
-            path = platformPath
+
+        if (!productInfoBasedIdeManager.supports(platformPath)) {
+            return createIde {
+                missingLayoutFileMode = SKIP_SILENTLY
+                path = platformPath
+            }.toLayoutIndex(platformPath)
         }
+
+        val productInfo = ProductInfoParser().parse(ProductInfoPathResolver(platformPath).resolve())
+        return createProductInfoBasedIndex(platformPath, productInfo, productInfo.toIdeVersion())
+    }
+
+    private fun createProductInfoBasedIndex(
+        platformPath: Path,
+        productInfo: ProductInfo,
+        ideVersion: IdeVersion,
+    ) = CachingJarFileSystemProvider().use { jarFileSystemProvider ->
+        val layoutComponents = ValidatingLayoutComponentsProvider(SKIP_SILENTLY)
+            .resolveLayoutComponents(productInfo, platformPath)
+        ProductInfoBasedIde.of(
+            platformPath,
+            ideVersion,
+            productInfo,
+            mapOf(
+                ProductInfoLayoutComponentsPluginCollectionSource(platformPath, ideVersion, layoutComponents) to
+                    ProductInfoLayoutBasedPluginCollectionProvider(NoOpLayoutComponentsPluginReader, jarFileSystemProvider),
+                ProductInfoPluginCollectionSource(platformPath, ideVersion, productInfo) to
+                    ProductInfoPluginReaderPluginCollectionProvider(UndeclaredInLayoutPluginReader(setOf("AI", "CL"))),
+            ),
+        )
+            .toLayoutIndex(platformPath)
+    }
+
+    private fun Ide.toLayoutIndex(platformPath: Path): IdeLayoutIndex {
         val productInfo = platformPath.productInfo()
-        val bundledPlugins = ide.bundledPlugins.mapNotNull { plugin ->
+        val bundledPlugins = bundledPlugins.mapNotNull { plugin ->
             val id = plugin.pluginId ?: plugin.pluginName ?: return@mapNotNull null
             plugin to id
         }
@@ -88,7 +134,7 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
             entries = bundledPlugins.map { (plugin, id) ->
                 plugin.toEntry(
                     id = id,
-                    ide = ide,
+                    ide = this,
                     platformPath = platformPath,
                     dependencyKeys = entryKeys,
                 )
@@ -148,6 +194,26 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
         return hexFormat.formatHex(MessageDigest.getInstance("SHA-256").digest(payload.toByteArray()))
     }
 }
+
+private object NoOpLayoutComponentsPluginReader : ProductInfoBasedIdeManager.PluginReader<LayoutComponents> {
+    override fun readPlugins(
+        idePath: Path,
+        pluginMetadataSource: LayoutComponents,
+        layoutComponentNameSource: LayoutComponentNameSource<LayoutComponents>,
+        ideVersion: IdeVersion,
+    ) = emptyList<IdePlugin>()
+
+    override fun supports(pluginMetadataSource: Any) = true
+}
+
+private fun ProductInfo.toIdeVersion() = IdeVersion.createIdeVersion(
+    buildString {
+        if (productCode.isNotEmpty()) {
+            append(productCode).append("-")
+        }
+        append(buildNumber)
+    },
+)
 
 /**
  * Converts a live plugin-structure model entry into the serialized layout-index representation.
