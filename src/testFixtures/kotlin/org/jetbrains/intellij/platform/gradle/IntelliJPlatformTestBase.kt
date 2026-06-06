@@ -6,8 +6,8 @@ import org.gradle.api.GradleException
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
 import org.gradle.testkit.runner.UnexpectedBuildResultException
+import java.io.IOException
 import java.lang.management.ManagementFactory
-import java.nio.file.FileSystemException
 import java.nio.file.Path
 import kotlin.io.path.*
 import kotlin.test.AfterTest
@@ -69,8 +69,9 @@ abstract class IntelliJPlatformTestBase {
             try {
                 dir.deleteRecursively()
                 return
-            } catch (exception: FileSystemException) {
+            } catch (exception: IOException) {
                 if (attempt == 4) {
+                    printDeletionFailureDiagnostics(exception)
                     throw exception
                 }
                 Thread.sleep(100)
@@ -288,6 +289,18 @@ abstract class IntelliJPlatformTestBase {
 
     private companion object {
         const val CONFIGURATION_CACHE_ARGUMENT = "--configuration-cache"
+    }
+
+    private fun printDeletionFailureDiagnostics(exception: IOException) {
+        val diagnostics = buildString {
+            appendLine()
+            appendLine("=== Test Directory Deletion Failure Start ===")
+            appendLine("Directory: $dir")
+            appendLine(exception.stackTraceToString())
+            appendLine("=== Test Directory Deletion Failure End ===")
+        }
+
+        System.err.println(diagnostics)
     }
 
     @PublishedApi
