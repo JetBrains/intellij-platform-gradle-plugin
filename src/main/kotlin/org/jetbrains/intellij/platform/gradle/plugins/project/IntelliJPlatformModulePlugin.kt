@@ -201,6 +201,10 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                     }
                 }
             }
+
+            named(Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS) {
+                isCanBeConsumed = true
+            }
         }
 
         with(project.dependencies) {
@@ -246,17 +250,60 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
         val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
         val intellijPlatformPluginComposedModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE]
+        val intellijPlatformPluginModuleDependenciesConfiguration = project.configurations.create(
+            name = Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE_DEPENDENCIES,
+            description = "IntelliJ Platform plugin dependencies inherited from plugin modules",
+        ) {
+            isCanBeConsumed = false
+            isCanBeResolved = true
+
+            attributes {
+                attribute(Attributes.extracted, true)
+                attribute(Attributes.localPluginsNormalized, true)
+                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
+            }
+        }
+
+        project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS].extendsFrom(intellijPlatformPluginModuleDependenciesConfiguration)
+
+        val pluginDependencyModuleDependencies = ConcurrentHashMap<String, ProjectDependency>()
+        fun inheritPluginDependencies(dependency: ProjectDependency) {
+            pluginDependencyModuleDependencies.putIfAbsent(dependency.path, dependency)
+        }
+
         val pluginModuleDependencyPaths = ConcurrentHashMap.newKeySet<String>()
         intellijPlatformPluginModuleConfiguration.dependencies.whenObjectAdded(Unit.closureOf<Dependency> {
             if (this is ProjectDependency) {
                 pluginModuleDependencyPaths += path
+                inheritPluginDependencies(this)
             }
         })
         val pluginComposedModuleDependencyPaths = ConcurrentHashMap.newKeySet<String>()
         intellijPlatformPluginComposedModuleConfiguration.dependencies.whenObjectAdded(Unit.closureOf<Dependency> {
             if (this is ProjectDependency) {
                 pluginComposedModuleDependencyPaths += path
+                inheritPluginDependencies(this)
             }
+        })
+
+        project.tasks.withType<PrepareSandboxTask>().configureEach {
+            pluginsClasspath.from(intellijPlatformPluginModuleDependenciesConfiguration)
+        }
+
+        intellijPlatformPluginModuleDependenciesConfiguration.dependencies.addAllLater(project.provider {
+            pluginDependencyModuleDependencies.values
+                .asSequence()
+                .filter { intellijPlatformProjects.isPureModuleProject(it.path) }
+                .sortedBy { it.path }
+                .map {
+                    project.dependencies.project(
+                        mapOf(
+                            "path" to it.path,
+                            "configuration" to Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS,
+                        )
+                    )
+                }
+                .toList()
         })
 
         val inferredPluginModuleDependencies = ConcurrentHashMap<String, ProjectDependency>()

@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.util.GradleVersion
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.toPlatformJavaVersion
@@ -265,5 +266,122 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 assertTrue("ClionFeature.class" in jarPaths)
             }
         }
+    }
+
+    @Test
+    fun `split mode run sandbox installs plugin dependencies declared by plugin modules`() {
+        settingsFile write //language=kotlin
+                """
+                include("backend")
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        pluginComposedModule(implementation(project(":backend")))
+                    }
+                }
+                """.trimIndent()
+
+        dir.resolve("backend/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform.module")
+                }
+
+                repositories {
+                    mavenCentral()
+
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.jetbrains.postfixCompletion", "0.8-beta")
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        dir.resolve("backend/src/main/java/BackendFeature.java") write //language=java
+                """
+                class BackendFeature {}
+                """.trimIndent()
+
+        build("prepareSandbox_${Tasks.RUN_IDE_BACKEND}")
+
+        val backendPluginsDirectory = sandboxDirectory
+            .resolve("projectName")
+            .resolve("$intellijPlatformType-$intellijPlatformVersion")
+            .resolve("${Sandbox.PLUGINS}_${Tasks.RUN_IDE_BACKEND}")
+
+        assertExists(backendPluginsDirectory.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar"))
+    }
+
+    @Test
+    fun `split mode frontend run sandbox installs plugin dependencies declared by frontend plugin modules`() {
+        settingsFile write //language=kotlin
+                """
+                include("frontend")
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        pluginComposedModule(implementation(project(":frontend")))
+                    }
+                }
+
+                intellijPlatform {
+                    pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.FRONTEND
+                }
+                """.trimIndent()
+
+        dir.resolve("frontend/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform.module")
+                }
+
+                repositories {
+                    mavenCentral()
+
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.jetbrains.postfixCompletion", "0.8-beta")
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        dir.resolve("frontend/src/main/java/FrontendFeature.java") write //language=java
+                """
+                class FrontendFeature {}
+                """.trimIndent()
+
+        build("prepareSandbox_${Tasks.RUN_IDE_FRONTEND}")
+
+        val frontendPluginsDirectory = sandboxDirectory
+            .resolve("projectName")
+            .resolve("$intellijPlatformType-$intellijPlatformVersion")
+            .resolve("${Sandbox.PLUGINS}_${Tasks.RUN_IDE_FRONTEND}")
+            .resolve("frontend")
+
+        assertExists(frontendPluginsDirectory.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar"))
     }
 }

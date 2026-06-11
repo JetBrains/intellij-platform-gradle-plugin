@@ -5,12 +5,14 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.attributes.LibraryElements
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
+import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
@@ -155,10 +157,28 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 attributes {
                     attribute(Attributes.extracted, true)
                     attribute(Attributes.localPluginsNormalized, true)
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
                 }
 
                 extendsFrom(intellijPlatformPluginDependenciesConfiguration)
                 extendsFrom(intellijPlatformPluginLocalConfiguration)
+            }
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS,
+                description = "IntelliJ Platform plugin dependency elements",
+            ) {
+                // Gradle rejects attributes on declarable-only configurations.
+                isCanBeConsumed = true
+                isCanBeResolved = false
+
+                attributes {
+                    attribute(Attributes.extracted, true)
+                    attribute(Attributes.localPluginsNormalized, true)
+                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
+                }
+
+                extendsFrom(intellijPlatformPluginConfiguration)
+                isCanBeConsumed = false
             }
 
             val intellijPlatformTestPluginDependenciesConfiguration = create(

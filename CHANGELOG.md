@@ -19,6 +19,7 @@
 - Avoid retaining JAR file-system handles after plugin structure metadata parsing, fixing temporary project cleanup failures in `verifyPluginStructure` and related plugin inspection flows.
 - Keep warning-level IDE console logging enabled for `runIde` and `testIde` by setting `intellij.console.log.level=warning` explicitly, as 262+ IDEs disable it by default.
 - Avoid Javac2 nullability instrumentation failures with upcoming Gradle versions by isolating the Java Compiler Ant task classloader.
+- Install `plugin(...)` dependencies declared by plugin module projects into split-mode run sandboxes.
 
 ## [2.16.0] - 2026-05-01
 

@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.plugins.project
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin.ID
 import org.jetbrains.intellij.platform.gradle.services.IntelliJPlatformProjectsService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
@@ -12,6 +13,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.companion.ProcessResourcesCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
+@Suppress("unused")
 abstract class IntelliJPlatformPlugin : Plugin<Project> {
 
     private val log = Logger(javaClass)
@@ -30,6 +32,8 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             .registerClassLoaderScopedBuildService(IntelliJPlatformProjectsService::class)
             .get()
             .markPluginProject(project.path)
+
+        project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS).isCanBeConsumed = false
 
         listOf(
             // Build
