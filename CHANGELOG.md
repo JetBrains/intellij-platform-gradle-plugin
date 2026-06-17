@@ -7,6 +7,7 @@
 - Added support for unit-testing of Kotlin plugin by introducing `TestFrameworkType.Plugin.Kotlin`.
 - Provided utilities for UI testing of debugger and Jupyter Notebook: `TestFrameworkType.UiUtil.Debugger` and `TestFrameworkType.UiUtil.Jupyter`.
 - Update Kotlin and Java version mappings for IntelliJ Platform `262`
+- Introduce `IdeaHomePathArgumentProvider` to supply `-Didea.home.path` JVM argument and apply it to test IDE tasks.
 
 ### Fixed
 

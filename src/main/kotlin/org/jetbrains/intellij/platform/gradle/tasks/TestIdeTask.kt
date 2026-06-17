@@ -14,6 +14,7 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.argumentProviders.IdeaHomePathArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
@@ -69,7 +70,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     sourceTask.coroutinesJavaAgentFile,
                     sourceTask.runtimeArchitecture,
                     options = this,
-                )
+                ),
             )
 
             jvmArgumentProviders.add(
@@ -78,7 +79,11 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     sourceTask.sandboxPluginsDirectory,
                     sourceTask.sandboxSystemDirectory,
                     sourceTask.sandboxLogDirectory,
-                )
+                ),
+            )
+
+            jvmArgumentProviders.add(
+                IdeaHomePathArgumentProvider(sourceTask.intelliJPlatformConfiguration),
             )
 
             systemProperty("idea.classpath.index.enabled", "false")
