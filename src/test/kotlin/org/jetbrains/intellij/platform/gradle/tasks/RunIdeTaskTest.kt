@@ -365,6 +365,15 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.RUN_IDE_BACKEND) {
             assertContains("`splitModeServerPort` is set to 0; selected random free port ", output)
+            assertContains("Split-mode backend sandbox paths:", output)
+            assertContains("idea.config.path=", output)
+            assertContains("config_${Tasks.RUN_IDE_BACKEND}", output)
+            assertContains("idea.system.path=", output)
+            assertContains("system_${Tasks.RUN_IDE_BACKEND}", output)
+            assertContains("idea.log.path=", output)
+            assertContains("log_${Tasks.RUN_IDE_BACKEND}", output)
+            assertContains("idea.plugins.path=", output)
+            assertContains("plugins_${Tasks.RUN_IDE_BACKEND}", output)
 
             val appArgsLine = output.lineSequence().first { it.startsWith("APP_ARGS=serverMode -p ") }
             val port = appArgsLine.removePrefix("APP_ARGS=serverMode -p ").trim().toInt()
@@ -554,6 +563,15 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 "APP_ARGS=thinClient tcp://127.0.0.1:6093#cb=fake&remoteId=Split%20Mode --refresh-split-mode-token=true",
                 output
             )
+            assertContains("Split-mode frontend sandbox paths:", output)
+            assertContains("idea.config.path=", output)
+            assertContains("config_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
+            assertContains("idea.system.path=", output)
+            assertContains("system_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
+            assertContains("idea.log.path=", output)
+            assertContains("log_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
+            assertContains("idea.plugins.path=", output)
+            assertContains("plugins_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
             assertContains("frontend.properties", output)
             assertContains("-Didea.platform.prefix=JetBrainsClient", output)
             assertNotContains("coroutines-javaagent", output)

@@ -132,6 +132,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
 
         workingDir = platformPath.toFile()
         purgeOldLogDirectoriesIfRequested()
+        logSplitModeSandboxPaths()
 
         if (composeHotReload.get() && executionMode.get() != ExecutionMode.SPLIT_MODE_FRONTEND) {
             log.info("Compose Hot Reload is enabled for `runIde` task")
@@ -495,6 +496,22 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                 sandboxLogPath.createDirectories()
             }
         }
+    }
+
+    private fun logSplitModeSandboxPaths() {
+        val mode = when (executionMode.get()) {
+            ExecutionMode.SPLIT_MODE_BACKEND -> "backend"
+            ExecutionMode.SPLIT_MODE_FRONTEND -> "frontend"
+            ExecutionMode.STANDARD -> return
+        }
+
+        log.lifecycle(
+            "Split-mode $mode sandbox paths:\n" +
+                "  idea.config.path=${sandboxConfigDirectory.asPath.safePathString}\n" +
+                "  idea.system.path=${sandboxSystemDirectory.asPath.safePathString}\n" +
+                "  idea.log.path=${sandboxLogDirectory.asPath.safePathString}\n" +
+                "  idea.plugins.path=${sandboxPluginsDirectory.asPath.safePathString}"
+        )
     }
 
     private fun configureSplitModeFrontendLaunch() {
