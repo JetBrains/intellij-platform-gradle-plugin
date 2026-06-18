@@ -202,7 +202,8 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
     /**
      * Runs the split-mode backend through Gradle's managed [JavaExec] execution, while making the launched IDE process
      * observable:
-     *  - before launching, [ensureNoConflictingSplitModeBackend] fails fast when another backend is already running;
+     *  - before launching, [checkForConflictingSplitModeBackend] fails fast when a backend this plugin recorded is
+     *    still running, and warns when the configured port already appears to be in use;
      *  - during the run, a background tracker records the launched process identifier (PID) to
      *    [SplitModeAware.splitModeBackendPidFile] and logs it;
      *  - on exit, the PID file is removed so it never points to a dead process.
@@ -211,7 +212,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
      * in plugin code, which fails at task-execution time.
      */
     private fun runSplitModeBackend() {
-        ensureNoConflictingSplitModeBackend()
+        checkForConflictingSplitModeBackend()
 
         val pidPath = splitModeBackendPidFile.asPath
         val trackerStopped = AtomicBoolean(false)
@@ -268,19 +269,23 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
     }
 
     private fun ProcessHandle.looksLikeSplitModeBackend(): Boolean {
-        val commandLine = info().commandLine().orElse(null) ?: return true
+        // When the OS does not expose the command line we cannot positively confirm this descendant is the backend,
+        // so we skip it rather than record a PID we cannot verify later (e.g. frequently on Windows).
+        val commandLine = info().commandLine().orElse(null) ?: return false
         return commandLine.contains(SPLIT_MODE_BACKEND_COMMAND)
     }
 
     /**
-     * Fails fast with an actionable message when a split-mode backend already appears to be running, so an
-     * orphaned process is visible instead of silently blocking a fresh launch.
+     * Surfaces a conflicting split-mode backend before launching a fresh one.
      *
-     * Two independent signals are checked:
-     *  - a previously written [SplitModeAware.splitModeBackendPidFile] that still points to a live process;
-     *  - the configured [splitModeServerPort] already accepting connections (best-effort PID lookup via `lsof`).
+     * Two independent signals are checked, with different severities:
+     *  - a previously written [SplitModeAware.splitModeBackendPidFile] that still points to a live IDE process this
+     *    plugin launched: an unambiguous conflict that **fails fast**;
+     *  - the configured [splitModeServerPort] already accepting connections: this may be any unrelated process, so it
+     *    only **warns** (best-effort PID lookup via `lsof`) and lets the IDE attempt to bind, preserving the
+     *    pre-feature behavior.
      */
-    private fun ensureNoConflictingSplitModeBackend() {
+    private fun checkForConflictingSplitModeBackend() {
         val pidPath = splitModeBackendPidFile.asPath
         val runningHandle = readRunningSplitModeBackendHandle(pidPath)
         if (runningHandle != null) {
@@ -299,13 +304,13 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         if (isSplitModeServerPortInUse(port)) {
             val holders = findListeningProcessIds(port)
             val holderText = when {
-                holders.isEmpty() -> "an unknown process is listening on it"
+                holders.isEmpty() -> "the owning process could not be determined"
                 else -> "PID(s) ${holders.joinToString(", ")} are listening on it"
             }
-            throw InvalidUserDataException(
-                "Split-mode backend port $port is already in use ($holderText). " +
-                    "Another backend may already be running (possibly orphaned). " +
-                    "Stop it first or set a different `splitModeServerPort` before launching `${Tasks.RUN_IDE_BACKEND}`."
+            log.warn(
+                "Split-mode backend port $port appears to be in use ($holderText). " +
+                    "The backend may fail to bind it. If startup fails, stop the conflicting process " +
+                    "or set a different `splitModeServerPort` before launching `${Tasks.RUN_IDE_BACKEND}`."
             )
         }
     }
@@ -325,9 +330,10 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
             return null
         }
 
-        // Guard against PID reuse: when the OS exposes the command line and it clearly is not an IDE process,
-        // treat the recorded PID as stale rather than blocking the launch.
-        val commandLine = handle.info().commandLine().orElse(null) ?: return handle
+        // Guard against PID reuse: only treat the recorded PID as a running backend when the OS exposes a command line
+        // that clearly looks like an IDE process. When the command line is unavailable we cannot positively confirm
+        // the process, so we treat the marker as stale rather than block a launch over an unrelated reused PID.
+        val commandLine = handle.info().commandLine().orElse(null) ?: return null
         val looksLikeIdeProcess = listOf("java", "idea", "Main", "JetBrains")
             .any { commandLine.contains(it, ignoreCase = true) }
         return handle.takeIf { looksLikeIdeProcess }
