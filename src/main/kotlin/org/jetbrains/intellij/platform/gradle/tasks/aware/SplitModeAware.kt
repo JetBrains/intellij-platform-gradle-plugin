@@ -96,6 +96,25 @@ interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
         get() = sandboxDirectory.file("split-mode-frontend.join.link")
 
     /**
+     * Path to a file storing the OS process identifier (PID) of the running split-mode backend process.
+     *
+     * It is written when the backend task launches the IDE process and removed when that process exits.
+     * The file allows detecting an already-running (possibly orphaned) backend before starting a new one.
+     */
+    @get:Internal
+    val splitModeBackendPidFile: Provider<RegularFile>
+        get() = sandboxDirectory.file("split-mode-backend.pid")
+
+    /**
+     * Path to a file storing the OS process identifier (PID) of the running split-mode frontend process.
+     *
+     * It is written when the frontend task launches the JetBrains Client process and removed when that process exits.
+     */
+    @get:Internal
+    val splitModeFrontendPidFile: Provider<RegularFile>
+        get() = sandboxDirectory.file("split-mode-frontend.pid")
+
+    /**
      * Resolves the effective plugin installation target.
      *
      * The new [PluginInstallationTargetAware.pluginInstallationTarget] property takes precedence over the deprecated [splitModeTarget]

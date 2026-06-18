@@ -8,6 +8,8 @@
 - Provided utilities for UI testing of debugger and Jupyter Notebook: `TestFrameworkType.UiUtil.Debugger` and `TestFrameworkType.UiUtil.Jupyter`.
 - Update Kotlin and Java version mappings for IntelliJ Platform `262`
 - Introduce `IdeaHomePathArgumentProvider` to supply `-Didea.home.path` JVM argument and apply it to test IDE tasks.
+- Track and log the launched `runIdeBackend` process identifier (PID) to a `split-mode-backend.pid` file in the sandbox, and fail fast with the conflicting PID(s) when `runIdeBackend` is started while another backend is already running or its `splitModeServerPort` is already in use.
+- Allow selecting a random free split-mode backend port (in the range `5990..6989`) at execution time by setting `splitModeServerPort` to `0`; when left unset it still defaults to `5990`.
 
 ### Fixed
 
