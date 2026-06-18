@@ -405,7 +405,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `runIdeBackend fails when the configured port is already in use`() {
+    fun `runIdeBackend warns but proceeds when the configured port is already in use`() {
         configureFakeJavaLauncher()
 
         java.net.ServerSocket(0).use { serverSocket ->
@@ -419,9 +419,26 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
             )
 
-            buildAndFail(Tasks.RUN_IDE_BACKEND) {
-                assertContains("Split-mode backend port $port is already in use", output)
+            build(Tasks.RUN_IDE_BACKEND) {
+                assertContains("Split-mode backend port $port appears to be in use", output)
+                // The launch must still proceed instead of being blocked.
+                assertContains("APP_ARGS=serverMode -p $port", output)
             }
+        }
+    }
+
+    @Test
+    fun `runIdeBackend ignores a stale backend PID file`() {
+        configureFakeJavaLauncher()
+
+        val runtimeSandbox = dir.resolve(".intellijPlatform/sandbox/projectName/$intellijPlatformType-$intellijPlatformVersion")
+        runtimeSandbox.createDirectories()
+        // A PID that does not resolve to any live process must be treated as a stale marker, not a running backend.
+        val deadPid = 999_999_999L
+        runtimeSandbox.resolve("split-mode-backend.pid").toFile().writeText(deadPid.toString())
+
+        build(Tasks.RUN_IDE_BACKEND) {
+            assertContains("APP_ARGS=serverMode -p 5990", output)
         }
     }
 
