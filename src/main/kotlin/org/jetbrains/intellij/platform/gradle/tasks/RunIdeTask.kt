@@ -10,6 +10,7 @@ import org.gradle.api.tasks.*
 import org.gradle.api.tasks.options.Option
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.named
+import org.gradle.process.ExecOperations
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -21,11 +22,19 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
+import java.io.ByteArrayOutputStream
 import java.io.OutputStream
 import java.net.InetSocketAddress
+import java.net.ServerSocket
 import java.net.Socket
 import java.net.URI
+import java.nio.file.Path
 import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit.SECONDS
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.stream.Collectors
+import javax.inject.Inject
+import kotlin.concurrent.thread
 import kotlin.io.path.*
 
 internal const val SPLIT_MODE_FRONTEND_COMMAND = "thinClient"
@@ -33,6 +42,10 @@ private const val SPLIT_MODE_BACKEND_COMMAND = "serverMode"
 private const val SPLIT_MODE_FRONTEND_ENV_VAR_BASE_NAME = "JETBRAINS_CLIENT"
 internal const val SPLIT_MODE_FRONTEND_MAIN_CLASS = "com.intellij.platform.runtime.loader.IntellijLoader"
 private const val DEFAULT_SPLIT_MODE_SERVER_PORT = 5990
+private const val SPLIT_MODE_SERVER_PORT_RANDOM = 0
+internal const val SPLIT_MODE_SERVER_PORT_RANDOM_MIN = 5990
+internal const val SPLIT_MODE_SERVER_PORT_RANDOM_MAX = 6989
+private const val SPLIT_MODE_SERVER_PORT_RANDOM_ATTEMPTS = 50
 private const val DEFAULT_JVM_DEBUG_PORT = 5005
 private const val DEFAULT_SPLIT_MODE_FRONTEND_DEBUG_PORT = 5007
 private const val SPLIT_MODE_JOIN_LINK_MARKER = "Join link:"
@@ -43,6 +56,8 @@ private const val SPLIT_MODE_HOST_PASSWORD_ENV = "CWM_HOST_PASSWORD"
 private const val SPLIT_MODE_CLIENT_PASSWORD_ENV = "CWM_CLIENT_PASSWORD"
 private const val SPLIT_MODE_NO_TIMEOUTS_ENV = "CWM_NO_TIMEOUTS"
 private const val SPLIT_MODE_SHARED_PASSWORD = "qwerty123"
+private const val SPLIT_MODE_PORT_PROBE_TIMEOUT_MS = 200
+private const val SPLIT_MODE_PID_POLL_INTERVAL_MS = 50L
 internal const val PURGE_OLD_LOG_DIRECTORIES_OPTION = "purge-old-log-directories"
 
 /**
@@ -58,11 +73,23 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
 
     private val log = Logger(javaClass)
 
+    /**
+     * Caches the split-mode backend port resolved for this execution, so a randomly selected free port stays stable
+     * across the multiple reads during a single run.
+     */
+    private var resolvedSplitModeServerPort: Int? = null
+
+    @get:Inject
+    abstract val execOperations: ExecOperations
+
     @get:Internal
     abstract val executionMode: Property<ExecutionMode>
 
     /**
-     * The backend port used by split-mode source-like tasks.
+     * The backend port used by split-mode backend/frontend tasks; `runIdeBackend` passes it to `serverMode -p`.
+     *
+     * Defaults to [DEFAULT_SPLIT_MODE_SERVER_PORT]. Set it to `0` to have a random free port in the range
+     * [[SPLIT_MODE_SERVER_PORT_RANDOM_MIN], [SPLIT_MODE_SERVER_PORT_RANDOM_MAX]] selected at execution time and logged.
      */
     @get:Input
     abstract val splitModeServerPort: Property<Int>
@@ -129,7 +156,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                 configureSplitModeBackendLaunch()
                 argumentProviders.removeAll { it is SplitModeArgumentProvider }
                 validateSplitModeTaskArguments()
-                args(SPLIT_MODE_BACKEND_COMMAND, "-p", splitModeServerPort.get().toString())
+                args(SPLIT_MODE_BACKEND_COMMAND, "-p", resolveSplitModeServerPort().toString())
             }
 
             ExecutionMode.SPLIT_MODE_FRONTEND -> {
@@ -146,7 +173,10 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
 
         systemPropertyDefault("idea.auto.reload.plugins", autoReload.get())
 
-        super.exec()
+        when (executionMode.get()) {
+            ExecutionMode.SPLIT_MODE_BACKEND -> runSplitModeBackend()
+            else -> super.exec()
+        }
     }
 
     private fun validateSplitModeTaskArguments() {
@@ -167,6 +197,224 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                 else -> null
             },
         )
+    }
+
+    /**
+     * Runs the split-mode backend through Gradle's managed [JavaExec] execution, while making the launched IDE process
+     * observable:
+     *  - before launching, [ensureNoConflictingSplitModeBackend] fails fast when another backend is already running;
+     *  - during the run, a background tracker records the launched process identifier (PID) to
+     *    [SplitModeAware.splitModeBackendPidFile] and logs it;
+     *  - on exit, the PID file is removed so it never points to a dead process.
+     *
+     * The process itself is started by Gradle (not [ProcessBuilder]) because Gradle instruments direct process launches
+     * in plugin code, which fails at task-execution time.
+     */
+    private fun runSplitModeBackend() {
+        ensureNoConflictingSplitModeBackend()
+
+        val pidPath = splitModeBackendPidFile.asPath
+        val trackerStopped = AtomicBoolean(false)
+        val tracker = startSplitModeBackendPidTracker(pidPath, trackerStopped)
+        try {
+            super.exec()
+        } finally {
+            trackerStopped.set(true)
+            tracker.interrupt()
+            runCatching { tracker.join(SECONDS.toMillis(2)) }
+            pidPath.deleteIfExists()
+        }
+    }
+
+    /**
+     * Starts a background daemon thread that detects the IDE process launched by [JavaExec] (a newly appeared
+     * descendant running the split-mode backend command), then records and logs its PID.
+     *
+     * Detection is best-effort: it observes child processes of the current build process and stops as soon as the
+     * backend is found or [trackerStopped] is set.
+     */
+    private fun startSplitModeBackendPidTracker(pidPath: Path, trackerStopped: AtomicBoolean): Thread {
+        val port = resolveSplitModeServerPort()
+        val currentProcess = ProcessHandle.current()
+        val preexistingPids = currentProcess.descendants().map { it.pid() }.collect(Collectors.toSet())
+
+        return thread(isDaemon = true, name = "split-mode-backend-pid-tracker") {
+            while (!trackerStopped.get()) {
+                val backendHandle = currentProcess.descendants()
+                    .filter { it.isAlive && it.pid() !in preexistingPids }
+                    .filter { it.looksLikeSplitModeBackend() }
+                    .findFirst()
+                    .orElse(null)
+
+                if (backendHandle != null) {
+                    runCatching {
+                        writeSplitModeBackendPidFile(pidPath, backendHandle.pid())
+                        log.lifecycle(
+                            "Started split-mode backend (PID ${backendHandle.pid()}) on port $port. " +
+                                "PID file: '${pidPath.safePathString}'."
+                        )
+                    }
+                    return@thread
+                }
+
+                try {
+                    Thread.sleep(SPLIT_MODE_PID_POLL_INTERVAL_MS)
+                } catch (_: InterruptedException) {
+                    Thread.currentThread().interrupt()
+                    return@thread
+                }
+            }
+        }
+    }
+
+    private fun ProcessHandle.looksLikeSplitModeBackend(): Boolean {
+        val commandLine = info().commandLine().orElse(null) ?: return true
+        return commandLine.contains(SPLIT_MODE_BACKEND_COMMAND)
+    }
+
+    /**
+     * Fails fast with an actionable message when a split-mode backend already appears to be running, so an
+     * orphaned process is visible instead of silently blocking a fresh launch.
+     *
+     * Two independent signals are checked:
+     *  - a previously written [SplitModeAware.splitModeBackendPidFile] that still points to a live process;
+     *  - the configured [splitModeServerPort] already accepting connections (best-effort PID lookup via `lsof`).
+     */
+    private fun ensureNoConflictingSplitModeBackend() {
+        val pidPath = splitModeBackendPidFile.asPath
+        val runningHandle = readRunningSplitModeBackendHandle(pidPath)
+        if (runningHandle != null) {
+            val commandSuffix = runningHandle.info().command()
+                .map { ", command: '$it'" }
+                .orElse("")
+            throw InvalidUserDataException(
+                "A split-mode backend is already running (PID ${runningHandle.pid()}$commandSuffix), recorded in '${pidPath.safePathString}'. " +
+                    "Stop it first (e.g. `kill ${runningHandle.pid()}`) or change `splitModeServerPort` before launching `${Tasks.RUN_IDE_BACKEND}` again."
+            )
+        }
+        // Either no PID file, or it referenced a process that is no longer alive; drop the stale marker.
+        pidPath.deleteIfExists()
+
+        val port = resolveSplitModeServerPort()
+        if (isSplitModeServerPortInUse(port)) {
+            val holders = findListeningProcessIds(port)
+            val holderText = when {
+                holders.isEmpty() -> "an unknown process is listening on it"
+                else -> "PID(s) ${holders.joinToString(", ")} are listening on it"
+            }
+            throw InvalidUserDataException(
+                "Split-mode backend port $port is already in use ($holderText). " +
+                    "Another backend may already be running (possibly orphaned). " +
+                    "Stop it first or set a different `splitModeServerPort` before launching `${Tasks.RUN_IDE_BACKEND}`."
+            )
+        }
+    }
+
+    /**
+     * Reads the PID recorded in [pidPath] and returns its [ProcessHandle] only when that process is still alive and
+     * still looks like an IDE process. Returns `null` (and treats the file as stale) otherwise.
+     */
+    private fun readRunningSplitModeBackendHandle(pidPath: Path): ProcessHandle? {
+        if (pidPath.notExists()) {
+            return null
+        }
+
+        val pid = runCatching { pidPath.readText().trim().toLong() }.getOrNull() ?: return null
+        val handle = ProcessHandle.of(pid).orElse(null) ?: return null
+        if (!handle.isAlive) {
+            return null
+        }
+
+        // Guard against PID reuse: when the OS exposes the command line and it clearly is not an IDE process,
+        // treat the recorded PID as stale rather than blocking the launch.
+        val commandLine = handle.info().commandLine().orElse(null) ?: return handle
+        val looksLikeIdeProcess = listOf("java", "idea", "Main", "JetBrains")
+            .any { commandLine.contains(it, ignoreCase = true) }
+        return handle.takeIf { looksLikeIdeProcess }
+    }
+
+    private fun writeSplitModeBackendPidFile(pidPath: Path, pid: Long) {
+        pidPath.parent?.createDirectories()
+        pidPath.writeText(pid.toString())
+    }
+
+    /**
+     * Resolves the split-mode backend port for this run: the configured [splitModeServerPort] (defaulting to
+     * [DEFAULT_SPLIT_MODE_SERVER_PORT]), or a random free port from
+     * [SPLIT_MODE_SERVER_PORT_RANDOM_MIN]..[SPLIT_MODE_SERVER_PORT_RANDOM_MAX] when it is explicitly set to
+     * [SPLIT_MODE_SERVER_PORT_RANDOM] (`0`).
+     *
+     * The resolved value is cached so repeated reads within a single execution stay consistent.
+     */
+    private fun resolveSplitModeServerPort(): Int {
+        resolvedSplitModeServerPort?.let { return it }
+
+        val port = when (val configured = splitModeServerPort.get()) {
+            SPLIT_MODE_SERVER_PORT_RANDOM -> findFreeSplitModeServerPort().also {
+                log.lifecycle("`splitModeServerPort` is set to 0; selected random free port $it for the split-mode backend.")
+            }
+
+            else -> configured
+        }
+        resolvedSplitModeServerPort = port
+        return port
+    }
+
+    /**
+     * Picks a random free port within [SPLIT_MODE_SERVER_PORT_RANDOM_MIN]..[SPLIT_MODE_SERVER_PORT_RANDOM_MAX],
+     * falling back to an OS-assigned ephemeral port if no candidate in the range could be bound.
+     */
+    private fun findFreeSplitModeServerPort(): Int {
+        repeat(SPLIT_MODE_SERVER_PORT_RANDOM_ATTEMPTS) {
+            val candidate = (SPLIT_MODE_SERVER_PORT_RANDOM_MIN..SPLIT_MODE_SERVER_PORT_RANDOM_MAX).random()
+            if (isPortFree(candidate)) {
+                return candidate
+            }
+        }
+        return ServerSocket(0).use { it.localPort }
+    }
+
+    private fun isPortFree(port: Int) = runCatching {
+        ServerSocket().use { serverSocket ->
+            serverSocket.reuseAddress = false
+            serverSocket.bind(InetSocketAddress("127.0.0.1", port))
+        }
+        true
+    }.getOrDefault(false)
+
+    private fun isSplitModeServerPortInUse(port: Int) = runCatching {
+        Socket().use { socket ->
+            socket.connect(InetSocketAddress("127.0.0.1", port), SPLIT_MODE_PORT_PROBE_TIMEOUT_MS)
+        }
+        true
+    }.getOrDefault(false)
+
+    /**
+     * Best-effort lookup of the PIDs listening on [port] using `lsof`, available on macOS and Linux.
+     * Returns an empty list when the tool is unavailable (e.g. on Windows) or no holder could be resolved.
+     *
+     * `lsof` is launched through Gradle's [ExecOperations] service rather than [ProcessBuilder], because Gradle
+     * instruments direct process launches in plugin code and fails at task-execution time.
+     */
+    private fun findListeningProcessIds(port: Int): List<Long> {
+        if (OperatingSystem.current().isWindows) {
+            return emptyList()
+        }
+
+        val output = ByteArrayOutputStream()
+        return runCatching {
+            execOperations.exec {
+                commandLine("lsof", "-nP", "-iTCP:$port", "-sTCP:LISTEN", "-t")
+                standardOutput = output
+                errorOutput = OutputStream.nullOutputStream()
+                isIgnoreExitValue = true
+            }
+            output.toString()
+                .lineSequence()
+                .mapNotNull { it.trim().toLongOrNull() }
+                .distinct()
+                .toList()
+        }.getOrDefault(emptyList())
     }
 
     private fun resolveSplitModeFrontendJoinLink(): String {
@@ -274,7 +522,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
 
     private fun isJvmDebugEnabled() = debug || debugOptions.enabled.orNull == true
 
-    private fun createSplitModeFrontendDebugJoinLink() = "debug://localhost:${splitModeServerPort.get()}#remoteId=Split%20Mode"
+    private fun createSplitModeFrontendDebugJoinLink() = "debug://localhost:${resolveSplitModeServerPort()}#remoteId=Split%20Mode"
 
     private fun decorateSplitModeFrontendJoinLink(joinLink: String): String {
         if (!joinLink.startsWith("tcp://")) {

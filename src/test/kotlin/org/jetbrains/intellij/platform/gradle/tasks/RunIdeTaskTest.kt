@@ -167,6 +167,14 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
                         if (Arrays.asList(args).contains("serverMode")) {
                             printAndLog("Join link: tcp://127.0.0.1:5990#cb=fake", debugLines);
+                            var aliveMs = System.getProperty("fake.backend.alive.ms");
+                            if (aliveMs != null && !aliveMs.isBlank()) {
+                                try {
+                                    Thread.sleep(Long.parseLong(aliveMs));
+                                } catch (InterruptedException interrupted) {
+                                    Thread.currentThread().interrupt();
+                                }
+                            }
                         }
 
                         debugLines.add("=== fake java end ===");
@@ -326,7 +334,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `runIdeBackend launches serverMode on configured port`() {
+    fun `runIdeBackend launches serverMode on default port when none is configured`() {
         configureFakeJavaLauncher()
 
         build(Tasks.RUN_IDE_BACKEND) {
@@ -341,6 +349,80 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
         kotlin.test.assertEquals(1, joinLinkFiles.size)
         kotlin.test.assertEquals("tcp://127.0.0.1:5990#cb=fake", joinLinkFiles.single().readText().trim())
+    }
+
+    @Test
+    fun `runIdeBackend selects a random free port when configured to zero`() {
+        configureFakeJavaLauncher()
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
+                splitModeServerPort.set(0)
+            }
+            """.trimIndent()
+        )
+
+        build(Tasks.RUN_IDE_BACKEND) {
+            assertContains("`splitModeServerPort` is set to 0; selected random free port ", output)
+
+            val appArgsLine = output.lineSequence().first { it.startsWith("APP_ARGS=serverMode -p ") }
+            val port = appArgsLine.removePrefix("APP_ARGS=serverMode -p ").trim().toInt()
+            assertTrue(port in 5990..6989, "Expected a port in 5990..6989 but was $port")
+        }
+    }
+
+    @Test
+    fun `runIdeBackend logs the launched backend process id`() {
+        configureFakeJavaLauncher()
+        // Keep the launched backend process alive long enough for the PID tracker to observe it deterministically.
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
+                jvmArgs("-Dfake.backend.alive.ms=2000")
+            }
+            """.trimIndent()
+        )
+
+        build(Tasks.RUN_IDE_BACKEND) {
+            assertContains("Started split-mode backend (PID ", output)
+        }
+    }
+
+    @Test
+    fun `runIdeBackend fails when a split-mode backend is already running`() {
+        configureFakeJavaLauncher()
+
+        val runtimeSandbox = dir.resolve(".intellijPlatform/sandbox/projectName/$intellijPlatformType-$intellijPlatformVersion")
+        runtimeSandbox.createDirectories()
+        val currentPid = ProcessHandle.current().pid()
+        runtimeSandbox.resolve("split-mode-backend.pid").toFile().writeText(currentPid.toString())
+
+        buildAndFail(Tasks.RUN_IDE_BACKEND) {
+            assertContains("A split-mode backend is already running (PID $currentPid", output)
+        }
+    }
+
+    @Test
+    fun `runIdeBackend fails when the configured port is already in use`() {
+        configureFakeJavaLauncher()
+
+        java.net.ServerSocket(0).use { serverSocket ->
+            val port = serverSocket.localPort
+            buildFile.toFile().appendText(
+                """
+
+                tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
+                    splitModeServerPort.set($port)
+                }
+                """.trimIndent()
+            )
+
+            buildAndFail(Tasks.RUN_IDE_BACKEND) {
+                assertContains("Split-mode backend port $port is already in use", output)
+            }
+        }
     }
 
     @Test
