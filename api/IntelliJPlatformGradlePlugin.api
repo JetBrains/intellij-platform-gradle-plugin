@@ -253,6 +253,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field RUN_IDE Ljava/lang/String;
 	public static final field RUN_IDE_BACKEND Ljava/lang/String;
 	public static final field RUN_IDE_FRONTEND Ljava/lang/String;
+	public static final field RUN_IDE_SPLIT_MODE Ljava/lang/String;
 	public static final field SETUP_DEPENDENCIES Ljava/lang/String;
 	public static final field SIGN_PLUGIN Ljava/lang/String;
 	public static final field TEST_IDE_PERFORMANCE Ljava/lang/String;
@@ -3197,7 +3198,9 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandbo
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getRuntimeClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getSandboxSuffix ()Lorg/gradle/api/provider/Property;
+	public fun getSplitModeBackendPidFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendJoinLinkFile ()Lorg/gradle/api/provider/Provider;
+	public fun getSplitModeFrontendPidFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
 	public fun validateIntelliJPlatformVersion ()V
 	public fun validateSplitModeSupport ()V
@@ -3276,6 +3279,11 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PublishPluginTas
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeSplitModeTask : org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask {
+	public fun <init> ()V
+	public fun exec ()V
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/ComposeHotReloadAware, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginInstallationTargetAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/RunIdeTask$Companion;
 	public fun <init> ()V
@@ -3283,13 +3291,16 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/RunIdeTask : 
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun exec ()V
 	public fun getEffectivePluginInstallationTarget ()Lorg/gradle/api/provider/Provider;
+	public abstract fun getExecOperations ()Lorg/gradle/process/ExecOperations;
 	public abstract fun getExecutionMode ()Lorg/gradle/api/provider/Property;
 	public fun getPlatformPath ()Ljava/nio/file/Path;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getPurgeOldLogDirectories ()Lorg/gradle/api/provider/Property;
+	public fun getSplitModeBackendPidFile ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getSplitModeFrontendBootstrapClasspath ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getSplitModeFrontendJoinLink ()Lorg/gradle/api/provider/Property;
 	public fun getSplitModeFrontendJoinLinkFile ()Lorg/gradle/api/provider/Provider;
+	public fun getSplitModeFrontendPidFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getSplitModeServerPort ()Lorg/gradle/api/provider/Property;
 	public final fun setPurgeOldLogDirectoriesOption (Z)V
@@ -3645,7 +3656,9 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public abstract fun getSandboxPluginsFrontendDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSandboxSystemFrontendDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSplitMode ()Lorg/gradle/api/provider/Property;
+	public fun getSplitModeBackendPidFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendJoinLinkFile ()Lorg/gradle/api/provider/Provider;
+	public fun getSplitModeFrontendPidFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getSplitModeTarget ()Lorg/gradle/api/provider/Property;
 	public fun validateSplitModeSupport ()V
@@ -3655,7 +3668,9 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeA
 	public static fun getEffectivePluginInstallationTarget (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/gradle/api/provider/Provider;
 	public static fun getPlatformPath (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Ljava/nio/file/Path;
 	public static fun getProductInfo (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public static fun getSplitModeBackendPidFile (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/gradle/api/provider/Provider;
 	public static fun getSplitModeFrontendJoinLinkFile (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/gradle/api/provider/Provider;
+	public static fun getSplitModeFrontendPidFile (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/gradle/api/provider/Provider;
 	public static fun getSplitModeFrontendProperties (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)Lorg/gradle/api/provider/Provider;
 	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)V
 	public static fun validateSplitModeSupport (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware;)V

@@ -15,6 +15,7 @@ import javax.tools.ToolProvider
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.readText
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -128,6 +129,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 package fake.launcher;
 
                 import java.lang.management.ManagementFactory;
+                import java.net.ServerSocket;
                 import java.nio.file.Files;
                 import java.nio.file.Path;
                 import java.nio.file.StandardOpenOption;
@@ -165,20 +167,50 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                             printAndLog("APP_ARGS=" + appArgs, debugLines);
                         }
 
-                        if (Arrays.asList(args).contains("serverMode")) {
-                            printAndLog("Join link: tcp://127.0.0.1:5990#cb=fake", debugLines);
+                        var argsList = Arrays.asList(args);
+                        var exitCode = resolveExitCode(argsList);
+                        if (argsList.contains("serverMode")) {
+                            var port = 5990;
+                            var portOptionIndex = argsList.indexOf("-p");
+                            if (portOptionIndex >= 0 && portOptionIndex + 1 < args.length) {
+                                port = Integer.parseInt(args[portOptionIndex + 1]);
+                            }
+
                             var aliveMs = System.getProperty("fake.backend.alive.ms");
                             if (aliveMs != null && !aliveMs.isBlank()) {
-                                try {
-                                    Thread.sleep(Long.parseLong(aliveMs));
-                                } catch (InterruptedException interrupted) {
-                                    Thread.currentThread().interrupt();
+                                try (var serverSocket = new ServerSocket(port)) {
+                                    printAndLog("Join link: tcp://127.0.0.1:" + port + "#cb=fake", debugLines);
+                                    try {
+                                        Thread.sleep(Long.parseLong(aliveMs));
+                                    } catch (InterruptedException interrupted) {
+                                        Thread.currentThread().interrupt();
+                                    }
                                 }
+                            } else {
+                                printAndLog("Join link: tcp://127.0.0.1:" + port + "#cb=fake", debugLines);
                             }
                         }
 
                         debugLines.add("=== fake java end ===");
                         writeDebugLog(debugLines);
+                        if (exitCode != 0) {
+                            System.exit(exitCode);
+                        }
+                    }
+
+                    private static int resolveExitCode(List<String> argsList) {
+                        var propertyName = "fake.exit.code";
+                        if (argsList.contains("serverMode")) {
+                            propertyName = "fake.backend.exit.code";
+                        } else if (argsList.contains("thinClient")) {
+                            propertyName = "fake.frontend.exit.code";
+                        }
+
+                        var configured = System.getProperty(propertyName, System.getProperty("fake.exit.code", "0"));
+                        if (configured == null || configured.isBlank()) {
+                            return 0;
+                        }
+                        return Integer.parseInt(configured);
                     }
 
                     private static String getenv(String name) {
@@ -349,6 +381,151 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
         kotlin.test.assertEquals(1, joinLinkFiles.size)
         kotlin.test.assertEquals("tcp://127.0.0.1:5990#cb=fake", joinLinkFiles.single().readText().trim())
+    }
+
+    @Test
+    fun `runIdeSplitMode starts backend before frontend`() {
+        configureFakeJavaLauncher()
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
+                jvmArgs("-Dfake.backend.alive.ms=1000")
+            }
+            """.trimIndent()
+        )
+
+        build(Tasks.RUN_IDE_SPLIT_MODE) {
+            val backendArgs = "APP_ARGS=serverMode -p 5990"
+            val frontendArgs = "APP_ARGS=thinClient tcp://127.0.0.1:5990#cb=fake&remoteId=Split%20Mode --refresh-split-mode-token=true"
+
+            assertContains(backendArgs, output)
+            assertContains(frontendArgs, output)
+            assertTrue(
+                output.indexOf(backendArgs) < output.indexOf(frontendArgs),
+                "Expected backend launch output before frontend launch output."
+            )
+            assertContains("Split-mode backend sandbox paths:", output)
+            assertContains("config_${Tasks.RUN_IDE_BACKEND}", output)
+            assertContains("system_${Tasks.RUN_IDE_BACKEND}", output)
+            assertContains("log_${Tasks.RUN_IDE_BACKEND}", output)
+            assertContains("plugins_${Tasks.RUN_IDE_BACKEND}", output)
+            assertContains("Split-mode frontend sandbox paths:", output)
+            assertContains("config_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
+            assertContains("system_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
+            assertContains("log_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
+            assertContains("plugins_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
+            assertContains("-Didea.properties.file=", output)
+            assertContains("${Tasks.RUN_IDE_SPLIT_MODE}-frontend.properties", output)
+        }
+
+        val frontendProperties = sandbox.resolve("${Tasks.RUN_IDE_SPLIT_MODE}-frontend.properties")
+        assertTrue(frontendProperties.exists())
+        frontendProperties.readText().let { properties ->
+            assertContains("idea.config.path=", properties)
+            assertContains("config_${Tasks.RUN_IDE_FRONTEND}/frontend", properties)
+            assertContains("idea.system.path=", properties)
+            assertContains("system_${Tasks.RUN_IDE_FRONTEND}/frontend", properties)
+            assertContains("idea.log.path=", properties)
+            assertContains("log_${Tasks.RUN_IDE_FRONTEND}/frontend", properties)
+            assertContains("idea.plugins.path=", properties)
+            assertContains("plugins_${Tasks.RUN_IDE_FRONTEND}/frontend", properties)
+        }
+    }
+
+    @Test
+    fun `runIdeSplitMode keeps JVM debugging only on backend`() {
+        configureFakeJavaLauncher()
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
+                jvmArgs("-Dfake.backend.alive.ms=1000")
+                debugOptions.enabled.set(true)
+                debugOptions.server.set(true)
+                debugOptions.port.set(0)
+                debugOptions.suspend.set(false)
+            }
+            """.trimIndent()
+        )
+
+        build(Tasks.RUN_IDE_SPLIT_MODE) {
+            val backendArgs = "APP_ARGS=serverMode -p 5990"
+            val frontendArgs = "APP_ARGS=thinClient debug://localhost:5990#remoteId=Split%20Mode --refresh-split-mode-token=true"
+            val jvmArgLinesWithJdwp = output.lineSequence()
+                .filter { it.startsWith("JVM_ARGS=") && "jdwp" in it }
+                .toList()
+
+            assertContains(backendArgs, output)
+            assertContains(frontendArgs, output)
+            assertContains("-agentlib:jdwp=", jvmArgLinesWithJdwp.single())
+            assertTrue(
+                output.indexOf(jvmArgLinesWithJdwp.single()) < output.indexOf(frontendArgs),
+                "Expected only backend launch to receive JDWP JVM arguments."
+            )
+            assertContains("Java debugging is disabled for the frontend process launched by `${Tasks.RUN_IDE_SPLIT_MODE}`.", output)
+        }
+    }
+
+    @Test
+    fun `runIdeSplitMode reuses configuration cache`() {
+        configureFakeJavaLauncher()
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
+                jvmArgs("-Dfake.backend.alive.ms=1000")
+            }
+            """.trimIndent()
+        )
+
+        buildWithConfigurationCache(Tasks.RUN_IDE_SPLIT_MODE)
+        buildWithConfigurationCache(Tasks.RUN_IDE_SPLIT_MODE) {
+            assertConfigurationCacheReused()
+        }
+    }
+
+    @Test
+    fun `runIdeSplitMode accepts expected shutdown exit code`() {
+        configureFakeJavaLauncher()
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
+                jvmArgs(
+                    "-Dfake.backend.alive.ms=1000",
+                    "-Dfake.frontend.exit.code=193",
+                    "-Dfake.backend.exit.code=193",
+                )
+            }
+            """.trimIndent()
+        )
+
+        build(Tasks.RUN_IDE_SPLIT_MODE) {
+            assertContains("Split-mode frontend process exited with expected shutdown code 193.", output)
+            assertContains("Split-mode backend process exited with expected shutdown code 193.", output)
+        }
+    }
+
+    @Test
+    fun `runIdeSplitMode fails on unexpected frontend exit code`() {
+        configureFakeJavaLauncher()
+        buildFile.toFile().appendText(
+            """
+
+            tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
+                jvmArgs(
+                    "-Dfake.backend.alive.ms=1000",
+                    "-Dfake.frontend.exit.code=17",
+                )
+            }
+            """.trimIndent()
+        )
+
+        buildAndFail(Tasks.RUN_IDE_SPLIT_MODE) {
+            assertContains("Process 'command", output)
+            assertContains("finished with non-zero exit value 17", output)
+        }
     }
 
     @Test

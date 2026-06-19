@@ -5,12 +5,15 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.Directory
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.options.Option
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.named
 import org.gradle.process.ExecOperations
+import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -59,6 +62,13 @@ private const val SPLIT_MODE_SHARED_PASSWORD = "qwerty123"
 private const val SPLIT_MODE_PORT_PROBE_TIMEOUT_MS = 200
 private const val SPLIT_MODE_PID_POLL_INTERVAL_MS = 50L
 internal const val PURGE_OLD_LOG_DIRECTORIES_OPTION = "purge-old-log-directories"
+
+internal data class SplitModeSandboxPaths(
+    val configDirectory: Provider<Directory>,
+    val pluginsDirectory: Provider<Directory>,
+    val systemDirectory: Provider<Directory>,
+    val logDirectory: Provider<Directory>,
+)
 
 /**
  * Runs the IDE instance using the currently selected IntelliJ Platform with the built plugin loaded.
@@ -126,13 +136,25 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
      * Executes the task, configures, and runs the IDE.
      */
     @TaskAction
-    override fun exec() {
+    override open fun exec() {
+        prepareIdeExecution()
+
+        when (executionMode.get()) {
+            ExecutionMode.SPLIT_MODE_BACKEND -> runSplitModeBackend(::runJavaExec)
+            else -> runJavaExec()
+        }
+    }
+
+    internal fun prepareIdeExecution(
+        frontendJoinLinkOverride: String? = null,
+        sandboxPathsOverride: SplitModeSandboxPaths? = null,
+    ) {
         validateIntelliJPlatformVersion()
         validateSplitModeSupport()
 
         workingDir = platformPath.toFile()
-        purgeOldLogDirectoriesIfRequested()
-        logSplitModeSandboxPaths()
+        purgeOldLogDirectoriesIfRequested(sandboxPathsOverride?.logDirectory)
+        logSplitModeSandboxPaths(sandboxPathsOverride)
 
         if (composeHotReload.get() && executionMode.get() != ExecutionMode.SPLIT_MODE_FRONTEND) {
             log.info("Compose Hot Reload is enabled for `runIde` task")
@@ -166,18 +188,35 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                 validateSplitModeTaskArguments()
                 args(
                     SPLIT_MODE_FRONTEND_COMMAND,
-                    decorateSplitModeFrontendJoinLink(resolveSplitModeFrontendJoinLink()),
+                    decorateSplitModeFrontendJoinLink(frontendJoinLinkOverride ?: resolveSplitModeFrontendJoinLink()),
                     SPLIT_MODE_REFRESH_TOKEN_ARGUMENT,
                 )
             }
         }
 
         systemPropertyDefault("idea.auto.reload.plugins", autoReload.get())
+    }
 
-        when (executionMode.get()) {
-            ExecutionMode.SPLIT_MODE_BACKEND -> runSplitModeBackend()
-            else -> super.exec()
-        }
+    private fun runJavaExec() {
+        super.exec()
+    }
+
+    internal fun copyJavaExecSpecTo(spec: JavaExecSpec) {
+        copyTo(spec as JavaForkOptions)
+        javaLauncher.orNull
+            ?.executablePath
+            ?.asFile
+            ?.absolutePath
+            ?.let { spec.executable = it }
+            ?: executable?.takeIf { it.isNotBlank() }?.let { spec.executable = it }
+        spec.jvmArgs(allJvmArgs)
+        spec.workingDir = workingDir
+        spec.classpath = classpath
+        spec.mainClass.set(mainClass)
+        spec.args = args
+        runCatching { spec.standardOutput = standardOutput }
+        runCatching { spec.errorOutput = errorOutput }
+        spec.isIgnoreExitValue = isIgnoreExitValue
     }
 
     private fun validateSplitModeTaskArguments() {
@@ -212,14 +251,14 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
      * The process itself is started by Gradle (not [ProcessBuilder]) because Gradle instruments direct process launches
      * in plugin code, which fails at task-execution time.
      */
-    private fun runSplitModeBackend() {
+    internal fun runSplitModeBackend(launch: () -> Unit) {
         checkForConflictingSplitModeBackend()
 
         val pidPath = splitModeBackendPidFile.asPath
         val trackerStopped = AtomicBoolean(false)
         val tracker = startSplitModeBackendPidTracker(pidPath, trackerStopped)
         try {
-            super.exec()
+            launch()
         } finally {
             trackerStopped.set(true)
             tracker.interrupt()
@@ -424,7 +463,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         }.getOrDefault(emptyList())
     }
 
-    private fun resolveSplitModeFrontendJoinLink(): String {
+    internal fun resolveSplitModeFrontendJoinLink(): String {
         splitModeFrontendJoinLink.orNull
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
@@ -479,7 +518,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         true
     }.getOrDefault(false)
 
-    private fun purgeOldLogDirectoriesIfRequested() {
+    private fun purgeOldLogDirectoriesIfRequested(sandboxLogDirectoryOverride: Provider<Directory>? = null) {
         if (!purgeOldLogDirectories.get()) {
             return
         }
@@ -487,7 +526,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         when (executionMode.get()) {
             ExecutionMode.STANDARD,
             ExecutionMode.SPLIT_MODE_BACKEND, ExecutionMode.SPLIT_MODE_FRONTEND -> {
-                val sandboxLogPath = sandboxLogDirectory.asPath
+                val sandboxLogPath = (sandboxLogDirectoryOverride ?: sandboxLogDirectory).asPath
                 if (sandboxLogPath.exists()) {
                     log.info("Removing existing sandbox log directory at '${sandboxLogPath.safePathString}'.")
                     sandboxLogPath.toFile().deleteRecursively()
@@ -498,19 +537,24 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         }
     }
 
-    private fun logSplitModeSandboxPaths() {
+    private fun logSplitModeSandboxPaths(sandboxPathsOverride: SplitModeSandboxPaths? = null) {
         val mode = when (executionMode.get()) {
             ExecutionMode.SPLIT_MODE_BACKEND -> "backend"
             ExecutionMode.SPLIT_MODE_FRONTEND -> "frontend"
             ExecutionMode.STANDARD -> return
         }
 
+        val configDirectory = sandboxPathsOverride?.configDirectory ?: sandboxConfigDirectory
+        val systemDirectory = sandboxPathsOverride?.systemDirectory ?: sandboxSystemDirectory
+        val logDirectory = sandboxPathsOverride?.logDirectory ?: sandboxLogDirectory
+        val pluginsDirectory = sandboxPathsOverride?.pluginsDirectory ?: sandboxPluginsDirectory
+
         log.lifecycle(
             "Split-mode $mode sandbox paths:\n" +
-                "  idea.config.path=${sandboxConfigDirectory.asPath.safePathString}\n" +
-                "  idea.system.path=${sandboxSystemDirectory.asPath.safePathString}\n" +
-                "  idea.log.path=${sandboxLogDirectory.asPath.safePathString}\n" +
-                "  idea.plugins.path=${sandboxPluginsDirectory.asPath.safePathString}"
+                "  idea.config.path=${configDirectory.asPath.safePathString}\n" +
+                "  idea.system.path=${systemDirectory.asPath.safePathString}\n" +
+                "  idea.log.path=${logDirectory.asPath.safePathString}\n" +
+                "  idea.plugins.path=${pluginsDirectory.asPath.safePathString}"
         )
     }
 
@@ -614,6 +658,18 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
 
                 val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_SANDBOX_RUN_IDE_FRONTEND)
                 applyFrontendSandboxFrom(prepareSandboxTaskProvider)
+            }
+
+            project.registerTask<RunIdeSplitModeTask>(Tasks.RUN_IDE_SPLIT_MODE, configureWithType = false) {
+                description = "Runs the IDE backend and JetBrains Client frontend in Split Mode."
+                executionMode.convention(ExecutionMode.SPLIT_MODE_BACKEND)
+                splitMode.convention(true)
+
+                val prepareBackendSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_SANDBOX_RUN_IDE_BACKEND)
+                applySandboxFrom(prepareBackendSandboxTaskProvider)
+
+                val prepareFrontendSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_SANDBOX_RUN_IDE_FRONTEND)
+                applySplitModeFrontendSandboxFrom(prepareFrontendSandboxTaskProvider)
             }
 
             project.registerTask<RunIdeTask> {
