@@ -10,6 +10,7 @@
 - Introduce `IdeaHomePathArgumentProvider` to supply `-Didea.home.path` JVM argument and apply it to test IDE tasks.
 - Track and log the launched `runIdeBackend` process identifier (PID) to a `split-mode-backend.pid` file in the sandbox. Fail fast when `runIdeBackend` is started while a previously launched backend recorded in that file is still running, and warn (without blocking the launch) when the configured `splitModeServerPort` already appears to be in use.
 - Allow selecting a random free split-mode backend port (in the range `5990..6989`) at execution time by setting `splitModeServerPort` to `0`; when left unset it still defaults to `5990`.
+- Add `runIdeSplitMode` to start the split-mode backend and then launch the frontend once the backend join link is available.
 
 ### Fixed
 
