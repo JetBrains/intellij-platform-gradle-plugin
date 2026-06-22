@@ -131,7 +131,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         sandboxLogDirectory.asPath.createDirectories()
         sandboxSystemDirectory.asPath.createDirectories()
 
-        if (splitMode.get() && effectivePluginInstallationTarget.get().includes(SplitModeAware.PluginInstallationTarget.FRONTEND)) {
+        if (splitMode.get()) {
             disableIdeUpdate(sandboxConfigFrontendDirectory)
             disabledPlugins(sandboxConfigFrontendDirectory)
             createSplitModeFrontendPropertiesFile()
@@ -365,12 +365,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                                 else -> sandboxConfigDirectory
                             }
                         },
-                        splitMode.flatMap { isSplitMode ->
-                            when {
-                                isSplitMode -> sandboxPluginsFrontendDirectory
-                                else -> sandboxPluginsDirectory
-                            }
-                        },
+                        defaultDestinationDirectory,
                         splitMode.flatMap { isSplitMode ->
                             when {
                                 isSplitMode -> sandboxLogFrontendDirectory
