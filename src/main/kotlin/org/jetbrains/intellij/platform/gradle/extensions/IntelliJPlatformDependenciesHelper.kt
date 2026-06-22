@@ -610,19 +610,25 @@ class IntelliJPlatformDependenciesHelper(
         configurationName: String = Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES,
         intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(provider {
-        val bundledModules = bundledModulesProvider.orNull
-        requireNotNull(bundledModules) { "The `intellijPlatform.bundledModules` dependency helper was called with no `bundledModules` value provided." }
+    ) {
+        if (configurationName == Configurations.INTELLIJ_PLATFORM_BUNDLED_MODULES) {
+            intellijPlatformProjects.get().registerModuleBundledModules(projectPath, bundledModulesProvider)
+        }
 
-        val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
-        requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
+        configurations[configurationName].dependencies.addAllLater(provider {
+            val bundledModules = bundledModulesProvider.orNull
+            requireNotNull(bundledModules) { "The `intellijPlatform.bundledModules` dependency helper was called with no `bundledModules` value provided." }
 
-        bundledModules
-            .map(String::trim)
-            .filter(String::isNotEmpty)
-            .map { createIntelliJPlatformBundledModule(it, platformPath) }
-            .onEach(action)
-    }.cached())
+            val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
+            requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
+
+            bundledModules
+                .map(String::trim)
+                .filter(String::isNotEmpty)
+                .map { createIntelliJPlatformBundledModule(it, platformPath) }
+                .onEach(action)
+        }.cached())
+    }
 
     /**
      * Adds Compose UI-related bundled modules depending on the current IntelliJ Platform build.

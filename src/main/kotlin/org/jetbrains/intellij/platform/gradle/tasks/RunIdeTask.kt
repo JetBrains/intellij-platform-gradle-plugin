@@ -321,12 +321,13 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                 applySandboxFrom(prepareSandboxTaskProvider)
             }
 
-            project.registerTask<PrepareSandboxTask>(
-                PREPARE_SANDBOX_RUN_IDE_BACKEND,
-                PREPARE_SANDBOX_RUN_IDE_FRONTEND,
-                configureWithType = false,
-            ) {
+            project.registerTask<PrepareSandboxTask>(PREPARE_SANDBOX_RUN_IDE_BACKEND, configureWithType = false) {
                 splitMode.convention(true)
+                pluginInstallationTarget.convention(SplitModeAware.PluginInstallationTarget.BACKEND)
+            }
+            project.registerTask<PrepareSandboxTask>(PREPARE_SANDBOX_RUN_IDE_FRONTEND, configureWithType = false) {
+                splitMode.convention(true)
+                pluginInstallationTarget.convention(SplitModeAware.PluginInstallationTarget.FRONTEND)
             }
 
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE_BACKEND, configureWithType = false) {

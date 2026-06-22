@@ -504,7 +504,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `runIdeFrontend uses shared sandbox plugins directory for BOTH target`() {
+    fun `runIdeFrontend uses frontend sandbox plugins directory for BOTH target`() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
@@ -527,7 +527,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         build(Tasks.RUN_IDE_FRONTEND) {
             assertContains("FRONTEND_SANDBOX_PLUGINS=", output)
             assertContains("plugins_runIdeFrontend", output)
-            assertNotContains("plugins_runIdeFrontend/frontend", output)
+            assertContains("plugins_runIdeFrontend/frontend", output)
         }
     }
 

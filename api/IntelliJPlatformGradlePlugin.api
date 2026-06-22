@@ -22,6 +22,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Components {
 public final class org/jetbrains/intellij/platform/gradle/Constants$Configurations {
 	public static final field COMPOSE_HOT_RELOAD_AGENT Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Configurations;
+	public static final field INTELLIJ_PLATFORM_BACKEND_PLUGIN_MODULE_DEPENDENCIES Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_BUNDLED_MODULES Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_BUNDLED_PLUGINS Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_CLASSPATH Ljava/lang/String;
@@ -31,6 +32,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 	public static final field INTELLIJ_PLATFORM_DEPENDENCY Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_DISTRIBUTION Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_FRONTEND_PLUGIN_MODULE_DEPENDENCIES Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_GRAMMAR_KIT Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_JAVA_COMPILER Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_JFLEX Ljava/lang/String;

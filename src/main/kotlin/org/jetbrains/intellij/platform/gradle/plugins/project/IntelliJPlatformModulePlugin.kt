@@ -2,9 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.plugins.project
 
+import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.JavaVersion
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
@@ -23,11 +23,15 @@ import org.jetbrains.intellij.platform.gradle.services.IntelliJPlatformProjectsS
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatformsService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.*
+import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget
+import org.jetbrains.intellij.platform.gradle.tasks.aware.asExplicitPluginInstallationTarget
+import org.jetbrains.intellij.platform.gradle.tasks.aware.asPluginInstallationTarget
 import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
 import org.jetbrains.intellij.platform.gradle.tasks.companion.TestCompanion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.create
 import org.jetbrains.intellij.platform.gradle.utils.dependenciesHelper
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import java.util.concurrent.ConcurrentHashMap
 
 abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
@@ -53,6 +57,12 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             .registerClassLoaderScopedBuildService(IntelliJPlatformProjectsService::class)
             .get()
             .also { it.markModuleProject(project.path) }
+        intellijPlatformProjects.registerModulePluginInstallationTarget(
+            project.path,
+            project.extensionProvider.flatMap {
+                it.pluginInstallationTarget.orElse(it.splitModeTarget.asExplicitPluginInstallationTarget())
+            },
+        )
 
         // To understand what is going on below read & watch this:
         // https://youtu.be/2gPJD0mAres?t=461
@@ -73,8 +83,9 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                     attributeProvider(
                         TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE,
                         compileJavaTaskProvider.map { task ->
-                            task.options.release.orNull ?: JavaVersion.toVersion(task.targetCompatibility).majorVersion.toInt()
-                        }
+                            task.options.release.orNull
+                                ?: JavaVersion.toVersion(task.targetCompatibility).majorVersion.toInt()
+                        },
                     )
 
                     attributes.attribute(Attributes.jvmEnvironment, "standard-jvm")
@@ -116,7 +127,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                  */
                 extendsFrom(
                     this@configurations[Configurations.External.API],
-                    this@configurations[Configurations.External.COMPILE_ONLY_API]
+                    this@configurations[Configurations.External.COMPILE_ONLY_API],
                 )
             }
 
@@ -129,7 +140,10 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
                 applyVariantCommonAttributes {
                     attribute(Usage.USAGE_ATTRIBUTE, project.objects.named(Usage.JAVA_RUNTIME))
-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
+                    attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        project.objects.named(Attributes.COMPOSED_JAR_NAME),
+                    )
                 }
 
                 /**
@@ -185,7 +199,10 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             ).forEach {
                 named(it) {
                     attributes {
-                        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.COMPOSED_JAR_NAME))
+                        attribute(
+                            LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                            project.objects.named(Attributes.COMPOSED_JAR_NAME),
+                        )
                     }
                 }
             }
@@ -197,7 +214,10 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             ).forEach {
                 named(it) {
                     attributes {
-                        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
+                        attribute(
+                            LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                            project.objects.named(Attributes.DISTRIBUTION_NAME),
+                        )
                     }
                 }
             }
@@ -248,23 +268,44 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             )
         }
 
-        val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
-        val intellijPlatformPluginComposedModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE]
-        val intellijPlatformPluginModuleDependenciesConfiguration = project.configurations.create(
+        val intellijPlatformPluginModuleConfiguration =
+            project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
+        val intellijPlatformPluginComposedModuleConfiguration =
+            project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE]
+
+        fun createPluginModuleDependenciesConfiguration(name: String, description: String) =
+            project.configurations.create(name, description) {
+                attributes {
+                    attribute(Attributes.extracted, true)
+                    attribute(Attributes.localPluginsNormalized, true)
+                    attribute(
+                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
+                        project.objects.named(Attributes.DISTRIBUTION_NAME),
+                    )
+                }
+            }
+
+        val intellijPlatformBackendPluginModuleDependenciesConfiguration = createPluginModuleDependenciesConfiguration(
+            name = Configurations.INTELLIJ_PLATFORM_BACKEND_PLUGIN_MODULE_DEPENDENCIES,
+            description = "IntelliJ Platform backend plugin dependencies inherited from plugin modules",
+        )
+        val intellijPlatformFrontendPluginModuleDependenciesConfiguration = createPluginModuleDependenciesConfiguration(
+            name = Configurations.INTELLIJ_PLATFORM_FRONTEND_PLUGIN_MODULE_DEPENDENCIES,
+            description = "IntelliJ Platform frontend plugin dependencies inherited from plugin modules",
+        )
+        val intellijPlatformPluginModuleDependenciesConfiguration = createPluginModuleDependenciesConfiguration(
             name = Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE_DEPENDENCIES,
             description = "IntelliJ Platform plugin dependencies inherited from plugin modules",
-        ) {
-            isCanBeConsumed = false
-            isCanBeResolved = true
-
-            attributes {
-                attribute(Attributes.extracted, true)
-                attribute(Attributes.localPluginsNormalized, true)
-                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
-            }
+        ).apply {
+            extendsFrom(
+                intellijPlatformBackendPluginModuleDependenciesConfiguration,
+                intellijPlatformFrontendPluginModuleDependenciesConfiguration,
+            )
         }
 
-        project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS].extendsFrom(intellijPlatformPluginModuleDependenciesConfiguration)
+        project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS].extendsFrom(
+            intellijPlatformPluginModuleDependenciesConfiguration,
+        )
 
         val pluginDependencyModuleDependencies = ConcurrentHashMap<String, ProjectDependency>()
         fun inheritPluginDependencies(dependency: ProjectDependency) {
@@ -272,39 +313,75 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
         }
 
         val pluginModuleDependencyPaths = ConcurrentHashMap.newKeySet<String>()
-        intellijPlatformPluginModuleConfiguration.dependencies.whenObjectAdded(Unit.closureOf<Dependency> {
-            if (this is ProjectDependency) {
-                pluginModuleDependencyPaths += path
-                inheritPluginDependencies(this)
-            }
-        })
+        intellijPlatformPluginModuleConfiguration.dependencies.whenObjectAdded(
+            Unit.closureOf<Dependency> {
+                if (this is ProjectDependency) {
+                    pluginModuleDependencyPaths += path
+                    inheritPluginDependencies(this)
+                }
+            },
+        )
         val pluginComposedModuleDependencyPaths = ConcurrentHashMap.newKeySet<String>()
-        intellijPlatformPluginComposedModuleConfiguration.dependencies.whenObjectAdded(Unit.closureOf<Dependency> {
-            if (this is ProjectDependency) {
-                pluginComposedModuleDependencyPaths += path
-                inheritPluginDependencies(this)
-            }
-        })
+        intellijPlatformPluginComposedModuleConfiguration.dependencies.whenObjectAdded(
+            Unit.closureOf<Dependency> {
+                if (this is ProjectDependency) {
+                    pluginComposedModuleDependencyPaths += path
+                    inheritPluginDependencies(this)
+                }
+            },
+        )
 
-        project.tasks.withType<PrepareSandboxTask>().configureEach {
-            pluginsClasspath.from(intellijPlatformPluginModuleDependenciesConfiguration)
+        val rootPluginInstallationTargetProvider = project.extensionProvider.flatMap {
+            it.pluginInstallationTarget
+                .orElse(it.splitModeTarget.asPluginInstallationTarget())
+                .orElse(PluginInstallationTarget.BACKEND)
         }
 
-        intellijPlatformPluginModuleDependenciesConfiguration.dependencies.addAllLater(project.provider {
-            pluginDependencyModuleDependencies.values
-                .asSequence()
-                .filter { intellijPlatformProjects.isPureModuleProject(it.path) }
-                .sortedBy { it.path }
-                .map {
-                    project.dependencies.project(
-                        mapOf(
-                            "path" to it.path,
-                            "configuration" to Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS,
-                        )
-                    )
-                }
-                .toList()
-        })
+        fun modulePluginInstallationTarget(dependency: ProjectDependency): PluginInstallationTarget {
+            val rootTarget = rootPluginInstallationTargetProvider.get()
+
+            return intellijPlatformProjects.resolveModulePluginInstallationTarget(dependency.path, rootTarget)
+        }
+
+        fun Configuration.addPluginModuleDependenciesFor(target: PluginInstallationTarget) {
+            dependencies.addAllLater(
+                project.provider {
+                    pluginDependencyModuleDependencies.values
+                        .asSequence()
+                        .filter { intellijPlatformProjects.isPureModuleProject(it.path) }
+                        .filter { modulePluginInstallationTarget(it).includes(target) }
+                        .sortedBy { it.path }
+                        .map {
+                            project.dependencies.project(
+                                mapOf(
+                                    "path" to it.path,
+                                    "configuration" to Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS,
+                                ),
+                            )
+                        }
+                        .toList()
+                },
+            )
+        }
+
+        project.tasks.withType<PrepareSandboxTask>().configureEach {
+            pluginsClasspath.from(
+                project.provider {
+                    when (effectivePluginInstallationTarget.get()) {
+                        PluginInstallationTarget.BACKEND -> intellijPlatformBackendPluginModuleDependenciesConfiguration
+                        PluginInstallationTarget.FRONTEND -> intellijPlatformFrontendPluginModuleDependenciesConfiguration
+                        PluginInstallationTarget.BOTH -> intellijPlatformPluginModuleDependenciesConfiguration
+                    }
+                },
+            )
+        }
+
+        intellijPlatformBackendPluginModuleDependenciesConfiguration.addPluginModuleDependenciesFor(
+            PluginInstallationTarget.BACKEND,
+        )
+        intellijPlatformFrontendPluginModuleDependenciesConfiguration.addPluginModuleDependenciesFor(
+            PluginInstallationTarget.FRONTEND,
+        )
 
         val inferredPluginModuleDependencies = ConcurrentHashMap<String, ProjectDependency>()
         fun addInferredPluginModuleDependency(dependency: ProjectDependency) {
@@ -321,15 +398,17 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 .all(::addInferredPluginModuleDependency)
         }
 
-        intellijPlatformPluginModuleConfiguration.dependencies.addAllLater(project.provider {
-            inferredPluginModuleDependencies.values
-                .asSequence()
-                .filterNot { it.path in pluginModuleDependencyPaths }
-                .filterNot { it.path in pluginComposedModuleDependencyPaths }
-                .filter { intellijPlatformProjects.isPureModuleProject(it.path) }
-                .sortedBy { it.path }
-                .toList()
-        })
+        intellijPlatformPluginModuleConfiguration.dependencies.addAllLater(
+            project.provider {
+                inferredPluginModuleDependencies.values
+                    .asSequence()
+                    .filterNot { it.path in pluginModuleDependencyPaths }
+                    .filterNot { it.path in pluginComposedModuleDependencyPaths }
+                    .filter { intellijPlatformProjects.isPureModuleProject(it.path) }
+                    .sortedBy { it.path }
+                    .toList()
+            },
+        )
 
         IntelliJPlatformTestingExtension.register(
             project = project,

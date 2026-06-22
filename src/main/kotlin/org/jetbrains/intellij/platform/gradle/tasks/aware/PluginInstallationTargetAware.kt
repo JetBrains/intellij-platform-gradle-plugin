@@ -24,6 +24,9 @@ internal fun Provider<SplitModeAware.PluginInstallationTarget>.asSplitModeTarget
 internal fun Provider<SplitModeAware.SplitModeTarget>.asPluginInstallationTarget() =
     map { it.toPluginInstallationTarget() }
 
+internal fun Provider<SplitModeAware.SplitModeTarget>.asExplicitPluginInstallationTarget() =
+    asPluginInstallationTarget().filter { it != SplitModeAware.PluginInstallationTarget.BACKEND }
+
 internal fun Property<SplitModeAware.SplitModeTarget>.conventionFrom(
     pluginInstallationTarget: Provider<SplitModeAware.PluginInstallationTarget>,
 ) {
@@ -53,3 +56,29 @@ internal fun SplitModeAware.pluginInstallationDirectory(): Provider<Directory> =
             else -> sandboxPluginsDirectory.get()
         }
     }
+
+private const val FRONTEND_PLATFORM_MODULE_PREFIX = "intellij.platform.frontend"
+private const val BACKEND_PLATFORM_MODULE_SUFFIX = ".backend"
+
+internal fun Iterable<String>.inferredPluginInstallationTarget() =
+    map(String::trim)
+        .filter(String::isNotEmpty)
+        .fold(null as SplitModeAware.PluginInstallationTarget?) { target, module ->
+            val moduleTarget = when {
+                module == FRONTEND_PLATFORM_MODULE_PREFIX || module.startsWith("$FRONTEND_PLATFORM_MODULE_PREFIX.") ->
+                    SplitModeAware.PluginInstallationTarget.FRONTEND
+
+                module.endsWith(BACKEND_PLATFORM_MODULE_SUFFIX) ->
+                    SplitModeAware.PluginInstallationTarget.BACKEND
+
+                else -> null
+            }
+            target.combineWith(moduleTarget)
+        }
+
+private fun SplitModeAware.PluginInstallationTarget?.combineWith(other: SplitModeAware.PluginInstallationTarget?) = when {
+    this == null -> other
+    other == null -> this
+    this == other -> this
+    else -> SplitModeAware.PluginInstallationTarget.BOTH
+}

@@ -21,6 +21,7 @@
 - Keep warning-level IDE console logging enabled for `runIde` and `testIde` by setting `intellij.console.log.level=warning` explicitly, as 262+ IDEs disable it by default.
 - Avoid Javac2 nullability instrumentation failures with upcoming Gradle versions by isolating the Java Compiler Ant task classloader.
 - Install `plugin(...)` dependencies declared by plugin module projects into split-mode run sandboxes.
+- Route split-mode plugin dependencies inherited from module projects to the backend or frontend sandbox according to the module plugin installation target.
 
 ## [2.16.0] - 2026-05-01
 
