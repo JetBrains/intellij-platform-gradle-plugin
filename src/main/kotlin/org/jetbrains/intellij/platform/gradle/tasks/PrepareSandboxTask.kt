@@ -131,7 +131,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         sandboxLogDirectory.asPath.createDirectories()
         sandboxSystemDirectory.asPath.createDirectories()
 
-        if (splitMode.get()) {
+        if (splitMode.get() && effectivePluginInstallationTarget.get().includes(SplitModeAware.PluginInstallationTarget.FRONTEND)) {
             disableIdeUpdate(sandboxConfigFrontendDirectory)
             disabledPlugins(sandboxConfigFrontendDirectory)
             createSplitModeFrontendPropertiesFile()
@@ -199,9 +199,6 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
      * Creates a properties file which will be passed to the frontend process when the IDE is started in Split Mode.
      */
     private fun createSplitModeFrontendPropertiesFile() {
-        if (!splitMode.get()) {
-            return
-        }
         log.info("Preparing sandbox for a Split Mode.")
 
         val pluginsDirectory = frontendProcessPluginsDirectory().get().asPath
@@ -217,9 +214,11 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     }
 
     private fun preparePluginDirectories() {
+        val target = effectivePluginInstallationTarget.get()
         when {
             !splitMode.get() -> cleanupFrontendPluginsDirectory()
-            effectivePluginInstallationTarget.get() == SplitModeAware.PluginInstallationTarget.FRONTEND -> cleanupBackendPluginsDirectoryPreservingFrontend()
+            target == SplitModeAware.PluginInstallationTarget.BACKEND -> deleteFrontendPluginsDirectory()
+            target == SplitModeAware.PluginInstallationTarget.FRONTEND -> cleanupBackendPluginsDirectoryPreservingFrontend()
             else -> cleanupFrontendPluginsDirectory()
         }
     }
@@ -230,6 +229,14 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 it.toFile().deleteRecursively()
             }
             it.createDirectories()
+        }
+    }
+
+    private fun deleteFrontendPluginsDirectory() {
+        sandboxPluginsFrontendDirectory.asPath.let {
+            if (it.exists()) {
+                it.toFile().deleteRecursively()
+            }
         }
     }
 

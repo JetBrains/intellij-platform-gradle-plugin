@@ -33,7 +33,9 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             .get()
             .markPluginProject(project.path)
 
-        project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS).isCanBeConsumed = false
+        project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_PLUGIN_ELEMENTS) {
+            isCanBeConsumed = false
+        }
 
         listOf(
             // Build

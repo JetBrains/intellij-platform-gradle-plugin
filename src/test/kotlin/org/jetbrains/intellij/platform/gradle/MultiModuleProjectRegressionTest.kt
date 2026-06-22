@@ -37,16 +37,16 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         dir.resolve("backend/build.gradle.kts") write //language=kotlin
                 """
                 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
-                
+
                 plugins {
                     id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform.module")
                 }
-                
+
                 val compileKotlinJvmTarget = tasks.named<KotlinJvmCompile>("compileKotlin").flatMap {
                     it.compilerOptions.jvmTarget
                 }
-                
+
                 println("backend.compileKotlin.jvmTarget=" + compileKotlinJvmTarget.orNull)
                 """.trimIndent()
 
@@ -87,15 +87,15 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform.module")
                 }
-                
+
                 repositories {
                     mavenCentral()
-                
+
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         local("${clionIdePath.invariantSeparatorsPathString}")
@@ -118,11 +118,11 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         settingsFile overwrite //language=kotlin
                 """
                 rootProject.name = "projectName"
-                
+
                 plugins {
                     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
                 }
-                
+
                 include("core", "rider", "clion")
                 """.trimIndent()
 
@@ -153,29 +153,29 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         dir.resolve("core/build.gradle.kts") write //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.*
-                
+
                 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-                
+
                 version = "1.0.0"
-                
+
                 plugins {
                     id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform")
                 }
-                
+
                 kotlin {
                     jvmToolchain(21)
                 }
-                
+
                 repositories {
                     mavenCentral()
-                
+
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
@@ -184,7 +184,7 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                         zipSigner()
                     }
                 }
-                
+
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
@@ -207,36 +207,36 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         val moduleBuildFile = //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.*
-                
+
                 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-                
+
                 version = "1.0.0"
-                
+
                 plugins {
                     id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform.module")
                 }
-                
+
                 kotlin {
                     jvmToolchain(21)
                 }
-                
+
                 repositories {
                     mavenCentral()
-                
+
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
                         pluginModule(implementation(project(":core")))
                     }
                 }
-                
+
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -279,8 +279,12 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     intellijPlatform {
-                        pluginComposedModule(implementation(project(":backend")))
+                        pluginModule(implementation(project(":backend")))
                     }
+                }
+
+                intellijPlatform {
+                    pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
                 }
                 """.trimIndent()
 
@@ -322,10 +326,111 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
             .resolve("${Sandbox.PLUGINS}_${Tasks.RUN_IDE_BACKEND}")
 
         assertExists(backendPluginsDirectory.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar"))
+        assertExists(backendPluginsDirectory.resolve("projectName/lib/projectName-1.0.0.jar"))
+        assertFalse(backendPluginsDirectory.resolve("frontend").toFile().exists())
     }
 
     @Test
-    fun `split mode frontend run sandbox installs plugin dependencies declared by frontend plugin modules`() {
+    fun `split mode run sandboxes keep backend and frontend module plugin dependencies separated`() {
+        settingsFile write //language=kotlin
+                """
+                include("backend", "frontend")
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        pluginModule(implementation(project(":backend")))
+                        pluginModule(implementation(project(":frontend")))
+                    }
+                }
+
+                intellijPlatform {
+                    pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
+                }
+                """.trimIndent()
+
+        dir.resolve("backend/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform.module")
+                }
+
+                repositories {
+                    mavenCentral()
+
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        plugin("org.jetbrains.postfixCompletion", "0.8-beta")
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        dir.resolve("frontend/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform.module")
+                }
+
+                repositories {
+                    mavenCentral()
+
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                    pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.FRONTEND
+                }
+                """.trimIndent()
+
+        dir.resolve("backend/src/main/java/BackendFeature.java") write //language=java
+                """
+                class BackendFeature {}
+                """.trimIndent()
+        dir.resolve("frontend/src/main/java/FrontendFeature.java") write //language=java
+                """
+                class FrontendFeature {}
+                """.trimIndent()
+
+        build("prepareSandbox_${Tasks.RUN_IDE_BACKEND}", "prepareSandbox_${Tasks.RUN_IDE_FRONTEND}")
+
+        val sandbox = sandboxDirectory
+            .resolve("projectName")
+            .resolve("$intellijPlatformType-$intellijPlatformVersion")
+        val backendPluginsDirectory = sandbox.resolve("${Sandbox.PLUGINS}_${Tasks.RUN_IDE_BACKEND}")
+        val frontendPluginsDirectory = sandbox.resolve("${Sandbox.PLUGINS}_${Tasks.RUN_IDE_FRONTEND}").resolve("frontend")
+
+        assertExists(backendPluginsDirectory.resolve("projectName/lib/projectName-1.0.0.jar"))
+        assertExists(backendPluginsDirectory.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar"))
+        assertFalse(backendPluginsDirectory.resolve("frontend").toFile().exists())
+
+        assertExists(frontendPluginsDirectory.resolve("projectName/lib/projectName-1.0.0.jar"))
+        assertFalse(frontendPluginsDirectory.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar").toFile().exists())
+        assertFalse(frontendPluginsDirectory.parent.resolve("projectName").toFile().exists())
+        assertFalse(frontendPluginsDirectory.parent.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar").toFile().exists())
+    }
+
+    @Test
+    fun `split mode frontend run sandbox infers frontend module plugin dependencies from bundled frontend module`() {
         settingsFile write //language=kotlin
                 """
                 include("frontend")
@@ -335,7 +440,72 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 """
                 dependencies {
                     intellijPlatform {
-                        pluginComposedModule(implementation(project(":frontend")))
+                        pluginModule(implementation(project(":frontend")))
+                    }
+                }
+
+                intellijPlatform {
+                    pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
+                }
+                """.trimIndent()
+
+        dir.resolve("frontend/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform.module")
+                }
+
+                repositories {
+                    mavenCentral()
+
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        bundledModule("intellij.platform.frontend")
+                        plugin("org.jetbrains.postfixCompletion", "0.8-beta")
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        dir.resolve("frontend/src/main/java/FrontendFeature.java") write //language=java
+                """
+                class FrontendFeature {}
+                """.trimIndent()
+
+        build("prepareSandbox_${Tasks.RUN_IDE_FRONTEND}")
+
+        val frontendPluginsDirectory = sandboxDirectory
+            .resolve("projectName")
+            .resolve("$intellijPlatformType-$intellijPlatformVersion")
+            .resolve("${Sandbox.PLUGINS}_${Tasks.RUN_IDE_FRONTEND}")
+            .resolve("frontend")
+
+        assertExists(frontendPluginsDirectory.resolve("projectName/lib/projectName-1.0.0.jar"))
+        assertExists(frontendPluginsDirectory.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar"))
+        assertFalse(frontendPluginsDirectory.parent.resolve("projectName").toFile().exists())
+        assertFalse(frontendPluginsDirectory.parent.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar").toFile().exists())
+    }
+
+    @Test
+    fun `split mode frontend run sandbox inherits module plugin dependencies from root frontend target`() {
+        settingsFile write //language=kotlin
+                """
+                include("frontend")
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        pluginModule(implementation(project(":frontend")))
                     }
                 }
 
@@ -382,6 +552,9 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
             .resolve("${Sandbox.PLUGINS}_${Tasks.RUN_IDE_FRONTEND}")
             .resolve("frontend")
 
+        assertExists(frontendPluginsDirectory.resolve("projectName/lib/projectName-1.0.0.jar"))
         assertExists(frontendPluginsDirectory.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar"))
+        assertFalse(frontendPluginsDirectory.parent.resolve("projectName").toFile().exists())
+        assertFalse(frontendPluginsDirectory.parent.resolve("org.jetbrains.postfixCompletion-0.8-beta.jar").toFile().exists())
     }
 }

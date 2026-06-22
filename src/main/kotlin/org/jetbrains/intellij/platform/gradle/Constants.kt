@@ -100,6 +100,8 @@ object Constants {
         const val INTELLIJ_PLATFORM_PLUGIN_MODULE = "intellijPlatformPluginModule"
         const val INTELLIJ_PLATFORM_PLUGIN_ELEMENTS = "intellijPlatformPluginElements"
         const val INTELLIJ_PLATFORM_PLUGIN_MODULE_DEPENDENCIES = "intellijPlatformPluginModuleDependencies"
+        const val INTELLIJ_PLATFORM_BACKEND_PLUGIN_MODULE_DEPENDENCIES = "intellijPlatformBackendPluginModuleDependencies"
+        const val INTELLIJ_PLATFORM_FRONTEND_PLUGIN_MODULE_DEPENDENCIES = "intellijPlatformFrontendPluginModuleDependencies"
         const val INTELLIJ_PLATFORM_PLUGIN = "intellijPlatformPlugin"
         const val INTELLIJ_PLATFORM_BUNDLED_PLUGINS = "intellijPlatformBundledPlugins"
         const val INTELLIJ_PLATFORM_BUNDLED_MODULES = "intellijPlatformBundledModules"
