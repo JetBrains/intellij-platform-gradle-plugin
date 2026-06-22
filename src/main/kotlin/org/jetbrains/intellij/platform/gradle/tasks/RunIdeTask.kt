@@ -280,12 +280,15 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         val preexistingPids = currentProcess.descendants().map { it.pid() }.collect(Collectors.toSet())
 
         return thread(isDaemon = true, name = "split-mode-backend-pid-tracker") {
+            var lastAmbiguousCandidatePids = emptyList<Long>()
             while (!trackerStopped.get()) {
-                val backendHandle = currentProcess.descendants()
+                val candidates = currentProcess.descendants()
                     .filter { it.isAlive && it.pid() !in preexistingPids }
-                    .filter { it.looksLikeSplitModeBackend() }
-                    .findFirst()
-                    .orElse(null)
+                    .collect(Collectors.toList())
+                val backendHandle = selectSplitModeBackendCandidate(candidates)
+                if (backendHandle == null && candidates.size > 1) {
+                    lastAmbiguousCandidatePids = candidates.map { it.pid() }
+                }
 
                 if (backendHandle != null) {
                     runCatching {
@@ -302,15 +305,28 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                     Thread.sleep(SPLIT_MODE_PID_POLL_INTERVAL_MS)
                 } catch (_: InterruptedException) {
                     Thread.currentThread().interrupt()
-                    return@thread
+                    break
                 }
+            }
+
+            if (lastAmbiguousCandidatePids.isNotEmpty()) {
+                log.debug(
+                    "Unable to determine split-mode backend PID from ambiguous new descendant processes: " +
+                        lastAmbiguousCandidatePids.joinToString(", ")
+                )
             }
         }
     }
 
-    private fun ProcessHandle.looksLikeSplitModeBackend(): Boolean {
-        // When the OS does not expose the command line we cannot positively confirm this descendant is the backend,
-        // so we skip it rather than record a PID we cannot verify later (e.g. frequently on Windows).
+    private fun selectSplitModeBackendCandidate(candidates: List<ProcessHandle>): ProcessHandle? {
+        candidates.firstOrNull { it.hasSplitModeBackendCommandLine() }?.let { return it }
+
+        // Command-line metadata can be unavailable or race with process exit. If exactly one new descendant appeared,
+        // treat it as the JavaExec child Gradle just launched; multiple descendants are intentionally left ambiguous.
+        return candidates.singleOrNull()
+    }
+
+    private fun ProcessHandle.hasSplitModeBackendCommandLine(): Boolean {
         val commandLine = info().commandLine().orElse(null) ?: return false
         return commandLine.contains(SPLIT_MODE_BACKEND_COMMAND)
     }
