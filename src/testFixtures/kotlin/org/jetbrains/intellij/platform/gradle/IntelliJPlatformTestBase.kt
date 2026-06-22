@@ -65,16 +65,24 @@ abstract class IntelliJPlatformTestBase {
     @OptIn(ExperimentalPathApi::class)
     @AfterTest
     open fun tearDown() {
-        repeat(5) { attempt ->
+        deleteTempDirectoryWithRetries()
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    private fun deleteTempDirectoryWithRetries() {
+        val isWindows = System.getProperty("os.name").startsWith("Windows")
+        val maxAttempts = if (isWindows) 20 else 5
+        val retryDelayMs = if (isWindows) 250L else 100L
+        repeat(maxAttempts) { attempt ->
             try {
                 dir.deleteRecursively()
                 return
             } catch (exception: IOException) {
-                if (attempt == 4) {
+                if (attempt == maxAttempts - 1) {
                     printDeletionFailureDiagnostics(exception)
                     throw exception
                 }
-                Thread.sleep(100)
+                Thread.sleep(retryDelayMs)
             }
         }
     }

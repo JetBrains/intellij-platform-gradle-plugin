@@ -566,13 +566,14 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             """
 
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
-                jvmArgs("-Dfake.backend.alive.ms=2000")
+                jvmArgs("-Dfake.backend.alive.ms=5000")
             }
             """.trimIndent()
         )
 
         build(Tasks.RUN_IDE_BACKEND) {
             assertContains("Started split-mode backend (PID ", output)
+            assertFalse(sandbox.resolve("split-mode-backend.pid").exists())
         }
     }
 
