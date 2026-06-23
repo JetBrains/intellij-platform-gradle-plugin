@@ -406,13 +406,22 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
             return null
         }
 
-        // Guard against PID reuse: only treat the recorded PID as a running backend when the OS exposes a command line
-        // that clearly looks like an IDE process. When the command line is unavailable we cannot positively confirm
-        // the process, so we treat the marker as stale rather than block a launch over an unrelated reused PID.
-        val commandLine = handle.info().commandLine().orElse(null) ?: return null
+        // Guard against PID reuse: only treat the recorded PID as a running backend when the OS exposes process
+        // metadata that clearly looks like an IDE process. On Windows, commandLine() may be unavailable even when
+        // command() is present, so inspect all metadata ProcessHandle can provide.
+        val commandLine = handle.ideProcessCommandLineOrNull() ?: return null
         val looksLikeIdeProcess = listOf("java", "idea", "Main", "JetBrains")
             .any { commandLine.contains(it, ignoreCase = true) }
         return handle.takeIf { looksLikeIdeProcess }
+    }
+
+    private fun ProcessHandle.ideProcessCommandLineOrNull(): String? {
+        val info = info()
+        return listOfNotNull(
+            info.commandLine().orElse(null),
+            info.command().orElse(null),
+            info.arguments().orElse(null)?.joinToString(" "),
+        ).joinToString(" ").takeIf { it.isNotBlank() }
     }
 
     private fun writeSplitModeBackendPidFile(pidPath: Path, pid: Long) {
