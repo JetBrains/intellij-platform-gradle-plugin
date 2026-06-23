@@ -32,6 +32,7 @@ import java.net.ServerSocket
 import java.net.Socket
 import java.net.URI
 import java.nio.file.Path
+import java.time.Instant
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicBoolean
@@ -277,13 +278,15 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
     private fun startSplitModeBackendPidTracker(pidPath: Path, trackerStopped: AtomicBoolean): Thread {
         val port = resolveSplitModeServerPort()
         val currentProcess = ProcessHandle.current()
+        val trackerStartedAt = Instant.now()
         val preexistingPids = currentProcess.descendants().map { it.pid() }.collect(Collectors.toSet())
 
         return thread(isDaemon = true, name = "split-mode-backend-pid-tracker") {
             var lastAmbiguousCandidatePids = emptyList<Long>()
             while (!trackerStopped.get()) {
                 val candidates = currentProcess.descendants()
-                    .filter { it.isAlive && it.pid() !in preexistingPids }
+                    .filter { it.isAlive }
+                    .filter { it.pid() !in preexistingPids || it.startedAtOrAfter(trackerStartedAt) }
                     .collect(Collectors.toList())
                 val backendHandle = selectSplitModeBackendCandidate(candidates)
                 if (backendHandle == null && candidates.size > 1) {
@@ -321,15 +324,32 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
     private fun selectSplitModeBackendCandidate(candidates: List<ProcessHandle>): ProcessHandle? {
         candidates.firstOrNull { it.hasSplitModeBackendCommandLine() }?.let { return it }
 
+        // On Windows, Gradle can launch JavaExec through a short process chain and command-line metadata may not expose
+        // the final application arguments. If that chain has one live leaf, it is the IDE JVM rather than the wrapper.
+        candidates.singleLeafOrNull()?.let { return it }
+
         // Command-line metadata can be unavailable or race with process exit. If exactly one new descendant appeared,
         // treat it as the JavaExec child Gradle just launched; multiple descendants are intentionally left ambiguous.
         return candidates.singleOrNull()
+    }
+
+    private fun List<ProcessHandle>.singleLeafOrNull(): ProcessHandle? {
+        val candidatePids = map { it.pid() }.toSet()
+        return filter { candidate ->
+            candidate.children()
+                .noneMatch { it.isAlive && it.pid() in candidatePids }
+        }.singleOrNull()
     }
 
     private fun ProcessHandle.hasSplitModeBackendCommandLine(): Boolean {
         val commandLine = info().commandLine().orElse(null) ?: return false
         return commandLine.contains(SPLIT_MODE_BACKEND_COMMAND)
     }
+
+    private fun ProcessHandle.startedAtOrAfter(instant: Instant): Boolean =
+        info().startInstant()
+            .map { !it.isBefore(instant) }
+            .orElse(false)
 
     /**
      * Surfaces a conflicting split-mode backend before launching a fresh one.
