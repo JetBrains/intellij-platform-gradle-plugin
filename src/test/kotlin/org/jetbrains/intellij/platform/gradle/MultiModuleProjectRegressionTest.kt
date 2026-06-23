@@ -37,16 +37,16 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         dir.resolve("backend/build.gradle.kts") write //language=kotlin
                 """
                 import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
-
+                
                 plugins {
                     id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 val compileKotlinJvmTarget = tasks.named<KotlinJvmCompile>("compileKotlin").flatMap {
                     it.compilerOptions.jvmTarget
                 }
-
+                
                 println("backend.compileKotlin.jvmTarget=" + compileKotlinJvmTarget.orNull)
                 """.trimIndent()
 
@@ -87,15 +87,15 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         local("${clionIdePath.invariantSeparatorsPathString}")
@@ -118,11 +118,11 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         settingsFile overwrite //language=kotlin
                 """
                 rootProject.name = "projectName"
-
+                
                 plugins {
                     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
                 }
-
+                
                 include("core", "rider", "clion")
                 """.trimIndent()
 
@@ -153,29 +153,29 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         dir.resolve("core/build.gradle.kts") write //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.*
-
+                
                 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-
+                
                 version = "1.0.0"
-
+                
                 plugins {
                     id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform")
                 }
-
+                
                 kotlin {
                     jvmToolchain(21)
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
@@ -184,7 +184,7 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                         zipSigner()
                     }
                 }
-
+                
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
@@ -207,36 +207,36 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
         val moduleBuildFile = //language=kotlin
                 """
                 import org.jetbrains.intellij.platform.gradle.*
-
+                
                 val intellijPlatformTypeProperty = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
                 val intellijPlatformVersionProperty = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-
+                
                 version = "1.0.0"
-
+                
                 plugins {
                     id("org.jetbrains.kotlin.jvm")
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 kotlin {
                     jvmToolchain(21)
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create(intellijPlatformTypeProperty, intellijPlatformVersionProperty)
                         pluginModule(implementation(project(":core")))
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -282,7 +282,7 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                         pluginModule(implementation(project(":backend")))
                     }
                 }
-
+                
                 intellijPlatform {
                     pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
                 }
@@ -293,21 +293,21 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         plugin("org.jetbrains.postfixCompletion", "0.8-beta")
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -345,7 +345,7 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                         pluginModule(implementation(project(":frontend")))
                     }
                 }
-
+                
                 intellijPlatform {
                     pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
                 }
@@ -356,21 +356,21 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         plugin("org.jetbrains.postfixCompletion", "0.8-beta")
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -381,21 +381,21 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                     pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.FRONTEND
@@ -443,7 +443,7 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                         pluginModule(implementation(project(":frontend")))
                     }
                 }
-
+                
                 intellijPlatform {
                     pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
                 }
@@ -454,22 +454,22 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         bundledModule("intellij.platform.frontend")
                         plugin("org.jetbrains.postfixCompletion", "0.8-beta")
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }
@@ -508,7 +508,7 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                         pluginModule(implementation(project(":frontend")))
                     }
                 }
-
+                
                 intellijPlatform {
                     pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.FRONTEND
                 }
@@ -519,21 +519,21 @@ class MultiModuleProjectRegressionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform.module")
                 }
-
+                
                 repositories {
                     mavenCentral()
-
+                
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-
+                
                 dependencies {
                     intellijPlatform {
                         plugin("org.jetbrains.postfixCompletion", "0.8-beta")
                     }
                 }
-
+                
                 intellijPlatform {
                     instrumentCode = false
                 }
