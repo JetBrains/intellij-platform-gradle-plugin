@@ -38,7 +38,15 @@ abstract class IntelliJPlatformTestBase {
     val kotlinPluginVersion = System.getProperty("test.kotlin.version")
     val gradleVersion = System.getProperty("test.gradle.version").takeUnless { it.isNullOrEmpty() } ?: gradleDefault
     val gradleHome = Path(System.getProperty("test.gradle.home")).createDirectories()
-    val testKitDir = gradleHome.resolve(".testKit").createDirectories()
+    private val testWorkerId = System.getProperty("org.gradle.test.worker")
+        ?.takeUnless(String::isBlank)
+        ?.replace(Regex("[^A-Za-z0-9_.-]"), "_")
+    val testKitDir = gradleHome.resolve(".testKit")
+        .let { root ->
+            // Parallel test forks must not share Gradle's transform cache locks.
+            testWorkerId?.let { root.resolve("worker-$it") } ?: root
+        }
+        .createDirectories()
     val intellijPlatformCacheDir = gradleHome.resolve(".intellijPlatform").createDirectories()
     val idesCacheDir = intellijPlatformCacheDir.resolve("ides").createDirectories()
 
