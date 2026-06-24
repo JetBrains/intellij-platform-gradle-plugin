@@ -303,23 +303,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     attribute(Attributes.extracted, true)
                 }
 
-                defaultDependencies {
-                    addAllLater(
-                        project.providers[GradleProperties.VerifyPluginDefaultRecommendedIdes].flatMap { enabled ->
-                            when {
-                                enabled &&
-                                        intellijPluginVerifierIdesDependencyConfiguration.dependencies.isEmpty() &&
-                                        intellijPluginVerifierIdesLocalConfiguration.dependencies.isEmpty() ->
-                                    dependenciesHelper.createIntelliJPluginVerifierIdeDependencies(
-                                        dependenciesHelper.createRecommendedPluginVerifierIdesValueSource(),
-                                    )
-
-                                else -> project.provider { emptyList() }
-                            }
-                        },
-                    )
-                }
-
                 extendsFrom(intellijPluginVerifierIdesDependencyConfiguration)
                 extendsFrom(intellijPluginVerifierIdesLocalConfiguration)
             }
@@ -557,6 +540,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     dependenciesHelper = dependenciesHelper,
                     extensionProvider = project.extensionProvider,
                     objects = project.objects,
+                    providers = project.providers,
                     target = pluginVerification,
                 )
             }
