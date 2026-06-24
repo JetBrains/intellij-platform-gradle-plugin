@@ -54,7 +54,7 @@ jobs:
 
       - name: Restore IntelliJ Platform test cache
         id: intellij-platform-cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: .gradle/testGradleHome/.intellijPlatform
           key: test-gradle-home-v5-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml', 'src/test/**/*.kt', 'src/test/resources/**', 'src/testFixtures/**/*.kt', 'src/integrationTest/**/*.kt', 'src/integrationTest/resources/**') }}
@@ -62,7 +62,7 @@ jobs:
             test-gradle-home-v5-intellij-platform-${{ runner.os }}-
 
       - name: Restore Gradle TestKit cache
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: .gradle/testGradleHome/.testKit
           key: test-gradle-home-v2-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
