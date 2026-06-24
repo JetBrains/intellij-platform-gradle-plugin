@@ -326,6 +326,7 @@ class IntelliJPlatformDependenciesHelper(
         dependencyArchivesConfigurationName: String,
         localArchivesConfigurationName: String,
         requiredConfigurationName: String? = null,
+        registerRequestedPlatform: Boolean = true,
     ) {
         markIntelliJPlatformDependencyExplicit(dependencyConfigurationName)
 
@@ -342,15 +343,17 @@ class IntelliJPlatformDependenciesHelper(
             }
         }.cached()
 
-        requestedIntelliJPlatforms.set(
-            requestsProvider.map { requests ->
-                when (requests.size) {
-                    1 -> requests.single()
-                    else -> error("The '$dependencyConfigurationName' configuration must contain exactly one IntelliJ Platform dependency request, but ${requests.size} were found.")
-                }
-            },
-            dependencyConfigurationName,
-        )
+        if (registerRequestedPlatform) {
+            requestedIntelliJPlatforms.set(
+                requestsProvider.map { requests ->
+                    when (requests.size) {
+                        1 -> requests.single()
+                        else -> error("The '$dependencyConfigurationName' configuration must contain exactly one IntelliJ Platform dependency request, but ${requests.size} were found.")
+                    }
+                },
+                dependencyConfigurationName,
+            )
+        }
 
         configurations[localArchivesConfigurationName].dependencies.addAllLater(
             requestsProvider.zip(splitModeProvider) { requests, splitMode ->
@@ -400,40 +403,6 @@ class IntelliJPlatformDependenciesHelper(
 
         createIntelliJPlatformDependency(requestedIntelliJPlatform).apply(action)
     }.cached())
-
-    /**
-     * A base method for adding a dependency on the IntelliJ Platform.
-     *
-     * @param notationsProvider The provider for the type of the IntelliJ Platform dependency. Accepts either [IntelliJPlatformType] or [String].
-     * @param configurationName The name of the configuration to add the dependency to.
-     * @param action An optional action to be performed on the created dependency.
-     */
-    @Throws(GradleException::class)
-    internal fun addIntelliJPluginVerifierIdes(
-        notationsProvider: Provider<List<String>>,
-        configurationName: String = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-        action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(
-        createIntelliJPluginVerifierIdeDependencies(
-            notationsProvider = notationsProvider,
-            action = action,
-        ),
-    )
-
-    internal fun createIntelliJPluginVerifierIdeDependencies(
-        notationsProvider: Provider<List<String>>,
-        action: DependencyAction = {},
-    ) = provider {
-        val notations = notationsProvider.get()
-
-        notations.map {
-            val (type, version) = it.parseIdeNotation()
-            when (type) {
-                IntelliJPlatformType.AndroidStudio -> createAndroidStudio(version)
-                else -> createIntelliJPlatformInstaller(type, version)
-            }.apply(action)
-        }
-    }.cached()
 
     internal fun createRecommendedPluginVerifierIdesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) =
         createProductReleasesValueSource {

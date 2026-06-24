@@ -605,6 +605,50 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `select ides mode uses configured IDE cache`() {
+        writePluginXmlFile()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    caching {
+                        ides {
+                            enabled = true
+                            path = File("${idesCacheDir.invariantSeparatorsPathString}")
+                        }
+                    }
+                    
+                    pluginVerification {
+                        ides {
+                            select {
+                                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
+                                channels = listOf(ProductRelease.Channel.RELEASE)
+                                sinceBuild = "233"
+                                untilBuild = "233.*"
+                            }
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            Tasks.VERIFY_PLUGIN,
+            "--list-ides",
+            projectProperties = mapOf(
+                GradleProperties.ProductsReleasesJetBrainsIdesUrl.toString() to resourceUrl("products-releases/idea-releases-list.xml").toString(),
+                GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to resourceUrl("products-releases/android-studio-releases-list.xml").toString(),
+            ),
+        ) {
+            val ideLine = output.lines().single { it.startsWith("IC-2023.3.4 - ") }
+            val idePath = Path(ideLine.substringAfter(" - "))
+
+            assertTrue(idePath.startsWith(idesCacheDir), "Expected $idePath to be located under $idesCacheDir")
+            assertEquals("IC-2023.3.4", idePath.name)
+            assertExists(idePath)
+        }
+    }
+
+    @Test
     fun `list ides mode with multiple IDEs`() {
         writePluginXmlFile()
         writePluginVerifierDependency()

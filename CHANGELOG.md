@@ -25,6 +25,7 @@
 - Avoid Javac2 nullability instrumentation failures with upcoming Gradle versions by isolating the Java Compiler Ant task classloader.
 - Install `plugin(...)` dependencies declared by plugin module projects into split-mode run sandboxes.
 - Route split-mode plugin dependencies inherited from module projects to the backend or frontend sandbox according to the module plugin installation target.
+- Replace `addIntelliJPluginVerifierIdes` with `createInstallerDependencies` to simplify IDE dependencies creation and enable better caching configuration adjustments in tests. JetBrains/intellij-platform-gradle-plugin#2170
 
 ## [2.16.0] - 2026-05-01
 
