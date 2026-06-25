@@ -181,7 +181,7 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
                 org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes = false
                 """.trimIndent()
 
-        build(DEPENDENCIES) {
+        buildAndFail(DEPENDENCIES) {
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform
