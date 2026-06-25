@@ -114,6 +114,66 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
     }
 
     @Test
+    fun `do not purge existing parser output when lexer shares target root output dir`() {
+        val generatedRoot = dir.resolve("gen")
+
+        buildFile write //language=kotlin
+                """
+                tasks.named("generateParser", GenerateParserTask::class.java) {
+                    sourceFile = file("${resource("grammarkit/generateParser/Example.bnf")}")
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
+                }
+                
+                tasks.named("generateLexer", GenerateLexerTask::class.java) {
+                    sourceFile = file("${resource("grammarkit/generateLexer/ExampleWithPackage.flex")}")
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
+                }
+                """.trimIndent()
+
+        build(Tasks.GENERATE_PARSER) {
+            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_PARSER}")?.outcome)
+        }
+
+        build(Tasks.GENERATE_LEXER) {
+            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_LEXER}")?.outcome)
+        }
+
+        val generatedPaths = collectPaths(generatedRoot)
+        assertTrue(generatedPaths.any { it.endsWith("Parser.java") })
+        assertContains(generatedPaths, "org/jetbrains/grammarkit/lexer/GeneratedLexer.java")
+    }
+
+    @Test
+    fun `do not purge custom parser output when custom lexer shares target root output dir`() {
+        val generatedRoot = dir.resolve("gen")
+
+        buildFile write //language=kotlin
+                """
+                tasks.register<GenerateParserTask>("generateCustomParser") {
+                    sourceFile = file("${resource("grammarkit/generateParser/Example.bnf")}")
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
+                }
+                
+                tasks.register<GenerateLexerTask>("generateCustomLexer") {
+                    sourceFile = file("${resource("grammarkit/generateLexer/ExampleWithPackage.flex")}")
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
+                }
+                """.trimIndent()
+
+        build("generateCustomParser") {
+            assertEquals(TaskOutcome.SUCCESS, task(":generateCustomParser")?.outcome)
+        }
+
+        build("generateCustomLexer") {
+            assertEquals(TaskOutcome.SUCCESS, task(":generateCustomLexer")?.outcome)
+        }
+
+        val generatedPaths = collectPaths(generatedRoot)
+        assertTrue(generatedPaths.any { it.endsWith("Parser.java") })
+        assertContains(generatedPaths, "org/jetbrains/grammarkit/lexer/GeneratedLexer.java")
+    }
+
+    @Test
     fun `do not purge stale files by default when using deprecated target output dir`() {
         val staleFile = dir.resolve("gen/StaleLexer.java")
 

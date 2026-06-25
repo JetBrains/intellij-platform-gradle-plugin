@@ -20,6 +20,8 @@ import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.regex.Pattern
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.deleteRecursively
 
 /**
  * A Gradle task for generating a lexer using JFlex for the IntelliJ Platform.
@@ -39,7 +41,7 @@ abstract class GenerateLexerTask : JavaExec() {
     @Deprecated(
         message = "Use targetRootOutputDir instead. " +
                 "There is also a new default for the `generateLexer` task which should be sufficient for most use cases." +
-                "When using the new property, stale files in `targetRootOutputDir` are deleted by default " +
+                "When using the new property, stale files in the resolved lexer output directory are deleted by default " +
                 "and the Java file is created in a subdirectory matching the package of the file. " +
                 "You can restore the previous behavior by adding `purgeOldFiles = false` and `packageName = \"\"`. ",
         replaceWith = ReplaceWith("targetRootOutputDir"),
@@ -52,7 +54,7 @@ abstract class GenerateLexerTask : JavaExec() {
     /**
      * The output directory for the generated lexer.
      * The Java file for the lexer is created in a subdirectory matching the [packageName].
-     * Stale files in the given directory are deleted during task execution,
+     * Stale files in the resolved lexer output directory are deleted during task execution,
      * unless [purgeOldFiles] is explicitly set to `false`.
      */
     @get:OutputDirectory
@@ -89,7 +91,7 @@ abstract class GenerateLexerTask : JavaExec() {
 
     /**
      * Purge old files from the target directory before generating the lexer.
-     * By default, old files are purged unless you are using the deprecated property [targetOutputDir].
+     * By default, old files are purged from the resolved lexer output directory unless you are using the deprecated property [targetOutputDir].
      * If you want to disable this option because the output directory is shared with another task,
      * note that you may run into issues with stale files. Also note that
      * [overlapping task outputs are discouraged by Gradle](https://docs.gradle.org/8.13/userguide/organizing_gradle_projects.html#avoid_overlapping_task_outputs)
@@ -121,17 +123,17 @@ abstract class GenerateLexerTask : JavaExec() {
     )
     fun targetFile(lexerClass: Provider<String>): Provider<RegularFile> = lexerClass.flatMap(::targetFile)
 
+    @OptIn(ExperimentalPathApi::class)
     @TaskAction
     override fun exec() {
-        if (purgeOldFiles.orNull == true) {
-            targetOutputDir.asFile.orNull?.deleteRecursively()
+        if (targetOutputDir.isPresent) {
+            if (purgeOldFiles.orNull == true) {
+                targetOutputDir.asPath.deleteRecursively()
+            }
+        } else if (purgeOldFiles.orNull != false) {
+            getOutputDirectory().asPath.deleteRecursively()
         }
-        if (purgeOldFiles.orNull != false) {
-            // Delete targetRootOutputDir even if the directory is overridden by `targetOutputDir`.
-            // The directory may still contain stale files from a previous execution,
-            // and would still be added to the source set when using `srcDir(task)`.
-            targetRootOutputDir.asFile.orNull?.deleteRecursively()
-        }
+
         ByteArrayOutputStream().use { os ->
             try {
                 args = getArguments()

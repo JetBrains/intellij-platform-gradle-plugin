@@ -26,6 +26,7 @@
 - Install `plugin(...)` dependencies declared by plugin module projects into split-mode run sandboxes.
 - Route split-mode plugin dependencies inherited from module projects to the backend or frontend sandbox according to the module plugin installation target.
 - Replace `addIntelliJPluginVerifierIdes` with `createInstallerDependencies` to simplify IDE dependencies creation and enable better caching configuration adjustments in tests. JetBrains/intellij-platform-gradle-plugin#2170
+- Fix GrammarKit lexer cleanup to purge only its resolved output directory so shared parser output is preserved.
 
 ## [2.16.0] - 2026-05-01
 

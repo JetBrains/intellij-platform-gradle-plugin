@@ -1083,7 +1083,7 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion;
-	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;)V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;)V
 	public final fun ProductReleasesValueSource (Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
 	public static synthetic fun ProductReleasesValueSource$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/gradle/api/provider/Provider;
 	public final fun create (Ljava/lang/Object;Ljava/lang/String;)V
@@ -1114,7 +1114,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion {
-	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;
+	public final fun register (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Publishing {
