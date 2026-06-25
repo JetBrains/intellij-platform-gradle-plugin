@@ -1,6 +1,5 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
@@ -17,7 +16,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
-import java.io.ByteArrayOutputStream
 import java.io.File
 import java.util.regex.Pattern
 import kotlin.io.path.ExperimentalPathApi
@@ -134,15 +132,8 @@ abstract class GenerateLexerTask : JavaExec() {
             getOutputDirectory().asPath.deleteRecursively()
         }
 
-        ByteArrayOutputStream().use { os ->
-            try {
-                args = getArguments()
-                errorOutput = TeeOutputStream(System.out, os)
-                standardOutput = TeeOutputStream(System.out, os)
-                super.exec()
-            } catch (e: Exception) {
-                throw GradleException(os.toString().trim(), e)
-            }
+        execWithTeeOutput(getArguments()) {
+            super.exec()
         }
     }
 

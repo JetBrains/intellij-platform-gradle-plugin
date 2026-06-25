@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.apache.tools.ant.util.TeeOutputStream
 import org.gradle.api.GradleException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
@@ -32,7 +31,6 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.ProblemsAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.*
-import java.io.ByteArrayOutputStream
 import java.util.*
 import kotlin.io.path.exists
 
@@ -286,11 +284,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             },
         )
 
-        ByteArrayOutputStream().use { os ->
-            standardOutput = TeeOutputStream(System.out, os)
+        execWithTeeOutput(teeErrorOutput = false, throwOutputOnFailure = false) {
             super.exec()
-            verifyOutput(os.toString())
-        }
+        }.let(::verifyOutput)
     }
 
     /**

@@ -2,6 +2,8 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.apache.tools.ant.util.TeeOutputStream
+import org.gradle.api.GradleException
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
 import org.gradle.api.Task
@@ -36,6 +38,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeE
 import org.jetbrains.intellij.platform.gradle.services.pluginXmlService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
+import java.io.ByteArrayOutputStream
 
 /**
  * Registers a task of type [T] with the given names
@@ -66,6 +69,28 @@ internal inline fun <reified T : Task> Project.registerTask(
     when (configureWithType) {
         true -> tasks.withType<T>().configureEach(configuration)
         false -> taskProviders.forEach { it.configure(configuration) }
+    }
+}
+
+internal fun JavaExec.execWithTeeOutput(
+    arguments: List<String>? = null,
+    teeErrorOutput: Boolean = true,
+    throwOutputOnFailure: Boolean = true,
+    exec: () -> Unit,
+): String = ByteArrayOutputStream().use { os ->
+    try {
+        arguments?.let { args = it }
+        standardOutput = TeeOutputStream(System.out, os)
+        if (teeErrorOutput) {
+            errorOutput = TeeOutputStream(System.out, os)
+        }
+        exec()
+        os.toString()
+    } catch (e: Exception) {
+        if (!throwOutputOnFailure) {
+            throw e
+        }
+        throw GradleException(os.toString().trim(), e)
     }
 }
 
