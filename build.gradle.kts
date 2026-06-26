@@ -41,7 +41,7 @@ repositories {
     mavenCentral()
 }
 
-val additionalPluginClasspath: Configuration by configurations.creating
+val additionalPluginClasspath = configurations.create("additionalPluginClasspath")
 
 dependencies {
     api(libs.undertow)
@@ -221,15 +221,17 @@ fun Test.configureTests() {
 
 }
 
-val dokkaGeneratePublicationHtml by tasks.existing(DokkaGeneratePublicationTask::class)
-val javadocJar by tasks.registering(Jar::class) {
-    dependsOn(dokkaGeneratePublicationHtml)
+val dokkaGeneratePublicationHtml = tasks.named<DokkaGeneratePublicationTask>("dokkaGeneratePublicationHtml")
+val javadocJar = tasks.register<Jar>("javadocJar") {
+    description = "Generate javadoc JAR"
     archiveClassifier = "javadoc"
+    dependsOn(dokkaGeneratePublicationHtml)
     from(dokkaGeneratePublicationHtml.map { it.outputDirectory })
     patchManifest()
 }
 
-val sourcesJar by tasks.registering(Jar::class) {
+val sourcesJar = tasks.register<Jar>("sourcesJar") {
+    description = "Generate sources JAR"
     archiveClassifier = "sources"
     from(sourceSets.main.get().allSource)
     patchManifest()
