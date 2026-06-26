@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import java.nio.file.Paths
 import kotlin.test.Test
 
@@ -130,11 +131,12 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 """.trimIndent()
 
         build(
-            "dependencies",
-            "--configuration=intellijPluginVerifierIdes",
+            Tasks.VERIFY_PLUGIN,
+            "--list-ides",
             projectProperties = defaultProjectProperties,
         ) {
-            assertContains("idea:ideaIU:2023.1.7", output)
+            assertContains("IDEs that will be used for verification:", output)
+            assertContains("IU-2023.1.7 - ", output)
         }
     }
 
@@ -158,12 +160,13 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 """.trimIndent()
 
         build(
-            "dependencies",
-            "--configuration=intellijPluginVerifierIdes",
+            Tasks.VERIFY_PLUGIN,
+            "--list-ides",
             projectProperties = defaultProjectProperties,
         ) {
-            assertContains("idea:ideaIC:2024.1", output)
-            assertNotContains("idea:ideaIU:2023.1.7", output)
+            assertContains("IDEs that will be used for verification:", output)
+            assertContains("IC-2024.1 - ", output)
+            assertNotContains("IU-2023.1.7 - ", output)
         }
     }
 
@@ -207,11 +210,12 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 """.trimIndent()
 
         build(
-            "dependencies",
-            "--configuration=intellijPluginVerifierIdes",
+            Tasks.VERIFY_PLUGIN,
+            "--list-ides",
             projectProperties = defaultProjectProperties,
         ) {
-            assertContains("localIde:$intellijPlatformType:$intellijPlatformType-$intellijPlatformBuildNumber", output)
+            assertContains("IDEs that will be used for verification:", output)
+            assertContains("$intellijPlatformType-$intellijPlatformVersion - ", output)
         }
     }
 
