@@ -299,9 +299,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
                 description = "IntelliJ Plugin Verifier IDEs",
             ) {
-                attributes {
-                    attribute(Attributes.extracted, true)
-                }
+                isCanBeResolved = false
 
                 extendsFrom(intellijPluginVerifierIdesDependencyConfiguration)
                 extendsFrom(intellijPluginVerifierIdesLocalConfiguration)
