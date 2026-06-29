@@ -76,6 +76,7 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
                 tasks.named("generateLexer", GenerateLexerTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
                     targetOutputDir = layout.buildDirectory.dir("gen/org/jetbrains/grammarkit/lexer")
+                    pathToClass = "GeneratedLexer.java"
                 }
                 """.trimIndent()
 
@@ -91,7 +92,7 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
     }
 
     @Test
-    fun `purge stale files by default when using target root output dir`() {
+    fun `do not purge stale files when lexer class path is omitted`() {
         val staleFile = dir.resolve("gen/StaleLexer.java")
 
         buildFile write //language=kotlin
@@ -108,9 +109,34 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
 
         build(Tasks.GENERATE_LEXER, args = listOf("--rerun-tasks")) {
             assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_LEXER}")?.outcome)
+            assertContains(output, "Cannot purge old lexer files for :generateLexer because `pathToClass` is not set.")
         }
 
-        assertFalse(staleFile.toFile().exists())
+        assertTrue(staleFile.toFile().exists())
+    }
+
+    @Test
+    fun `purge lexer class by default when lexer class path is set`() {
+        val generatedLexer = dir.resolve("gen/GeneratedLexer.java")
+
+        buildFile write //language=kotlin
+                """
+                tasks.named("generateLexer", GenerateLexerTask::class.java) {
+                    sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
+                    pathToClass = "GeneratedLexer.java"
+                }
+                """.trimIndent()
+
+        build(Tasks.GENERATE_LEXER)
+        generatedLexer write "class StaleLexer {}"
+        assertContains(generatedLexer.toFile().readText(), "StaleLexer")
+
+        build(Tasks.GENERATE_LEXER, args = listOf("--rerun-tasks")) {
+            assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_LEXER}")?.outcome)
+        }
+
+        assertFalse("StaleLexer" in generatedLexer.toFile().readText())
     }
 
     @Test
@@ -122,11 +148,14 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
                 tasks.named("generateParser", GenerateParserTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateParser/Example.bnf")}")
                     targetRootOutputDir = layout.projectDirectory.dir("gen")
+                    pathToParser = "generated/GeneratedParser.java"
+                    pathToPsiRoot = "generated/psi"
                 }
                 
                 tasks.named("generateLexer", GenerateLexerTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateLexer/ExampleWithPackage.flex")}")
                     targetRootOutputDir = layout.projectDirectory.dir("gen")
+                    pathToClass = "org/jetbrains/grammarkit/lexer/GeneratedLexer.java"
                 }
                 """.trimIndent()
 
@@ -152,11 +181,14 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
                 tasks.register<GenerateParserTask>("generateCustomParser") {
                     sourceFile = file("${resource("grammarkit/generateParser/Example.bnf")}")
                     targetRootOutputDir = layout.projectDirectory.dir("gen")
+                    pathToParser = "generated/GeneratedParser.java"
+                    pathToPsiRoot = "generated/psi"
                 }
                 
                 tasks.register<GenerateLexerTask>("generateCustomLexer") {
                     sourceFile = file("${resource("grammarkit/generateLexer/ExampleWithPackage.flex")}")
                     targetRootOutputDir = layout.projectDirectory.dir("gen")
+                    pathToClass = "org/jetbrains/grammarkit/lexer/GeneratedLexer.java"
                 }
                 """.trimIndent()
 
@@ -203,10 +235,13 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
                 tasks.named("generateLexer", GenerateLexerTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
                     targetOutputDir = layout.projectDirectory.dir("gen/org/jetbrains/grammarkit/lexer")
+                    pathToClass = "GeneratedLexer.java"
                 }
                 
                 sourceSets.main {
-                    java.srcDir(tasks.named("generateLexer"))
+                    val generateLexer = tasks.named("generateLexer", GenerateLexerTask::class.java)
+                    java.srcDir(generateLexer.flatMap { it.targetOutputDir })
+                    compileJavaTaskName.let { tasks.named(it) { dependsOn(generateLexer) } }
                 }
                 """.trimIndent()
 
@@ -222,6 +257,7 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
                 tasks.named("generateLexer", GenerateLexerTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
                     targetOutputDir = layout.projectDirectory.dir("gen/org/jetbrains/grammarkit/lexer")
+                    pathToClass = "GeneratedLexer.java"
                 }
                 """.trimIndent()
 

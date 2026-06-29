@@ -5,6 +5,7 @@
 ### Fixed
 
 - Add product-info bundled plugin classpath entries to `TestIdeTask`, resolving bundled plugin IDs and module aliases through the IDE layout index.
+- Prevent GrammarKit lexer and parser cleanup from deleting shared output roots by purging only explicit generator outputs: `GenerateLexerTask.pathToClass`, `GenerateParserTask.pathToParser`, and `GenerateParserTask.pathToPsiRoot`.
 
 ## [2.17.0] - 2026-06-26
 
