@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Add product-info bundled plugin classpath entries to `TestIdeTask`, resolving bundled plugin IDs and module aliases through the IDE layout index.
+
 ## [2.17.0] - 2026-06-26
 
 ### Added

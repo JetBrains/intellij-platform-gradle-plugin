@@ -18,6 +18,9 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.IdeaHomePathArgu
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
+import org.jetbrains.intellij.platform.gradle.intellijPlatformIdeLayoutIndicesCachePath
+import org.jetbrains.intellij.platform.gradle.services.IdeLayoutIndexService
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
@@ -116,6 +119,19 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // dependencies the first on the classpath.
             val currentPluginLibsProvider = getCurrentPluginLibs()
             val otherPluginsLibsProvider = getOtherPluginLibs()
+            val ideLayoutIndexService = project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
+            val bundledPluginsClasspathProvider = project.provider {
+                val platformPath = sourceTask.platformPath
+                val ideLayoutIndex = ideLayoutIndexService.get().resolve(
+                    platformPath = platformPath,
+                    cacheDirectory = project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath).get(),
+                )
+
+                sourceTask.productInfo.bundledPlugins
+                    .mapNotNull(ideLayoutIndex::findByIdOrModuleId)
+                    .flatMap { it.classpath.map(platformPath::resolve) }
+                    .distinct()
+            }
 
             // Build the classpath in the correct order:
             // 1. Instrumented test code (if available)
@@ -126,6 +142,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // 6. Original classpath without runtime dependencies
             // 7. Test runtime classpath configuration
             // 8. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
+            // 9. Bundled plugins declared by product-info
             classpath = project.files(
                 instrumentedTestCode,
                 currentPluginLibsProvider,
@@ -135,6 +152,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 classpath.filter { it !in runtimeDependencies.files },
                 sourceTask.intellijPlatformTestRuntimeClasspathConfiguration,
                 sourceTask.intelliJPlatformTestRuntimeFixClasspathConfiguration,
+                bundledPluginsClasspathProvider,
             )
 
             testClassesDirs = instrumentedTestCode + testClassesDirs
