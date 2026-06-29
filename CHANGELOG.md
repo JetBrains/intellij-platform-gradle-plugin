@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.17.0] - 2026-06-26
+
 ### Added
 
 - Added support for unit-testing of Kotlin plugin by introducing `TestFrameworkType.Plugin.Kotlin`.
@@ -1781,7 +1783,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.16.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.17.0...HEAD
+[2.17.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.16.0...v2.17.0
 [2.16.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.15.0...v2.16.0
 [2.15.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.14.0...v2.15.0
 [2.14.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.13.1...v2.14.0
