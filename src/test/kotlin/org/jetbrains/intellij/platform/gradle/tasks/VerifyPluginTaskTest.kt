@@ -636,7 +636,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
             "--list-ides",
             projectProperties = mapOf(
                 GradleProperties.ProductsReleasesJetBrainsIdesUrl.toString() to resourceUrl("products-releases/idea-releases-list.xml").toString(),
-                GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to resourceUrl("products-releases/android-studio-releases-list.xml").toString(),
+                GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to resourceUrl("products-releases/android-studio-releases-list.json").toString(),
             ),
         ) {
             val ideLine = output.lines().single { it.startsWith("IC-2023.3.4 - ") }

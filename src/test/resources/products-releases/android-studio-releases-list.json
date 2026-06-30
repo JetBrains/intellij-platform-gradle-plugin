@@ -1,0 +1,188 @@
+{
+  "content": {
+    "item": [
+      {
+        "name": "Android Studio Jellyfish | 2023.3.1 Canary 13",
+        "build": "AI-233.14475.28.2331.11543046",
+        "version": "2023.3.1.13",
+        "channel": "Canary",
+        "platformBuild": "233.14475.28",
+        "platformVersion": "2023.3.4",
+        "date": "March 7, 2024",
+        "download": [
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.13/android-studio-2023.3.1.13-cros.deb",
+            "size": "987.1 MB",
+            "checksum": "480fb0f8706458f11b45f75de24e97ad4e0d577ad5e6b74bb2820b1237a9268a"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.13/android-studio-2023.3.1.13-mac_arm.dmg",
+            "size": "1.2 GB",
+            "checksum": "d07f67827472cd61881f9838c93500c7286bef605cc7b083da4e8be8077ea968"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.13/android-studio-2023.3.1.13-mac.dmg",
+            "size": "1.2 GB",
+            "checksum": "d293c5ddd79168d759ffaba8d9ab868cf6db32c3291fb56db1ba59908fd87792"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.13/android-studio-2023.3.1.13-windows.exe",
+            "size": "1.2 GB",
+            "checksum": "2c9c2ac89255d4fc778fae7ba1a11d22183c4560d33b501fc8b328c9c8809247"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.13/android-studio-2023.3.1.13-linux.tar.gz",
+            "size": "1.2 GB",
+            "checksum": "6e0be5c4e82a980c8db9f0ccf2b097587ee4b6a768b996bab2b3839a9e7bbde8"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.13/android-studio-2023.3.1.13-windows-exe.zip",
+            "size": "1.2 GB",
+            "checksum": "4023d7c02b608b3bad6bf6798a61908cd850e58de167e3e01bc6d252702e3747"
+          }
+        ]
+      },
+      {
+        "name": "Android Studio Jellyfish | 2023.3.1 Canary 12",
+        "build": "AI-233.14475.28.2331.11514062",
+        "version": "2023.3.1.12",
+        "channel": "Canary",
+        "platformBuild": "233.14475.28",
+        "platformVersion": "2023.3.4",
+        "date": "February 29, 2024",
+        "download": [
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.12/android-studio-2023.3.1.12-cros.deb",
+            "size": "987.0 MB",
+            "checksum": "16e899eaddbd45bf8188a334ae7cb774d9ee8713bf5751efeeb70b354734de18"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.12/android-studio-2023.3.1.12-mac_arm.dmg",
+            "size": "1.2 GB",
+            "checksum": "9d0efbead22afbfd3305d275b9fd62cdf92d68653ac53b929d378513d24ed661"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.12/android-studio-2023.3.1.12-mac.dmg",
+            "size": "1.2 GB",
+            "checksum": "e16215b3ef89d1a8c89a532d2cfa246f2a8739358d1773becc28087e2388f775"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.12/android-studio-2023.3.1.12-windows.exe",
+            "size": "1.2 GB",
+            "checksum": "23c3045517cd6e0437e70f7211bf44bd589147ec40fd431de442db346301ec94"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.12/android-studio-2023.3.1.12-linux.tar.gz",
+            "size": "1.2 GB",
+            "checksum": "e9fdd8e093f42aa46ed55a8a4ed4638ab8cbdb16e5943a0752ac31dd9ec4d54e"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.12/android-studio-2023.3.1.12-windows-exe.zip",
+            "size": "1.2 GB",
+            "checksum": "f269bb24c5a7fd9ab5355d9589dcfb2ee78115ad59304c1b0f6afdd58b30b606"
+          }
+        ]
+      },
+      {
+        "name": "Android Studio Jellyfish | 2023.3.1 Canary 9",
+        "build": "AI-233.14015.106.2331.11423272",
+        "version": "2023.3.1.9",
+        "channel": "Canary",
+        "platformBuild": "233.14015.106",
+        "platformVersion": "2023.3.3",
+        "date": "February 8, 2024",
+        "download": [
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.9/android-studio-2023.3.1.9-cros.deb",
+            "size": "986.5 MB",
+            "checksum": "81a7fe3740f159623410578d8ed2dba3a7e461e25147510edbff43f429d7cf3d"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.9/android-studio-2023.3.1.9-mac_arm.dmg",
+            "size": "1.2 GB",
+            "checksum": "eca72cdb1c364c3326e2f23178fc2ff1ffb2587b5e26ae93d3be23e92742295e"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.9/android-studio-2023.3.1.9-mac.dmg",
+            "size": "1.2 GB",
+            "checksum": "e6391125fd2204e9cf4944e1342c85e76612ebcd8814cf3c69360c5f32a9f7e2"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/install/2023.3.1.9/android-studio-2023.3.1.9-windows.exe",
+            "size": "1.2 GB",
+            "checksum": "e16dfc63467225ef6070a21704a41e6e8492a831a94ea3bd7eb9ecdf55391e7d"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-linux.tar.gz",
+            "size": "1.2 GB",
+            "checksum": "c67f38b2876961c26020bc06062c6ec21ba0f6166ea6a7e2cc6f7c2982d21ecc"
+          },
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.3.1.9/android-studio-2023.3.1.9-windows-exe.zip",
+            "size": "1.2 GB",
+            "checksum": "3a78a7ca1a703c0387cc13be05f5cc6435011573aa754fe68e69687c99e8b329"
+          }
+        ]
+      },
+      {
+        "name": "Android Studio Iguana | 2023.2.1",
+        "build": "AI-232.10227.8.2321.11479570",
+        "version": "2023.2.1.23",
+        "channel": "Release",
+        "platformBuild": "232.10227.8",
+        "platformVersion": "2023.2.5",
+        "date": "February 29, 2024",
+        "download": [
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.2.1.23/android-studio-2023.2.1.23-linux.tar.gz",
+            "size": "1.2 GB",
+            "checksum": "1b668f80ca811cdc350deb6568143da37fd57d7e90121f5542a319e52fd5a073"
+          }
+        ]
+      },
+      {
+        "name": "Android Studio Hedgehog | 2023.1.1",
+        "build": "AI-231.9392.1.2311.11076708",
+        "version": "2023.1.1.26",
+        "channel": "Release",
+        "platformBuild": "231.9392.1",
+        "platformVersion": "2023.1.5",
+        "date": "November 30, 2023",
+        "download": [
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2023.1.1.26/android-studio-2023.1.1.26-linux.tar.gz",
+            "size": "1.1 GB",
+            "checksum": "977e8a9855414f7d41157f0be0e10fb740c42bd337f763d5d96b3e059780663d"
+          }
+        ]
+      },
+      {
+        "name": "Android Studio Giraffe | 2022.3.1",
+        "build": "AI-223.8836.35.2231.10406996",
+        "version": "2022.3.1.18",
+        "channel": "Release",
+        "platformBuild": "223.8836.35",
+        "platformVersion": "2022.3.3",
+        "date": "July 25, 2023",
+        "download": [
+          {
+            "link": "https://redirector.gvt1.com/edgedl/android/studio/ide-zips/2022.3.1.18/android-studio-2022.3.1.18-linux.tar.gz",
+            "size": "1.2 GB",
+            "checksum": "24215e1324a6ac911810b2cc1afb2d735cf745dfbc06918a42b8d6fbc6bf7433"
+          }
+        ]
+      },
+      {
+        "name": "Android Studio 4.0 Canary 8",
+        "build": "AI-193.5233.102.40.6107147",
+        "version": "4.0.0.8",
+        "channel": "Canary",
+        "platformBuild": "193.5233.102",
+        "platformVersion": "2019.3",
+        "date": "January 7, 2020",
+        "download": []
+      }
+    ],
+    "version": 195
+  }
+}

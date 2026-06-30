@@ -2,33 +2,42 @@
 
 package org.jetbrains.intellij.platform.gradle.models
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import nl.adaptivity.xmlutil.serialization.XmlElement
-import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 data class AndroidStudioReleases(
-    val version: Int,
-    @XmlSerialName("item") val items: List<Item>,
+    val content: Content,
 ) {
+    val version
+        get() = content.version
+
+    val items
+        get() = content.items
+
+    @Serializable
+    data class Content(
+        @SerialName("item") val items: List<Item>,
+        val version: Int,
+    )
 
     @Serializable
     data class Item(
-        @XmlElement val name: String,
-        @XmlElement val build: String,
-        @XmlElement val version: String,
-        @XmlElement val channel: String,
-        @XmlElement val platformBuild: String,
-        @XmlElement val platformVersion: String,
-        @XmlElement val date: String,
-        @XmlSerialName("download") val downloads: List<Download>,
+        val name: String,
+        val build: String,
+        val version: String,
+        val channel: String,
+        val platformBuild: String,
+        val platformVersion: String,
+        val date: String,
+        @SerialName("download") val downloads: List<Download>,
     ) {
 
         @Serializable
         data class Download(
-            @XmlElement val link: String,
-            @XmlElement val size: String,
-            @XmlElement val checksum: String,
+            val link: String,
+            val size: String,
+            val checksum: String,
         )
     }
 }

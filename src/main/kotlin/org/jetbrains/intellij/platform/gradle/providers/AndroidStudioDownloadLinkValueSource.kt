@@ -23,7 +23,7 @@ abstract class AndroidStudioDownloadLinkValueSource : ValueSource<String, Parame
 
     interface Parameters : ValueSourceParameters {
         /**
-         * A file containing the XML with all available Android Studio releases.
+         * The URL to the resource containing the JSON with all available Android Studio releases.
          *
          * @see GradleProperties.ProductsReleasesAndroidStudioUrl
          */

@@ -22,7 +22,7 @@ class ProductReleasesServiceTest {
         }
         val contents = mapOf(
             "jetbrains" to checkNotNull(javaClass.classLoader.getResource("products-releases/idea-releases-list.xml")).readText(),
-            "androidStudio" to checkNotNull(javaClass.classLoader.getResource("products-releases/android-studio-releases-list.xml")).readText(),
+            "androidStudio" to checkNotNull(javaClass.classLoader.getResource("products-releases/android-studio-releases-list.json")).readText(),
         )
         var loads = 0
         val objects = ProjectBuilder.builder().build().objects

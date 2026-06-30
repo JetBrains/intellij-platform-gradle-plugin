@@ -45,7 +45,7 @@ abstract class ProductReleasesValueSource : ValueSource<List<String>, ProductRel
         val jetbrainsIdesUrl: Property<String>
 
         /**
-         * The URL to the resource containing the XML with all Android Studio releases.
+         * The URL to the resource containing the JSON with all Android Studio releases.
          *
          * @see GradleProperties.ProductsReleasesAndroidStudioUrl
          */

@@ -268,7 +268,7 @@ object Constants {
 
         const val ANDROID_STUDIO_INSTALLERS = "https://redirector.gvt1.com/edgedl/android/studio"
         const val JETBRAINS_IDES_INSTALLERS = "https://download.jetbrains.com"
-        const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"
+        const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.json"
         const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
         const val PRODUCTS_RELEASES_CDN_BUILDS = "https://data.services.jetbrains.com/products?code={type}&fields=code,releases.type,releases.version,releases.build"
     }

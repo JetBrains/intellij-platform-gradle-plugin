@@ -1311,12 +1311,12 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/flow/Stop
 
 public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Companion;
-	public fun <init> (ILjava/util/List;)V
-	public final fun component1 ()I
-	public final fun component2 ()Ljava/util/List;
-	public final fun copy (ILjava/util/List;)Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases;ILjava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases;
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;)V
+	public final fun component1 ()Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;
+	public final fun copy (Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;)Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases;Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases;
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getContent ()Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;
 	public final fun getItems ()Ljava/util/List;
 	public final fun getVersion ()I
 	public fun hashCode ()I
@@ -1335,6 +1335,35 @@ public final synthetic class org/jetbrains/intellij/platform/gradle/models/Andro
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Companion {
+	public final fun serializer ()Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content$Companion;
+	public fun <init> (Ljava/util/List;I)V
+	public final fun component1 ()Ljava/util/List;
+	public final fun component2 ()I
+	public final fun copy (Ljava/util/List;I)Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;Ljava/util/List;IILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getItems ()Ljava/util/List;
+	public final fun getVersion ()I
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final synthetic class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content$$serializer;
+	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
+	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
+	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;
+	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
+	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
+	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content;)V
+	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/AndroidStudioReleases$Content$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 

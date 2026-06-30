@@ -118,7 +118,7 @@ class ProductReleasesValueSourceTest : IntelliJPluginTestBase() {
                     val productReleases = providers.of(org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource::class) {
                         parameters {
                             jetbrainsIdesUrl = "${resourceUrl("products-releases/idea-releases-list.xml")}"
-                            androidStudioUrl = "${resourceUrl("products-releases/android-studio-releases-list.xml")}"
+                            androidStudioUrl = "${resourceUrl("products-releases/android-studio-releases-list.json")}"
                 
                             sinceBuild = "$sinceBuild"
                             untilBuild = "$untilBuild"

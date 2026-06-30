@@ -18,7 +18,7 @@ class AndroidStudioDownloadLinkValueSourceTest : IntelliJPluginTestBase() {
                 tasks {
                     val androidStudioDownloadLink = providers.of(org.jetbrains.intellij.platform.gradle.providers.AndroidStudioDownloadLinkValueSource::class) {
                         parameters {
-                            androidStudioUrl = "${resourceUrl("products-releases/android-studio-releases-list.xml")}"
+                            androidStudioUrl = "${resourceUrl("products-releases/android-studio-releases-list.json")}"
                             androidStudioVersion = "2023.3.1.9"
                         }
                     }

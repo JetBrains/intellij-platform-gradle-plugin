@@ -225,7 +225,7 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
             .toAbsolutePath()
             .toUri()
             .toString()
-        val androidStudioUrl = Paths.get("src", "test", "resources", "products-releases", "android-studio-releases-list.xml")
+        val androidStudioUrl = Paths.get("src", "test", "resources", "products-releases", "android-studio-releases-list.json")
             .toAbsolutePath()
             .toUri()
             .toString()

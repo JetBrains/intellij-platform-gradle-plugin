@@ -20,7 +20,7 @@ class AndroidStudioDownloadLinkServiceTest {
                 .apply { isAccessible = true }
                 .newInstance()
         }
-        val content = checkNotNull(javaClass.classLoader.getResource("products-releases/android-studio-releases-list.xml")).readText()
+        val content = checkNotNull(javaClass.classLoader.getResource("products-releases/android-studio-releases-list.json")).readText()
         var loads = 0
         val objects = ProjectBuilder.builder().build().objects
 
