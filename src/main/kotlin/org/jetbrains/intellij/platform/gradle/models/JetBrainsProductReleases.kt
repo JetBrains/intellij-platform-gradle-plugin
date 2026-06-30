@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class JetBrainsCdnBuilds(
+data class JetBrainsProductReleases(
     val code: String,
     val releases: List<Release> = mutableListOf(),
 ) {

@@ -8,7 +8,7 @@ import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
-import org.jetbrains.intellij.platform.gradle.models.JetBrainsCdnBuilds
+import org.jetbrains.intellij.platform.gradle.models.JetBrainsProductReleases
 import org.jetbrains.intellij.platform.gradle.models.decode
 import org.jetbrains.intellij.platform.gradle.models.json
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -23,7 +23,7 @@ abstract class ProductReleaseBuildValueSource : ValueSource<String, ProductRelea
 
     interface Parameters : ValueSourceParameters {
         /**
-         * The URL to the resource containing the XML with all JetBrains IDEs releases.
+         * The URL to the resource containing the JSON with JetBrains IDEs releases.
          *
          * @see GradleProperties.ProductsReleasesCdnBuildsUrl
          */
@@ -58,9 +58,9 @@ internal fun loadProductReleaseBuilds(productsReleasesCdnBuildsUrl: String?, loa
     productsReleasesCdnBuildsUrl
         ?.let(loader)
         ?.also { log.info("Reading JetBrains IDEs releases from URL: $productsReleasesCdnBuildsUrl") }
-        ?.let { decode<List<JetBrainsCdnBuilds>>(it, stringFormat = json) }
+        ?.let { decode<List<JetBrainsProductReleases>>(it, stringFormat = json) }
 
-internal fun List<JetBrainsCdnBuilds>.resolveBuild(version: String) =
+internal fun List<JetBrainsProductReleases>.resolveBuild(version: String) =
     firstOrNull()
         ?.releases
         ?.find { it.version == version }

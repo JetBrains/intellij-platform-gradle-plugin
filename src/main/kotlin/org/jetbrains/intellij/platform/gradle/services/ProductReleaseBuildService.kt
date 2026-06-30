@@ -4,7 +4,7 @@ package org.jetbrains.intellij.platform.gradle.services
 
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
-import org.jetbrains.intellij.platform.gradle.models.JetBrainsCdnBuilds
+import org.jetbrains.intellij.platform.gradle.models.JetBrainsProductReleases
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleaseBuildValueSource
 import org.jetbrains.intellij.platform.gradle.providers.loadProductReleaseBuilds
 import org.jetbrains.intellij.platform.gradle.providers.resolveBuild
@@ -15,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap
 abstract class ProductReleaseBuildService : BuildService<BuildServiceParameters.None> {
 
     private val log = Logger(javaClass)
-    private val builds = ConcurrentHashMap<String, List<JetBrainsCdnBuilds>>()
+    private val builds = ConcurrentHashMap<String, List<JetBrainsProductReleases>>()
 
     internal fun resolve(
         parameters: ProductReleaseBuildValueSource.Parameters,
