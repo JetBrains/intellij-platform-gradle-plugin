@@ -15,5 +15,14 @@ data class JetBrainsCdnBuilds(
         val type: String,
         val version: String,
         val build: String,
-    )
+    ) {
+        var downloads: Map<String, Download> = emptyMap()
+
+        @Serializable
+        data class Download(
+            val link: String,
+            val size: Long? = null,
+            val checksumLink: String? = null,
+        )
+    }
 }

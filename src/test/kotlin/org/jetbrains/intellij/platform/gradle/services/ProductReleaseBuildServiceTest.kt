@@ -6,6 +6,8 @@ import org.gradle.api.services.BuildServiceParameters
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleaseBuildValueSource
+import org.jetbrains.intellij.platform.gradle.providers.loadProductReleaseBuilds
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -25,7 +27,18 @@ class ProductReleaseBuildServiceTest {
               {
                 "code": "IC",
                 "releases": [
-                  { "type": "release", "version": "2024.3", "build": "243.12818.47" },
+                  {
+                    "type": "release",
+                    "version": "2024.3",
+                    "build": "243.12818.47",
+                    "downloads": {
+                      "linux": {
+                        "link": "https://download.jetbrains.com/idea/ideaIC-2024.3.tar.gz",
+                        "size": 123456,
+                        "checksumLink": "https://download.jetbrains.com/idea/ideaIC-2024.3.tar.gz.sha256"
+                      }
+                    }
+                  },
                   { "type": "release", "version": "2024.3.1", "build": "243.21565.193" }
                 ]
               }
@@ -59,5 +72,16 @@ class ProductReleaseBuildServiceTest {
         assertEquals("243.12818.47", firstResult)
         assertEquals("243.21565.193", secondResult)
         assertEquals(1, loads)
+
+        val linuxDownload = loadProductReleaseBuilds("https://example/IC.json", { content }, Logger(javaClass))
+            ?.single()
+            ?.releases
+            ?.first()
+            ?.downloads
+            ?.get("linux")
+
+        assertEquals("https://download.jetbrains.com/idea/ideaIC-2024.3.tar.gz", linuxDownload?.link)
+        assertEquals(123456L, linuxDownload?.size)
+        assertEquals("https://download.jetbrains.com/idea/ideaIC-2024.3.tar.gz.sha256", linuxDownload?.checksumLink)
     }
 }
