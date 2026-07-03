@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.services
 
+import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.ProviderFactory
@@ -10,23 +11,24 @@ import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.tasks.Input
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.newInstance
-import org.jetbrains.intellij.platform.gradle.GradleProperties
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
-import org.jetbrains.intellij.platform.gradle.providers.*
-import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
-import org.jetbrains.intellij.platform.gradle.validateVersion
 import java.net.URI
+import java.nio.file.Path
+import java.security.MessageDigest
+import java.time.LocalDate
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import kotlin.collections.asSequence
-import kotlin.collections.map
-import kotlin.collections.toSet
-import kotlin.text.get
+import kotlin.io.path.createDirectories
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
 abstract class ProductReleasesService @Inject constructor(
     private val objectFactory: ObjectFactory,
@@ -49,6 +51,12 @@ abstract class ProductReleasesService @Inject constructor(
          */
         @get:Input
         val androidStudioUrl: Property<String>
+
+        /**
+         * Directory used to cache raw product release JSON listings across Gradle invocations.
+         */
+        @get:Input
+        val cacheDirectory: Property<String>
     }
 
     private val log = Logger(javaClass)
@@ -71,28 +79,7 @@ abstract class ProductReleasesService @Inject constructor(
         filter: ProductReleasesValueSource.FilterParameters,
         loader: (String) -> String? = { URI(it).toURL().readText() },
     ) = filter.types.get()
-        .mapNotNull { type ->
-            // TODO: read from cache first? with productReleases
-            when (type) {
-                IntelliJPlatformType.AndroidStudio -> {
-                    parameters.androidStudioUrl.orNull
-                        ?.also { log.info("Reading Android Studio releases from: $it") }
-                        ?.let(loader)
-                        ?.let { decode<AndroidStudioReleases>(it) }
-                        ?.toProductReleases()
-                }
-
-                else -> {
-                    parameters.jetbrainsIdesUrl.orNull
-                        ?.replace("{type}", type.code)
-                        ?.let(loader)
-                        ?.also { log.info("Reading JetBrains IDEs releases from URL: $it") }
-                        ?.let { decode<List<JetBrainsProductReleases>>(it, stringFormat = json) }
-                        ?.firstOrNull()
-                        ?.toProductReleases()
-                }
-            }
-        }
+        .map { loadProductReleases(it, loader) }
         .flatten()
         .run {
             val since = filter.sinceBuild.orNull?.ifBlank { "0" }?.toVersion()
@@ -103,7 +90,11 @@ abstract class ProductReleasesService @Inject constructor(
                     in 100..999 -> build
                     else -> this.version
                 }
-                return (since?.let { getComparativeVersion(it) >= it} != false) && (until?.let { getComparativeVersion(it) <= it } != false)
+                return (since?.let { getComparativeVersion(it) >= it } != false) && (until?.let {
+                    getComparativeVersion(
+                        it,
+                    ) <= it
+                } != false)
             }
 
             val codes = filter.types.get().map { it.code }.toSet()
@@ -138,7 +129,73 @@ abstract class ProductReleasesService @Inject constructor(
                 .filter { it.testVersion() }
                 .toSet()
         }
+
+    private fun loadProductReleases(type: IntelliJPlatformType, loader: (String) -> String?): List<ProductRelease> {
+        val url = when (type) {
+            IntelliJPlatformType.AndroidStudio -> parameters.androidStudioUrl.orNull
+            else -> parameters.jetbrainsIdesUrl.orNull?.replace("{type}", type.code)
+        } ?: return emptyList()
+
+        return productReleases.computeIfAbsent("${type.code}:$url") {
+            loadListing(url, loader)?.let { content ->
+                when (type) {
+                    IntelliJPlatformType.AndroidStudio -> decode<AndroidStudioReleases>(content).toProductReleases()
+                    else -> decode<List<JetBrainsProductReleases>>(content, stringFormat = json)
+                        .firstOrNull()
+                        ?.toProductReleases()
+                        .orEmpty()
+                }
+            }.orEmpty()
+        }
+    }
+
+    private fun loadListing(url: String, loader: (String) -> String?): String? {
+        val cacheFile = cacheFile(url)
+        val lockFile = lockFile(cacheFile)
+        val today = LocalDate.now().toString()
+        val cachedContent = runCatching { cacheFile.readText() }.getOrNull()
+        val lastUpdate = runCatching { lockFile.readText().trim() }.getOrNull()
+
+        if (cachedContent != null && lastUpdate == today) {
+            log.info("Reading product releases listing from cache: $cacheFile")
+            return cachedContent
+        }
+
+        return try {
+            loader(url)?.also {
+                log.info("Reading product releases listing from URL: $url")
+                cacheFile.parent.createDirectories()
+                cacheFile.writeText(it)
+                lockFile.writeText(today)
+            }
+        } catch (e: Exception) {
+            if (cachedContent == null) {
+                throw e
+            }
+
+            log.warn("Failed to refresh product releases listing from URL: $url. Using cached listing: $cacheFile", e)
+            cachedContent
+        } ?: cachedContent
+    }
+
+    private fun cacheFile(url: String): Path {
+        val digest = MessageDigest.getInstance("SHA-256").digest(url.toByteArray())
+        val fileName = "${HexFormat.of().formatHex(digest)}.json"
+        return Path.of(parameters.cacheDirectory.get()).resolve(fileName)
+    }
+
+    private fun lockFile(cacheFile: Path) = cacheFile.resolveSibling("${cacheFile.fileName}.lock")
 }
+
+internal fun Gradle.productReleasesService(providers: ProviderFactory, rootProjectDirectory: Path) =
+    registerClassLoaderScopedBuildService(ProductReleasesService::class) {
+        parameters {
+            jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
+            androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
+            cacheDirectory =
+                providers.intellijPlatformProductReleasesCachePath(rootProjectDirectory).map { it.safePathString }
+        }
+    }
 
 private val jetBrainsProductCodeAliases = mapOf(
     "IIC" to "IC",
@@ -178,7 +235,7 @@ internal fun JetBrainsProductReleases.toProductReleases() =
 internal fun AndroidStudioReleases.toProductReleases() =
     items.mapNotNull { item ->
         val channel = runCatching {
-            ProductRelease.Channel.valueOf(item.channel.uppercase())
+            Channel.valueOf(item.channel.uppercase())
         }.getOrNull() ?: return@mapNotNull null
 
         ProductRelease(

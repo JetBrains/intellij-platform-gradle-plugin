@@ -8,6 +8,7 @@ import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IDES
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IVY
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_PRODUCT_RELEASES
 import org.jetbrains.intellij.platform.gradle.Constants.LAYOUT_INDEX
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
@@ -238,6 +239,12 @@ internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory:
  */
 internal fun ProviderFactory.intellijPlatformIdeLayoutIndicesCachePath(rootProjectDirectory: Path) =
     intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(LAYOUT_INDEX) }
+
+/**
+ * Directory used to persist raw product release JSON listings.
+ */
+internal fun ProviderFactory.intellijPlatformProductReleasesCachePath(rootProjectDirectory: Path) =
+    intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_PRODUCT_RELEASES) }
 
 /**
  * Resolves the directory path from the given provider.

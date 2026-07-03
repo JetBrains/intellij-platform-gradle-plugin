@@ -2,14 +2,22 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_PRODUCT_RELEASES
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.assertContains
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.gradleProperties
+import org.jetbrains.intellij.platform.gradle.overwrite
+import org.jetbrains.intellij.platform.gradle.settingsFile
 import org.jetbrains.intellij.platform.gradle.write
+import java.time.LocalDate
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.readText
 import kotlin.test.Test
+import kotlin.test.assertEquals
 
 class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
@@ -87,5 +95,82 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
             assertConfigurationCacheReused()
             assertContains("> Task :${Tasks.PRINT_PRODUCTS_RELEASES}", output)
         }
+    }
+
+    @Test
+    fun `product release listings are cached between task runs and subprojects`() {
+        settingsFile write //language=kotlin
+                """
+                include("first", "second")
+                """.trimIndent()
+
+        val listingContent = checkNotNull(javaClass.classLoader.getResource("products-releases/jetbrains-product-releases-IU.json")).readText()
+        val listingFile = dir.resolve("jetbrains-product-releases-IU.json")
+        listingFile overwrite listingContent
+
+        gradleProperties write //language=properties
+                """
+                ${GradleProperties.ProductsReleasesCdnBuildsUrl}=${listingFile.toUri().toString().replace("IU.json", "{type}.json")}
+                """.trimIndent()
+
+        listOf("first", "second").forEach { subproject ->
+            dir.resolve("$subproject/build.gradle.kts") write //language=kotlin
+                    """
+                    plugins {
+                        id("org.jetbrains.intellij.platform")
+                    }
+
+                    tasks {
+                        ${Tasks.PRINT_PRODUCTS_RELEASES} {
+                            types = listOf(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea)
+                            channels = listOf(org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.RELEASE)
+                            sinceBuild = "223"
+                            untilBuild = "233.*"
+                        }
+                    }
+                    """.trimIndent()
+        }
+
+        build(":first:${Tasks.PRINT_PRODUCTS_RELEASES}") {
+            assertContains(
+                "> Task :first:${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2023.3.4\nIU-2023.2.6",
+                output,
+            )
+        }
+
+        val cacheDirectory = dir.resolve(CACHE_DIRECTORY).resolve(CACHE_DIRECTORY_PRODUCT_RELEASES)
+        val cacheFiles = cacheDirectory.listDirectoryEntries("*.json")
+        val lockFiles = cacheDirectory.listDirectoryEntries("*.lock")
+
+        assertEquals(1, cacheFiles.size)
+        assertEquals(1, lockFiles.size)
+        assertEquals(LocalDate.now().toString(), lockFiles.single().readText().trim())
+
+        listingFile overwrite //language=json
+                """not-json"""
+
+        build(":second:${Tasks.PRINT_PRODUCTS_RELEASES}") {
+            assertContains(
+                "> Task :second:${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2023.3.4\nIU-2023.2.6",
+                output,
+            )
+        }
+
+        assertEquals(1, cacheDirectory.listDirectoryEntries("*.json").size)
+        assertEquals(1, cacheDirectory.listDirectoryEntries("*.lock").size)
+
+        cacheFiles.single() overwrite //language=json
+                """not-json"""
+        lockFiles.single() overwrite LocalDate.now().minusDays(1).toString()
+        listingFile overwrite listingContent
+
+        build(":second:${Tasks.PRINT_PRODUCTS_RELEASES}") {
+            assertContains(
+                "> Task :second:${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2023.3.4\nIU-2023.2.6",
+                output,
+            )
+        }
+
+        assertEquals(LocalDate.now().toString(), lockFiles.single().readText().trim())
     }
 }

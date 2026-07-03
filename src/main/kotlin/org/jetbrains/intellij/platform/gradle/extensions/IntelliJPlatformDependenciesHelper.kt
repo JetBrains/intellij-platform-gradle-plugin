@@ -108,12 +108,7 @@ class IntelliJPlatformDependenciesHelper(
         gradle.registerClassLoaderScopedBuildService(ModuleDescriptorCoordinatesService::class)
     }
     private val productReleasesService by lazy {
-        gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class) {
-            parameters {
-                jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
-                androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
-            }
-        }
+        gradle.productReleasesService(providers, rootProjectDirectory)
     }
     private val extractorServiceProvider by lazy {
         gradle.registerClassLoaderScopedBuildService(ExtractorService::class)

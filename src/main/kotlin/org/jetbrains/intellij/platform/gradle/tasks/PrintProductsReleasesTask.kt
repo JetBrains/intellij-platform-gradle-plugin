@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.assign
@@ -35,7 +35,7 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesService
      *
      * Default value: The output of [ProductReleasesValueSource] using default configuration
      */
-    @get:Input
+    @get:Internal
     abstract val productsReleases: ListProperty<String>
 
     @TaskAction
