@@ -19,6 +19,20 @@ data class ProductRelease(
     val downloads: List<Download> = emptyList(),
 //    val id: String,
 ) {
+    internal val notationVersion
+        get() = when {
+            channel == Channel.RELEASE -> version
+            type == IntelliJPlatformType.AndroidStudio -> version
+            else -> build
+        }
+
+    val notation
+        get() = "$type-$notationVersion"
+
+    internal fun matchesVersion(version: Version) = version == when {
+        version.isBuildNumber() -> build
+        else -> notationVersion
+    }
 
     enum class Channel {
         EAP, MILESTONE, BETA, RELEASE, CANARY, PATCH, RC, PREVIEW;

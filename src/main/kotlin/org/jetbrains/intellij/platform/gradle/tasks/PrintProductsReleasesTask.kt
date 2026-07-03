@@ -11,7 +11,6 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.assign
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.models.type
@@ -64,13 +63,7 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesService
                 productsReleases.convention(
                     project.provider {
                         productReleasesService.get().resolve(productReleasesParameters)
-                            .latestReleases().map {
-                                when {
-                                    it.channel == ProductRelease.Channel.RELEASE -> "${it.type}-${it.version}"
-                                    it.type == IntelliJPlatformType.AndroidStudio -> "${it.type}-${it.version}"
-                                    else -> "${it.type}-${it.build}"
-                                }
-                            }
+                            .latestReleases().map { it.notation }
                     },
                 )
 

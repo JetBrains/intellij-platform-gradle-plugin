@@ -2,13 +2,49 @@
 
 package org.jetbrains.intellij.platform.gradle.models
 
+import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.services.toProductReleases
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 class ProductReleaseCatalogEntryTest {
+
+    @Test
+    fun `resolve product release notation according to channel and type`() {
+        fun release(type: IntelliJPlatformType, channel: ProductRelease.Channel) = ProductRelease(
+            type = type,
+            name = type.name,
+            channel = channel,
+            version = "2026.1.3.2".toVersion(),
+            build = "261.12345.67".toVersion(),
+        )
+
+        val ideaRelease = release(IntelliJPlatformType.IntellijIdea, ProductRelease.Channel.RELEASE)
+        val ideaEap = release(IntelliJPlatformType.IntellijIdea, ProductRelease.Channel.EAP)
+        val androidStudioCanary = release(IntelliJPlatformType.AndroidStudio, ProductRelease.Channel.CANARY)
+
+        assertEquals(
+            "${IntelliJPlatformType.IntellijIdea}-2026.1.3.2",
+            ideaRelease.notation,
+        )
+        assertEquals(
+            "${IntelliJPlatformType.IntellijIdea}-261.12345.67",
+            ideaEap.notation,
+        )
+        assertEquals(
+            "${IntelliJPlatformType.AndroidStudio}-2026.1.3.2",
+            androidStudioCanary.notation,
+        )
+
+        assertTrue(ideaRelease.matchesVersion("2026.1.3.2".toVersion()))
+        assertTrue(ideaEap.matchesVersion("261.12345.67".toVersion()))
+        assertFalse(ideaEap.matchesVersion("2026.1.3.2".toVersion()))
+        assertTrue(androidStudioCanary.matchesVersion("2026.1.3.2".toVersion()))
+    }
 
     @Test
     fun `resolve Android Studio artifact with named release classifier`() {
@@ -163,9 +199,26 @@ class ProductReleaseCatalogEntryTest {
         build = "261".toVersion(),
         downloads = listOf(
             ProductRelease.Download(
-                kind = null,
+                kind = currentJetBrainsDownloadKind(),
                 link = link,
             ),
         ),
     ).resolveDownloadArtifact()
+
+    private fun currentJetBrainsDownloadKind() = with(OperatingSystem.current()) {
+        val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
+
+        when {
+            isLinux -> "linux" + when (arch) {
+                null -> ""
+                else -> "ARM64"
+            }
+            isWindows -> "windowsZip"
+            isMacOsX -> "mac" + when (arch) {
+                null -> ""
+                else -> "M1"
+            }
+            else -> error("Unsupported operating system: $name")
+        }
+    }
 }

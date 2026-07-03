@@ -940,15 +940,7 @@ class IntelliJPlatformDependenciesHelper(
         objects.newInstance<ProductReleasesValueSource.FilterParameters>()
             .apply(configure)
             .let { parameters ->
-                provider {
-                    productReleasesService.get().resolve(parameters).map {
-                        when {
-                            it.channel == Channel.RELEASE -> "${it.type}-${it.version}"
-                            it.type == IntelliJPlatformType.AndroidStudio -> "${it.type}-${it.version}"
-                            else -> "${it.type}-${it.build}"
-                        }
-                    }
-                }
+                provider { productReleasesService.get().resolve(parameters).map { it.notation } }
                     .cached<String>() // TODO: do we need that?
                     .map { it.toList() }
             }

@@ -57,14 +57,7 @@ abstract class ProductReleasesService @Inject constructor(
     internal fun resolve(type: IntelliJPlatformType, version: Version) = resolve {
         types = listOf(type)
     }.map { productReleases ->
-        productReleases.find {
-            version == when {
-                version.major in 100..999 -> it.build
-                type == IntelliJPlatformType.AndroidStudio -> it.version
-                it.channel == Channel.RELEASE -> it.version
-                else -> it.build
-            }
-        }
+        productReleases.find { it.matchesVersion(version) }
     }
 
     internal fun resolve(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
