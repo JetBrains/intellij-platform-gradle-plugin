@@ -87,7 +87,7 @@ class ProductReleaseCatalogEntryTest {
         assertEquals(
             ProductRelease.Download.Artifact("261.25134.95", "jbr.win", "zip"),
             artifact(
-                IntelliJPlatformType.IntellijIdea,
+                IntelliJPlatformType.JetBrainsClient,
                 "https://download.jetbrains.com/idea/code-with-me/JetBrainsClient-261.25134.95.jbr.win.zip",
             ),
         )

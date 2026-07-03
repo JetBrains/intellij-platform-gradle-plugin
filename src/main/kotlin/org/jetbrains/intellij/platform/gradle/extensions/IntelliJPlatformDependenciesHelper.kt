@@ -959,50 +959,11 @@ class IntelliJPlatformDependenciesHelper(
             runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
 
             when {
-                productMode == ProductMode.FRONTEND -> createJetBrainsClient(type, version)
-                else -> when {
-                    useInstaller -> createIntelliJPlatformInstaller(type, version)
-                    else -> createIntelliJPlatform(type, version)
-                }
+                productMode == ProductMode.FRONTEND -> createIntelliJPlatformInstaller(IntelliJPlatformType.JetBrainsClient, version)
+                useInstaller -> createIntelliJPlatformInstaller(type, version)
+                else -> createIntelliJPlatform(type, version)
             }
         }
-
-    /**
-     * Creates JetBrains Client dependency.
-     *
-     * @param version JetBrains Client version.
-     */
-    private fun createJetBrainsClient(type: IntelliJPlatformType, version: String): Dependency {
-        val jetBrainsClientType = requireNotNull(IntelliJPlatformType.JetBrainsClient.installer)
-        runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
-        runCatching { IntelliJPlatformType.JetBrainsClient.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
-
-        val (extension, classifier) = with(OperatingSystem.current()) {
-            val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
-            when {
-                isLinux -> ArtifactType.TAR_GZ to arch
-                isWindows -> ArtifactType.ZIP to when {
-                    arch == null -> "jbr.win"
-                    else -> "$arch.jbr.win"
-                }
-
-                isMacOsX -> ArtifactType.SIT to arch
-                else -> throw GradleException("Unsupported operating system: $name")
-            }
-        }.let { (type, classifier) -> type.toString() to classifier }
-
-        val group = jetBrainsClientType.groupId
-        val name = jetBrainsClientType.artifactId
-        val buildNumber = productReleasesService.get().resolve {
-            this.sinceBuild = version
-            this.untilBuild = version
-            this.types = listOf(type)
-        }.get().single().build.toString()
-
-        requireNotNull(buildNumber) { "Couldn't resolve JetBrains Client build number for type: '$type', version: '$version'" }
-
-        return dependencyFactory.create(group, name, buildNumber, classifier, extension)
-    }
 
     /**
      * Creates a [Dependency] using a Jar file resolved in [platformPath] with [path].
