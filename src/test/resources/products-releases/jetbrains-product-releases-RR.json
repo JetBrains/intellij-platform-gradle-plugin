@@ -1,0 +1,24 @@
+[
+  {
+    "code": "RR",
+    "releases": [
+      {
+        "type": "eap",
+        "version": "2023.3",
+        "build": "233.14015.155"
+      },
+      {
+        "type": "eap",
+        "version": "2023.2",
+        "build": "232.9921.62",
+        "downloads": {
+          "linux": {
+            "link": "https://download.jetbrains.com/rustrover/RustRover-2023.2.tar.gz",
+            "size": 123456,
+            "checksumLink": "https://download.jetbrains.com/rustrover/RustRover-2023.2.tar.gz.sha256"
+          }
+        }
+      }
+    ]
+  }
+]

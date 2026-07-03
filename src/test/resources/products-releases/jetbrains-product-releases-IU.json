@@ -1,0 +1,49 @@
+[
+  {
+    "code": "IIU",
+    "releases": [
+      {
+        "type": "release",
+        "version": "2025.1.6",
+        "build": "251.28774.11"
+      },
+      {
+        "type": "eap",
+        "version": "2024.1",
+        "build": "241.14494.30"
+      },
+      {
+        "type": "release",
+        "version": "2023.3.4",
+        "build": "233.14475.28",
+        "downloads": {
+          "linux": {
+            "link": "https://download.jetbrains.com/idea/ideaIU-2023.3.4.tar.gz",
+            "size": 123456,
+            "checksumLink": "https://download.jetbrains.com/idea/ideaIU-2023.3.4.tar.gz.sha256"
+          },
+          "windowsZip": {
+            "link": "https://download.jetbrains.com/idea/ideaIU-2023.3.4.win.zip",
+            "size": 123456,
+            "checksumLink": "https://download.jetbrains.com/idea/ideaIU-2023.3.4.win.zip.sha256"
+          },
+          "mac": {
+            "link": "https://download.jetbrains.com/idea/ideaIU-2023.3.4.dmg",
+            "size": 123456,
+            "checksumLink": "https://download.jetbrains.com/idea/ideaIU-2023.3.4.dmg.sha256"
+          }
+        }
+      },
+      {
+        "type": "release",
+        "version": "2023.2.6",
+        "build": "232.10300.40"
+      },
+      {
+        "type": "release",
+        "version": "2023.1.7",
+        "build": "231.9423.15"
+      }
+    ]
+  }
+]
