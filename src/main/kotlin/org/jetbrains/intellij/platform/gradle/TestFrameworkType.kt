@@ -23,6 +23,7 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
         Coordinates("com.jetbrains.intellij.tools","ide-starter-squashed"),
         Coordinates("com.jetbrains.intellij.tools","ide-starter-junit5"),
         Coordinates("com.jetbrains.intellij.tools","ide-starter-driver"),
+        Coordinates("com.jetbrains.intellij.tools","ide-starter-product-idea-ultimate"),
         Coordinates("com.jetbrains.intellij.driver","driver-client"),
         Coordinates("com.jetbrains.intellij.driver","driver-sdk"),
         Coordinates("com.jetbrains.intellij.driver","driver-model"),
