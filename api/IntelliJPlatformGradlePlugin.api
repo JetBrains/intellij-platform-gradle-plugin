@@ -184,7 +184,6 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Locations {
 	public static final field MAVEN_REPOSITORY Ljava/lang/String;
 	public static final field PRODUCTS_RELEASES_ANDROID_STUDIO Ljava/lang/String;
 	public static final field PRODUCTS_RELEASES_CDN_BUILDS Ljava/lang/String;
-	public static final field PRODUCTS_RELEASES_JETBRAINS_IDES Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Plugin {
@@ -322,10 +321,6 @@ public final class org/jetbrains/intellij/platform/gradle/GradleProperties$Produ
 
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$ProductsReleasesCdnBuildsUrl : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$ProductsReleasesCdnBuildsUrl;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/GradleProperties$ProductsReleasesJetBrainsIdesUrl : org/jetbrains/intellij/platform/gradle/GradleProperties {
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$ProductsReleasesJetBrainsIdesUrl;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$SelfUpdateCheck : org/jetbrains/intellij/platform/gradle/GradleProperties {
@@ -1698,237 +1693,6 @@ public final class org/jetbrains/intellij/platform/gradle/models/IvyModulePublic
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases {
-	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Companion;
-	public fun <init> (Ljava/util/List;)V
-	public final fun component1 ()Ljava/util/List;
-	public final fun copy (Ljava/util/List;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getProducts ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product {
-	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/util/List;Ljava/util/List;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/util/List;
-	public final fun component3 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/util/List;Ljava/util/List;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product;Ljava/lang/String;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getChannels ()Ljava/util/List;
-	public final fun getCodes ()Ljava/util/List;
-	public final fun getName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel {
-	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/util/List;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()I
-	public final fun component7 ()Ljava/lang/String;
-	public final fun component8 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/util/List;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/String;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBuilds ()Ljava/util/List;
-	public final fun getFeedback ()Ljava/lang/String;
-	public final fun getId ()Ljava/lang/String;
-	public final fun getLicensing ()Ljava/lang/String;
-	public final fun getMajorVersion ()I
-	public final fun getName ()Ljava/lang/String;
-	public final fun getStatus ()Ljava/lang/String;
-	public final fun getUrl ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build {
-	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;Ljava/util/List;Ljava/util/List;)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;Ljava/util/List;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Ljava/lang/String;
-	public final fun component6 ()Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;
-	public final fun component7 ()Ljava/util/List;
-	public final fun component8 ()Ljava/util/List;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;Ljava/util/List;Ljava/util/List;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;Ljava/util/List;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getBlogPost ()Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;
-	public final fun getButtons ()Ljava/util/List;
-	public final fun getFullNumber ()Ljava/lang/String;
-	public final fun getMessage ()Ljava/lang/String;
-	public final fun getNumber ()Ljava/lang/String;
-	public final fun getPatches ()Ljava/util/List;
-	public final fun getReleaseDate ()Ljava/lang/String;
-	public final fun getVersion ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost {
-	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost$Companion;
-	public fun <init> (Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getUrl ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$BlogPost$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button {
-	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Z)V
-	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Z
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button;Ljava/lang/String;Ljava/lang/String;ZILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getDownload ()Z
-	public final fun getName ()Ljava/lang/String;
-	public final fun getUrl ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Button$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch {
-	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getFrom ()Ljava/lang/String;
-	public final fun getFullFrom ()Ljava/lang/String;
-	public final fun getSize ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final synthetic class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Build$Patch$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Channel$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsIdesReleases$Product$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
-}
-
 public final class org/jetbrains/intellij/platform/gradle/models/JetBrainsProductReleases {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/models/JetBrainsProductReleases$Companion;
 	public fun <init> (Ljava/lang/String;Ljava/util/List;)V
@@ -2684,20 +2448,25 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductModules$
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/ProductRelease {
-	public fun <init> (Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
-	public final fun component3 ()Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;
+	public final fun component2 ()Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;
+	public final fun component3 ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public final fun component4 ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public final fun component5 ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
-	public final fun component6 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease;Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease;
+	public final fun component6 ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
+	public final fun component7 ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
+	public final fun component8 ()Ljava/util/List;
+	public final fun copy (Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Ljava/util/List;)Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease;Ljava/lang/String;Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Lorg/jetbrains/intellij/platform/gradle/utils/Version;Ljava/util/List;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getBuild ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public final fun getChannel ()Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;
-	public final fun getId ()Ljava/lang/String;
+	public final fun getDownloads ()Ljava/util/List;
 	public final fun getName ()Ljava/lang/String;
+	public final fun getPlatformBuild ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
+	public final fun getPlatformVersion ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public final fun getType ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 	public final fun getVersion ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public fun hashCode ()I
@@ -2716,6 +2485,24 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductRelease$
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;
 	public static fun values ()[Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/models/ProductRelease$Download {
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Download;
+	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Download;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Download;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getChecksum ()Ljava/lang/String;
+	public final fun getChecksumLink ()Ljava/lang/String;
+	public final fun getKind ()Ljava/lang/String;
+	public final fun getLink ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/performanceTest/ProfilerName : java/lang/Enum {
@@ -2774,17 +2561,6 @@ public abstract class org/jetbrains/intellij/platform/gradle/plugins/settings/In
 	public fun apply (Lorg/gradle/api/initialization/Settings;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/providers/AndroidStudioDownloadLinkValueSource : org/gradle/api/provider/ValueSource {
-	public fun <init> ()V
-	public synthetic fun obtain ()Ljava/lang/Object;
-	public fun obtain ()Ljava/lang/String;
-}
-
-public abstract interface class org/jetbrains/intellij/platform/gradle/providers/AndroidStudioDownloadLinkValueSource$Parameters : org/gradle/api/provider/ValueSourceParameters {
-	public abstract fun getAndroidStudioUrl ()Lorg/gradle/api/provider/Property;
-	public abstract fun getAndroidStudioVersion ()Lorg/gradle/api/provider/Property;
-}
-
 public abstract class org/jetbrains/intellij/platform/gradle/providers/CoroutinesJavaAgentValueSource : org/gradle/api/provider/ValueSource {
 	public fun <init> ()V
 	public fun obtain ()Ljava/io/File;
@@ -2841,18 +2617,6 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/providers
 	public abstract fun getIntellijPlatformPath ()Lorg/gradle/api/file/DirectoryProperty;
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/providers/ProductReleaseBuildValueSource : org/gradle/api/provider/ValueSource {
-	public fun <init> ()V
-	public synthetic fun obtain ()Ljava/lang/Object;
-	public fun obtain ()Ljava/lang/String;
-}
-
-public abstract interface class org/jetbrains/intellij/platform/gradle/providers/ProductReleaseBuildValueSource$Parameters : org/gradle/api/provider/ValueSourceParameters {
-	public abstract fun getProductsReleasesCdnBuildsUrl ()Lorg/gradle/api/provider/Property;
-	public abstract fun getType ()Lorg/gradle/api/provider/Property;
-	public abstract fun getVersion ()Lorg/gradle/api/provider/Property;
-}
-
 public abstract class org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource : org/gradle/api/provider/ValueSource {
 	public fun <init> ()V
 	public synthetic fun obtain ()Ljava/lang/Object;
@@ -2864,11 +2628,6 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/providers
 	public abstract fun getSinceBuild ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTypes ()Lorg/gradle/api/provider/ListProperty;
 	public abstract fun getUntilBuild ()Lorg/gradle/api/provider/Property;
-}
-
-public abstract interface class org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource$Parameters : org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource$FilterParameters {
-	public abstract fun getAndroidStudioUrl ()Lorg/gradle/api/provider/Property;
-	public abstract fun getJetbrainsIdesUrl ()Lorg/gradle/api/provider/Property;
 }
 
 public abstract class org/jetbrains/intellij/platform/gradle/resolvers/Resolver {
@@ -2926,10 +2685,6 @@ public final class org/jetbrains/intellij/platform/gradle/resolvers/path/Product
 	public fun getSubjectInput ()Ljava/nio/file/Path;
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/services/AndroidStudioDownloadLinkService : org/gradle/api/services/BuildService {
-	public fun <init> ()V
-}
-
 public abstract class org/jetbrains/intellij/platform/gradle/services/ExtractorService : org/gradle/api/services/BuildService {
 	public fun <init> (Lorg/gradle/api/file/ArchiveOperations;Lorg/gradle/api/provider/ProviderFactory;Lorg/gradle/api/file/FileSystemOperations;)V
 	public final fun extract (Ljava/nio/file/Path;Ljava/nio/file/Path;)V
@@ -2956,12 +2711,13 @@ public abstract class org/jetbrains/intellij/platform/gradle/services/PluginXmlS
 	public static synthetic fun resolve$default (Lorg/jetbrains/intellij/platform/gradle/services/PluginXmlService;Ljava/nio/file/Path;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lcom/jetbrains/plugin/structure/intellij/beans/PluginBean;
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/services/ProductReleaseBuildService : org/gradle/api/services/BuildService {
-	public fun <init> ()V
+public abstract class org/jetbrains/intellij/platform/gradle/services/ProductReleasesService : org/gradle/api/services/BuildService {
+	public fun <init> (Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/services/ProductReleasesService : org/gradle/api/services/BuildService {
-	public fun <init> ()V
+public abstract interface class org/jetbrains/intellij/platform/gradle/services/ProductReleasesService$Parameters : org/gradle/api/services/BuildServiceParameters {
+	public abstract fun getAndroidStudioUrl ()Lorg/gradle/api/provider/Property;
+	public abstract fun getJetbrainsIdesUrl ()Lorg/gradle/api/provider/Property;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform {
@@ -3321,7 +3077,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PrintBundledPlug
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrintProductsReleasesTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource$FilterParameters {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrintProductsReleasesTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource$FilterParameters, org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/PrintProductsReleasesTask$Companion;
 	public fun <init> ()V
 	public abstract fun getProductsReleases ()Lorg/gradle/api/provider/ListProperty;
@@ -3668,6 +3424,10 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ProblemsAware {
 	public abstract fun getProblems ()Lorg/gradle/api/problems/Problems;
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware {
+	public abstract fun getProductReleasesService ()Lorg/gradle/api/provider/Property;
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware : org/gradle/process/JavaForkOptions, org/jetbrains/intellij/platform/gradle/tasks/aware/AutoReloadAware, org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware {

@@ -635,7 +635,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
             Tasks.VERIFY_PLUGIN,
             "--list-ides",
             projectProperties = mapOf(
-                GradleProperties.ProductsReleasesJetBrainsIdesUrl.toString() to resourceUrl("products-releases/idea-releases-list.xml").toString(),
+                GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
                 GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to resourceUrl("products-releases/android-studio-releases-list.json").toString(),
             ),
         ) {

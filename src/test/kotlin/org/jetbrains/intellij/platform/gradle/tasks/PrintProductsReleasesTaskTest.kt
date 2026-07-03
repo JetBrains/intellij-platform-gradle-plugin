@@ -2,50 +2,63 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.assertContains
 import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.models.JetBrainsIdesReleases
-import org.jetbrains.intellij.platform.gradle.models.decode
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import org.jetbrains.intellij.platform.gradle.gradleProperties
 import org.jetbrains.intellij.platform.gradle.write
-import java.net.URI
 import kotlin.test.Test
 
 class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `print product releases`() {
-        // Fetch actual releases from the remote resource
-        val content = URI(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES).toURL().readText()
-        val releases = decode<JetBrainsIdesReleases>(content)
-
-        // Get all IC release versions grouped by minor version, keeping only the highest patch for each
-        val icReleases = releases.products
-            .first { intellijPlatformType in it.codes }
-            .channels
-            .first { it.status == "release" }
-            .builds
-            .map { it.version.toVersion() }
-            .filter { it >= intellijPlatformVersion.toVersion() }
-            .groupBy { "${it.major}.${it.minor}" }
-            .map { (_, versions) -> versions.maxBy { it.patch } }
-
         buildFile write //language=kotlin
                 """
                 tasks {
                     ${Tasks.PRINT_PRODUCTS_RELEASES} {
                         types = listOf(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea)
                         channels = listOf(org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.RELEASE)
+                        sinceBuild = "223"
+                        untilBuild = "233.*"
                     }
                 }
                 """.trimIndent()
 
-        build(Tasks.PRINT_PRODUCTS_RELEASES) {
+        build(
+            Tasks.PRINT_PRODUCTS_RELEASES,
+            projectProperties = mapOf(
+                GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
+            ),
+        ) {
             assertContains(
-                "> Task :${Tasks.PRINT_PRODUCTS_RELEASES}\n" + icReleases.joinToString("\n") { "$intellijPlatformType-$it" },
+                "> Task :${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2023.3.4\nIU-2023.2.6",
+                output,
+            )
+        }
+    }
+
+    @Test
+    fun `print product releases for IntelliJ IDEA with default filters`() {
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    ${Tasks.PRINT_PRODUCTS_RELEASES} {
+                        types = listOf(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea)
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            Tasks.PRINT_PRODUCTS_RELEASES,
+            projectProperties = mapOf(
+                GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
+            ),
+        ) {
+            assertContains(
+                "> Task :${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2025.1.6",
                 output,
             )
         }
@@ -53,6 +66,11 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `reuses configuration cache`() {
+        gradleProperties write //language=properties
+                """
+                ${GradleProperties.ProductsReleasesCdnBuildsUrl}=${resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json")}
+                """.trimIndent()
+
         buildFile write //language=kotlin
                 """
                 tasks {

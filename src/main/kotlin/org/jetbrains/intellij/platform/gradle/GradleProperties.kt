@@ -129,17 +129,8 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
     object ProductsReleasesAndroidStudioUrl : GradleProperties<String>(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
 
     /**
-     * Specifies the URL from which the list of all JetBrains IDEs releases is fetched.
-     * This listing is later parsed by [ProductReleasesValueSource] to provide a list of IDEs matching the filtering criteria for running
-     * the IntelliJ Plugin Verifier tool with the [VerifyPluginTask] task.
-     *
-     * Default value: [Locations.PRODUCTS_RELEASES_JETBRAINS_IDES]
-     */
-    object ProductsReleasesJetBrainsIdesUrl : GradleProperties<String>(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES)
-
-    /**
-     * Specifies the URL from which the list of all JetBrains IDEs CDN release builds is fetched.
-     * This listing is used for mapping IDE releases to build numbers to download the corresponding JetBrains Client archive.
+     * Specifies the URL from which JetBrains IDEs CDN releases are fetched.
+     * This listing is used for matching IDE releases, mapping IDE releases to build numbers, and resolving download links.
      *
      * Default value: [Locations.PRODUCTS_RELEASES_CDN_BUILDS]
      */

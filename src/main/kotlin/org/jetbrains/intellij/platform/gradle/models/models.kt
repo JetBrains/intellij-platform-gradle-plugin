@@ -34,13 +34,13 @@ internal val xml = XML {
 private inline fun <reified T> obtainStringFormat(): StringFormat {
     return when (T::class) {
         IvyModule::class,
-        JetBrainsIdesReleases::class,
         MavenMetadata::class,
         ModuleDescriptor::class,
         ProductModules::class,
         -> xml
 
         AndroidStudioReleases::class,
+        JetBrainsProductReleases::class,
         ProductInfo::class,
         -> json
 

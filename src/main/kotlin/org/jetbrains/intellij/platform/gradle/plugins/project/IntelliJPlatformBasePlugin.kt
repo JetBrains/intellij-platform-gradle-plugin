@@ -1,5 +1,7 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
+@file:Suppress("UnusedImport")
+
 package org.jetbrains.intellij.platform.gradle.plugins.project
 
 import org.gradle.api.GradleException
@@ -10,6 +12,7 @@ import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
@@ -37,6 +40,7 @@ import org.jetbrains.intellij.platform.gradle.plugins.configureKotlinJvmToolchai
 import org.jetbrains.intellij.platform.gradle.plugins.enableComposeHotReloadCompilerOptions
 import org.jetbrains.intellij.platform.gradle.plugins.setupChangelogConventions
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
+import org.jetbrains.intellij.platform.gradle.services.ProductReleasesService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
@@ -57,6 +61,13 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             apply(JavaLibraryPlugin::class)
             // https://docs.gradle.org/current/userguide/idea_plugin.html
             apply(IdeaPlugin::class)
+        }
+
+        project.gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class) {
+            parameters {
+                jetbrainsIdesUrl = project.providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
+                androidStudioUrl = project.providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
+            }
         }
 
         val dependenciesHelper by lazy {
@@ -566,6 +577,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 is ModuleAware,
                 is PluginAware,
                 is PluginVerifierAware,
+                is ProductReleasesServiceAware,
                 is RunnableIdeAware,
                 is RuntimeAware,
                 is SandboxAware,

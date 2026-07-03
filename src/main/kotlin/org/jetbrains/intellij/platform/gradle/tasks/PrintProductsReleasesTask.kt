@@ -11,14 +11,13 @@ import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.assign
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.GradleProperties
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.services.ProductReleasesService
-import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
+import org.jetbrains.intellij.platform.gradle.services.latestReleases
+import org.jetbrains.intellij.platform.gradle.tasks.aware.ProductReleasesServiceAware
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 /**
@@ -29,7 +28,8 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  * The filter used for retrieving the release list can be customized by using properties provided with [ProductReleasesValueSource.FilterParameters].
  */
 @UntrackedTask(because = "Prints output")
-abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSource.FilterParameters {
+abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesServiceAware,
+    ProductReleasesValueSource.FilterParameters {
 
     /**
      * Property that holds the list of product releases to print and which can be used to retrieve the result list.
@@ -53,18 +53,25 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
         override fun register(project: Project) =
             project.registerTask<PrintProductsReleasesTask>(Tasks.PRINT_PRODUCTS_RELEASES) {
                 val ideaVersionProvider = project.extensionProvider.map { it.pluginConfiguration.ideaVersion }
-                val productReleasesParameters = project.objects.newInstance(ProductReleasesValueSource.Parameters::class.java).apply {
-                    jetbrainsIdesUrl = project.providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
-                    androidStudioUrl = project.providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
-                    sinceBuild = this@registerTask.sinceBuild
-                    untilBuild = this@registerTask.untilBuild
-                    types = this@registerTask.types
-                    channels = this@registerTask.channels
-                }
-                val productReleasesService = project.gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class)
+                val productReleasesParameters =
+                    project.objects.newInstance(ProductReleasesValueSource.FilterParameters::class.java).apply {
+                        sinceBuild = this@registerTask.sinceBuild
+                        untilBuild = this@registerTask.untilBuild
+                        types = this@registerTask.types
+                        channels = this@registerTask.channels
+                    }
 
                 productsReleases.convention(
-                    project.providers.provider { productReleasesService.get().resolve(productReleasesParameters) }
+                    project.provider {
+                        productReleasesService.get().resolve(productReleasesParameters)
+                            .latestReleases().map {
+                                when {
+                                    it.channel == ProductRelease.Channel.RELEASE -> "${it.type}-${it.version}"
+                                    it.type == IntelliJPlatformType.AndroidStudio -> "${it.type}-${it.version}"
+                                    else -> "${it.type}-${it.build}"
+                                }
+                            }
+                    },
                 )
 
                 channels.convention(ProductRelease.Channel.entries)

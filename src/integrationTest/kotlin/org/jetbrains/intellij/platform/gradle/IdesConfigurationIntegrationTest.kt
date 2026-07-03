@@ -12,6 +12,17 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     useCache = false,
 ) {
 
+    private val jetBrainsProductsReleasesUrl = Paths.get("src", "test", "resources", "products-releases", "jetbrains-product-releases-IC.json")
+        .toAbsolutePath()
+        .toUri()
+        .toString()
+        .replace("IC.json", "{type}.json")
+
+    override val defaultProjectProperties
+        get() = super.defaultProjectProperties + mapOf(
+            GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to jetBrainsProductsReleasesUrl,
+        )
+
     @Test
     fun `configure multiple ides using a provider`() {
         buildFile write //language=kotlin
@@ -221,10 +232,6 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
     @Test
     fun `latest helper resolves the newest selected ide type`() {
-        val jetbrainsIdesUrl = Paths.get("src", "test", "resources", "products-releases", "idea-releases-list.xml")
-            .toAbsolutePath()
-            .toUri()
-            .toString()
         val androidStudioUrl = Paths.get("src", "test", "resources", "products-releases", "android-studio-releases-list.json")
             .toAbsolutePath()
             .toUri()
@@ -263,7 +270,6 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
         build(
             "printLatestIdes",
             projectProperties = defaultProjectProperties + mapOf(
-                GradleProperties.ProductsReleasesJetBrainsIdesUrl.toString() to jetbrainsIdesUrl,
                 GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to androidStudioUrl,
             ),
         ) {

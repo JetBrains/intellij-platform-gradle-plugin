@@ -19,8 +19,8 @@ import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Provider
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.internal.os.OperatingSystem
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -96,7 +96,9 @@ class IntelliJPlatformDependenciesHelper(
     private val log = Logger(javaClass)
     internal val requestedIntelliJPlatforms by lazy {
         gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class, projectPath) {
-            parameters.useInstaller = true
+            parameters {
+                useInstaller = true
+            }
         }.get()
     }
     internal val intellijPlatformProjects by lazy {
@@ -106,13 +108,12 @@ class IntelliJPlatformDependenciesHelper(
         gradle.registerClassLoaderScopedBuildService(ModuleDescriptorCoordinatesService::class)
     }
     private val productReleasesService by lazy {
-        gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class)
-    }
-    private val androidStudioDownloadLinkService by lazy {
-        gradle.registerClassLoaderScopedBuildService(AndroidStudioDownloadLinkService::class)
-    }
-    private val productReleaseBuildService by lazy {
-        gradle.registerClassLoaderScopedBuildService(ProductReleaseBuildService::class)
+        gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class) {
+//            parameters {
+//                jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
+//                androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
+//            }
+        }
     }
     private val extractorServiceProvider by lazy {
         gradle.registerClassLoaderScopedBuildService(ExtractorService::class)
@@ -926,24 +927,31 @@ class IntelliJPlatformDependenciesHelper(
         versionProvider: Provider<String>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_JFLEX,
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addLater(provider {
-        val version = versionProvider.orNull
-        requireNotNull(version) { "The `intellijPlatform.jflex` dependency helper was called with no `version` value provided." }
+    ) = configurations[configurationName].dependencies.addLater(
+        provider {
+            val version = versionProvider.orNull
+            requireNotNull(version) { "The `intellijPlatform.jflex` dependency helper was called with no `version` value provided." }
 
-        createJFlex(version).apply(action)
-    }.cached())
+            createJFlex(version).apply(action)
+        }.cached(),
+    )
 
     internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
-        objects.newInstance<ProductReleasesValueSource.Parameters>().apply {
-            jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
-            androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
-
-            configure()
-        }.let { parameters ->
-            provider { productReleasesService.get().resolve(parameters) }
-                .cached<String>()
-                .map { it.toList() }
-        }
+        objects.newInstance<ProductReleasesValueSource.FilterParameters>()
+            .apply(configure)
+            .let { parameters ->
+                provider {
+                    productReleasesService.get().resolve(parameters).map {
+                        when {
+                            it.channel == Channel.RELEASE -> "${it.type}-${it.version}"
+                            it.type == IntelliJPlatformType.AndroidStudio -> "${it.type}-${it.version}"
+                            else -> "${it.type}-${it.build}"
+                        }
+                    }
+                }
+                    .cached<String>() // TODO: do we need that?
+                    .map { it.toList() }
+            }
 
     //</editor-fold>
 
@@ -960,44 +968,12 @@ class IntelliJPlatformDependenciesHelper(
 
             when {
                 productMode == ProductMode.FRONTEND -> createJetBrainsClient(type, version)
-                type == IntelliJPlatformType.AndroidStudio -> createAndroidStudio(version)
                 else -> when {
                     useInstaller -> createIntelliJPlatformInstaller(type, version)
                     else -> createIntelliJPlatform(type, version)
                 }
             }
         }
-
-    /**
-     * Creates Android Studio dependency.
-     *
-     * @param version Android Studio version.
-     */
-    private fun createAndroidStudio(version: String): Dependency {
-        val type = IntelliJPlatformType.AndroidStudio
-        runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
-
-        val parameters = objects.newInstance<AndroidStudioDownloadLinkValueSource.Parameters>().apply {
-            androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
-            androidStudioVersion = version
-        }
-        val downloadLink = androidStudioDownloadLinkService.get().resolve(parameters)
-
-        requireNotNull(downloadLink) { "Couldn't resolve Android Studio download URL for version: '$version'" }
-        requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
-
-        val group = type.installer.groupId
-        val name = type.installer.artifactId
-        val fileName = downloadLink.substringAfterLast('/')
-        val downloadLinkVersion = downloadLink.substringBeforeLast('/').substringAfterLast('/')
-
-        val (classifier, extension) = fileName
-            .substringAfter("$name-")
-            .substringAfter("$version-")
-            .split(".", limit = 2)
-
-        return dependencyFactory.create(group, name, downloadLinkVersion, classifier, extension)
-    }
 
     /**
      * Creates JetBrains Client dependency.
@@ -1008,12 +984,6 @@ class IntelliJPlatformDependenciesHelper(
         val jetBrainsClientType = requireNotNull(IntelliJPlatformType.JetBrainsClient.installer)
         runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
         runCatching { IntelliJPlatformType.JetBrainsClient.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
-
-        val parameters = objects.newInstance<ProductReleaseBuildValueSource.Parameters>().apply {
-            productsReleasesCdnBuildsUrl = providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
-            this.version = version
-            this.type = type
-        }
 
         val (extension, classifier) = with(OperatingSystem.current()) {
             val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
@@ -1031,7 +1001,12 @@ class IntelliJPlatformDependenciesHelper(
 
         val group = jetBrainsClientType.groupId
         val name = jetBrainsClientType.artifactId
-        val buildNumber = productReleaseBuildService.get().resolve(parameters)
+        val buildNumber = productReleasesService.get().resolve {
+            this.sinceBuild = version
+            this.untilBuild = version
+            this.types = listOf(type)
+        }.get().single().build.toString()
+
         requireNotNull(buildNumber) { "Couldn't resolve JetBrains Client build number for type: '$type', version: '$version'" }
 
         return dependencyFactory.create(group, name, buildNumber, classifier, extension)
@@ -1068,30 +1043,21 @@ class IntelliJPlatformDependenciesHelper(
      * @param version IntelliJ Platform version.
      * @param type IntelliJ Platform type.
      */
-    private fun createIntelliJPlatformInstaller(
-        type: IntelliJPlatformType,
-        version: String,
-    ): Dependency {
+    private fun createIntelliJPlatformInstaller(type: IntelliJPlatformType, version: String): Dependency {
         requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
-
-        val group = type.installer.groupId
-        val name = type.installer.artifactId
+        runCatching { type.validateVersion(version) }.onFailure { log.error(it.message.orEmpty()) }
 
         if (type == IntelliJPlatformType.Rider) {
             log.warn("Using Rider as a target IntelliJ Platform with `useInstaller = true` is currently not supported, please set `useInstaller = false` instead. See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1852")
         }
 
-        val (extension, classifier) = with(OperatingSystem.current()) {
-            val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
-            when {
-                isWindows -> ArtifactType.ZIP to "win"
-                isLinux -> ArtifactType.TAR_GZ to arch
-                isMacOsX -> ArtifactType.DMG to arch
-                else -> throw GradleException("Unsupported operating system: $name")
-            }
-        }.let { (type, classifier) -> type.toString() to classifier }
+        val result = productReleasesService.get().resolve(type, version.toVersion()).orNull
+        val downloadArtifact = result?.resolveDownloadArtifact()
 
-        return dependencyFactory.create(group, name, version, classifier, extension)
+        requireNotNull(downloadArtifact) { "Couldn't resolve ${type.name} download URL for version: '$version'" }
+        requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }
+
+        return dependencyFactory.create(type.installer.groupId, type.installer.artifactId, downloadArtifact.downloadLinkVersion, downloadArtifact.classifier, downloadArtifact.extension)
     }
 
     /**
