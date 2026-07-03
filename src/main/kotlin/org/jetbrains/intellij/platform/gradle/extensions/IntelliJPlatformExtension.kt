@@ -1052,7 +1052,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 val (type, version) = notation.parseIdeNotation()
                 this.type = type
                 this.version = version
-                useInstaller = true
+                this.useInstaller = true
             }
 
             private fun defaultRecommended() {
