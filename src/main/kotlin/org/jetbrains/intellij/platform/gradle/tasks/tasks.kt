@@ -22,9 +22,11 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.argumentProviders.*
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.collectModuleDescriptorJars
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.customCommandFor
 import org.jetbrains.intellij.platform.gradle.models.launchFor
@@ -37,6 +39,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSigne
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.services.ProductReleasesService
 import org.jetbrains.intellij.platform.gradle.services.pluginXmlService
+import org.jetbrains.intellij.platform.gradle.services.productReleasesService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
@@ -434,7 +437,12 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
         }
 
         if (this is ProductReleasesServiceAware) {
-            productReleasesService = project.gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class)
+            productReleasesService = project.gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class) {
+                parameters {
+                    jetbrainsIdesUrl = providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
+                    androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
+                }
+            }
         }
     }
 }

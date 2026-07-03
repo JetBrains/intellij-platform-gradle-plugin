@@ -40,7 +40,6 @@ import org.jetbrains.intellij.platform.gradle.plugins.configureKotlinJvmToolchai
 import org.jetbrains.intellij.platform.gradle.plugins.enableComposeHotReloadCompilerOptions
 import org.jetbrains.intellij.platform.gradle.plugins.setupChangelogConventions
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
-import org.jetbrains.intellij.platform.gradle.services.ProductReleasesService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
@@ -61,13 +60,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             apply(JavaLibraryPlugin::class)
             // https://docs.gradle.org/current/userguide/idea_plugin.html
             apply(IdeaPlugin::class)
-        }
-
-        project.gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class) {
-            parameters {
-                jetbrainsIdesUrl = project.providers[GradleProperties.ProductsReleasesCdnBuildsUrl]
-                androidStudioUrl = project.providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
-            }
         }
 
         val dependenciesHelper by lazy {
