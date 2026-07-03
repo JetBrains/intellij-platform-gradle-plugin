@@ -79,8 +79,7 @@ abstract class ProductReleasesService @Inject constructor(
         filter: ProductReleasesValueSource.FilterParameters,
         loader: (String) -> String? = { URI(it).toURL().readText() },
     ) = filter.types.get()
-        .map { loadProductReleases(it, loader) }
-        .flatten()
+        .flatMap { loadProductReleases(it, loader) }
         .run {
             val since = filter.sinceBuild.orNull?.ifBlank { "0" }?.toVersion()
             val until = filter.untilBuild.orNull?.ifBlank { null }?.replace("*", "99999")?.toVersion()
