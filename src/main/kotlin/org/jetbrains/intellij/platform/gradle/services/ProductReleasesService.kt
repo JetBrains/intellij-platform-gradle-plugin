@@ -14,7 +14,7 @@ import org.gradle.kotlin.dsl.newInstance
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
-import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesFilterParameters
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
@@ -68,15 +68,15 @@ abstract class ProductReleasesService @Inject constructor(
         productReleases.find { it.matchesVersion(version) }
     }
 
-    internal fun resolve(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
-        objectFactory.newInstance<ProductReleasesValueSource.FilterParameters>()
+    internal fun resolve(configure: ProductReleasesFilterParameters.() -> Unit) =
+        objectFactory.newInstance<ProductReleasesFilterParameters>()
             .apply(configure)
             .let { parameters ->
                 providerFactory.provider { resolve(parameters) }
             }
 
     internal fun resolve(
-        filter: ProductReleasesValueSource.FilterParameters,
+        filter: ProductReleasesFilterParameters,
         loader: (String) -> String? = { URI(it).toURL().readText() },
     ) = filter.types.get()
         .flatMap { loadProductReleases(it, loader) }

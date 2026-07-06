@@ -15,7 +15,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
-import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginProjectConfigurationTask
@@ -122,8 +121,8 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
 
     /**
      * Specifies the URL from which the list of all Android Studio releases is fetched.
-     * This listing is later parsed by [ProductReleasesValueSource] to provide a list of IDEs matching the filtering criteria for running
-     * the IntelliJ Plugin Verifier tool with the [VerifyPluginTask] task.
+     * This listing is later parsed to provide a list of IDEs matching the filtering criteria for running the IntelliJ Plugin Verifier
+     * tool with the [VerifyPluginTask] task.
      *
      * Default value: [Locations.PRODUCTS_RELEASES_ANDROID_STUDIO]
      */

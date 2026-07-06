@@ -31,7 +31,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
-import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource.FilterParameters
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesFilterParameters
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.PatchPluginXmlTask
@@ -1059,7 +1059,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 val notationsProvider = providers[GradleProperties.VerifyPluginDefaultRecommendedIdes]
                     .flatMap { enabled ->
                         when {
-                            enabled -> ProductReleasesValueSource()
+                            enabled -> productReleaseNotations()
                             else -> dependenciesHelper.provider { emptyList() }
                         }
                     }
@@ -1107,8 +1107,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
 
             /**
              * Adds the currently targeted IntelliJ Platform to be used for testing with the IntelliJ Plugin Verifier.
-             *
-             * @see ProductReleasesValueSource
              */
             fun current() = local(
                 dependenciesHelper.platformPathProvider(Configurations.INTELLIJ_PLATFORM_DEPENDENCY).map { it.toFile() },
@@ -1118,10 +1116,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             /**
              * Adds the latest available IntelliJ Platform of the currently used type to be used for testing with the IntelliJ Plugin Verifier.
              *
-             * @see ProductReleasesValueSource
+             * @see ProductReleasesFilterParameters
              */
-            fun latest(configure: FilterParameters.() -> Unit = {}) = createInstallerDependencies(
-                ProductReleasesValueSource(configure).map { notations ->
+            fun latest(configure: ProductReleasesFilterParameters.() -> Unit = {}) = createInstallerDependencies(
+                productReleaseNotations(configure).map { notations ->
                     notations
                         .map { it.parseIdeNotation() }
                         .distinctBy { (type, _) -> type.code }
@@ -1133,9 +1131,9 @@ abstract class IntelliJPlatformExtension @Inject constructor(
              * Retrieves matching IDEs using the default configuration based on the currently used IntelliJ Platform and applies them
              * for IntelliJ Platform Verifier.
              *
-             * @see ProductReleasesValueSource
+             * @see ProductReleasesFilterParameters
              */
-            fun recommended() = createInstallerDependencies(ProductReleasesValueSource())
+            fun recommended() = createInstallerDependencies(productReleaseNotations())
 
             /**
              * Helper to fall back to the [recommended] IDE list when the receiver provider is absent.
@@ -1146,21 +1144,21 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             /**
              * Helper to fall back to the [recommended] IDE list when the receiver provider is absent.
              */
-            fun Provider<List<String>>.orRecommended() = orElse(ProductReleasesValueSource())
+            fun Provider<List<String>>.orRecommended() = orElse(productReleaseNotations())
 
             /**
              * Retrieves matching IDEs using custom filter parameters.
              *
-             * @see ProductReleasesValueSource
+             * @see ProductReleasesFilterParameters
              */
-            fun select(configure: FilterParameters.() -> Unit = {}) = createInstallerDependencies(ProductReleasesValueSource(configure))
+            fun select(configure: ProductReleasesFilterParameters.() -> Unit = {}) =
+                createInstallerDependencies(productReleaseNotations(configure))
 
             /**
-             * Extension function for the [IntelliJPlatformExtension.PluginVerification.Ides] extension to let filter IDE binary releases just using [FilterParameters].
+             * Provides IDE release notations using [ProductReleasesFilterParameters].
              */
-            @Suppress("FunctionName")
-            fun ProductReleasesValueSource(configure: FilterParameters.() -> Unit = {}) =
-                dependenciesHelper.createRecommendedPluginVerifierIdesValueSource(configure)
+            private fun productReleaseNotations(configure: ProductReleasesFilterParameters.() -> Unit = {}) =
+                dependenciesHelper.createRecommendedPluginVerifierIdesProvider(configure)
 
             companion object {
                 fun register(

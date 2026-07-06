@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Changed
+
+- Replace the stubbed `ProductReleasesValueSource` with service-backed product release notation providers and shared `ProductReleasesFilterParameters`.
+
 ### Fixed
 
 - Add product-info bundled plugin classpath entries to `TestIdeTask`, resolving bundled plugin IDs and module aliases through the IDE layout index.

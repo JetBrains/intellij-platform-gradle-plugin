@@ -400,8 +400,8 @@ class IntelliJPlatformDependenciesHelper(
         createIntelliJPlatformDependency(requestedIntelliJPlatform).apply(action)
     }.cached())
 
-    internal fun createRecommendedPluginVerifierIdesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit = {}) =
-        createProductReleasesValueSource {
+    internal fun createRecommendedPluginVerifierIdesProvider(configure: ProductReleasesFilterParameters.() -> Unit = {}) =
+        createProductReleasesProvider {
             val ideaVersionProvider = extensionProvider.map { it.pluginConfiguration.ideaVersion }
 
             channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
@@ -931,8 +931,8 @@ class IntelliJPlatformDependenciesHelper(
         }.cached(),
     )
 
-    internal fun createProductReleasesValueSource(configure: ProductReleasesValueSource.FilterParameters.() -> Unit) =
-        objects.newInstance<ProductReleasesValueSource.FilterParameters>()
+    internal fun createProductReleasesProvider(configure: ProductReleasesFilterParameters.() -> Unit) =
+        objects.newInstance<ProductReleasesFilterParameters>()
             .apply(configure)
             .let { parameters ->
                 provider { productReleasesService.get().resolve(parameters).latestReleases().map { it.notation } }
