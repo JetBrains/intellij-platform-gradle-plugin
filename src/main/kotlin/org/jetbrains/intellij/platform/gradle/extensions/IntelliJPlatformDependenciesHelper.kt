@@ -936,7 +936,7 @@ class IntelliJPlatformDependenciesHelper(
             .apply(configure)
             .let { parameters ->
                 provider { productReleasesService.get().resolve(parameters).latestReleases().map { it.notation } }
-                    .cached<String>() // TODO: do we need that?
+                    .cached<String>()
                     .map { it.toList() }
             }
 
