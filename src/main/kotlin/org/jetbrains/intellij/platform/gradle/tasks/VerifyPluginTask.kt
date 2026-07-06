@@ -23,12 +23,14 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.problems.Problems
 import org.jetbrains.intellij.platform.gradle.problems.reportError
 import org.jetbrains.intellij.platform.gradle.tasks.aware.PluginVerifierAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.ProblemsAware
+import org.jetbrains.intellij.platform.gradle.tasks.aware.ProductReleasesServiceAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.util.*
@@ -46,7 +48,7 @@ import kotlin.io.path.exists
 // TODO: Parallel run? https://docs.gradle.org/current/userguide/worker_api.html#converting_to_worker_api
 @Suppress("UnstableApiUsage")
 @UntrackedTask(because = "Should always run")
-abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware, ProblemsAware {
+abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware, ProblemsAware, ProductReleasesServiceAware {
 
     /**
      * Holds a reference to IntelliJ Platform IDEs which will be used by the IntelliJ Plugin Verifier CLI tool for verification.
@@ -228,7 +230,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
                     prefix = "IDEs that will be used for verification:\n",
                 ) { platformPath ->
                     val productInfo = platformPath.productInfo()
-                    "${productInfo.type}-${productInfo.version} - ${platformPath.safePathString}"
+                    "${productInfo.listIdeNotation()} - ${platformPath.safePathString}"
                 }.let(::println)
             }
         }
@@ -469,6 +471,13 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             }
         }
     }
+
+    private fun ProductInfo.listIdeNotation() =
+        runCatching {
+            productReleasesService.get()
+                .resolve(type, buildNumber.toVersion())
+                .orNull
+        }.getOrNull()?.notation ?: "$type-$version"
 
     init {
         group = Plugin.GROUP_NAME

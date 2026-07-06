@@ -5,12 +5,32 @@
       {
         "type": "eap",
         "version": "2024.1",
-        "build": "241.14494.17",
+        "build": "241.14494.240",
         "downloads": {
           "linux": {
             "link": "https://download.jetbrains.com/idea/ideaIC-2024.1.tar.gz",
             "size": 123456,
             "checksumLink": "https://download.jetbrains.com/idea/ideaIC-2024.1.tar.gz.sha256"
+          },
+          "linuxARM64": {
+            "link": "https://download.jetbrains.com/idea/ideaIC-2024.1-aarch64.tar.gz",
+            "size": 123456,
+            "checksumLink": "https://download.jetbrains.com/idea/ideaIC-2024.1-aarch64.tar.gz.sha256"
+          },
+          "windowsZip": {
+            "link": "https://download.jetbrains.com/idea/ideaIC-2024.1.win.zip",
+            "size": 123456,
+            "checksumLink": "https://download.jetbrains.com/idea/ideaIC-2024.1.win.zip.sha256"
+          },
+          "mac": {
+            "link": "https://download.jetbrains.com/idea/ideaIC-2024.1.dmg",
+            "size": 123456,
+            "checksumLink": "https://download.jetbrains.com/idea/ideaIC-2024.1.dmg.sha256"
+          },
+          "macM1": {
+            "link": "https://download.jetbrains.com/idea/ideaIC-2024.1-aarch64.dmg",
+            "size": 123456,
+            "checksumLink": "https://download.jetbrains.com/idea/ideaIC-2024.1-aarch64.dmg.sha256"
           }
         }
       },
