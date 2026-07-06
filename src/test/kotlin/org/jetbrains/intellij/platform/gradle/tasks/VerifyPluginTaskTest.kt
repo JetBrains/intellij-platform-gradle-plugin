@@ -336,8 +336,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
-            assertContains("Could not find", output)
-            assertContains("idea:ideaIC:foo", output)
+            assertContains("Couldn't resolve IntellijIdeaCommunity download URL for version: 'foo'", output)
         }
     }
 

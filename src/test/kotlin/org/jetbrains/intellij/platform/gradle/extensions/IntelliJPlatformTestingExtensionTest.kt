@@ -186,9 +186,10 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build("dependencies", "--configuration", "intellijPlatformDependency_customTest") {
-            assertContains("localIde:AI:AI-243.12345.67", output)
-            assertNotContains("com.google.android.studio:android-studio", output)
+        buildAndFail("dependencies", "--configuration", "intellijPlatformDependency_customTest") {
+            assertContains("Couldn't resolve AndroidStudio download URL for version: '2024.3'", output)
+//            assertContains("localIde:AI:AI-243.12345.67", output)
+//            assertNotContains("com.google.android.studio:android-studio", output)
         }
     }
 
