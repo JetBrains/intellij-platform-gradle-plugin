@@ -14,7 +14,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
  *
  * @see IntelliJPlatformExtension.sandboxContainer
  */
-interface SandboxAware : SandboxStructure {
+interface SandboxAware : IntelliJPlatformAware, SandboxStructure {
 
     fun Task.applySandboxFrom(sandboxProducerTaskProvider: TaskProvider<PrepareSandboxTask>) {
         sandboxDirectory

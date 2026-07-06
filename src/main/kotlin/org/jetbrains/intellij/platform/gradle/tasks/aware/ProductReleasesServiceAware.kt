@@ -6,7 +6,7 @@ import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Internal
 import org.jetbrains.intellij.platform.gradle.services.ProductReleasesService
 
-interface ProductReleasesServiceAware {
+interface ProductReleasesServiceAware : IntelliJPlatformAware {
 
     @get:Internal
     val productReleasesService: Property<ProductReleasesService>
