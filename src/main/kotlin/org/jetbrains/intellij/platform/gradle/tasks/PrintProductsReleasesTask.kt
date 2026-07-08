@@ -14,7 +14,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.models.type
-import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesFilterParameters
 import org.jetbrains.intellij.platform.gradle.services.latestReleases
 import org.jetbrains.intellij.platform.gradle.tasks.aware.ProductReleasesServiceAware
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
@@ -24,16 +24,16 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  * with [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild]
  * and [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild] properties.
  *
- * The filter used for retrieving the release list can be customized by using properties provided with [ProductReleasesValueSource.FilterParameters].
+ * The filter used for retrieving the release list can be customized by using properties provided with [ProductReleasesFilterParameters].
  */
 @UntrackedTask(because = "Prints output")
 abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesServiceAware,
-    ProductReleasesValueSource.FilterParameters {
+    ProductReleasesFilterParameters {
 
     /**
      * Property that holds the list of product releases to print and which can be used to retrieve the result list.
      *
-     * Default value: The output of [ProductReleasesValueSource] using default configuration
+     * Default value: Product releases matching the default filter configuration.
      */
     @get:Internal
     abstract val productsReleases: ListProperty<String>
@@ -53,7 +53,7 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesService
             project.registerTask<PrintProductsReleasesTask>(Tasks.PRINT_PRODUCTS_RELEASES) {
                 val ideaVersionProvider = project.extensionProvider.map { it.pluginConfiguration.ideaVersion }
                 val productReleasesParameters =
-                    project.objects.newInstance(ProductReleasesValueSource.FilterParameters::class.java).apply {
+                    project.objects.newInstance(ProductReleasesFilterParameters::class.java).apply {
                         sinceBuild = this@registerTask.sinceBuild
                         untilBuild = this@registerTask.untilBuild
                         types = this@registerTask.types

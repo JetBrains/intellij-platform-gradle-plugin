@@ -7,6 +7,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants {
 	public static final field CACHE_DIRECTORY Ljava/lang/String;
 	public static final field CACHE_DIRECTORY_IDES Ljava/lang/String;
 	public static final field CACHE_DIRECTORY_IVY Ljava/lang/String;
+	public static final field CACHE_DIRECTORY_PRODUCT_RELEASES Ljava/lang/String;
 	public static final field DEFAULT_MAIN_CLASS Ljava/lang/String;
 	public static final field IDEA_CORE Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants;
@@ -1079,8 +1080,6 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides$Companion;
 	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/model/ObjectFactory;Lorg/gradle/api/provider/ProviderFactory;)V
-	public final fun ProductReleasesValueSource (Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
-	public static synthetic fun ProductReleasesValueSource$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$PluginVerification$Ides;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/gradle/api/provider/Provider;
 	public final fun create (Ljava/lang/Object;Ljava/lang/String;)V
 	public final fun create (Ljava/lang/Object;Ljava/lang/String;Lkotlin/jvm/functions/Function1;)V
 	public final fun create (Ljava/lang/Object;Lorg/gradle/api/provider/Provider;)V
@@ -2465,6 +2464,7 @@ public final class org/jetbrains/intellij/platform/gradle/models/ProductRelease 
 	public final fun getChannel ()Lorg/jetbrains/intellij/platform/gradle/models/ProductRelease$Channel;
 	public final fun getDownloads ()Ljava/util/List;
 	public final fun getName ()Ljava/lang/String;
+	public final fun getNotation ()Ljava/lang/String;
 	public final fun getPlatformBuild ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public final fun getPlatformVersion ()Lorg/jetbrains/intellij/platform/gradle/utils/Version;
 	public final fun getType ()Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
@@ -2617,13 +2617,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/providers
 	public abstract fun getIntellijPlatformPath ()Lorg/gradle/api/file/DirectoryProperty;
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource : org/gradle/api/provider/ValueSource {
-	public fun <init> ()V
-	public synthetic fun obtain ()Ljava/lang/Object;
-	public fun obtain ()Ljava/util/List;
-}
-
-public abstract interface class org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource$FilterParameters : org/gradle/api/provider/ValueSourceParameters {
+public abstract interface class org/jetbrains/intellij/platform/gradle/providers/ProductReleasesFilterParameters {
 	public abstract fun getChannels ()Lorg/gradle/api/provider/ListProperty;
 	public abstract fun getSinceBuild ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTypes ()Lorg/gradle/api/provider/ListProperty;
@@ -2717,6 +2711,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/services/ProductRel
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/services/ProductReleasesService$Parameters : org/gradle/api/services/BuildServiceParameters {
 	public abstract fun getAndroidStudioUrl ()Lorg/gradle/api/provider/Property;
+	public abstract fun getCacheDirectory ()Lorg/gradle/api/provider/Property;
 	public abstract fun getJetbrainsIdesUrl ()Lorg/gradle/api/provider/Property;
 }
 
@@ -3077,7 +3072,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/PrintBundledPlug
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrintProductsReleasesTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/providers/ProductReleasesValueSource$FilterParameters, org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrintProductsReleasesTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/providers/ProductReleasesFilterParameters, org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/PrintProductsReleasesTask$Companion;
 	public fun <init> ()V
 	public abstract fun getProductsReleases ()Lorg/gradle/api/provider/ListProperty;
@@ -3274,7 +3269,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginStru
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginVerifierAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ProblemsAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware {
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask : org/gradle/api/tasks/JavaExec, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginVerifierAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ProblemsAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$Companion;
 	public fun <init> ()V
 	public fun exec ()V
@@ -3352,16 +3347,16 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask
 public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats$Companion {
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/AutoReloadAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/AutoReloadAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getAutoReload ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ComposeHotReloadAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ComposeHotReloadAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getComposeHotReload ()Lorg/gradle/api/provider/Property;
 	public abstract fun getComposeHotReloadAgentConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
 	public abstract fun getCoroutinesJavaAgentFile ()Lorg/gradle/api/file/RegularFileProperty;
 }
 
@@ -3371,7 +3366,10 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/Coroutines
 	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware;)V
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
+}
+
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getIntelliJPlatformConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getIntelliJPlatformPluginConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getIntelliJPlatformTestRuntimeFixClasspathConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
@@ -3386,11 +3384,11 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPl
 	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware;)V
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/JavaCompilerAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/JavaCompilerAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getJavaCompilerConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/KotlinMetadataAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/KotlinMetadataAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getKotlinApiVersion ()Lorg/gradle/api/provider/Property;
 	public abstract fun getKotlinJvmTarget ()Lorg/gradle/api/provider/Property;
 	public abstract fun getKotlinLanguageVersion ()Lorg/gradle/api/provider/Property;
@@ -3400,11 +3398,11 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public abstract fun getKotlinxCoroutinesLibraryPresent ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getModule ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware : org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware {
 	public abstract fun getPluginXml ()Lorg/gradle/api/file/RegularFileProperty;
 }
 
@@ -3414,23 +3412,23 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAwar
 	public static final fun parse (Lorg/gradle/api/provider/Provider;Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginInstallationTargetAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginInstallationTargetAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getPluginInstallationTarget ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginVerifierAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/PluginVerifierAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getPluginVerifierExecutable ()Lorg/gradle/api/file/RegularFileProperty;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ProblemsAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ProblemsAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getProblems ()Lorg/gradle/api/problems/Problems;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getProductReleasesService ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware : org/gradle/process/JavaForkOptions, org/jetbrains/intellij/platform/gradle/tasks/aware/AutoReloadAware, org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware : org/gradle/process/JavaForkOptions, org/jetbrains/intellij/platform/gradle/tasks/aware/AutoReloadAware, org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware {
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware$DefaultImpls {
@@ -3441,7 +3439,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/RunnableId
 	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RunnableIdeAware;)V
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
 	public abstract fun getJetbrainsRuntimeConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getRuntimeArchitecture ()Lorg/gradle/api/provider/Property;
 	public abstract fun getRuntimeDirectory ()Lorg/gradle/api/file/DirectoryProperty;
@@ -3455,7 +3453,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAwa
 	public static fun validateIntelliJPlatformVersion (Lorg/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware;)V
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware : org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure {
 	public fun applyFrontendSandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 	public fun applySandboxFrom (Lorg/gradle/api/Task;Lorg/gradle/api/tasks/TaskProvider;)V
 }
@@ -3474,11 +3472,11 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/awa
 	public abstract fun getTestSandbox ()Lorg/gradle/api/provider/Property;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SigningAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SigningAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
 	public abstract fun getZipSignerExecutable ()Lorg/gradle/api/file/RegularFileProperty;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxStructure {
 	public fun getEffectivePluginInstallationTarget ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getSandboxConfigFrontendDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getSandboxLogFrontendDirectory ()Lorg/gradle/api/file/DirectoryProperty;
@@ -3527,7 +3525,7 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeA
 	public static fun values ()[Lorg/jetbrains/intellij/platform/gradle/tasks/aware/SplitModeAware$SplitModeTarget;
 }
 
-public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware : org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware {
+public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/TestableAware : org/jetbrains/intellij/platform/gradle/tasks/aware/CoroutinesJavaAgentAware, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware, org/jetbrains/intellij/platform/gradle/tasks/aware/SandboxAware {
 	public abstract fun getIntellijPlatformClasspathConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getIntellijPlatformTestClasspathConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;
 	public abstract fun getIntellijPlatformTestRuntimeClasspathConfiguration ()Lorg/gradle/api/file/ConfigurableFileCollection;

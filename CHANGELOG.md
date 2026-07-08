@@ -6,9 +6,14 @@
 
 - Add `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes` Gradle property to control bundled plugin IDs or module IDs excluded from the `TestIdeTask` classpath. It defaults to `com.intellij.openRewrite`.
 
+### Changed
+
+- Replace the stubbed `ProductReleasesValueSource` with service-backed product release notation providers and shared `ProductReleasesFilterParameters`.
+
 ### Fixed
 
 - Add product-info bundled plugin classpath entries to `TestIdeTask`, resolving bundled plugin IDs and module aliases through the IDE layout index.
+- Make `verifyPlugin --list-ides` print product-release-aware IDE notations, using build numbers for non-release IDEs instead of always using the marketing version.
 - Prevent GrammarKit lexer and parser cleanup from deleting shared output roots by purging only explicit generator outputs: `GenerateLexerTask.pathToClass`, `GenerateParserTask.pathToParser`, and `GenerateParserTask.pathToPsiRoot`.
 
 ## [2.17.0] - 2026-06-26

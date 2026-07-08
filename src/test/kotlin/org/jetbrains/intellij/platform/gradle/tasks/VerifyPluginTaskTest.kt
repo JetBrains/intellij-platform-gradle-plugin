@@ -638,12 +638,47 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to resourceUrl("products-releases/android-studio-releases-list.json").toString(),
             ),
         ) {
-            val ideLine = output.lines().single { it.startsWith("IC-2023.3.4 - ") }
+            val ideLine = output.lines().single { it.startsWith("IC-2023.3.8 - ") }
             val idePath = Path(ideLine.substringAfter(" - "))
 
             assertTrue(idePath.startsWith(idesCacheDir), "Expected $idePath to be located under $idesCacheDir")
-            assertEquals("IC-2023.3.4", idePath.name)
+            assertEquals("IC-2023.3.8", idePath.name)
             assertExists(idePath)
+        }
+    }
+
+    @Test
+    fun `list ides mode uses product release notation`() {
+        writePluginXmlFile()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        ides {
+                            select {
+                                types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
+                                channels = listOf(ProductRelease.Channel.EAP)
+                                sinceBuild = "241"
+                                untilBuild = "241.*"
+                            }
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            Tasks.VERIFY_PLUGIN,
+            "--list-ides",
+            projectProperties = mapOf(
+                "intellijPlatform.useInstaller" to false,
+                GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
+                GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to resourceUrl("products-releases/android-studio-releases-list.json").toString(),
+            ),
+        ) {
+            assertContains("IDEs that will be used for verification:", output)
+            assertContains("IC-241.17011.2 - ", output)
+            assertNotContains("IC-2024.1 - ", output)
         }
     }
 

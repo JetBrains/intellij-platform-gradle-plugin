@@ -42,7 +42,13 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
             ),
         ) {
             assertContains(
-                "> Task :${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2023.3.4\nIU-2023.2.6",
+                """
+                > Task :${Tasks.PRINT_PRODUCTS_RELEASES}
+                IU-2023.3.8
+                IU-2023.2.8
+                IU-2023.1.7
+                IU-2022.3.3
+                """.trimIndent(),
                 output,
             )
         }
@@ -66,7 +72,14 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
             ),
         ) {
             assertContains(
-                "> Task :${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2025.1.6",
+                """
+                > Task :${Tasks.PRINT_PRODUCTS_RELEASES}
+                IU-262.8665.81
+                IU-2026.1.4
+                IU-2025.3.6
+                IU-2025.2.6.2
+                IU-2025.1.7.1
+                """.trimIndent(),
                 output,
             )
         }
@@ -119,7 +132,7 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
                     plugins {
                         id("org.jetbrains.intellij.platform")
                     }
-
+                    
                     tasks {
                         ${Tasks.PRINT_PRODUCTS_RELEASES} {
                             types = listOf(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea)
@@ -133,7 +146,13 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
         build(":first:${Tasks.PRINT_PRODUCTS_RELEASES}") {
             assertContains(
-                "> Task :first:${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2023.3.4\nIU-2023.2.6",
+                """
+                > Task :first:${Tasks.PRINT_PRODUCTS_RELEASES}
+                IU-2023.3.8
+                IU-2023.2.8
+                IU-2023.1.7
+                IU-2022.3.3
+                """.trimIndent(),
                 output,
             )
         }
@@ -151,7 +170,13 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
         build(":second:${Tasks.PRINT_PRODUCTS_RELEASES}") {
             assertContains(
-                "> Task :second:${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2023.3.4\nIU-2023.2.6",
+                """
+                > Task :second:${Tasks.PRINT_PRODUCTS_RELEASES}
+                IU-2023.3.8
+                IU-2023.2.8
+                IU-2023.1.7
+                IU-2022.3.3
+                """.trimIndent(),
                 output,
             )
         }
@@ -166,7 +191,13 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
         build(":second:${Tasks.PRINT_PRODUCTS_RELEASES}") {
             assertContains(
-                "> Task :second:${Tasks.PRINT_PRODUCTS_RELEASES}\nIU-2023.3.4\nIU-2023.2.6",
+                """
+                > Task :second:${Tasks.PRINT_PRODUCTS_RELEASES}
+                IU-2023.3.8
+                IU-2023.2.8
+                IU-2023.1.7
+                IU-2022.3.3
+                """.trimIndent(),
                 output,
             )
         }

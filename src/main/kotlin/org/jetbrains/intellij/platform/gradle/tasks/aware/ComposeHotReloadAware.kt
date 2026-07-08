@@ -12,7 +12,7 @@ import org.gradle.api.tasks.options.Option
 /**
  * Provides the possibility to auto-reload Compose UI when code changes in the IDE.
  */
-interface ComposeHotReloadAware {
+interface ComposeHotReloadAware : IntelliJPlatformAware {
     /**
      * Enables auto-reload of Compose UIs after code changes for the task.
      * This allows a much faster development cycle by avoiding a full restart of the development instance after code changes.

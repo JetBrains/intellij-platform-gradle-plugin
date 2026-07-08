@@ -13,7 +13,7 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatform
  * @see RunnableIdeAware
  * @see TestableAware
  */
-interface CoroutinesJavaAgentAware : IntelliJPlatformVersionAware {
+interface CoroutinesJavaAgentAware : IntelliJPlatformAware, IntelliJPlatformVersionAware {
 
     /**
      * The path to the coroutines Java Agent file.

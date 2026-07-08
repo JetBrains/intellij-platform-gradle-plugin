@@ -11,7 +11,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
  *
  * @see RunnableIdeAware
  */
-interface AutoReloadAware {
+interface AutoReloadAware : IntelliJPlatformAware {
 
     /**
      * Enables auto-reload of dynamic plugins.

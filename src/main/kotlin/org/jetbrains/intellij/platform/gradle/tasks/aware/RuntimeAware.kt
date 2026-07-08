@@ -16,7 +16,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathReso
  *
  * @see JavaRuntimePathResolver
  */
-interface RuntimeAware : IntelliJPlatformVersionAware {
+interface RuntimeAware : IntelliJPlatformAware, IntelliJPlatformVersionAware {
 
     /**
      * Holds the [Configurations.JETBRAINS_RUNTIME] configuration with the JetBrains Runtime dependency added.

@@ -558,29 +558,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         )
         IntelliJPlatformRepositoriesExtension.register(project, target = project.repositories)
 
-        @Suppress("KotlinConstantConditions")
-        project.tasks.matching {
-            when (it) {
-                is AutoReloadAware,
-                is CoroutinesJavaAgentAware,
-                is IntelliJPlatformVersionAware,
-                is JavaCompilerAware,
-                is KotlinMetadataAware,
-                is ModuleAware,
-                is PluginAware,
-                is PluginVerifierAware,
-                is ProductReleasesServiceAware,
-                is RunnableIdeAware,
-                is RuntimeAware,
-                is SandboxAware,
-                is SigningAware,
-                is SplitModeAware,
-                is TestableAware,
-                    -> true
-
-                else -> false
-            }
-        }.configureEach(project::preconfigureTask)
+        project.tasks
+            .matching { it is IntelliJPlatformAware }
+            .configureEach(project::preconfigureTask)
 
         listOf(
             InitializeIntelliJPlatformPluginTask,

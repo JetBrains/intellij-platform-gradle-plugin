@@ -24,7 +24,7 @@ import org.jetbrains.intellij.platform.gradle.utils.Version
  *
  * Split Mode requires the IntelliJ Platform in the version `241.14473` or later.
  */
-interface SplitModeAware : IntelliJPlatformVersionAware, SandboxStructure {
+interface SplitModeAware : IntelliJPlatformAware, IntelliJPlatformVersionAware, SandboxStructure {
 
     /**
      * Enables Split Mode when running the IDE.

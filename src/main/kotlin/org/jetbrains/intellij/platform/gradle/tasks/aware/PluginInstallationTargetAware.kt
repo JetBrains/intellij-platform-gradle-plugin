@@ -6,7 +6,7 @@ import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 
-interface PluginInstallationTargetAware {
+interface PluginInstallationTargetAware : IntelliJPlatformAware {
 
     /**
      * Specifies in which part of the product the developed plugin should be installed.
