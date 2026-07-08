@@ -47,6 +47,7 @@ object Constants {
         val MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER = "233".toVersion()
         val MINIMAL_INTELLIJ_PLATFORM_VERSION = "2023.3".toVersion()
         val MINIMAL_SPLIT_MODE_BUILD_NUMBER = "241.14473".toVersion()
+        val PRODUCT_STARTER_MINIMAL_BUILD_NUMBER = "262".toVersion()
         val UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER = "253".toVersion()
         val UNIFIED_INTELLIJ_IDEA_VERSION = "2025.3".toVersion()
         val UNIFIED_PYCHARM_BUILD_NUMBER = "253".toVersion()
