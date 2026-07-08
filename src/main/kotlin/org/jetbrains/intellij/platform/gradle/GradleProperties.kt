@@ -18,6 +18,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformReposit
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginProjectConfigurationTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -147,6 +148,19 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      * Feature respects the Gradle `--offline` mode.
      */
     object SelfUpdateCheck : GradleProperties<Boolean>(true)
+
+    /**
+     * Specifies the bundled plugin IDs or module IDs excluded from the [TestIdeTask] classpath.
+     * The property accepts a comma-separated list.
+     *
+     * To include all bundled plugins, set it to an empty value:
+     * ```
+     * org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes=
+     * ```
+     *
+     * Default value: `com.intellij.openRewrite`
+     */
+    object TestIdeBundledPluginsClasspathExcludes : GradleProperties<String>("com.intellij.openRewrite")
 
     /**
      * Controls whether [IntelliJPlatformExtension.PluginVerification.Ides.recommended] IDEs should be added automatically

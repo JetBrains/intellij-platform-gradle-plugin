@@ -3,6 +3,7 @@ package org.jetbrains.intellij.platform.gradle
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.testfixtures.ProjectBuilder
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
+import org.jetbrains.intellij.platform.gradle.utils.splitCommaSeparated
 import java.nio.file.Path
 import kotlin.io.path.pathString
 import kotlin.test.BeforeTest
@@ -99,5 +100,31 @@ class GradlePropertiesTest {
         assertNotNull(result)
 
         assertEquals(result.safePathString, Path.of(System.getProperty("user.home") + "/my-project/.cache/intellij").safePathString)
+    }
+
+    @Test
+    fun `testIde bundled plugins classpath excludes property has openRewrite default`() {
+        val property = GradleProperties.TestIdeBundledPluginsClasspathExcludes
+
+        assertEquals("org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes", property.toString())
+        assertEquals("com.intellij.openRewrite", property.defaultValue)
+        assertEquals(listOf("com.intellij.openRewrite"), providers[property].get().splitCommaSeparated())
+    }
+
+    @Test
+    fun `splitCommaSeparated trims values and skips empty entries`() {
+        val provider = providers.provider { " com.intellij.foo,com.intellij.bar, , com.intellij.baz " }
+
+        assertEquals(
+            listOf("com.intellij.foo", "com.intellij.bar", "com.intellij.baz"),
+            provider.get().splitCommaSeparated(),
+        )
+    }
+
+    @Test
+    fun `splitCommaSeparated returns empty list for blank value`() {
+        val provider = providers.provider { "   " }
+
+        assertEquals(emptyList(), provider.get().splitCommaSeparated())
     }
 }

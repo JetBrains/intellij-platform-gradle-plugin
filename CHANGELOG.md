@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes` Gradle property to control bundled plugin IDs or module IDs excluded from the `TestIdeTask` classpath. It defaults to `com.intellij.openRewrite`.
+
 ### Fixed
 
 - Add product-info bundled plugin classpath entries to `TestIdeTask`, resolving bundled plugin IDs and module aliases through the IDE layout index.

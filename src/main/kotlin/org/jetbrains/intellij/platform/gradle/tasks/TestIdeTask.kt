@@ -14,10 +14,12 @@ import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IdeaHomePathArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.IntelliJPlatformArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentProvider
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
+import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.intellijPlatformIdeLayoutIndicesCachePath
 import org.jetbrains.intellij.platform.gradle.services.IdeLayoutIndexService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
@@ -27,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
+import org.jetbrains.intellij.platform.gradle.utils.splitCommaSeparated
 import kotlin.io.path.name
 
 /**
@@ -120,7 +123,9 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             val currentPluginLibsProvider = getCurrentPluginLibs()
             val otherPluginsLibsProvider = getOtherPluginLibs()
             val ideLayoutIndexService = project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
-            val bundledPluginsClasspathProvider = project.provider {
+            val bundledPluginsClasspathExcludesProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathExcludes]
+                .map { it.splitCommaSeparated().toSet() }
+            val bundledPluginsClasspathProvider = bundledPluginsClasspathExcludesProvider.map { bundledPluginsClasspathExcludes ->
                 val platformPath = sourceTask.platformPath
                 val ideLayoutIndex = ideLayoutIndexService.get().resolve(
                     platformPath = platformPath,
@@ -128,6 +133,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 )
 
                 sourceTask.productInfo.bundledPlugins
+                    .minus(bundledPluginsClasspathExcludes)
                     .mapNotNull(ideLayoutIndex::findByIdOrModuleId)
                     .flatMap { it.classpath.map(platformPath::resolve) }
                     .distinct()

@@ -273,7 +273,7 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to androidStudioUrl,
             ),
         ) {
-            assertContains("ides = idea:ideaIU:2023.3.4, webide:PhpStorm:2023.3.5", output)
+            assertContains("ides = idea:ideaIU:2023.3.8, webide:PhpStorm:2023.3.8", output)
             assertNotContains("idea:ideaIU:2023.2.6", output)
         }
     }
