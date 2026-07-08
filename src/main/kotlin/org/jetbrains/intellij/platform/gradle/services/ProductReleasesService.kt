@@ -11,24 +11,19 @@ import org.gradle.api.services.BuildServiceParameters
 import org.gradle.api.tasks.Input
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.newInstance
+import org.gradle.kotlin.dsl.of
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesFilterParameters
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesListingValueSource
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
-import java.net.URI
 import java.nio.file.Path
-import java.security.MessageDigest
-import java.time.LocalDate
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import kotlin.io.path.createDirectories
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
 
 abstract class ProductReleasesService @Inject constructor(
     private val objectFactory: ObjectFactory,
@@ -77,7 +72,7 @@ abstract class ProductReleasesService @Inject constructor(
 
     internal fun resolve(
         filter: ProductReleasesFilterParameters,
-        loader: (String) -> String? = { URI(it).toURL().readText() },
+        loader: (String) -> String? = ::loadListing,
     ) = filter.types.get()
         .flatMap { loadProductReleases(it, loader) }
         .run {
@@ -136,7 +131,7 @@ abstract class ProductReleasesService @Inject constructor(
         } ?: return emptyList()
 
         return productReleases.computeIfAbsent("${type.code}:$url") {
-            loadListing(url, loader)?.let { content ->
+            loader(url)?.let { content ->
                 when (type) {
                     IntelliJPlatformType.AndroidStudio -> decode<AndroidStudioReleases>(content).toProductReleases()
                     else -> decode<List<JetBrainsProductReleases>>(content, stringFormat = json)
@@ -148,42 +143,11 @@ abstract class ProductReleasesService @Inject constructor(
         }
     }
 
-    private fun loadListing(url: String, loader: (String) -> String?): String? {
-        val cacheFile = cacheFile(url)
-        val lockFile = lockFile(cacheFile)
-        val today = LocalDate.now().toString()
-        val cachedContent = runCatching { cacheFile.readText() }.getOrNull()
-        val lastUpdate = runCatching { lockFile.readText().trim() }.getOrNull()
-
-        if (cachedContent != null && lastUpdate == today) {
-            log.info("Reading product releases listing from cache: $cacheFile")
-            return cachedContent
-        }
-
-        return try {
-            loader(url)?.also {
-                log.info("Reading product releases listing from URL: $url")
-                cacheFile.parent.createDirectories()
-                cacheFile.writeText(it)
-                lockFile.writeText(today)
-            }
-        } catch (e: Exception) {
-            if (cachedContent == null) {
-                throw e
-            }
-
-            log.warn("Failed to refresh product releases listing from URL: $url. Using cached listing: $cacheFile", e)
-            cachedContent
-        } ?: cachedContent
-    }
-
-    private fun cacheFile(url: String): Path {
-        val digest = MessageDigest.getInstance("SHA-256").digest(url.toByteArray())
-        val fileName = "${HexFormat.of().formatHex(digest)}.json"
-        return Path.of(parameters.cacheDirectory.get()).resolve(fileName)
-    }
-
-    private fun lockFile(cacheFile: Path) = cacheFile.resolveSibling("${cacheFile.fileName}.lock")
+    private fun loadListing(url: String) =
+        providerFactory.of(ProductReleasesListingValueSource::class) {
+            parameters.url = url
+            parameters.cacheDirectory = this@ProductReleasesService.parameters.cacheDirectory
+        }.orNull
 }
 
 internal fun Gradle.productReleasesService(providers: ProviderFactory, rootProjectDirectory: Path) =
