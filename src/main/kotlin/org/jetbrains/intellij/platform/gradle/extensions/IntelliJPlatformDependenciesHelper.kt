@@ -823,7 +823,8 @@ class IntelliJPlatformDependenciesHelper(
                 val version = versionProvider.orNull
                 requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
 
-                type.coordinates.map {
+                val buildNumber = platformPath.productInfo().buildNumber.toVersion()
+                type.coordinatesFor(buildNumber).map {
                     createPlatformDependency(it, version, platformPath)
                 }
             }

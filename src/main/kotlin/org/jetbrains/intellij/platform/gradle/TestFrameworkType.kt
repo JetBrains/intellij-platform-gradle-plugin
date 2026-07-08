@@ -2,7 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle
 
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
+import org.jetbrains.intellij.platform.gradle.utils.Version
 
 /**
  * Definition of Test Framework types available for writing tests for IntelliJ Platform plugins.
@@ -11,6 +13,11 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
  */
 @Suppress("unused")
 sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
+    internal fun coordinatesFor(buildNumber: Version) = coordinates.filterNot {
+        it.artifactId.startsWith(IDE_STARTER_PRODUCT_PREFIX) &&
+                buildNumber < Constraints.PRODUCT_STARTER_MINIMAL_BUILD_NUMBER
+    }
+
     object Platform : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework"))
     object JUnit5 : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5"))
     object Bundled : TestFrameworkType(Coordinates("bundled", "lib/testFramework.jar"))
@@ -73,5 +80,9 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
         object VCS : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "vcs-test-framework"))
         object XML : TestFrameworkType(Coordinates("com.jetbrains.intellij.xml", "xml-test-framework"))
         object WebSymbols : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "web-symbols-test-framework"))
+    }
+
+    private companion object {
+        const val IDE_STARTER_PRODUCT_PREFIX = "ide-starter-product-"
     }
 }
