@@ -638,11 +638,11 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to resourceUrl("products-releases/android-studio-releases-list.json").toString(),
             ),
         ) {
-            val ideLine = output.lines().single { it.startsWith("IC-2023.3.4 - ") }
+            val ideLine = output.lines().single { it.startsWith("IC-2023.3.8 - ") }
             val idePath = Path(ideLine.substringAfter(" - "))
 
             assertTrue(idePath.startsWith(idesCacheDir), "Expected $idePath to be located under $idesCacheDir")
-            assertEquals("IC-2023.3.4", idePath.name)
+            assertEquals("IC-2023.3.8", idePath.name)
             assertExists(idePath)
         }
     }
@@ -677,7 +677,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
             ),
         ) {
             assertContains("IDEs that will be used for verification:", output)
-            assertContains("IC-241.14494.240 - ", output)
+            assertContains("IC-241.17011.2 - ", output)
             assertNotContains("IC-2024.1 - ", output)
         }
     }
