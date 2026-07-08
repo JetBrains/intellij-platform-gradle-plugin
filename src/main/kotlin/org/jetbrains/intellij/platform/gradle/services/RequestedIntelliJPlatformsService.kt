@@ -117,7 +117,7 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                         .orElse(errorProvider("version")),
                     configuration.useInstaller
                         .orElse(base.map { it.useInstaller })
-                        .orElse(errorProvider("useInstaller")),
+                        .orElse(parameters.useInstaller),
                     configuration.useCache
                         .orElse(base.map { it.useCache })
                         .orElse(errorProvider("useCache")),

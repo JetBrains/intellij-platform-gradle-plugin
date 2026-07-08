@@ -1013,7 +1013,7 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param artifactPath Path to the local IntelliJ Platform.
      */
-    private fun createIntelliJPlatformLocal(artifactPath: Path): Dependency {
+    internal fun createIntelliJPlatformLocal(artifactPath: Path): Dependency {
         val localProductInfo = artifactPath.productInfo().apply {
             validateSupportedVersion()
         }
