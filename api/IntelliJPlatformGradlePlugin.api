@@ -332,6 +332,10 @@ public final class org/jetbrains/intellij/platform/gradle/GradleProperties$ShimS
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$ShimServerPort;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathExcludes : org/jetbrains/intellij/platform/gradle/GradleProperties {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathExcludes;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$UseCacheRedirector : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$UseCacheRedirector;
 }
