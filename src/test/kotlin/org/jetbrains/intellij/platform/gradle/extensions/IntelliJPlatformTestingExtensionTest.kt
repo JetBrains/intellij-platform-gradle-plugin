@@ -144,8 +144,8 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 """
                 {
                     "name": "Android Studio",
-                    "version": "2024.3",
-                    "buildNumber": "243.12345.67",
+                    "version": "2024.3.2.14",
+                    "buildNumber": "243.25659.59",
                     "productCode": "AI"
                 }
                 """.trimIndent()
@@ -187,7 +187,7 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build("dependencies", "--configuration", "intellijPlatformDependency_customTest") {
-            assertContains("localIde:AI:AI-243.12345.67", output)
+            assertContains("localIde:AI:AI-243.25659.59", output)
             assertNotContains("com.google.android.studio:android-studio", output)
         }
     }
@@ -254,18 +254,6 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
         buildAndFail("customTest") {
             assertContains("idea:ideaIC:$intellijPlatformVersion", output)
             assertNotContains("localIde:AI:AI-243.12345.67", output)
-        }
-    }
-
-    private fun java.nio.file.Path.writeModuleDescriptorsJar(vararg entries: Pair<String, String>) {
-        outputStream().use { outputStream ->
-            ZipOutputStream(outputStream).use { zip ->
-                entries.forEach { (entryName, content) ->
-                    zip.putNextEntry(ZipEntry(entryName))
-                    zip.write(content.toByteArray())
-                    zip.closeEntry()
-                }
-            }
         }
     }
 }
