@@ -16,9 +16,9 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 @file:Suppress("DEPRECATION")
-
+                
                 println("EXT_TARGET=" + intellijPlatform.splitModeTarget.get())
-
+                
                 val customRun by intellijPlatformTesting.runIde.registering {
                     println("CUSTOM_TARGET=" + splitModeTarget.get())
                 }
@@ -187,9 +187,8 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build("dependencies", "--configuration", "intellijPlatformDependency_customTest") {
-            assertContains("Couldn't resolve AndroidStudio download URL for version: '2024.3'", output)
-//            assertContains("localIde:AI:AI-243.25659.59", output)
-//            assertNotContains("com.google.android.studio:android-studio", output)
+            assertContains("localIde:AI:AI-243.25659.59", output)
+            assertNotContains("com.google.android.studio:android-studio", output)
         }
     }
 
