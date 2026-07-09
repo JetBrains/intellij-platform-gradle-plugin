@@ -5,6 +5,7 @@
 ### Added
 
 - Add `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes` Gradle property to control bundled plugin IDs or module IDs excluded from the `TestIdeTask` classpath. It defaults to `com.intellij.openRewrite`.
+- Add product-specific IDE Starter dependencies to `TestFrameworkType.Starter`, enabling Starter tests to launch supported IDEs with `IdeInfo` for IntelliJ Platform `262` and newer.
 
 ### Changed
 
