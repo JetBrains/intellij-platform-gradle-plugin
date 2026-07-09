@@ -6,7 +6,7 @@ kotlinxSerialization = "1.11.0"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 undertow = "2.4.2.Final"
-xmlutil = "1.0.0"
+xmlutil = "1.0.1"
 
 # plugins
 dokka = "2.2.0"
