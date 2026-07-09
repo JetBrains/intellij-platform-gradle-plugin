@@ -55,7 +55,7 @@ object Constants {
         val UNIFIED_PYCHARM_VERSION = "2025.3".toVersion()
 
         const val COMPOSE_HOT_RELOAD_VERSION = "1.1.0-alpha03"
-        const val GRAMMAR_KIT_VERSION = "2023.3.3"
+        const val GRAMMAR_KIT_VERSION = "2023.3.2"
         const val JFLEX_VERSION = "1.10.17"
     }
 
