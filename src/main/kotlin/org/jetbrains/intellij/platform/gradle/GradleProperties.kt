@@ -164,7 +164,7 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
         "com.intellij.ja",
         "com.intellij.ko",
         "com.intellij.zh",
-    ).joinToString())
+    ).joinToString(","))
 
     /**
      * Controls whether [IntelliJPlatformExtension.PluginVerification.Ides.recommended] IDEs should be added automatically
