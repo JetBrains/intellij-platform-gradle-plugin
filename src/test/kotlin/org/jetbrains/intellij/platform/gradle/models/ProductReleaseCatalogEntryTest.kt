@@ -48,16 +48,11 @@ class ProductReleaseCatalogEntryTest {
 
     @Test
     fun `resolve Android Studio artifact with named release classifier`() {
+        val (link, artifact) = currentAndroidStudioNamedReleaseArtifact()
+
         assertEquals(
-            ProductRelease.Download.Artifact(
-                downloadLinkVersion = "2026.1.3.2",
-                classifier = "quail3-canary2-mac_arm",
-                extension = "dmg",
-            ),
-            artifact(
-                IntelliJPlatformType.AndroidStudio,
-                "https://edgedl.me.gvt1.com/android/studio/ide-zips/2026.1.3.2/android-studio-quail3-canary2-mac_arm.dmg",
-            ),
+            artifact,
+            artifact(IntelliJPlatformType.AndroidStudio, link),
         )
     }
 
@@ -220,5 +215,32 @@ class ProductReleaseCatalogEntryTest {
             }
             else -> error("Unsupported operating system: $name")
         }
+    }
+
+    private fun currentAndroidStudioNamedReleaseArtifact() = with(OperatingSystem.current()) {
+        val classifier = when {
+            isLinux -> "quail3-canary2-linux"
+            isWindows -> "quail3-canary2-windows-exe"
+            isMacOsX -> "quail3-canary2-mac" + when (System.getProperty("os.arch")) {
+                "aarch64" -> "_arm"
+                else -> ""
+            }
+            else -> error("Unsupported operating system: $name")
+        }
+        val extension = when {
+            isLinux -> "tar.gz"
+            isWindows -> "zip"
+            isMacOsX -> "dmg"
+            else -> error("Unsupported operating system: $name")
+        }
+        val directory = when {
+            isMacOsX -> "install"
+            else -> "ide-zips"
+        }
+
+        Pair(
+            "https://edgedl.me.gvt1.com/android/studio/$directory/2026.1.3.2/android-studio-$classifier.$extension",
+            ProductRelease.Download.Artifact("2026.1.3.2", classifier, extension),
+        )
     }
 }
