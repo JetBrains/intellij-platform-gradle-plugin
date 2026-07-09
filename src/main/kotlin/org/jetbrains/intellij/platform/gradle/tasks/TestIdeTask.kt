@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
@@ -21,12 +22,14 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentP
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.intellijPlatformIdeLayoutIndicesCachePath
+import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.services.IdeLayoutIndexService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.splitCommaSeparated
@@ -70,26 +73,42 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
         internal val configuration: Test.() -> Unit = {
             enableAssertions = true
 
+            val intelliJPlatformConfiguration = sourceTask.intelliJPlatformConfiguration
+            val intellijPlatformTestClasspathConfiguration = sourceTask.intellijPlatformTestClasspathConfiguration
+            val intellijPlatformClasspathConfiguration = sourceTask.intellijPlatformClasspathConfiguration
+            val intellijPlatformTestRuntimeClasspathConfiguration = sourceTask.intellijPlatformTestRuntimeClasspathConfiguration
+            val intelliJPlatformTestRuntimeFixClasspathConfiguration = sourceTask.intelliJPlatformTestRuntimeFixClasspathConfiguration
+            val coroutinesJavaAgentFile = sourceTask.coroutinesJavaAgentFile
+            val runtimeArchitecture = sourceTask.runtimeArchitecture
+            val runtimeDirectory = sourceTask.runtimeDirectory
+            val runtimeMetadata = sourceTask.runtimeMetadata
+            val sandboxConfigDirectory = sourceTask.sandboxConfigDirectory
+            val sandboxPluginsDirectory = sourceTask.sandboxPluginsDirectory
+            val sandboxSystemDirectory = sourceTask.sandboxSystemDirectory
+            val sandboxLogDirectory = sourceTask.sandboxLogDirectory
+            val pluginDirectory = sourceTask.pluginDirectory
+            val platformPathProvider = project.provider { intelliJPlatformConfiguration.platformPath() }
+
             jvmArgumentProviders.add(
                 IntelliJPlatformArgumentProvider(
-                    sourceTask.intelliJPlatformConfiguration,
-                    sourceTask.coroutinesJavaAgentFile,
-                    sourceTask.runtimeArchitecture,
+                    intelliJPlatformConfiguration,
+                    coroutinesJavaAgentFile,
+                    runtimeArchitecture,
                     options = this,
                 ),
             )
 
             jvmArgumentProviders.add(
                 SandboxArgumentProvider(
-                    sourceTask.sandboxConfigDirectory,
-                    sourceTask.sandboxPluginsDirectory,
-                    sourceTask.sandboxSystemDirectory,
-                    sourceTask.sandboxLogDirectory,
+                    sandboxConfigDirectory,
+                    sandboxPluginsDirectory,
+                    sandboxSystemDirectory,
+                    sandboxLogDirectory,
                 ),
             )
 
             jvmArgumentProviders.add(
-                IdeaHomePathArgumentProvider(sourceTask.intelliJPlatformConfiguration),
+                IdeaHomePathArgumentProvider(intelliJPlatformConfiguration),
             )
 
             systemProperty("idea.classpath.index.enabled", "false")
@@ -120,19 +139,21 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             //
             // So to make the test environment more like the production environment, we should put the plugin's direct
             // dependencies the first on the classpath.
-            val currentPluginLibsProvider = getCurrentPluginLibs()
-            val otherPluginsLibsProvider = getOtherPluginLibs()
+            val currentPluginLibsProvider = getCurrentPluginLibs(pluginDirectory)
+            val otherPluginsLibsProvider = getOtherPluginLibs(sandboxPluginsDirectory, pluginDirectory)
             val ideLayoutIndexService = project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
+            val ideLayoutIndexCacheDirectoryProvider =
+                project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
             val bundledPluginsClasspathExcludesProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathExcludes]
                 .map { it.splitCommaSeparated().toSet() }
             val bundledPluginsClasspathProvider = bundledPluginsClasspathExcludesProvider.map { bundledPluginsClasspathExcludes ->
-                val platformPath = sourceTask.platformPath
+                val platformPath = platformPathProvider.get()
                 val ideLayoutIndex = ideLayoutIndexService.get().resolve(
                     platformPath = platformPath,
-                    cacheDirectory = project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath).get(),
+                    cacheDirectory = ideLayoutIndexCacheDirectoryProvider.get(),
                 )
 
-                sourceTask.productInfo.bundledPlugins
+                platformPath.productInfo().bundledPlugins
                     .minus(bundledPluginsClasspathExcludes)
                     .mapNotNull(ideLayoutIndex::findByIdOrModuleId)
                     .flatMap { it.classpath.map(platformPath::resolve) }
@@ -153,17 +174,17 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 instrumentedTestCode,
                 currentPluginLibsProvider,
                 otherPluginsLibsProvider,
-                sourceTask.intellijPlatformTestClasspathConfiguration - sourceTask.intellijPlatformClasspathConfiguration,
-                sourceTask.intellijPlatformClasspathConfiguration,
+                intellijPlatformTestClasspathConfiguration - intellijPlatformClasspathConfiguration,
+                intellijPlatformClasspathConfiguration,
                 classpath.filter { it !in runtimeDependencies.files },
-                sourceTask.intellijPlatformTestRuntimeClasspathConfiguration,
-                sourceTask.intelliJPlatformTestRuntimeFixClasspathConfiguration,
+                intellijPlatformTestRuntimeClasspathConfiguration,
+                intelliJPlatformTestRuntimeFixClasspathConfiguration,
                 bundledPluginsClasspathProvider,
             )
 
             testClassesDirs = instrumentedTestCode + testClassesDirs
 
-            javaLauncher = sourceTask.runtimeDirectory.zip(sourceTask.runtimeMetadata) { directory, metadata ->
+            javaLauncher = runtimeDirectory.zip(runtimeMetadata) { directory, metadata ->
                 IntelliJPlatformJavaLauncher(directory, metadata)
             }
         }
@@ -172,7 +193,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
          * Load only the contents of the lib directory because some plugins have arbitrary files in their
          * distribution zip file, which break the JVM when added to the classpath.
          */
-        private fun Test.getCurrentPluginLibs() = sourceTask.pluginDirectory.asFileTree.matching {
+        private fun getCurrentPluginLibs(pluginDirectory: DirectoryProperty) = pluginDirectory.asFileTree.matching {
             include("${Sandbox.Plugin.LIB}/**/*.jar")
         }
 
@@ -180,8 +201,11 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
          * Load only the contents of the lib directory because some plugins have arbitrary files in their
          * distribution zip file, which break the JVM when added to the classpath.
          */
-        private fun Test.getOtherPluginLibs() =
-            sourceTask.sandboxPluginsDirectory.zip(sourceTask.pluginDirectory) { sandboxPluginsDirectory, pluginDirectory ->
+        private fun getOtherPluginLibs(
+            sandboxPluginsDirectory: DirectoryProperty,
+            pluginDirectory: DirectoryProperty,
+        ) =
+            sandboxPluginsDirectory.zip(pluginDirectory) { sandboxPluginsDirectory, pluginDirectory ->
                 val pluginName = pluginDirectory.asPath.name
                 sandboxPluginsDirectory.asFileTree.matching {
                     include("*/${Sandbox.Plugin.LIB}/*.jar")
