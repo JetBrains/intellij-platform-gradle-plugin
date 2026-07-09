@@ -2,7 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.models
 
-import nl.adaptivity.xmlutil.serialization.XML
+import kotlinx.serialization.decodeFromString
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -51,7 +51,7 @@ class IvyModuleTest {
 
     @Test
     fun `decode bundled plugin ivy module`() {
-        val result = XML.decodeFromString<IvyModule>(input)
+        val result = xml.decodeFromString<IvyModule>(input)
 
         assertEquals("bundledPlugin", result.info?.organisation)
         assertEquals("org.jetbrains.kotlin", result.info?.module)

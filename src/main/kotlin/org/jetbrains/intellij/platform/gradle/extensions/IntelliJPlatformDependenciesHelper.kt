@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import kotlinx.serialization.encodeToString
-import nl.adaptivity.xmlutil.serialization.XML
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
 import org.gradle.api.artifacts.ConfigurationContainer
@@ -24,7 +23,6 @@ import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes.ArtifactType
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.IDEA_CORE
@@ -1600,9 +1598,7 @@ class IntelliJPlatformDependenciesHelper(
         val ivyFile = providers.localPlatformArtifactsPath(rootProjectDirectory).get().resolve(fileName)
 
         val newIvyModule = block()
-        val newIvyModuleContent = XML {
-            indentString = "  "
-        }.encodeToString(newIvyModule)
+        val newIvyModuleContent = xml.encodeToString(newIvyModule)
 
         IVY_MODULE_WRITE_LOCK.withLock {
             ivyFile.parent.createDirectories()

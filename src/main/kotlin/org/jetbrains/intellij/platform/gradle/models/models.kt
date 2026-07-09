@@ -21,10 +21,11 @@ import java.nio.file.Path
 import kotlin.io.path.readText
 
 internal val json = Json { ignoreUnknownKeys = true }
-internal val xml = XML {
-    defaultPolicy {
+internal val xml = XML.recommended_1_0 {
+    policy {
         unknownChildHandler = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
     }
+    indentString = "  "
 }
 
 /**

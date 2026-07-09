@@ -11,9 +11,9 @@ import io.undertow.server.handlers.proxy.*
 import io.undertow.server.handlers.proxy.ProxyClient.ProxyTarget
 import io.undertow.util.*
 import kotlinx.serialization.encodeToString
-import nl.adaptivity.xmlutil.serialization.XML
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.BaseArtifactRepository
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
+import org.jetbrains.intellij.platform.gradle.models.xml
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.xnio.OptionMap
 import org.xnio.Xnio
@@ -119,9 +119,6 @@ abstract class Shim(
     internal class IvyDescriptorHttpHandler(private val delegate: RequestHandler) : HttpHandler {
 
         private val log = Logger(javaClass)
-        private val ivyDescriptorXml = XML {
-            indentString = "  "
-        }
         private val hexFormat = HexFormat.of()
         private val checksumSha1Header = HttpString.tryFromString("X-Checksum-Sha1")
 
@@ -143,7 +140,7 @@ abstract class Shim(
                 return
             }
 
-            val ivyDescriptor = ivyDescriptorXml.encodeToString(ivyModule)
+            val ivyDescriptor = xml.encodeToString(ivyModule)
             val ivyDescriptorBytes = ivyDescriptor.toByteArray()
 
             val sha1 = hexFormat.formatHex(MessageDigest.getInstance("SHA-1").digest(ivyDescriptorBytes))

@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts
 
-import nl.adaptivity.xmlutil.serialization.XML
-import nl.adaptivity.xmlutil.serialization.XmlConfig
 import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
@@ -21,6 +19,7 @@ import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.models.IvyModulePublicationsOnly
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.models.type
+import org.jetbrains.intellij.platform.gradle.models.xml
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
@@ -30,14 +29,8 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.io.path.notExists
 
-private val ivyPublicationsXml = XML {
-    defaultPolicy {
-        unknownChildHandler = XmlConfig.IGNORING_UNKNOWN_CHILD_HANDLER
-    }
-}
-
 internal fun decodeIvyModulePublications(input: String) =
-    ivyPublicationsXml.decodeFromString(IvyModulePublicationsOnly.serializer(), input).publications
+    xml.decodeFromString(IvyModulePublicationsOnly.serializer(), input).publications
 
 /**
  * This comes into play only when [org.gradle.api.initialization.resolve.RulesMode.PREFER_PROJECT] (the default) is used in Gradle's settings.
