@@ -41,7 +41,6 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
         Coordinates("com.jetbrains.intellij.tools", "ide-starter-product-rubymine"),
         Coordinates("com.jetbrains.intellij.tools", "ide-starter-product-clion"),
         Coordinates("com.jetbrains.intellij.tools", "ide-starter-product-datagrip"),
-        Coordinates("com.jetbrains.intellij.tools", "ide-starter-product-aqua"),
         Coordinates("com.jetbrains.intellij.tools", "ide-starter-product-rustrover"),
         Coordinates("com.jetbrains.intellij.tools", "ide-starter-product-android-studio"),
         Coordinates("com.jetbrains.intellij.tools", "ide-starter-product-gateway"),
