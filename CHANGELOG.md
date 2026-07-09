@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Exclude `com.intellij.ja`, `com.intellij.ko`, and `com.intellij.zh` bundled translation plugins  when composing tests classpath JetBrains/intellij-platform-gradle-plugin#2182
+
 ## [2.18.0] - 2026-07-09
 
 ### Added

@@ -159,7 +159,12 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      *
      * Default value: `com.intellij.openRewrite`
      */
-    object TestIdeBundledPluginsClasspathExcludes : GradleProperties<String>("com.intellij.openRewrite")
+    object TestIdeBundledPluginsClasspathExcludes : GradleProperties<String>(listOf(
+        "com.intellij.openRewrite",
+        "com.intellij.ja",
+        "com.intellij.ko",
+        "com.intellij.zh",
+    ).joinToString())
 
     /**
      * Controls whether [IntelliJPlatformExtension.PluginVerification.Ides.recommended] IDEs should be added automatically
