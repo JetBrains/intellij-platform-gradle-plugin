@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.models
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class JetBrainsCdnBuilds(
+data class JetBrainsProductReleases(
     val code: String,
     val releases: List<Release> = mutableListOf(),
 ) {
@@ -15,5 +15,14 @@ data class JetBrainsCdnBuilds(
         val type: String,
         val version: String,
         val build: String,
-    )
+    ) {
+        var downloads: Map<String, Download> = emptyMap()
+
+        @Serializable
+        data class Download(
+            val link: String,
+            val size: Long? = null,
+            val checksumLink: String? = null,
+        )
+    }
 }

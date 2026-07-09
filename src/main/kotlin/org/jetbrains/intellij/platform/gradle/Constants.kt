@@ -12,6 +12,7 @@ object Constants {
     const val CACHE_DIRECTORY = ".intellijPlatform"
     const val CACHE_DIRECTORY_IVY = "localPlatformArtifacts"
     const val CACHE_DIRECTORY_IDES = "ides"
+    const val CACHE_DIRECTORY_PRODUCT_RELEASES = "productReleases"
     const val DEFAULT_MAIN_CLASS = "com.intellij.idea.Main"
         const val LAYOUT_INDEX = "layoutIndex"
     const val TOOLBOX_IGNORE = ".toolbox-ignore"
@@ -54,8 +55,8 @@ object Constants {
         val UNIFIED_PYCHARM_VERSION = "2025.3".toVersion()
 
         const val COMPOSE_HOT_RELOAD_VERSION = "1.1.0-alpha03"
-        const val GRAMMAR_KIT_VERSION = "2023.3.1"
-        const val JFLEX_VERSION = "1.9.2"
+        const val GRAMMAR_KIT_VERSION = "2023.3.3"
+        const val JFLEX_VERSION = "1.10.17"
     }
 
     object Extensions {
@@ -269,8 +270,7 @@ object Constants {
 
         const val ANDROID_STUDIO_INSTALLERS = "https://redirector.gvt1.com/edgedl/android/studio"
         const val JETBRAINS_IDES_INSTALLERS = "https://download.jetbrains.com"
-        const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.xml"
-        const val PRODUCTS_RELEASES_JETBRAINS_IDES = "https://www.jetbrains.com/updates/updates.xml"
-        const val PRODUCTS_RELEASES_CDN_BUILDS = "https://data.services.jetbrains.com/products?code={type}&fields=code,releases.type,releases.version,releases.build"
+        const val PRODUCTS_RELEASES_ANDROID_STUDIO = "https://jb.gg/android-studio-releases-list.json"
+        const val PRODUCTS_RELEASES_CDN_BUILDS = "https://data.services.jetbrains.com/products?code={type}&fields=code,releases.type,releases.version,releases.build,releases.downloads"
     }
 }

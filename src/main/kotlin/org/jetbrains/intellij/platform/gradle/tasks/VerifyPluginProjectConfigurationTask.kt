@@ -359,7 +359,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                 targetCompatibility.convention(compileJavaTaskProvider.map { it.options.release.orNull?.toString() ?: it.targetCompatibility })
                 mutedMessages.convention(
                     project.providers[GradleProperties.VerifyPluginProjectConfigurationMutedMessages]
-                        .map { it.split(',').map(String::trim).filter(String::isNotEmpty) }
+                        .map { it.splitCommaSeparated() }
                 )
             }
     }

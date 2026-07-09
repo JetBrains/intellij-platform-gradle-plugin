@@ -17,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
  * Interface used to describe tasks used for running tests, such as a customizable [TestIdeTask] or [PrepareTestTask]
  * used for configuring `test` and keeping it immutable.
  */
-interface TestableAware : CoroutinesJavaAgentAware, RuntimeAware, SandboxAware {
+interface TestableAware : CoroutinesJavaAgentAware, IntelliJPlatformAware, RuntimeAware, SandboxAware {
 
     /**
      * Holds the [Configurations.INTELLIJ_PLATFORM_CLASSPATH] configuration.

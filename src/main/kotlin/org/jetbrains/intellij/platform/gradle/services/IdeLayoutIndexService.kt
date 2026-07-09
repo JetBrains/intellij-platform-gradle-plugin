@@ -243,7 +243,7 @@ private fun IdePlugin.toEntry(
             contentModuleDependencies.asSequence().map { it.moduleName })
         .filter(String::isNotBlank)
         .distinct()
-        .mapNotNull { ide.findPluginById(it) ?: ide.findPluginByModule(it) }
+        .mapNotNull { ide.findPluginByIdOrModuleId(it)?.plugin }
         .filterNot { it.pluginId == IDEA_CORE }
         .toSet()
         .mapNotNull { dependencyKeys[it] },

@@ -1,5 +1,7 @@
 // Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
+@file:Suppress("UnusedImport")
+
 package org.jetbrains.intellij.platform.gradle.plugins.project
 
 import org.gradle.api.GradleException
@@ -10,6 +12,7 @@ import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
@@ -299,9 +302,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 name = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES,
                 description = "IntelliJ Plugin Verifier IDEs",
             ) {
-                attributes {
-                    attribute(Attributes.extracted, true)
-                }
+                isCanBeResolved = false
 
                 extendsFrom(intellijPluginVerifierIdesDependencyConfiguration)
                 extendsFrom(intellijPluginVerifierIdesLocalConfiguration)
@@ -557,28 +558,9 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         )
         IntelliJPlatformRepositoriesExtension.register(project, target = project.repositories)
 
-        @Suppress("KotlinConstantConditions")
-        project.tasks.matching {
-            when (it) {
-                is AutoReloadAware,
-                is CoroutinesJavaAgentAware,
-                is IntelliJPlatformVersionAware,
-                is JavaCompilerAware,
-                is KotlinMetadataAware,
-                is ModuleAware,
-                is PluginAware,
-                is PluginVerifierAware,
-                is RunnableIdeAware,
-                is RuntimeAware,
-                is SandboxAware,
-                is SigningAware,
-                is SplitModeAware,
-                is TestableAware,
-                    -> true
-
-                else -> false
-            }
-        }.configureEach(project::preconfigureTask)
+        project.tasks
+            .matching { it is IntelliJPlatformAware }
+            .configureEach(project::preconfigureTask)
 
         listOf(
             InitializeIntelliJPlatformPluginTask,

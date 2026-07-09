@@ -5,20 +5,18 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
 import org.gradle.api.provider.ListProperty
-import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.assign
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
-import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
 import org.jetbrains.intellij.platform.gradle.models.type
-import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
-import org.jetbrains.intellij.platform.gradle.services.ProductReleasesService
-import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesFilterParameters
+import org.jetbrains.intellij.platform.gradle.services.latestReleases
+import org.jetbrains.intellij.platform.gradle.tasks.aware.ProductReleasesServiceAware
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 
 /**
@@ -26,17 +24,18 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
  * with [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.sinceBuild]
  * and [IntelliJPlatformExtension.PluginConfiguration.IdeaVersion.untilBuild] properties.
  *
- * The filter used for retrieving the release list can be customized by using properties provided with [ProductReleasesValueSource.FilterParameters].
+ * The filter used for retrieving the release list can be customized by using properties provided with [ProductReleasesFilterParameters].
  */
 @UntrackedTask(because = "Prints output")
-abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSource.FilterParameters {
+abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesServiceAware,
+    ProductReleasesFilterParameters {
 
     /**
      * Property that holds the list of product releases to print and which can be used to retrieve the result list.
      *
-     * Default value: The output of [ProductReleasesValueSource] using default configuration
+     * Default value: Product releases matching the default filter configuration.
      */
-    @get:Input
+    @get:Internal
     abstract val productsReleases: ListProperty<String>
 
     @TaskAction
@@ -53,18 +52,19 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesValueSo
         override fun register(project: Project) =
             project.registerTask<PrintProductsReleasesTask>(Tasks.PRINT_PRODUCTS_RELEASES) {
                 val ideaVersionProvider = project.extensionProvider.map { it.pluginConfiguration.ideaVersion }
-                val productReleasesParameters = project.objects.newInstance(ProductReleasesValueSource.Parameters::class.java).apply {
-                    jetbrainsIdesUrl = project.providers[GradleProperties.ProductsReleasesJetBrainsIdesUrl]
-                    androidStudioUrl = project.providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
-                    sinceBuild = this@registerTask.sinceBuild
-                    untilBuild = this@registerTask.untilBuild
-                    types = this@registerTask.types
-                    channels = this@registerTask.channels
-                }
-                val productReleasesService = project.gradle.registerClassLoaderScopedBuildService(ProductReleasesService::class)
+                val productReleasesParameters =
+                    project.objects.newInstance(ProductReleasesFilterParameters::class.java).apply {
+                        sinceBuild = this@registerTask.sinceBuild
+                        untilBuild = this@registerTask.untilBuild
+                        types = this@registerTask.types
+                        channels = this@registerTask.channels
+                    }
 
                 productsReleases.convention(
-                    project.providers.provider { productReleasesService.get().resolve(productReleasesParameters) }
+                    project.provider {
+                        productReleasesService.get().resolve(productReleasesParameters)
+                            .latestReleases().map { it.notation }
+                    },
                 )
 
                 channels.convention(ProductRelease.Channel.entries)

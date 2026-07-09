@@ -1,0 +1,34 @@
+[
+  {
+    "code": "JBC",
+    "releases": [
+      {
+        "type": "release",
+        "version": "2025.1.6",
+        "build": "251.28774.11",
+        "downloads": {
+          "linux": {
+            "link": "https://download.jetbrains.com/idea/code-with-me/JetBrainsClient-251.28774.11.tar.gz",
+            "size": 123456
+          },
+          "linuxARM64": {
+            "link": "https://download.jetbrains.com/idea/code-with-me/JetBrainsClient-251.28774.11-aarch64.tar.gz",
+            "size": 123456
+          },
+          "windowsZip": {
+            "link": "https://download.jetbrains.com/idea/code-with-me/JetBrainsClient-251.28774.11.jbr.win.zip",
+            "size": 123456
+          },
+          "mac": {
+            "link": "https://download.jetbrains.com/idea/code-with-me/JetBrainsClient-251.28774.11.sit",
+            "size": 123456
+          },
+          "macM1": {
+            "link": "https://download.jetbrains.com/idea/code-with-me/JetBrainsClient-251.28774.11-aarch64.sit",
+            "size": 123456
+          }
+        }
+      }
+    ]
+  }
+]

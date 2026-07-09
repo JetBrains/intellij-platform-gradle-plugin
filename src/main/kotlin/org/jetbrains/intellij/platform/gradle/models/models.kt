@@ -33,14 +33,14 @@ internal val xml = XML {
 @Throws(GradleException::class)
 private inline fun <reified T> obtainStringFormat(): StringFormat {
     return when (T::class) {
-        AndroidStudioReleases::class,
         IvyModule::class,
-        JetBrainsIdesReleases::class,
         MavenMetadata::class,
         ModuleDescriptor::class,
         ProductModules::class,
         -> xml
 
+        AndroidStudioReleases::class,
+        JetBrainsProductReleases::class,
         ProductInfo::class,
         -> json
 

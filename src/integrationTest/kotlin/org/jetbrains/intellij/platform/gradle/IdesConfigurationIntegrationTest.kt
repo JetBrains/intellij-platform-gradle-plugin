@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import java.nio.file.Paths
 import kotlin.test.Test
 
@@ -10,6 +11,17 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
     resourceName = "ides-configuration",
     useCache = false,
 ) {
+
+    private val jetBrainsProductsReleasesUrl = Paths.get("src", "test", "resources", "products-releases", "jetbrains-product-releases-IC.json")
+        .toAbsolutePath()
+        .toUri()
+        .toString()
+        .replace("IC.json", "{type}.json")
+
+    override val defaultProjectProperties
+        get() = super.defaultProjectProperties + mapOf(
+            GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to jetBrainsProductsReleasesUrl,
+        )
 
     @Test
     fun `configure multiple ides using a provider`() {
@@ -130,11 +142,12 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 """.trimIndent()
 
         build(
-            "dependencies",
-            "--configuration=intellijPluginVerifierIdes",
+            Tasks.VERIFY_PLUGIN,
+            "--list-ides",
             projectProperties = defaultProjectProperties,
         ) {
-            assertContains("idea:ideaIU:2023.1.7", output)
+            assertContains("IDEs that will be used for verification:", output)
+            assertContains("IU-2023.1.7 - ", output)
         }
     }
 
@@ -158,12 +171,13 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 """.trimIndent()
 
         build(
-            "dependencies",
-            "--configuration=intellijPluginVerifierIdes",
+            Tasks.VERIFY_PLUGIN,
+            "--list-ides",
             projectProperties = defaultProjectProperties,
         ) {
-            assertContains("idea:ideaIC:2024.1", output)
-            assertNotContains("idea:ideaIU:2023.1.7", output)
+            assertContains("IDEs that will be used for verification:", output)
+            assertContains("IC-2024.1 - ", output)
+            assertNotContains("IU-2023.1.7 - ", output)
         }
     }
 
@@ -207,21 +221,18 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 """.trimIndent()
 
         build(
-            "dependencies",
-            "--configuration=intellijPluginVerifierIdes",
+            Tasks.VERIFY_PLUGIN,
+            "--list-ides",
             projectProperties = defaultProjectProperties,
         ) {
-            assertContains("localIde:$intellijPlatformType:$intellijPlatformType-$intellijPlatformBuildNumber", output)
+            assertContains("IDEs that will be used for verification:", output)
+            assertContains("$intellijPlatformType-$intellijPlatformVersion - ", output)
         }
     }
 
     @Test
     fun `latest helper resolves the newest selected ide type`() {
-        val jetbrainsIdesUrl = Paths.get("src", "test", "resources", "products-releases", "idea-releases-list.xml")
-            .toAbsolutePath()
-            .toUri()
-            .toString()
-        val androidStudioUrl = Paths.get("src", "test", "resources", "products-releases", "android-studio-releases-list.xml")
+        val androidStudioUrl = Paths.get("src", "test", "resources", "products-releases", "android-studio-releases-list.json")
             .toAbsolutePath()
             .toUri()
             .toString()
@@ -259,11 +270,10 @@ class IdesConfigurationIntegrationTest : IntelliJPlatformIntegrationTestBase(
         build(
             "printLatestIdes",
             projectProperties = defaultProjectProperties + mapOf(
-                GradleProperties.ProductsReleasesJetBrainsIdesUrl.toString() to jetbrainsIdesUrl,
                 GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to androidStudioUrl,
             ),
         ) {
-            assertContains("ides = idea:ideaIU:2023.3.4, webide:PhpStorm:2023.3.5", output)
+            assertContains("ides = idea:ideaIU:2023.3.8, webide:PhpStorm:2023.3.8", output)
             assertNotContains("idea:ideaIU:2023.2.6", output)
         }
     }

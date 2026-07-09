@@ -12,7 +12,7 @@ import org.gradle.api.problems.Problems as GradleProblems
  * problems via the incubating Problems API.
  */
 @Suppress("UnstableApiUsage")
-interface ProblemsAware {
+interface ProblemsAware : IntelliJPlatformAware {
 
     @get:Inject
     val problems: GradleProblems

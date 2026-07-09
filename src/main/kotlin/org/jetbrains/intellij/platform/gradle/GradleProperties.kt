@@ -8,15 +8,16 @@ import org.gradle.api.provider.ProviderFactory
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IDES
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_IVY
+import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY_PRODUCT_RELEASES
 import org.jetbrains.intellij.platform.gradle.Constants.LAYOUT_INDEX
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
-import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesValueSource
 import org.jetbrains.intellij.platform.gradle.tasks.BuildSearchableOptionsTask
 import org.jetbrains.intellij.platform.gradle.tasks.InitializeIntelliJPlatformPluginTask
+import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginProjectConfigurationTask
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -121,25 +122,16 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
 
     /**
      * Specifies the URL from which the list of all Android Studio releases is fetched.
-     * This listing is later parsed by [ProductReleasesValueSource] to provide a list of IDEs matching the filtering criteria for running
-     * the IntelliJ Plugin Verifier tool with the [VerifyPluginTask] task.
+     * This listing is later parsed to provide a list of IDEs matching the filtering criteria for running the IntelliJ Plugin Verifier
+     * tool with the [VerifyPluginTask] task.
      *
      * Default value: [Locations.PRODUCTS_RELEASES_ANDROID_STUDIO]
      */
     object ProductsReleasesAndroidStudioUrl : GradleProperties<String>(Locations.PRODUCTS_RELEASES_ANDROID_STUDIO)
 
     /**
-     * Specifies the URL from which the list of all JetBrains IDEs releases is fetched.
-     * This listing is later parsed by [ProductReleasesValueSource] to provide a list of IDEs matching the filtering criteria for running
-     * the IntelliJ Plugin Verifier tool with the [VerifyPluginTask] task.
-     *
-     * Default value: [Locations.PRODUCTS_RELEASES_JETBRAINS_IDES]
-     */
-    object ProductsReleasesJetBrainsIdesUrl : GradleProperties<String>(Locations.PRODUCTS_RELEASES_JETBRAINS_IDES)
-
-    /**
-     * Specifies the URL from which the list of all JetBrains IDEs CDN release builds is fetched.
-     * This listing is used for mapping IDE releases to build numbers to download the corresponding JetBrains Client archive.
+     * Specifies the URL from which JetBrains IDEs CDN releases are fetched.
+     * This listing is used for matching IDE releases, mapping IDE releases to build numbers, and resolving download links.
      *
      * Default value: [Locations.PRODUCTS_RELEASES_CDN_BUILDS]
      */
@@ -155,6 +147,19 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      * Feature respects the Gradle `--offline` mode.
      */
     object SelfUpdateCheck : GradleProperties<Boolean>(true)
+
+    /**
+     * Specifies the bundled plugin IDs or module IDs excluded from the [TestIdeTask] classpath.
+     * The property accepts a comma-separated list.
+     *
+     * To include all bundled plugins, set it to an empty value:
+     * ```
+     * org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes=
+     * ```
+     *
+     * Default value: `com.intellij.openRewrite`
+     */
+    object TestIdeBundledPluginsClasspathExcludes : GradleProperties<String>("com.intellij.openRewrite")
 
     /**
      * Controls whether [IntelliJPlatformExtension.PluginVerification.Ides.recommended] IDEs should be added automatically
@@ -247,6 +252,12 @@ internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory:
  */
 internal fun ProviderFactory.intellijPlatformIdeLayoutIndicesCachePath(rootProjectDirectory: Path) =
     intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(LAYOUT_INDEX) }
+
+/**
+ * Directory used to persist raw product release JSON listings.
+ */
+internal fun ProviderFactory.intellijPlatformProductReleasesCachePath(rootProjectDirectory: Path) =
+    intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_PRODUCT_RELEASES) }
 
 /**
  * Resolves the directory path from the given provider.

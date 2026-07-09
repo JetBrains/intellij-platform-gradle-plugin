@@ -274,3 +274,8 @@ internal val PluginManager.isModule
     get() = hasPlugin(Plugins.MODULE) && !hasPlugin(Plugin.ID)
 
 internal val String.withRandomSuffix get() = "${this}_${UUID.randomUUID()}"
+
+internal fun String.splitCommaSeparated() =
+    split(',')
+        .map(String::trim)
+        .filter(String::isNotEmpty)

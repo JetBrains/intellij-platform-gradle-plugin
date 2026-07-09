@@ -36,6 +36,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.JavaRuntimePathReso
 import org.jetbrains.intellij.platform.gradle.resolvers.path.MarketplaceZipSignerPathResolver
 import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.services.pluginXmlService
+import org.jetbrains.intellij.platform.gradle.services.productReleasesService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.ByteArrayOutputStream
@@ -429,6 +430,10 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                 configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH)
             intelliJPlatformTestRuntimeFixClasspathConfiguration =
                 project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH]
+        }
+
+        if (this is ProductReleasesServiceAware) {
+            productReleasesService = project.gradle.productReleasesService(project.providers, project.rootProjectPath)
         }
     }
 }

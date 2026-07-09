@@ -25,7 +25,6 @@ internal fun <T : BuildService<P>, P : BuildServiceParameters> Gradle.registerCl
     projectPath: String? = null,
     configureAction: Action<BuildServiceSpec<P>> = Action { },
 ): Provider<T> {
-
     val serviceName = "${serviceClass.simpleName}_${serviceClass.java.classLoader.hashCode()}" +
             projectPath?.let { "_${it.replace(":", "_")}" }.orEmpty()
     return sharedServices.registerIfAbsent(serviceName, serviceClass.java, configureAction)

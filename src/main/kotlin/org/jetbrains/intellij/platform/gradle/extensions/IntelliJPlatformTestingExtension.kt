@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.*
+import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.LibraryElements
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.internal.tasks.DefaultTaskDependency
@@ -99,9 +100,12 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
 
                     defaultDependencies {
                         addAllLater(project.provider {
-                            val baseLocalDependencies = baseIntelliJPlatformLocalConfiguration.dependencies.toList()
-                            val customLocalDependencies = customIntelliJPlatformLocalConfiguration.dependencies.toList()
+                            val customLocalDependencies = localDependenciesFrom(customIntelliJPlatformLocalConfiguration)
                             val hasExplicitCustomRequest = type.isPresent || version.isPresent || useInstaller.isPresent
+                            val baseLocalDependencies = when {
+                                customLocalDependencies.isNotEmpty() || hasExplicitCustomRequest -> emptyList()
+                                else -> localDependenciesFrom(baseIntelliJPlatformLocalConfiguration)
+                            }
 
                             when {
                                 customLocalDependencies.isNotEmpty() -> customLocalDependencies
@@ -292,6 +296,12 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     applySandboxFrom(prepareSandboxTask)
                 }
             }
+        }
+
+    private fun localDependenciesFrom(configuration: Configuration) =
+        when {
+            configuration.resolve().isEmpty() -> emptyList()
+            else -> listOf(dependenciesHelper.createIntelliJPlatformLocal(configuration.platformPath()))
         }
 
     companion object {

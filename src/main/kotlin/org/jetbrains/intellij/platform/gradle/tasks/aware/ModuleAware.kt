@@ -9,7 +9,7 @@ import org.gradle.api.tasks.Internal
 /**
  * Provides the information if the current task is executed in a module context.
  */
-interface ModuleAware {
+interface ModuleAware : IntelliJPlatformAware {
 
     /**
      * Indicates if the current project represents an IntelliJ Platform plugin module.

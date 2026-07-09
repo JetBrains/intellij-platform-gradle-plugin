@@ -18,14 +18,13 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.File
 import java.util.regex.Pattern
-import kotlin.io.path.ExperimentalPathApi
-import kotlin.io.path.deleteRecursively
 
 /**
  * A Gradle task for generating a lexer using JFlex for the IntelliJ Platform.
  * This task takes a Flex definition file as an input, generates the lexer, and saves it in the specified output directory.
  * It also optionally purges old files and allows specifying a custom skeleton file.
  */
+@Suppress("DEPRECATION")
 @CacheableTask
 abstract class GenerateLexerTask : JavaExec() {
 
@@ -39,25 +38,30 @@ abstract class GenerateLexerTask : JavaExec() {
     @Deprecated(
         message = "Use targetRootOutputDir instead. " +
                 "There is also a new default for the `generateLexer` task which should be sufficient for most use cases." +
-                "When using the new property, stale files in the resolved lexer output directory are deleted by default " +
+                "When using the new property, the generated class file is deleted by default if `pathToClass` is set, " +
                 "and the Java file is created in a subdirectory matching the package of the file. " +
                 "You can restore the previous behavior by adding `purgeOldFiles = false` and `packageName = \"\"`. ",
         replaceWith = ReplaceWith("targetRootOutputDir"),
         level = DeprecationLevel.WARNING,
     )
-    @get:OutputDirectory
-    @get:Optional
+    @get:Internal
     abstract val targetOutputDir: DirectoryProperty
 
     /**
-     * The output directory for the generated lexer.
+     * The output root directory for the generated lexer.
      * The Java file for the lexer is created in a subdirectory matching the [packageName].
-     * Stale files in the resolved lexer output directory are deleted during task execution,
-     * unless [purgeOldFiles] is explicitly set to `false`.
      */
-    @get:OutputDirectory
-    @get:Optional
+    @get:Internal
     abstract val targetRootOutputDir: DirectoryProperty
+
+    /**
+     * The location of the generated lexer class, relative to [targetRootOutputDir].
+     * When [targetOutputDir] is used, this path is resolved relative to [targetOutputDir] instead.
+     * Stale files are purged only from this path.
+     */
+    @get:Input
+    @get:Optional
+    abstract val pathToClass: Property<String>
 
     /**
      * The name of the package where the lexer shall be created.
@@ -88,24 +92,31 @@ abstract class GenerateLexerTask : JavaExec() {
     abstract val skeleton: RegularFileProperty
 
     /**
-     * Purge old files from the target directory before generating the lexer.
-     * By default, old files are purged from the resolved lexer output directory unless you are using the deprecated property [targetOutputDir].
-     * If you want to disable this option because the output directory is shared with another task,
-     * note that you may run into issues with stale files. Also note that
-     * [overlapping task outputs are discouraged by Gradle](https://docs.gradle.org/8.13/userguide/organizing_gradle_projects.html#avoid_overlapping_task_outputs)
-     * and may cause issues when using the build cache.
+     * Purge the generated lexer class before generating the lexer.
+     * Purging requires [pathToClass] to be set, so that only the generated file is removed.
      */
     @get:Input
     @get:Optional
     abstract val purgeOldFiles: Property<Boolean>
 
     /**
+     * The output lexer class file.
+     */
+    @get:OutputFile
+    @get:Optional
+    protected val classFile: Provider<RegularFile>
+        get() = when {
+            targetOutputDir.isPresent -> targetOutputDir.file(pathToClass.map(::relativeOutputPath))
+            else -> targetRootOutputDir.file(pathToClass.map(::relativeOutputPath))
+        }
+
+    /**
      * The location of the lexer class computed from the [targetOutputDir].
      * Because the lexer class is defined in the flex file, it needs to be passed here too.
      */
     @Deprecated(
-        message = "You may specify the expected output directory relative to targetRootOutputDir instead.",
-        replaceWith = ReplaceWith("targetRootOutputDir.file(/* add package if necessary */ \"\${lexerClass}.java\")"),
+        message = "Use pathToClass instead.",
+        replaceWith = ReplaceWith("pathToClass.set(/* add package if necessary */ \"\${lexerClass}.java\")"),
         level = DeprecationLevel.WARNING,
     )
     fun targetFile(lexerClass: String): Provider<RegularFile> = targetOutputDir.file("${lexerClass}.java")
@@ -115,22 +126,15 @@ abstract class GenerateLexerTask : JavaExec() {
      * Because the lexer class is defined in the flex file, it needs to be passed here too.
      */
     @Deprecated(
-        message = "You may specify the expected output directory relative to targetRootOutputDir instead.",
-        replaceWith = ReplaceWith("targetRootOutputDir.file(lexerClass.map { /* add package if necessary */ \"\${it}.java\"})"),
+        message = "Use pathToClass instead.",
+        replaceWith = ReplaceWith("pathToClass.set(lexerClass.map { /* add package if necessary */ \"\${it}.java\" })"),
         level = DeprecationLevel.WARNING,
     )
     fun targetFile(lexerClass: Provider<String>): Provider<RegularFile> = lexerClass.flatMap(::targetFile)
 
-    @OptIn(ExperimentalPathApi::class)
     @TaskAction
     override fun exec() {
-        if (targetOutputDir.isPresent) {
-            if (purgeOldFiles.orNull == true) {
-                targetOutputDir.asPath.deleteRecursively()
-            }
-        } else if (purgeOldFiles.orNull != false) {
-            getOutputDirectory().asPath.deleteRecursively()
-        }
+        purgeOldFiles()
 
         execWithTeeOutput(getArguments()) {
             super.exec()
@@ -174,6 +178,20 @@ abstract class GenerateLexerTask : JavaExec() {
             """.trimIndent())
         }
     }
+
+    private fun purgeOldFiles() {
+        val shouldPurge = purgeOldFiles.orNull ?: !targetOutputDir.isPresent
+        if (!shouldPurge) {
+            return
+        }
+        if (pathToClass.isPresent) {
+            classFile.get().asFile.deleteRecursively()
+        } else {
+            logger.warn("Cannot purge old lexer files for $path because `pathToClass` is not set.")
+        }
+    }
+
+    private fun relativeOutputPath(path: String) = path.trimStart('/', '\\')
 
     /**
      * Try to find and read the package declaration in the given source file.
