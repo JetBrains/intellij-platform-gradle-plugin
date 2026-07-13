@@ -157,13 +157,15 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      * org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes=
      * ```
      *
-     * Default value: `com.intellij.openRewrite`
+     * Default value: `com.intellij.openRewrite,com.intellij.ja,com.intellij.ko,com.intellij.zh,org.jetbrains.plugins.vue`
      */
     object TestIdeBundledPluginsClasspathExcludes : GradleProperties<String>(listOf(
         "com.intellij.openRewrite",
         "com.intellij.ja",
         "com.intellij.ko",
         "com.intellij.zh",
+        // See: #2183, https://youtrack.jetbrains.com/issue/WEB-78747
+        "org.jetbrains.plugins.vue",
     ).joinToString(","))
 
     /**
