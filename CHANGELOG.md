@@ -2,6 +2,8 @@
 
 ## [next]
 
+## [2.18.1] - 2026-07-10
+
 ### Fixed
 
 - Exclude `com.intellij.ja`, `com.intellij.ko`, and `com.intellij.zh` bundled translation plugins  when composing tests classpath JetBrains/intellij-platform-gradle-plugin#2182
@@ -1805,7 +1807,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.1...HEAD
+[2.18.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.0...v2.18.1
 [2.18.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.17.0...v2.18.0
 [2.17.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.16.0...v2.17.0
 [2.16.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.15.0...v2.16.0
