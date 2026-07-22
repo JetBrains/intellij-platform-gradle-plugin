@@ -124,6 +124,8 @@ object Constants {
         const val INTELLIJ_PLATFORM_JAVA_COMPILER = "intellijPlatformJavaCompiler"
         const val INTELLIJ_PLATFORM_JFLEX = "intellijPlatformJFlex"
         const val INTELLIJ_PLATFORM_RUNTIME_CLASSPATH = "intellijPlatformRuntimeClasspath"
+        const val INTELLIJ_PLATFORM_SANDBOX_RUNTIME_CLASSPATH = "intellijPlatformSandboxRuntimeClasspath"
+        const val INTELLIJ_PLATFORM_TEST_SANDBOX_RUNTIME_CLASSPATH = "intellijPlatformTestSandboxRuntimeClasspath"
         const val INTELLIJ_PLUGIN_VERIFIER = "intellijPluginVerifier"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES = "intellijPluginVerifierIdes"
         const val INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY = "intellijPluginVerifierIdesDependency"

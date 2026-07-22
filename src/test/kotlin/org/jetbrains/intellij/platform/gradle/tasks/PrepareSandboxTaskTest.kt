@@ -335,6 +335,49 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `exclude dependencies from all sandbox runtime classpaths`() {
+        dir.resolve("src/main/java/App.java") write //language=java
+                """
+                import org.joda.time.DateTime;
+                import org.apache.logging.log4j.LogManager;
+
+                class App {
+                    private final DateTime now = new DateTime();
+                    private static final String LOGGER_NAME = LogManager.getLogger().getName();
+                }
+                """.trimIndent()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation("joda-time:joda-time:2.8.1")
+                    implementation("org.apache.logging.log4j:log4j-core:2.24.3")
+                }
+
+                configurations.named("intellijPlatformSandboxRuntimeClasspath") {
+                    exclude(group = "joda-time", module = "joda-time")
+                    exclude(group = "org.apache.logging.log4j", module = "log4j-api")
+                }
+                """.trimIndent()
+
+        build(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX)
+
+        listOf(
+            sandbox.resolve("plugins/projectName/lib"),
+            sandbox.resolve("plugins-test/projectName/lib"),
+        ).forEach { lib ->
+            assertExists(lib.resolve("log4j-core-2.24.3.jar"))
+            assertFalse(lib.resolve("joda-time-2.8.1.jar").exists())
+            assertFalse(lib.resolve("log4j-api-2.24.3.jar").exists())
+        }
+    }
+
+    @Test
     fun `prepare sandbox for splitMode with plugin installed on frontend via deprecated target`() {
         buildSandboxForSplitMode(
             """

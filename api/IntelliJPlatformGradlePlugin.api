@@ -46,6 +46,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 	public static final field INTELLIJ_PLATFORM_PLUGIN_MODULE Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PLUGIN_MODULE_DEPENDENCIES Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_RUNTIME_CLASSPATH Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_SANDBOX_RUNTIME_CLASSPATH Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_TEST_CLASSPATH Ljava/lang/String;
@@ -55,6 +56,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Configuratio
 	public static final field INTELLIJ_PLATFORM_TEST_PLUGIN_LOCAL Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_TEST_SANDBOX_RUNTIME_CLASSPATH Ljava/lang/String;
 	public static final field INTELLIJ_PLUGIN_VERIFIER Ljava/lang/String;
 	public static final field INTELLIJ_PLUGIN_VERIFIER_IDES Ljava/lang/String;
 	public static final field INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY Ljava/lang/String;

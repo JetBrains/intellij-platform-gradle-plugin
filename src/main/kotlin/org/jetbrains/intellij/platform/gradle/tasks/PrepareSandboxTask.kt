@@ -102,7 +102,11 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     abstract val pluginsClasspath: ConfigurableFileCollection
 
     /**
-     * Dependencies defined with the [JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME] configuration.
+     * Dependencies resolved from [Configurations.INTELLIJ_PLATFORM_SANDBOX_RUNTIME_CLASSPATH] or
+     * [Configurations.INTELLIJ_PLATFORM_TEST_SANDBOX_RUNTIME_CLASSPATH].
+     *
+     * The sandbox configurations inherit dependencies from [JavaPlugin.RUNTIME_CLASSPATH_CONFIGURATION_NAME] and allow dependency exclusions
+     * to be applied only to sandbox contents, without changing the project's compile or test classpaths.
      */
     @get:Classpath
     abstract val runtimeClasspath: ConfigurableFileCollection
@@ -281,12 +285,12 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
                 val intellijPlatformPluginModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE]
                 val intellijPlatformPluginComposedModuleConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE]
-                val intellijPlatformRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH]
-                val intellijPlatformTestRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH]
+                val intellijPlatformSandboxRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_SANDBOX_RUNTIME_CLASSPATH]
+                val intellijPlatformTestSandboxRuntimeClasspathConfiguration = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_SANDBOX_RUNTIME_CLASSPATH]
                 val runtimeConfiguration = project.files(testSandbox.map {
                     when (it) {
-                        true -> intellijPlatformTestRuntimeClasspathConfiguration
-                        false -> intellijPlatformRuntimeClasspathConfiguration
+                        true -> intellijPlatformTestSandboxRuntimeClasspathConfiguration
+                        false -> intellijPlatformSandboxRuntimeClasspathConfiguration
                     }
                 })
 
@@ -351,7 +355,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 inputs.property("instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })
                 inputs.property("sandboxDirectory", sandboxDirectory.map { it.asPath.pathString })
                 inputs.property("sandboxSuffix", sandboxSuffix)
-                inputs.files(intellijPlatformRuntimeClasspathConfiguration)
+                inputs.files(runtimeConfiguration)
 
                 outputs.upToDateWhen {
                     listOf(

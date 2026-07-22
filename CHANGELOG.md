@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add sandbox-specific runtime classpath configurations for applying dependency exclusions to every `PrepareSandboxTask` without changing project compile or test classpaths JetBrains/intellij-platform-gradle-plugin#2177
+
 ### Fixed
 
 - Change duplicates strategy in PrepareSandboxTask to `WARN` JetBrains/intellij-platform-gradle-plugin#2191

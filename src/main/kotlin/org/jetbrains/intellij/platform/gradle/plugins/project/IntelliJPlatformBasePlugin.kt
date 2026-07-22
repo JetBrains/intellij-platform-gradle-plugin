@@ -381,7 +381,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     intellijPlatformTestDependenciesConfiguration,
                 )
             }
-            create(
+            val intellijPlatformTestRuntimeClasspathConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH,
                 description = "IntelliJ Platform Test Runtime Classpath resolvable configuration",
             ) {
@@ -412,7 +412,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     )
                 }
             }
-            create(
+            val intellijPlatformRuntimeClasspathConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
                 description = "IntelliJ Platform Runtime Classpath resolvable configuration",
             ) {
@@ -422,6 +422,29 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                 extendsFrom(
                     this@configurations[Configurations.External.RUNTIME_CLASSPATH],
+                )
+            }
+            val intellijPlatformSandboxRuntimeClasspathConfiguration = create(
+                name = Configurations.INTELLIJ_PLATFORM_SANDBOX_RUNTIME_CLASSPATH,
+                description = "IntelliJ Platform Sandbox Runtime Classpath resolvable configuration",
+            ) {
+                attributes {
+                    attributes.attribute(Attributes.kotlinJPlatformType, "jvm")
+                }
+
+                extendsFrom(intellijPlatformRuntimeClasspathConfiguration)
+            }
+            create(
+                name = Configurations.INTELLIJ_PLATFORM_TEST_SANDBOX_RUNTIME_CLASSPATH,
+                description = "IntelliJ Platform Test Sandbox Runtime Classpath resolvable configuration",
+            ) {
+                attributes {
+                    attributes.attribute(Attributes.kotlinJPlatformType, "jvm")
+                }
+
+                extendsFrom(
+                    intellijPlatformSandboxRuntimeClasspathConfiguration,
+                    intellijPlatformTestRuntimeClasspathConfiguration,
                 )
             }
 
@@ -477,6 +500,8 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 project.configurations[Configurations.INTELLIJ_PLATFORM_CLASSPATH],
                 project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH],
                 project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH],
+                project.configurations[Configurations.INTELLIJ_PLATFORM_SANDBOX_RUNTIME_CLASSPATH],
+                project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_SANDBOX_RUNTIME_CLASSPATH],
             ).forEach {
                 it.attributes
                     .attribute(Attributes.extracted, true)
