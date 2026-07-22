@@ -35,6 +35,8 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.PluginConfiguration.*
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.models.coroutines
+import org.jetbrains.intellij.platform.gradle.models.kotlinStdlib
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.plugins.configureKotlinJvmToolchainConventions
 import org.jetbrains.intellij.platform.gradle.plugins.enableComposeHotReloadCompilerOptions
@@ -64,6 +66,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         val dependenciesHelper by lazy {
             project.dependenciesHelper
+        }
+        val defaultSandboxExclusions = when {
+            project.providers[GradleProperties.UseDefaultSandboxExclusions].get() -> kotlinStdlib + coroutines
+            else -> emptySet()
         }
 
         /**
@@ -434,7 +440,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                 extendsFrom(intellijPlatformRuntimeClasspathConfiguration)
             }
-            create(
+            val intellijPlatformTestSandboxRuntimeClasspathConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_TEST_SANDBOX_RUNTIME_CLASSPATH,
                 description = "IntelliJ Platform Test Sandbox Runtime Classpath resolvable configuration",
             ) {
@@ -446,6 +452,15 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     intellijPlatformSandboxRuntimeClasspathConfiguration,
                     intellijPlatformTestRuntimeClasspathConfiguration,
                 )
+            }
+
+            listOf(
+                intellijPlatformSandboxRuntimeClasspathConfiguration,
+                intellijPlatformTestSandboxRuntimeClasspathConfiguration,
+            ).forEach { configuration ->
+                defaultSandboxExclusions.forEach { coordinates ->
+                    configuration.exclude(mapOf("group" to coordinates.groupId, "module" to coordinates.artifactId))
+                }
             }
 
             create(

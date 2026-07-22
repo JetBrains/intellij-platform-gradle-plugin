@@ -5,6 +5,7 @@
 ### Added
 
 - Add sandbox-specific runtime classpath configurations for applying dependency exclusions to every `PrepareSandboxTask` without changing project compile or test classpaths JetBrains/intellij-platform-gradle-plugin#2177
+- Exclude Kotlin stdlib and Kotlin Coroutines dependencies from sandbox runtime classpaths by default. Set `` to opt out JetBrains/intellij-platform-gradle-plugin#2177
 
 ### Fixed
 

@@ -378,6 +378,51 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `exclude default sandbox dependencies`() {
+        addDefaultSandboxDependencies()
+
+        build(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX)
+
+        sandboxLibDirectories().forEach { lib ->
+            assertFalse(lib.resolve("kotlin-stdlib-$kotlinPluginVersion.jar").exists())
+            assertFalse(lib.resolve("kotlinx-coroutines-core-jvm-1.7.1.jar").exists())
+        }
+    }
+
+    @Test
+    fun `include default sandbox dependencies when default exclusions are disabled`() {
+        addDefaultSandboxDependencies()
+        gradleProperties write "${GradleProperties.UseDefaultSandboxExclusions}=false"
+
+        build(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX)
+
+        sandboxLibDirectories().forEach { lib ->
+            assertExists(lib.resolve("kotlin-stdlib-$kotlinPluginVersion.jar"))
+            assertExists(lib.resolve("kotlinx-coroutines-core-jvm-1.7.1.jar"))
+        }
+    }
+
+    private fun addDefaultSandboxDependencies() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin />
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation("org.jetbrains.kotlin:kotlin-stdlib:$kotlinPluginVersion")
+                    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.1")
+                }
+                """.trimIndent()
+    }
+
+    private fun sandboxLibDirectories() = listOf(
+        sandbox.resolve("plugins/projectName/lib"),
+        sandbox.resolve("plugins-test/projectName/lib"),
+    )
+
+    @Test
     fun `prepare sandbox for splitMode with plugin installed on frontend via deprecated target`() {
         buildSandboxForSplitMode(
             """

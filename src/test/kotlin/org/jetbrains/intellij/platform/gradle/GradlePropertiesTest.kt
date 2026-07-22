@@ -112,6 +112,15 @@ class GradlePropertiesTest {
     }
 
     @Test
+    fun `default sandbox exclusions property is enabled by default`() {
+        val property = GradleProperties.UseDefaultSandboxExclusions
+
+        assertEquals("org.jetbrains.intellij.platform.useDefaultSandboxExclusions", property.toString())
+        assertEquals(true, property.defaultValue)
+        assertEquals(true, providers[property].get())
+    }
+
+    @Test
     fun `splitCommaSeparated trims values and skips empty entries`() {
         val provider = providers.provider { " com.intellij.foo,com.intellij.bar, , com.intellij.baz " }
 

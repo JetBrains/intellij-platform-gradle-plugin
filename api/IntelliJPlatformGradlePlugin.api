@@ -343,6 +343,10 @@ public final class org/jetbrains/intellij/platform/gradle/GradleProperties$UseCa
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$UseCacheRedirector;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/GradleProperties$UseDefaultSandboxExclusions : org/jetbrains/intellij/platform/gradle/GradleProperties {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$UseDefaultSandboxExclusions;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$VerifyPluginDefaultRecommendedIdes : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$VerifyPluginDefaultRecommendedIdes;
 }

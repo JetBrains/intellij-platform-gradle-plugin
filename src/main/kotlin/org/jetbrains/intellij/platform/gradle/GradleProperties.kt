@@ -169,6 +169,14 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
     ).joinToString(","))
 
     /**
+     * Controls whether dependencies provided by the IntelliJ Platform are excluded from sandbox runtime classpaths by default.
+     * The default exclusions contain Kotlin stdlib and Kotlin Coroutines dependencies.
+     *
+     * Default value: `true`
+     */
+    object UseDefaultSandboxExclusions : GradleProperties<Boolean>(true)
+
+    /**
      * Controls whether [IntelliJPlatformExtension.PluginVerification.Ides.recommended] IDEs should be added automatically
      * when no IntelliJ Plugin Verifier IDEs were configured explicitly.
      *
