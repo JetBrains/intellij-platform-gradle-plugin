@@ -9,6 +9,8 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformReposit
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 
+private const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY = "kotlin.stdlib.default.dependency"
+
 @Suppress("unused", "UnstableApiUsage")
 abstract class IntelliJPlatformSettingsPlugin : Plugin<Settings> {
 
@@ -18,6 +20,16 @@ abstract class IntelliJPlatformSettingsPlugin : Plugin<Settings> {
         log.info("Configuring plugin: ${Plugins.SETTINGS}")
 
         checkGradleVersion()
+
+        settings.gradle.lifecycle.beforeProject {
+            val extraProperties = extensions.extraProperties
+
+            if (!providers.gradleProperty(KOTLIN_STDLIB_DEFAULT_DEPENDENCY).isPresent &&
+                !extraProperties.has(KOTLIN_STDLIB_DEFAULT_DEPENDENCY)
+            ) {
+                extraProperties.set(KOTLIN_STDLIB_DEFAULT_DEPENDENCY, "false")
+            }
+        }
 
         IntelliJPlatformRepositoriesExtension.register(settings, target = settings.dependencyResolutionManagement.repositories)
     }
