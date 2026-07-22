@@ -92,7 +92,7 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
     }
 
     @Test
-    fun `do not purge stale files when lexer class path is omitted`() {
+    fun `purge stale files when lexer class path is omitted`() {
         val staleFile = dir.resolve("gen/StaleLexer.java")
 
         buildFile write //language=kotlin
@@ -109,10 +109,9 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
 
         build(Tasks.GENERATE_LEXER, args = listOf("--rerun-tasks")) {
             assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_LEXER}")?.outcome)
-            assertContains(output, "Cannot purge old lexer files for :generateLexer because `pathToClass` is not set.")
         }
 
-        assertTrue(staleFile.toFile().exists())
+        assertFalse(staleFile.toFile().exists())
     }
 
     @Test
@@ -234,14 +233,11 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
                 """
                 tasks.named("generateLexer", GenerateLexerTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
-                    targetOutputDir = layout.projectDirectory.dir("gen/org/jetbrains/grammarkit/lexer")
-                    pathToClass = "GeneratedLexer.java"
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
                 }
                 
                 sourceSets.main {
-                    val generateLexer = tasks.named("generateLexer", GenerateLexerTask::class.java)
-                    java.srcDir(generateLexer.flatMap { it.targetOutputDir })
-                    compileJavaTaskName.let { tasks.named(it) { dependsOn(generateLexer) } }
+                    java.srcDir(tasks.named("generateLexer"))
                 }
                 """.trimIndent()
 
@@ -256,8 +252,7 @@ class GenerateLexerTaskTest : GrammarKitPluginTestBase() {
                 """
                 tasks.named("generateLexer", GenerateLexerTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateLexer/Example.flex")}")
-                    targetOutputDir = layout.projectDirectory.dir("gen/org/jetbrains/grammarkit/lexer")
-                    pathToClass = "GeneratedLexer.java"
+                    targetRootOutputDir = layout.projectDirectory.dir("gen")
                 }
                 """.trimIndent()
 

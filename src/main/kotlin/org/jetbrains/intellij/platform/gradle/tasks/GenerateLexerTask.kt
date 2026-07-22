@@ -50,6 +50,7 @@ abstract class GenerateLexerTask : JavaExec() {
     /**
      * The output root directory for the generated lexer.
      * The Java file for the lexer is created in a subdirectory matching the [packageName].
+     * When [pathToClass] is not set, this directory is treated as an exclusively owned task output.
      */
     @get:Internal
     abstract val targetRootOutputDir: DirectoryProperty
@@ -57,7 +58,7 @@ abstract class GenerateLexerTask : JavaExec() {
     /**
      * The location of the generated lexer class, relative to [targetRootOutputDir].
      * When [targetOutputDir] is used, this path is resolved relative to [targetOutputDir] instead.
-     * Stale files are purged only from this path.
+     * Setting this property allows the output directory to be shared because stale files are purged only from this path.
      */
     @get:Input
     @get:Optional
@@ -92,12 +93,25 @@ abstract class GenerateLexerTask : JavaExec() {
     abstract val skeleton: RegularFileProperty
 
     /**
-     * Purge the generated lexer class before generating the lexer.
-     * Purging requires [pathToClass] to be set, so that only the generated file is removed.
+     * Purge previously generated lexer output before generating the lexer.
+     * When [pathToClass] is set, only the generated file is removed. Otherwise, the exclusively owned output directory
+     * is removed.
      */
     @get:Input
     @get:Optional
     abstract val purgeOldFiles: Property<Boolean>
+
+    /**
+     * The exclusively owned output directory.
+     *
+     * When [pathToClass] is not set, the task owns the entire output directory. Declaring the directory as an output
+     * keeps the task usable as a source directory and allows Gradle to infer task dependencies. When [pathToClass] is
+     * set, only [classFile] is declared as an output so that the output directory can be shared safely.
+     */
+    @get:OutputDirectory
+    @get:Optional
+    protected val rootOutputDirectory: Provider<Directory>
+        get() = targetOutputDir.orElse(targetRootOutputDir).filter { !pathToClass.isPresent }
 
     /**
      * The output lexer class file.
@@ -187,7 +201,7 @@ abstract class GenerateLexerTask : JavaExec() {
         if (pathToClass.isPresent) {
             classFile.get().asFile.deleteRecursively()
         } else {
-            logger.warn("Cannot purge old lexer files for $path because `pathToClass` is not set.")
+            rootOutputDirectory.get().asFile.deleteRecursively()
         }
     }
 

@@ -24,8 +24,6 @@ class GenerateParserTaskTest : GrammarKitPluginTestBase() {
                 tasks.named("generateParser", GenerateParserTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateParser/Example.bnf")}")
                     targetRootOutputDir = layout.projectDirectory.dir("gen")
-                    pathToParser = "generated/GeneratedParser.java"
-                    pathToPsiRoot = "generated/psi"
                 }
                 """.trimIndent()
 
@@ -80,7 +78,7 @@ class GenerateParserTaskTest : GrammarKitPluginTestBase() {
     }
 
     @Test
-    fun `do not purge stale files when parser paths are omitted`() {
+    fun `purge stale files when parser paths are omitted`() {
         val staleFile = dir.resolve("gen/StaleParser.java")
 
         buildFile write //language=kotlin
@@ -97,10 +95,9 @@ class GenerateParserTaskTest : GrammarKitPluginTestBase() {
 
         build(Tasks.GENERATE_PARSER, args = listOf("--rerun-tasks")) {
             assertEquals(TaskOutcome.SUCCESS, task(":${Tasks.GENERATE_PARSER}")?.outcome)
-            assertContains(output, "Cannot purge old parser files for :generateParser because `pathToParser` and `pathToPsiRoot` are not set.")
         }
 
-        assertTrue(staleFile.toFile().exists())
+        assertFalse(staleFile.toFile().exists())
     }
 
     @Test
@@ -169,14 +166,10 @@ class GenerateParserTaskTest : GrammarKitPluginTestBase() {
                 tasks.named("generateParser", GenerateParserTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateParser/Example.bnf")}")
                     targetRootOutputDir = layout.projectDirectory.dir("gen")
-                    pathToParser = "generated/GeneratedParser.java"
-                    pathToPsiRoot = "generated/psi"
                 }
                 
                 sourceSets.main {
-                    val generateParser = tasks.named("generateParser", GenerateParserTask::class.java)
-                    java.srcDir(generateParser.flatMap { it.targetRootOutputDir })
-                    compileJavaTaskName.let { tasks.named(it) { dependsOn(generateParser) } }
+                    java.srcDir(tasks.named("generateParser"))
                 }
                 """.trimIndent()
 
@@ -193,8 +186,6 @@ class GenerateParserTaskTest : GrammarKitPluginTestBase() {
                 tasks.named("generateParser", GenerateParserTask::class.java) {
                     sourceFile = file("${resource("grammarkit/generateParser/Example.bnf")}")
                     targetRootOutputDir = layout.projectDirectory.dir("gen")
-                    pathToParser = "generated/GeneratedParser.java"
-                    pathToPsiRoot = "generated/psi"
                 }
                 """.trimIndent()
 

@@ -5,6 +5,7 @@
 ### Fixed
 
 - Change duplicates strategy in PrepareSandboxTask to `WARN` JetBrains/intellij-platform-gradle-plugin#2191
+- Restore GrammarKit generator tasks as source-set directories for exclusively owned output roots while preserving precise output tracking for shared roots JetBrains/intellij-platform-gradle-plugin#2186
 
 ## [2.18.1] - 2026-07-10
 

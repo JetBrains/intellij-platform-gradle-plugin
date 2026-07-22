@@ -40,13 +40,15 @@ abstract class GenerateParserTask : JavaExec() {
     /**
      * Required.
      * The output root directory.
+     * When [pathToParser] and [pathToPsiRoot] are not set, this directory is treated as an exclusively owned task output.
      */
     @get:Internal
     abstract val targetRootOutputDir: DirectoryProperty
 
     /**
      * The location of the generated parser class, relative to the [targetRootOutputDir].
-     * Stale files are purged only from this path and [pathToPsiRoot].
+     * Setting this property with [pathToPsiRoot] allows the output directory to be shared because stale files are purged
+     * only from these paths.
      */
     @get:Input
     @get:Optional
@@ -54,11 +56,25 @@ abstract class GenerateParserTask : JavaExec() {
 
     /**
      * The location of the generated PSI files, relative to the [targetRootOutputDir].
-     * Stale files are purged only from this path and [pathToParser].
+     * Setting this property with [pathToParser] allows the output directory to be shared because stale files are purged
+     * only from these paths.
      */
     @get:Input
     @get:Optional
     abstract val pathToPsiRoot: Property<String>
+
+    /**
+     * The exclusively owned output directory.
+     *
+     * When the explicit output paths are not set, the task owns the entire output directory. Declaring the directory
+     * as an output keeps the task usable as a source directory and allows Gradle to infer task dependencies. When the
+     * explicit paths are set, only [parserOutputFile] and [psiOutputDir] are declared as outputs so that the output
+     * directory can be shared safely.
+     */
+    @get:OutputDirectory
+    @get:Optional
+    protected val rootOutputDirectory: Provider<Directory>
+        get() = targetRootOutputDir.filter { !pathToParser.isPresent && !pathToPsiRoot.isPresent }
 
     /**
      * The output parser file computed from the [pathToParser] property.
@@ -87,8 +103,9 @@ abstract class GenerateParserTask : JavaExec() {
         get() = psiDir()
 
     /**
-     * Purge old parser and PSI files before generating the parser.
-     * Purging requires [pathToParser] and [pathToPsiRoot] to be set, so that only generated outputs are removed.
+     * Purge previously generated parser and PSI output before generating the parser.
+     * When [pathToParser] and [pathToPsiRoot] are set, only those outputs are removed. Otherwise, the exclusively owned
+     * output directory is removed.
      */
     @get:Input
     @get:Optional
@@ -117,7 +134,7 @@ abstract class GenerateParserTask : JavaExec() {
             parserOutputFile.get().asFile.deleteRecursively()
             psiOutputDir.get().asFile.deleteRecursively()
         } else {
-            logger.warn("Cannot purge old parser files for $path because `pathToParser` and `pathToPsiRoot` are not set.")
+            rootOutputDirectory.get().asFile.deleteRecursively()
         }
     }
 

@@ -2848,6 +2848,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/GenerateLexer
 	public abstract fun getPackageName ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPathToClass ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPurgeOldFiles ()Lorg/gradle/api/provider/Property;
+	protected final fun getRootOutputDirectory ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getSkeleton ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getSourceFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getTargetOutputDir ()Lorg/gradle/api/file/DirectoryProperty;
@@ -2886,6 +2887,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/GenerateParse
 	public abstract fun getPathToPsiRoot ()Lorg/gradle/api/provider/Property;
 	protected final fun getPsiOutputDir ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getPurgeOldFiles ()Lorg/gradle/api/provider/Property;
+	protected final fun getRootOutputDirectory ()Lorg/gradle/api/provider/Provider;
 	public abstract fun getSourceFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getTargetRootOutputDir ()Lorg/gradle/api/file/DirectoryProperty;
 	public final fun parserFile ()Lorg/gradle/api/provider/Provider;
