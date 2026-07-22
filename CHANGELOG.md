@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Change duplicates strategy in PrepareSandboxTask to `WARN` JetBrains/intellij-platform-gradle-plugin#2191
+
 ## [2.18.1] - 2026-07-10
 
 ### Fixed
