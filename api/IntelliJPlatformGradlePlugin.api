@@ -456,6 +456,10 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Go;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$IJent : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$IJent;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Java : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Java;
 }
@@ -476,8 +480,24 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$LSP;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$MLCompletion : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$MLCompletion;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$MLCompletionCloud : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$MLCompletionCloud;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$MLNextEdits : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$MLNextEdits;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Maven : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Maven;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$NavBar : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$NavBar;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Notebooks : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
@@ -488,16 +508,32 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$PolySymbols;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Python : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Python;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Qodana : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Qodana;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$RDClient : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$RDClient;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$ReSharper : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$ReSharper;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Rider : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Rider;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Ruby : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Ruby;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Statistics : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$Statistics;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Plugin$UAST : org/jetbrains/intellij/platform/gradle/TestFrameworkType {

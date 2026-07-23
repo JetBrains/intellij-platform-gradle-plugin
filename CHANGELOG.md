@@ -4,6 +4,7 @@
 
 ### Added
 
+- Expand `TestFrameworkType.Plugin` with IJent, ML completion, navigation bar, Python, RD client, Rider, and statistics test frameworks.
 - Add sandbox-specific runtime classpath configurations for applying dependency exclusions to every `PrepareSandboxTask` without changing project compile or test classpaths JetBrains/intellij-platform-gradle-plugin#2177
 - Exclude Kotlin stdlib and Kotlin Coroutines dependencies from sandbox runtime classpaths by default. Set `org.jetbrains.intellij.platform.useDefaultSandboxExclusions=false` to opt out JetBrains/intellij-platform-gradle-plugin#2177
 - Default `kotlin.stdlib.default.dependency` to `false` for projects using the IntelliJ Platform settings plugin while preserving an explicitly configured value

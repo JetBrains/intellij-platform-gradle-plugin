@@ -33,6 +33,25 @@ class TestFrameworkTypeTest {
         assertEquals(coordinates, TestFrameworkType.Starter.coordinates.toList())
     }
 
+    @Test
+    fun `Plugin test framework types use published coordinates`() {
+        val coordinates = mapOf(
+            TestFrameworkType.Plugin.IJent to Coordinates("com.jetbrains.intellij.platform", "ijent-test-framework"),
+            TestFrameworkType.Plugin.MLCompletion to Coordinates("com.jetbrains.intellij.ml", "ml-llm-completion-test-framework"),
+            TestFrameworkType.Plugin.MLCompletionCloud to Coordinates("com.jetbrains.intellij.ml", "ml-llm-completion-cloud-test-framework"),
+            TestFrameworkType.Plugin.MLNextEdits to Coordinates("com.jetbrains.intellij.ml", "ml-llm-next-edits-test-framework"),
+            TestFrameworkType.Plugin.NavBar to Coordinates("com.jetbrains.intellij.platform", "navbar-test-framework"),
+            TestFrameworkType.Plugin.Python to Coordinates("com.jetbrains.intellij.python", "python-community-test-framework"),
+            TestFrameworkType.Plugin.RDClient to Coordinates("com.jetbrains.intellij.rd", "rd-client-test-framework"),
+            TestFrameworkType.Plugin.Rider to Coordinates("com.jetbrains.intellij.rider", "rider-test-framework"),
+            TestFrameworkType.Plugin.Statistics to Coordinates("com.jetbrains.intellij.platform", "statistics-test-framework"),
+        )
+
+        coordinates.forEach { (type, coordinate) ->
+            assertEquals(listOf(coordinate), type.coordinates.toList())
+        }
+    }
+
     private companion object {
         fun Coordinates.isIdeStarterProduct() = artifactId.startsWith("ide-starter-product-")
     }
