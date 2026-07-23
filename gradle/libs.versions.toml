@@ -3,7 +3,7 @@
 intellijStructure = "3.332"
 intellijPluginRepositoryRestClient = "2.0.51"
 kotlinxSerialization = "1.11.0"
-okhttp = "4.12.0"
+okhttp = "5.4.0"
 retrofit = "2.11.0"
 undertow = "2.4.2.Final"
 xmlutil = "1.0.1"
