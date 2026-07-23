@@ -74,6 +74,18 @@ abstract class ProductReleasesService @Inject constructor(
         filter: ProductReleasesFilterParameters,
         loader: (String) -> String? = ::loadListing,
     ) = filter.types.get()
+        .let { types ->
+            buildSet {
+                addAll(types)
+
+                if (IntelliJPlatformType.IntellijIdeaCommunity in types) {
+                    add(IntelliJPlatformType.IntellijIdea)
+                }
+                if (IntelliJPlatformType.PyCharmCommunity in types) {
+                    add(IntelliJPlatformType.PyCharm)
+                }
+            }.distinctBy { it.code }
+        }
         .flatMap { loadProductReleases(it, loader) }
         .run {
             val since = filter.sinceBuild.orNull?.ifBlank { "0" }?.toVersion()

@@ -8,6 +8,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.assertContains
+import org.jetbrains.intellij.platform.gradle.assertNotContains
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.gradleProperties
 import org.jetbrains.intellij.platform.gradle.overwrite
@@ -82,6 +83,37 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent(),
                 output,
             )
+        }
+    }
+
+    @Test
+    fun `community product releases include unified IntelliJ IDEA versions`() {
+        buildFile write //language=kotlin
+                """
+                tasks {
+                    ${Tasks.PRINT_PRODUCTS_RELEASES} {
+                        types = listOf(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity)
+                        channels = listOf(
+                            org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.RELEASE,
+                            org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.EAP,
+                            org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel.RC,
+                        )
+                        sinceBuild = "241"
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            Tasks.PRINT_PRODUCTS_RELEASES,
+            projectProperties = mapOf(
+                GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
+            ),
+        ) {
+            assertContains("IC-2025.2.6.2", output)
+            assertContains("IU-2025.3.6", output)
+            assertContains("IU-2026.1.4", output)
+            assertContains("IU-262.8665.81", output)
+            assertNotContains("IU-2025.2.6.2", output)
         }
     }
 
