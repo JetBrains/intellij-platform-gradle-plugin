@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- Serialize code instrumentation tasks within each project to prevent concurrent access to Gradle's shared Ant builder JetBrains/intellij-platform-gradle-plugin#2193
 - Regression. Include unified IntelliJ IDEA 2025.3+ releases in the default Plugin Verifier IDE selection when targeting IntelliJ IDEA Community.
 - Change duplicates strategy in PrepareSandboxTask to `WARN` JetBrains/intellij-platform-gradle-plugin#2191
 - Restore GrammarKit generator tasks as source-set directories for exclusively owned output roots while preserving precise output tracking for shared roots JetBrains/intellij-platform-gradle-plugin#2186

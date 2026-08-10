@@ -131,6 +131,86 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `serializes instrumentation tasks within a project`() {
+        dir.resolve("src/alpha/java/Alpha.java") write "class Alpha {}"
+        dir.resolve("src/beta/java/Beta.java") write "class Beta {}"
+
+        gradleProperties write //language=properties
+                """
+                org.gradle.configuration-cache.parallel=true
+                org.gradle.parallel=true
+                """.trimIndent()
+
+        buildFile overwrite //language=kotlin
+                """
+                import org.jetbrains.intellij.platform.gradle.extensions.*
+                import org.jetbrains.intellij.platform.gradle.tasks.*
+
+                plugins {
+                    id("java")
+                    id("org.jetbrains.intellij.platform") apply false
+                }
+
+                sourceSets.create("alpha")
+                sourceSets.create("beta")
+
+                apply(plugin = "org.jetbrains.intellij.platform")
+
+                repositories {
+                    mavenCentral()
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    extensions.configure<IntelliJPlatformDependenciesExtension> {
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                    }
+                }
+
+                extensions.configure<IntelliJPlatformExtension> {
+                    buildSearchableOptions = false
+                    instrumentCode = true
+                }
+
+                val instrumentAlphaCodeMarker = layout.buildDirectory.file("instrumentAlphaCode.running")
+                val instrumentBetaCodeMarker = layout.buildDirectory.file("instrumentBetaCode.running")
+
+                fun InstrumentCodeTask.failOnOverlap(marker: Provider<RegularFile>, otherMarker: Provider<RegularFile>) {
+                    this.doFirst {
+                        marker.get().asFile.apply {
+                            parentFile.mkdirs()
+                            createNewFile()
+                        }
+                        repeat(20) {
+                            check(!otherMarker.get().asFile.exists()) {
+                                "Instrumentation tasks from the same project overlapped"
+                            }
+                            Thread.sleep(100)
+                        }
+                    }
+                    this.doLast {
+                        marker.get().asFile.delete()
+                    }
+                }
+
+                tasks.named<InstrumentCodeTask>("instrumentAlphaCode") {
+                    failOnOverlap(instrumentAlphaCodeMarker, instrumentBetaCodeMarker)
+                }
+                tasks.named<InstrumentCodeTask>("instrumentBetaCode") {
+                    failOnOverlap(instrumentBetaCodeMarker, instrumentAlphaCodeMarker)
+                }
+                """.trimIndent()
+
+        val args = listOf("--parallel", "--max-workers=2")
+        buildWithConfigurationCache("clean", "instrumentAlphaCode", "instrumentBetaCode", args = args)
+        buildWithConfigurationCache("clean", "instrumentAlphaCode", "instrumentBetaCode", args = args) {
+            assertConfigurationCacheReused()
+        }
+    }
+
+    @Test
     fun `reuses configuration cache`() {
         buildWithConfigurationCache(ASSEMBLE, args = defaultArgs)
 

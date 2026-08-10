@@ -24,6 +24,8 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
+import org.jetbrains.intellij.platform.gradle.services.InstrumentCodeTaskLockService
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.JavaCompilerAware
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
@@ -289,12 +291,20 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     companion object : Registrable {
         override fun register(project: Project) {
             val instrumentCodeEnabled = project.extensionProvider.flatMap { it.instrumentCode }
+            val instrumentCodeTaskLock = project.gradle.registerClassLoaderScopedBuildService(
+                InstrumentCodeTaskLockService::class,
+                project.path,
+            ) {
+                maxParallelUsages.set(1)
+            }
             val sourceSets = project.extensions.getByType<SourceSetContainer>()
 
             sourceSets.forEach { sourceSet ->
                 val name = sourceSet.getTaskName("instrument", "code")
 
                 project.registerTask<InstrumentCodeTask>(name, configureWithType = false) {
+                    usesService(instrumentCodeTaskLock)
+
                     outputDirectory.convention(project.layout.buildDirectory.map { it.dir("instrumented").dir(name) })
                     instrumentationLogs.convention(project.gradle.startParameter.logLevel == LogLevel.INFO)
 
