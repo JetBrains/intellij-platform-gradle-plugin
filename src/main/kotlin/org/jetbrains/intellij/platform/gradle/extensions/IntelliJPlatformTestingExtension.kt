@@ -384,6 +384,28 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
             configurationName = testDependenciesConfigurationName.get(),
         )
 
+        /**
+         * Adds dependencies on the `test-framework` libraries or their variants, required for testing plugins.
+         *
+         * The versions are determined by the IntelliJ Platform build number.
+         *
+         * @param types Test Framework variant types.
+         * @see TestFrameworkType
+         */
+        fun testFrameworks(vararg types: TestFrameworkType) =
+            testFrameworks(types.asList())
+
+        /**
+         * Adds dependencies on the `test-framework` libraries or their variants, required for testing plugins.
+         *
+         * The versions are determined by the IntelliJ Platform build number.
+         *
+         * @param types Test Framework variant types.
+         * @see TestFrameworkType
+         */
+        fun testFrameworks(types: List<TestFrameworkType>) =
+            types.forEach { testFramework(it) }
+
         val task
             get() = project.tasks.named(name, taskClass)
 

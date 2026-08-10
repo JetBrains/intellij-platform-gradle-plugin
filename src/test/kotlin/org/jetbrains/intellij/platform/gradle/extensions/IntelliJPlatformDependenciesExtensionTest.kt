@@ -119,6 +119,26 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
         }
     }
 
+    @Test
+    fun `testFrameworks adds all requested test framework dependencies`() {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        testFrameworks(TestFrameworkType.Platform, TestFrameworkType.JUnit5)
+                        testFrameworks(listOf(TestFrameworkType.Plugin.Java, TestFrameworkType.Plugin.Maven))
+                    }
+                }
+                """.trimIndent()
+
+        build("dependencies", "--configuration=intellijPlatformTestDependencies") {
+            assertContains("com.jetbrains.intellij.platform:test-framework", output)
+            assertContains("com.jetbrains.intellij.platform:test-framework-junit5", output)
+            assertContains("com.jetbrains.intellij.java:java-test-framework", output)
+            assertContains("com.jetbrains.intellij.maven:maven-test-framework", output)
+        }
+    }
+
     private fun currentJetBrainsClientArtifact(buildNumber: String): JetBrainsClientArtifact {
         val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
 

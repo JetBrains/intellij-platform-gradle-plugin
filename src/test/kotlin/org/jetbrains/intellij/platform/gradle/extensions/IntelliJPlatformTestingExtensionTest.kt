@@ -138,6 +138,30 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `custom testIde task testFrameworks adds all requested test framework dependencies`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        name = "myPluginName"
+                    }
+                }
+
+                val pluralTest by intellijPlatformTesting.testIde.registering {
+                    testFrameworks(TestFrameworkType.Platform, TestFrameworkType.JUnit5)
+                    testFrameworks(listOf(TestFrameworkType.Plugin.Java, TestFrameworkType.Plugin.Maven))
+                }
+                """.trimIndent()
+
+        build("dependencies", "--configuration=intellijPlatformTestDependencies_pluralTest") {
+            assertContains("com.jetbrains.intellij.platform:test-framework", output)
+            assertContains("com.jetbrains.intellij.platform:test-framework-junit5", output)
+            assertContains("com.jetbrains.intellij.java:java-test-framework", output)
+            assertContains("com.jetbrains.intellij.maven:maven-test-framework", output)
+        }
+    }
+
+    @Test
     fun `custom testIde task prefers base local IntelliJ Platform dependency over computed remote archive`() {
         val localIdePath = dir.resolve("android-studio-local")
         localIdePath.resolve("product-info.json") write //language=json

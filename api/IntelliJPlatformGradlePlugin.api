@@ -911,6 +911,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Lorg/gradle/api/provider/Provider;Ljava/lang/String;)V
 	public static synthetic fun testFramework$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
 	public static synthetic fun testFramework$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Lorg/gradle/api/provider/Provider;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun testFrameworks (Ljava/util/List;)V
+	public final fun testFrameworks ([Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;)V
 	public final fun testLocalPlugin (Ljava/io/File;)V
 	public final fun testLocalPlugin (Ljava/lang/String;)V
 	public final fun testLocalPlugin (Lorg/gradle/api/artifacts/ProjectDependency;)Z
@@ -1317,6 +1319,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Ljava/lang/String;)V
 	public final fun testFramework (Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Lorg/gradle/api/provider/Provider;)V
 	public static synthetic fun testFramework$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters;Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun testFrameworks (Ljava/util/List;)V
+	public final fun testFrameworks ([Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType;)V
 }
 
 public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$Companion {
