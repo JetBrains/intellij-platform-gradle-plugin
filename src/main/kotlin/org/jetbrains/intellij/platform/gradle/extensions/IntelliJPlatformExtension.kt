@@ -7,6 +7,7 @@ import groovy.lang.DelegatesTo
 import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.ProjectLayout
@@ -55,7 +56,6 @@ import javax.inject.Inject
 abstract class IntelliJPlatformExtension @Inject constructor(
     configurations: ConfigurationContainer,
     providers: ProviderFactory,
-    rootProjectDirectory: Path,
 ) : ExtensionAware {
 
     private val intelliJPlatformConfiguration = configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].asLenient
@@ -100,6 +100,14 @@ abstract class IntelliJPlatformExtension @Inject constructor(
     abstract val instrumentCode: Property<Boolean>
 
     /**
+     * Taken into account only if [splitMode] is set to `true` and specifies in which part of the IDE the plugin
+     * should be installed when `runIde` task is executed: the backend process, the frontend process, or both.
+     *
+     * Effective default value: [SplitModeAware.PluginInstallationTarget.BACKEND]
+     */
+    abstract val pluginInstallationTarget: Property<SplitModeAware.PluginInstallationTarget>
+
+    /**
      * Defines the project name, which is used for creating file structure and the build archive.
      *
      * Default value: [Project.getName]
@@ -125,14 +133,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * Default value: `false`
      */
     abstract val splitMode: Property<Boolean>
-
-    /**
-     * Taken into account only if [splitMode] is set to `true` and specifies in which part of the IDE the plugin
-     * should be installed when `runIde` task is executed: the backend process, the frontend process, or both.
-     *
-     * Effective default value: [SplitModeAware.PluginInstallationTarget.BACKEND]
-     */
-    abstract val pluginInstallationTarget: Property<SplitModeAware.PluginInstallationTarget>
 
     /**
      * Deprecated alias for [pluginInstallationTarget].
@@ -1207,7 +1207,6 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 Extensions.INTELLIJ_PLATFORM,
                 project.configurations,
                 project.providers,
-                project.rootProjectPath,
             ) {
                 autoReload.convention(true)
                 buildSearchableOptions.convention(true)
