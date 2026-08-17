@@ -224,6 +224,24 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         action.call()
     }
 
+    val nativeVariants
+        get() = extensions.getByType<NativeVariants>()
+
+    fun nativeVariants(action: Action<in NativeVariants>) {
+        action.execute(nativeVariants)
+    }
+
+    fun nativeVariants(
+        @DelegatesTo(
+            value = NativeVariants::class,
+            strategy = Closure.DELEGATE_FIRST
+        ) action: Closure<*>,
+    ) {
+        action.delegate = nativeVariants
+        action.resolveStrategy = Closure.DELEGATE_FIRST
+        action.call()
+    }
+
     @IntelliJPlatform
     abstract class Caching : ExtensionAware {
 
@@ -1197,6 +1215,80 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     )
                     teamCityOutputFormat.convention(false)
                     subsystemsToCheck.convention(Subsystems.ALL)
+                }
+        }
+    }
+
+    @IntelliJPlatform
+    abstract class NativeVariants @Inject constructor(
+        objects: ObjectFactory,
+    ) : ExtensionAware {
+
+        val linux = objects.newInstance<Platform>()
+        val mac = objects.newInstance<Platform>()
+        val windows = objects.newInstance<Platform>()
+
+        fun linux(action: Action<in Platform>) {
+            action.execute(linux)
+        }
+
+        fun linux(@DelegatesTo(value = Platform::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+            action.delegate = linux
+            action.resolveStrategy = Closure.DELEGATE_FIRST
+            action.call()
+        }
+
+        fun mac(action: Action<in Platform>) {
+            action.execute(mac)
+        }
+
+        fun mac(@DelegatesTo(value = Platform::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+            action.delegate = mac
+            action.resolveStrategy = Closure.DELEGATE_FIRST
+            action.call()
+        }
+
+        fun windows(action: Action<in Platform>) {
+            action.execute(windows)
+        }
+
+        fun windows(@DelegatesTo(value = Platform::class, strategy = Closure.DELEGATE_FIRST) action: Closure<*>) {
+            action.delegate = windows
+            action.resolveStrategy = Closure.DELEGATE_FIRST
+            action.call()
+        }
+
+        /**
+         * Publish the plugin update in multiple variants for different OSes and architectures.
+         *
+         * Default value: `false`
+         */
+        abstract val enabled: Property<Boolean>
+
+        internal operator fun get(variant: Variant) = with(variant) {
+            when (os) {
+                "linux" -> linux
+                "mac" -> mac
+                "windows" -> windows
+                else -> error("Unsupported operating system: $os")
+            }.let { platform ->
+                when (arch) {
+                    "x86_64" -> platform.x86_64
+                    "arm64" -> platform.arm64
+                    else -> error("Unsupported architecture: $arch")
+                }
+            }
+        }
+
+        abstract class Platform {
+            abstract val x86_64: ConfigurableFileCollection
+            abstract val arm64: ConfigurableFileCollection
+        }
+
+        companion object : Registrable<NativeVariants> {
+            override fun register(project: Project, target: Any) =
+                target.configureExtension<NativeVariants>(Extensions.NATIVE_VARIANTS) {
+                    enabled.convention(false)
                 }
         }
     }

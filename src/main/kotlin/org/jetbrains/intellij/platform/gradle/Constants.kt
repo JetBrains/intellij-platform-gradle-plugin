@@ -65,6 +65,7 @@ object Constants {
         const val IDEA_VERSION = "ideaVersion"
         const val INTELLIJ_PLATFORM = "intellijPlatform"
         const val INTELLIJ_PLATFORM_TESTING = "intellijPlatformTesting"
+        const val NATIVE_VARIANTS = "nativeVariants"
         const val PLUGIN_CONFIGURATION = "pluginConfiguration"
         const val PLUGIN_VERIFICATION = "pluginVerification"
         const val PLUGINS = "plugins"
@@ -193,6 +194,7 @@ object Constants {
 
     object Tasks {
         const val BUILD_PLUGIN = "buildPlugin"
+        const val BUILD_PLUGIN_VARIANTS = "buildPluginVariants"
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val CLEAN_SANDBOX = "cleanSandbox"
         const val COMPOSED_JAR = "composedJar"
@@ -207,6 +209,7 @@ object Constants {
         const val JAR_SEARCHABLE_OPTIONS = "jarSearchableOptions"
         const val PATCH_PLUGIN_XML = "patchPluginXml"
         const val PREPARE_JAR_SEARCHABLE_OPTIONS = "prepareJarSearchableOptions"
+        const val PREPARE_PLUGIN_VARIANT = "preparePluginVariant"
         const val PREPARE_SANDBOX = "prepareSandbox"
         const val PREPARE_TEST = "prepareTest"
         const val PREPARE_TEST_SANDBOX = "prepareTestSandbox"

@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.file.ProjectLayout
 import org.gradle.api.tasks.bundling.Zip
 import org.gradle.kotlin.dsl.get
@@ -44,7 +45,9 @@ abstract class BuildPluginTask : Zip() {
                 from(jarSearchableOptionsTaskProvider) {
                     into(Sandbox.Plugin.LIB)
                 }
-                from(prepareSandboxTaskProvider.map { it.pluginDirectory })
+                from(prepareSandboxTaskProvider.map { it.pluginDirectory }) {
+                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                }
                 into(archiveBaseName)
             }
 
