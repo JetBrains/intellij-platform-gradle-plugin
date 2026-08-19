@@ -10,6 +10,10 @@
 - Exclude Kotlin stdlib and Kotlin Coroutines dependencies from sandbox runtime classpaths by default. Set `org.jetbrains.intellij.platform.useDefaultSandboxExclusions=false` to opt out JetBrains/intellij-platform-gradle-plugin#2177
 - Default `kotlin.stdlib.default.dependency` to `false` for projects using the IntelliJ Platform settings plugin while preserving an explicitly configured value
 
+### Changed
+
+- Keep bundled plugins declared in `product-info.json` off test classpaths by default. Set `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathEnabled=true` to opt in.
+
 ### Fixed
 
 - Serialize code instrumentation tasks within each project to prevent concurrent access to Gradle's shared Ant builder JetBrains/intellij-platform-gradle-plugin#2193

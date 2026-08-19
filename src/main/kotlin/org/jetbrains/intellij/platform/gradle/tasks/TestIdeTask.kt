@@ -146,18 +146,25 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
             val bundledPluginsClasspathExcludesProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathExcludes]
                 .map { it.splitCommaSeparated().toSet() }
-            val bundledPluginsClasspathProvider = bundledPluginsClasspathExcludesProvider.map { bundledPluginsClasspathExcludes ->
-                val platformPath = platformPathProvider.get()
-                val ideLayoutIndex = ideLayoutIndexService.get().resolve(
-                    platformPath = platformPath,
-                    cacheDirectory = ideLayoutIndexCacheDirectoryProvider.get(),
-                )
+            val bundledPluginsClasspathEnabledProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathEnabled]
+            val bundledPluginsClasspathProvider = bundledPluginsClasspathEnabledProvider.flatMap { enabled ->
+                when {
+                    enabled -> bundledPluginsClasspathExcludesProvider.map { bundledPluginsClasspathExcludes ->
+                        val platformPath = platformPathProvider.get()
+                        val ideLayoutIndex = ideLayoutIndexService.get().resolve(
+                            platformPath = platformPath,
+                            cacheDirectory = ideLayoutIndexCacheDirectoryProvider.get(),
+                        )
 
-                platformPath.productInfo().bundledPlugins
-                    .minus(bundledPluginsClasspathExcludes)
-                    .mapNotNull(ideLayoutIndex::findByIdOrModuleId)
-                    .flatMap { it.classpath.map(platformPath::resolve) }
-                    .distinct()
+                        platformPath.productInfo().bundledPlugins
+                            .minus(bundledPluginsClasspathExcludes)
+                            .mapNotNull(ideLayoutIndex::findByIdOrModuleId)
+                            .flatMap { it.classpath.map(platformPath::resolve) }
+                            .distinct()
+                    }
+
+                    else -> project.providers.provider { emptyList() }
+                }
             }
 
             // Build the classpath in the correct order:
@@ -169,7 +176,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // 6. Original classpath without runtime dependencies
             // 7. Test runtime classpath configuration
             // 8. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
-            // 9. Bundled plugins declared by product-info
+            // 9. Bundled plugins declared by product-info, when explicitly enabled
             classpath = project.files(
                 instrumentedTestCode,
                 currentPluginLibsProvider,

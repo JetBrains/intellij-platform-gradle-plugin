@@ -335,6 +335,10 @@ public final class org/jetbrains/intellij/platform/gradle/GradleProperties$ShimS
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$ShimServerPort;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathEnabled : org/jetbrains/intellij/platform/gradle/GradleProperties {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathEnabled;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathExcludes : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathExcludes;
 }
@@ -969,7 +973,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension : org/gradle/api/plugins/ExtensionAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Companion;
-	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/provider/ProviderFactory;Ljava/nio/file/Path;)V
+	public fun <init> (Lorg/gradle/api/artifacts/ConfigurationContainer;Lorg/gradle/api/provider/ProviderFactory;)V
 	public final fun caching (Lgroovy/lang/Closure;)V
 	public final fun caching (Lorg/gradle/api/Action;)V
 	public abstract fun getAutoReload ()Lorg/gradle/api/provider/Property;

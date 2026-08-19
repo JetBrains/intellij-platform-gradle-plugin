@@ -2,11 +2,13 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.assertContains
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.write
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 class TestIdeTaskTest : IntelliJPluginTestBase() {
 
@@ -40,4 +42,53 @@ class TestIdeTaskTest : IntelliJPluginTestBase() {
             assertContains("IDEA_HOME_PATH=", output)
         }
     }
+
+    @Test
+    fun `bundled plugins classpath is disabled by default and can be enabled`() {
+        buildFile write //language=kotlin
+                """
+                tasks.register("printBundledPluginsClasspath") {
+                    doLast {
+                        val testTask = tasks.named<org.gradle.api.tasks.testing.Test>("test").get()
+                        val ideaHomePath = testTask.jvmArgumentProviders
+                            .flatMap { it.asArguments() }
+                            .single { it.startsWith("-Didea.home.path=") }
+                            .substringAfter("=")
+                            .let(::file)
+                        val pluginsDirectories = listOf(
+                            ideaHomePath.resolve("plugins"),
+                            ideaHomePath.resolve("Contents/plugins"),
+                        ).filter { it.isDirectory }
+
+                        testTask.classpath.files
+                            .filter { classpathEntry ->
+                                pluginsDirectories.any { classpathEntry.toPath().startsWith(it.toPath()) }
+                            }
+                            .map { it.canonicalPath }
+                            .sorted()
+                            .forEach { println("BUNDLED_PLUGIN_CLASSPATH=${'$'}it") }
+                    }
+                }
+                """.trimIndent()
+
+        val defaultClasspath = build("printBundledPluginsClasspath").output.bundledPluginsClasspathEntries()
+        val enabledClasspath = build(
+            "printBundledPluginsClasspath",
+            projectProperties = mapOf(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString() to true),
+        ).output.bundledPluginsClasspathEntries()
+
+        assertTrue(
+            enabledClasspath.containsAll(defaultClasspath),
+            "Enabling the bundled plugins classpath should preserve the default test classpath",
+        )
+        assertTrue(
+            enabledClasspath.size > defaultClasspath.size,
+            "Enabling the bundled plugins classpath should add entries from bundled plugins",
+        )
+    }
+
+    private fun String.bundledPluginsClasspathEntries() = lineSequence()
+        .filter { it.startsWith("BUNDLED_PLUGIN_CLASSPATH=") }
+        .map { it.substringAfter('=') }
+        .toSet()
 }
