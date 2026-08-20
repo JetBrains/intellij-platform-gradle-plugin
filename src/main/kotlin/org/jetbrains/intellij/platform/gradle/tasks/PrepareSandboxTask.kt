@@ -24,7 +24,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.currentVariant
-import org.jetbrains.intellij.platform.gradle.variants
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
@@ -44,9 +43,6 @@ internal fun Project.currentNativeVariantFiles(consumerName: String): CurrentNat
     val nativeVariantsProvider = extensionProvider.map { it.nativeVariants }
     val currentVariantProvider = providers.currentVariant()
     val nativeVariantsEnabledProvider = nativeVariantsProvider.flatMap { it.enabled }
-    val preparePluginVariantTaskProviders = variants.associateWith { variant ->
-        tasks.named<PreparePluginVariantTask>(PreparePluginVariantTask.taskName(variant))
-    }
 
     val emptyFiles = objects.fileCollection()
     val emptyFilesProvider = provider { emptyFiles }
@@ -67,7 +63,9 @@ internal fun Project.currentNativeVariantFiles(consumerName: String): CurrentNat
         nativeVariantsEnabledProvider.flatMap { enabled ->
             when {
                 enabled -> currentVariantProvider.flatMap { variant ->
-                    preparePluginVariantTaskProviders.getValue(variant).flatMap { it.outputDirectory }
+                    tasks
+                        .named<PreparePluginVariantTask>(PreparePluginVariantTask.taskName(variant))
+                        .flatMap { it.outputDirectory }
                 }
 
                 else -> emptyPluginJarDirectoryProvider
