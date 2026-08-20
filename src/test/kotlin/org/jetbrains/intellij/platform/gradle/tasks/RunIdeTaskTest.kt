@@ -97,44 +97,25 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         }
     }
 
-    private fun assertRunIdePluginsDirectory(directoryName: String) {
-        val assertionTask = "assertRunIdePluginsDirectory"
-
-        buildFile write //language=kotlin
-                """
-                val runIdePluginsDirectory = tasks.named<RunIdeTask>("${Tasks.RUN_IDE}").flatMap { it.sandboxPluginsDirectory }
-                tasks.register("$assertionTask") {
-                    doLast {
-                        check(runIdePluginsDirectory.get().asFile.name == "$directoryName")
-                    }
-                }
-                """.trimIndent()
-
-        build(assertionTask)
-    }
-
     @Test
-    fun `runIde overlays current native variant on default sandbox without changing distribution`() {
+    fun `runIde uses current native variant without changing base sandbox or distribution`() {
         configureNativeVariants()
         val prepareRunIdeSandbox = "${Tasks.PREPARE_SANDBOX}_${Tasks.RUN_IDE}"
         val prepareCurrentVariant = "${Tasks.PREPARE_PLUGIN_VARIANT}_${hostVariant.os}_${hostVariant.arch}"
         dir.resolve("base/bin/collision.txt") write "base"
-        dir.resolve("base/shared.txt") write "shared"
         buildFile write //language=kotlin
                 """
-                tasks.named<PrepareSandboxTask>("${Tasks.PREPARE_SANDBOX}") {
+                tasks.named<PrepareSandboxTask>("$prepareRunIdeSandbox") {
                     from("base") {
                         into("projectName")
                     }
                 }
                 """.trimIndent()
 
-        assertRunIdePluginsDirectory("plugins_runIde")
-
         build(Tasks.RUN_IDE, args = listOf("--dry-run")) {
-            assertTrue(":${Tasks.PREPARE_SANDBOX} SKIPPED" in output.lineSequence())
             assertTrue(":$prepareRunIdeSandbox SKIPPED" in output.lineSequence())
             assertTrue(":$prepareCurrentVariant SKIPPED" in output.lineSequence())
+            assertFalse(":${Tasks.PREPARE_SANDBOX} SKIPPED" in output.lineSequence())
         }
 
         buildWithConfigurationCache(prepareRunIdeSandbox, Tasks.BUILD_PLUGIN)
@@ -144,13 +125,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
         assertCurrentNativeVariant(sandbox.resolve("plugins_runIde/projectName"))
         assertBasePlugin(sandbox.resolve("plugins/projectName"))
-        assertEquals("base", sandbox.resolve("plugins/projectName/bin/collision.txt").readText().trim())
-        assertEquals("shared", sandbox.resolve("plugins_runIde/projectName/shared.txt").readText().trim())
-        assertEquals("shared", sandbox.resolve("plugins/projectName/shared.txt").readText().trim())
 
         buildDirectory.resolve("distributions/projectName-1.0.0.zip").toZip().use { distribution ->
-            assertEquals("base", fileText(distribution, "projectName/bin/collision.txt"))
-            assertEquals("shared", fileText(distribution, "projectName/shared.txt"))
             variants.forEach { variant ->
                 assertFalse("projectName/bin/${variant.os}-${variant.arch}.txt" in collectPaths(distribution))
             }
@@ -493,7 +469,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIde keeps old log directories by default`() {
         configureFakeJavaLauncher()
-        val staleLogFile = sandbox.resolve("${Sandbox.LOG}/old-session/idea.log")
+        val staleLogFile = sandbox.resolve("${Sandbox.LOG}_${Tasks.RUN_IDE}/old-session/idea.log")
         staleLogFile.parent.createDirectories()
         staleLogFile.toFile().writeText("stale")
 
@@ -514,7 +490,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        val logDirectory = sandbox.resolve(Sandbox.LOG)
+        val logDirectory = sandbox.resolve("${Sandbox.LOG}_${Tasks.RUN_IDE}")
         val staleLogFile = logDirectory.resolve("old-session/idea.log")
         staleLogFile.parent.createDirectories()
         staleLogFile.toFile().writeText("stale")
