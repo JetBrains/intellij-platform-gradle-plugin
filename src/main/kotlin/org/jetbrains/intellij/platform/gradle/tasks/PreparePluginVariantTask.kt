@@ -20,6 +20,7 @@ import org.gradle.kotlin.dsl.register
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.Variant
 import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
@@ -139,13 +140,18 @@ abstract class PreparePluginVariantTask : DefaultTask() {
     }
 
     companion object : Registrable {
+        internal fun taskName(variant: Variant) =
+            with(variant) { "${Tasks.PREPARE_PLUGIN_VARIANT}_${os}_$arch" }
+
         override fun register(project: Project) {
             val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
             val pluginVersionProvider = project.extensionProvider.flatMap { it.pluginConfiguration.version }
             val nativeVariantsEnabledProvider = project.extensionProvider.flatMap { it.nativeVariants.enabled }
 
-            variants.forEach { (os, arch) ->
-                project.tasks.register<PreparePluginVariantTask>("${Tasks.PREPARE_PLUGIN_VARIANT}_${os}_$arch") {
+            variants.forEach { variant ->
+                val (os, arch) = variant
+
+                project.tasks.register<PreparePluginVariantTask>(taskName(variant)) {
                     inputJar.convention(composedJarTaskProvider.flatMap { it.archiveFile })
                     pluginVersion.convention(pluginVersionProvider.map { "$it-$os-$arch" })
                     operatingSystem.convention(os)

@@ -10,6 +10,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.*
 import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.gradle.jvm.tasks.Jar
@@ -22,13 +23,64 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.currentVariant
+import org.jetbrains.intellij.platform.gradle.variants
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPluginsExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
+import javax.inject.Inject
 import kotlin.io.path.*
+
+internal data class CurrentNativeVariantFiles(
+    val enabled: Provider<Boolean>,
+    val files: ConfigurableFileCollection,
+    val pluginJar: ConfigurableFileCollection,
+)
+
+internal fun Project.currentNativeVariantFiles(consumerName: String): CurrentNativeVariantFiles {
+    val nativeVariantsProvider = extensionProvider.map { it.nativeVariants }
+    val currentVariantProvider = providers.currentVariant()
+    val nativeVariantsEnabledProvider = nativeVariantsProvider.flatMap { it.enabled }
+    val preparePluginVariantTaskProviders = variants.associateWith { variant ->
+        tasks.named<PreparePluginVariantTask>(PreparePluginVariantTask.taskName(variant))
+    }
+
+    val emptyFiles = objects.fileCollection()
+    val emptyFilesProvider = provider { emptyFiles }
+    val nativeVariantFiles = objects.fileCollection().from(
+        nativeVariantsEnabledProvider.flatMap { enabled ->
+            when {
+                enabled -> currentVariantProvider.flatMap { variant ->
+                    nativeVariantsProvider.map { it[variant] }
+                }
+
+                else -> emptyFilesProvider
+            }
+        }
+    )
+
+    val emptyPluginJarDirectoryProvider = layout.buildDirectory.dir("tmp/nativeVariants/empty/$consumerName")
+    val nativeVariantPluginJar = objects.fileCollection().from(
+        nativeVariantsEnabledProvider.flatMap { enabled ->
+            when {
+                enabled -> currentVariantProvider.flatMap { variant ->
+                    preparePluginVariantTaskProviders.getValue(variant).flatMap { it.outputDirectory }
+                }
+
+                else -> emptyPluginJarDirectoryProvider
+            }
+        }
+    )
+
+    return CurrentNativeVariantFiles(
+        enabled = nativeVariantsEnabledProvider,
+        files = nativeVariantFiles,
+        pluginJar = nativeVariantPluginJar,
+    )
+}
 
 /**
  * Prepares a sandbox environment with the plugin and its dependencies installed.
@@ -42,6 +94,13 @@ import kotlin.io.path.*
 @Suppress("KDocUnresolvedReference")
 @DisableCachingByDefault(because = "Not worth caching")
 abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, SandboxStructure, SplitModeAware, PluginInstallationTargetAware {
+
+    @get:Inject
+    internal abstract val fileSystemOperations: FileSystemOperations
+
+    private val nativeVariantEnabled = project.objects.property(Boolean::class.java).convention(false)
+    private val nativeVariantFiles = project.objects.fileCollection()
+    private val nativeVariantPluginJar = project.objects.fileCollection()
 
     /**
      * Represents the suffix used i.e., for test-related or custom tasks.
@@ -148,6 +207,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
         preparePluginDirectories()
         super.copy()
+        copyNativeVariant()
     }
 
     override fun getDestinationDir() = defaultDestinationDirectory.asFile.get()
@@ -255,19 +315,45 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
             ?.forEach { it.deleteRecursively() }
     }
 
+    private fun copyNativeVariant() {
+        if (!nativeVariantEnabled.get()) {
+            return
+        }
+
+        val libDirectory = pluginDirectory.dir(Sandbox.Plugin.LIB)
+
+        pluginDirectory.asPath
+            .resolve(Sandbox.Plugin.LIB)
+            .resolve(pluginJar.asPath.fileName)
+            .deleteIfExists()
+
+        fileSystemOperations.copy {
+            from(nativeVariantFiles)
+            into(pluginDirectory)
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        }
+        fileSystemOperations.copy {
+            from(nativeVariantPluginJar)
+            into(libDirectory)
+            duplicatesStrategy = DuplicatesStrategy.INCLUDE
+        }
+    }
+
     init {
         group = Plugin.GROUP_NAME
         description = "Prepares a sandbox environment with the plugin and its dependencies installed."
         duplicatesStrategy = DuplicatesStrategy.WARN
     }
 
+    internal fun includeCurrentNativeVariant() = with(project.currentNativeVariantFiles(name)) {
+        nativeVariantEnabled.set(enabled)
+        nativeVariantFiles.from(files)
+        nativeVariantPluginJar.from(pluginJar)
+    }
+
     companion object : Registrable {
         override fun register(project: Project) =
-            project.registerTask<PrepareSandboxTask>(
-                Tasks.PREPARE_SANDBOX,
-                Tasks.PREPARE_TEST_SANDBOX,
-                Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX,
-            ) {
+            project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX) {
                 val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
 
                 sandboxSuffix.convention(
@@ -353,8 +439,15 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                 from(pluginsClasspath)
 
                 inputs.property("instrumentCode", project.extensionProvider.flatMap { it.instrumentCode })
+                inputs.property("nativeVariantEnabled", nativeVariantEnabled)
                 inputs.property("sandboxDirectory", sandboxDirectory.map { it.asPath.pathString })
                 inputs.property("sandboxSuffix", sandboxSuffix)
+                inputs.files(nativeVariantFiles)
+                    .withPropertyName("nativeVariantFiles")
+                    .withPathSensitivity(PathSensitivity.RELATIVE)
+                inputs.files(nativeVariantPluginJar)
+                    .withPropertyName("nativeVariantPluginJar")
+                    .withPathSensitivity(PathSensitivity.RELATIVE)
                 inputs.files(runtimeConfiguration)
 
                 outputs.upToDateWhen {

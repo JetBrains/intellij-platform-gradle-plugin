@@ -134,11 +134,7 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
 
     companion object : Registrable {
 
-        internal val configuration: TestIdePerformanceTask.() -> Unit = {
-            val prepareTestIdePerformanceSandboxTaskProvider =
-                project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX)
-            applySandboxFrom(prepareTestIdePerformanceSandboxTaskProvider)
-
+//        internal val configuration: TestIdePerformanceTask.() -> Unit = {
 //                artifactsDirectory.convention(extension.type.flatMap { type ->
 //                    extension.version.flatMap { version ->
 //                        project.layout.buildDirectory.dir(
@@ -169,14 +165,19 @@ abstract class TestIdePerformanceTask : JavaExec(), RunnableIdeAware, TestableAw
 //                        configurePluginDependency(project, plugin, extension, this, resolver)
 //                    }
 //                }
-        }
+//        }
 
-        override fun register(project: Project) =
-            project.registerTask<TestIdePerformanceTask>(
-                Tasks.TEST_IDE_PERFORMANCE,
-                configureWithType = false,
-                configuration = configuration
-            )
+        override fun register(project: Project) {
+            project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX, configureWithType = false) {
+                includeCurrentNativeVariant()
+            }
+
+            project.registerTask<TestIdePerformanceTask>(Tasks.TEST_IDE_PERFORMANCE, configureWithType = false) {
+                val prepareTestIdePerformanceSandboxTaskProvider =
+                    project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_IDE_PERFORMANCE_SANDBOX)
+                applySandboxFrom(prepareTestIdePerformanceSandboxTaskProvider)
+            }
+        }
     }
 
 //    private fun resolveLatestPluginUpdate(pluginId: String, buildNumber: String, channel: String = "") =
