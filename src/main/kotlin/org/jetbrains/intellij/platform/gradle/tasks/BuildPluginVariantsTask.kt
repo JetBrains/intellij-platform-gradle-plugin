@@ -4,6 +4,8 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.DefaultTask
 import org.gradle.api.Project
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.tasks.OutputFiles
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import org.gradle.work.DisableCachingByDefault
@@ -19,6 +21,9 @@ import org.jetbrains.intellij.platform.gradle.variants
 @DisableCachingByDefault(because = "No output state to track")
 abstract class BuildPluginVariantsTask : DefaultTask() {
 
+    @get:OutputFiles
+    abstract val archiveFiles: ConfigurableFileCollection
+
     init {
         group = Plugin.GROUP_NAME
         description = "Builds all OS- and architecture-specific plugin distributions."
@@ -31,7 +36,8 @@ abstract class BuildPluginVariantsTask : DefaultTask() {
             val variantTaskProviders = variants.map { variant ->
                 val (os, arch) = variant
                 val suffix = "_${os}_$arch"
-                val preparePluginVariantTaskProvider = project.tasks.named<PreparePluginVariantTask>(Tasks.PREPARE_PLUGIN_VARIANT + suffix)
+                val preparePluginVariantTaskProvider =
+                    project.tasks.named<PreparePluginVariantTask>(Tasks.PREPARE_PLUGIN_VARIANT + suffix)
 
                 project.tasks.register<BuildPluginTask>(Tasks.BUILD_PLUGIN_VARIANTS + suffix) {
                     archiveClassifier.convention("$os-$arch")
@@ -48,10 +54,15 @@ abstract class BuildPluginVariantsTask : DefaultTask() {
             }
 
             project.registerTask<BuildPluginVariantsTask>(Tasks.BUILD_PLUGIN_VARIANTS, configureWithType = false) {
+                archiveFiles.from(
+                    variantTaskProviders.map {
+                        it.map { task -> task.archiveFile }
+                    },
+                )
                 dependsOn(
                     nativeVariantsEnabledProvider.map { enabled ->
                         variantTaskProviders.takeIf { enabled }.orEmpty()
-                    }
+                    },
                 )
             }
         }
