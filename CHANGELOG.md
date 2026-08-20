@@ -16,6 +16,7 @@
 
 ### Fixed
 
+- Parse `hdiutil info` property-list output when detaching stale DMG images, avoiding partition-type GUIDs being passed to `hdiutil detach` [IJPL-253360](https://youtrack.jetbrains.com/issue/IJPL-253360)
 - Serialize code instrumentation tasks within each project to prevent concurrent access to Gradle's shared Ant builder JetBrains/intellij-platform-gradle-plugin#2193
 - Regression. Include unified IntelliJ IDEA 2025.3+ releases in the default Plugin Verifier IDE selection when targeting IntelliJ IDEA Community.
 - Change duplicates strategy in PrepareSandboxTask to `WARN` JetBrains/intellij-platform-gradle-plugin#2191
