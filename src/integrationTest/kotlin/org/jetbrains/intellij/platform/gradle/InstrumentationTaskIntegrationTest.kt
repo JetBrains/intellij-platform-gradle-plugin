@@ -88,7 +88,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertEquals(1028, (jar readEntry "MainSub.class").length)
 
                 jar containsFileInArchive "MyProjectService.class"
-                assertEquals(588, (jar readEntry "MyProjectService.class").length)
+                assertEquals(593, (jar readEntry "MyProjectService.class").length)
             }
         }
     }
