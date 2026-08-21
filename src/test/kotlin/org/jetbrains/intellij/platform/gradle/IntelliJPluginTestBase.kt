@@ -19,6 +19,15 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
     open val enableIntelliJPlatformCache = false
     val randomTaskName = "task_" + (1..1000).random()
 
+    protected open fun intellijPlatformDependency() = //language=kotlin
+        """
+        val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
+        val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
+        val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
+
+        create(type, version) { this.useInstaller.set(useInstaller) }
+        """.trimIndent()
+
     @BeforeTest
     override fun setup() {
         super.setup()
@@ -85,11 +94,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                 
                 dependencies {
                     intellijPlatform {
-                        val useInstaller = providers.gradleProperty("intellijPlatform.useInstaller").orElse("true").map { it.toBoolean() }
-                        val type = providers.gradleProperty("intellijPlatform.type").orElse("$intellijPlatformType")
-                        val version = providers.gradleProperty("intellijPlatform.version").orElse("$intellijPlatformVersion")
-                        
-                        create(type, version) { this.useInstaller.set(useInstaller) }
+                        ${intellijPlatformDependency().replace("\n", "\n                        ")}
                     }
                 }
                             
