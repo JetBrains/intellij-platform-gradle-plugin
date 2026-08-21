@@ -24,6 +24,10 @@ abstract class PrepareTestTask : DefaultTask(), TestableAware {
 
     companion object : Registrable {
         override fun register(project: Project) {
+            project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_TEST_SANDBOX, configureWithType = false) {
+                includeCurrentNativeVariant()
+            }
+
             project.registerTask<PrepareTestTask>(Tasks.PREPARE_TEST) {
                 val prepareTestSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_TEST_SANDBOX)
                 applySandboxFrom(prepareTestSandboxTaskProvider)

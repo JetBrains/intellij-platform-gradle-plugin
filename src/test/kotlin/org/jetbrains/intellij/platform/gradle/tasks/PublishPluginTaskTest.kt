@@ -7,10 +7,12 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import java.net.InetSocketAddress
-import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 
 class PublishPluginTaskTest : IntelliJPluginTestBase() {
 
@@ -169,7 +171,79 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 assertContains("Uploaded successfully; ignoring IDE Services upload response parsing failure.", output)
             }
 
-            assertEquals(1, requests.get())
+            assertEquals(1, requests.size)
+        }
+    }
+
+    @Test
+    fun `publish all native variant archives`() {
+        pluginXml overwrite //language=xml
+                """
+                <idea-plugin>
+                    <id>org.example.plugin</id>
+                    <name>PluginName</name>
+                    <version>0.0.1</version>
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <vendor>JetBrains</vendor>
+                    <depends>com.intellij.modules.platform</depends>
+                </idea-plugin>
+                """.trimIndent()
+
+        withIdeServicesUploadResponse(
+            """
+            {
+              "id" : "org.example.plugin",
+              "name" : "PluginName",
+              "vendor" : "JetBrains",
+              "minVersion" : "1.0",
+              "maxVersion" : "1.4.0",
+              "isPrivate" : true
+            }
+            """.trimIndent()
+        ) { serverUrl, requests ->
+            buildFile write //language=kotlin
+                    """
+                    intellijPlatform {
+                        nativeVariants {
+                            enabled = true
+                        }
+                        publishing {
+                            token = "ide-services-token"
+                            host = "$serverUrl"
+                            ideServices = true
+                            channels = listOf("Stable")
+                        }
+                    }
+                    """.trimIndent()
+
+            buildWithConfigurationCache(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
+                assertTaskOutcome(Tasks.PUBLISH_PLUGIN, TaskOutcome.SUCCESS)
+                assertNotNull(task(":${Tasks.BUILD_PLUGIN_VARIANTS}"))
+                assertNull(task(":${Tasks.BUILD_PLUGIN}"))
+                assertNull(task(":${Tasks.SIGN_PLUGIN}"))
+
+                variants.forEach { variant ->
+                    assertTaskOutcome("${Tasks.BUILD_PLUGIN_VARIANTS}_${variant.os}_${variant.arch}", TaskOutcome.SUCCESS)
+                }
+            }
+            buildWithConfigurationCache(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
+                assertConfigurationCacheReused()
+                assertTaskOutcome(Tasks.PUBLISH_PLUGIN, TaskOutcome.SUCCESS)
+            }
+
+            val expectedArchiveNames = variants
+                .map { "projectName-1.0.0-${it.os}-${it.arch}.zip" }
+                .flatMap { listOf(it, it) }
+                .sorted()
+            val uploadedArchiveNames = requests
+                .map { request ->
+                    requireNotNull(Regex("""filename="?([^";\r\n]+\.zip)"?""").find(request)) {
+                        "No ZIP archive filename found in upload request"
+                    }.groupValues[1]
+                }
+                .sorted()
+
+            assertEquals(expectedArchiveNames, uploadedArchiveNames)
         }
     }
 
@@ -248,12 +322,11 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
         }
     }
 
-    private fun withIdeServicesUploadResponse(responseBody: String, block: (String, AtomicInteger) -> Unit) {
-        val requests = AtomicInteger()
+    private fun withIdeServicesUploadResponse(responseBody: String, block: (String, List<String>) -> Unit) {
+        val requests = CopyOnWriteArrayList<String>()
         val server = HttpServer.create(InetSocketAddress("127.0.0.1", 0), 0).apply {
             createContext("/api/plugins") { exchange ->
-                requests.incrementAndGet()
-                exchange.requestBody.use { it.readBytes() }
+                requests += exchange.requestBody.use { it.readBytes().toString(Charsets.ISO_8859_1) }
 
                 val bytes = responseBody.toByteArray()
                 exchange.responseHeaders.add("Content-Type", "application/json")

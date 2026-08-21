@@ -6,6 +6,7 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
+import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
@@ -16,6 +17,7 @@ import org.gradle.process.ExecOperations
 import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
+import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.ComposeHotReloadArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
@@ -24,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeD
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
+import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
@@ -672,22 +675,29 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
     }
 
     companion object : Registrable {
+        private const val PREPARE_SANDBOX_RUN_IDE = "${Tasks.PREPARE_SANDBOX}_${Tasks.RUN_IDE}"
         private const val PREPARE_SANDBOX_RUN_IDE_BACKEND = "${Tasks.PREPARE_SANDBOX}_${Tasks.RUN_IDE_BACKEND}"
         private const val PREPARE_SANDBOX_RUN_IDE_FRONTEND = "${Tasks.PREPARE_SANDBOX}_${Tasks.RUN_IDE_FRONTEND}"
 
         override fun register(project: Project) {
-            project.registerTask<RunIdeTask>(Tasks.RUN_IDE, configureWithType = false) {
-                val prepareSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX)
-                applySandboxFrom(prepareSandboxTaskProvider)
+            project.registerTask<PrepareSandboxTask>(PREPARE_SANDBOX_RUN_IDE, configureWithType = false) {
+                includeCurrentNativeVariant()
             }
 
             project.registerTask<PrepareSandboxTask>(PREPARE_SANDBOX_RUN_IDE_BACKEND, configureWithType = false) {
+                includeCurrentNativeVariant()
                 splitMode.convention(true)
                 pluginInstallationTarget.convention(SplitModeAware.PluginInstallationTarget.BACKEND)
             }
             project.registerTask<PrepareSandboxTask>(PREPARE_SANDBOX_RUN_IDE_FRONTEND, configureWithType = false) {
+                includeCurrentNativeVariant()
                 splitMode.convention(true)
                 pluginInstallationTarget.convention(SplitModeAware.PluginInstallationTarget.FRONTEND)
+            }
+
+            project.registerTask<RunIdeTask>(Tasks.RUN_IDE, configureWithType = false) {
+                val prepareRunIdeSandboxTaskProvider = project.tasks.named<PrepareSandboxTask>(PREPARE_SANDBOX_RUN_IDE)
+                applySandboxFrom(prepareRunIdeSandboxTaskProvider)
             }
 
             project.registerTask<RunIdeTask>(Tasks.RUN_IDE_BACKEND, configureWithType = false) {

@@ -588,6 +588,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
             Signing.register(project, target = intelliJPlatform)
             Publishing.register(project, target = intelliJPlatform)
+            NativeVariants.register(project, target = intelliJPlatform)
         }
 
         IntelliJPlatformDependenciesExtension.register(

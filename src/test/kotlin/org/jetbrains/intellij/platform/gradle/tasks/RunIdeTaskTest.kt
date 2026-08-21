@@ -7,9 +7,13 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.assertContains
 import org.jetbrains.intellij.platform.gradle.assertNotContains
+import org.jetbrains.intellij.platform.gradle.buildDirectory
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.cacheDirectory
+import org.jetbrains.intellij.platform.gradle.currentVariant
 import org.jetbrains.intellij.platform.gradle.overwrite
+import org.jetbrains.intellij.platform.gradle.pluginXml
+import org.jetbrains.intellij.platform.gradle.variants
 import org.jetbrains.intellij.platform.gradle.write
 import javax.tools.ToolProvider
 import kotlin.io.path.createDirectories
@@ -17,6 +21,7 @@ import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.readText
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -26,6 +31,137 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     private val sandbox
         get() = cacheDirectory.resolve(Sandbox.CONTAINER).resolve("projectName")
             .resolve("$intellijPlatformType-$intellijPlatformVersion")
+    private val hostVariant = currentVariant(System.getProperty("os.name"), System.getProperty("os.arch"))
+
+    private fun configureNativeVariants(enabled: Boolean = true) {
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <name>MyPluginName</name>
+                  <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
+
+        variants.forEach { variant ->
+            dir.resolve("native/${variant.os}-${variant.arch}/bin/${variant.os}-${variant.arch}.txt") write "${variant.os}-${variant.arch}"
+            dir.resolve("native/${variant.os}-${variant.arch}/bin/collision.txt") write "${variant.os}-${variant.arch}"
+        }
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    nativeVariants {
+                        enabled = $enabled
+                        linux.x86_64.from(file("native/linux-x86_64"))
+                        linux.arm64.from(file("native/linux-arm64"))
+                        mac.x86_64.from(file("native/mac-x86_64"))
+                        mac.arm64.from(file("native/mac-arm64"))
+                        windows.x86_64.from(file("native/windows-x86_64"))
+                        windows.arm64.from(file("native/windows-arm64"))
+                    }
+                }
+                """.trimIndent()
+    }
+
+    private fun assertCurrentNativeVariant(pluginDirectory: java.nio.file.Path) {
+        variants.forEach { variant ->
+            val marker = pluginDirectory.resolve("bin/${variant.os}-${variant.arch}.txt")
+            when (variant) {
+                hostVariant -> assertTrue(marker.exists(), "Expected current native variant marker: $marker")
+                else -> assertFalse(marker.exists(), "Unexpected native variant marker: $marker")
+            }
+        }
+        assertEquals(
+            "${hostVariant.os}-${hostVariant.arch}",
+            pluginDirectory.resolve("bin/collision.txt").readText().trim(),
+        )
+
+        pluginDirectory.resolve("lib/projectName-1.0.0.jar").toZip().use { jar ->
+            val descriptor = fileText(jar, "META-INF/plugin.xml")
+            assertContains("<version>1.0.0-${hostVariant.os}-${hostVariant.arch}</version>", descriptor)
+            assertContains("<depends>com.intellij.modules.os.${hostVariant.os}</depends>", descriptor)
+            assertContains("<depends>com.intellij.modules.arch.${hostVariant.arch}</depends>", descriptor)
+        }
+    }
+
+    private fun assertBasePlugin(pluginDirectory: java.nio.file.Path) {
+        variants.forEach { variant ->
+            assertFalse(pluginDirectory.resolve("bin/${variant.os}-${variant.arch}.txt").exists())
+        }
+
+        pluginDirectory.resolve("lib/projectName-1.0.0.jar").toZip().use { jar ->
+            val descriptor = fileText(jar, "META-INF/plugin.xml")
+            assertContains("<version>1.0.0</version>", descriptor)
+            assertNotContains("<depends>com.intellij.modules.os.", descriptor)
+            assertNotContains("<depends>com.intellij.modules.arch.", descriptor)
+        }
+    }
+
+    @Test
+    fun `runIde uses current native variant without changing base sandbox or distribution`() {
+        configureNativeVariants()
+        val prepareRunIdeSandbox = "${Tasks.PREPARE_SANDBOX}_${Tasks.RUN_IDE}"
+        val prepareCurrentVariant = "${Tasks.PREPARE_PLUGIN_VARIANT}_${hostVariant.os}_${hostVariant.arch}"
+        dir.resolve("base/bin/collision.txt") write "base"
+        buildFile write //language=kotlin
+                """
+                tasks.named<PrepareSandboxTask>("$prepareRunIdeSandbox") {
+                    from("base") {
+                        into("projectName")
+                    }
+                }
+                """.trimIndent()
+
+        build(Tasks.RUN_IDE, args = listOf("--dry-run")) {
+            assertTrue(":$prepareRunIdeSandbox SKIPPED" in output.lineSequence())
+            assertTrue(":$prepareCurrentVariant SKIPPED" in output.lineSequence())
+            assertFalse(":${Tasks.PREPARE_SANDBOX} SKIPPED" in output.lineSequence())
+        }
+
+        buildWithConfigurationCache(prepareRunIdeSandbox, Tasks.BUILD_PLUGIN)
+        buildWithConfigurationCache(prepareRunIdeSandbox, Tasks.BUILD_PLUGIN) {
+            assertConfigurationCacheReused()
+        }
+
+        assertCurrentNativeVariant(sandbox.resolve("plugins_runIde/projectName"))
+        assertBasePlugin(sandbox.resolve("plugins/projectName"))
+
+        buildDirectory.resolve("distributions/projectName-1.0.0.zip").toZip().use { distribution ->
+            variants.forEach { variant ->
+                assertFalse("projectName/bin/${variant.os}-${variant.arch}.txt" in collectPaths(distribution))
+            }
+            distribution.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                val descriptor = fileText(jar, "META-INF/plugin.xml")
+                assertContains("<version>1.0.0</version>", descriptor)
+                assertNotContains("<depends>com.intellij.modules.os.", descriptor)
+                assertNotContains("<depends>com.intellij.modules.arch.", descriptor)
+            }
+        }
+    }
+
+    @Test
+    fun `split and custom runIde sandboxes use current native variant`() {
+        configureNativeVariants()
+        val customRunIde = "customRunIde"
+        buildFile write //language=kotlin
+                """
+                val $customRunIde by intellijPlatformTesting.runIde.registering {
+                    task {
+                        enabled = false
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "${Tasks.PREPARE_SANDBOX}_${Tasks.RUN_IDE_BACKEND}",
+            "${Tasks.PREPARE_SANDBOX}_${Tasks.RUN_IDE_FRONTEND}",
+            "${Tasks.PREPARE_SANDBOX}_$customRunIde",
+        )
+
+        assertCurrentNativeVariant(sandbox.resolve("plugins_runIdeBackend/projectName"))
+        assertCurrentNativeVariant(sandbox.resolve("plugins_runIdeFrontend/frontend/projectName"))
+        assertCurrentNativeVariant(sandbox.resolve("plugins_$customRunIde/projectName"))
+    }
 
     private fun configureFrontendJoinLinkProvider(
         delayMs: Int,
@@ -127,7 +263,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         helperSource overwrite //language=java
                 """
                 package fake.launcher;
-
+                
                 import java.lang.management.ManagementFactory;
                 import java.net.ServerSocket;
                 import java.nio.file.Files;
@@ -136,10 +272,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 import java.util.ArrayList;
                 import java.util.Arrays;
                 import java.util.List;
-
+                
                 public final class FakeLauncher {
                     private FakeLauncher() {}
-
+                
                     public static void run(String mainClass, String[] args) throws Exception {
                         var debugLines = new ArrayList<String>();
                         debugLines.add("=== fake java start ===");
@@ -148,7 +284,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                         for (var arg : args) {
                             debugLines.add("ARG=" + arg);
                         }
-
+                
                         printAndLog("JETBRAINS_CLIENT_JDK=" + getenv("JETBRAINS_CLIENT_JDK"), debugLines);
                         printAndLog("JETBRAINS_CLIENT_VM_OPTIONS=" + getenv("JETBRAINS_CLIENT_VM_OPTIONS"), debugLines);
                         printAndLog("JETBRAINS_CLIENT_PROPERTIES=" + getenv("JETBRAINS_CLIENT_PROPERTIES"), debugLines);
@@ -156,17 +292,17 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                         readVmOptions(debugLines);
                         printAndLog("JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_END", debugLines);
                         printAndLog("MAIN_CLASS=" + mainClass, debugLines);
-
+                
                         var jvmArgs = String.join(" ", filteredInputArguments());
                         if (!jvmArgs.isBlank()) {
                             printAndLog("JVM_ARGS=" + jvmArgs, debugLines);
                         }
-
+                
                         var appArgs = String.join(" ", args);
                         if (!appArgs.isBlank()) {
                             printAndLog("APP_ARGS=" + appArgs, debugLines);
                         }
-
+                
                         var argsList = Arrays.asList(args);
                         var exitCode = resolveExitCode(argsList);
                         if (argsList.contains("serverMode")) {
@@ -175,7 +311,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                             if (portOptionIndex >= 0 && portOptionIndex + 1 < args.length) {
                                 port = Integer.parseInt(args[portOptionIndex + 1]);
                             }
-
+                
                             var aliveMs = System.getProperty("fake.backend.alive.ms");
                             if (aliveMs != null && !aliveMs.isBlank()) {
                                 try (var serverSocket = new ServerSocket(port)) {
@@ -190,14 +326,14 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                                 printAndLog("Join link: tcp://127.0.0.1:" + port + "#cb=fake", debugLines);
                             }
                         }
-
+                
                         debugLines.add("=== fake java end ===");
                         writeDebugLog(debugLines);
                         if (exitCode != 0) {
                             System.exit(exitCode);
                         }
                     }
-
+                
                     private static int resolveExitCode(List<String> argsList) {
                         var propertyName = "fake.exit.code";
                         if (argsList.contains("serverMode")) {
@@ -205,34 +341,34 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                         } else if (argsList.contains("thinClient")) {
                             propertyName = "fake.frontend.exit.code";
                         }
-
+                
                         var configured = System.getProperty(propertyName, System.getProperty("fake.exit.code", "0"));
                         if (configured == null || configured.isBlank()) {
                             return 0;
                         }
                         return Integer.parseInt(configured);
                     }
-
+                
                     private static String getenv(String name) {
                         return System.getenv().getOrDefault(name, "");
                     }
-
+                
                     private static void readVmOptions(List<String> debugLines) throws Exception {
                         var vmOptions = getenv("JETBRAINS_CLIENT_VM_OPTIONS");
                         if (vmOptions.isBlank()) {
                             return;
                         }
-
+                
                         var vmOptionsPath = Path.of(vmOptions);
                         if (!Files.exists(vmOptionsPath)) {
                             return;
                         }
-
+                
                         for (var line : Files.readAllLines(vmOptionsPath)) {
                             printAndLog(line, debugLines);
                         }
                     }
-
+                
                     private static List<String> filteredInputArguments() {
                         var fakeLauncherClasses = System.getProperty("fake.java.fakeLauncherClasses", "");
                         var filtered = new ArrayList<String>();
@@ -247,12 +383,12 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                         }
                         return filtered;
                     }
-
+                
                     private static void printAndLog(String line, List<String> debugLines) {
                         System.out.println(line);
                         debugLines.add(line);
                     }
-
+                
                     private static void writeDebugLog(List<String> debugLines) throws Exception {
                         var debugLog = System.getProperty("fake.java.debug.log", "");
                         if (debugLog.isBlank()) {
@@ -271,10 +407,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         ideaMainSource overwrite //language=java
                 """
                 package com.intellij.idea;
-
+                
                 public final class Main {
                     private Main() {}
-
+                
                     public static void main(String[] args) throws Exception {
                         fake.launcher.FakeLauncher.run(Main.class.getName(), args);
                     }
@@ -283,10 +419,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         intellijLoaderSource overwrite //language=java
                 """
                 package com.intellij.platform.runtime.loader;
-
+                
                 public final class IntellijLoader {
                     private IntellijLoader() {}
-
+                
                     public static void main(String[] args) throws Exception {
                         fake.launcher.FakeLauncher.run(IntellijLoader.class.getName(), args);
                     }
@@ -333,7 +469,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIde keeps old log directories by default`() {
         configureFakeJavaLauncher()
-        val staleLogFile = sandbox.resolve("${Sandbox.LOG}/old-session/idea.log")
+        val staleLogFile = sandbox.resolve("${Sandbox.LOG}_${Tasks.RUN_IDE}/old-session/idea.log")
         staleLogFile.parent.createDirectories()
         staleLogFile.toFile().writeText("stale")
 
@@ -354,7 +490,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             """.trimIndent()
         )
 
-        val logDirectory = sandbox.resolve(Sandbox.LOG)
+        val logDirectory = sandbox.resolve("${Sandbox.LOG}_${Tasks.RUN_IDE}")
         val staleLogFile = logDirectory.resolve("old-session/idea.log")
         staleLogFile.parent.createDirectories()
         staleLogFile.toFile().writeText("stale")

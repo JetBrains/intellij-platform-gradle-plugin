@@ -100,21 +100,20 @@ class SandboxIntegrationTest : IntelliJPlatformIntegrationTestBase(
     fun `create sandbox in a custom directory within the common sandbox container`() {
         buildFile write //language=kotlin
                 """
-                tasks {
-                    prepareSandbox {
-                        sandboxDirectory = intellijPlatform.sandboxContainer.map { it.dir("custom-directory") }
-                    }
+                tasks.named<org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask>("${Tasks.PREPARE_SANDBOX}_${Tasks.RUN_IDE}") {
+                    sandboxDirectory = intellijPlatform.sandboxContainer.map { it.dir("custom-directory") }
                 }
                 """.trimIndent()
 
         build(Tasks.RUN_IDE, projectProperties = defaultProjectProperties) {
             val sandbox = sandboxDirectory.resolve("custom-directory")
+            val suffix = "_${Tasks.RUN_IDE}"
 
             assertExists(sandbox)
-            assertExists(sandbox.resolve(Sandbox.CONFIG))
-            assertExists(sandbox.resolve(Sandbox.LOG))
-            assertExists(sandbox.resolve(Sandbox.PLUGINS))
-            assertExists(sandbox.resolve(Sandbox.SYSTEM))
+            assertExists(sandbox.resolve(Sandbox.CONFIG + suffix))
+            assertExists(sandbox.resolve(Sandbox.LOG + suffix))
+            assertExists(sandbox.resolve(Sandbox.PLUGINS + suffix))
+            assertExists(sandbox.resolve(Sandbox.SYSTEM + suffix))
         }
     }
 

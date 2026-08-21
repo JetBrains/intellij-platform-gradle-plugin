@@ -119,6 +119,70 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `build native plugin variant from shared sandbox`() {
+        writeJavaFile()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <name>MyPluginName</name>
+                  <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
+
+        dir.resolve("native/linux-arm64/bin/native.txt") write "linux-arm64"
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    nativeVariants {
+                        enabled = true
+                        linux.arm64.from(file("native/linux-arm64"))
+                    }
+                }
+                """.trimIndent()
+
+        build(Tasks.BUILD_PLUGIN).apply {
+            assertNull(task(":${Tasks.BUILD_PLUGIN_VARIANTS}_linux_arm64"))
+        }
+
+        buildWithConfigurationCache(Tasks.BUILD_PLUGIN_VARIANTS).apply {
+            assertNotNull(task(":${Tasks.BUILD_PLUGIN_VARIANTS}_linux_arm64"))
+            assertNull(task(":${Tasks.BUILD_PLUGIN}"))
+            assertNull(task(":${Tasks.PREPARE_SANDBOX}_linux_arm64"))
+        }
+
+        buildWithConfigurationCache(Tasks.BUILD_PLUGIN_VARIANTS) {
+            assertConfigurationCacheReused()
+        }
+
+        buildDirectory.resolve("distributions/projectName-1.0.0-linux-arm64.zip").let { distribution ->
+            assertExists(distribution)
+
+            distribution.toZip().use { zip ->
+                assertTrue("projectName/bin/native.txt" in collectPaths(zip))
+                assertEquals("linux-arm64", fileText(zip, "projectName/bin/native.txt"))
+
+                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                    assertEquals(
+                        """
+                        <idea-plugin>
+                          <idea-version since-build="$sinceBuild" />
+                          <version>1.0.0-linux-arm64</version>
+                          <name>MyPluginName</name>
+                          <vendor>JetBrains</vendor>
+                          <depends>com.intellij.modules.os.linux</depends>
+                          <depends>com.intellij.modules.arch.arm64</depends>
+                        </idea-plugin>
+                        """.trimIndent(),
+                        fileText(jar, "META-INF/plugin.xml"),
+                    )
+                }
+            }
+        }
+    }
+
+    @Test
     fun `build plugin distribution with Kotlin`() {
         writeJavaFile()
         writeKotlinUIFile()

@@ -44,6 +44,8 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             BuildSearchableOptionsTask,
             PrepareJarSearchableOptionsTask,
             JarSearchableOptionsTask,
+            PreparePluginVariantTask,
+            BuildPluginVariantsTask,
             BuildPluginTask,
 
             // Test

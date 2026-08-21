@@ -5,7 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.api.DefaultTask
 import org.gradle.api.GradleException
 import org.gradle.api.Project
-import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
@@ -38,10 +38,10 @@ abstract class PublishPluginTask : DefaultTask() {
      * @see BuildPluginTask.archiveFile
      * @see IntelliJPlatformExtension.Signing
      */
-    @get:InputFile
+    @get:InputFiles
     @get:Optional
     @get:PathSensitive(PathSensitivity.RELATIVE)
-    abstract val archiveFile: RegularFileProperty
+    abstract val archiveFiles: ConfigurableFileCollection
 
     /**
      * Specifies the URL host of a plugin repository.
@@ -98,10 +98,7 @@ abstract class PublishPluginTask : DefaultTask() {
             throw GradleException("'token' property must be specified for plugin publishing")
         }
 
-        val path = archiveFile.asPath
-        val pluginId = withIdePluginManager(temporaryDir.toPath()) {
-            it.safelyCreatePlugin(path, suppressPluginProblems = false).getOrThrow().pluginId
-        }
+        val paths = archiveFiles.files.map { it.toPath() }
 
         val resolvedHost = host.get()
         val useIdeServices = ideServices.get()
@@ -118,24 +115,30 @@ abstract class PublishPluginTask : DefaultTask() {
             false -> PluginRepositoryFactory.create(resolvedHost, resolvedToken)
         }
 
-        resolvedChannels.forEach { channel ->
-            log.info("Uploading plugin '$pluginId' from '$path' to '$resolvedHost', channel: '$channel'")
-            try {
-                repositoryClient.uploader.uploadUpdateByXmlIdAndFamily(
-                    id = pluginId as StringPluginId,
-                    family = ProductFamily.INTELLIJ,
-                    file = path.toFile(),
-                    channel = channel.takeIf { it != "default" },
-                    notes = null,
-                    isHidden = isHidden,
-                )
-                log.info("Uploaded successfully")
-            } catch (exception: Exception) {
-                if (useIdeServices && exception.isIdeServicesUploadResponseParsingFailure()) {
-                    log.warn("Uploaded successfully; ignoring IDE Services upload response parsing failure.")
-                    log.debug("IDE Services upload response parsing failure", exception)
-                } else {
-                    throw GradleException("Failed to upload plugin: ${exception.message}", exception)
+        paths.forEach { path ->
+            val pluginId = withIdePluginManager(temporaryDir.toPath()) {
+                it.safelyCreatePlugin(path, suppressPluginProblems = false).getOrThrow().pluginId
+            }
+
+            resolvedChannels.forEach { channel ->
+                log.info("Uploading plugin '$pluginId' from '$path' to '$resolvedHost', channel: '$channel'")
+                try {
+                    repositoryClient.uploader.uploadUpdateByXmlIdAndFamily(
+                        id = pluginId as StringPluginId,
+                        family = ProductFamily.INTELLIJ,
+                        file = path.toFile(),
+                        channel = channel.takeIf { it != "default" },
+                        notes = null,
+                        isHidden = isHidden,
+                    )
+                    log.info("Uploaded successfully")
+                } catch (exception: Exception) {
+                    if (useIdeServices && exception.isIdeServicesUploadResponseParsingFailure()) {
+                        log.warn("Uploaded successfully; ignoring IDE Services upload response parsing failure.")
+                        log.debug("IDE Services upload response parsing failure", exception)
+                    } else {
+                        throw GradleException("Failed to upload plugin: ${exception.message}", exception)
+                    }
                 }
             }
         }
@@ -160,7 +163,9 @@ abstract class PublishPluginTask : DefaultTask() {
             project.registerTask<PublishPluginTask>(Tasks.PUBLISH_PLUGIN) {
                 val publishingProvider = project.extensionProvider.map { it.publishing }
                 val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
+                val buildPluginVariantsTaskProvider = project.tasks.named<BuildPluginVariantsTask>(Tasks.BUILD_PLUGIN_VARIANTS)
                 val signPluginTaskProvider = project.tasks.named<SignPluginTask>(Tasks.SIGN_PLUGIN)
+                val nativeVariantsEnabledProvider = project.extensionProvider.flatMap { it.nativeVariants.enabled }
 
                 val isOffline = project.gradle.startParameter.isOffline
 
@@ -170,20 +175,28 @@ abstract class PublishPluginTask : DefaultTask() {
                 channels.convention(publishingProvider.flatMap { it.channels })
                 hidden.convention(publishingProvider.flatMap { it.hidden })
 
-                // TODO: can this be done in any other way?
-                archiveFile.convention(
-                    signPluginTaskProvider
-                        .map { it.didWork }
-                        .flatMap { signed ->
-                            when {
-                                signed -> signPluginTaskProvider.flatMap { it.signedArchiveFile }
-                                else -> buildPluginTaskProvider.flatMap { it.archiveFile }
+                archiveFiles.from(
+                    nativeVariantsEnabledProvider.flatMap { enabled ->
+                        when (enabled) {
+                            true -> buildPluginVariantsTaskProvider.map { it.archiveFiles }
+                            else -> signPluginTaskProvider.map { it.didWork }.flatMap { signed ->
+                                when {
+                                    signed -> signPluginTaskProvider.flatMap { it.signedArchiveFile }
+                                    else -> buildPluginTaskProvider.flatMap { it.archiveFile }
+                                }
                             }
                         }
+                    },
+                )
+                dependsOn(
+                    nativeVariantsEnabledProvider.map { enabled ->
+                        when (enabled) {
+                            true -> listOf(buildPluginVariantsTaskProvider)
+                            false -> listOf(buildPluginTaskProvider, signPluginTaskProvider)
+                        }
+                    },
                 )
 
-                dependsOn(buildPluginTaskProvider)
-                dependsOn(signPluginTaskProvider)
                 onlyIf { !isOffline }
             }
     }
