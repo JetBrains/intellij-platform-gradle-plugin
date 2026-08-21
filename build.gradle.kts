@@ -148,7 +148,7 @@ tasks {
 testing {
     suites {
         fun JvmComponentDependencies.embeddedKotlin(module: String) =
-            project.dependencies.embeddedKotlin(module) as String
+            dependencyFactory.create("org.jetbrains.kotlin:kotlin-$module:$embeddedKotlinVersion")
 
 //        named<JvmTestSuite>("test") {
 //            dependencies {
