@@ -175,6 +175,10 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
     private val log = Logger(javaClass)
 
+    init {
+        into(defaultDestinationDirectory)
+    }
+
     @TaskAction
     override fun copy() {
         log.info("Preparing sandbox")
@@ -207,10 +211,6 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         super.copy()
         copyNativeVariant()
     }
-
-    override fun getDestinationDir() = defaultDestinationDirectory.asFile.get()
-
-    override fun configure(closure: Closure<*>) = super.configure(closure)
 
     /**
      * @throws GradleException
