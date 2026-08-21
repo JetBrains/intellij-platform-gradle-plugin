@@ -10,6 +10,8 @@ import kotlin.test.Test
 
 class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
 
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
+
     private val patchedPluginXml
         get() = buildDirectory.resolve("tmp/${Tasks.PATCH_PLUGIN_XML}/plugin.xml")
 
@@ -428,6 +430,7 @@ class PatchPluginXmlTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
+        build(Tasks.PATCH_PLUGIN_XML)
         buildWithConfigurationCache(Tasks.PATCH_PLUGIN_XML)
 
         buildWithConfigurationCache(Tasks.PATCH_PLUGIN_XML) {

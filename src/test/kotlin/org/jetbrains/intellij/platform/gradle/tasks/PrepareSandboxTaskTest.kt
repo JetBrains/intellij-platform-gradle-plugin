@@ -7,10 +7,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.Version
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.zip.ZipEntry
-import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
 import kotlin.test.BeforeTest
 import kotlin.test.Ignore
@@ -20,7 +16,7 @@ import kotlin.test.assertFalse
 
 class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
-    override fun intellijPlatformDependency() = """local("${createLocalIntelliJPlatform().invariantSeparatorsPathString}")"""
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
 
     @BeforeTest
     override fun setup() {
@@ -32,81 +28,6 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                     compileOnly("org.jetbrains:annotations:26.0.2")
                 }
                 """.trimIndent()
-    }
-
-    private fun createLocalIntelliJPlatform() = dir.resolve("local-ide").also { platformPath ->
-        platformPath.resolve("build.txt") write "$intellijPlatformType-$intellijPlatformBuildNumber"
-        platformPath.resolve("product-info.json") write //language=json
-                """
-                {
-                  "name": "IntelliJ IDEA",
-                  "version": "$intellijPlatformVersion",
-                  "buildNumber": "$intellijPlatformBuildNumber",
-                  "productCode": "$intellijPlatformType",
-                  "dataDirectoryName": "IntelliJIdeaTest",
-                  "svgIconPath": "bin/idea.svg",
-                  "productVendor": "JetBrains",
-                  "launch": [],
-                  "bundledPlugins": [
-                    "com.intellij",
-                    "com.intellij.copyright"
-                  ],
-                  "modules": [],
-                  "layout": [
-                    {
-                      "name": "com.intellij",
-                      "kind": "plugin",
-                      "classPath": [
-                        "lib/product.jar"
-                      ]
-                    },
-                    {
-                      "name": "com.intellij.copyright",
-                      "kind": "plugin",
-                      "classPath": [
-                        "plugins/copyright/lib/copyright.jar"
-                      ]
-                    }
-                  ]
-                }
-                """.trimIndent()
-
-        writePlugin(
-            path = platformPath.resolve("lib/product.jar"),
-            descriptorName = "ideaPlugin.xml",
-            id = "com.intellij",
-            name = "IDEA CORE",
-        )
-        writePlugin(
-            path = platformPath.resolve("plugins/copyright/lib/copyright.jar"),
-            descriptorName = "plugin.xml",
-            id = "com.intellij.copyright",
-            name = "Copyright",
-        )
-        writeEmptyJar(platformPath.resolve("modules/module-descriptors.jar"))
-    }
-
-    private fun writePlugin(path: Path, descriptorName: String, id: String, name: String) {
-        path.parent.createDirectories()
-        ZipOutputStream(Files.newOutputStream(path)).use { zip ->
-            zip.putNextEntry(ZipEntry("META-INF/$descriptorName"))
-            zip.write(
-                //language=xml
-                """
-                <idea-plugin>
-                  <id>$id</id>
-                  <name>$name</name>
-                  <version>1.0</version>
-                </idea-plugin>
-                """.trimIndent().toByteArray()
-            )
-            zip.closeEntry()
-        }
-    }
-
-    private fun writeEmptyJar(path: Path) {
-        path.parent.createDirectories()
-        ZipOutputStream(Files.newOutputStream(path)).close()
     }
 
     private val sandbox

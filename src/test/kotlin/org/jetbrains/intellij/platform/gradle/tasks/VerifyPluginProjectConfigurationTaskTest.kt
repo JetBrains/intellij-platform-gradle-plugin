@@ -14,6 +14,8 @@ private const val HEADER = "The following plugin configuration issues were found
 
 class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
+
     @Test
     fun `do not show errors when configuration is valid`() {
         pluginXml write //language=xml
@@ -416,6 +418,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 </idea-plugin>
                 """.trimIndent()
 
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION)
         buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION)
 
         buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {

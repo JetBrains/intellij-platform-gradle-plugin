@@ -6,6 +6,7 @@ import org.gradle.api.internal.project.ProjectInternal
 import org.gradle.kotlin.dsl.support.normaliseLineSeparators
 import java.io.FileOutputStream
 import java.nio.file.*
+import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.*
@@ -27,6 +28,82 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
         create(type, version) { this.useInstaller.set(useInstaller) }
         """.trimIndent()
+
+    protected fun localIntelliJPlatformDependency() =
+        """local("${createLocalIntelliJPlatform().invariantSeparatorsPathString}")"""
+
+    private fun createLocalIntelliJPlatform() = dir.resolve("local-ide").also { platformPath ->
+        platformPath.resolve("build.txt") write "$intellijPlatformType-$intellijPlatformBuildNumber"
+        platformPath.resolve("product-info.json") write //language=json
+                """
+                {
+                  "name": "IntelliJ IDEA",
+                  "version": "$intellijPlatformVersion",
+                  "buildNumber": "$intellijPlatformBuildNumber",
+                  "productCode": "$intellijPlatformType",
+                  "dataDirectoryName": "IntelliJIdeaTest",
+                  "svgIconPath": "bin/idea.svg",
+                  "productVendor": "JetBrains",
+                  "launch": [],
+                  "bundledPlugins": [
+                    "com.intellij",
+                    "com.intellij.copyright"
+                  ],
+                  "modules": [],
+                  "layout": [
+                    {
+                      "name": "com.intellij",
+                      "kind": "plugin",
+                      "classPath": [
+                        "lib/product.jar"
+                      ]
+                    },
+                    {
+                      "name": "com.intellij.copyright",
+                      "kind": "plugin",
+                      "classPath": [
+                        "plugins/copyright/lib/copyright.jar"
+                      ]
+                    }
+                  ]
+                }
+                """.trimIndent()
+
+        writePlugin(
+            path = platformPath.resolve("lib/product.jar"),
+            descriptorName = "ideaPlugin.xml",
+            id = "com.intellij",
+            name = "IDEA CORE",
+        )
+        writePlugin(
+            path = platformPath.resolve("plugins/copyright/lib/copyright.jar"),
+            descriptorName = "plugin.xml",
+            id = "com.intellij.copyright",
+            name = "Copyright",
+        )
+        platformPath.resolve("modules/module-descriptors.jar").apply {
+            parent.createDirectories()
+            ZipOutputStream(Files.newOutputStream(this)).close()
+        }
+    }
+
+    private fun writePlugin(path: Path, descriptorName: String, id: String, name: String) {
+        path.parent.createDirectories()
+        ZipOutputStream(Files.newOutputStream(path)).use { zip ->
+            zip.putNextEntry(ZipEntry("META-INF/$descriptorName"))
+            zip.write(
+                //language=xml
+                """
+                <idea-plugin>
+                  <id>$id</id>
+                  <name>$name</name>
+                  <version>1.0</version>
+                </idea-plugin>
+                """.trimIndent().toByteArray()
+            )
+            zip.closeEntry()
+        }
+    }
 
     @BeforeTest
     override fun setup() {
