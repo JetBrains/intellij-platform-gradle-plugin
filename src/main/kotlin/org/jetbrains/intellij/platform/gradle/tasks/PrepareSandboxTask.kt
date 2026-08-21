@@ -318,21 +318,22 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
             return
         }
 
-        val libDirectory = pluginDirectory.dir(Sandbox.Plugin.LIB)
+        val pluginDirectoryPath = pluginDirectory.asPath
+        val libDirectoryPath = pluginDirectoryPath.resolve(Sandbox.Plugin.LIB)
 
-        pluginDirectory.asPath
+        pluginDirectoryPath
             .resolve(Sandbox.Plugin.LIB)
             .resolve(pluginJar.asPath.fileName)
             .deleteIfExists()
 
         fileSystemOperations.copy {
             from(nativeVariantFiles)
-            into(pluginDirectory)
+            into(pluginDirectoryPath)
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
         fileSystemOperations.copy {
             from(nativeVariantPluginJar)
-            into(libDirectory)
+            into(libDirectoryPath)
             duplicatesStrategy = DuplicatesStrategy.INCLUDE
         }
     }
