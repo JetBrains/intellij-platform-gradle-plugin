@@ -1261,6 +1261,8 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         /**
          * Publish the plugin update in multiple variants for different OSes and architectures.
          *
+         * Requires plugin compatibility to start at IntelliJ Platform 2026.1 (`since-build` 261) or later.
+         *
          * Default value: `false`
          */
         abstract val enabled: Property<Boolean>

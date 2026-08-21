@@ -50,6 +50,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
+                    pluginConfiguration.ideaVersion.sinceBuild = "$nativeVariantsSinceBuild"
                     nativeVariants {
                         enabled = $enabled
                         linux.x86_64.from(file("native/linux-x86_64"))

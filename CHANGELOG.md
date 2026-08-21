@@ -4,7 +4,7 @@
 
 ### Added
 
-- Add `intellijPlatform.nativeVariants` DSL and `buildPluginVariants` tasks for creating Linux, macOS, and Windows plugin distributions targeting `x86_64` and `arm64` architectures.
+- Add `intellijPlatform.nativeVariants` DSL and `buildPluginVariants` tasks for creating Linux, macOS, and Windows plugin distributions targeting `x86_64` and `arm64` architectures. Native variant compatibility must start at IntelliJ Platform 2026.1 (`since-build` 261).
 - Add `testFrameworks()` dependency helpers for configuring multiple `TestFrameworkType` values in one call JetBrains/intellij-platform-gradle-plugin#2194
 - Expand `TestFrameworkType.Plugin` with IJent, ML completion, navigation bar, Python, RD client, Rider, and statistics test frameworks.
 - Add sandbox-specific runtime classpath configurations for applying dependency exclusions to every `PrepareSandboxTask` without changing project compile or test classpaths JetBrains/intellij-platform-gradle-plugin#2177

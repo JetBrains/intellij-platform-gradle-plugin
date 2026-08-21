@@ -47,6 +47,8 @@ object Constants {
         val MINIMAL_GRADLE_VERSION: GradleVersion = GradleVersion.version("9.0.0")
         val MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER = "233".toVersion()
         val MINIMAL_INTELLIJ_PLATFORM_VERSION = "2023.3".toVersion()
+        internal val MINIMAL_NATIVE_VARIANTS_BUILD_NUMBER = "261".toVersion()
+        internal val MINIMAL_NATIVE_VARIANTS_VERSION = "2026.1".toVersion()
         val MINIMAL_SPLIT_MODE_BUILD_NUMBER = "241.14473".toVersion()
         val PRODUCT_STARTER_MINIMAL_BUILD_NUMBER = "262".toVersion()
         val UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER = "253".toVersion()

@@ -18,12 +18,14 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import org.jdom2.Element
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.Variant
 import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import org.jetbrains.intellij.platform.gradle.variants
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -39,9 +41,15 @@ private const val PLUGIN_XML_PATH = "META-INF/plugin.xml"
 
 /**
  * Creates an OS- and architecture-specific plugin Jar from the shared composed plugin Jar.
+ *
+ * Native variant compatibility must start at IntelliJ Platform 2026.1 (build 261). The resulting plugin descriptor
+ * must declare `since-build` 261 or later because the injected OS and architecture module dependencies are unavailable
+ * in earlier platform versions.
  */
 @CacheableTask
 abstract class PreparePluginVariantTask : DefaultTask() {
+
+    private val sinceBuild = project.objects.property(String::class.java)
 
     /**
      * The shared composed plugin Jar used as the source of the variant.
@@ -77,10 +85,13 @@ abstract class PreparePluginVariantTask : DefaultTask() {
     init {
         group = Plugin.GROUP_NAME
         description = "Creates an OS- and architecture-specific plugin Jar."
+        inputs.property("sinceBuild", sinceBuild.orElse(""))
     }
 
     @TaskAction
     fun preparePluginVariant() {
+        validateSinceBuild()
+
         val outputPath = outputDirectory.asPath
             .also { it.toFile().deleteRecursively() }
             .also { it.createDirectories() }
@@ -139,12 +150,24 @@ abstract class PreparePluginVariantTask : DefaultTask() {
             .readBytes()
     }
 
+    private fun validateSinceBuild() {
+        val configuredSinceBuild = sinceBuild.orNull
+
+        require(configuredSinceBuild?.toVersion()?.let { it >= Constraints.MINIMAL_NATIVE_VARIANTS_BUILD_NUMBER } == true) {
+            "The `nativeVariants` feature requires `since-build` " +
+                "${Constraints.MINIMAL_NATIVE_VARIANTS_BUILD_NUMBER} " +
+                "(IntelliJ Platform ${Constraints.MINIMAL_NATIVE_VARIANTS_VERSION}) or later, but " +
+                "'${configuredSinceBuild ?: "<unspecified>"}' was provided."
+        }
+    }
+
     companion object : Registrable {
         internal fun taskName(variant: Variant) =
             with(variant) { "${Tasks.PREPARE_PLUGIN_VARIANT}_${os}_$arch" }
 
         override fun register(project: Project) {
             val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
+            val patchPluginXmlTaskProvider = project.tasks.named<PatchPluginXmlTask>(Tasks.PATCH_PLUGIN_XML)
             val pluginVersionProvider = project.extensionProvider.flatMap { it.pluginConfiguration.version }
             val nativeVariantsEnabledProvider = project.extensionProvider.flatMap { it.nativeVariants.enabled }
 
@@ -153,6 +176,7 @@ abstract class PreparePluginVariantTask : DefaultTask() {
 
                 project.tasks.register<PreparePluginVariantTask>(taskName(variant)) {
                     inputJar.convention(composedJarTaskProvider.flatMap { it.archiveFile })
+                    sinceBuild.convention(patchPluginXmlTaskProvider.flatMap { it.sinceBuild })
                     pluginVersion.convention(pluginVersionProvider.map { "$it-$os-$arch" })
                     operatingSystem.convention(os)
                     architecture.convention(arch)

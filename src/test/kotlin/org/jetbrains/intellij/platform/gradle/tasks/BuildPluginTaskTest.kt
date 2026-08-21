@@ -135,6 +135,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
+                    pluginConfiguration.ideaVersion.sinceBuild = "$nativeVariantsSinceBuild"
                     nativeVariants {
                         enabled = true
                         linux.arm64.from(file("native/linux-arm64"))
@@ -167,7 +168,7 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                     assertEquals(
                         """
                         <idea-plugin>
-                          <idea-version since-build="$sinceBuild" />
+                          <idea-version since-build="$nativeVariantsSinceBuild" />
                           <version>1.0.0-linux-arm64</version>
                           <name>MyPluginName</name>
                           <vendor>JetBrains</vendor>
@@ -179,6 +180,33 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                     )
                 }
             }
+        }
+    }
+
+    @Test
+    fun `reject native variants with an unsupported since-build`() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                  <name>MyPluginName</name>
+                  <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    nativeVariants.enabled = true
+                    pluginConfiguration.ideaVersion.sinceBuild = "253"
+                }
+                """.trimIndent()
+
+        buildAndFail("${Tasks.PREPARE_PLUGIN_VARIANT}_linux_arm64") {
+            assertContains(
+                "The `nativeVariants` feature requires `since-build` $nativeVariantsSinceBuild " +
+                    "(IntelliJ Platform $nativeVariantsIntelliJPlatformVersion) or later, but '253' was provided.",
+                output,
+            )
         }
     }
 

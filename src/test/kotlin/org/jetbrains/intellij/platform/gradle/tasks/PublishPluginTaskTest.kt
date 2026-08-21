@@ -204,6 +204,7 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
             buildFile write //language=kotlin
                     """
                     intellijPlatform {
+                        pluginConfiguration.ideaVersion.sinceBuild = "$nativeVariantsSinceBuild"
                         nativeVariants {
                             enabled = true
                         }
