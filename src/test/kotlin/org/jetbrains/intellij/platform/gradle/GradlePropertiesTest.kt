@@ -112,6 +112,15 @@ class GradlePropertiesTest {
     }
 
     @Test
+    fun `testIde bundled plugins classpath is disabled by default`() {
+        val property = GradleProperties.TestIdeBundledPluginsClasspathEnabled
+
+        assertEquals("org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathEnabled", property.toString())
+        assertEquals(false, property.defaultValue)
+        assertEquals(false, providers[property].get())
+    }
+
+    @Test
     fun `default sandbox exclusions property is enabled by default`() {
         val property = GradleProperties.UseDefaultSandboxExclusions
 

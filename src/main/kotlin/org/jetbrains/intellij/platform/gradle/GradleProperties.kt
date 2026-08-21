@@ -149,7 +149,15 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
     object SelfUpdateCheck : GradleProperties<Boolean>(true)
 
     /**
-     * Specifies the bundled plugin IDs or module IDs excluded from the [TestIdeTask] classpath.
+     * Controls whether bundled plugins declared in `product-info.json` are added to the [TestIdeTask] classpath.
+     *
+     * Default value: `false`
+     */
+    object TestIdeBundledPluginsClasspathEnabled : GradleProperties<Boolean>(false)
+
+    /**
+     * Specifies the bundled plugin IDs or module IDs excluded from the [TestIdeTask] classpath when
+     * [TestIdeBundledPluginsClasspathEnabled] is enabled.
      * The property accepts a comma-separated list.
      *
      * To include all bundled plugins, set it to an empty value:

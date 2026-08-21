@@ -2,6 +2,11 @@
 
 package org.jetbrains.intellij.platform.gradle.providers
 
+import com.dd.plist.NSArray
+import com.dd.plist.NSDictionary
+import com.dd.plist.NSObject
+import com.dd.plist.NSString
+import com.dd.plist.PropertyListParser
 import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
@@ -52,23 +57,15 @@ abstract class DmgExtractorValueSource : ValueSource<Path, DmgExtractorValueSour
 
         log.info("Extracting DMG archive '$path' to temporary directory.")
 
-        val hdiutilInfo = ByteArrayOutputStream().use { os ->
+        val detachTarget = ByteArrayOutputStream().use { os ->
             execOperations.exec {
-                commandLine("hdiutil", "info")
+                commandLine("hdiutil", "info", "-plist")
                 standardOutput = os
             }
-            os.toString()
+            PropertyListParser.parse(os.toByteArray()).findDetachTarget(path.pathString)
         }
 
-        val resources = hdiutilInfo
-            .split("================================================")
-            .drop(1).associate {
-                with(it.trim().lines()) {
-                    first().split(" : ").last() to last().split("\t").last()
-                }
-            }
-
-        resources[path.pathString]?.let { volume ->
+        detachTarget?.let { volume ->
             execOperations.exec {
                 commandLine("hdiutil", "detach", "-force", "-quiet", volume)
             }
@@ -111,3 +108,25 @@ abstract class DmgExtractorValueSource : ValueSource<Path, DmgExtractorValueSour
         return targetDirectory
     }
 }
+
+internal fun NSObject?.findDetachTarget(imagePath: String): String? {
+    val image = (this as? NSDictionary)
+        ?.dictionaries("images")
+        ?.firstOrNull { it.string("image-path") == imagePath }
+        ?: return null
+    val systemEntities = image.dictionaries("system-entities")
+    val mountedEntity = systemEntities.firstOrNull { it.string("mount-point") != null }
+
+    return mountedEntity?.string("dev-entry")
+        ?: mountedEntity?.string("mount-point")
+        ?: systemEntities.firstNotNullOfOrNull { it.string("dev-entry") }
+}
+
+private fun NSDictionary.dictionaries(key: String) =
+    (objectForKey(key) as? NSArray)
+        ?.array
+        ?.filterIsInstance<NSDictionary>()
+        .orEmpty()
+
+private fun NSDictionary.string(key: String) =
+    (objectForKey(key) as? NSString)?.content

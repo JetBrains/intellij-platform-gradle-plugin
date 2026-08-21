@@ -1,12 +1,13 @@
 [versions]
 # libraries
+ddPlist = "1.30"
 intellijStructure = "3.332"
 intellijPluginRepositoryRestClient = "2.0.51"
 kotlinxSerialization = "1.11.0"
 okhttp = "4.12.0"
 retrofit = "2.11.0"
 undertow = "2.4.2.Final"
-xmlutil = "1.0.1"
+xmlutil = "1.0.2"
 
 # plugins
 dokka = "2.2.0"
@@ -15,6 +16,7 @@ gradlePluginPublish = "2.1.1"
 gradleChangelogPlugin = "2.5.0"
 
 [libraries]
+dd-plist = { group = "com.googlecode.plist", name = "dd-plist", version.ref = "ddPlist" }
 intellij-pluginRepositoryRestClient = { group = "org.jetbrains.intellij", name = "plugin-repository-rest-client", version.ref = "intellijPluginRepositoryRestClient" }
 intellij-structure-base = { group = "org.jetbrains.intellij.plugins", name = "structure-base", version.ref = "intellijStructure" }
 intellij-structure-ide = { group = "org.jetbrains.intellij.plugins", name = "structure-ide", version.ref = "intellijStructure" }

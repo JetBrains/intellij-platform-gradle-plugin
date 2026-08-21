@@ -22,7 +22,7 @@ jobs:
     uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
     secrets: inherit
     with:
-      gradleVersion: "9.6.1"
+      gradleVersion: "9.7.1"
       os: ubuntu-latest
 
   primeWindowsIntellijPlatformTestCache:
@@ -32,7 +32,7 @@ jobs:
     uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
     secrets: inherit
     with:
-      gradleVersion: "9.6.1"
+      gradleVersion: "9.7.1"
       os: windows-latest
 
   primeMacosIntellijPlatformTestCache:
@@ -42,7 +42,7 @@ jobs:
     uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
     secrets: inherit
     with:
-      gradleVersion: "9.6.1"
+      gradleVersion: "9.7.1"
       os: macos-latest
 
   unitTests:
@@ -114,7 +114,7 @@ jobs:
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6.2.0
+        uses: gradle/actions/setup-gradle@v6.3.0
         with:
           cache-read-only: true
 

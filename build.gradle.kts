@@ -66,6 +66,7 @@ dependencies {
         exclude("org.jetbrains.kotlinx")
         exclude("org.slf4j")
     }
+    implementation(libs.dd.plist)
     implementation(libs.intellij.structure.base, commonExclusions)
     api(libs.intellij.structure.ide, commonExclusions)
     api(libs.intellij.structure.intellij, commonExclusions)
