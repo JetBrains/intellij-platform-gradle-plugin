@@ -123,7 +123,6 @@ object UnitTestsMACOS : BuildType({
 
 object UnitTestsWINDOWS : BuildType({
     name = "Unit Tests (Windows)"
-    paused = true
 
     vcs {
         root(DslContext.settingsRoot)
