@@ -63,8 +63,8 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
      *
      * Default value: `classesDirs` of the project's source sets.
      */
-    @get:Incremental
     @get:InputFiles
+    @get:SkipWhenEmpty
     @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val classesDirs: ConfigurableFileCollection
 

@@ -16,6 +16,8 @@ import kotlin.test.assertNull
 
 class PublishPluginTaskTest : IntelliJPluginTestBase() {
 
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
+
     @BeforeTest
     override fun setup() {
         super.setup()
@@ -217,6 +219,7 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                     }
                     """.trimIndent()
 
+            build(Tasks.PREPARE_SANDBOX)
             buildWithConfigurationCache(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
                 assertTaskOutcome(Tasks.PUBLISH_PLUGIN, TaskOutcome.SUCCESS)
                 assertNotNull(task(":${Tasks.BUILD_PLUGIN_VARIANTS}"))
@@ -313,6 +316,9 @@ class PublishPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
+        buildAndFail(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
+            assertContains("'token' property must be specified for plugin publishing", output)
+        }
         buildAndFailWithConfigurationCache(Tasks.PUBLISH_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertContains("'token' property must be specified for plugin publishing", output)
         }
