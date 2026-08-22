@@ -84,7 +84,6 @@ object UnitTestsLINUX : BuildType({
 
 object UnitTestsMACOS : BuildType({
     name = "Unit Tests (macOS)"
-    paused = true
 
     vcs {
         root(DslContext.settingsRoot)
