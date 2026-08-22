@@ -1,6 +1,7 @@
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
+import jetbrains.buildServer.configs.kotlin.matrix
 import jetbrains.buildServer.configs.kotlin.projectFeatures.githubIssues
 
 /*
@@ -30,9 +31,7 @@ version = "2026.1"
 project {
     description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/intellij-platform-gradle-plugin"
 
-    buildType(UnitTestsLINUX)
-    buildType(UnitTestsWINDOWS)
-    buildType(UnitTestsMACOS)
+    buildType(UnitTests)
 
     features {
         githubIssues {
@@ -43,8 +42,8 @@ project {
     }
 }
 
-object UnitTestsLINUX : BuildType({
-    name = "Unit Tests (Linux)"
+object UnitTests : BuildType({
+    name = "Unit Tests"
     paused = true
 
     vcs {
@@ -53,20 +52,37 @@ object UnitTestsLINUX : BuildType({
 
     steps {
         gradle {
-            name = "Unit Tests – Gradle 7.6"
-            tasks = "check -PtestGradleVersion=7.6"
+            name = "Run Tests"
+            tasks = "test -PtestGradleVersion=%testGradleVersion% -PtestGradleUserHome=\"%teamcity.build.checkoutDir%/.gradle/testGradleHome\" -PtestMaxParallelForks=1 --console=plain --no-build-cache"
+            conditions {
+                doesNotEqual("os", "Windows")
+            }
         }
         gradle {
-            name = "Unit Tests – Gradle 8.6"
-            tasks = "check -PtestGradleVersion=8.6"
-        }
-        gradle {
-            name = "Unit Tests – Gradle 8.7-rc-3"
-            tasks = "check -PtestGradleVersion=8.7-rc-3"
+            name = "Run Tests (Windows)"
+            tasks = "test -PtestGradleVersion=%testGradleVersion% -PtestGradleUserHome=\"%teamcity.build.checkoutDir%/.gradle/testGradleHome\" -PtestMaxParallelForks=2 --console=plain --no-build-cache"
+            conditions {
+                equals("os", "Windows")
+            }
         }
     }
 
     features {
+        matrix {
+            os = listOf(
+                value("Windows"),
+                value("Linux"),
+                value("Mac OS"),
+            )
+            param(
+                "testGradleVersion",
+                listOf(
+                    value("9.0.0"),
+                    value("9.7.1"),
+                    value("nightly"),
+                ),
+            )
+        }
         commitStatusPublisher {
             publisher = github {
                 githubUrl = "https://api.github.com"
@@ -76,89 +92,5 @@ object UnitTestsLINUX : BuildType({
             }
             param("github_oauth_user", "hsz")
         }
-    }
-
-    requirements {
-        equals("teamcity.agent.jvm.os.family", "Linux")
-    }
-})
-
-object UnitTestsMACOS : BuildType({
-    name = "Unit Tests (macOS)"
-    paused = true
-
-    vcs {
-        root(DslContext.settingsRoot)
-    }
-
-    steps {
-        gradle {
-            name = "Unit Tests – Gradle 7.6"
-            tasks = "check -PtestGradleVersion=7.6"
-        }
-        gradle {
-            name = "Unit Tests – Gradle 8.6"
-            tasks = "check -PtestGradleVersion=8.6"
-        }
-        gradle {
-            name = "Unit Tests – Gradle 8.7-rc-3"
-            tasks = "check -PtestGradleVersion=8.7-rc-3"
-        }
-    }
-
-    features {
-        commitStatusPublisher {
-            publisher = github {
-                githubUrl = "https://api.github.com"
-                authType = personalToken {
-                    token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
-                }
-            }
-            param("github_oauth_user", "hsz")
-        }
-    }
-
-    requirements {
-        equals("teamcity.agent.jvm.os.family", "macOS")
-    }
-})
-
-object UnitTestsWINDOWS : BuildType({
-    name = "Unit Tests (Windows)"
-    paused = true
-
-    vcs {
-        root(DslContext.settingsRoot)
-    }
-
-    steps {
-        gradle {
-            name = "Unit Tests – Gradle 7.6"
-            tasks = "check -PtestGradleVersion=7.6"
-        }
-        gradle {
-            name = "Unit Tests – Gradle 8.6"
-            tasks = "check -PtestGradleVersion=8.6"
-        }
-        gradle {
-            name = "Unit Tests – Gradle 8.7-rc-3"
-            tasks = "check -PtestGradleVersion=8.7-rc-3"
-        }
-    }
-
-    features {
-        commitStatusPublisher {
-            publisher = github {
-                githubUrl = "https://api.github.com"
-                authType = personalToken {
-                    token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
-                }
-            }
-            param("github_oauth_user", "hsz")
-        }
-    }
-
-    requirements {
-        equals("teamcity.agent.jvm.os.family", "Windows")
     }
 })
