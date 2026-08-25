@@ -37,8 +37,8 @@ project {
     features {
         githubIssues {
             id = "PROJECT_EXT_621"
-            displayName = "JetBrains/gradle-intellij-plugin"
-            repositoryURL = "https://github.com/JetBrains/gradle-intellij-plugin"
+            displayName = "JetBrains/intellij-platform-gradle-plugin"
+            repositoryURL = "https://github.com/JetBrains/intellij-platform-gradle-plugin"
         }
     }
 }
