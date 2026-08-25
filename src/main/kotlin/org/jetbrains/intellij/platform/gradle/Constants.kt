@@ -200,6 +200,7 @@ object Constants {
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val CLEAN_SANDBOX = "cleanSandbox"
         const val COMPOSED_JAR = "composedJar"
+        const val DUMP_PRODUCTS_RELEASES = "dumpProductsReleases"
         const val GENERATE_LEXER = "generateLexer"
         const val GENERATE_MANIFEST = "generateManifest"
         const val GENERATE_PARSER = "generateParser"

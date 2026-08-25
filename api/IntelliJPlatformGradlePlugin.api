@@ -237,6 +237,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field BUILD_SEARCHABLE_OPTIONS Ljava/lang/String;
 	public static final field CLEAN_SANDBOX Ljava/lang/String;
 	public static final field COMPOSED_JAR Ljava/lang/String;
+	public static final field DUMP_PRODUCTS_RELEASES Ljava/lang/String;
 	public static final field GENERATE_LEXER Ljava/lang/String;
 	public static final field GENERATE_MANIFEST Ljava/lang/String;
 	public static final field GENERATE_PARSER Ljava/lang/String;
@@ -2946,6 +2947,17 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/ComposedJarTa
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/ComposedJarTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/DumpProductsReleasesTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/DumpProductsReleasesTask$Companion;
+	public fun <init> ()V
+	public final fun dumpProductsReleases ()V
+	public abstract fun getOutputFile ()Lorg/gradle/api/file/RegularFileProperty;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/DumpProductsReleasesTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
 	public fun register (Lorg/gradle/api/Project;)V
 }
 

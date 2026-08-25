@@ -605,6 +605,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         listOf(
             InitializeIntelliJPlatformPluginTask,
+            DumpProductsReleasesTask,
             PrintBundledModulesTask,
             PrintBundledPluginsTask,
             PrintProductsReleasesTask,
