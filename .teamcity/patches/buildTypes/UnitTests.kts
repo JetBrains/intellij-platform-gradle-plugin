@@ -3,6 +3,8 @@ package patches.buildTypes
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.buildFeatures.CommitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
+import jetbrains.buildServer.configs.kotlin.buildSteps.GradleBuildStep
+import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
 import jetbrains.buildServer.configs.kotlin.ui.*
 
 /*
@@ -11,6 +13,36 @@ To apply the patch, change the buildType with id = 'UnitTests'
 accordingly, and delete the patch script.
 */
 changeBuildType(RelativeId("UnitTests")) {
+    expectSteps {
+        gradle {
+            name = "Run Tests"
+
+            conditions {
+                doesNotEqual("os", "Windows")
+            }
+            tasks = """test -PtestGradleVersion=%testGradleVersion% -PtestGradleUserHome="%teamcity.build.checkoutDir%/.gradle/testGradleHome" -PtestMaxParallelForks=1 --console=plain --no-build-cache"""
+        }
+        gradle {
+            name = "Run Tests (Windows)"
+
+            conditions {
+                equals("os", "Windows")
+            }
+            tasks = """test -PtestGradleVersion=%testGradleVersion% -PtestGradleUserHome="%teamcity.build.checkoutDir%/.gradle/testGradleHome" -PtestMaxParallelForks=2 --console=plain --no-build-cache"""
+        }
+    }
+    steps {
+        update<GradleBuildStep>(1) {
+            clearConditions()
+
+            conditions {
+                equals("os", "Windows")
+            }
+            jdkHome = "%env.JDK_21_0%"
+            param("teamcity.kubernetes.executor.pull.policy", "")
+        }
+    }
+
     features {
         val feature1 = find<CommitStatusPublisher> {
             commitStatusPublisher {
