@@ -63,16 +63,7 @@ object UnitTests : BuildType({
         gradle {
             name = "Run Tests"
             tasks = "test -PtestGradleVersion=%testGradleVersion% -PtestGradleUserHome=\"%teamcity.build.checkoutDir%/.gradle/testGradleHome\" -PtestMaxParallelForks=1 --console=plain --no-build-cache"
-            conditions {
-                doesNotEqual("os", "Windows")
-            }
-        }
-        gradle {
-            name = "Run Tests (Windows)"
-            tasks = "test -PtestGradleVersion=%testGradleVersion% -PtestGradleUserHome=\"%teamcity.build.checkoutDir%/.gradle/testGradleHome\" -PtestMaxParallelForks=2 --console=plain --no-build-cache"
-            conditions {
-                equals("os", "Windows")
-            }
+            jdkHome = "%env.JDK_17_0%"
         }
     }
 
