@@ -62,7 +62,7 @@ object UnitTests : BuildType({
     steps {
         gradle {
             name = "Run Tests"
-            tasks = "test -PtestGradleVersion=%testGradleVersion% -PtestGradleUserHome=\"%teamcity.build.checkoutDir%/.gradle/testGradleHome\" -PtestMaxParallelForks=1 --console=plain --no-build-cache"
+            tasks = "test -PtestGradleVersion=%testGradleVersion% -PtestMaxParallelForks=1 --console=plain --no-build-cache"
             jdkHome = "%env.JDK_17_0%"
         }
     }
