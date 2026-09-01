@@ -2,7 +2,6 @@ package patches.projects
 
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.Project
-import jetbrains.buildServer.configs.kotlin.projectFeatures.GitHubIssueTracker
 import jetbrains.buildServer.configs.kotlin.projectFeatures.githubIssues
 import jetbrains.buildServer.configs.kotlin.ui.*
 
@@ -13,16 +12,11 @@ accordingly, and delete the patch script.
 */
 changeProject(DslContext.projectId) {
     features {
-        val feature1 = find<GitHubIssueTracker> {
+        remove {
             githubIssues {
                 id = "PROJECT_EXT_621"
                 displayName = "JetBrains/intellij-platform-gradle-plugin"
                 repositoryURL = "https://github.com/JetBrains/intellij-platform-gradle-plugin"
-            }
-        }
-        feature1.apply {
-            authType = storedToken {
-                tokenId = "tc_token_id:CID_7bac63521d33dff346806a0a72c1f875:-1:ba01b8a4-a359-4c95-9d14-e301420110b1"
             }
         }
     }
