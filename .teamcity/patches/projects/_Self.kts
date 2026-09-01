@@ -2,6 +2,7 @@ package patches.projects
 
 import jetbrains.buildServer.configs.kotlin.*
 import jetbrains.buildServer.configs.kotlin.Project
+import jetbrains.buildServer.configs.kotlin.projectFeatures.githubConnection
 import jetbrains.buildServer.configs.kotlin.projectFeatures.githubIssues
 import jetbrains.buildServer.configs.kotlin.ui.*
 
@@ -17,6 +18,14 @@ changeProject(DslContext.projectId) {
                 id = "PROJECT_EXT_621"
                 displayName = "JetBrains/intellij-platform-gradle-plugin"
                 repositoryURL = "https://github.com/JetBrains/intellij-platform-gradle-plugin"
+            }
+        }
+        add {
+            githubConnection {
+                id = "PROJECT_EXT_2"
+                displayName = "GitHub.com OAuth App"
+                clientId = "Ov23ctLOmqluzaLmqUnE"
+                clientSecret = "credentialsJSON:ddd1befb-465b-4f4f-be25-a7887ff020a3"
             }
         }
     }
