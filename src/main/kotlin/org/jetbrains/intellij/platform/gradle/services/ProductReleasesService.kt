@@ -177,6 +177,7 @@ private val jetBrainsProductCodeAliases = mapOf(
     "IIU" to "IU",
     "PCC" to "PC",
     "PCP" to "PY",
+    "DG" to "DB",
 )
 
 internal fun JetBrainsProductReleases.toProductReleases() =
