@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.extensions
 
+import org.gradle.api.Action
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.file.Directory
 import org.gradle.api.model.ObjectFactory
@@ -24,7 +25,7 @@ import javax.inject.Inject
 @IntelliJPlatform
 abstract class IntelliJPlatformPluginsExtension @Inject constructor(
     private val dependenciesHelper: IntelliJPlatformDependenciesHelper,
-    objects: ObjectFactory,
+    private val objects: ObjectFactory,
 ) : ExtensionAware {
 
     internal val intellijPlatformConfigurationName = objects.property<String>()
@@ -44,10 +45,18 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      * @param id The plugin identifier.
      * @param version The plugin version.
      * @param channel The plugin distribution channel.
+     * @param configure Plugin dependency configuration.
      */
-    fun plugin(id: String, version: String, channel: String = "") = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+    @JvmOverloads
+    fun plugin(
+        id: String,
+        version: String,
+        channel: String = "",
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
         pluginsProvider = dependenciesHelper.provider { listOf(Triple(id, version, channel)) },
         configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
     )
 
     /**
@@ -56,10 +65,18 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      * @param id The provider of the plugin identifier.
      * @param version The provider of the plugin version.
      * @param channel The provider of the plugin distribution channel.
+     * @param configure Plugin dependency configuration.
      */
-    fun plugin(id: Provider<String>, version: Provider<String>, channel: Provider<String>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+    @JvmOverloads
+    fun plugin(
+        id: Provider<String>,
+        version: Provider<String>,
+        channel: Provider<String> = dependenciesHelper.provider { "" },
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
         pluginsProvider = dependenciesHelper.provider { listOf(Triple(id.get(), version.get(), channel.get())) },
         configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
     )
 
     /**
@@ -68,10 +85,16 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      * - `pluginId:version@channel`
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
+     * @param configure Plugin dependency configuration.
      */
-    fun plugin(notation: Provider<String>) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+    @JvmOverloads
+    fun plugin(
+        notation: Provider<String>,
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
         pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
         configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
     )
 
     /**
@@ -80,10 +103,16 @@ abstract class IntelliJPlatformPluginsExtension @Inject constructor(
      * - `pluginId:version@channel`
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
+     * @param configure Plugin dependency configuration.
      */
-    fun plugin(notation: String) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+    @JvmOverloads
+    fun plugin(
+        notation: String,
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
         pluginsProvider = dependenciesHelper.provider { listOfNotNull(notation.parsePluginNotation()) },
         configurationName = intellijPlatformPluginDependencyConfigurationName.get(),
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
     )
 
     /**

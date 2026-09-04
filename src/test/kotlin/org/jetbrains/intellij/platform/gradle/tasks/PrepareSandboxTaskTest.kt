@@ -5,7 +5,6 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import java.nio.file.Files
 import java.nio.file.Path
@@ -749,6 +748,210 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `exclude bundled plugin libraries from classpath and sandbox`() {
+        val repository = createPluginFixtureRepository(includeControlPlugin = true)
+
+        writeJavaFile()
+        pluginXml write "<idea-plugin />"
+        configurePluginFixtureRepository(repository)
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        plugin("$FILTER_TARGET_PLUGIN_ID", "$PLUGIN_FIXTURE_VERSION") {
+                            excludeBundledLibrary("jena-*.jar")
+                        }
+                        plugin("$FILTER_CONTROL_PLUGIN_ID", "$PLUGIN_FIXTURE_VERSION")
+                    }
+                }
+                """.trimIndent()
+        configureClasspathAssertionTask(
+            taskName = "assertFilteredPluginClasspath",
+            configurationName = Constants.Configurations.External.COMPILE_CLASSPATH,
+            expectedPresent = listOf(
+                FILTER_TARGET_MAIN_JAR,
+                FILTER_TARGET_SUPPORT_JAR,
+                FILTER_CONTROL_MAIN_JAR,
+                FILTER_CONTROL_JENA_JAR,
+            ),
+            expectedAbsent = listOf(FILTER_TARGET_JENA_CORE_JAR, FILTER_TARGET_JENA_ARQ_JAR),
+        )
+
+        build(Tasks.PREPARE_SANDBOX, "assertFilteredPluginClasspath")
+        buildWithConfigurationCache(Tasks.PREPARE_SANDBOX, "assertFilteredPluginClasspath")
+        buildWithConfigurationCache(Tasks.PREPARE_SANDBOX, "assertFilteredPluginClasspath") {
+            assertConfigurationCacheReused()
+        }
+
+        val plugins = sandbox.resolve("plugins")
+        assertExists(plugins.resolve("filter-target/lib/$FILTER_TARGET_MAIN_JAR"))
+        assertExists(plugins.resolve("filter-target/lib/$FILTER_TARGET_SUPPORT_JAR"))
+        assertFalse(plugins.resolve("filter-target/lib/$FILTER_TARGET_JENA_CORE_JAR").exists())
+        assertFalse(plugins.resolve("filter-target/lib/modules/$FILTER_TARGET_JENA_ARQ_JAR").exists())
+        assertExists(plugins.resolve("filter-control/lib/$FILTER_CONTROL_MAIN_JAR"))
+        assertExists(plugins.resolve("filter-control/lib/$FILTER_CONTROL_JENA_JAR"))
+    }
+
+    @Test
+    fun `exclude bundled libraries from test plugin classpath`() {
+        val repository = createPluginFixtureRepository()
+
+        writeJavaFile()
+        pluginXml write "<idea-plugin />"
+        configurePluginFixtureRepository(repository)
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        testPlugin("$FILTER_TARGET_PLUGIN_ID", "$PLUGIN_FIXTURE_VERSION") {
+                            excludeBundledLibraries("$FILTER_TARGET_JENA_CORE_JAR", "$FILTER_TARGET_JENA_ARQ_JAR")
+                        }
+                    }
+                }
+                """.trimIndent()
+        configureClasspathAssertionTask(
+            taskName = "assertFilteredTestPluginClasspath",
+            configurationName = Constants.Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
+            expectedPresent = listOf(FILTER_TARGET_MAIN_JAR, FILTER_TARGET_SUPPORT_JAR),
+            expectedAbsent = listOf(FILTER_TARGET_JENA_CORE_JAR, FILTER_TARGET_JENA_ARQ_JAR),
+        )
+
+        build("assertFilteredTestPluginClasspath")
+    }
+
+    @Test
+    fun `exclude bundled libraries from custom testing plugin classpath and sandbox`() {
+        val repository = createPluginFixtureRepository()
+        val customTest = "customTest"
+
+        writeJavaFile()
+        pluginXml write "<idea-plugin />"
+        configurePluginFixtureRepository(repository)
+        buildFile write //language=kotlin
+                """
+                val $customTest by intellijPlatformTesting.testIde.registering {
+                    plugins {
+                        plugin("$FILTER_TARGET_PLUGIN_ID", "$PLUGIN_FIXTURE_VERSION") {
+                            excludeBundledLibrary("jena-*.jar")
+                        }
+                    }
+                }
+                """.trimIndent()
+        configureClasspathAssertionTask(
+            taskName = "assertFilteredCustomTestPluginClasspath",
+            configurationName = "${Constants.Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH}_$customTest",
+            expectedPresent = listOf(FILTER_TARGET_MAIN_JAR, FILTER_TARGET_SUPPORT_JAR),
+            expectedAbsent = listOf(FILTER_TARGET_JENA_CORE_JAR, FILTER_TARGET_JENA_ARQ_JAR),
+        )
+
+        build("${Tasks.PREPARE_SANDBOX}_$customTest", "assertFilteredCustomTestPluginClasspath")
+
+        val plugin = sandbox.resolve("plugins_$customTest/filter-target")
+        assertExists(plugin.resolve("lib/$FILTER_TARGET_MAIN_JAR"))
+        assertExists(plugin.resolve("lib/$FILTER_TARGET_SUPPORT_JAR"))
+        assertFalse(plugin.resolve("lib/$FILTER_TARGET_JENA_CORE_JAR").exists())
+        assertFalse(plugin.resolve("lib/modules/$FILTER_TARGET_JENA_ARQ_JAR").exists())
+    }
+
+    @Test
+    fun `exclude bundled libraries from plugin dependency inherited from module sandbox`() {
+        val repository = createPluginFixtureRepository(includeControlPlugin = true)
+
+        gradleProperties write "\norg.gradle.unsafe.isolated-projects=true"
+        writeJavaFile()
+        pluginXml write "<idea-plugin />"
+        configurePluginFixtureRepository(repository)
+        settingsFile write //language=kotlin
+                """
+                include("backend")
+                """.trimIndent()
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        pluginModule(implementation(project(":backend")))
+                        plugin("$FILTER_CONTROL_PLUGIN_ID", "$PLUGIN_FIXTURE_VERSION") {
+                            excludeBundledLibrary("$FILTER_CONTROL_JENA_JAR")
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        val backendBuildFile = dir.resolve("backend/build.gradle.kts")
+        backendBuildFile write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform.module")
+                }
+                """.trimIndent()
+        backendBuildFile write pluginFixtureRepository(repository)
+        backendBuildFile write //language=kotlin
+                """
+                repositories {
+                    intellijPlatform {
+                        localPlatformArtifacts()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        local("${dir.resolve("local-ide").invariantSeparatorsPathString}")
+                        plugin("$FILTER_TARGET_PLUGIN_ID", "$PLUGIN_FIXTURE_VERSION") {
+                            excludeBundledLibrary("jena-*.jar")
+                        }
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+        dir.resolve("backend/src/main/java/BackendFeature.java") write "class BackendFeature {}"
+
+        build("clean", Tasks.PREPARE_SANDBOX)
+        build("clean", Tasks.PREPARE_SANDBOX)
+        sandbox.toFile().deleteRecursively()
+        build("clean", Tasks.PREPARE_SANDBOX) {
+            assertConfigurationCacheReused()
+        }
+
+        val plugin = sandbox.resolve("plugins/filter-target")
+        assertExists(plugin.resolve("lib/$FILTER_TARGET_MAIN_JAR"))
+        assertExists(plugin.resolve("lib/$FILTER_TARGET_SUPPORT_JAR"))
+        assertFalse(plugin.resolve("lib/$FILTER_TARGET_JENA_CORE_JAR").exists())
+        assertFalse(plugin.resolve("lib/modules/$FILTER_TARGET_JENA_ARQ_JAR").exists())
+        val controlPlugin = sandbox.resolve("plugins/filter-control")
+        assertExists(controlPlugin.resolve("lib/$FILTER_CONTROL_MAIN_JAR"))
+        assertFalse(controlPlugin.resolve("lib/$FILTER_CONTROL_JENA_JAR").exists())
+    }
+
+    @Test
+    fun `fail when bundled library exclusion removes plugin descriptor`() {
+        val repository = createPluginFixtureRepository()
+
+        writeJavaFile()
+        pluginXml write "<idea-plugin />"
+        configurePluginFixtureRepository(repository)
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        plugin("$FILTER_TARGET_PLUGIN_ID", "$PLUGIN_FIXTURE_VERSION") {
+                            excludeBundledLibrary("$FILTER_TARGET_MAIN_JAR")
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        buildAndFail(Tasks.PREPARE_SANDBOX) {
+            assertContains(
+                "Filtering bundled libraries from plugin '$FILTER_TARGET_PLUGIN_ID' removed or invalidated its plugin descriptor.",
+                output,
+            )
+        }
+    }
+
+    @Test
     @Ignore
     fun `prepare sandbox with plugin dependency with classes directory`() {
         val plugin = createPlugin()
@@ -1301,5 +1504,147 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         buildWithConfigurationCache(Tasks.PREPARE_SANDBOX) {
             assertConfigurationCacheReused()
         }
+    }
+
+    private fun createPluginFixtureRepository(includeControlPlugin: Boolean = false) =
+        dir.resolve("plugin-fixture-repository").also { repository ->
+            writePluginFixture(
+                repository = repository,
+                id = FILTER_TARGET_PLUGIN_ID,
+                rootName = "filter-target",
+                mainJarName = FILTER_TARGET_MAIN_JAR,
+                bundledLibraries = listOf(
+                    "lib/$FILTER_TARGET_JENA_CORE_JAR",
+                    "lib/modules/$FILTER_TARGET_JENA_ARQ_JAR",
+                    "lib/$FILTER_TARGET_SUPPORT_JAR",
+                ),
+            )
+            if (includeControlPlugin) {
+                writePluginFixture(
+                    repository = repository,
+                    id = FILTER_CONTROL_PLUGIN_ID,
+                    rootName = "filter-control",
+                    mainJarName = FILTER_CONTROL_MAIN_JAR,
+                    bundledLibraries = listOf("lib/$FILTER_CONTROL_JENA_JAR"),
+                )
+            }
+        }
+
+    private fun writePluginFixture(
+        repository: Path,
+        id: String,
+        rootName: String,
+        mainJarName: String,
+        bundledLibraries: List<String>,
+    ) {
+        val pluginRoot = dir.resolve("plugin-fixture-staging/$id/$rootName")
+        val files = buildList {
+            add(pluginRoot.resolve("lib/$mainJarName").also {
+                writePlugin(it, descriptorName = "plugin.xml", id = id, name = rootName)
+            })
+            addAll(bundledLibraries.map { relativePath ->
+                pluginRoot.resolve(relativePath).also(::writeEmptyJar)
+            })
+        }
+        val moduleDirectory = repository.resolve(
+            "${PLUGIN_FIXTURE_GROUP.replace('.', '/')}/$id/$PLUGIN_FIXTURE_VERSION",
+        ).createDirectories()
+
+        val artifact = moduleDirectory.resolve("$id-$PLUGIN_FIXTURE_VERSION.zip")
+        ZipOutputStream(Files.newOutputStream(artifact)).use { zip ->
+            files.forEach { file ->
+                zip.putNextEntry(
+                    ZipEntry("$rootName/${file.relativeTo(pluginRoot).invariantSeparatorsPathString}")
+                )
+                Files.copy(file, zip)
+                zip.closeEntry()
+            }
+        }
+        moduleDirectory.resolve("$id-$PLUGIN_FIXTURE_VERSION.pom") write //language=xml
+                """
+                <project xmlns="http://maven.apache.org/POM/4.0.0">
+                  <modelVersion>4.0.0</modelVersion>
+                  <groupId>$PLUGIN_FIXTURE_GROUP</groupId>
+                  <artifactId>$id</artifactId>
+                  <version>$PLUGIN_FIXTURE_VERSION</version>
+                  <packaging>zip</packaging>
+                </project>
+                """.trimIndent()
+    }
+
+    private fun configurePluginFixtureRepository(repository: Path) {
+        buildFile write pluginFixtureRepository(repository)
+    }
+
+    private fun pluginFixtureRepository(repository: Path) = //language=kotlin
+        """
+        repositories {
+            exclusiveContent {
+                forRepository {
+                    maven {
+                        name = "pluginFixture"
+                        url = uri("${repository.invariantSeparatorsPathString}")
+                    }
+                }
+                filter {
+                    includeGroup("$PLUGIN_FIXTURE_GROUP")
+                }
+            }
+        }
+        """.trimIndent()
+
+    private fun configureClasspathAssertionTask(
+        taskName: String,
+        configurationName: String,
+        expectedPresent: List<String>,
+        expectedAbsent: List<String>,
+    ) {
+        val taskClassName = taskName.replaceFirstChar(Char::uppercaseChar) + "Task"
+        val present = expectedPresent.joinToString(prefix = "listOf(", postfix = ")") { "\"$it\"" }
+        val absent = expectedAbsent.joinToString(prefix = "listOf(", postfix = ")") { "\"$it\"" }
+
+        buildFile write //language=kotlin
+                """
+                abstract class $taskClassName : org.gradle.api.DefaultTask() {
+                    @get:org.gradle.api.tasks.Classpath
+                    abstract val classpath: org.gradle.api.file.ConfigurableFileCollection
+
+                    @get:org.gradle.api.tasks.Input
+                    abstract val expectedPresent: org.gradle.api.provider.ListProperty<String>
+
+                    @get:org.gradle.api.tasks.Input
+                    abstract val expectedAbsent: org.gradle.api.provider.ListProperty<String>
+
+                    @org.gradle.api.tasks.TaskAction
+                    fun assertClasspath() {
+                        val names = classpath.files.map { it.name }.toSet()
+                        check(names.containsAll(expectedPresent.get())) {
+                            "Missing expected plugin libraries: ${'$'}{expectedPresent.get().toSet() - names}; classpath: ${'$'}names"
+                        }
+                        check(names.intersect(expectedAbsent.get().toSet()).isEmpty()) {
+                            "Excluded plugin libraries remain on the classpath: ${'$'}{names.intersect(expectedAbsent.get().toSet())}"
+                        }
+                    }
+                }
+
+                tasks.register<$taskClassName>("$taskName") {
+                    classpath.from(configurations.named("$configurationName"))
+                    expectedPresent.set($present)
+                    expectedAbsent.set($absent)
+                }
+                """.trimIndent()
+    }
+
+    companion object {
+        private const val PLUGIN_FIXTURE_GROUP = Constants.Configurations.Dependencies.MARKETPLACE_GROUP
+        private const val PLUGIN_FIXTURE_VERSION = "1.0.0"
+        private const val FILTER_TARGET_PLUGIN_ID = "com.example.filter-target"
+        private const val FILTER_CONTROL_PLUGIN_ID = "com.example.filter-control"
+        private const val FILTER_TARGET_MAIN_JAR = "filter-target.jar"
+        private const val FILTER_TARGET_JENA_CORE_JAR = "jena-core-4.2.0.jar"
+        private const val FILTER_TARGET_JENA_ARQ_JAR = "jena-arq-4.2.0.jar"
+        private const val FILTER_TARGET_SUPPORT_JAR = "target-support.jar"
+        private const val FILTER_CONTROL_MAIN_JAR = "filter-control.jar"
+        private const val FILTER_CONTROL_JENA_JAR = "jena-core-5.0.0.jar"
     }
 }

@@ -26,6 +26,7 @@ import java.nio.file.Path
 import java.util.jar.JarFile
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
 
 /**
@@ -70,21 +71,9 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
                  *
                  * For other plugins, we never (usually?) get into this block because their Ivy artifacts already list jars,
                  * instead of pointing to a directory, see: [org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule]
-                 */
+                */
                 else -> {
-                    val extractDirectory = createTempDirectory()
-                    val jars = try {
-                        withIdePluginManager(extractDirectory) { manager ->
-                            val plugin = runCatching {
-                                val pluginPath = path.resolvePluginPath()
-                                manager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
-                            }.getOrNull()
-
-                            plugin?.originalFile?.let(::collectJars) ?: plugin?.let { emptyList() }
-                        }
-                    } finally {
-                        extractDirectory.toFile().deleteRecursively()
-                    }
+                    val jars = path.resolvePluginLayout()?.path?.let(::collectJars)
 
                     if (jars == null) {
                         log.warn("Unknown input: $path")
@@ -114,11 +103,41 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
                 from
                     .attribute(Attributes.extracted, true)
                     .attribute(Attributes.collected, false)
+                    .attribute(Attributes.pluginLibrariesFiltered, true)
                 to
                     .attribute(Attributes.extracted, true)
                     .attribute(Attributes.collected, true)
+                    .attribute(Attributes.pluginLibrariesFiltered, true)
             }
         }
+    }
+}
+
+internal data class PluginLayout(
+    val id: String,
+    val path: Path,
+)
+
+internal fun Path.resolvePluginLayout(): PluginLayout? {
+    val pluginPath = runCatching(::resolvePluginPath).getOrNull() ?: return null
+    if (!pluginPath.resolve(Sandbox.Plugin.LIB).isDirectory() ||
+        pluginPath.resolve("product-info.json").exists() ||
+        pluginPath.resolve("Resources/product-info.json").exists()
+    ) {
+        return null
+    }
+    val temporaryDirectory = createTempDirectory()
+
+    return try {
+        withIdePluginManager(temporaryDirectory) { manager ->
+            manager
+                .safelyCreatePlugin(pluginPath, suppressPluginProblems = true)
+                .getOrNull()
+                ?.pluginId
+                ?.let { PluginLayout(it, pluginPath) }
+        }
+    } finally {
+        temporaryDirectory.toFile().deleteRecursively()
     }
 }
 

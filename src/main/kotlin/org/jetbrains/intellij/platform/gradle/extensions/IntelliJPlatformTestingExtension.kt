@@ -167,6 +167,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                 ) {
                     attributes {
                         attribute(Attributes.extracted, true)
+                        attribute(Attributes.pluginLibrariesFiltered, true)
                         attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
                     }
 
@@ -203,6 +204,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     attributes {
                         attribute(Attributes.extracted, true)
                         attribute(Attributes.collected, true)
+                        attribute(Attributes.pluginLibrariesFiltered, true)
                     }
 
                     extendsFrom(customIntelliJPlatformConfiguration)
@@ -215,6 +217,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     attributes {
                         attribute(Attributes.extracted, true)
                         attribute(Attributes.collected, true)
+                        attribute(Attributes.pluginLibrariesFiltered, true)
                     }
 
                     extendsFrom(customIntelliJPlatformConfiguration)
@@ -227,6 +230,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     attributes
                         .attribute(Attributes.extracted, true)
                         .attribute(Attributes.collected, true)
+                        .attribute(Attributes.pluginLibrariesFiltered, true)
 
                     attributes {
                         attributes.attribute(Attributes.kotlinJPlatformType, "jvm")

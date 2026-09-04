@@ -92,6 +92,10 @@ class IntelliJPlatformDependenciesHelper(
 ) {
 
     private val log = Logger(javaClass)
+    private val pluginLibraryExclusionEntries =
+        gradle.registerClassLoaderScopedBuildServiceParameters(PluginLibraryExclusionsService::class) {
+            parameters.entries.convention(emptyList())
+        }.entries
     internal val requestedIntelliJPlatforms by lazy {
         gradle.registerClassLoaderScopedBuildService(RequestedIntelliJPlatformsService::class, projectPath) {
             parameters {
@@ -113,6 +117,14 @@ class IntelliJPlatformDependenciesHelper(
     }
     private val ideLayoutIndexService by lazy {
         gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
+    }
+    internal val pluginLibraryExclusionRules: Provider<Map<String, Set<String>>> by lazy {
+        pluginLibraryExclusionEntries.map { values ->
+            values
+                .groupBy(PluginLibraryExclusion::pluginId, PluginLibraryExclusion::pattern)
+                .mapValues { (_, patterns) -> patterns.toSortedSet().toSet() }
+                .toSortedMap()
+        }
     }
 
     /**
@@ -465,28 +477,47 @@ class IntelliJPlatformDependenciesHelper(
      *
      * @param pluginsProvider The provider of the list containing triples with plugin identifier, version, and channel.
      * @param configurationName The name of the configuration to add the dependency to.
+     * @param excludedBundledLibraries Bundled library file name patterns to exclude from the plugin distribution.
      * @param action The action to be performed on the dependency. Defaults to an empty action.
      */
     internal fun addIntelliJPlatformPluginDependencies(
         pluginsProvider: Provider<List<Triple<String, String, String>>>,
         configurationName: String = Configurations.INTELLIJ_PLATFORM_PLUGIN_DEPENDENCY,
+        excludedBundledLibraries: Set<String> = emptySet(),
         action: DependencyAction = {},
-    ) = configurations[configurationName].dependencies.addAllLater(provider {
-        val plugins = pluginsProvider.get()
+    ) {
+        val cachedPluginsProvider = pluginsProvider.cached()
 
-        plugins.map { (id, version, group) ->
-            require(id.isNotBlank()) {
-                "The `intellijPlatform.plugins` dependency helper was called with a plugin with no `id` provided."
-            }
-            require(version.isNotBlank()) {
-                """
-                The `intellijPlatform.plugins` dependency helper was called with the `$id` plugin with no `version` provided.
-                If you expect to add a dependency on a bundled plugin, use `intellijPlatform.bundledPlugin` or `intellijPlatform.bundledPlugins` instead.
-                """.trimIndent()
-            }
-            createIntelliJPlatformPlugin(id, version, group).apply(action)
+        if (excludedBundledLibraries.isNotEmpty()) {
+            pluginLibraryExclusionEntries.addAll(
+                cachedPluginsProvider.map { plugins ->
+                    plugins.flatMap { (id, _, _) ->
+                        val pluginId = id.trim()
+                        excludedBundledLibraries.map { pattern ->
+                            PluginLibraryExclusion(pluginId, pattern)
+                        }
+                    }
+                },
+            )
         }
-    }.cached())
+
+        configurations[configurationName].dependencies.addAllLater(provider {
+            val plugins = cachedPluginsProvider.get()
+
+            plugins.map { (id, version, group) ->
+                require(id.isNotBlank()) {
+                    "The `intellijPlatform.plugins` dependency helper was called with a plugin with no `id` provided."
+                }
+                require(version.isNotBlank()) {
+                    """
+                    The `intellijPlatform.plugins` dependency helper was called with the `$id` plugin with no `version` provided.
+                    If you expect to add a dependency on a bundled plugin, use `intellijPlatform.bundledPlugin` or `intellijPlatform.bundledPlugins` instead.
+                    """.trimIndent()
+                }
+                createIntelliJPlatformPlugin(id, version, group).apply(action)
+            }
+        }.cached())
+    }
 
     /**
      * A base method for adding a dependency on plugins compatible with the current IntelliJ Platform version.

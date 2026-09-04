@@ -811,12 +811,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param id The plugin identifier.
      * @param version The plugin version.
      * @param group The plugin distribution channel.
+     * @param configure Plugin dependency configuration.
      */
     @JvmOverloads
-    fun plugin(id: String, version: String, group: String = Dependencies.MARKETPLACE_GROUP) =
-        dependenciesHelper.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = dependenciesHelper.provider { listOf(Triple(id, version, group)) },
-        )
+    fun plugin(
+        id: String,
+        version: String,
+        group: String = Dependencies.MARKETPLACE_GROUP,
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOf(Triple(id, version, group)) },
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
+    )
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform.
@@ -824,11 +830,18 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param id The provider of the plugin identifier.
      * @param version The provider of the plugin version.
      * @param group The provider of the plugin distribution channel.
+     * @param configure Plugin dependency configuration.
      */
-    fun plugin(id: Provider<String>, version: Provider<String>, group: Provider<String>) =
-        dependenciesHelper.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = dependenciesHelper.provider { listOf(Triple(id.get(), version.get(), group.get())) },
-        )
+    @JvmOverloads
+    fun plugin(
+        id: Provider<String>,
+        version: Provider<String>,
+        group: Provider<String> = dependenciesHelper.provider { Dependencies.MARKETPLACE_GROUP },
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOf(Triple(id.get(), version.get(), group.get())) },
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
+    )
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -836,11 +849,16 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * - `pluginId:version@channel`
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
+     * @param configure Plugin dependency configuration.
      */
-    fun plugin(notation: Provider<String>) =
-        dependenciesHelper.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
-        )
+    @JvmOverloads
+    fun plugin(
+        notation: Provider<String>,
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
+    )
 
     /**
      * Adds a dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -848,11 +866,16 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * - `pluginId:version@channel`
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
+     * @param configure Plugin dependency configuration.
      */
-    fun plugin(notation: String) =
-        dependenciesHelper.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = dependenciesHelper.provider { listOfNotNull(notation.parsePluginNotation()) },
-        )
+    @JvmOverloads
+    fun plugin(
+        notation: String,
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOfNotNull(notation.parsePluginNotation()) },
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
+    )
 
     /**
      * Adds dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -946,13 +969,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param id The plugin identifier.
      * @param version The plugin version.
      * @param group The plugin distribution channel.
+     * @param configure Plugin dependency configuration.
      */
     @JvmOverloads
-    fun testPlugin(id: String, version: String, group: String = Dependencies.MARKETPLACE_GROUP) =
-        dependenciesHelper.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = dependenciesHelper.provider { listOf(Triple(id, version, group)) },
-            configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
-        )
+    fun testPlugin(
+        id: String,
+        version: String,
+        group: String = Dependencies.MARKETPLACE_GROUP,
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOf(Triple(id, version, group)) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
+    )
 
     /**
      * Adds a test dependency on a plugin for IntelliJ Platform.
@@ -960,12 +989,19 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param id The provider of the plugin identifier.
      * @param version The provider of the plugin version.
      * @param group The provider of the plugin distribution channel.
+     * @param configure Plugin dependency configuration.
      */
-    fun testPlugin(id: Provider<String>, version: Provider<String>, group: Provider<String>) =
-        dependenciesHelper.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = zip(id, version, group) { id, version, group -> listOf(Triple(id, version, group)) },
-            configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
-        )
+    @JvmOverloads
+    fun testPlugin(
+        id: Provider<String>,
+        version: Provider<String>,
+        group: Provider<String> = dependenciesHelper.provider { Dependencies.MARKETPLACE_GROUP },
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = zip(id, version, group) { id, version, group -> listOf(Triple(id, version, group)) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
+    )
 
     /**
      * Adds a test dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -973,12 +1009,17 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * - `pluginId:version@channel`
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
+     * @param configure Plugin dependency configuration.
      */
-    fun testPlugin(notation: Provider<String>) =
-        dependenciesHelper.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
-            configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
-        )
+    @JvmOverloads
+    fun testPlugin(
+        notation: Provider<String>,
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = notation.map { listOfNotNull(it.parsePluginNotation()) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
+    )
 
     /**
      * Adds a test dependency on a plugin for IntelliJ Platform using a string notation, in the following formats:
@@ -986,12 +1027,17 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * - `pluginId:version@channel`
      *
      * @param notation The plugin notation in `pluginId:version` or `pluginId:version@channel` format.
+     * @param configure Plugin dependency configuration.
      */
-    fun testPlugin(notation: String) =
-        dependenciesHelper.addIntelliJPlatformPluginDependencies(
-            pluginsProvider = dependenciesHelper.provider { listOfNotNull(notation.parsePluginNotation()) },
-            configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
-        )
+    @JvmOverloads
+    fun testPlugin(
+        notation: String,
+        configure: Action<IntelliJPlatformPluginConfiguration> = Action {},
+    ) = dependenciesHelper.addIntelliJPlatformPluginDependencies(
+        pluginsProvider = dependenciesHelper.provider { listOfNotNull(notation.parsePluginNotation()) },
+        configurationName = Configurations.INTELLIJ_PLATFORM_TEST_PLUGIN_DEPENDENCY,
+        excludedBundledLibraries = objects.collectExcludedBundledLibraries(configure),
+    )
 
     /**
      * Adds test dependencies on a plugin for IntelliJ Platform using a string notation, in the following formats:

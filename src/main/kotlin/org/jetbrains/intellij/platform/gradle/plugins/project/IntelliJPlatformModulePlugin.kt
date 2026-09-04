@@ -279,6 +279,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             project.configurations.create(name, description) {
                 attributes {
                     attribute(Attributes.extracted, true)
+                    attribute(Attributes.pluginLibrariesFiltered, true)
                     attribute(Attributes.localPluginsNormalized, true)
                     attribute(
                         LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,

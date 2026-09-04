@@ -7,8 +7,15 @@ import org.gradle.api.invocation.Gradle
 import org.gradle.api.provider.Provider
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.services.BuildServiceRegistration
 import org.gradle.api.services.BuildServiceSpec
 import kotlin.reflect.KClass
+
+private fun <T : BuildService<*>> classLoaderScopedBuildServiceName(
+    serviceClass: KClass<T>,
+    projectPath: String?,
+) = "${serviceClass.simpleName}_${serviceClass.java.classLoader.hashCode()}" +
+        projectPath?.let { "_$it" }.orEmpty()
 
 /**
  * Registers a classloader-scoped build service in the Gradle build lifecycle.
@@ -25,7 +32,27 @@ internal fun <T : BuildService<P>, P : BuildServiceParameters> Gradle.registerCl
     projectPath: String? = null,
     configureAction: Action<BuildServiceSpec<P>> = Action { },
 ): Provider<T> {
-    val serviceName = "${serviceClass.simpleName}_${serviceClass.java.classLoader.hashCode()}" +
-            projectPath?.let { "_$it" }.orEmpty()
+    val serviceName = classLoaderScopedBuildServiceName(serviceClass, projectPath)
     return sharedServices.registerIfAbsent(serviceName, serviceClass.java, configureAction)
+}
+
+/**
+ * Registers a classloader-scoped build service and returns its shared parameters.
+ *
+ * Looking up a registration by its exact name is supported with Isolated Projects and lets independently configured
+ * projects contribute configuration-cache-tracked values without accessing another project's model.
+ */
+internal fun <T : BuildService<P>, P : BuildServiceParameters> Gradle.registerClassLoaderScopedBuildServiceParameters(
+    serviceClass: KClass<T>,
+    projectPath: String? = null,
+    configureAction: Action<BuildServiceSpec<P>> = Action { },
+): P {
+    val serviceName = classLoaderScopedBuildServiceName(serviceClass, projectPath)
+    sharedServices.registerIfAbsent(serviceName, serviceClass.java, configureAction)
+
+    @Suppress("UNCHECKED_CAST")
+    val registration = sharedServices.registrations.findByName(serviceName) as? BuildServiceRegistration<T, P>
+        ?: error("The '$serviceName' build service was not registered.")
+
+    return registration.parameters
 }

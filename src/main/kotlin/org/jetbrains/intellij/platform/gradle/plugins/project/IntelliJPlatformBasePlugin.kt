@@ -29,6 +29,7 @@ import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComp
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.CollectorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.ExtractorTransformer
 import org.jetbrains.intellij.platform.gradle.artifacts.transform.LocalPluginsNormalizationTransformers
+import org.jetbrains.intellij.platform.gradle.artifacts.transform.PluginLibrariesFilterTransformer
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension.*
@@ -165,6 +166,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             ) {
                 attributes {
                     attribute(Attributes.extracted, true)
+                    attribute(Attributes.pluginLibrariesFiltered, true)
                     attribute(Attributes.localPluginsNormalized, true)
                     attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
                 }
@@ -182,6 +184,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
                 attributes {
                     attribute(Attributes.extracted, true)
+                    attribute(Attributes.pluginLibrariesFiltered, true)
                     attribute(Attributes.localPluginsNormalized, true)
                     attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
                 }
@@ -212,6 +215,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             ) {
                 attributes {
                     attribute(Attributes.extracted, true)
+                    attribute(Attributes.pluginLibrariesFiltered, true)
                     attribute(Attributes.localPluginsNormalized, true)
                 }
 
@@ -494,6 +498,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             attributesSchema {
                 attribute(Attributes.collected)
                 attribute(Attributes.extracted)
+                attribute(Attributes.pluginLibrariesFiltered)
             }
 
             Attributes.ArtifactType.Archives.forEach {
@@ -501,11 +506,13 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     .attributes
                     .attribute(Attributes.extracted, false)
                     .attribute(Attributes.collected, false)
+                    .attribute(Attributes.pluginLibrariesFiltered, false)
             }
             artifactTypes.maybeCreate(Attributes.ArtifactType.DIRECTORY.toString())
                 .attributes
                 .attribute(Attributes.extracted, true)
                 .attribute(Attributes.collected, false)
+                .attribute(Attributes.pluginLibrariesFiltered, false)
 
             listOf(
                 project.configurations[Configurations.External.COMPILE_CLASSPATH],
@@ -521,9 +528,11 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                 it.attributes
                     .attribute(Attributes.extracted, true)
                     .attribute(Attributes.collected, true)
+                    .attribute(Attributes.pluginLibrariesFiltered, true)
             }
 
             ExtractorTransformer.register(this, project.gradle.registerClassLoaderScopedBuildService(ExtractorService::class))
+            PluginLibrariesFilterTransformer.register(this, dependenciesHelper.pluginLibraryExclusionRules)
             CollectorTransformer.register(this)
             LocalPluginsNormalizationTransformers.register(this)
 
@@ -532,6 +541,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                     .attributes
                     .attribute(Attributes.extracted, true)
                     .attribute(Attributes.collected, true)
+                    .attribute(Attributes.pluginLibrariesFiltered, true)
             }
         }
 

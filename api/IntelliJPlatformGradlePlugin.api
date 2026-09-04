@@ -872,9 +872,17 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun plugin (Ljava/lang/String;)V
 	public final fun plugin (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun plugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun plugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/gradle/api/Action;)V
+	public final fun plugin (Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun plugin (Lorg/gradle/api/provider/Provider;)V
+	public final fun plugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;)V
+	public final fun plugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
 	public final fun plugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
-	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun plugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;)V
+	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;ILjava/lang/Object;)V
 	public final fun pluginComposedModule (Lorg/gradle/api/artifacts/Dependency;)Ljava/lang/Boolean;
 	public final fun pluginModule (Lorg/gradle/api/artifacts/Dependency;)Ljava/lang/Boolean;
 	public final fun pluginVerifier ()V
@@ -952,9 +960,17 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun testPlugin (Ljava/lang/String;)V
 	public final fun testPlugin (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun testPlugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun testPlugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/gradle/api/Action;)V
+	public final fun testPlugin (Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun testPlugin (Lorg/gradle/api/provider/Provider;)V
+	public final fun testPlugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;)V
+	public final fun testPlugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
 	public final fun testPlugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
-	public static synthetic fun testPlugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun testPlugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;)V
+	public static synthetic fun testPlugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun testPlugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun testPlugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun testPlugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;ILjava/lang/Object;)V
 	public final fun testPlugins (Ljava/util/List;)V
 	public final fun testPlugins (Lorg/gradle/api/provider/Provider;)V
 	public final fun testPlugins ([Ljava/lang/String;)V
@@ -1249,6 +1265,12 @@ public final class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPla
 	public fun register (Lorg/gradle/api/Project;Ljava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Signing;
 }
 
+public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginConfiguration {
+	public fun <init> ()V
+	public final fun excludeBundledLibraries ([Ljava/lang/String;)V
+	public final fun excludeBundledLibrary (Ljava/lang/String;)V
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension : org/gradle/api/plugins/ExtensionAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension$Companion;
 	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Lorg/gradle/api/model/ObjectFactory;)V
@@ -1278,10 +1300,19 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun localPlugin (Lorg/gradle/api/file/Directory;)V
 	public final fun localPlugin (Lorg/gradle/api/provider/Provider;)V
 	public final fun plugin (Ljava/lang/String;)V
+	public final fun plugin (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun plugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public final fun plugin (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/gradle/api/Action;)V
+	public final fun plugin (Ljava/lang/String;Lorg/gradle/api/Action;)V
 	public final fun plugin (Lorg/gradle/api/provider/Provider;)V
+	public final fun plugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;)V
+	public final fun plugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
 	public final fun plugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;)V
-	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun plugin (Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;)V
+	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension;Ljava/lang/String;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;ILjava/lang/Object;)V
+	public static synthetic fun plugin$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformPluginsExtension;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/provider/Provider;Lorg/gradle/api/Action;ILjava/lang/Object;)V
 	public final fun plugins (Ljava/util/List;)V
 	public final fun plugins (Lorg/gradle/api/provider/Provider;)V
 	public final fun plugins ([Ljava/lang/String;)V
