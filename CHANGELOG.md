@@ -8,13 +8,12 @@
 - Add `testFrameworks()` dependency helpers for configuring multiple `TestFrameworkType` values in one call JetBrains/intellij-platform-gradle-plugin#2194
 - Expand `TestFrameworkType.Plugin` with IJent, ML completion, navigation bar, Python, RD client, Rider, and statistics test frameworks.
 - Add sandbox-specific runtime classpath configurations for applying dependency exclusions to every `PrepareSandboxTask` without changing project compile or test classpaths JetBrains/intellij-platform-gradle-plugin#2177
-- Exclude Kotlin stdlib and Kotlin Coroutines dependencies from sandbox runtime classpaths by default. Set `org.jetbrains.intellij.platform.useDefaultSandboxExclusions=false` to opt out JetBrains/intellij-platform-gradle-plugin#2177
-- Default `kotlin.stdlib.default.dependency` to `false` for projects using the IntelliJ Platform settings plugin while preserving an explicitly configured value
-  Add `DumpProductsReleasesTask` to support dumping IntelliJ Platform product releases for Plugin DevKit plugin purposes
+- Add `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathEnabled` property to control whether bundled plugins declared in `product-info.json` are added to test classpaths. It defaults to `true`; set it to `false` to opt out.
+- Add `DumpProductsReleasesTask` to support dumping IntelliJ Platform product releases for Plugin DevKit plugin purposes
 
 ### Changed
 
-- Keep bundled plugins declared in `product-info.json` off test classpaths by default. Set `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathEnabled=true` to opt in.
+- Avoid bundling dependencies already provided by the IntelliJ Platform: exclude Kotlin stdlib and Kotlin Coroutines dependencies from sandbox runtime classpaths by default, and default `kotlin.stdlib.default.dependency` to `false` for projects using the IntelliJ Platform settings plugin while preserving an explicitly configured value. Set `org.jetbrains.intellij.platform.useDefaultSandboxExclusions=false` to opt out of the sandbox exclusions JetBrains/intellij-platform-gradle-plugin#2177
 
 ### Fixed
 

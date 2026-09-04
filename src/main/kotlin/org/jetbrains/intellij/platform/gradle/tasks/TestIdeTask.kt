@@ -176,7 +176,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // 6. Original classpath without runtime dependencies
             // 7. Test runtime classpath configuration
             // 8. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
-            // 9. Bundled plugins declared by product-info, when explicitly enabled
+            // 9. Bundled plugins declared by product-info, when enabled
             classpath = project.files(
                 instrumentedTestCode,
                 currentPluginLibsProvider,

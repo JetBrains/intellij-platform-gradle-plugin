@@ -44,7 +44,7 @@ class TestIdeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `bundled plugins classpath is disabled by default and can be enabled`() {
+    fun `bundled plugins classpath is enabled by default and can be disabled`() {
         buildFile write //language=kotlin
                 """
                 tasks.register("printBundledPluginsClasspath") {
@@ -72,18 +72,18 @@ class TestIdeTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         val defaultClasspath = build("printBundledPluginsClasspath").output.bundledPluginsClasspathEntries()
-        val enabledClasspath = build(
+        val disabledClasspath = build(
             "printBundledPluginsClasspath",
-            projectProperties = mapOf(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString() to true),
+            projectProperties = mapOf(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString() to false),
         ).output.bundledPluginsClasspathEntries()
 
         assertTrue(
-            enabledClasspath.containsAll(defaultClasspath),
-            "Enabling the bundled plugins classpath should preserve the default test classpath",
+            defaultClasspath.containsAll(disabledClasspath),
+            "The default bundled plugins classpath should preserve the explicitly disabled test classpath",
         )
         assertTrue(
-            enabledClasspath.size > defaultClasspath.size,
-            "Enabling the bundled plugins classpath should add entries from bundled plugins",
+            defaultClasspath.size > disabledClasspath.size,
+            "The default bundled plugins classpath should contain entries from bundled plugins",
         )
     }
 
