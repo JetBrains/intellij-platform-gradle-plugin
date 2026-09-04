@@ -153,10 +153,14 @@ class ProductReleaseCatalogEntryTest {
                 code = "PCP",
                 releases = listOf(release("2026.1", "261.25134.203")),
             ),
+            JetBrainsProductReleases(
+                code = "DG",
+                releases = listOf(release("2026.2.2", "262.9437.70")),
+            ),
         ).flatMap { it.toProductReleases() }
 
         assertEquals(
-            listOf("IC", "IU", "PC", "PY"),
+            listOf("IC", "IU", "PC", "PY", "DB"),
             entries.map { it.type.code },
         )
     }
