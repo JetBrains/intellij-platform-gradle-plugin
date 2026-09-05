@@ -474,7 +474,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         staleLogFile.parent.createDirectories()
         staleLogFile.toFile().writeText("stale")
 
-        build(Tasks.RUN_IDE)
+        build(Tasks.RUN_IDE) {
+            assertContains("IDE logs: ", output)
+            assertContains("${Sandbox.LOG}_${Tasks.RUN_IDE}/idea.log", output)
+        }
 
         assertTrue(staleLogFile.exists())
     }
@@ -509,6 +512,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         build(Tasks.RUN_IDE_BACKEND) {
             assertContains("MAIN_CLASS=com.intellij.idea.Main", output)
             assertContains("APP_ARGS=serverMode -p 5990", output)
+            assertContains("IDE logs (backend): ", output)
+            assertContains("log_${Tasks.RUN_IDE_BACKEND}/idea.log", output)
         }
 
         val joinLinkFiles = dir.toFile()
@@ -552,6 +557,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertContains("system_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
             assertContains("log_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
             assertContains("plugins_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
+            assertContains("IDE logs (backend): ", output)
+            assertContains("log_${Tasks.RUN_IDE_BACKEND}/idea.log", output)
+            assertContains("IDE logs (frontend): ", output)
+            assertContains("log_${Tasks.RUN_IDE_FRONTEND}/frontend/idea.log", output)
             assertContains("-Didea.properties.file=", output)
             assertContains("${Tasks.RUN_IDE_SPLIT_MODE}-frontend.properties", output)
         }
@@ -887,6 +896,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertContains("log_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
             assertContains("idea.plugins.path=", output)
             assertContains("plugins_${Tasks.RUN_IDE_FRONTEND}/frontend", output)
+            assertContains("IDE logs (frontend): ", output)
+            assertContains("log_${Tasks.RUN_IDE_FRONTEND}/frontend/idea.log", output)
             assertContains("frontend.properties", output)
             assertContains("-Didea.platform.prefix=JetBrainsClient", output)
             assertNotContains("coroutines-javaagent", output)
