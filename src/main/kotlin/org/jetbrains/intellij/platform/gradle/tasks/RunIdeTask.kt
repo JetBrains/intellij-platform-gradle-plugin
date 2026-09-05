@@ -159,6 +159,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         workingDir = platformPath.toFile()
         purgeOldLogDirectoriesIfRequested(sandboxPathsOverride?.logDirectory)
         logSplitModeSandboxPaths(sandboxPathsOverride)
+        logIdeLogPath(sandboxPathsOverride?.logDirectory)
 
         if (composeHotReload.get() && executionMode.get() != ExecutionMode.SPLIT_MODE_FRONTEND) {
             log.info("Compose Hot Reload is enabled for `runIde` task")
@@ -604,6 +605,24 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
                 "  idea.log.path=${logDirectory.asPath.safePathString}\n" +
                 "  idea.plugins.path=${pluginsDirectory.asPath.safePathString}"
         )
+    }
+
+    /**
+     * Prints a single lifecycle-level line pointing at the `idea.log` file within the resolved sandbox log directory of
+     * this run task, so the sandbox IDE log path is discoverable at the default Gradle log level.
+     *
+     * The log file may not exist yet when the message is printed; only the expected path is reported. In Split Mode this
+     * is invoked once per launched process (backend and frontend), producing one line for each.
+     */
+    private fun logIdeLogPath(sandboxLogDirectoryOverride: Provider<Directory>? = null) {
+        val ideaLogPath = (sandboxLogDirectoryOverride ?: sandboxLogDirectory).asPath.resolve("idea.log")
+        val label = when (executionMode.get()) {
+            ExecutionMode.SPLIT_MODE_BACKEND -> "IDE logs (backend)"
+            ExecutionMode.SPLIT_MODE_FRONTEND -> "IDE logs (frontend)"
+            ExecutionMode.STANDARD -> "IDE logs"
+        }
+
+        log.lifecycle("$label: ${ideaLogPath.safePathString}")
     }
 
     private fun configureSplitModeFrontendLaunch() {

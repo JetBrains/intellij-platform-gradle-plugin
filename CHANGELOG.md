@@ -11,6 +11,7 @@
 - Add sandbox-specific runtime classpath configurations for applying dependency exclusions to every `PrepareSandboxTask` without changing project compile or test classpaths JetBrains/intellij-platform-gradle-plugin#2177
 - Add `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathEnabled` property to control whether bundled plugins declared in `product-info.json` are added to test classpaths. It defaults to `true`; set it to `false` to opt out.
 - Add `DumpProductsReleasesTask` to support dumping IntelliJ Platform product releases for Plugin DevKit plugin purposes
+- Print a lifecycle-level `IDE logs: <sandbox>/log/idea.log` line when launching `runIde`, `runIdeBackend`, `runIdeFrontend`, and `runIdeSplitMode` (one line per process, with backend and frontend paths in Split Mode), so the sandbox IDE log path is visible at the default Gradle log level
 
 ### Changed
 
