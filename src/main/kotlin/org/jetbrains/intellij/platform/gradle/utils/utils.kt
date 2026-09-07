@@ -40,7 +40,7 @@ import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.*
 
-val FileSystemLocation.asPath
+internal val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()
 
 internal val <T : FileSystemLocation> Provider<T>.asPath
@@ -62,7 +62,7 @@ internal fun ConfigurationContainer.create(
 internal val Configuration.asLenient
     get() = incoming.artifactView { lenient(true) }.files
 
-fun <T : Any> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
+internal fun <T : Any> Property<T>.isSpecified() = isPresent && when (val value = orNull) {
     null -> false
     is String -> value.isNotEmpty()
     is RegularFile -> value.asFile.exists()
@@ -78,7 +78,7 @@ fun <T : Any> Property<T>.isSpecified() = isPresent && when (val value = orNull)
  * @throws GradleException
  */
 @Throws(GradleException::class)
-fun FileCollection.platformPath(requestedPlatform: RequestedIntelliJPlatform? = null) = with(toList()) {
+internal fun FileCollection.platformPath(requestedPlatform: RequestedIntelliJPlatform? = null) = with(toList()) {
     val message = when (size) {
         0 -> "No IntelliJ Platform dependency found" + requestedPlatform?.let { " with '$it'" }.orEmpty() + "."
         1 -> null
@@ -247,13 +247,13 @@ private fun getProblemResolver(suppressPluginProblems: Boolean): PluginCreationR
     }
 }
 
-val Project.settings: Settings
+internal val Project.settings: Settings
     get() = (gradle as GradleInternal).settings
 
-val Project.rootProjectPath
+internal val Project.rootProjectPath
     get() = rootProject.rootDir.toPath().absolute()
 
-val Project.extensionProvider: Provider<IntelliJPlatformExtension>
+internal val Project.extensionProvider: Provider<IntelliJPlatformExtension>
     get() = provider { the<IntelliJPlatformExtension>() }
 
 internal val Project.dependenciesHelper

@@ -405,8 +405,7 @@ public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformType$C
 }
 
 public final class org/jetbrains/intellij/platform/gradle/IntelliJPlatformTypeKt {
-	public static final fun toIntelliJPlatformType (Ljava/lang/Object;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
-	public static final fun validateVersion (Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
+	public static final fun toIntelliJPlatformType (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/IntelliJPlatformType;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/ProductMode : java/lang/Enum {
@@ -574,23 +573,6 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$UiUt
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$UiUtil$Jupyter : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$UiUtil$Jupyter;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/Variant {
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lorg/jetbrains/intellij/platform/gradle/Variant;
-	public static synthetic fun copy$default (Lorg/jetbrains/intellij/platform/gradle/Variant;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lorg/jetbrains/intellij/platform/gradle/Variant;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getArch ()Ljava/lang/String;
-	public final fun getOs ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/VariantKt {
-	public static final fun getVariants ()Ljava/util/List;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/argumentProviders/ComposeHotReloadArgumentProvider : org/gradle/process/CommandLineArgumentProvider {
@@ -3740,12 +3722,6 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/companion/TestCo
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
-public final class org/jetbrains/intellij/platform/gradle/utils/CachedKt {
-	public static final fun asImmutable (Lorg/gradle/api/provider/HasConfigurableValue;)Lorg/gradle/api/provider/HasConfigurableValue;
-	public static final fun getMarkedAsNonNull (Ljava/lang/Object;)Ljava/lang/Object;
-	public static final fun markAsNonNull (Ljava/lang/Object;)V
-}
-
 public abstract interface class org/jetbrains/intellij/platform/gradle/utils/IdeServicesPluginRepositoryService : org/jetbrains/intellij/pluginRepository/internal/api/PluginRepositoryService {
 	public abstract fun uploadById (ILokhttp3/RequestBody;Lokhttp3/RequestBody;ZLokhttp3/MultipartBody$Part;)Lretrofit2/Call;
 	public abstract fun uploadByStringIdAndFamily (Lokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/RequestBody;Lokhttp3/RequestBody;ZLokhttp3/MultipartBody$Part;)Lretrofit2/Call;
@@ -3785,24 +3761,6 @@ public final class org/jetbrains/intellij/platform/gradle/utils/Logger {
 	public static synthetic fun trace$default (Lorg/jetbrains/intellij/platform/gradle/utils/Logger;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
 	public final fun warn (Ljava/lang/String;Ljava/lang/Throwable;)V
 	public static synthetic fun warn$default (Lorg/jetbrains/intellij/platform/gradle/utils/Logger;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
-}
-
-public final class org/jetbrains/intellij/platform/gradle/utils/PlatformJavaVersionsKt {
-	public static final fun getPlatformJavaVersions ()Ljava/util/Map;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/utils/PlatformKotlinVersionsKt {
-	public static final fun getPlatformKotlinVersions ()Ljava/util/Map;
-}
-
-public final class org/jetbrains/intellij/platform/gradle/utils/UtilsKt {
-	public static final fun getAsPath (Lorg/gradle/api/file/FileSystemLocation;)Ljava/nio/file/Path;
-	public static final fun getExtensionProvider (Lorg/gradle/api/Project;)Lorg/gradle/api/provider/Provider;
-	public static final fun getRootProjectPath (Lorg/gradle/api/Project;)Ljava/nio/file/Path;
-	public static final fun getSettings (Lorg/gradle/api/Project;)Lorg/gradle/api/initialization/Settings;
-	public static final fun isSpecified (Lorg/gradle/api/provider/Property;)Z
-	public static final fun platformPath (Lorg/gradle/api/file/FileCollection;Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;)Ljava/nio/file/Path;
-	public static synthetic fun platformPath$default (Lorg/gradle/api/file/FileCollection;Lorg/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform;ILjava/lang/Object;)Ljava/nio/file/Path;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/utils/Version : java/lang/Comparable {

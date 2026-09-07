@@ -203,18 +203,31 @@ enum class IntelliJPlatformType(
 }
 
 /**
+ * Maps the product code [String] to an [IntelliJPlatformType].
+ *
+ * @receiver The product code [String] to convert into an [IntelliJPlatformType]
+ * @param version The version string to help determine the correct type
+ * @return [IntelliJPlatformType] instance
+ * @throws IllegalArgumentException if the value cannot be converted to [IntelliJPlatformType]
+ */
+@Throws(IllegalArgumentException::class)
+fun String.toIntelliJPlatformType(version: String) = IntelliJPlatformType.fromCode(this, version)
+
+/**
  * Maps the value to an [IntelliJPlatformType].
  *
- * This extension function transforms [Any] value that can be converted into [IntelliJPlatformType].
- * Also validates that the type-version combination is valid.
+ * This extension function transforms an [Any] value that can be converted into an [IntelliJPlatformType].
+ * It is intentionally kept `internal`: exposing an extension on [Any] leaks a helper into every build script
+ * that applies the plugin. See https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1146.
+ * External consumers should use the typed [String.toIntelliJPlatformType] overload instead.
  *
  * @receiver [Any] value that can be converted to [IntelliJPlatformType]
  * @param version The version string to help determine the correct type
  * @return [IntelliJPlatformType] instance
- * @throws IllegalArgumentException if the value cannot be converted to [IntelliJPlatformType] or if the combination is invalid
+ * @throws IllegalArgumentException if the value cannot be converted to [IntelliJPlatformType]
  */
 @Throws(IllegalArgumentException::class)
-fun Any.toIntelliJPlatformType(version: String) = when (this) {
+internal fun Any.toIntelliJPlatformType(version: String) = when (this) {
     is IntelliJPlatformType -> IntelliJPlatformType.fromCode(code, version)
     is String -> IntelliJPlatformType.fromCode(this, version)
     else -> throw IllegalArgumentException("Invalid argument type: '$javaClass'. Supported types: String or ${IntelliJPlatformType::class.java}")
@@ -230,7 +243,7 @@ fun Any.toIntelliJPlatformType(version: String) = when (this) {
  * @throws IllegalArgumentException if the version is not compatible with this type
  */
 @Throws(IllegalArgumentException::class)
-fun IntelliJPlatformType.validateVersion(version: String) = also {
+internal fun IntelliJPlatformType.validateVersion(version: String) = also {
     fun test(buildConstraint: Version, versionConstraint: Version, message: String) = with(Version.parse(version)) {
         this >= when {
             isBuildNumber() -> buildConstraint

@@ -16,6 +16,7 @@
 ### Changed
 
 - Avoid bundling dependencies already provided by the IntelliJ Platform: exclude Kotlin stdlib and Kotlin Coroutines dependencies from sandbox runtime classpaths by default, and default `kotlin.stdlib.default.dependency` to `false` for projects using the IntelliJ Platform settings plugin while preserving an explicitly configured value. Set `org.jetbrains.intellij.platform.useDefaultSandboxExclusions=false` to opt out of the sandbox exclusions JetBrains/intellij-platform-gradle-plugin#2177
+- Mark internal utility helpers as `internal` so they no longer leak into consumers' build scripts. This hides the `utils/` helpers (`asPath`, `isSpecified`, `platformPath`, `Project.settings`, `Project.rootProjectPath`, `Project.extensionProvider`, the `cached*` provider helpers, `asImmutable`, `markAsNonNull`/`markedAsNonNull`, and the `PlatformJavaVersions`/`PlatformKotlinVersions` maps) as well as the internal `Variant` type. The `Any.toIntelliJPlatformType(String)` extension is replaced with a typed `String.toIntelliJPlatformType(String)` overload to stop polluting every build script with an extension on `Any`. JetBrains/intellij-platform-gradle-plugin#1146
 
 ### Fixed
 

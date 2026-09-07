@@ -5,9 +5,9 @@ package org.jetbrains.intellij.platform.gradle
 import org.gradle.api.GradleException
 import org.gradle.api.provider.ProviderFactory
 
-data class Variant(val os: String, val arch: String)
+internal data class Variant(val os: String, val arch: String)
 
-val variants = listOf(
+internal val variants = listOf(
     Variant("linux", "x86_64"),
     Variant("linux", "arm64"),
     Variant("mac", "x86_64"),
