@@ -14,7 +14,7 @@ object Constants {
     const val CACHE_DIRECTORY_IDES = "ides"
     const val CACHE_DIRECTORY_PRODUCT_RELEASES = "productReleases"
     const val DEFAULT_MAIN_CLASS = "com.intellij.idea.Main"
-        const val LAYOUT_INDEX = "layoutIndex"
+    const val LAYOUT_INDEX = "layoutIndex"
     const val TOOLBOX_IGNORE = ".toolbox-ignore"
     const val IDEA_CORE = "com.intellij"
 
