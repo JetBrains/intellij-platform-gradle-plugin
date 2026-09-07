@@ -1,0 +1,30 @@
+# EditorConfig — https://editorconfig.org
+#
+# These rules describe the code style already used throughout the IntelliJ Platform
+# Gradle Plugin sources. They are picked up automatically by IntelliJ IDEA and other
+# EditorConfig-aware editors so that newly written or reformatted code stays consistent
+# with the existing code base. See CONTRIBUTING.md ("Code Style") for the rationale.
+#
+# Note: adding this file is not an invitation to reformat the whole repository. Reformat
+# only the code you actually change.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+
+[*.{kt,kts}]
+indent_size = 4
+# The project keeps trailing commas in multi-line argument and parameter lists.
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+
+[*.{yml,yaml}]
+indent_size = 2
+
+[*.md]
+# Markdown uses trailing spaces as hard line breaks.
+trim_trailing_whitespace = false

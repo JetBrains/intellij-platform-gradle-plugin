@@ -63,6 +63,56 @@ The Gradle project needs to be refreshed to apply changes.
 > }
 > ```
 
+## Code Style
+
+The project is written in Kotlin (production code and the Gradle Kotlin DSL build scripts) and follows the
+**default IntelliJ IDEA Kotlin code style**. There is no custom formatter, linter, or ktlint/Spotless setup –
+the conventions below are simply what the existing sources already use, and they are captured in the
+[`.editorconfig`](.editorconfig) file in the repository root so that any EditorConfig-aware editor picks them up
+automatically.
+
+When contributing, please match the surrounding code. The most important conventions are:
+
+- **Encoding and line endings** – files are UTF-8, use Unix (`LF`) line endings, and end with a single trailing
+  newline. Do not leave trailing whitespace (Markdown files are the only exception, where trailing spaces may be
+  used as hard line breaks).
+- **Indentation** – four spaces, never tabs. This applies to both Kotlin sources and the `*.gradle.kts` scripts.
+  YAML files (for example, GitHub Actions workflows) use two spaces.
+- **Line length** – aim for roughly 120 characters as a soft guide, matching the IDE default right margin.
+  Longer lines are acceptable when wrapping would hurt readability – for example, URLs, KDoc, string literals, or
+  enum entries carrying coordinates.
+- **Imports** – let the IDE manage them (*Optimize Imports*). Remove unused imports and keep the default import
+  ordering. The project does not forbid wildcard (`*`) imports; both single-name and wildcard imports produced by
+  the IDE default settings are present, so there is no need to expand or collapse them by hand.
+- **Braces** – use the K&R style produced by the IDE: the opening brace stays on the same line as the declaration
+  or statement, and `else`/`catch`/`finally` continue on the line of the preceding closing brace.
+- **Trailing commas** – keep a trailing comma on the last element of multi-line argument, parameter, and value
+  lists (for example, multi-line `enum` entries or `data class` constructors). Single-line lists have no trailing
+  comma.
+- **Naming** – `PascalCase` for types (classes, interfaces, objects, enums), `camelCase` for functions,
+  properties, and parameters, and `UPPER_SNAKE_CASE` for `const val` and top-level/`object` constants.
+- **Documentation** – public API is documented with KDoc (`/** … */`) using the standard tags where relevant
+  (`@param`, `@return`, `@throws`, `@property`, `@receiver`, `@see`). Each declaration has a single KDoc block.
+- **Copyright header** – every Kotlin source file starts with the JetBrains copyright header on the very first
+  line, followed by a blank line and the `package` declaration:
+
+  ```kotlin
+  // Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+  ```
+
+  The header is maintained by the shared *JetBrains Copyrights* profile stored under
+  [`.idea/copyright`](.idea/copyright); IntelliJ IDEA fills in the end year automatically. New files created in the
+  IDE receive it via **Code | Copyright | Update Copyright**.
+
+### Applying the style in IntelliJ IDEA
+
+1. Open the project in IntelliJ IDEA. EditorConfig support is bundled and enabled by default, so the
+   [`.editorconfig`](.editorconfig) settings are applied automatically – no extra configuration is required.
+2. Before committing, run **Code | Reformat Code** (<kbd>Ctrl/Cmd</kbd>+<kbd>Alt</kbd>+<kbd>L</kbd>) and
+   **Code | Optimize Imports** (<kbd>Ctrl/Cmd</kbd>+<kbd>Alt</kbd>+<kbd>O</kbd>) on the code you changed.
+3. Reformat only the lines you actually touched. Please avoid repository-wide reformatting so that reviews stay
+   focused on the change itself.
+
 ## Pull Requests
 
 To correctly prepare the pull requests, make sure to provide the following information:
