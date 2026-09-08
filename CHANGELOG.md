@@ -19,6 +19,7 @@
 
 ### Fixed
 
+- Resolve MPS installer download URLs using the release revision directory.
 - Map the DataGrip product releases catalog code `DG` to the `DB` platform code so DataGrip installer download URLs resolve correctly JetBrains/intellij-platform-gradle-plugin#2210
 - Parse `hdiutil info` property-list output when detaching stale DMG images, avoiding partition-type GUIDs being passed to `hdiutil detach` [IJPL-253360](https://youtrack.jetbrains.com/issue/IJPL-253360)
 - Serialize code instrumentation tasks within each project to prevent concurrent access to Gradle's shared Ant builder JetBrains/intellij-platform-gradle-plugin#2193

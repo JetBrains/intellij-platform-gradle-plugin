@@ -86,6 +86,20 @@ class ProductReleaseCatalogEntryTest {
                 "https://download.jetbrains.com/idea/code-with-me/JetBrainsClient-261.25134.95.jbr.win.zip",
             ),
         )
+        assertEquals(
+            ProductRelease.Download.Artifact("2026.1", "macos-aarch64", "dmg"),
+            artifact(
+                IntelliJPlatformType.MPS,
+                "https://download.jetbrains.com/mps/2026.1/MPS-2026.1-macos-aarch64.dmg",
+            ),
+        )
+        assertEquals(
+            ProductRelease.Download.Artifact("2026.2-EAP1", "macos-aarch64", "dmg"),
+            artifact(
+                IntelliJPlatformType.MPS,
+                "https://download.jetbrains.com/mps/2026.2-EAP1/MPS-2026.2-EAP1-macos-aarch64.dmg",
+            ),
+        )
     }
 
     @Test

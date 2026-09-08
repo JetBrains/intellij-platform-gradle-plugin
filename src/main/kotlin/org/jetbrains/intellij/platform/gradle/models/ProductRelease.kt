@@ -75,7 +75,8 @@ internal fun ProductRelease.resolveDownload(): ProductRelease.Download? {
             .filterNot { it.link.endsWith(".deb") || it.link.endsWith(".exe") } // Extracting of .deb and .exe archives is not supported.
             .toList()
 
-        return candidates.firstOrNull { it.link.substringAfterLast('/').contains("$os$arch.") } ?: candidates.firstOrNull()
+        return candidates.firstOrNull { it.link.substringAfterLast('/').contains("$os$arch.") }
+            ?: candidates.firstOrNull()
     } else {
         val arch = when {
             os == "windows" -> "Zip"
@@ -102,16 +103,15 @@ internal fun ProductRelease.resolveDownloadArtifact(): ProductRelease.Download.A
     val baseName = fileName.removeSuffix(".$extension")
     val revisionFromParent = segments.dropLast(1).lastOrNull { it.firstOrNull()?.isDigit() == true }
 
-    val isAndroidStudio = "/android/studio/" in path
-
-    val (name, rest) = when {
-        isAndroidStudio -> {
+    val (name, rest) = when (type) {
+        IntelliJPlatformType.AndroidStudio -> {
             val name = "android-studio"
             val prefix = "$name-"
             require(baseName.startsWith(prefix)) { "Cannot resolve artifact from '$link'" }
 
             name to baseName.removePrefix(prefix)
         }
+
         else -> {
             val separator = baseName.indices.firstOrNull {
                 baseName[it] == '-' && baseName.getOrNull(it + 1)?.isDigit() == true
@@ -122,19 +122,32 @@ internal fun ProductRelease.resolveDownloadArtifact(): ProductRelease.Download.A
         }
     }
 
-    if (isAndroidStudio && revisionFromParent != null) {
-        val classifier = rest
-            .removePrefix("$revisionFromParent-")
-            .removePrefix("$revisionFromParent.")
-            .takeIf { it != rest || rest != revisionFromParent }
+    revisionFromParent?.let { revision ->
+        val classifier = requireNotNull(
+            when (type) {
+                IntelliJPlatformType.AndroidStudio ->
+                    rest
+                        .removePrefix("$revision-")
+                        .removePrefix("$revision.")
+                        .takeIf { it != rest || rest != revision }
 
-        return ProductRelease.Download.Artifact(revisionFromParent, classifier, extension)
+                IntelliJPlatformType.MPS ->
+                    rest
+                        .removePrefix("$revision-")
+                        .takeIf { it != rest }
+
+                else -> return@let
+            },
+        ) { "Cannot resolve artifact from '$link'" }
+
+        return ProductRelease.Download.Artifact(revision, classifier, extension)
     }
 
     val classifierSeparator = when (name) {
         "JetBrainsClient" -> rest.indices.firstOrNull {
             (rest[it] == '-' || rest[it] == '.') && rest.getOrNull(it + 1)?.isLetter() == true
         } ?: -1
+
         else -> maxOf(rest.lastIndexOf('-'), rest.lastIndexOf('.')).takeIf {
             it >= 0 && rest.getOrNull(it + 1)?.isLetter() == true
         } ?: -1
