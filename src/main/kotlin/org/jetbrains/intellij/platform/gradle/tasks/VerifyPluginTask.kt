@@ -197,6 +197,26 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     @get:Option(option = "list-ides", description = "List IDEs that would be used for verification without performing it")
     abstract val listIdes: Property<Boolean>
 
+    /**
+     * Determines whether the IntelliJ Plugin Verifier resolves plugin classes against the JetBrains Runtime (JBR)
+     * bundled with each verified IDE, instead of a single runtime shared across all verified IDEs.
+     *
+     * When enabled (default), the `-runtime-dir` option is not passed to the Plugin Verifier, so it resolves classes
+     * against the JBR bundled within each target IDE. The [runtimeDirectory] is still exposed through the `JAVA_HOME`
+     * environment variable and used only as a fallback for IDEs that don't ship a bundled JBR.
+     *
+     * When disabled, the resolved [runtimeDirectory] (the JetBrains Runtime associated with the IntelliJ Platform used
+     * to build the plugin) is forced for all verified IDEs via the `-runtime-dir` option — the behavior from before
+     * this option was introduced.
+     *
+     * Default value: `true`
+     *
+     * @see <a href="https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1611">#1611</a>
+     */
+    @get:Input
+    @get:Optional
+    abstract val useBundledRuntime: Property<Boolean>
+
     private val problemsReportUrl get() = ConsoleRenderer().asClickableFileUrl(problemsReportFile.get().asFile)
 
     private val log = Logger(javaClass)
@@ -277,6 +297,13 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
 
         classpath = objectFactory.fileCollection().from(executable)
 
+        // When verifying against each IDE's bundled JBR, don't force a single runtime with `-runtime-dir`; instead
+        // expose the resolved runtime via `JAVA_HOME` so the Plugin Verifier uses it only as a fallback for IDEs
+        // that don't ship a bundled JBR. See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1611
+        if (useBundledRuntime.getOrElse(true)) {
+            environment("JAVA_HOME", runtimeDirectory.asPath.safePathString)
+        }
+
         args(
             listOf("check-plugin") + getOptions() + file.safePathString + ides.map {
                 when {
@@ -299,8 +326,14 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     private fun getOptions(): List<String> {
         val args = mutableListOf(
             "-verification-reports-dir", verificationReportsDirectory.asPath.safePathString,
-            "-runtime-dir", runtimeDirectory.asPath.safePathString,
         )
+
+        // Force the configured runtime for all verified IDEs only when bundled-JBR verification is disabled.
+        // Otherwise the option is omitted so the Plugin Verifier picks each IDE's bundled JBR. See: #1611
+        if (!useBundledRuntime.getOrElse(true)) {
+            args.add("-runtime-dir")
+            args.add(runtimeDirectory.asPath.safePathString)
+        }
 
         externalPrefixes.get().takeIf { it.isNotEmpty() }?.let {
             args.add("-external-prefixes")
@@ -524,6 +557,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 offline.convention(project.gradle.startParameter.isOffline)
                 listIdes.convention(false)
+                useBundledRuntime.convention(true)
 
                 problemsReportFile.convention(project.layout.buildDirectory.file("reports/problems/problems-report.html"))
             }

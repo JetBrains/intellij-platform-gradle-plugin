@@ -3458,6 +3458,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginT
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getSubsystemsToCheck ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTeamCityOutputFormat ()Lorg/gradle/api/provider/Property;
+	public abstract fun getUseBundledRuntime ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVerificationReportsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getVerificationReportsFormats ()Lorg/gradle/api/provider/ListProperty;
 	public fun validateIntelliJPlatformVersion ()V

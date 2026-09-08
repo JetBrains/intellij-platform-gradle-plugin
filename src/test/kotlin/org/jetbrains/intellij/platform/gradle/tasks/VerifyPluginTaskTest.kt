@@ -40,6 +40,41 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `run plugin verifier against each IDE bundled runtime by default`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        build(Tasks.VERIFY_PLUGIN) {
+            // By default the '-runtime-dir' option is not passed, so the Plugin Verifier resolves classes against
+            // each verified IDE's own bundled JetBrains Runtime instead of the runtime used to build the plugin.
+            // The verifier logs "Using Java runtime from ..." only when '-runtime-dir' is provided. See: #1611
+            assertContains("Starting the IntelliJ Plugin Verifier", output)
+            assertNotContains("Using Java runtime from", output)
+        }
+    }
+
+    @Test
+    fun `run plugin verifier forces the build runtime when useBundledRuntime is disabled`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildFile write //language=kotlin
+                """
+                tasks.withType<VerifyPluginTask> {
+                    useBundledRuntime = false
+                }
+                """.trimIndent()
+
+        build(Tasks.VERIFY_PLUGIN) {
+            // When bundled-runtime verification is disabled, the resolved build runtime is forced for all IDEs
+            // via the '-runtime-dir' option, which makes the verifier log "Using Java runtime from ...". See: #1611
+            assertContains("Using Java runtime from", output)
+        }
+    }
+
+    @Test
     @Ignore("Due to Problems API integration")
     fun `run plugin verifier fails on old version lower than 1_255`() {
         writePluginXmlFile()

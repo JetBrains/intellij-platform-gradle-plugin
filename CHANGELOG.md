@@ -16,6 +16,7 @@
 ### Changed
 
 - Avoid bundling dependencies already provided by the IntelliJ Platform: exclude Kotlin stdlib and Kotlin Coroutines dependencies from sandbox runtime classpaths by default, and default `kotlin.stdlib.default.dependency` to `false` for projects using the IntelliJ Platform settings plugin while preserving an explicitly configured value. Set `org.jetbrains.intellij.platform.useDefaultSandboxExclusions=false` to opt out of the sandbox exclusions JetBrains/intellij-platform-gradle-plugin#2177
+- Run the IntelliJ Plugin Verifier against each verified IDE's own bundled JetBrains Runtime (JBR) instead of the runtime used to build the plugin, so plugin classes are resolved against the correct runtime per IDE. The `verifyPlugin` task no longer passes `-runtime-dir` by default; the resolved runtime is exposed via `JAVA_HOME` and used only as a fallback for IDEs without a bundled JBR. Set the `verifyPlugin` task's `useBundledRuntime` property to `false` to restore the previous behavior of forcing the build runtime for all IDEs JetBrains/intellij-platform-gradle-plugin#1611
 
 ### Fixed
 
