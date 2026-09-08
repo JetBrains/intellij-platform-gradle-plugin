@@ -970,44 +970,28 @@ class IntelliJPlatformDependenciesHelper(
                     .map { it.toList() }
             }
 
-    /**
-     * Resolves the latest available IntelliJ Platform installer version for the given [type] using the
-     * [ProductReleasesService] and returns it as a [Provider].
-     *
-     * The newest matching release (by build number) is selected. By default, releases from the
-     * [Channel.RELEASE], [Channel.EAP], and [Channel.RC] channels are considered (mirroring the
-     * `pluginVerification.ides.latest()` defaults); the [configure] block can narrow the selection down, for example
-     * by restricting [ProductReleasesFilterParameters.channels] or the
-     * [ProductReleasesFilterParameters.sinceBuild]/[ProductReleasesFilterParameters.untilBuild] range.
-     *
-     * @param type The type of the IntelliJ Platform to resolve the latest version for. Accepts either [String] or [IntelliJPlatformType].
-     * @param configure The [ProductReleasesFilterParameters] filter configuration.
-     */
     internal fun createProductReleaseLatestVersionProvider(
-        type: Any,
-        configure: ProductReleasesFilterParameters.() -> Unit = {},
+        type: IntelliJPlatformType,
+        configure: ProductReleasesFilterParameters.() -> Unit,
     ): Provider<String> {
-        val platformType = when (type) {
-            is IntelliJPlatformType -> type
-            is String -> IntelliJPlatformType.fromCode(type)
-            else -> throw IllegalArgumentException("Invalid argument type: '${type.javaClass}'. Supported types: String or ${IntelliJPlatformType::class.java}")
+        val parameters = objects.newInstance<ProductReleasesFilterParameters>().apply {
+            channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
+            configure()
+            types.set(listOf(type))
         }
 
-        return objects.newInstance<ProductReleasesFilterParameters>()
-            .apply {
-                channels.convention(listOf(Channel.RELEASE, Channel.EAP, Channel.RC))
-                types.convention(listOf(platformType))
-                configure()
-            }
-            .let { parameters ->
-                provider {
-                    productReleasesService.get()
-                        .resolve(parameters)
-                        .maxByOrNull { it.build }
-                        ?.notationVersion
-                        ?.toString()
-                }.cached()
-            }
+        return objects.property<String>()
+            .value(provider {
+                val release = productReleasesService.get()
+                    .resolve(parameters)
+                    .filter { it.type == type }
+                    .maxByOrNull { it.build }
+
+                requireNotNull(release) {
+                    "No IntelliJ Platform releases found for type '$type' matching the latestVersion filters."
+                }.notationVersion.toString()
+            })
+            .asImmutable()
     }
 
     //</editor-fold>

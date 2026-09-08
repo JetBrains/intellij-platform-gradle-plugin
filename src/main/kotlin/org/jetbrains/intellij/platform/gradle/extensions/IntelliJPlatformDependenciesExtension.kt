@@ -164,8 +164,9 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * ```
      *
      * The newest matching release is selected and used with the installer distribution (the default `useInstaller = true`).
-     * By default, releases from the `RELEASE`, `EAP`, and `RC` channels are considered; narrow the selection with the
-     * [configure] block, for example to track the latest EAP build:
+     * By default, releases from the `RELEASE`, `EAP`, and `RC` channels are considered.
+     * The requested [type] remains authoritative if [ProductReleasesFilterParameters.types] is also configured.
+     * Narrow the selection with the [configure] block, for example to track the latest EAP build:
      *
      * ```kotlin
      * intellijIdeaCommunity(latestVersion(IntelliJPlatformType.IntellijIdeaCommunity) {
@@ -176,12 +177,12 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * Note: because the resolved version follows the latest release, the exact IntelliJ Platform used may change over
      * time, which affects build reproducibility.
      *
-     * @param type The type of the IntelliJ Platform. Accepts either [String] or [IntelliJPlatformType].
+     * @param type The type of the IntelliJ Platform.
      * @param configure The product releases filter configuration.
      */
     @Incubating
     fun latestVersion(
-        type: Any,
+        type: IntelliJPlatformType,
         configure: ProductReleasesFilterParameters.() -> Unit = {},
     ): Provider<String> = dependenciesHelper.createProductReleaseLatestVersionProvider(type, configure)
 

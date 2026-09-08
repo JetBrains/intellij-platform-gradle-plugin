@@ -20,6 +20,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesFilterParameters
 import org.jetbrains.intellij.platform.gradle.tasks.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
@@ -347,6 +348,25 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
 
         fun plugins(configuration: Action<IntelliJPlatformPluginsExtension>) {
             configuration.execute(the<IntelliJPlatformPluginsExtension>())
+        }
+
+        /**
+         * Uses the latest available installer for the given IntelliJ Platform [type].
+         *
+         * By default, releases from the `RELEASE`, `EAP`, and `RC` channels are considered.
+         * The requested [type] remains authoritative if [ProductReleasesFilterParameters.types] is also configured.
+         *
+         * @param type The type of the IntelliJ Platform.
+         * @param configure The product releases filter configuration.
+         */
+        @Incubating
+        fun latestVersion(
+            type: IntelliJPlatformType,
+            configure: ProductReleasesFilterParameters.() -> Unit = {},
+        ) {
+            this.type.set(type)
+            version.set(dependenciesHelper.createProductReleaseLatestVersionProvider(type, configure))
+            useInstaller.set(true)
         }
 
         /**

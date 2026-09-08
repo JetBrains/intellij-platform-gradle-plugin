@@ -141,39 +141,95 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
 
     @Test
     fun `latestVersion resolves the newest installer version from product releases`() {
+        writeLatestVersionTask(
+            """
+            channels = listOf(ProductRelease.Channel.RELEASE)
+            sinceBuild = "223"
+            untilBuild = "233.*"
+            """,
+        )
+
+        buildWithConfigurationCache(
+            "printLatestVersion",
+            projectProperties = productReleasesProperties,
+        ) {
+            assertContains("LATEST_VERSION=2023.3.8", output)
+        }
+
+        buildWithConfigurationCache(
+            "printLatestVersion",
+            projectProperties = productReleasesProperties,
+        ) {
+            assertContains("Reusing configuration cache.", output)
+            assertContains("LATEST_VERSION=2023.3.8", output)
+        }
+    }
+
+    @Test
+    fun `latestVersion keeps the requested type and returns the EAP build number`() {
+        writeLatestVersionTask(
+            """
+            channels = listOf(ProductRelease.Channel.EAP)
+            types = listOf(IntelliJPlatformType.WebStorm)
+            """,
+        )
+
+        build(
+            "printLatestVersion",
+            projectProperties = productReleasesProperties,
+        ) {
+            assertContains("LATEST_VERSION=252.26199.7", output)
+        }
+    }
+
+    @Test
+    fun `latestVersion fails with a clear message when no release matches`() {
+        writeLatestVersionTask(
+            """
+            sinceBuild = "999"
+            """,
+        )
+
+        buildAndFail(
+            "printLatestVersion",
+            projectProperties = productReleasesProperties,
+        ) {
+            assertContains("No IntelliJ Platform releases found for type 'IC' matching the latestVersion filters.", output)
+        }
+    }
+
+    private fun writeLatestVersionTask(configure: String) {
+        val indentedConfigure = configure.trimIndent().prependIndent(" ".repeat(20))
+
         buildFile write //language=kotlin
                 """
                 val latestVersionProperty = objects.property<String>()
-                
+
                 dependencies {
                     intellijPlatform {
                         latestVersionProperty.set(
                             latestVersion(IntelliJPlatformType.IntellijIdeaCommunity) {
-                                channels = listOf(ProductRelease.Channel.RELEASE)
-                                sinceBuild = "223"
-                                untilBuild = "233.*"
+$indentedConfigure
                             }
                         )
                     }
                 }
-                
+
                 tasks.register("printLatestVersion") {
                     val value = latestVersionProperty
+                    inputs.property("latestVersion", value)
                     doLast {
                         println("LATEST_VERSION=" + value.get())
                     }
                 }
                 """.trimIndent()
-
-        build(
-            "printLatestVersion",
-            projectProperties = mapOf(
-                GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
-            ),
-        ) {
-            assertContains("LATEST_VERSION=2023.3.8", output)
-        }
     }
+
+    private val productReleasesProperties
+        get() = mapOf(
+            GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to
+                    resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
+        )
 
     private fun currentJetBrainsClientArtifact(buildNumber: String): JetBrainsClientArtifact {
         val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }

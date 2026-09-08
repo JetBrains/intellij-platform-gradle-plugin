@@ -56,6 +56,42 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `custom runIde task can use the latest matching installer version`() {
+        buildFile write //language=kotlin
+                """
+                val customRun = intellijPlatformTesting.runIde.register("customRun") {
+                    latestVersion(IntelliJPlatformType.IntellijIdeaCommunity) {
+                        channels = listOf(ProductRelease.Channel.EAP)
+                    }
+                }
+
+                tasks.register("printCustomRunVersion") {
+                    val platformType = customRun.flatMap { it.type }
+                    val platformVersion = customRun.flatMap { it.version }
+                    val useInstaller = customRun.flatMap { it.useInstaller }
+                    inputs.property("platformType", platformType)
+                    inputs.property("platformVersion", platformVersion)
+                    inputs.property("useInstaller", useInstaller)
+                    doLast {
+                        println("LATEST_PLATFORM=" + platformType.get() + "-" + platformVersion.get())
+                        println("USE_INSTALLER=" + useInstaller.get())
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "printCustomRunVersion",
+            projectProperties = mapOf(
+                GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to
+                        resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
+            ),
+        ) {
+            assertContains("LATEST_PLATFORM=IC-252.26199.7", output)
+            assertContains("USE_INSTALLER=true", output)
+        }
+    }
+
+    @Test
     fun `custom testIde task with JUnit5 testFramework can be registered`() {
         buildFile write //language=kotlin
                 """
