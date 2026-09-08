@@ -209,8 +209,9 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
      * to build the plugin) is forced for all verified IDEs via the `-runtime-dir` option — the behavior from before
      * this option was introduced.
      *
-     * Default value: `true`
+     * Default value: [IntelliJPlatformExtension.PluginVerification.useBundledRuntime], `true`
      *
+     * @see IntelliJPlatformExtension.PluginVerification.useBundledRuntime
      * @see <a href="https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1611">#1611</a>
      */
     @get:Input
@@ -557,7 +558,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 offline.convention(project.gradle.startParameter.isOffline)
                 listIdes.convention(false)
-                useBundledRuntime.convention(true)
+                useBundledRuntime.convention(pluginVerificationProvider.flatMap { it.useBundledRuntime })
 
                 problemsReportFile.convention(project.layout.buildDirectory.file("reports/problems/problems-report.html"))
             }

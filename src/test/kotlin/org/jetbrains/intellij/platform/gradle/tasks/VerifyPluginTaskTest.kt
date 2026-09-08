@@ -55,7 +55,30 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `run plugin verifier forces the build runtime when useBundledRuntime is disabled`() {
+    fun `run plugin verifier forces the build runtime when useBundledRuntime is disabled via DSL`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        useBundledRuntime = false
+                    }
+                }
+                """.trimIndent()
+
+        build(Tasks.VERIFY_PLUGIN) {
+            // When bundled-runtime verification is disabled through the pluginVerification DSL, the resolved build
+            // runtime is forced for all IDEs via the '-runtime-dir' option, which makes the verifier log
+            // "Using Java runtime from ...". See: #1611
+            assertContains("Using Java runtime from", output)
+        }
+    }
+
+    @Test
+    fun `run plugin verifier forces the build runtime when useBundledRuntime is disabled on the task`() {
         writePluginXmlFile()
         writePluginVerifierDependency()
         writePluginVerifierIde()
@@ -68,7 +91,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN) {
-            // When bundled-runtime verification is disabled, the resolved build runtime is forced for all IDEs
+            // The task-level property overrides the DSL convention and forces the build runtime for all IDEs
             // via the '-runtime-dir' option, which makes the verifier log "Using Java runtime from ...". See: #1611
             assertContains("Using Java runtime from", output)
         }
