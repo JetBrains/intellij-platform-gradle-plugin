@@ -1180,6 +1180,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/extension
 	public abstract fun getIgnoredProblemsFile ()Lorg/gradle/api/file/RegularFileProperty;
 	public abstract fun getSubsystemsToCheck ()Lorg/gradle/api/provider/Property;
 	public abstract fun getTeamCityOutputFormat ()Lorg/gradle/api/provider/Property;
+	public abstract fun getUseBundledRuntime ()Lorg/gradle/api/provider/Property;
 	public abstract fun getVerificationReportsDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getVerificationReportsFormats ()Lorg/gradle/api/provider/ListProperty;
 	public fun ides (Lgroovy/lang/Closure;)V
