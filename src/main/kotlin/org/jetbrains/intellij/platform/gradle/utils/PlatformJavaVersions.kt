@@ -8,7 +8,7 @@ import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 /**
  * Java versions list used in IntelliJ Platform synchronized with [IntelliJ Platform SDK Docs](https://plugins.jetbrains.com/docs/intellij/build-number-ranges.html#intellij-platform-based-products-of-recent-ide-versions)
  */
-val PlatformJavaVersions = mapOf(
+internal val PlatformJavaVersions = mapOf(
     Version(262) to JavaVersion.VERSION_25,
     Version(242) to JavaVersion.VERSION_21,
     Version(222) to JavaVersion.VERSION_17,
