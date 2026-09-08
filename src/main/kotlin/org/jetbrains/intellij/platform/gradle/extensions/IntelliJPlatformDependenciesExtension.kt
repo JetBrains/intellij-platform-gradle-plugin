@@ -25,6 +25,7 @@ import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.coroutines
 import org.jetbrains.intellij.platform.gradle.models.kotlinStdlib
 import org.jetbrains.intellij.platform.gradle.plugins.configureExtension
+import org.jetbrains.intellij.platform.gradle.providers.ProductReleasesFilterParameters
 import org.jetbrains.intellij.platform.gradle.tasks.ComposedJarTask
 import org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask
 import org.jetbrains.intellij.platform.gradle.toIntelliJPlatformType
@@ -150,6 +151,39 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         this.version = version
         apply(configure::execute)
     }
+
+    /**
+     * Resolves the latest available IntelliJ Platform installer version for the given [type] from the product releases
+     * listing and returns it as a [Provider], so it can be passed directly to any dependency helper that accepts a
+     * `Provider<String>` version, such as [intellijIdeaCommunity] or [create]:
+     *
+     * ```kotlin
+     * intellijPlatform {
+     *     intellijIdeaCommunity(latestVersion(IntelliJPlatformType.IntellijIdeaCommunity))
+     * }
+     * ```
+     *
+     * The newest matching release is selected and used with the installer distribution (the default `useInstaller = true`).
+     * By default, releases from the `RELEASE`, `EAP`, and `RC` channels are considered; narrow the selection with the
+     * [configure] block, for example to track the latest EAP build:
+     *
+     * ```kotlin
+     * intellijIdeaCommunity(latestVersion(IntelliJPlatformType.IntellijIdeaCommunity) {
+     *     channels = listOf(ProductRelease.Channel.EAP)
+     * })
+     * ```
+     *
+     * Note: because the resolved version follows the latest release, the exact IntelliJ Platform used may change over
+     * time, which affects build reproducibility.
+     *
+     * @param type The type of the IntelliJ Platform. Accepts either [String] or [IntelliJPlatformType].
+     * @param configure The product releases filter configuration.
+     */
+    @Incubating
+    fun latestVersion(
+        type: Any,
+        configure: ProductReleasesFilterParameters.() -> Unit = {},
+    ): Provider<String> = dependenciesHelper.createProductReleaseLatestVersionProvider(type, configure)
 
     /**
      * Adds a dependency on Android Studio.

@@ -840,6 +840,8 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun jflex (Ljava/lang/String;)V
 	public final fun jflex (Lorg/gradle/api/provider/Provider;)V
 	public static synthetic fun jflex$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun latestVersion (Ljava/lang/Object;Lkotlin/jvm/functions/Function1;)Lorg/gradle/api/provider/Provider;
+	public static synthetic fun latestVersion$default (Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesExtension;Ljava/lang/Object;Lkotlin/jvm/functions/Function1;ILjava/lang/Object;)Lorg/gradle/api/provider/Provider;
 	public final fun local (Ljava/io/File;)V
 	public final fun local (Ljava/lang/String;)V
 	public final fun local (Ljava/nio/file/Path;)V

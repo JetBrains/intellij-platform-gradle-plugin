@@ -139,6 +139,42 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
         }
     }
 
+    @Test
+    fun `latestVersion resolves the newest installer version from product releases`() {
+        buildFile write //language=kotlin
+                """
+                val latestVersionProperty = objects.property<String>()
+                
+                dependencies {
+                    intellijPlatform {
+                        latestVersionProperty.set(
+                            latestVersion(IntelliJPlatformType.IntellijIdeaCommunity) {
+                                channels = listOf(ProductRelease.Channel.RELEASE)
+                                sinceBuild = "223"
+                                untilBuild = "233.*"
+                            }
+                        )
+                    }
+                }
+                
+                tasks.register("printLatestVersion") {
+                    val value = latestVersionProperty
+                    doLast {
+                        println("LATEST_VERSION=" + value.get())
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "printLatestVersion",
+            projectProperties = mapOf(
+                GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
+            ),
+        ) {
+            assertContains("LATEST_VERSION=2023.3.8", output)
+        }
+    }
+
     private fun currentJetBrainsClientArtifact(buildNumber: String): JetBrainsClientArtifact {
         val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
 
