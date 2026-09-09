@@ -1,4 +1,4 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2026 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
@@ -47,24 +47,21 @@ class VerifyPluginTaskFailureLevelTest {
     }
 
     @Test
-    fun `every failure level except NOT_DYNAMIC declares a verdict marker, and NOT_DYNAMIC does not`() {
+    fun `every failure level except NOT_DYNAMIC is covered by a verdict sample, and NOT_DYNAMIC is not`() {
+        // The verdict marker is intentionally private; its presence is proven indirectly: every covered level has a
+        // realistic verdict sample that the first test requires to parse back to exactly that level (which is only
+        // possible with a matching marker). NOT_DYNAMIC has no sample because the verifier never persists it.
         FailureLevel.values().forEach { level ->
             when (level) {
-                FailureLevel.NOT_DYNAMIC -> assertTrue(
-                    level.verdictMarker == null,
-                    "$level must not declare a verdict marker (the verifier does not persist it)",
+                FailureLevel.NOT_DYNAMIC -> assertFalse(
+                    verdictSamples.containsKey(level),
+                    "$level must not have a verdict sample (the verifier does not persist it)",
                 )
 
-                else -> {
-                    assertTrue(
-                        level.verdictMarker != null,
-                        "$level must declare a verdict marker so it can be detected from the verdict file",
-                    )
-                    assertTrue(
-                        verdictSamples.containsKey(level),
-                        "$level is missing a realistic verdict sample in this test",
-                    )
-                }
+                else -> assertTrue(
+                    verdictSamples.containsKey(level),
+                    "$level is missing a realistic verdict sample so its verdict marker is left untested",
+                )
             }
         }
     }
