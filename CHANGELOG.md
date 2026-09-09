@@ -21,6 +21,7 @@
 
 ### Fixed
 
+- Fail the `verifyPlugin` task based on the IntelliJ Plugin Verifier report files instead of parsing its console output, so verification problems matching the configured `failureLevel` fail the build even when `teamCityOutputFormat` is enabled JetBrains/intellij-platform-gradle-plugin#1739
 - Resolve MPS installer download URLs using the release revision directory.
 - Map the DataGrip product releases catalog code `DG` to the `DB` platform code so DataGrip installer download URLs resolve correctly JetBrains/intellij-platform-gradle-plugin#2210
 - Parse `hdiutil info` property-list output when detaching stale DMG images, avoiding partition-type GUIDs being passed to `hdiutil detach` [IJPL-253360](https://youtrack.jetbrains.com/issue/IJPL-253360)

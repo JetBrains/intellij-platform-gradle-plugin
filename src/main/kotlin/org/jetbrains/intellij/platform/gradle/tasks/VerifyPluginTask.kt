@@ -33,8 +33,13 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.ProblemsAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.ProductReleasesServiceAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.*
+import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
+import kotlin.io.path.readText
 
 /**
  * Runs the IntelliJ Plugin Verifier CLI tool to check compatibility with specified IDE builds.
@@ -316,7 +321,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
 
         execWithTeeOutput(teeErrorOutput = false, throwOutputOnFailure = false) {
             super.exec()
-        }.let(::verifyOutput)
+        }.let(::verifyResult)
     }
 
     /**
@@ -368,13 +373,24 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     }
 
     /**
-     * @throws GradleException
+     * Determines the verification outcome by reading the reports produced by the IntelliJ Plugin Verifier under
+     * [verificationReportsDirectory] and fails the task when any reported [FailureLevel] matches the configured
+     * [failureLevel].
+     *
+     * Unlike parsing the console output, the report files are always written by the Plugin Verifier regardless of
+     * the console output format, so the pass/fail decision no longer depends on the [teamCityOutputFormat] flag.
+     *
+     * @see <a href="https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1739">#1739</a>
+     * @throws GradleException when the verification reports contain problems matching the [failureLevel]
      */
     @Throws(GradleException::class)
-    private fun verifyOutput(output: String) {
+    private fun verifyResult(output: String) {
         val failureLevels = failureLevel.get()
         log.debug("Current failure levels: ${failureLevels.joinToString(", ")}")
 
+        // A plugin archive that cannot be parsed at all is reported by the Plugin Verifier as an "invalid plugin
+        // file" for which no per-IDE verification report is produced, so this structural failure is detected from
+        // the tool output directly.
         val invalidFilesMessage = "The following files specified for the verification are not valid plugins:"
         if (output.contains(invalidFilesMessage)) {
             val errorMessage = output.lines()
@@ -400,54 +416,54 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
         val collectedProblems = collectProblems(output)
 
         collectedProblems.forEach { (ideVersion, ideProblems) ->
-            ideProblems.forEach { (failureLevel, issues) ->
-                issues.forEach { (title, description) ->
-                    val label = "$title [${failureLevel.sectionHeading}]"
-                    val details = buildString {
-                        append("IDE Version: $ideVersion")
-                        append("\n")
-                        append(failureLevel.message)
+            ideProblems.forEach { (failureLevel, description) ->
+                val label = failureLevel.sectionHeading
+                val details = buildString {
+                    append("IDE Version: $ideVersion")
+                    append("\n")
+                    append(failureLevel.message)
+                    if (description.isNotBlank()) {
                         append("\n\n")
                         append(description)
                     }
-                    val solution = when (failureLevel) {
-                        FailureLevel.COMPATIBILITY_PROBLEMS, FailureLevel.COMPATIBILITY_WARNINGS ->
-                            "Review the compatibility issues and update your plugin code to use compatible APIs for the target IDE version. Consider updating dependency versions or adjusting the since-build/until-build range."
-                        FailureLevel.DEPRECATED_API_USAGES ->
-                            "Replace deprecated API usage with recommended alternatives. Check the IDE's API documentation for migration paths."
-                        FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES ->
-                            "Remove usage of APIs scheduled for removal and migrate to replacement APIs immediately to ensure future compatibility."
-                        FailureLevel.EXPERIMENTAL_API_USAGES ->
-                            "Be aware that experimental APIs may change without notice. Consider using stable alternatives or accept the risk of future API changes."
-                        FailureLevel.INTERNAL_API_USAGES ->
-                            "Replace internal API usage with public APIs. Internal APIs are not intended for plugin use and may break compatibility."
-                        FailureLevel.OVERRIDE_ONLY_API_USAGES ->
-                            "Override-only APIs should only be overridden in subclasses, not called directly. Review your usage and follow the API contract."
-                        FailureLevel.NON_EXTENDABLE_API_USAGES ->
-                            "Do not extend classes or interfaces marked as non-extendable. Use composition or find alternative extension points."
-                        FailureLevel.PLUGIN_STRUCTURE_WARNINGS ->
-                            "Fix the plugin structure issues identified. Ensure plugin.xml is valid and all required files are present."
-                        FailureLevel.MISSING_DEPENDENCIES ->
-                            "Add the missing plugin dependencies to your plugin.xml <depends> section or include them in your plugin distribution."
-                        FailureLevel.INVALID_PLUGIN ->
-                            "Fix the plugin structure to create a valid plugin artifact. Ensure META-INF/plugin.xml exists and is properly formatted."
-                        FailureLevel.NOT_DYNAMIC ->
-                            "If dynamic loading is required, review the plugin structure and ensure all components support dynamic loading. Otherwise, accept that IDE restart is needed."
-                    }
+                }
+                val solution = when (failureLevel) {
+                    FailureLevel.COMPATIBILITY_PROBLEMS, FailureLevel.COMPATIBILITY_WARNINGS ->
+                        "Review the compatibility issues and update your plugin code to use compatible APIs for the target IDE version. Consider updating dependency versions or adjusting the since-build/until-build range."
+                    FailureLevel.DEPRECATED_API_USAGES ->
+                        "Replace deprecated API usage with recommended alternatives. Check the IDE's API documentation for migration paths."
+                    FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES ->
+                        "Remove usage of APIs scheduled for removal and migrate to replacement APIs immediately to ensure future compatibility."
+                    FailureLevel.EXPERIMENTAL_API_USAGES ->
+                        "Be aware that experimental APIs may change without notice. Consider using stable alternatives or accept the risk of future API changes."
+                    FailureLevel.INTERNAL_API_USAGES ->
+                        "Replace internal API usage with public APIs. Internal APIs are not intended for plugin use and may break compatibility."
+                    FailureLevel.OVERRIDE_ONLY_API_USAGES ->
+                        "Override-only APIs should only be overridden in subclasses, not called directly. Review your usage and follow the API contract."
+                    FailureLevel.NON_EXTENDABLE_API_USAGES ->
+                        "Do not extend classes or interfaces marked as non-extendable. Use composition or find alternative extension points."
+                    FailureLevel.PLUGIN_STRUCTURE_WARNINGS ->
+                        "Fix the plugin structure issues identified. Ensure plugin.xml is valid and all required files are present."
+                    FailureLevel.MISSING_DEPENDENCIES ->
+                        "Add the missing plugin dependencies to your plugin.xml <depends> section or include them in your plugin distribution."
+                    FailureLevel.INVALID_PLUGIN ->
+                        "Fix the plugin structure to create a valid plugin artifact. Ensure META-INF/plugin.xml exists and is properly formatted."
+                    FailureLevel.NOT_DYNAMIC ->
+                        "If dynamic loading is required, review the plugin structure and ensure all components support dynamic loading. Otherwise, accept that IDE restart is needed."
+                }
 
-                    problems.reporter.report(
-                        Problems.VerifyPlugin.VerificationFailure(failureLevel),
-                    ) {
-                        contextualLabel(label)
-                        details(details)
-                        solution(solution)
-                        severity(
-                            when {
-                                failureLevel in failureLevels -> Severity.ERROR
-                                else -> Severity.WARNING
-                            },
-                        )
-                    }
+                problems.reporter.report(
+                    Problems.VerifyPlugin.VerificationFailure(failureLevel),
+                ) {
+                    contextualLabel(label)
+                    details(details)
+                    solution(solution)
+                    severity(
+                        when {
+                            failureLevel in failureLevels -> Severity.ERROR
+                            else -> Severity.WARNING
+                        },
+                    )
                 }
             }
         }
@@ -462,48 +478,70 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
         }
     }
 
-    private fun collectProblems(output: String): Map<String, Map<FailureLevel, Map<String, String>>> {
-        val headingToLevel = FailureLevel.entries.associateBy { it.sectionHeading }
+    /**
+     * Reads the verification reports written by the Plugin Verifier into [verificationReportsDirectory] and maps
+     * them onto [FailureLevel] categories, grouped by the verified IDE version.
+     *
+     * The verifier recreates the reports directory on each run and stores the outcome of every verified
+     * `(IDE, plugin)` pair using the following layout:
+     * ```
+     * <reports>/<IDE version>/plugins/<plugin ID>/<plugin version>/verification-verdict.txt (+ detail files)
+     * ```
+     *
+     * The always-present `verification-verdict.txt` encodes every reported category, so its content is the source
+     * of truth for the pass/fail decision; the optional per-category detail files (when present) are used to enrich
+     * the reported problem descriptions. The only exception is [FailureLevel.NOT_DYNAMIC], which the verifier does
+     * not persist into the reports and is therefore detected on a best-effort basis from the (plain) tool output.
+     */
+    private fun collectProblems(output: String): Map<String, Map<FailureLevel, String>> {
+        val reportsDirectory = verificationReportsDirectory.asPath.takeIf { it.exists() }
+            ?: return emptyMap()
 
-        val lines = output.lineSequence().toList()
-        val starts = lines.mapIndexedNotNull { i, s -> pluginLinePattern.find(s)?.let { i to it.groupValues[1] } }
+        val notDynamic = output.contains(FailureLevel.NOT_DYNAMIC.sectionHeading)
 
-        return buildMap {
-            starts.forEachIndexed { idx, (start, ide) ->
-                val end = starts.getOrNull(idx + 1)?.first ?: lines.size
-                val entries = lines.subList(start + 1, end)
+        return reportsDirectory.listDirectoryEntries()
+            .filter { it.isDirectory() }
+            .associate { ideDirectory ->
+                val ideProblems = linkedMapOf<FailureLevel, String>()
 
-                val headers = entries.mapIndexedNotNull { i, entry ->
-                    headingToLevel.entries.firstOrNull { entry.startsWith(it.key) }?.let { i to it.value }
+                ideDirectory.resolve("plugins")
+                    .takeIf { it.exists() }
+                    ?.listDirectoryEntries()?.filter { it.isDirectory() } // <plugin ID> directories
+                    ?.flatMap { it.listDirectoryEntries().filter { path -> path.isDirectory() } } // <plugin version> directories
+                    ?.forEach { pluginDirectory ->
+                        val verdict = pluginDirectory.resolve(VERIFICATION_VERDICT_FILE_NAME)
+                            .takeIf { it.exists() }
+                            ?.readText()
+                            .orEmpty()
+
+                        verdictMarkers.forEach { (marker, level) ->
+                            if (verdict.contains(marker)) {
+                                ideProblems.putIfAbsent(level, detailsOf(level, pluginDirectory, verdict))
+                            }
+                        }
+                    }
+
+                if (notDynamic) {
+                    ideProblems.putIfAbsent(FailureLevel.NOT_DYNAMIC, FailureLevel.NOT_DYNAMIC.message)
                 }
 
-                val map = headers.associateTo(linkedMapOf()) { (start, level) ->
-                    val items = entries.drop(start + 1).takeWhile { it.startsWith(' ') }.map { it.trim() }
-                    level to parseItemsToMap(items)
-                }
-
-                put(ide, map)
+                ideDirectory.name to ideProblems
             }
-        }
+            .filterValues { it.isNotEmpty() }
     }
 
-    private fun parseItemsToMap(items: List<String>): Map<String, String> {
-        val keys = items.mapIndexedNotNull { i, item ->
-            when {
-                item.startsWith("#") -> i to item.removePrefix("#")
-                else -> null
-            }
-        }
-        return buildMap {
-            keys.forEachIndexed { idx, (start, key) ->
-                val end = keys.getOrNull(idx + 1)?.first ?: items.size
-                val value = items.subList(start + 1, end)
-                    .asSequence()
-                    .filter { it.isNotBlank() && !it.startsWith("#") }
-                    .joinToString("\n")
-                put(key, value)
-            }
-        }
+    /**
+     * Provides a human-readable description for the given [level] occurred in [pluginDirectory], preferring the
+     * content of the corresponding detail file (when present) and falling back to the plugin's verdict otherwise.
+     */
+    private fun detailsOf(level: FailureLevel, pluginDirectory: Path, verdict: String): String {
+        val detailFileName = detailFileNames[level] ?: return verdict.trim()
+        return pluginDirectory.resolve(detailFileName)
+            .takeIf { it.exists() }
+            ?.readText()
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?: verdict.trim()
     }
 
     private fun ProductInfo.listIdeNotation() =
@@ -521,7 +559,49 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     }
 
     companion object : Registrable {
-        private val pluginLinePattern = Regex("^Plugin .*? against (\\S+):")
+        /**
+         * The name of the always-present per-plugin verdict file written by the Plugin Verifier for every verified
+         * `(IDE, plugin)` pair. Its content encodes all reported problem categories.
+         */
+        private const val VERIFICATION_VERDICT_FILE_NAME = "verification-verdict.txt"
+
+        /**
+         * Maps a stable phrase from the Plugin Verifier verdict ([VERIFICATION_VERDICT_FILE_NAME]) onto the matching
+         * [FailureLevel]. The verdict is used as the source of truth because it precisely distinguishes categories
+         * that share a report file (e.g. scheduled-for-removal vs. deprecated API usages) and encodes the ones that
+         * have no dedicated file at all (e.g. missing mandatory dependencies).
+         */
+        private val verdictMarkers = linkedMapOf(
+            "missing mandatory" to FailureLevel.MISSING_DEPENDENCIES,
+            "compatibility problem" to FailureLevel.COMPATIBILITY_PROBLEMS,
+            "compatibility warning" to FailureLevel.COMPATIBILITY_WARNINGS,
+            "of scheduled for removal API" to FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES,
+            "of deprecated API" to FailureLevel.DEPRECATED_API_USAGES,
+            "of experimental API" to FailureLevel.EXPERIMENTAL_API_USAGES,
+            "of internal API" to FailureLevel.INTERNAL_API_USAGES,
+            "non-extendable API usage" to FailureLevel.NON_EXTENDABLE_API_USAGES,
+            "override-only API usage" to FailureLevel.OVERRIDE_ONLY_API_USAGES,
+            "plugin configuration defect" to FailureLevel.PLUGIN_STRUCTURE_WARNINGS,
+            "Plugin is invalid:" to FailureLevel.INVALID_PLUGIN,
+        )
+
+        /**
+         * Optional per-[FailureLevel] detail files providing richer descriptions than the verdict summary. They are
+         * written only when the respective category has at least one entry, so their content — when present — is used
+         * purely to enrich the reported problem descriptions and never to drive the pass/fail decision.
+         */
+        private val detailFileNames = mapOf(
+            FailureLevel.COMPATIBILITY_WARNINGS to "compatibility-warnings.txt",
+            FailureLevel.COMPATIBILITY_PROBLEMS to "compatibility-problems.txt",
+            FailureLevel.DEPRECATED_API_USAGES to "deprecated-usages.txt",
+            FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES to "deprecated-usages.txt",
+            FailureLevel.EXPERIMENTAL_API_USAGES to "experimental-api-usages.txt",
+            FailureLevel.INTERNAL_API_USAGES to "internal-api-usages.txt",
+            FailureLevel.OVERRIDE_ONLY_API_USAGES to "override-only-usages.txt",
+            FailureLevel.NON_EXTENDABLE_API_USAGES to "non-extendable-api-usages.txt",
+            FailureLevel.PLUGIN_STRUCTURE_WARNINGS to "plugin-structure-warnings.txt",
+            FailureLevel.INVALID_PLUGIN to "invalid-plugin.txt",
+        )
 
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
