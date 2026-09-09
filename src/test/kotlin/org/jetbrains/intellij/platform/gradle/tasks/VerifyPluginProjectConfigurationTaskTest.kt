@@ -405,6 +405,62 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `report plugin dependency not declared in plugin descriptor`() {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        bundledPlugin("com.intellij.copyright")
+                    }
+                }
+                """.trimIndent()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="212" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
+
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertContains(HEADER, output)
+            assertContains(
+                "- Plugin dependency not declared in plugin descriptor The plugin dependency 'com.intellij.copyright' is declared in the build script, but it is not referenced in any plugin descriptor", output
+            )
+        }
+    }
+
+    @Test
+    fun `do not report plugin dependency declared in plugin descriptor`() {
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        bundledPlugin("com.intellij.copyright")
+                    }
+                }
+                """.trimIndent()
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <depends>com.intellij.copyright</depends>
+                    <idea-version since-build="212" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
+
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertNotContains("Plugin dependency not declared in plugin descriptor", output)
+        }
+    }
+
+    @Test
     fun `reuses configuration cache`() {
         pluginXml write //language=xml
                 """

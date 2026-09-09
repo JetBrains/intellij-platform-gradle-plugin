@@ -3398,10 +3398,13 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/TestIdeUiTask$Co
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginProjectConfigurationTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/KotlinMetadataAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ModuleAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware, org/jetbrains/intellij/platform/gradle/tasks/aware/ProblemsAware, org/jetbrains/intellij/platform/gradle/tasks/aware/RuntimeAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/VerifyPluginProjectConfigurationTask$Companion;
 	public fun <init> ()V
+	public abstract fun getBundledPluginDependencyIds ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getGitignoreFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getIdeLayoutIndexCacheDirectory ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getIntellijPlatformCache ()Lorg/gradle/api/file/DirectoryProperty;
 	public abstract fun getMutedMessages ()Lorg/gradle/api/provider/ListProperty;
 	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public abstract fun getPluginDependencyIds ()Lorg/gradle/api/provider/SetProperty;
 	public abstract fun getPluginXmlService ()Lorg/gradle/api/provider/Property;
 	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
 	public abstract fun getRootDirectory ()Lorg/gradle/api/provider/Property;

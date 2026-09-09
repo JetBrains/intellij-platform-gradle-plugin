@@ -13,6 +13,7 @@
 - Add `DumpProductsReleasesTask` to support dumping IntelliJ Platform product releases for Plugin DevKit plugin purposes
 - Print a lifecycle-level `IDE logs: <sandbox>/log/idea.log` line when launching `runIde`, `runIdeBackend`, `runIdeFrontend`, and `runIdeSplitMode` (one line per process, with backend and frontend paths in Split Mode), so the sandbox IDE log path is visible at the default Gradle log level
 - Support `latest` and `Constraints.LATEST_VERSION` as the version of installer-based IntelliJ Platform dependencies and custom testing configurations, resolving the newest release across all channels for the requested platform type JetBrains/intellij-platform-gradle-plugin#1628
+- Report a `verifyPluginProjectConfiguration` warning when a plugin dependency declared in the build script with `plugin(...)`, `compatiblePlugin(...)`, or `bundledPlugin(...)` is not reflected in any plugin descriptor (`<depends>` / `<dependencies>`), since such missing declarations lead to runtime failures like `NoClassDefFoundError`. Mute individual messages with `org.jetbrains.intellij.platform.verifyPluginProjectConfigurationMutedMessages` JetBrains/intellij-platform-gradle-plugin#1670
 
 ### Changed
 

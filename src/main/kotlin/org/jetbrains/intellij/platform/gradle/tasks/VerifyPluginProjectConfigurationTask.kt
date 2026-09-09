@@ -10,6 +10,7 @@ import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.problems.Severity
 import org.gradle.api.provider.ListProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.named
@@ -20,9 +21,14 @@ import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.get
+import org.jetbrains.intellij.platform.gradle.intellijPlatformIdeLayoutIndicesCachePath
 import org.jetbrains.intellij.platform.gradle.problems.Problems
+import org.jetbrains.intellij.platform.gradle.services.DeclaredPluginDependenciesService
+import org.jetbrains.intellij.platform.gradle.services.IdeLayoutIndexService
 import org.jetbrains.intellij.platform.gradle.services.PluginXmlService
 import org.jetbrains.intellij.platform.gradle.services.pluginXmlService
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
+import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildServiceParameters
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.io.File
@@ -38,6 +44,7 @@ import kotlin.io.path.readLines
  * - The used IntelliJ Platform version must be equal or higher than the minimum supported version `2022.3` (`223`) defined in [MINIMAL_INTELLIJ_PLATFORM_VERSION].
  * - The dependency on the [Kotlin Standard Library](https://jb.gg/intellij-platform-kotlin-stdlib) should be excluded.
  * - The Kotlin Coroutines library [must not be added explicitly](https://jb.gg/intellij-platform-kotlin-coroutines) to the project as it is already provided with the IntelliJ Platform.
+ * - Each plugin dependency declared in the build script with `plugin(...)`, `compatiblePlugin(...)`, or `bundledPlugin(...)` should be reflected in the plugin descriptor(s) with a matching `<depends>` or `<dependencies>` entry.
  *
  * @see <a href="https://jb.gg/intellij-platform-versions">Build Number Ranges</a>
  */
@@ -89,6 +96,33 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
 
     @get:Internal
     abstract val pluginXmlService: Property<PluginXmlService>
+
+    /**
+     * Plugin IDs of the plugin dependencies (added with `plugin(...)` or `compatiblePlugin(...)`) declared in the build
+     * script. Each of these IDs is expected to be referenced in the plugin descriptor(s) with `<depends>` or
+     * `<dependencies><plugin>`.
+     */
+    @get:Input
+    abstract val pluginDependencyIds: SetProperty<String>
+
+    /**
+     * Plugin IDs of the bundled plugin dependencies (added with `bundledPlugin(...)`) declared in the build script. Each
+     * of these IDs - or one of its module aliases - is expected to be referenced in the plugin descriptor(s).
+     */
+    @get:Input
+    abstract val bundledPluginDependencyIds: SetProperty<String>
+
+    /**
+     * Shared service that provides the cached serialized IDE layout index used to resolve bundled plugin module aliases.
+     */
+    @get:Internal
+    internal abstract val ideLayoutIndexService: Property<IdeLayoutIndexService>
+
+    /**
+     * On-disk cache location for layout-index snapshots derived from extracted IDE distributions.
+     */
+    @get:Internal
+    abstract val ideLayoutIndexCacheDirectory: DirectoryProperty
 
     private val log = Logger(javaClass)
 
@@ -181,6 +215,62 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                                 solution(solution)
                             }
                             add("$label $details $solution")
+                        }
+
+                        run {
+                            val descriptorDependencyIdentifiers = buildSet {
+                                pluginBean.dependencies.forEach { dependency ->
+                                    dependency.dependencyId?.trim()?.takeIf(String::isNotEmpty)?.let(::add)
+                                }
+                                pluginBean.dependenciesV2.orEmpty().forEach { dependencies ->
+                                    dependencies.plugins.forEach { plugin ->
+                                        plugin.dependencyId?.trim()?.takeIf(String::isNotEmpty)?.let(::add)
+                                    }
+                                    dependencies.modules.forEach { module ->
+                                        module.moduleName?.trim()?.takeIf(String::isNotEmpty)?.let(::add)
+                                    }
+                                }
+                            }
+
+                            val ideLayoutIndex by lazy {
+                                runCatching {
+                                    ideLayoutIndexService.get().resolve(platformPath, ideLayoutIndexCacheDirectory.asPath)
+                                }.getOrNull()
+                            }
+
+                            val missingPluginDependencyIds = buildList {
+                                // Plugins referenced with `plugin(...)` must be declared by their exact ID.
+                                pluginDependencyIds.get()
+                                    .filter { it !in descriptorDependencyIdentifiers }
+                                    .forEach(::add)
+
+                                // Bundled plugins may be referenced by their ID or by one of their module aliases.
+                                bundledPluginDependencyIds.get()
+                                    .filter { id ->
+                                        if (id in descriptorDependencyIdentifiers) {
+                                            return@filter false
+                                        }
+                                        val aliases = ideLayoutIndex
+                                            ?.findByIdOrModuleId(id)
+                                            ?.definedModules
+                                            ?.takeIf { it.isNotEmpty() }
+                                            ?: listOf(id)
+                                        aliases.none { it in descriptorDependencyIdentifiers }
+                                    }
+                                    .forEach(::add)
+                            }
+
+                            missingPluginDependencyIds.forEach { pluginId ->
+                                val label = "Plugin dependency not declared in plugin descriptor"
+                                val details = "The plugin dependency '$pluginId' is declared in the build script, but it is not referenced in any plugin descriptor (plugin.xml). Plugins that provide code your plugin depends on must also be declared in the descriptor, otherwise their classes won't be available at runtime, which may lead to failures such as NoClassDefFoundError."
+                                val solution = "Declare the dependency in your plugin.xml, e.g. `<depends>$pluginId</depends>` (or `<dependencies><plugin id=\"$pluginId\"/></dependencies>` in the module-based descriptor). See: https://plugins.jetbrains.com/docs/intellij/plugin-dependencies.html"
+                                report(label) {
+                                    details(details)
+                                    solution(solution)
+                                    documentedAt("https://plugins.jetbrains.com/docs/intellij/plugin-dependencies.html")
+                                }
+                                add("$label $details $solution")
+                            }
                         }
                     }
                     ?: run {
@@ -355,6 +445,14 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
                     project.rootProject.rootDir.resolve(".gitignore").takeIf { it.exists() }
                 }))
                 pluginXmlService.convention(project.pluginXmlService())
+                val declaredPluginDependencies = project.gradle
+                    .registerClassLoaderScopedBuildServiceParameters(DeclaredPluginDependenciesService::class, project.path)
+                pluginDependencyIds.convention(declaredPluginDependencies.pluginIds.map { it.toSet() })
+                bundledPluginDependencyIds.convention(declaredPluginDependencies.bundledPluginIds.map { it.toSet() })
+                ideLayoutIndexService.convention(project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class))
+                ideLayoutIndexCacheDirectory.convention(project.layout.dir(project.provider {
+                    project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath).get().toFile()
+                }))
                 sourceCompatibility.convention(compileJavaTaskProvider.map { it.options.release.orNull?.toString() ?: it.sourceCompatibility })
                 targetCompatibility.convention(compileJavaTaskProvider.map { it.options.release.orNull?.toString() ?: it.targetCompatibility })
                 mutedMessages.convention(
