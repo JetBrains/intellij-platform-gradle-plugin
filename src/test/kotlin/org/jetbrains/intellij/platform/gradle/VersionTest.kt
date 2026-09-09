@@ -53,6 +53,22 @@ class VersionTest {
     }
 
     @Test
+    fun `latest version preserves explicit types and canonicalizes string codes`() {
+        assertEquals(
+            IntelliJPlatformType.IntellijIdeaUltimate,
+            IntelliJPlatformType.IntellijIdeaUltimate.toIntelliJPlatformType(Constants.Constraints.LATEST_VERSION),
+        )
+        assertEquals(
+            IntelliJPlatformType.IntellijIdea,
+            "IU".toIntelliJPlatformType(Constants.Constraints.LATEST_VERSION),
+        )
+        assertEquals(
+            IntelliJPlatformType.IntellijIdea,
+            IntelliJPlatformType.IntellijIdea.toIntelliJPlatformType(Constants.Constraints.LATEST_VERSION),
+        )
+    }
+
+    @Test
     fun `product info minimum Java version overrides build number mapping`() {
         val productInfo = ProductInfo(
             version = "2026.1",

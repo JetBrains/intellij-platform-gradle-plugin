@@ -309,7 +309,7 @@ class IntelliJPlatformDependenciesHelper(
             log.warn(
                 """
                 Do not use `bundledLibrary()` in production, as direct access to the IntelliJ Platform libraries is not recommended.
-    
+
                 It should only be used as a workaround in case the IntelliJ Platform Gradle Plugin is not aligned with the latest IntelliJ Platform classpath changes.
                 """.trimIndent()
             )
@@ -345,7 +345,7 @@ class IntelliJPlatformDependenciesHelper(
         val requestsProvider = configurationsProvider.map { configurations ->
             resolveConfiguration()
             configurations.map {
-                requestedIntelliJPlatforms.request(it, dependencyConfigurationName).get()
+                requestedIntelliJPlatforms.request(it, dependencyConfigurationName).get().resolveLatestVersion()
             }
         }.cached()
 
@@ -969,6 +969,31 @@ class IntelliJPlatformDependenciesHelper(
                     .cached<String>()
                     .map { it.toList() }
             }
+
+    private fun RequestedIntelliJPlatform.resolveLatestVersion(): RequestedIntelliJPlatform {
+        if (version != Constraints.LATEST_VERSION) {
+            return this
+        }
+
+        require(useInstaller) {
+            "The '${Constraints.LATEST_VERSION}' IntelliJ Platform version can only be used with installer distributions. Set `useInstaller = true`."
+        }
+
+        val release = productReleasesService.get()
+            .resolve {
+                types = listOf(type)
+                channels = emptyList()
+            }
+            .get()
+            .filter { it.type == type }
+            .maxByOrNull { it.build }
+
+        requireNotNull(release) {
+            "No IntelliJ Platform installer releases found for type '$type'."
+        }
+
+        return copy(version = release.notationVersion.toString())
+    }
 
     //</editor-fold>
 
@@ -1616,7 +1641,7 @@ class IntelliJPlatformDependenciesHelper(
             // If this happened, it means that this method is called somewhere with the wrong parameters.
             log.warn(
                 """
-                Unexpected flow.                
+                Unexpected flow.
                 Please file an issue attaching the content and exception message to: $GITHUB_REPOSITORY/issues/new
 
                 File: $fileName

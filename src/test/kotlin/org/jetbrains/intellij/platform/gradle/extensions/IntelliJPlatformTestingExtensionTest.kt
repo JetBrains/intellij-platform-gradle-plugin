@@ -16,9 +16,9 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
         buildFile write //language=kotlin
                 """
                 @file:Suppress("DEPRECATION")
-                
+
                 println("EXT_TARGET=" + intellijPlatform.splitModeTarget.get())
-                
+
                 val customRun by intellijPlatformTesting.runIde.registering {
                     println("CUSTOM_TARGET=" + splitModeTarget.get())
                 }
@@ -39,10 +39,10 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                         name = "myPluginName"
                     }
                 }
-                
+
                 val customTest by intellijPlatformTesting.testIde.registering {
                     testFramework(TestFrameworkType.Platform)
-                
+
                     task {
                         useJUnitPlatform()
                     }
@@ -56,6 +56,28 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `custom runIde task can use the latest installer version`() {
+        buildFile write //language=kotlin
+                """
+                val customRun = intellijPlatformTesting.runIde.register("customRun") {
+                    type = IntelliJPlatformType.IntellijIdea
+                    version = "latest"
+                }
+                """.trimIndent()
+
+        build(
+            "dependencies",
+            "--configuration=intellijPlatformDependency_customRun",
+            projectProperties = mapOf(
+                GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to
+                        resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
+            ),
+        ) {
+            assertContains("idea:idea:262.8665.81", output)
+        }
+    }
+
+    @Test
     fun `custom testIde task with JUnit5 testFramework can be registered`() {
         buildFile write //language=kotlin
                 """
@@ -64,10 +86,10 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                         name = "myPluginName"
                     }
                 }
-                
+
                 val myCustomTest by intellijPlatformTesting.testIde.registering {
                     testFramework(TestFrameworkType.JUnit5)
-                
+
                     task {
                         useJUnitPlatform()
                     }
@@ -89,10 +111,10 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                         name = "myPluginName"
                     }
                 }
-                
+
                 val versionedTest by intellijPlatformTesting.testIde.registering {
                     testFramework(TestFrameworkType.Platform, "1.0.0")
-                
+
                     task {
                         useJUnitPlatform()
                     }
@@ -119,12 +141,12 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                         name = "myPluginName"
                     }
                 }
-                
+
                 val versionProvider = provider { "1.0.0" }
-                
+
                 val providerTest by intellijPlatformTesting.testIde.registering {
                     testFramework(TestFrameworkType.Platform, versionProvider)
-                
+
                     task {
                         useJUnitPlatform()
                     }
@@ -179,30 +201,30 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform")
                 }
-                
+
                 repositories {
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         local("${localIdePath.invariantSeparatorsPathString}")
                     }
                 }
-                
+
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
-                    
+
                     caching {
                         ides {
                             enabled = false
                         }
                     }
                 }
-                
+
                 val customTest by intellijPlatformTesting.testIde.registering {
                     task {
                         enabled = false
@@ -234,40 +256,40 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform")
                 }
-                
+
                 repositories {
                     intellijPlatform {
                         defaultRepositories()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         local("${localIdePath.invariantSeparatorsPathString}")
                     }
                 }
-                
+
                 intellijPlatform {
                     buildSearchableOptions = false
                     instrumentCode = false
-                    
+
                     caching {
                         ides {
                             enabled = false
                         }
                     }
                 }
-                
+
                 val customTest by intellijPlatformTesting.testIde.registering {
                     type = org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdeaCommunity
                     version = "$intellijPlatformVersion"
                     useInstaller = true
-                    
+
                     task {
                         enabled = false
                     }
                 }
-                
+
                 configurations.named("intellijPlatformDependency_customTest") {
                     withDependencies {
                         throw Exception(toList().joinToString())

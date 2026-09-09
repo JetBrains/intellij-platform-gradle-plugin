@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import java.nio.file.Files
 import java.nio.file.Path
@@ -56,7 +57,7 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform")
                 }
-                
+
                 repositories {
                     ivy {
                         url = uri("${repository.invariantSeparatorsPathString}")
@@ -71,12 +72,12 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
                             includeModule("idea/code-with-me", "JetBrainsClient")
                         }
                     }
-                    
+
                     intellijPlatform {
                         localPlatformArtifacts()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create("IU", "2025.1.6") {
@@ -138,6 +139,108 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
             assertContains("com.jetbrains.intellij.maven:maven-test-framework", output)
         }
     }
+
+    @Test
+    fun `latest resolves the newest installer for the exact requested type`() {
+        val properties = productReleasesProperties + mapOf(
+            "intellijPlatform.type" to "IC",
+            "intellijPlatform.version" to Constraints.LATEST_VERSION,
+        )
+
+        buildWithConfigurationCache(
+            "dependencies",
+            "--configuration=intellijPlatformDependencyArchive",
+            projectProperties = properties,
+        ) {
+            assertContains("idea:ideaIC:2025.2.6.2", output)
+            assertNotContains("idea:idea:262.8665.81", output)
+        }
+
+        buildWithConfigurationCache(
+            "dependencies",
+            "--configuration=intellijPlatformDependencyArchive",
+            projectProperties = properties,
+        ) {
+            assertContains("Reusing configuration cache.", output)
+            assertContains("idea:ideaIC:2025.2.6.2", output)
+        }
+    }
+
+    @Test
+    fun `latest accepts the IU string code and selects the newest release across all channels`() {
+        build(
+            "dependencies",
+            "--configuration=intellijPlatformDependencyArchive",
+            projectProperties = productReleasesProperties + mapOf(
+                "intellijPlatform.type" to "IU",
+                "intellijPlatform.version" to Constraints.LATEST_VERSION,
+            ),
+        ) {
+            assertContains("idea:idea:262.8665.81", output)
+            assertNotContains("idea:ideaIU:", output)
+        }
+    }
+
+    @Test
+    fun `latest rejects non-installer platform dependencies`() {
+        buildAndFail(
+            "dependencies",
+            "--configuration=intellijPlatformDependencyArchive",
+            projectProperties = productReleasesProperties + mapOf(
+                "intellijPlatform.type" to "IC",
+                "intellijPlatform.version" to Constraints.LATEST_VERSION,
+                "intellijPlatform.useInstaller" to "false",
+            ),
+        ) {
+            assertContains("The 'latest' IntelliJ Platform version can only be used with installer distributions. Set `useInstaller = true`.", output)
+        }
+    }
+
+    @Test
+    fun `latest is normalized before naming the IDE cache directory`() {
+        val cachedIde = idesCacheDir.resolve("IC-2025.2.6.2")
+        cachedIde.resolve("product-info.json") overwrite //language=json
+                """
+                {
+                    "name": "IntelliJ IDEA Community Edition",
+                    "version": "2025.2.6.2",
+                    "buildNumber": "252.28539.54",
+                    "productCode": "IC"
+                }
+                """.trimIndent()
+        cachedIde.resolve("cache-marker") overwrite "cached"
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    caching {
+                        ides {
+                            enabled = true
+                            path = File("${idesCacheDir.invariantSeparatorsPathString}")
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(
+            "dependencies",
+            "--configuration=intellijPlatformLocal",
+            projectProperties = productReleasesProperties + mapOf(
+                "intellijPlatform.type" to "IC",
+                "intellijPlatform.version" to Constraints.LATEST_VERSION,
+            ),
+        ) {
+            assertContains("localIde:IC:IC-252.28539.54", output)
+        }
+
+        kotlin.test.assertFalse(idesCacheDir.resolve("IC-latest").toFile().exists())
+    }
+
+    private val productReleasesProperties
+        get() = mapOf(
+            GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to
+                    resourceUrl("products-releases/jetbrains-product-releases-IC.json").toString().replace("IC.json", "{type}.json"),
+        )
 
     private fun currentJetBrainsClientArtifact(buildNumber: String): JetBrainsClientArtifact {
         val arch = System.getProperty("os.arch").takeIf { it == "aarch64" }
