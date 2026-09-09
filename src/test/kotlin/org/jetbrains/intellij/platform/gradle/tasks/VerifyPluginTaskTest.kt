@@ -426,6 +426,30 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `fail when NOT_DYNAMIC failure level is combined with TeamCity output format`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        teamCityOutputFormat = true
+                        failureLevel = listOf(FailureLevel.NOT_DYNAMIC)
+                    }
+                }
+                """.trimIndent()
+
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            // The dynamic plugin eligibility status is not persisted in the reports nor emitted as a TeamCity
+            // message, so this combination is rejected up front instead of silently passing. See: #1739
+            assertContains("cannot be combined with 'teamCityOutputFormat = true'", output)
+        }
+    }
+
+    @Test
     fun `fail on incorrect ide version`() {
         writeJavaFile()
         writePluginXmlFile()
