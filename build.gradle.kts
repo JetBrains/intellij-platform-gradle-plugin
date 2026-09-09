@@ -109,7 +109,7 @@ tasks {
 
     wrapper {
         gradleVersion = providers.gradleProperty("gradleVersion").get()
-        distributionUrl = "https://cache-redirector.jetbrains.com/services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
+        distributionUrl = "https://services.gradle.org/distributions/gradle-$gradleVersion-all.zip"
     }
 
     pluginUnderTestMetadata {
