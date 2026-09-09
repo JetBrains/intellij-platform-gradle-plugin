@@ -377,6 +377,109 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `fail on Deprecated API usages with TeamCity output format`() {
+        writeJavaFileWithDeprecation()
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        teamCityOutputFormat = true
+                        failureLevel = listOf(FailureLevel.DEPRECATED_API_USAGES)
+                    }
+                }
+                """.trimIndent()
+
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            // With TeamCity output the plain problem sections are not printed to stdout, but the verification
+            // outcome is derived from the report files, so the task still fails. See: #1739
+            assertContains("##teamcity[", output)
+            assertContains("Verification failed with [DEPRECATED_API_USAGES] problems.", output)
+        }
+    }
+
+    @Test
+    fun `pass on Deprecated API usages with TeamCity output format`() {
+        writeJavaFileWithDeprecation()
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        teamCityOutputFormat = true
+                    }
+                }
+                """.trimIndent()
+
+        build(Tasks.VERIFY_PLUGIN) {
+            // The deprecated API usages are not part of the default failure level, so the task passes even though
+            // TeamCity output is enabled and the plain problem sections are absent from stdout. See: #1739
+            assertContains("##teamcity[", output)
+            assertNotContains("Verification failed with [DEPRECATED_API_USAGES] problems.", output)
+        }
+    }
+
+    @Test
+    fun `fail when NOT_DYNAMIC failure level is combined with TeamCity output format`() {
+        writeJavaFile()
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        teamCityOutputFormat = true
+                        failureLevel = listOf(FailureLevel.NOT_DYNAMIC)
+                    }
+                }
+                """.trimIndent()
+
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            // The dynamic plugin eligibility status is not persisted in the reports nor emitted as a TeamCity
+            // message, so this combination is rejected up front instead of silently passing. See: #1739
+            assertContains("cannot be combined with 'teamCityOutputFormat = true'", output)
+        }
+    }
+
+    @Test
+    fun `fail on invalid plugin archive with TeamCity output format`() {
+        writePluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        // An archive without a valid plugin structure makes the Plugin Verifier write no verification verdict.
+        val invalidArchive = dir.resolve("invalid-plugin.zip").apply { writeText("not a valid plugin archive") }
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        teamCityOutputFormat = true
+                    }
+                }
+                tasks.withType<VerifyPluginTask> {
+                    archiveFile = file("${invalidArchive.invariantSeparatorsPathString}")
+                }
+                """.trimIndent()
+
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            // With TeamCity output the plain "not valid plugins" heading is not printed - the invalid plugin is only
+            // reported as a "(invalid plugins)" TeamCity service message and no verdict file is written. The task must
+            // still fail closed instead of staying green. See: #1739
+            assertContains("##teamcity[", output)
+            assertContains("Invalid plugin structure detected", output)
+        }
+    }
+
+    @Test
     fun `fail on incorrect ide version`() {
         writeJavaFile()
         writePluginXmlFile()

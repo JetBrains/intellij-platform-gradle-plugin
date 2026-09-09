@@ -33,8 +33,13 @@ import org.jetbrains.intellij.platform.gradle.tasks.aware.ProblemsAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.ProductReleasesServiceAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.RuntimeAware
 import org.jetbrains.intellij.platform.gradle.utils.*
+import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.exists
+import kotlin.io.path.isDirectory
+import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
+import kotlin.io.path.readText
 
 /**
  * Runs the IntelliJ Plugin Verifier CLI tool to check compatibility with specified IDE builds.
@@ -145,9 +150,15 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     /**
      * A flag that controls the output format - if set to `true`, the TeamCity compatible output will be returned to stdout.
      *
+     * This cannot be combined with the [FailureLevel.NOT_DYNAMIC] failure level (which is also part of
+     * [FailureLevel.ALL]): the IntelliJ Plugin Verifier neither persists the dynamic plugin eligibility status in its
+     * report files nor emits it as a TeamCity service message, so it cannot be detected in TeamCity output mode and the
+     * task fails fast if both are requested together.
+     *
      * Default value: [IntelliJPlatformExtension.PluginVerification.teamCityOutputFormat]
      *
      * @see IntelliJPlatformExtension.PluginVerification.teamCityOutputFormat
+     * @see FailureLevel.NOT_DYNAMIC
      */
     @get:Input
     @get:Optional
@@ -256,6 +267,19 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             }
         }
 
+        // The Plugin Verifier does not persist the dynamic plugin eligibility status into its report files, and it
+        // prints it only to the plain console output — never as a TeamCity service message. Detecting NOT_DYNAMIC is
+        // therefore impossible when TeamCity output is enabled, so fail fast instead of silently letting a
+        // NOT_DYNAMIC failure level pass. See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1739
+        if (teamCityOutputFormat.get() && FailureLevel.NOT_DYNAMIC in failureLevel.get()) {
+            throw GradleException(
+                "The '${FailureLevel.NOT_DYNAMIC}' failure level cannot be combined with 'teamCityOutputFormat = true': " +
+                    "the IntelliJ Plugin Verifier neither persists the dynamic plugin eligibility status in its report " +
+                    "files nor emits it as a TeamCity service message, so it cannot be detected. Remove " +
+                    "'${FailureLevel.NOT_DYNAMIC}' from the failure level or disable the TeamCity output format.",
+            )
+        }
+
         val file = archiveFile.orNull?.asPath
         if (file == null || !file.exists()) {
             val label = "Plugin archive file not found"
@@ -316,7 +340,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
 
         execWithTeeOutput(teeErrorOutput = false, throwOutputOnFailure = false) {
             super.exec()
-        }.let(::verifyOutput)
+        }.let(::verifyResult)
     }
 
     /**
@@ -368,19 +392,151 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     }
 
     /**
-     * @throws GradleException
+     * Determines the verification outcome by reading the reports produced by the IntelliJ Plugin Verifier under
+     * [verificationReportsDirectory] and fails the task when any reported [FailureLevel] matches the configured
+     * [failureLevel].
+     *
+     * Unlike parsing the console output, the report files are always written by the Plugin Verifier regardless of
+     * the console output format, so the pass/fail decision no longer depends on the [teamCityOutputFormat] flag.
+     *
+     * @see <a href="https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1739">#1739</a>
+     * @throws GradleException when the verification reports contain problems matching the [failureLevel]
      */
     @Throws(GradleException::class)
-    private fun verifyOutput(output: String) {
+    private fun verifyResult(output: String) {
         val failureLevels = failureLevel.get()
         log.debug("Current failure levels: ${failureLevels.joinToString(", ")}")
 
-        val invalidFilesMessage = "The following files specified for the verification are not valid plugins:"
-        if (output.contains(invalidFilesMessage)) {
-            val errorMessage = output.lines()
-                .dropWhile { it != invalidFilesMessage }
-                .dropLastWhile { !it.startsWith(" ") }
-                .joinToString("\n")
+        val verdicts = readVerdicts()
+
+        // Fail closed: if the Plugin Verifier produced no readable verdict for any (IDE, plugin) pair, the
+        // verification did not complete normally — most commonly because the plugin artifact could not be parsed at
+        // all, in which case no per-IDE report is written. This must fail the task regardless of the console output
+        // format: with TeamCity output the invalid-plugin notice is emitted only as a service message and the plain
+        // "not valid plugins" heading never appears. See: #1739
+        if (verdicts.isEmpty()) {
+            failNoVerdict(output)
+        }
+
+        // The dynamic plugin eligibility status is the only category the Plugin Verifier does not persist into its
+        // reports; it is printed to the plain console output only. Combining it with the TeamCity output format is
+        // rejected earlier in exec() because it can never be detected here.
+        val notDynamic = output.contains(FailureLevel.NOT_DYNAMIC.sectionHeading)
+
+        val collectedProblems = linkedMapOf<String, MutableMap<FailureLevel, String>>()
+        verdicts.forEach { (ideVersion, pluginDirectory, verdict) ->
+            val ideProblems = collectedProblems.getOrPut(ideVersion) { linkedMapOf() }
+            parseVerdict(verdict).forEach { level ->
+                ideProblems.putIfAbsent(level, detailsOf(level, pluginDirectory, verdict))
+            }
+            if (notDynamic) {
+                ideProblems.putIfAbsent(FailureLevel.NOT_DYNAMIC, FailureLevel.NOT_DYNAMIC.message)
+            }
+        }
+
+        collectedProblems.forEach { (ideVersion, ideProblems) ->
+            ideProblems.forEach { (failureLevel, description) ->
+                val label = failureLevel.sectionHeading
+                val details = buildString {
+                    append("IDE Version: $ideVersion")
+                    append("\n")
+                    append(failureLevel.message)
+                    if (description.isNotBlank()) {
+                        append("\n\n")
+                        append(description)
+                    }
+                }
+                problems.reporter.report(
+                    Problems.VerifyPlugin.VerificationFailure(failureLevel),
+                ) {
+                    contextualLabel(label)
+                    details(details)
+                    solution(metadataOf(failureLevel).solution)
+                    severity(
+                        when {
+                            failureLevel in failureLevels -> Severity.ERROR
+                            else -> Severity.WARNING
+                        },
+                    )
+                }
+            }
+        }
+
+        val verificationFailures = collectedProblems
+            .flatMap { it.value.keys }
+            .toSet()
+            .intersect(failureLevels)
+
+        if (verificationFailures.isNotEmpty()) {
+            throw GradleException("Verification failed with $verificationFailures problems. See the report at: $problemsReportUrl")
+        }
+    }
+
+    /**
+     * A single verification verdict produced by the Plugin Verifier for one `(IDE, plugin)` pair.
+     *
+     * @property ideVersion the verified IDE version (the report's top-level directory name)
+     * @property pluginDirectory the directory holding the verdict and optional per-category detail files
+     * @property verdict the raw content of the `verification-verdict.txt` file
+     */
+    private data class PluginVerdict(val ideVersion: String, val pluginDirectory: Path, val verdict: String)
+
+    /**
+     * Reads the always-present `verification-verdict.txt` files written by the Plugin Verifier into
+     * [verificationReportsDirectory], returning one [PluginVerdict] per verified `(IDE, plugin)` pair.
+     *
+     * The verifier recreates the reports directory on each run and stores the outcome using the following layout:
+     * ```
+     * <reports>/<IDE version>/plugins/<plugin ID>/<plugin version>/verification-verdict.txt (+ detail files)
+     * ```
+     *
+     * These files are written regardless of the console output format, so the pass/fail decision derived from them
+     * no longer depends on the [teamCityOutputFormat] flag. An empty result means the verifier produced no verdict
+     * at all (see the fail-closed handling in [verifyResult]).
+     */
+    private fun readVerdicts(): List<PluginVerdict> {
+        val reportsDirectory = verificationReportsDirectory.asPath.takeIf { it.exists() }
+            ?: return emptyList()
+
+        return reportsDirectory.listDirectoryEntries()
+            .filter { it.isDirectory() }
+            .flatMap { ideDirectory ->
+                ideDirectory.resolve("plugins")
+                    .takeIf { it.exists() }
+                    ?.listDirectoryEntries()?.filter { it.isDirectory() } // <plugin ID> directories
+                    ?.flatMap { it.listDirectoryEntries().filter { path -> path.isDirectory() } } // <plugin version> directories
+                    ?.mapNotNull { pluginDirectory ->
+                        pluginDirectory.resolve(VERIFICATION_VERDICT_FILE_NAME)
+                            .takeIf { it.exists() }
+                            ?.readText()
+                            ?.let { PluginVerdict(ideDirectory.name, pluginDirectory, it) }
+                    }
+                    .orEmpty()
+            }
+    }
+
+    /**
+     * Fails the task when the Plugin Verifier produced no verification verdict at all.
+     *
+     * When the failure is caused by an unparseable plugin artifact — recognized from either the plain console
+     * heading or the TeamCity `(invalid plugins)` service message — a dedicated "invalid plugin structure"
+     * diagnostic is reported. Otherwise a generic "no verdict produced" error is thrown so the build never passes
+     * silently. See: [#1739](https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1739)
+     */
+    @Throws(GradleException::class)
+    private fun failNoVerdict(output: String): Nothing {
+        val invalidByPlainOutput = output.contains(INVALID_PLUGIN_FILES_PLAIN_HEADING)
+        val invalidByTeamCityOutput = output.contains(INVALID_PLUGIN_FILES_TEAMCITY_MARKER)
+
+        if (invalidByPlainOutput || invalidByTeamCityOutput) {
+            val errorMessage = when {
+                invalidByPlainOutput -> output.lines()
+                    .dropWhile { it != INVALID_PLUGIN_FILES_PLAIN_HEADING }
+                    .dropLastWhile { !it.startsWith(" ") }
+                    .joinToString("\n")
+
+                else -> "The Plugin Verifier reported the plugin artifact as invalid (see the '$INVALID_PLUGIN_FILES_TEAMCITY_MARKER' entry in the TeamCity output above)."
+            }
 
             val label = "Invalid plugin structure detected"
             val details = "The Plugin Verifier determined that the provided plugin artifact does not have a valid plugin structure. This may indicate missing plugin.xml, incorrect JAR structure, or other structural issues.\n$errorMessage"
@@ -397,113 +553,33 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             }
         }
 
-        val collectedProblems = collectProblems(output)
+        val label = "No verification verdict produced"
+        val details = "The IntelliJ Plugin Verifier finished without writing a verification verdict for any of the target IDEs into ${verificationReportsDirectory.asPath.safePathString}. The verification outcome could not be determined, so the task fails to avoid a false-positive result."
+        val solution = "Inspect the Plugin Verifier output above for the underlying failure. Ensure the plugin artifact and the target IDE versions are valid, then re-run the verification."
 
-        collectedProblems.forEach { (ideVersion, ideProblems) ->
-            ideProblems.forEach { (failureLevel, issues) ->
-                issues.forEach { (title, description) ->
-                    val label = "$title [${failureLevel.sectionHeading}]"
-                    val details = buildString {
-                        append("IDE Version: $ideVersion")
-                        append("\n")
-                        append(failureLevel.message)
-                        append("\n\n")
-                        append(description)
-                    }
-                    val solution = when (failureLevel) {
-                        FailureLevel.COMPATIBILITY_PROBLEMS, FailureLevel.COMPATIBILITY_WARNINGS ->
-                            "Review the compatibility issues and update your plugin code to use compatible APIs for the target IDE version. Consider updating dependency versions or adjusting the since-build/until-build range."
-                        FailureLevel.DEPRECATED_API_USAGES ->
-                            "Replace deprecated API usage with recommended alternatives. Check the IDE's API documentation for migration paths."
-                        FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES ->
-                            "Remove usage of APIs scheduled for removal and migrate to replacement APIs immediately to ensure future compatibility."
-                        FailureLevel.EXPERIMENTAL_API_USAGES ->
-                            "Be aware that experimental APIs may change without notice. Consider using stable alternatives or accept the risk of future API changes."
-                        FailureLevel.INTERNAL_API_USAGES ->
-                            "Replace internal API usage with public APIs. Internal APIs are not intended for plugin use and may break compatibility."
-                        FailureLevel.OVERRIDE_ONLY_API_USAGES ->
-                            "Override-only APIs should only be overridden in subclasses, not called directly. Review your usage and follow the API contract."
-                        FailureLevel.NON_EXTENDABLE_API_USAGES ->
-                            "Do not extend classes or interfaces marked as non-extendable. Use composition or find alternative extension points."
-                        FailureLevel.PLUGIN_STRUCTURE_WARNINGS ->
-                            "Fix the plugin structure issues identified. Ensure plugin.xml is valid and all required files are present."
-                        FailureLevel.MISSING_DEPENDENCIES ->
-                            "Add the missing plugin dependencies to your plugin.xml <depends> section or include them in your plugin distribution."
-                        FailureLevel.INVALID_PLUGIN ->
-                            "Fix the plugin structure to create a valid plugin artifact. Ensure META-INF/plugin.xml exists and is properly formatted."
-                        FailureLevel.NOT_DYNAMIC ->
-                            "If dynamic loading is required, review the plugin structure and ensure all components support dynamic loading. Otherwise, accept that IDE restart is needed."
-                    }
-
-                    problems.reporter.report(
-                        Problems.VerifyPlugin.VerificationFailure(failureLevel),
-                    ) {
-                        contextualLabel(label)
-                        details(details)
-                        solution(solution)
-                        severity(
-                            when {
-                                failureLevel in failureLevels -> Severity.ERROR
-                                else -> Severity.WARNING
-                            },
-                        )
-                    }
-                }
-            }
-        }
-
-        val verificationFailures = collectedProblems
-            .flatMap { it.value.keys }
-            .toSet()
-            .intersect(failureLevels)
-
-        if (verificationFailures.isNotEmpty()) {
-            throw GradleException("Verification failed with $verificationFailures problems. See the report at: $problemsReportUrl")
+        throw problems.reporter.reportError(
+            GradleException("$label $details $solution"),
+            Problems.VerifyPlugin.InvalidPlugin,
+            problemsReportUrl,
+        ) {
+            contextualLabel(label)
+            details(details)
+            solution(solution)
         }
     }
 
-    private fun collectProblems(output: String): Map<String, Map<FailureLevel, Map<String, String>>> {
-        val headingToLevel = FailureLevel.entries.associateBy { it.sectionHeading }
-
-        val lines = output.lineSequence().toList()
-        val starts = lines.mapIndexedNotNull { i, s -> pluginLinePattern.find(s)?.let { i to it.groupValues[1] } }
-
-        return buildMap {
-            starts.forEachIndexed { idx, (start, ide) ->
-                val end = starts.getOrNull(idx + 1)?.first ?: lines.size
-                val entries = lines.subList(start + 1, end)
-
-                val headers = entries.mapIndexedNotNull { i, entry ->
-                    headingToLevel.entries.firstOrNull { entry.startsWith(it.key) }?.let { i to it.value }
-                }
-
-                val map = headers.associateTo(linkedMapOf()) { (start, level) ->
-                    val items = entries.drop(start + 1).takeWhile { it.startsWith(' ') }.map { it.trim() }
-                    level to parseItemsToMap(items)
-                }
-
-                put(ide, map)
-            }
-        }
-    }
-
-    private fun parseItemsToMap(items: List<String>): Map<String, String> {
-        val keys = items.mapIndexedNotNull { i, item ->
-            when {
-                item.startsWith("#") -> i to item.removePrefix("#")
-                else -> null
-            }
-        }
-        return buildMap {
-            keys.forEachIndexed { idx, (start, key) ->
-                val end = keys.getOrNull(idx + 1)?.first ?: items.size
-                val value = items.subList(start + 1, end)
-                    .asSequence()
-                    .filter { it.isNotBlank() && !it.startsWith("#") }
-                    .joinToString("\n")
-                put(key, value)
-            }
-        }
+    /**
+     * Provides a human-readable description for the given [level] occurred in [pluginDirectory], preferring the
+     * content of the corresponding detail file (when present) and falling back to the plugin's verdict otherwise.
+     */
+    private fun detailsOf(level: FailureLevel, pluginDirectory: Path, verdict: String): String {
+        val detailFileName = metadataOf(level).detailFileName ?: return verdict.trim()
+        return pluginDirectory.resolve(detailFileName)
+            .takeIf { it.exists() }
+            ?.readText()
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?: verdict.trim()
     }
 
     private fun ProductInfo.listIdeNotation() =
@@ -521,7 +597,131 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     }
 
     companion object : Registrable {
-        private val pluginLinePattern = Regex("^Plugin .*? against (\\S+):")
+        /**
+         * The name of the always-present per-plugin verdict file written by the Plugin Verifier for every verified
+         * `(IDE, plugin)` pair. Its content encodes all reported problem categories.
+         */
+        private const val VERIFICATION_VERDICT_FILE_NAME = "verification-verdict.txt"
+
+        /**
+         * The plain console heading printed by the Plugin Verifier when a plugin artifact cannot be parsed at all.
+         */
+        private const val INVALID_PLUGIN_FILES_PLAIN_HEADING = "The following files specified for the verification are not valid plugins:"
+
+        /**
+         * The TeamCity test name reported by the Plugin Verifier when a plugin artifact cannot be parsed at all.
+         * With TeamCity output enabled, the plain [INVALID_PLUGIN_FILES_PLAIN_HEADING] is not printed.
+         */
+        private const val INVALID_PLUGIN_FILES_TEAMCITY_MARKER = "(invalid plugins)"
+
+        /**
+         * Verifier-specific metadata for a [FailureLevel], kept out of the public [FailureLevel] enum so it does not
+         * generate public (mangled) JVM getters for internal-only data.
+         *
+         * @property solution the suggested remediation reported through the Gradle Problems API
+         * @property verdictMarker the stable phrase to look for in the `verification-verdict.txt` file, or `null` when
+         * the verifier does not persist this category into its reports (only [FailureLevel.NOT_DYNAMIC])
+         * @property detailFileName the optional per-category detail file enriching the reported description, or `null`
+         * when the category has no dedicated file
+         */
+        private class FailureLevelMetadata(
+            val solution: String,
+            val verdictMarker: String?,
+            val detailFileName: String?,
+        )
+
+        /**
+         * Resolves the [FailureLevelMetadata] for a [FailureLevel]. The exhaustive `when` guarantees, at compile time,
+         * that a newly added category cannot silently miss its verdict marker, detail file, or solution.
+         */
+        private fun metadataOf(level: FailureLevel): FailureLevelMetadata =
+            when (level) {
+                FailureLevel.COMPATIBILITY_WARNINGS -> FailureLevelMetadata(
+                    solution = "Review the compatibility issues and update your plugin code to use compatible APIs for the target IDE version. Consider updating dependency versions or adjusting the since-build/until-build range.",
+                    verdictMarker = "compatibility warning",
+                    detailFileName = "compatibility-warnings.txt",
+                )
+
+                FailureLevel.COMPATIBILITY_PROBLEMS -> FailureLevelMetadata(
+                    solution = "Review the compatibility issues and update your plugin code to use compatible APIs for the target IDE version. Consider updating dependency versions or adjusting the since-build/until-build range.",
+                    verdictMarker = "compatibility problem",
+                    detailFileName = "compatibility-problems.txt",
+                )
+
+                FailureLevel.DEPRECATED_API_USAGES -> FailureLevelMetadata(
+                    solution = "Replace deprecated API usage with recommended alternatives. Check the IDE's API documentation for migration paths.",
+                    verdictMarker = "of deprecated API",
+                    detailFileName = "deprecated-usages.txt",
+                )
+
+                FailureLevel.SCHEDULED_FOR_REMOVAL_API_USAGES -> FailureLevelMetadata(
+                    solution = "Remove usage of APIs scheduled for removal and migrate to replacement APIs immediately to ensure future compatibility.",
+                    verdictMarker = "of scheduled for removal API",
+                    detailFileName = "deprecated-usages.txt",
+                )
+
+                FailureLevel.EXPERIMENTAL_API_USAGES -> FailureLevelMetadata(
+                    solution = "Be aware that experimental APIs may change without notice. Consider using stable alternatives or accept the risk of future API changes.",
+                    verdictMarker = "of experimental API",
+                    detailFileName = "experimental-api-usages.txt",
+                )
+
+                FailureLevel.INTERNAL_API_USAGES -> FailureLevelMetadata(
+                    solution = "Replace internal API usage with public APIs. Internal APIs are not intended for plugin use and may break compatibility.",
+                    verdictMarker = "of internal API",
+                    detailFileName = "internal-api-usages.txt",
+                )
+
+                FailureLevel.OVERRIDE_ONLY_API_USAGES -> FailureLevelMetadata(
+                    solution = "Override-only APIs should only be overridden in subclasses, not called directly. Review your usage and follow the API contract.",
+                    verdictMarker = "override-only API usage",
+                    detailFileName = "override-only-usages.txt",
+                )
+
+                FailureLevel.NON_EXTENDABLE_API_USAGES -> FailureLevelMetadata(
+                    solution = "Do not extend classes or interfaces marked as non-extendable. Use composition or find alternative extension points.",
+                    verdictMarker = "non-extendable API usage",
+                    detailFileName = "non-extendable-api-usages.txt",
+                )
+
+                FailureLevel.PLUGIN_STRUCTURE_WARNINGS -> FailureLevelMetadata(
+                    solution = "Fix the plugin structure issues identified. Ensure plugin.xml is valid and all required files are present.",
+                    verdictMarker = "plugin configuration defect",
+                    detailFileName = "plugin-structure-warnings.txt",
+                )
+
+                FailureLevel.MISSING_DEPENDENCIES -> FailureLevelMetadata(
+                    solution = "Add the missing plugin dependencies to your plugin.xml <depends> section or include them in your plugin distribution.",
+                    verdictMarker = "missing mandatory",
+                    detailFileName = null,
+                )
+
+                FailureLevel.INVALID_PLUGIN -> FailureLevelMetadata(
+                    solution = "Fix the plugin structure to create a valid plugin artifact. Ensure META-INF/plugin.xml exists and is properly formatted.",
+                    verdictMarker = "Plugin is invalid:",
+                    detailFileName = "invalid-plugin.txt",
+                )
+
+                FailureLevel.NOT_DYNAMIC -> FailureLevelMetadata(
+                    solution = "If dynamic loading is required, review the plugin structure and ensure all components support dynamic loading. Otherwise, accept that IDE restart is needed.",
+                    verdictMarker = null,
+                    detailFileName = null,
+                )
+            }
+
+        /**
+         * Parses the Plugin Verifier verdict text (content of a [VERIFICATION_VERDICT_FILE_NAME] file) into the set
+         * of [FailureLevel]s it reports.
+         *
+         * This is a pure function over the verdict string: every [FailureLevel] whose metadata declares a verdict
+         * marker is matched against the verdict independently, so the mapping can be unit-tested for each category
+         * without running the verifier. [FailureLevel.NOT_DYNAMIC] has no verdict marker because the verifier neither
+         * persists the dynamic plugin eligibility status into the reports nor emits it as a TeamCity service message.
+         */
+        internal fun parseVerdict(verdict: String): Set<FailureLevel> =
+            FailureLevel.values()
+                .filter { level -> metadataOf(level).verdictMarker?.let { verdict.contains(it) } == true }
+                .toSet()
 
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
@@ -564,55 +764,80 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             }
     }
 
+    /**
+     * A verification failure category reported by the IntelliJ Plugin Verifier.
+     *
+     * Only the human-readable [sectionHeading] and [message] are exposed on the public enum. The verifier-specific
+     * metadata (verdict marker, detail file, and suggested solution) is kept out of the enum in a private descriptor
+     * next to [parseVerdict], so it does not generate public (mangled) JVM getters for internal-only data.
+     *
+     * @property sectionHeading a short human-readable heading used when reporting the problem
+     * @property message a human-readable description of the category
+     */
     @Suppress("unused")
-    enum class FailureLevel(val sectionHeading: String, val message: String) {
+    enum class FailureLevel(
+        val sectionHeading: String,
+        val message: String,
+    ) {
         COMPATIBILITY_WARNINGS(
-            "Compatibility warnings",
-            "Compatibility warnings detected against the specified IDE version.",
+            sectionHeading = "Compatibility warnings",
+            message = "Compatibility warnings detected against the specified IDE version.",
         ),
         COMPATIBILITY_PROBLEMS(
-            "Compatibility problems",
-            "Compatibility problems detected against the specified IDE version.",
+            sectionHeading = "Compatibility problems",
+            message = "Compatibility problems detected against the specified IDE version.",
         ),
         DEPRECATED_API_USAGES(
-            "Deprecated API usages",
-            "Plugin uses API marked as deprecated (@Deprecated).",
+            sectionHeading = "Deprecated API usages",
+            message = "Plugin uses API marked as deprecated (@Deprecated).",
         ),
         SCHEDULED_FOR_REMOVAL_API_USAGES(
-            /* # usage(s) of */"scheduled for removal API",
-            "Plugin uses API marked as scheduled for removal (ApiStatus.@ScheduledForRemoval).",
+            sectionHeading = /* # usage(s) of */ "scheduled for removal API",
+            message = "Plugin uses API marked as scheduled for removal (ApiStatus.@ScheduledForRemoval).",
         ),
         EXPERIMENTAL_API_USAGES(
-            "Experimental API usages",
-            "Plugin uses API marked as experimental (ApiStatus.@Experimental).",
+            sectionHeading = "Experimental API usages",
+            message = "Plugin uses API marked as experimental (ApiStatus.@Experimental).",
         ),
         INTERNAL_API_USAGES(
-            "Internal API usages",
-            "Plugin uses API marked as internal (ApiStatus.@Internal).",
+            sectionHeading = "Internal API usages",
+            message = "Plugin uses API marked as internal (ApiStatus.@Internal).",
         ),
         OVERRIDE_ONLY_API_USAGES(
-            "Override-only API usages",
-            "Override-only API is used incorrectly (ApiStatus.@OverrideOnly).",
+            sectionHeading = "Override-only API usages",
+            message = "Override-only API is used incorrectly (ApiStatus.@OverrideOnly).",
         ),
         NON_EXTENDABLE_API_USAGES(
-            "Non-extendable API usages",
-            "Non-extendable API is used incorrectly (ApiStatus.@NonExtendable).",
+            sectionHeading = "Non-extendable API usages",
+            message = "Non-extendable API is used incorrectly (ApiStatus.@NonExtendable).",
         ),
         PLUGIN_STRUCTURE_WARNINGS(
-            "Plugin structure warnings",
-            "The structure of the plugin is not valid.",
+            sectionHeading = "Plugin structure warnings",
+            message = "The structure of the plugin is not valid.",
         ),
         MISSING_DEPENDENCIES(
-            "Missing dependencies",
-            "Plugin has some dependencies missing.",
+            sectionHeading = "Missing dependencies",
+            message = "Plugin has some dependencies missing.",
         ),
         INVALID_PLUGIN(
-            "The following files specified for the verification are not valid plugins",
-            "Provided plugin artifact is not valid.",
+            sectionHeading = "The following files specified for the verification are not valid plugins",
+            message = "Provided plugin artifact is not valid.",
         ),
+
+        /**
+         * The plugin probably cannot be enabled or disabled without an IDE restart.
+         *
+         * The IntelliJ Plugin Verifier reports the dynamic plugin eligibility status only to the plain console output;
+         * it neither persists it into the report files nor emits it as a TeamCity service message. This category
+         * therefore cannot be detected when [teamCityOutputFormat] is enabled, and — since it is also part of
+         * [ALL] — combining `teamCityOutputFormat = true` with a failure level containing this value (including [ALL])
+         * fails the task fast rather than passing silently.
+         *
+         * @see teamCityOutputFormat
+         */
         NOT_DYNAMIC(
-            "Plugin probably cannot be enabled or disabled without IDE restart",
-            "Plugin probably cannot be enabled or disabled without IDE restart.",
+            sectionHeading = "Plugin probably cannot be enabled or disabled without IDE restart",
+            message = "Plugin probably cannot be enabled or disabled without IDE restart.",
         );
 
         companion object {
