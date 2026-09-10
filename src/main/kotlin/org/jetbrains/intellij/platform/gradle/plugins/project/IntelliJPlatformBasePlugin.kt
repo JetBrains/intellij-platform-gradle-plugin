@@ -10,13 +10,11 @@ import org.gradle.api.Project
 import org.gradle.api.attributes.LibraryElements
 import org.gradle.api.plugins.JavaLibraryPlugin
 import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
-import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.ide.idea.IdeaPlugin
 import org.gradle.plugins.ide.idea.model.IdeaModel
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
@@ -562,9 +560,17 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         val requestedJavaLanguageVersion = javaExtension.toolchain.languageVersion.orElse(intellijPlatformJavaLanguageVersion)
 
-        project.tasks.withType<JavaCompile>().configureEach {
-            options.release.convention(requestedJavaLanguageVersion.map { it.toString().toInt() })
-        }
+        // The target IntelliJ Platform Java version is applied only as the Java toolchain language-version
+        // convention (see `configureJavaToolchainConvention` above). We intentionally do NOT set an
+        // `options.release` convention here: doing so used to override any `sourceCompatibility`/
+        // `targetCompatibility` the user configured (via the `java {}` extension or directly on the
+        // `JavaCompile` tasks), because javac prefers `--release` over `-source`/`-target`. As a result the
+        // published `org.gradle.jvm.version` variant attribute (see IntelliJPlatformModulePlugin, which reads
+        // `options.release ?: targetCompatibility`) advertised the platform version instead of the requested
+        // one. By leaving `options.release` unset, Gradle natively derives `sourceCompatibility`/
+        // `targetCompatibility` from the toolchain, so every supported way of configuring the Java level drives
+        // both compilation and the published attribute, while keeping `source`/`target`/`release` semantics
+        // distinct. See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1772
 
         project.pluginManager.withPlugin(Plugins.External.KOTLIN) {
             project.configureKotlinJvmToolchainConventions(
