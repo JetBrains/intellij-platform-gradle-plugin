@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.plugins.project
 
+import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.overwrite
@@ -48,6 +49,19 @@ class IntelliJPlatformComposedJarJvmVersionTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `java sourceCompatibility alone drives the composed jar Java version`() {
+        assertComposedJarJavaVersion(
+            configuration =
+                """
+                java {
+                    sourceCompatibility = JavaVersion.VERSION_17
+                }
+                """.trimIndent(),
+            expectedJavaMajor = 17,
+        )
+    }
+
+    @Test
     fun `toolchain languageVersion drives the composed jar Java version`() {
         assertComposedJarJavaVersion(
             configuration =
@@ -74,16 +88,44 @@ class IntelliJPlatformComposedJarJvmVersionTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `withType JavaCompile targetCompatibility drives the composed jar Java version`() {
+    fun `withType JavaCompile sourceCompatibility and targetCompatibility drive the composed jar Java version`() {
         assertComposedJarJavaVersion(
             configuration =
                 """
                 tasks.withType<org.gradle.api.tasks.compile.JavaCompile>().configureEach {
+                    sourceCompatibility = "17"
                     targetCompatibility = "17"
                 }
                 """.trimIndent(),
             expectedJavaMajor = 17,
         )
+    }
+
+    @Test
+    fun `targetCompatibility below sourceCompatibility fails compilation instead of silently changing source`() {
+        writeJavaFile()
+        buildFile overwrite buildScript(
+            """
+            java {
+                toolchain.languageVersion = org.gradle.jvm.toolchain.JavaLanguageVersion.of(21)
+            }
+            tasks.named<org.gradle.api.tasks.compile.JavaCompile>("compileJava") {
+                targetCompatibility = "17"
+            }
+            val compileJava = tasks.named<org.gradle.api.tasks.compile.JavaCompile>("compileJava").get()
+            println("compileJava.sourceCompatibility=" + compileJava.sourceCompatibility)
+            println("compileJava.targetCompatibility=" + compileJava.targetCompatibility)
+            println("compileJava.release=" + compileJava.options.release.orNull)
+            """.trimIndent(),
+        )
+
+        buildAndFail("compileJava") {
+            assertContains(output, "compileJava.sourceCompatibility=21")
+            assertContains(output, "compileJava.targetCompatibility=17")
+            assertContains(output, "compileJava.release=null")
+            assertContains(output, "source release 21 requires target release 21")
+            assertEquals(TaskOutcome.FAILED, task(":compileJava")?.outcome)
+        }
     }
 
     private fun assertComposedJarJavaVersion(configuration: String, expectedJavaMajor: Int) {
@@ -167,10 +209,11 @@ class IntelliJPlatformComposedJarJvmVersionTest : IntelliJPluginTestBase() {
         val distributionConfiguration = configurations.named("intellijPlatformDistribution")
         val composedJarTask = tasks.named<Jar>("composedJar")
 
+        // Query outgoing JVM attributes while the build script is still being evaluated.
+        println("platformMajor=$platformMajor")
+        println("composedJar.jvmVersion=" + composedJarConfiguration.get().attributes.getAttribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE))
+        println("distribution.jvmVersion=" + distributionConfiguration.get().attributes.getAttribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE))
         gradle.projectsEvaluated {
-            println("platformMajor=$platformMajor")
-            println("composedJar.jvmVersion=" + composedJarConfiguration.get().attributes.getAttribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE))
-            println("distribution.jvmVersion=" + distributionConfiguration.get().attributes.getAttribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE))
             println("composedJar.path=" + composedJarTask.get().archiveFile.get().asFile.absolutePath)
         }
         """.trimIndent()

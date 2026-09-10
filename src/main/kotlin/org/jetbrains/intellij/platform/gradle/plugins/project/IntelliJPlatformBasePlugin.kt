@@ -547,24 +547,18 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
         // This only sets the Java toolchain language version convention; launchers are still resolved by Gradle lazily.
         val intellijPlatformJavaLanguageVersion = dependenciesHelper.intellijPlatformJavaLanguageVersionProvider()
         val javaExtension = project.extensions.getByType<JavaPluginExtension>()
-        fun configureJavaToolchainConvention() {
-            javaExtension.toolchain.languageVersion.convention(intellijPlatformJavaLanguageVersion)
-        }
-
-        project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].dependencies.whenObjectAdded {
-            configureJavaToolchainConvention()
-        }
-        project.afterEvaluate {
-            configureJavaToolchainConvention()
-        }
+        // The request provider has no value until a platform is declared and does not resolve the IDE artifacts.
+        // Wire it once: reading compile targets or outgoing attributes can finalize the toolchain during configuration,
+        // so dependency callbacks and afterEvaluate must not reapply its convention.
+        javaExtension.toolchain.languageVersion.convention(intellijPlatformJavaLanguageVersion)
 
         val requestedJavaLanguageVersion = javaExtension.toolchain.languageVersion.orElse(intellijPlatformJavaLanguageVersion)
 
         // The target IntelliJ Platform Java version is applied only as the Java toolchain language-version
-        // convention (see `configureJavaToolchainConvention` above). We intentionally do NOT set an
+        // convention above. We intentionally do NOT set an
         // `options.release` convention here: doing so used to override any `sourceCompatibility`/
         // `targetCompatibility` the user configured (via the `java {}` extension or directly on the
-        // `JavaCompile` tasks), because javac prefers `--release` over `-source`/`-target`. As a result the
+        // `JavaCompile` tasks), because Gradle emits `--release` instead of `-source`/`-target` when it is set. As a result the
         // published `org.gradle.jvm.version` variant attribute (see IntelliJPlatformModulePlugin, which reads
         // `options.release ?: targetCompatibility`) advertised the platform version instead of the requested
         // one. By leaving `options.release` unset, Gradle natively derives `sourceCompatibility`/

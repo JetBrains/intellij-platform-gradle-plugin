@@ -29,7 +29,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         buildFile overwrite buildScript("org.jetbrains.intellij.platform")
 
         build(inspectTask) {
-            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchain=$expectedMajor")
             assertContains(output, "javaToolchainAfterEvaluate=$expectedMajor")
             // The IntelliJ Platform Java version is applied only through the toolchain, so `options.release`
             // stays unset and Gradle derives source/target compatibility from the toolchain.
@@ -46,7 +46,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         buildFile overwrite buildScript("org.jetbrains.intellij.platform.module")
 
         build(inspectTask) {
-            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchain=$expectedMajor")
             assertContains(output, "javaToolchainAfterEvaluate=$expectedMajor")
             assertContains(output, "compileJava.release=null")
             assertContains(output, "compileJava.sourceCompatibility=$expectedMajor")
@@ -71,7 +71,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         )
 
         build(inspectTask) {
-            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchain=$expectedMajor")
             assertContains(output, "javaToolchainAfterEvaluate=$expectedMajor")
             assertContains(output, "compileJava.release=null")
             assertContains(output, "compileJava.sourceCompatibility=$expectedMajor")
@@ -103,7 +103,7 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         )
 
         build(inspectTask) {
-            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchain=$expectedMajor")
             assertContains(output, "javaToolchainAfterEvaluate=$expectedMajor")
             assertContains(output, "compileJava.release=null")
             assertContains(output, "compileJava.sourceCompatibility=$expectedMajor")
@@ -126,13 +126,38 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
 
         build(inspectTask) {
             assertContains(output, "early.targetCompatibility=")
-            assertContains(output, "javaToolchain=null")
+            assertContains(output, "javaToolchain=$expectedMajor")
             assertContains(output, "javaToolchainAfterEvaluate=$expectedMajor")
             assertContains(output, "compileJava.release=null")
             assertContains(output, "compileJava.sourceCompatibility=$expectedMajor")
             assertContains(output, "compileJava.targetCompatibility=$expectedMajor")
             assertContains(output, "compileKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
             assertContains(output, "compileTestKotlin.jvmTarget=${expectedJvmTarget(expectedPlatformJavaVersion)}")
+        }
+    }
+
+    @Test
+    fun `querying outgoing JVM attributes during configuration does not resolve IntelliJ Platform dependency`() {
+        buildFile overwrite buildScript(
+            pluginId = "org.jetbrains.intellij.platform.module",
+            additionalConfiguration =
+                """
+                configurations.named("intellijPlatformDependency") {
+                    incoming.beforeResolve {
+                        throw org.gradle.api.GradleException("intellijPlatformDependency was resolved during configuration")
+                    }
+                }
+                listOf("intellijPlatformComposedJar", "intellijPlatformDistribution").forEach { name ->
+                    println(name + ".jvmVersion=" + configurations.getByName(name).attributes
+                        .getAttribute(org.gradle.api.attributes.java.TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE))
+                }
+                """.trimIndent(),
+        )
+
+        build(inspectTask) {
+            assertContains(output, "intellijPlatformComposedJar.jvmVersion=$expectedMajor")
+            assertContains(output, "intellijPlatformDistribution.jvmVersion=$expectedMajor")
+            assertContains(output, "javaToolchainAfterEvaluate=$expectedMajor")
         }
     }
 
@@ -337,36 +362,36 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
         import org.gradle.api.plugins.JavaPluginExtension
         import org.gradle.api.tasks.compile.JavaCompile
         import org.gradle.kotlin.dsl.the
-        
+
         import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
-        
+
         version = "1.0.0"
-        
+
         plugins {
             id("org.jetbrains.kotlin.jvm") version "$kotlinPluginVersion"
             id("$pluginId")
         }
 
         $preDependenciesConfiguration
-        
+
         repositories {
             mavenCentral()
-        
+
             intellijPlatform {
                 defaultRepositories()
             }
         }
-        
+
         dependencies {
             intellijPlatform {
                 $dependenciesConfiguration
             }
         }
-        
+
         intellijPlatform {
             buildSearchableOptions = false
             instrumentCode = false
-            
+
             caching {
                 ides {
                     enabled = true
@@ -374,26 +399,25 @@ class IntelliJPlatformJavaToolchainConventionTest : IntelliJPluginTestBase() {
                 }
             }
         }
-        
+
         $additionalConfiguration
-        
+
         val java = the<JavaPluginExtension>()
         val compileJava = tasks.named<JavaCompile>("compileJava")
         val compileJavaRelease = compileJava.flatMap { it.options.release }
         val compileKotlinJvmTarget = tasks.named<KotlinJvmCompile>("compileKotlin").flatMap { it.compilerOptions.jvmTarget }
         val compileTestKotlinJvmTarget = tasks.named<KotlinJvmCompile>("compileTestKotlin").flatMap { it.compilerOptions.jvmTarget }
-        
+
         println("javaToolchain=" + java.toolchain.languageVersion.orNull)
         println("compileJava.release=" + compileJavaRelease.orNull)
+        // Read these during build-script evaluation: tooling and other plugins can query them before afterEvaluate.
+        println("compileJava.sourceCompatibility=" + compileJava.get().sourceCompatibility)
+        println("compileJava.targetCompatibility=" + compileJava.get().targetCompatibility)
         println("compileKotlin.jvmTarget=" + compileKotlinJvmTarget.orNull)
         println("compileTestKotlin.jvmTarget=" + compileTestKotlinJvmTarget.orNull)
-        
+
         gradle.projectsEvaluated {
             println("javaToolchainAfterEvaluate=" + java.toolchain.languageVersion.orNull)
-            // Source/target compatibility conventions are wired through the toolchain, which is only applied
-            // after evaluation, so read them here rather than during configuration.
-            println("compileJava.sourceCompatibility=" + compileJava.get().sourceCompatibility)
-            println("compileJava.targetCompatibility=" + compileJava.get().targetCompatibility)
         }
         """.trimIndent()
 
