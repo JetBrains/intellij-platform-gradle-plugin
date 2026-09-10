@@ -401,11 +401,19 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     },
                 )
                 kotlinVersion.convention(kotlinPluginVersion)
-                kotlinStdlibDefaultDependency.convention(
-                    project.providers
-                        .gradleProperty("kotlin.stdlib.default.dependency")
-                        .map { it.toBoolean() },
-                )
+
+                // The `kotlin.stdlib.default.dependency` property must be resolved the same way the Kotlin Gradle
+                // plugin resolves it — honoring the value defined in the current (sub)project's `gradle.properties`
+                // file and its extra properties, not only the root project.
+                // `ProviderFactory.gradleProperty` reads only root/CLI/system-level Gradle properties
+                // (https://github.com/gradle/gradle/issues/23572, https://github.com/gradle/gradle/issues/24491),
+                // so a value set in a subproject's `gradle.properties` (or via the settings plugin's extra property)
+                // would be missed here, resulting in a false-positive "Kotlin stdlib dependency conflict" warning (#1789).
+                // Reading it eagerly with `Project.findProperty` at configuration time keeps this configuration-cache safe.
+                project.findProperty("kotlin.stdlib.default.dependency")
+                    ?.toString()
+                    ?.toBoolean()
+                    ?.let { kotlinStdlibDefaultDependency.convention(it) }
             }
 
             inputs.properties(

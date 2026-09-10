@@ -233,6 +233,107 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `do not report Kotlin stdlib bundling when disabled in subproject gradle properties`() {
+        val message = "Kotlin stdlib dependency conflict"
+
+        // The property must not be defined at the root level, so only the subproject can control it.
+        gradleProperties overwrite ""
+
+        settingsFile write //language=kotlin
+                """
+                include("subproject")
+                """.trimIndent()
+
+        dir.resolve("subproject/build.gradle.kts") write //language=kotlin
+                """
+                version = "1.0.0"
+
+                plugins {
+                    id("org.jetbrains.kotlin.jvm")
+                    id("org.jetbrains.intellij.platform")
+                }
+
+                kotlin {
+                    jvmToolchain(21)
+                }
+
+                repositories {
+                    mavenCentral()
+
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                    }
+                }
+
+                intellijPlatform {
+                    buildSearchableOptions = false
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        dir.resolve("subproject/src/main/resources/META-INF/plugin.xml") write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
+
+        val subprojectTask = ":subproject:${Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION}"
+
+        // The property is not defined anywhere, so the warning is reported.
+        build(subprojectTask) {
+            assertContains(message, output)
+        }
+
+        // The subproject's own gradle.properties disables the default Kotlin stdlib dependency,
+        // which used to be missed because ProviderFactory.gradleProperty reads only root-level properties (#1789).
+        dir.resolve("subproject/gradle.properties") write //language=properties
+                """
+                kotlin.stdlib.default.dependency = false
+                """.trimIndent()
+
+        build(CLEAN, subprojectTask) {
+            assertNotContains(message, output)
+        }
+    }
+
+    @Test
+    fun `do not report Kotlin stdlib bundling when disabled via extra properties`() {
+        val message = "Kotlin stdlib dependency conflict"
+
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="212" until-build='212.*' />
+                </idea-plugin>
+                """.trimIndent()
+
+        // The property is not defined in gradle.properties, only as an extra project property,
+        // matching how the IntelliJ Platform settings plugin provides its default (#1789).
+        gradleProperties overwrite ""
+
+        buildFile write //language=kotlin
+                """
+                extensions.extraProperties.set("kotlin.stdlib.default.dependency", "false")
+                """.trimIndent()
+
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            assertNotContains(message, output)
+        }
+    }
+
+    @Test
     fun `report kotlinx-coroutines dependency`() {
         buildFile write //language=kotlin
                 """

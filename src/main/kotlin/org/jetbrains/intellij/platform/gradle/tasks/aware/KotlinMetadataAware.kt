@@ -49,7 +49,9 @@ interface KotlinMetadataAware : IntelliJPlatformAware {
     val kotlinJvmTarget: Property<String>
 
     /**
-     * `kotlin.stdlib.default.dependency` property value defined in the `gradle.properties` file.
+     * `kotlin.stdlib.default.dependency` property value resolved the same way as by the Kotlin Gradle plugin,
+     * i.e. honoring the value defined in the current (sub)project's `gradle.properties` file and its extra
+     * properties, not only the root project.
      */
     @get:Internal
     val kotlinStdlibDefaultDependency: Property<Boolean>
