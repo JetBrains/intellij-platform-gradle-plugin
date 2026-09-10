@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.plugins.settings
 
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -47,9 +48,5 @@ class IntelliJPlatformSettingsPluginTest : IntelliJPlatformTestBase() {
         build("dependencies", args = listOf("--configuration", "runtimeClasspath")) {
             assertContains("org.jetbrains.kotlin:kotlin-stdlib", output)
         }
-    }
-
-    private companion object {
-        const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY = "kotlin.stdlib.default.dependency"
     }
 }

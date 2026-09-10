@@ -17,6 +17,7 @@ object Constants {
     const val LAYOUT_INDEX = "layoutIndex"
     const val TOOLBOX_IGNORE = ".toolbox-ignore"
     const val IDEA_CORE = "com.intellij"
+    const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY = "kotlin.stdlib.default.dependency"
 
     object Plugin {
         const val ID = "org.jetbrains.intellij.platform"

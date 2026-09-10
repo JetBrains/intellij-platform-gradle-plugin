@@ -19,6 +19,7 @@ import org.gradle.kotlin.dsl.*
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
+import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -401,11 +402,11 @@ internal fun <T : Task> Project.preconfigureTask(task: T) {
                     },
                 )
                 kotlinVersion.convention(kotlinPluginVersion)
-                kotlinStdlibDefaultDependency.convention(
-                    project.providers
-                        .gradleProperty("kotlin.stdlib.default.dependency")
-                        .map { it.toBoolean() },
-                )
+                // ProviderFactory.gradleProperty ignores values from subproject gradle.properties files:
+                // https://github.com/gradle/gradle/issues/23572
+                project.findProperty(KOTLIN_STDLIB_DEFAULT_DEPENDENCY)?.let {
+                    kotlinStdlibDefaultDependency.convention(it.toString().toBoolean())
+                }
             }
 
             inputs.properties(

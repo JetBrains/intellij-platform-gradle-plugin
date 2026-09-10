@@ -126,7 +126,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
 
         gradleProperties write //language=properties
                 buildList {
-                    add("kotlin.stdlib.default.dependency = false")
+                    add("${Constants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY} = false")
                     add("org.jetbrains.intellij.platform.selfUpdateCheck = false")
 
                     if (enableIntelliJPlatformCache) {
