@@ -35,8 +35,12 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDepende
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.resolvers.path.findEntry
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
+import java.nio.channels.FileChannel
+import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import java.nio.file.StandardOpenOption
 import java.util.*
 import kotlin.io.path.*
 
@@ -171,6 +175,48 @@ internal fun Path.writeTextIfChanged(text: String): Boolean {
 
     writeText(text)
     return true
+}
+
+/**
+ * Atomically and cross-process-safely writes [text] to this file if it differs from the current content.
+ *
+ * The whole operation is guarded with a [FileChannel.lock] acquired on a sibling `.lock` file, so that
+ * separate Gradle worker processes (e.g., when the local platform artifacts cache is shared across projects
+ * and IntelliJ's parallel Gradle model fetching is enabled) serialize their writes instead of racing.
+ * The content is first written to a temporary file in the same directory and then moved onto the target with
+ * [StandardCopyOption.ATOMIC_MOVE] (falling back to a plain replace when the filesystem doesn't support atomic
+ * moves), so that a concurrent reader never observes a truncated or half-written file.
+ *
+ * Callers are expected to still hold a JVM-local lock as a fast path, as a [FileChannel] lock is held per JVM
+ * and cannot be acquired twice for the same region from within the same process.
+ *
+ * @return `true` if the file was written, `false` if the content was already up to date.
+ */
+internal fun Path.writeTextAtomicallyIfChanged(text: String): Boolean {
+    parent?.createDirectories()
+
+    val lockFile = resolveSibling("$name.lock")
+    return FileChannel.open(lockFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE).use { channel ->
+        channel.lock().use {
+            if (exists() && readText() == text) {
+                return@use false
+            }
+
+            val temporaryFile = createTempFile(parent, "$name.", ".tmp")
+            try {
+                temporaryFile.writeText(text)
+                try {
+                    Files.move(temporaryFile, this, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+                } catch (_: AtomicMoveNotSupportedException) {
+                    Files.move(temporaryFile, this, StandardCopyOption.REPLACE_EXISTING)
+                }
+            } finally {
+                temporaryFile.deleteIfExists()
+            }
+
+            true
+        }
+    }
 }
 
 /**
