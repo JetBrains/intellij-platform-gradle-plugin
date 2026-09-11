@@ -40,8 +40,6 @@ abstract class BuildPluginVariantsTask : DefaultTask() {
                     project.tasks.named<PreparePluginVariantTask>(Tasks.PREPARE_PLUGIN_VARIANT + suffix)
 
                 project.tasks.register<BuildPluginTask>(Tasks.BUILD_PLUGIN_VARIANTS + suffix) {
-                    // Hide the per-target native variant tasks from the task list; the umbrella
-                    // `buildPluginVariants` task (registered below) stays visible in the base group.
                     group = null
 
                     archiveClassifier.convention("$os-$arch")
