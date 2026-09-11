@@ -1372,8 +1372,11 @@ class IntelliJPlatformDependenciesHelper(
         val targetDirectory = extractDirectory.resolve("${artifactPath.nameWithoutExtension}-$fingerprint")
 
         LOCAL_PLUGIN_EXTRACTION_LOCK.withLock {
-            // Do not guard this with a marker-file existence check. Gradle would record the missing marker as a
-            // configuration-cache input, then invalidate the freshly stored entry after extraction creates it.
+            // The fingerprint above encodes the archive's content identity, so an already-materialized target
+            // directory holds identical content. ExtractorService.extract() skips re-extraction in that case
+            // (reusing the existing directory), which avoids overwriting JARs that Windows may still keep locked
+            // from a previously-resolved classpath. The reuse check lives inside the BuildService so it is not
+            // recorded as a configuration-cache input.
             targetDirectory.createDirectories()
             extractorServiceProvider.get().extract(artifactPath, targetDirectory)
         }

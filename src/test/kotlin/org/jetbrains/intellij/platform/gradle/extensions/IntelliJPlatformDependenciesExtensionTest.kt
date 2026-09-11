@@ -130,8 +130,11 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
         build("verifyLocalPluginApiSources")
 
         // Keep the generated Ivy descriptor but remove the extracted ZIP to exercise extraction while the
-        // configuration-cache entry is stored. A marker-file check here would invalidate the next build.
-        dir.resolve(".intellijPlatform/extracted-plugins").toFile().deleteRecursively()
+        // configuration-cache entry is stored. Delete tolerantly: the classpath resolved above may still keep the
+        // extracted JARs locked in the Gradle daemon (memory-mapped on Windows), so a fire-and-forget delete would
+        // leave locked files behind. ExtractorService now skips re-extraction over an already-materialized directory,
+        // so any file that stays locked is harmless rather than overwritten (which used to hang on Windows).
+        deleteRecursivelyTolerating(dir.resolve(".intellijPlatform/extracted-plugins"))
         val configurationCacheArguments = listOf("--configuration", "compileClasspath")
         buildWithConfigurationCache("dependencies", args = configurationCacheArguments)
         buildWithConfigurationCache("dependencies", args = configurationCacheArguments) {
@@ -442,6 +445,22 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
             zip.putNextEntry(ZipEntry("plugin-a/lib/src/plugin-a-api-sources.jar"))
             zip.write(sourceJar)
             zip.closeEntry()
+        }
+    }
+
+    /**
+     * Deletes [path] recursively, tolerating files that cannot be removed yet. The Gradle daemon may still keep the
+     * just-resolved classpath JARs open (memory-mapped and therefore locked on Windows), so a single fire-and-forget
+     * delete would silently leave locked files behind. Retrying a few times gives the daemon a chance to release the
+     * handles; whatever remains locked afterwards is left in place instead of failing the test.
+     */
+    private fun deleteRecursivelyTolerating(path: Path, attempts: Int = 10) {
+        val file = path.toFile()
+        repeat(attempts) {
+            if (!file.exists() || file.deleteRecursively()) {
+                return
+            }
+            Thread.sleep(200)
         }
     }
 
