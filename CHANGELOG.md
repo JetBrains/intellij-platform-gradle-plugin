@@ -36,6 +36,7 @@
 - Regression. Include unified IntelliJ IDEA 2025.3+ releases in the default Plugin Verifier IDE selection when targeting IntelliJ IDEA Community.
 - Change duplicates strategy in PrepareSandboxTask to `WARN` JetBrains/intellij-platform-gradle-plugin#2191
 - Restore GrammarKit generator tasks as source-set directories for exclusively owned output roots while preserving precise output tracking for shared roots JetBrains/intellij-platform-gradle-plugin#2186
+- Resolve the `testFramework(...)` dependency declared inside a custom `intellijPlatformTesting.testIde` block against that task's own target IntelliJ Platform build number instead of the base project platform, so a custom task targeting a different `type`, `version`, or `localPath` no longer resolves the test framework for the wrong build JetBrains/intellij-platform-gradle-plugin#1993
 - Fix `verifyPluginSignature` failing with `Invalid argument: -----BEGIN CERTIFICATE-----` when the certificate chain is provided as content, such as via the `CERTIFICATE_CHAIN` environment variable. The verify task passed the raw certificate content as an extra CLI argument on top of the `-cert` temporary file path; it now passes only the file path, matching the `certificateChainFile` case JetBrains/intellij-platform-gradle-plugin#2008
 
 ## [2.18.1] - 2026-07-10

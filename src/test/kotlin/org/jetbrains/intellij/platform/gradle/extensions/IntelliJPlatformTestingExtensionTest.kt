@@ -302,4 +302,75 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
             assertNotContains("localIde:AI:AI-243.12345.67", output)
         }
     }
+
+    @Test
+    fun `custom testIde task resolves testFramework against its own target platform build number`() {
+        val baseIdePath = dir.resolve("base-ide")
+        baseIdePath.resolve("product-info.json") write //language=json
+                """
+                {
+                    "name": "IntelliJ IDEA",
+                    "version": "2024.1",
+                    "buildNumber": "241.11111.11",
+                    "productCode": "IC"
+                }
+                """.trimIndent()
+
+        val targetIdePath = dir.resolve("target-ide")
+        targetIdePath.resolve("product-info.json") write //language=json
+                """
+                {
+                    "name": "IntelliJ IDEA",
+                    "version": "2025.1",
+                    "buildNumber": "251.22222.22",
+                    "productCode": "IC"
+                }
+                """.trimIndent()
+
+        buildFile overwrite //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform")
+                }
+
+                repositories {
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        local("${baseIdePath.invariantSeparatorsPathString}")
+                    }
+                }
+
+                intellijPlatform {
+                    buildSearchableOptions = false
+                    instrumentCode = false
+
+                    caching {
+                        ides {
+                            enabled = false
+                        }
+                    }
+                }
+
+                val customTest by intellijPlatformTesting.testIde.registering {
+                    localPath = file("${targetIdePath.invariantSeparatorsPathString}")
+                    testFramework(org.jetbrains.intellij.platform.gradle.TestFrameworkType.Platform)
+
+                    task {
+                        enabled = false
+                    }
+                }
+                """.trimIndent()
+
+        build("dependencies", "--configuration", "intellijPlatformTestDependencies_customTest") {
+            // The test-framework dependency must resolve against the custom task's own target platform (251), not the base (241).
+            assertContains("com.jetbrains.intellij.platform:test-framework", output)
+            assertContains("251.22222.22", output)
+            assertNotContains("241.11111.11", output)
+        }
+    }
 }

@@ -861,7 +861,7 @@ class IntelliJPlatformDependenciesHelper(
 
                 val buildNumber = platformPath.productInfo().buildNumber.toVersion()
                 type.coordinatesFor(buildNumber).map {
-                    createPlatformDependency(it, version, platformPath)
+                    createPlatformDependency(it, version, platformPath, intellijPlatformConfigurationName)
                 }
             }
         }.onEach(action)
@@ -891,7 +891,7 @@ class IntelliJPlatformDependenciesHelper(
         val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
         requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
 
-        createPlatformDependency(coordinates, version, platformPath).apply(action)
+        createPlatformDependency(coordinates, version, platformPath, intellijPlatformConfigurationName).apply(action)
     }.cached())
 
     /**
@@ -1701,12 +1701,14 @@ class IntelliJPlatformDependenciesHelper(
      * @param coordinates Dependency coordinates.
      * @param version Dependency version.
      * @param platformPath The path to the current IntelliJ Platform.
+     * @param intellijPlatformConfigurationName The name of the IntelliJ Platform configuration that holds information about the current IntelliJ Platform instance.
      */
     private fun createPlatformDependency(
         coordinates: Coordinates,
         version: String,
         platformPath: Path,
-    ) = createDependency(coordinates, version).apply {
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+    ) = createDependency(coordinates, version, intellijPlatformConfigurationName = intellijPlatformConfigurationName).apply {
         moduleDescriptorCoordinates(platformPath).forEach {
             exclude(it.groupId, it.artifactId)
         }

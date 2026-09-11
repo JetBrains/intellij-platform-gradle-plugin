@@ -269,6 +269,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                 }
 
                 testDependenciesConfigurationName.set(customIntellijPlatformTestDependenciesConfiguration.name)
+                intellijPlatformConfigurationName.set(customIntelliJPlatformConfiguration.name)
 
                 val prepareSandboxTask = project.tasks.register<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX.withSuffix) {
                     group = null
@@ -340,6 +341,8 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         abstract val splitModeTarget: Property<SplitModeTarget>
 
         internal val testDependenciesConfigurationName: Property<String> = project.objects.property(String::class.java)
+        internal val intellijPlatformConfigurationName: Property<String> = project.objects.property(String::class.java)
+            .convention(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
 
         init {
             splitModeTarget.conventionFrom(pluginInstallationTarget)
@@ -369,6 +372,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
             type = type,
             versionProvider = dependenciesHelper.provider { version },
             configurationName = testDependenciesConfigurationName.get(),
+            intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
         )
 
         /**
@@ -390,6 +394,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
             type = type,
             versionProvider = version,
             configurationName = testDependenciesConfigurationName.get(),
+            intellijPlatformConfigurationName = intellijPlatformConfigurationName.get(),
         )
 
         /**
