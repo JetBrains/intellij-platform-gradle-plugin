@@ -13,6 +13,7 @@
 - Add `DumpProductsReleasesTask` to support dumping IntelliJ Platform product releases for Plugin DevKit plugin purposes
 - Print a lifecycle-level `IDE logs: <sandbox>/log/idea.log` line when launching `runIde`, `runIdeBackend`, `runIdeFrontend`, and `runIdeSplitMode` (one line per process, with backend and frontend paths in Split Mode), so the sandbox IDE log path is visible at the default Gradle log level
 - Support `latest` and `Constraints.LATEST_VERSION` as the version of installer-based IntelliJ Platform dependencies and custom testing configurations, resolving the newest release across all channels for the requested platform type JetBrains/intellij-platform-gradle-plugin#1628
+- Add `copyFromProject()` (and the backing `inheritFromProject` flag) to custom `intellijPlatformTesting.testIde`/`runIde` tasks, wiring their bundled plugin/module configurations to extend the project-level `bundledPlugin(...)`/`bundledModule(...)` declarations so they don't have to be repeated. It is opt-in and intended for tasks targeting the same IntelliJ Platform as the project JetBrains/intellij-platform-gradle-plugin#2063
 
 ### Changed
 

@@ -1387,8 +1387,10 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 
 public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformTestingExtension$CommonParameters : org/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependencyConfiguration, org/gradle/api/Buildable, org/gradle/api/Named, org/gradle/api/plugins/ExtensionAware {
 	public fun <init> (Ljava/lang/String;Lorg/gradle/api/Project;Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformDependenciesHelper;Ljava/lang/Class;)V
+	public final fun copyFromProject ()V
 	public fun getBuildDependencies ()Lorg/gradle/api/internal/tasks/DefaultTaskDependency;
 	public synthetic fun getBuildDependencies ()Lorg/gradle/api/tasks/TaskDependency;
+	public final fun getInheritFromProject ()Lorg/gradle/api/provider/Property;
 	public abstract fun getLocalPath ()Lorg/gradle/api/file/DirectoryProperty;
 	public fun getName ()Ljava/lang/String;
 	public abstract fun getPluginInstallationTarget ()Lorg/gradle/api/provider/Property;
