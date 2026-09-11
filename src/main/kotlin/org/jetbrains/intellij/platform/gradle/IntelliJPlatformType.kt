@@ -96,15 +96,15 @@ enum class IntelliJPlatformType(
         maven = Coordinates("com.jetbrains.intellij.phpstorm", "phpstorm"),
         installer = Coordinates("webide", "PhpStorm"),
     ),
-    PyCharm(
-        code = "PY",
-        maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharm"),
-        installer = Coordinates("python", "pycharm"),
-    ),
     PyCharmProfessional(
         code = "PY",
         maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharmPY"),
         installer = Coordinates("python", "pycharm-professional"),
+    ),
+    PyCharm(
+        code = "PY",
+        maven = Coordinates("com.jetbrains.intellij.pycharm", "pycharm"),
+        installer = Coordinates("python", "pycharm"),
     ),
     PyCharmCommunity(
         code = "PC",

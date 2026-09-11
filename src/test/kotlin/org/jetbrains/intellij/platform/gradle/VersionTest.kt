@@ -69,6 +69,47 @@ class VersionTest {
     }
 
     @Test
+    fun `code with version resolves unified IntelliJ IDEA and PyCharm at or after 2025_3`() {
+        // IntelliJ IDEA (IU): unified since 2025.3 (253), IntellijIdeaUltimate before.
+        assertEquals(
+            IntelliJPlatformType.IntellijIdea,
+            IntelliJPlatformType.fromCode("IU", "2025.3"),
+        )
+        assertEquals(
+            IntelliJPlatformType.IntellijIdea,
+            IntelliJPlatformType.fromCode("IU", "2026.2.2"),
+        )
+        assertEquals(
+            IntelliJPlatformType.IntellijIdeaUltimate,
+            IntelliJPlatformType.fromCode("IU", "2025.2"),
+        )
+
+        // PyCharm (PY): unified since 2025.3 (253), PyCharmProfessional before.
+        assertEquals(
+            IntelliJPlatformType.PyCharm,
+            IntelliJPlatformType.fromCode("PY", "2025.3"),
+        )
+        assertEquals(
+            IntelliJPlatformType.PyCharm,
+            IntelliJPlatformType.fromCode("PY", "2026.2.2"),
+        )
+        assertEquals(
+            IntelliJPlatformType.PyCharmProfessional,
+            IntelliJPlatformType.fromCode("PY", "2025.2"),
+        )
+
+        // Build-number notation honors the unified build number (253).
+        assertEquals(
+            IntelliJPlatformType.PyCharm,
+            IntelliJPlatformType.fromCode("PY", "253.12345"),
+        )
+        assertEquals(
+            IntelliJPlatformType.PyCharmProfessional,
+            IntelliJPlatformType.fromCode("PY", "252.12345"),
+        )
+    }
+
+    @Test
     fun `product info minimum Java version overrides build number mapping`() {
         val productInfo = ProductInfo(
             version = "2026.1",
