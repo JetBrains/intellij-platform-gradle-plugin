@@ -113,7 +113,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), ModuleAware
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Initializes the IntelliJ Platform Gradle Plugin"
     }
 

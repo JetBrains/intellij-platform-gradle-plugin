@@ -11,7 +11,6 @@ import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.get
@@ -54,7 +53,7 @@ abstract class JarSearchableOptionsTask : Jar() {
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Creates a Jar file with searchable options to be distributed with the plugin."
 
         includeEmptyDirs = false

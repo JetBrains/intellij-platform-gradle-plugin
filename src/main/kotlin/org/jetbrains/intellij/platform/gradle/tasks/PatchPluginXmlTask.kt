@@ -14,7 +14,6 @@ import org.gradle.kotlin.dsl.getByType
 import org.jdom2.CDATA
 import org.jdom2.Document
 import org.jdom2.Element
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.transformXml
@@ -318,7 +317,7 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Patches plugin.xml file with provided values."
     }
 

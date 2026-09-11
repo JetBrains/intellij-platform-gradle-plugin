@@ -44,7 +44,7 @@ abstract class PrintProductsReleasesTask : DefaultTask(), ProductReleasesService
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = Plugin.Groups.INFO
         description = "Prints the list of binary product releases that match criteria."
     }
 

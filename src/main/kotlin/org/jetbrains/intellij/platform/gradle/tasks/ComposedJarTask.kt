@@ -13,7 +13,6 @@ import org.gradle.kotlin.dsl.support.serviceOf
 import org.gradle.language.base.plugins.LifecycleBasePlugin
 import org.jetbrains.intellij.platform.gradle.Constants.Components
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -37,7 +36,7 @@ import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 abstract class ComposedJarTask : Jar(), ModuleAware {
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Composes a final Jar archive by combining the base jar, and instrumented classes, and declared submodules."
     }
 

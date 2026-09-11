@@ -7,7 +7,6 @@ import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.tasks.CacheableTask
 import org.gradle.jvm.tasks.Jar
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
 
@@ -18,7 +17,7 @@ import org.jetbrains.intellij.platform.gradle.tasks.companion.JarCompanion
 abstract class InstrumentedJarTask : Jar() {
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Creates a Jar file with instrumented classes."
     }
 

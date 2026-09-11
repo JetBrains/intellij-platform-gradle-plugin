@@ -12,7 +12,6 @@ import org.gradle.api.file.ProjectLayout
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
@@ -112,7 +111,7 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Prepares the content used by the jarSearchableOptions task."
     }
 

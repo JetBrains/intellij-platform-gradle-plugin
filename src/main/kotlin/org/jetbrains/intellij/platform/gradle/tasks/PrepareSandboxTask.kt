@@ -20,7 +20,6 @@ import org.gradle.work.DisableCachingByDefault
 import org.jdom2.Document
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.currentVariant
@@ -339,7 +338,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Prepares a sandbox environment with the plugin and its dependencies installed."
         duplicatesStrategy = DuplicatesStrategy.WARN
     }

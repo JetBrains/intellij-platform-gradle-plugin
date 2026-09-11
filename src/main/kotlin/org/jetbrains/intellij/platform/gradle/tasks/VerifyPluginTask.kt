@@ -590,7 +590,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
         }.getOrNull()?.notation ?: "$type-$version"
 
     init {
-        group = Plugin.GROUP_NAME
+        group = Plugin.Groups.VERIFICATION
         description = "Runs the IntelliJ Plugin Verifier CLI tool to check the binary compatibility with specified IDE builds."
 
         mainClass.set("com.jetbrains.pluginverifier.PluginVerifierMain")

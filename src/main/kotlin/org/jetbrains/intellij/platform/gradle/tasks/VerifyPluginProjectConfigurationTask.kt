@@ -337,7 +337,7 @@ abstract class VerifyPluginProjectConfigurationTask : DefaultTask(), IntelliJPla
     private operator fun Version?.compareTo(other: Version?) = other?.let { this?.compareTo(it) } ?: 0
 
     init {
-        group = Plugin.GROUP_NAME
+        group = Plugin.Groups.VERIFICATION
         description = "Validates the plugin project configuration."
     }
 
