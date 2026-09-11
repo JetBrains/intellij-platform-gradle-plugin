@@ -15,7 +15,6 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
-import java.util.*
 import kotlin.io.path.exists
 
 /**
@@ -94,14 +93,6 @@ abstract class VerifyPluginSignatureTask : JavaExec(), SigningAware {
         certificateChain.orNull?.let {
             yield("-cert")
             yield(createTemporaryCertificateChainFile(it).safePathString)
-            log.debug("Using certificate chain passed as content")
-
-            yield(
-                Base64.getDecoder()
-                    .runCatching { decode(it.trim()).let(::String) }
-                    .getOrDefault(it)
-            )
-
             log.debug("Using certificate chain passed as content")
         }
             ?: certificateChainFile.orNull?.let {
