@@ -40,6 +40,8 @@ abstract class BuildPluginVariantsTask : DefaultTask() {
                     project.tasks.named<PreparePluginVariantTask>(Tasks.PREPARE_PLUGIN_VARIANT + suffix)
 
                 project.tasks.register<BuildPluginTask>(Tasks.BUILD_PLUGIN_VARIANTS + suffix) {
+                    group = null
+
                     archiveClassifier.convention("$os-$arch")
 
                     from(preparePluginVariantTaskProvider.flatMap { it.outputDirectory }) {

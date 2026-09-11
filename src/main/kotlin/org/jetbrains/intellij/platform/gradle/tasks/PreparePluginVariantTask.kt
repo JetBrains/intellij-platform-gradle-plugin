@@ -19,7 +19,6 @@ import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.Variant
 import org.jetbrains.intellij.platform.gradle.models.transformXml
@@ -83,7 +82,7 @@ abstract class PreparePluginVariantTask : DefaultTask() {
     abstract val outputDirectory: DirectoryProperty
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Creates an OS- and architecture-specific plugin Jar."
         inputs.property("sinceBuild", sinceBuild.orElse(""))
     }

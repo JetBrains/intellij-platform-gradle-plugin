@@ -8,7 +8,6 @@ import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
@@ -81,7 +80,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Builds the index of UI components (searchable options) for the plugin."
     }
 

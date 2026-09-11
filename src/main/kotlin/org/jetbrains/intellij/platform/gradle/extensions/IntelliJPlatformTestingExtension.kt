@@ -271,7 +271,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                 testDependenciesConfigurationName.set(customIntellijPlatformTestDependenciesConfiguration.name)
 
                 val prepareSandboxTask = project.tasks.register<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX.withSuffix) {
-                    group = Plugin.GROUP_NAME
+                    group = null
 
                     if (T::class == RunIdeTask::class) {
                         includeCurrentNativeVariant()

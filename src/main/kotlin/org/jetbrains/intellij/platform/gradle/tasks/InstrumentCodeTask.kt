@@ -20,7 +20,6 @@ import org.gradle.work.ChangeType
 import org.gradle.work.Incremental
 import org.gradle.work.InputChanges
 import org.jetbrains.intellij.platform.gradle.BuildException
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
@@ -284,7 +283,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Executes the code instrumentation."
     }
 

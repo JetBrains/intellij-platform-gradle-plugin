@@ -97,7 +97,7 @@ abstract class VerifyPluginStructureTask : DefaultTask() {
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = Plugin.Groups.VERIFICATION
         description = "Validates completeness and contents of plugin.xml descriptors as well as plugin archive structure."
     }
 

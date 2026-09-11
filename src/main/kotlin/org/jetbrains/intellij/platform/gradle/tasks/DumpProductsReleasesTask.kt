@@ -10,7 +10,6 @@ import org.gradle.api.tasks.TaskAction
 import org.gradle.api.tasks.UntrackedTask
 import org.gradle.kotlin.dsl.assign
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
-import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease
@@ -51,7 +50,7 @@ abstract class DumpProductsReleasesTask : DefaultTask(), ProductReleasesServiceA
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = null
         description = "Dumps all known IntelliJ Platform product releases to a file for Plugin DevKit plugin purposes."
     }
 

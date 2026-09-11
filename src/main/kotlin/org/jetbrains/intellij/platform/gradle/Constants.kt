@@ -22,6 +22,16 @@ object Constants {
         const val ID = "org.jetbrains.intellij.platform"
         const val NAME = "IntelliJ Platform Gradle Plugin"
         const val GROUP_NAME = "intellij platform"
+
+        /**
+         * Gradle task groups used to organize the plugin tasks in the Gradle tool window.
+         *
+         * See: [JetBrains/intellij-platform-gradle-plugin#1886](https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1886)
+         */
+        internal object Groups {
+            const val VERIFICATION = "intellij platform verification"
+            const val INFO = "intellij platform info"
+        }
     }
 
     object Plugins {

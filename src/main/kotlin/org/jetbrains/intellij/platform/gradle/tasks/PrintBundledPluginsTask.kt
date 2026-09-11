@@ -49,7 +49,7 @@ abstract class PrintBundledPluginsTask : DefaultTask(), IntelliJPlatformVersionA
     }
 
     init {
-        group = Plugin.GROUP_NAME
+        group = Plugin.Groups.INFO
         description = "Prints the list of bundled plugins available within the currently targeted IntelliJ Platform."
     }
 
