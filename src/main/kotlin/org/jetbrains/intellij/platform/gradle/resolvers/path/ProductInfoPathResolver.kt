@@ -9,7 +9,7 @@ private const val PRODUCT_INFO_NAME = "product-info.json"
 
 /**
  * Resolves the path to the `product-info.json` file within the given IDE [Path].
- * This resolver relies on [listDirectoryEntries] instead of using the [exists] due to the Gradle configuration cache issues.
+ * This resolver relies on [kotlin.io.path.listDirectoryEntries] instead of using the [kotlin.io.path.exists] due to the Gradle configuration cache issues.
  */
 class ProductInfoPathResolver(
     private val intellijPlatformDirectory: Path,

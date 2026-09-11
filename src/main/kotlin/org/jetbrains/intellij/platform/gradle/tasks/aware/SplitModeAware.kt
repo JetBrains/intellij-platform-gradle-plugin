@@ -13,6 +13,7 @@ import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.models.ProductInfo
+import org.jetbrains.intellij.platform.gradle.models.validateSupportedVersion
 import org.jetbrains.intellij.platform.gradle.utils.Version
 
 /**
@@ -20,7 +21,7 @@ import org.jetbrains.intellij.platform.gradle.utils.Version
  * is running a frontend part (JetBrains Client) which connects to the backend.
  *
  * This property allows running the IDE with backend and frontend parts running in separate processes.
- * The developed plugin installation target is configured with [pluginInstallationTarget].
+ * The developed plugin installation target is configured with [PluginInstallationTargetAware.pluginInstallationTarget].
  *
  * Split Mode requires the IntelliJ Platform in the version `241.14473` or later.
  */
@@ -35,7 +36,7 @@ interface SplitModeAware : IntelliJPlatformAware, IntelliJPlatformVersionAware, 
     val splitMode: Property<Boolean>
 
     /**
-     * Deprecated alias for [pluginInstallationTarget].
+     * Deprecated alias for [PluginInstallationTargetAware.pluginInstallationTarget].
      *
      * Effective default value: [PluginInstallationTarget.BACKEND]
      */
