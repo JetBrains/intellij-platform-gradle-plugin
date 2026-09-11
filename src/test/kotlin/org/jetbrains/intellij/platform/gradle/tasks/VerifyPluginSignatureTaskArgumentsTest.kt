@@ -6,6 +6,7 @@ import org.gradle.testfixtures.ProjectBuilder
 import java.nio.file.Path
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.test.Test
@@ -53,7 +54,7 @@ class VerifyPluginSignatureTaskArgumentsTest {
 
         val certOptionIndices = arguments.withIndex().filter { it.value == "-cert" }.map { it.index }
         assertEquals(1, certOptionIndices.size, "Expected exactly one '-cert' option, got: $arguments")
-        assertEquals(certificateFile.toString(), arguments[certOptionIndices.single() + 1])
+        assertEquals(certificateFile.invariantSeparatorsPathString, arguments[certOptionIndices.single() + 1])
     }
 
     private fun buildArguments(
