@@ -11,6 +11,7 @@ import kotlin.io.path.pathString
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 
 class GradlePropertiesTest {
@@ -155,5 +156,18 @@ class GradlePropertiesTest {
         val provider = providers.provider { "   " }
 
         assertEquals(emptyList(), provider.get().splitCommaSeparated())
+    }
+
+    @Test
+    fun `layout index cache path resolves under the IDEs cache and not under the per-project cache`() {
+        // Regression for #2199: the IDE layout index must live beside the extracted IDEs (under the
+        // IDEs cache), not directly under the per-project '.intellijPlatform' cache, so that a
+        // workspace-cleaning CI step does not delete it every build.
+        val cachePath = providers.intellijPlatformCachePath(tempDir).get()
+        val idesCachePath = providers.intellijPlatformIdesCachePath(tempDir).get()
+        val layoutIndexPath = providers.intellijPlatformIdeLayoutIndicesCachePath(tempDir).get()
+
+        assertEquals(idesCachePath.resolve(Constants.LAYOUT_INDEX), layoutIndexPath)
+        assertNotEquals(cachePath.resolve(Constants.LAYOUT_INDEX), layoutIndexPath)
     }
 }
