@@ -63,6 +63,11 @@ data class IvyModule(
         @XmlSerialName("org") val organization: String? = null,
         @XmlSerialName("name") val name: String,
         @XmlSerialName("rev") val version: String,
+        // Map the dependency explicitly to the [IVY_DEFAULT_CONFIGURATION] only. Without an explicit configuration
+        // mapping, Ivy defaults to "*->*", which — now that the module also declares the [IVY_SOURCES_CONFIGURATION] —
+        // makes Gradle traverse every transitive edge once per configuration, duplicating bundled module/plugin
+        // dependencies in the resolved graph. The sources configuration never carries transitive dependencies.
+        @XmlSerialName("conf") val conf: String? = IVY_DEFAULT_CONFIGURATION,
         @XmlElement @XmlSerialName("artifact") val artifacts: List<Artifact> = emptyList(),
     ) {
 

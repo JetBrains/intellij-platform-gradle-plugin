@@ -12,6 +12,7 @@ import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.name
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -67,6 +68,22 @@ class IvyModuleTest {
         assertEquals("org.jetbrains.kotlin", result.info?.module)
         assertEquals(24, result.publications.size)
         assertEquals(4, result.dependencies.size)
+    }
+
+    @Test
+    fun `dependencies are mapped only to the default Ivy configuration`() {
+        // The module declares both the "default" and the "sources" configurations. Dependencies must be pinned to the
+        // "default" configuration; otherwise Ivy's implicit "*->*" mapping makes Gradle traverse every transitive edge
+        // once per configuration, duplicating bundled module/plugin dependencies in the resolved graph.
+        // See https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2033.
+        val dependency = IvyModule.Dependency(organization = "bundledModule", name = "intellij.platform.vcs.impl", version = "IU-253.28294.334")
+        assertEquals(IVY_DEFAULT_CONFIGURATION, dependency.conf)
+
+        val encoded = xml.encodeToString(IvyModule.serializer(), IvyModule(dependencies = listOf(dependency)))
+        assertContains(encoded, """conf="$IVY_DEFAULT_CONFIGURATION"""")
+
+        val decoded = xml.decodeFromString<IvyModule>(input)
+        assertTrue(decoded.dependencies.all { it.conf == IVY_DEFAULT_CONFIGURATION })
     }
 
     @OptIn(ExperimentalPathApi::class)
