@@ -10,7 +10,18 @@ data class Coordinates(val groupId: String, val artifactId: String) {
     override fun toString() = "$groupId:$artifactId"
 }
 
-fun Coordinates.resolveLatestVersion(repositoryUrl: String = Locations.MAVEN_REPOSITORY): String? {
+/**
+ * Resolves the latest version of the given [Coordinates] from the `maven-metadata.xml` of [repositoryUrl].
+ *
+ * When [offline] is `true`, no network request is performed (as required by Gradle's `--offline` mode) and `null`
+ * is returned. The [offline] flag must be captured at configuration time from [org.gradle.StartParameter.isOffline]
+ * and passed in explicitly; this function never reads `gradle.startParameter` on its own.
+ */
+fun Coordinates.resolveLatestVersion(repositoryUrl: String = Locations.MAVEN_REPOSITORY, offline: Boolean = false): String? {
+    if (offline) {
+        return null
+    }
+
     val host = repositoryUrl.trimEnd('/')
     val path = toString().replace(':', '/').replace('.', '/')
     val url = URL("$host/$path/maven-metadata.xml")

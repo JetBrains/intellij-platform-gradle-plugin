@@ -597,7 +597,7 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    @Ignore
+    @Ignore("Requires a live online priming pass (BUILD_PLUGIN) to populate the Gradle cache before the offline verification run, and the assertions assume a specific installer coordinate; keep disabled until it can run deterministically.")
     fun `run plugin verifier in offline mode`() {
         writePluginXmlFile()
         writePluginVerifierIde()

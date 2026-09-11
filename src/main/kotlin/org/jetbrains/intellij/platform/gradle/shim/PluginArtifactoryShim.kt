@@ -15,13 +15,24 @@ import org.gradle.kotlin.dsl.getCredentials
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.net.HttpURLConnection
 import java.net.URI
 import java.util.*
 
-class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int) : Shim(repository, port) {
+class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int, private val offline: Boolean = false) : Shim(repository, port) {
+
+    private val log = Logger(javaClass)
 
     private val repositoryListing by lazy {
+        if (offline) {
+            // Gradle's `--offline` does not block localhost, so the shim would otherwise reach out to Marketplace on its
+            // own. In offline mode we skip the network call and report an empty listing, which makes every lookup
+            // resolve to NOT_FOUND. Already-resolved plugins keep being served from Gradle's dependency cache.
+            log.info("Offline mode: skipping repository listing fetch for ${repository.url}")
+            return@lazy emptyList()
+        }
+
         repository.url.toURL().let { url ->
             url.openConnection().run {
                 repository.runCatching {

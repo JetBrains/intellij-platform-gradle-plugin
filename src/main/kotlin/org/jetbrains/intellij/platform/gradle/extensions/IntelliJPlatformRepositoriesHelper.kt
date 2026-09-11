@@ -39,6 +39,8 @@ class IntelliJPlatformRepositoriesHelper(
 
     private val shimManager = gradle.registerClassLoaderScopedBuildService(ShimManagerService::class) {
         parameters.port = providers[GradleProperties.ShimServerPort]
+        // Captured at configuration time; reading `startParameter` from within a BuildService is config-cache-illegal.
+        parameters.offline = gradle.startParameter.isOffline
     }
 
     /**

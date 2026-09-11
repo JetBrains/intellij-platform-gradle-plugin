@@ -52,6 +52,13 @@ abstract class ProductReleasesService @Inject constructor(
          */
         @get:Input
         val cacheDirectory: Property<String>
+
+        /**
+         * Whether Gradle runs in offline mode. Captured at configuration time from
+         * [org.gradle.StartParameter.isOffline] so no consumer reads `gradle.startParameter` from within this service.
+         */
+        @get:Input
+        val offline: Property<Boolean>
     }
 
     private val log = Logger(javaClass)
@@ -159,6 +166,7 @@ abstract class ProductReleasesService @Inject constructor(
         providerFactory.of(ProductReleasesListingValueSource::class) {
             parameters.url = url
             parameters.cacheDirectory = this@ProductReleasesService.parameters.cacheDirectory
+            parameters.offline = this@ProductReleasesService.parameters.offline
         }.orNull
 }
 
@@ -169,6 +177,9 @@ internal fun Gradle.productReleasesService(providers: ProviderFactory, rootProje
             androidStudioUrl = providers[GradleProperties.ProductsReleasesAndroidStudioUrl]
             cacheDirectory =
                 providers.intellijPlatformProductReleasesCachePath(rootProjectDirectory).map { it.safePathString }
+            // Captured at configuration time; reading `startParameter` from within a BuildService/ValueSource is
+            // config-cache-illegal.
+            offline = startParameter.isOffline
         }
     }
 

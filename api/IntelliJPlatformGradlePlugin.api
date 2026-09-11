@@ -1586,8 +1586,8 @@ public final class org/jetbrains/intellij/platform/gradle/models/Coordinates {
 public final class org/jetbrains/intellij/platform/gradle/models/CoordinatesKt {
 	public static final fun getCoroutines ()Ljava/util/Set;
 	public static final fun getKotlinStdlib ()Ljava/util/Set;
-	public static final fun resolveLatestVersion (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;)Ljava/lang/String;
-	public static synthetic fun resolveLatestVersion$default (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;ILjava/lang/Object;)Ljava/lang/String;
+	public static final fun resolveLatestVersion (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;Z)Ljava/lang/String;
+	public static synthetic fun resolveLatestVersion$default (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;ZILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule {
@@ -2744,6 +2744,10 @@ public abstract class org/jetbrains/intellij/platform/gradle/providers/LatestPlu
 	public fun obtain ()Ljava/lang/String;
 }
 
+public abstract interface class org/jetbrains/intellij/platform/gradle/providers/LatestPluginVersionValueSource$Parameters : org/gradle/api/provider/ValueSourceParameters {
+	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/providers/ModuleDescriptorsValueSource : org/gradle/api/provider/ValueSource {
 	public fun <init> ()V
 	public synthetic fun obtain ()Ljava/lang/Object;
@@ -2850,6 +2854,7 @@ public abstract interface class org/jetbrains/intellij/platform/gradle/services/
 	public abstract fun getAndroidStudioUrl ()Lorg/gradle/api/provider/Property;
 	public abstract fun getCacheDirectory ()Lorg/gradle/api/provider/Property;
 	public abstract fun getJetbrainsIdesUrl ()Lorg/gradle/api/provider/Property;
+	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/services/RequestedIntelliJPlatform {
@@ -2895,11 +2900,13 @@ public abstract class org/jetbrains/intellij/platform/gradle/services/ShimManage
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/services/ShimManagerService$Parameters : org/gradle/api/services/BuildServiceParameters {
+	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
 	public abstract fun getPort ()Lorg/gradle/api/provider/Property;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/shim/PluginArtifactoryShim : org/jetbrains/intellij/platform/gradle/shim/Shim {
-	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/artifacts/repositories/PluginArtifactRepository;I)V
+	public fun <init> (Lorg/jetbrains/intellij/platform/gradle/artifacts/repositories/PluginArtifactRepository;IZ)V
+	public synthetic fun <init> (Lorg/jetbrains/intellij/platform/gradle/artifacts/repositories/PluginArtifactRepository;IZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun getRoutingHandler ()Lio/undertow/server/RoutingHandler;
 }
 
