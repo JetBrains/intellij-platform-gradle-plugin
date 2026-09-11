@@ -1674,17 +1674,11 @@ class IntelliJPlatformDependenciesHelper(
         val newIvyModule = block()
         val newIvyModuleContent = xml.encodeToString(newIvyModule)
 
+        // The in-JVM lock is kept as a fast path and to prevent acquiring the cross-process file lock twice from
+        // within the same process. The actual write is atomic and additionally guarded by a cross-process file lock,
+        // so concurrent Gradle worker processes writing into a shared cache never observe a truncated descriptor.
         IVY_MODULE_WRITE_LOCK.withLock {
-            ivyFile.parent.createDirectories()
-
-            val shouldRewrite = when {
-                ivyFile.exists() -> ivyFile.readText() != newIvyModuleContent
-                else -> true
-            }
-
-            if (shouldRewrite) {
-                ivyFile.writeText(newIvyModuleContent)
-            }
+            ivyFile.writeTextAtomicallyIfChanged(newIvyModuleContent)
         }
 
         writtenIvyModules[fileName] = when (artifactPath) {
