@@ -285,7 +285,7 @@ internal fun ProviderFactory.intellijPlatformIdesCachePath(rootProjectDirectory:
  * lifetime and invalidation rules match the source data it describes.
  */
 internal fun ProviderFactory.intellijPlatformIdeLayoutIndicesCachePath(rootProjectDirectory: Path) =
-    intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(LAYOUT_INDEX) }
+    intellijPlatformIdesCachePath(rootProjectDirectory).map { it.resolve(LAYOUT_INDEX) }
 
 /**
  * Directory used to persist raw product release JSON listings.
