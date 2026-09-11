@@ -1370,15 +1370,12 @@ class IntelliJPlatformDependenciesHelper(
             "${artifactPath.safePathString}:${artifactPath.fileSize()}:${artifactPath.getLastModifiedTime()}".toByteArray(),
         )
         val targetDirectory = extractDirectory.resolve("${artifactPath.nameWithoutExtension}-$fingerprint")
-        val extractionMarker = targetDirectory.resolve(".intellij-platform-extracted")
 
         LOCAL_PLUGIN_EXTRACTION_LOCK.withLock {
-            if (extractionMarker.notExists()) {
-                targetDirectory.toFile().deleteRecursively()
-                targetDirectory.createDirectories()
-                extractorServiceProvider.get().extract(artifactPath, targetDirectory)
-                extractionMarker.createFile()
-            }
+            // Do not guard this with a marker-file existence check. Gradle would record the missing marker as a
+            // configuration-cache input, then invalidate the freshly stored entry after extraction creates it.
+            targetDirectory.createDirectories()
+            extractorServiceProvider.get().extract(artifactPath, targetDirectory)
         }
 
         return targetDirectory.resolvePluginPath()

@@ -128,10 +128,15 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         build("verifyLocalPluginApiSources")
-        buildWithConfigurationCache(
-            "dependencies",
-            args = listOf("--configuration", "compileClasspath"),
-        )
+
+        // Keep the generated Ivy descriptor but remove the extracted ZIP to exercise extraction while the
+        // configuration-cache entry is stored. A marker-file check here would invalidate the next build.
+        dir.resolve(".intellijPlatform/extracted-plugins").toFile().deleteRecursively()
+        val configurationCacheArguments = listOf("--configuration", "compileClasspath")
+        buildWithConfigurationCache("dependencies", args = configurationCacheArguments)
+        buildWithConfigurationCache("dependencies", args = configurationCacheArguments) {
+            assertContains("Reusing configuration cache.", output)
+        }
     }
 
     @Test
