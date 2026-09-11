@@ -8,11 +8,8 @@ import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.artifacts.MutableVariantFilesMetadata
 import org.gradle.api.artifacts.dsl.DependencyHandler
-import org.gradle.api.attributes.Category
-import org.gradle.api.attributes.DocsType
 import org.gradle.api.initialization.Settings
 import org.gradle.api.initialization.resolve.RulesMode
-import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.all
@@ -20,7 +17,8 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.extensions.parseIdeNotation
 import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
-import org.jetbrains.intellij.platform.gradle.models.IVY_SOURCE_ARTIFACT_TYPE
+import org.jetbrains.intellij.platform.gradle.models.IVY_DEFAULT_CONFIGURATION
+import org.jetbrains.intellij.platform.gradle.models.IVY_SOURCES_CONFIGURATION
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import org.jetbrains.intellij.platform.gradle.models.IvyModulePublicationsOnly
 import org.jetbrains.intellij.platform.gradle.models.productInfo
@@ -93,7 +91,6 @@ internal fun decodeIvyModulePublications(input: String) =
 abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
     private val absNormalizedPlatformPath: String,
     private val absNormalizedIvyPath: String,
-    private val objects: ObjectFactory,
 ) : ComponentMetadataRule {
 
     private val log = Logger(javaClass)
@@ -125,35 +122,23 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
             return
         }
 
-        /**
-         * Source JARs bundled in the plugin's `lib/src` directory are declared as [IVY_SOURCE_ARTIFACT_TYPE] publications.
-         * They must be surfaced only as sources and never end up on the compile/runtime classpath, so they're kept out of
-         * the regular variants and exposed through a dedicated sources variant instead.
-         *
-         * @see org.jetbrains.intellij.platform.gradle.models.toIvySourceArtifacts
-         */
-        val (sourcePublications, classpathPublications) = publications.partition { it.type == IVY_SOURCE_ARTIFACT_TYPE }
+        val publicationsByConfiguration = publications.groupBy { it.conf }
 
-        context.details.allVariants {
+        context.details.withVariant(IVY_DEFAULT_CONFIGURATION) {
             withFiles {
                 // Remove all existing artifacts because they have relative paths and won't be found.
                 removeAllFiles()
 
                 // Add new files (i.e., artifacts) with the correct absolute path.
-                classpathPublications.forEach { artifact -> addArtifactFile(artifact) }
+                publicationsByConfiguration[IVY_DEFAULT_CONFIGURATION].orEmpty().forEach { artifact -> addArtifactFile(artifact) }
             }
         }
 
-        // Expose bundled `lib/src` source JARs as a sources variant so the IDE can attach them automatically
-        // to the plugin library, without polluting the compile/runtime classpath.
-        if (sourcePublications.isNotEmpty()) {
-            context.details.addVariant(SOURCES_VARIANT_NAME) {
-                attributes {
-                    attribute(Category.CATEGORY_ATTRIBUTE, objects.named(Category::class.java, Category.DOCUMENTATION))
-                    attribute(DocsType.DOCS_TYPE_ATTRIBUTE, objects.named(DocsType::class.java, DocsType.SOURCES))
-                }
+        if (publicationsByConfiguration[IVY_SOURCES_CONFIGURATION].orEmpty().isNotEmpty()) {
+            context.details.withVariant(IVY_SOURCES_CONFIGURATION) {
                 withFiles {
-                    sourcePublications.forEach { artifact -> addArtifactFile(artifact) }
+                    removeAllFiles()
+                    publicationsByConfiguration[IVY_SOURCES_CONFIGURATION].orEmpty().forEach { artifact -> addArtifactFile(artifact) }
                 }
             }
         }
@@ -194,11 +179,6 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
     }
 
     companion object {
-        /**
-         * Name of the derived variant exposing the plugin's bundled `lib/src` source JARs.
-         */
-        private const val SOURCES_VARIANT_NAME = "intellijPlatformSources"
-
         private val ivyPublicationsCache = ConcurrentHashMap<String, List<IvyModule.Artifact>>()
 
         internal fun register(

@@ -156,6 +156,7 @@ class IntelliJPlatformDependenciesHelper(
 
     private companion object {
         val IVY_MODULE_WRITE_LOCK = ReentrantLock()
+        val LOCAL_PLUGIN_EXTRACTION_LOCK = ReentrantLock()
     }
 
     /**
@@ -1324,11 +1325,8 @@ class IntelliJPlatformDependenciesHelper(
             .get()
             .resolve("extracted-plugins")
             .createDirectories()
+        val pluginPath = resolveLocalPluginPath(artifactPath, extractDirectory)
         val (pluginVersion, pluginName) = withIdePluginManager(extractDirectory) { pluginManager ->
-            val pluginPath = when {
-                artifactPath.isDirectory() -> artifactPath.resolvePluginPath()
-                else -> artifactPath
-            }
             val plugin = pluginManager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
 
             plugin.pluginVersion to (plugin.pluginId ?: artifactPath.name)
@@ -1348,11 +1346,42 @@ class IntelliJPlatformDependenciesHelper(
                     module = name,
                     revision = version,
                 ),
-                publications = listOf(artifactPath.toAbsolutePathIvyArtifact()),
+                publications = listOf(artifactPath.toAbsolutePathIvyArtifact()) +
+                        pluginPath.toIvySourceArtifacts(metadataRulesModeProvider),
             )
         }
 
         return dependencyFactory.create(group, name, version)
+    }
+
+    /**
+     * Resolves the plugin directory used to discover `lib/src` source JARs. Archive contents are kept in the
+     * project cache because Ivy source artifacts must remain available after plugin metadata has been created.
+     */
+    private fun resolveLocalPluginPath(artifactPath: Path, extractDirectory: Path): Path {
+        if (artifactPath.isDirectory()) {
+            return artifactPath.resolvePluginPath()
+        }
+        if (!artifactPath.extension.equals("zip", ignoreCase = true)) {
+            return artifactPath
+        }
+
+        val fingerprint = UUID.nameUUIDFromBytes(
+            "${artifactPath.safePathString}:${artifactPath.fileSize()}:${artifactPath.getLastModifiedTime()}".toByteArray(),
+        )
+        val targetDirectory = extractDirectory.resolve("${artifactPath.nameWithoutExtension}-$fingerprint")
+        val extractionMarker = targetDirectory.resolve(".intellij-platform-extracted")
+
+        LOCAL_PLUGIN_EXTRACTION_LOCK.withLock {
+            if (extractionMarker.notExists()) {
+                targetDirectory.toFile().deleteRecursively()
+                targetDirectory.createDirectories()
+                extractorServiceProvider.get().extract(artifactPath, targetDirectory)
+                extractionMarker.createFile()
+            }
+        }
+
+        return targetDirectory.resolvePluginPath()
     }
 
     /**

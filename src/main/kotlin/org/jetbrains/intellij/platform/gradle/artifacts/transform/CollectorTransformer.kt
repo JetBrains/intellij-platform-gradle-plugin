@@ -107,7 +107,7 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
          * @see <a href="https://plugins.jetbrains.com/docs/intellij/bundling-plugin-openapi-sources.html">Bundling Plugin API Sources</a>
          */
         internal fun collectSourceJars(path: Path): List<Path> {
-            val libSrcPath = path.resolve(Sandbox.Plugin.LIB_SRC)
+            val libSrcPath = path.resolve(Sandbox.Plugin.LIB).resolve("src")
 
             return listOfNotNull(libSrcPath.takeIfExists())
                 .filter { it.isDirectory() }

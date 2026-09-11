@@ -6,6 +6,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.GZIPOutputStream
@@ -17,6 +18,121 @@ import kotlin.test.Ignore
 import kotlin.test.Test
 
 class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
+
+    @Test
+    fun `bundled plugin sources resolve separately from classpath artifacts`() {
+        val platformPath = dir.resolve("fake-platform")
+        val ivyPath = dir.resolve("fake-ivy")
+        writeBundledPluginIvyFixture(platformPath, ivyPath)
+
+        buildFile write //language=kotlin
+                """
+                repositories {
+                    ivy {
+                        name = "Bundled Plugin Sources Test"
+                        ivyPattern("${ivyPath.invariantSeparatorsPathString}/[revision]/[organization]-[module]-[revision].[ext]")
+                        artifactPattern("/[artifact]")
+                        content {
+                            includeModule("bundledPlugin", "plugin-a")
+                        }
+                    }
+                }
+
+                val bundledPluginUnderTest by configurations.creating
+
+                dependencies {
+                    add(bundledPluginUnderTest.name, "bundledPlugin:plugin-a:IC-241.1")
+                    components.all<org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule> {
+                        params(
+                            "${platformPath.invariantSeparatorsPathString}",
+                            "${ivyPath.invariantSeparatorsPathString}",
+                        )
+                    }
+                }
+
+                tasks.register("verifyBundledPluginSources") {
+                    doLast {
+                        val component = bundledPluginUnderTest.incoming.resolutionResult.allComponents
+                            .map { it.id }
+                            .filterIsInstance<org.gradle.api.artifacts.component.ModuleComponentIdentifier>()
+                            .single { it.group == "bundledPlugin" }
+                        val sourceFiles = dependencies.createArtifactResolutionQuery()
+                            .forComponents(component)
+                            .withArtifacts(
+                                org.gradle.jvm.JvmLibrary::class.java,
+                                org.gradle.language.base.artifact.SourcesArtifact::class.java,
+                            )
+                            .execute()
+                            .resolvedComponents
+                            .flatMap { result ->
+                                result.getArtifacts(org.gradle.language.base.artifact.SourcesArtifact::class.java)
+                                    .filterIsInstance<org.gradle.api.artifacts.result.ResolvedArtifactResult>()
+                                    .map { it.file.name }
+                            }
+
+                        check(bundledPluginUnderTest.files.map { it.name } == listOf("plugin-a.jar"))
+                        check(sourceFiles == listOf("plugin-a-api-sources.jar")) {
+                            "Expected only the bundled plugin API source JAR, got: ${'$'}sourceFiles"
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build("verifyBundledPluginSources")
+    }
+
+    @Test
+    fun `local plugin API sources are attached without entering project classpaths`() {
+        val pluginArchive = dir.resolve("plugin-a-1.0.0.zip")
+        writeLocalPluginWithApiSources(pluginArchive)
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        localPlugin(file("${pluginArchive.invariantSeparatorsPathString}"))
+                    }
+                }
+
+                tasks.register("verifyLocalPluginApiSources") {
+                    doLast {
+                        val compileClasspath = configurations.compileClasspath.get()
+                        val localPlugin = compileClasspath.incoming.resolutionResult.allComponents
+                            .map { it.id }
+                            .filterIsInstance<org.gradle.api.artifacts.component.ModuleComponentIdentifier>()
+                            .single { it.group == "localPlugin" }
+                        val sourceFiles = dependencies.createArtifactResolutionQuery()
+                            .forComponents(localPlugin)
+                            .withArtifacts(
+                                org.gradle.jvm.JvmLibrary::class.java,
+                                org.gradle.language.base.artifact.SourcesArtifact::class.java,
+                            )
+                            .execute()
+                            .resolvedComponents
+                            .flatMap { component ->
+                                component.getArtifacts(org.gradle.language.base.artifact.SourcesArtifact::class.java)
+                                    .filterIsInstance<org.gradle.api.artifacts.result.ResolvedArtifactResult>()
+                                    .map { it.file.name }
+                            }
+
+                        check(sourceFiles == listOf("plugin-a-api-sources.jar")) {
+                            "Expected the local plugin API source JAR, got: ${'$'}sourceFiles"
+                        }
+
+                        val projectClasspaths = compileClasspath.files + configurations.testRuntimeClasspath.get().files
+                        check(projectClasspaths.none { it.name == "plugin-a-api-sources.jar" }) {
+                            "Plugin API source JAR leaked onto a project classpath"
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build("verifyLocalPluginApiSources")
+        buildWithConfigurationCache(
+            "dependencies",
+            args = listOf("--configuration", "compileClasspath"),
+        )
+    }
 
     @Test
     @Ignore("When using cache, this warning is not emitted.")
@@ -288,6 +404,75 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
             "tar.gz" -> writeTarGz(path, "product-info.json", productInfo)
             else -> writeZip(path, "product-info.json", productInfo)
         }
+    }
+
+    private fun writeLocalPluginWithApiSources(path: Path) {
+        val pluginXml = //language=xml
+            """
+            <idea-plugin>
+                <id>com.example.plugin-a</id>
+                <name>Plugin A</name>
+                <version>1.0.0</version>
+                <vendor>Test</vendor>
+                <idea-version since-build="241" />
+            </idea-plugin>
+            """.trimIndent().toByteArray()
+        val pluginJar = ByteArrayOutputStream().use { bytes ->
+            ZipOutputStream(bytes).use { zip ->
+                zip.putNextEntry(ZipEntry("META-INF/plugin.xml"))
+                zip.write(pluginXml)
+                zip.closeEntry()
+            }
+            bytes.toByteArray()
+        }
+        val sourceJar = ByteArrayOutputStream().use { bytes ->
+            ZipOutputStream(bytes).use { }
+            bytes.toByteArray()
+        }
+
+        ZipOutputStream(Files.newOutputStream(path)).use { zip ->
+            zip.putNextEntry(ZipEntry("plugin-a/lib/plugin-a.jar"))
+            zip.write(pluginJar)
+            zip.closeEntry()
+            zip.putNextEntry(ZipEntry("plugin-a/lib/src/plugin-a-api-sources.jar"))
+            zip.write(sourceJar)
+            zip.closeEntry()
+        }
+    }
+
+    private fun writeBundledPluginIvyFixture(platformPath: Path, ivyPath: Path) {
+        platformPath.resolve("product-info.json") overwrite //language=json
+                """
+                {
+                    "name": "IntelliJ IDEA Community Edition",
+                    "version": "2024.1",
+                    "buildNumber": "241.1",
+                    "productCode": "IC"
+                }
+                """.trimIndent()
+
+        listOf(
+            platformPath.resolve("plugins/plugin-a/lib/plugin-a.jar"),
+            platformPath.resolve("plugins/plugin-a/lib/src/plugin-a-api-sources.jar"),
+        ).forEach { jar ->
+            jar.parent.createDirectories()
+            ZipOutputStream(Files.newOutputStream(jar)).use { }
+        }
+
+        ivyPath.resolve("IC-241.1/bundledPlugin-plugin-a-IC-241.1.xml") overwrite //language=xml
+                """
+                <ivy-module version="2.0">
+                    <info organisation="bundledPlugin" module="plugin-a" revision="IC-241.1" />
+                    <configurations>
+                        <conf name="default" visibility="public" />
+                        <conf name="sources" visibility="public" />
+                    </configurations>
+                    <publications>
+                        <artifact name="plugin-a" ext="jar" conf="default" url="plugins/plugin-a/lib" />
+                        <artifact name="plugin-a-api-sources" ext="jar" conf="sources" url="plugins/plugin-a/lib/src" />
+                    </publications>
+                </ivy-module>
+                """.trimIndent()
     }
 
     private fun writeZip(path: Path, name: String, content: ByteArray) {

@@ -3,8 +3,18 @@
 package org.jetbrains.intellij.platform.gradle.models
 
 import kotlinx.serialization.decodeFromString
+import org.gradle.api.initialization.resolve.RulesMode
+import org.gradle.testfixtures.ProjectBuilder
+import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.createDirectories
+import kotlin.io.path.createFile
+import kotlin.io.path.createTempDirectory
+import kotlin.io.path.deleteRecursively
+import kotlin.io.path.name
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 
 class IvyModuleTest {
 
@@ -57,5 +67,37 @@ class IvyModuleTest {
         assertEquals("org.jetbrains.kotlin", result.info?.module)
         assertEquals(24, result.publications.size)
         assertEquals(4, result.dependencies.size)
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    @Test
+    fun `plugin source artifacts use the Ivy sources configuration in every rules mode`() {
+        val pluginPath = createTempDirectory("plugin")
+
+        try {
+            pluginPath.resolve("lib/src/plugin-api-sources.jar").apply {
+                parent.createDirectories()
+                createFile()
+            }
+            val project = ProjectBuilder.builder().build()
+
+            val relativeArtifact = pluginPath.toIvySourceArtifacts(
+                project.provider { RulesMode.PREFER_PROJECT },
+                pluginPath.parent,
+            ).single()
+            val absoluteArtifact = pluginPath.toIvySourceArtifacts(
+                project.provider { RulesMode.PREFER_SETTINGS },
+                pluginPath.parent,
+            ).single()
+
+            assertEquals(IVY_SOURCES_CONFIGURATION, relativeArtifact.conf)
+            assertEquals("plugin-api-sources", relativeArtifact.name)
+            assertEquals("${pluginPath.name}/lib/src", relativeArtifact.url)
+            assertEquals(IVY_SOURCES_CONFIGURATION, absoluteArtifact.conf)
+            assertNull(absoluteArtifact.url)
+            assertTrue(absoluteArtifact.name.orEmpty().endsWith("${pluginPath.name}/lib/src/plugin-api-sources.jar"))
+        } finally {
+            pluginPath.deleteRecursively()
+        }
     }
 }

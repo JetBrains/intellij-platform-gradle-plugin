@@ -23,7 +23,10 @@ import kotlin.io.path.isDirectory
 data class IvyModule(
     val version: String = "2.0",
     @XmlElement @XmlSerialName("info") val info: Info? = null,
-    @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration> = listOf(Configuration("default")),
+    @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration> = listOf(
+        Configuration(IVY_DEFAULT_CONFIGURATION),
+        Configuration(IVY_SOURCES_CONFIGURATION),
+    ),
     @XmlElement @XmlChildrenName("artifact") val publications: List<Artifact> = emptyList(),
     @XmlElement @XmlChildrenName("dependency") val dependencies: List<Dependency> = emptyList(),
 ) {
@@ -47,7 +50,7 @@ data class IvyModule(
         val name: String? = null,
         val type: String? = null,
         val ext: String? = null,
-        val conf: String? = "default",
+        val conf: String? = IVY_DEFAULT_CONFIGURATION,
         // Doesn't seem to be supported by Gradle:
         // https://ant.apache.org/ivy/history/2.4.0/ivyfile/artifact.html
         // https://docs.gradle.org/current/javadoc/org/gradle/api/publish/ivy/IvyArtifact.html
@@ -161,31 +164,25 @@ internal fun Path.toIvyArtifacts(metadataRulesModeProvider: Provider<RulesMode>,
         else -> listOf(toAbsolutePathIvyArtifact())
     }
 
-/**
- * The Ivy artifact type used to mark a publication as a plugin source JAR bundled in `lib/src`.
- *
- * Such artifacts are declared in the Ivy descriptor so that [org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule]
- * can route them into a dedicated sources variant instead of the compile/runtime classpath.
- */
-internal const val IVY_SOURCE_ARTIFACT_TYPE = "src"
+/** The Ivy configuration used for regular compile/runtime artifacts. */
+internal const val IVY_DEFAULT_CONFIGURATION = "default"
+
+/** The Ivy configuration recognized by Gradle's `SourcesArtifact` resolution. */
+internal const val IVY_SOURCES_CONFIGURATION = "sources"
 
 /**
  * Creates Ivy artifacts pointing at the plugin public API source JARs bundled in the `lib/src` directory.
  *
- * The resulting artifacts are marked with the [IVY_SOURCE_ARTIFACT_TYPE] type so they can be surfaced only as sources
- * (and never end up on the compile/runtime classpath).
- *
- * Sources are exposed only when [RulesMode.PREFER_PROJECT] is used, because the attachment relies on
- * [org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule], which is registered only in that mode.
+ * The resulting artifacts are published in the Ivy [IVY_SOURCES_CONFIGURATION] configuration so Gradle's
+ * `ArtifactResolutionQuery` can surface them as sources without adding them to compile/runtime classpaths.
  *
  * @see toIvyArtifacts
  * @see CollectorTransformer.collectSourceJars
  */
-internal fun Path.toIvySourceArtifacts(metadataRulesModeProvider: Provider<RulesMode>, basePath: Path) =
-    when (metadataRulesModeProvider.get()) {
-        RulesMode.PREFER_PROJECT -> explodeIntoIvySourceArtifactsRelativeTo(basePath)
-        else -> emptyList()
-    }
+internal fun Path.toIvySourceArtifacts(metadataRulesModeProvider: Provider<RulesMode>, basePath: Path? = null) =
+    explodeIntoIvySourceArtifactsRelativeTo(
+        basePath = basePath.takeIf { metadataRulesModeProvider.get() == RulesMode.PREFER_PROJECT },
+    )
 
 private fun Path.explodeIntoIvySourceArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {
     // The contract is that we're working with absolute normalized paths here.
@@ -199,7 +196,12 @@ private fun Path.explodeIntoIvySourceArtifactsRelativeTo(basePath: Path? = null)
 
     return sourceJars
         .map { it.absolute().normalize() }
-        .map { it.toArtifactRelativeTo(absNormalizedBasePath).copy(type = IVY_SOURCE_ARTIFACT_TYPE) }
+        .map { sourceJar ->
+            when (absNormalizedBasePath) {
+                null -> sourceJar.toAbsolutePathIvyArtifact()
+                else -> sourceJar.toArtifactRelativeTo(absNormalizedBasePath)
+            }.copy(conf = IVY_SOURCES_CONFIGURATION)
+        }
 }
 
 private fun Path.explodeIntoIvyJarsArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {

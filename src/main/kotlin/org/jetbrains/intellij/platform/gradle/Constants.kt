@@ -263,14 +263,6 @@ object Constants {
             const val LIB = "lib"
             const val MODULES = "modules"
             const val LIB_MODULES = "$LIB/$MODULES"
-
-            /**
-             * Directory within a plugin distribution holding its public API source JARs.
-             *
-             * @see <a href="https://plugins.jetbrains.com/docs/intellij/bundling-plugin-openapi-sources.html">Bundling Plugin API Sources</a>
-             */
-            const val SRC = "src"
-            const val LIB_SRC = "$LIB/$SRC"
         }
     }
 
