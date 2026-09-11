@@ -10,6 +10,7 @@ import org.gradle.api.artifacts.Dependency
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.attributes.*
 import org.gradle.api.attributes.java.TargetJvmVersion
+import org.gradle.api.plugins.JavaPlugin
 import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -40,6 +41,28 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
 
     companion object {
         private const val ROOT_PROJECT_PATH = ":"
+
+        /**
+         * Declarable configurations on which a project dependency pointing at another IntelliJ Platform module can be
+         * registered. The [Attributes.COMPOSED_JAR_NAME] request is attached to those project dependencies directly,
+         * rather than to the resolvable compile/test classpaths, so it never reaches arbitrary third-party modules.
+         *
+         * See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1889
+         */
+        private val COMPOSED_JAR_PROJECT_DEPENDENCY_CONFIGURATIONS = setOf(
+            JavaPlugin.API_CONFIGURATION_NAME,
+            JavaPlugin.COMPILE_ONLY_API_CONFIGURATION_NAME,
+            JavaPlugin.COMPILE_ONLY_CONFIGURATION_NAME,
+            JavaPlugin.IMPLEMENTATION_CONFIGURATION_NAME,
+            JavaPlugin.RUNTIME_ONLY_CONFIGURATION_NAME,
+            JavaPlugin.TEST_COMPILE_ONLY_CONFIGURATION_NAME,
+            JavaPlugin.TEST_IMPLEMENTATION_CONFIGURATION_NAME,
+            JavaPlugin.TEST_RUNTIME_ONLY_CONFIGURATION_NAME,
+            "testFixturesApi",
+            "testFixturesImplementation",
+            "testFixturesCompileOnly",
+            "testFixturesRuntimeOnly",
+        )
     }
 
     override fun apply(project: Project) {
@@ -185,27 +208,40 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 description = "IntelliJ Platform plugin composed module",
             ) { isTransitive = false }
 
+            val composedJarLibraryElements = project.objects.named<LibraryElements>(Attributes.COMPOSED_JAR_NAME)
+            val requestComposedJar: AttributeContainer.() -> Unit = {
+                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, composedJarLibraryElements)
+            }
+
             listOf(
                 Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_RUNTIME_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_SANDBOX_RUNTIME_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_TEST_SANDBOX_RUNTIME_CLASSPATH,
-                Configurations.External.COMPILE_CLASSPATH,
-                Configurations.External.TEST_COMPILE_CLASSPATH,
-                Configurations.External.TEST_RUNTIME_CLASSPATH,
-                // TODO: required for test fixtures?
-                //       Configurations.External.TEST_FIXTURES_COMPILE_CLASSPATH,
+                // The user-facing compile/test classpaths are intentionally NOT forced here anymore.
+                // Forcing the attribute on the whole configuration made Gradle apply it to every resolved
+                // component, including arbitrary third-party modules, which collapsed a module pulled both
+                // plain and via a transitive classifier into a single composed-jar node and dropped the
+                // classifier artifact. See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1889
                 Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
                 Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE,
             ).forEach {
                 named(it) {
-                    attributes {
-                        attribute(
-                            LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
-                            project.objects.named(Attributes.COMPOSED_JAR_NAME),
-                        )
-                    }
+                    attributes(requestComposedJar)
+                }
+            }
+
+            // Instead of forcing `composed-jar` on the whole compile/test classpath, request it per project
+            // dependency. Own IntelliJ Platform modules travel as project dependencies, so tagging those keeps
+            // the instrumented and module-composed output on the classpath, while external modules resolve with
+            // standard Gradle variant selection again (fixing #1889). Attaching the attribute to every project
+            // dependency is safe: the previous configuration-wide forcing already requested `composed-jar` for
+            // every project dependency reaching these classpaths, and `ComposedJarRule` keeps a plain `jar`
+            // produced by a non-plugin project compatible with the request.
+            matching { it.name in COMPOSED_JAR_PROJECT_DEPENDENCY_CONFIGURATIONS }.configureEach {
+                dependencies.withType<ProjectDependency>().configureEach {
+                    attributes(requestComposedJar)
                 }
             }
 
