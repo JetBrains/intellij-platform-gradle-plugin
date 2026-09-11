@@ -7,6 +7,7 @@ import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
 import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.offlineResolutionErrorMessage
 import java.net.URI
 import java.nio.file.Path
 import java.security.MessageDigest
@@ -29,6 +30,13 @@ internal abstract class ProductReleasesListingValueSource :
 
         @get:Input
         val cacheDirectory: Property<String>
+
+        /**
+         * Whether Gradle runs in offline mode. Captured at configuration time from
+         * [org.gradle.StartParameter.isOffline] so this [ValueSource] never reads `gradle.startParameter` itself.
+         */
+        @get:Input
+        val offline: Property<Boolean>
     }
 
     private val log = Logger(javaClass)
@@ -44,6 +52,16 @@ internal abstract class ProductReleasesListingValueSource :
         if (cachedContent != null && lastUpdate == today) {
             log.info("Reading product releases listing from cache: $cacheFile")
             return cachedContent
+        }
+
+        if (parameters.offline.getOrElse(false)) {
+            if (cachedContent != null) {
+                log.info("Offline mode: reusing cached product releases listing: $cacheFile")
+                return cachedContent
+            }
+
+            log.warn(offlineResolutionErrorMessage("product releases listing from $url"))
+            return null
         }
 
         return try {

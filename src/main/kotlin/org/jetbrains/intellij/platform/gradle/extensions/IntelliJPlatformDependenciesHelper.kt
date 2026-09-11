@@ -112,6 +112,13 @@ class IntelliJPlatformDependenciesHelper(
     private val productReleasesService by lazy {
         gradle.productReleasesService(providers, rootProjectDirectory)
     }
+
+    /**
+     * Whether Gradle runs in offline mode. Captured once at configuration time from
+     * [org.gradle.StartParameter.isOffline]; never read from within a `ValueSource`/`BuildService`.
+     */
+    private val offline by lazy { gradle.startParameter.isOffline }
+
     private val extractorServiceProvider by lazy {
         gradle.registerClassLoaderScopedBuildService(ExtractorService::class)
     }
@@ -989,7 +996,10 @@ class IntelliJPlatformDependenciesHelper(
             .maxByOrNull { it.build }
 
         requireNotNull(release) {
-            "No IntelliJ Platform installer releases found for type '$type'."
+            when {
+                offline -> offlineResolutionErrorMessage("${type.installer ?: type.maven}:${Constraints.LATEST_VERSION}")
+                else -> "No IntelliJ Platform installer releases found for type '$type'."
+            }
         }
 
         return copy(version = release.notationVersion.toString())
@@ -1056,6 +1066,14 @@ class IntelliJPlatformDependenciesHelper(
 
         val result = productReleasesService.get().resolve(type, version.toVersion()).orNull
         val downloadArtifact = result?.resolveDownloadArtifact()
+
+        if (downloadArtifact == null && offline) {
+            // Offline and the installer download URL could not be resolved from the cached product releases listing.
+            // Emit the unified, actionable message and fall back to a best-effort dependency notation so Gradle can
+            // still serve it from its dependency cache when already resolved, or fail clearly with "Could not resolve".
+            log.error(offlineResolutionErrorMessage("${type.installer}:$version"))
+            return dependencyFactory.create(type.installer.groupId, type.installer.artifactId, version)
+        }
 
         requireNotNull(downloadArtifact) { "Couldn't resolve ${type.name} download URL for version: '$version'" }
         requireNotNull(type.installer) { "Specified type '$type' has no artifact coordinates available." }

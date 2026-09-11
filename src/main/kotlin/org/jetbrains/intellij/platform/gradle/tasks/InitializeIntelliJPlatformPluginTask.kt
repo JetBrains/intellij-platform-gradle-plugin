@@ -130,7 +130,9 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), ModuleAware
                     })
                 )
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
-                latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {})
+                latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {
+                    parameters.offline.set(project.gradle.startParameter.isOffline)
+                })
 
                 mustRunAfter(CLEAN)
             }

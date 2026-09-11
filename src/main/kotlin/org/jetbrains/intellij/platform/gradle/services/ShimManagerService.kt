@@ -23,6 +23,14 @@ abstract class ShimManagerService : BuildService<ShimManagerService.Parameters>,
 
         @get:Input
         val port: Property<Int>
+
+        /**
+         * Whether Gradle runs in offline mode. Captured at configuration time from
+         * [org.gradle.StartParameter.isOffline]. When enabled, shim servers must not perform any network access and
+         * instead report the requested artifacts as not found, letting Gradle's cache serve already-resolved plugins.
+         */
+        @get:Input
+        val offline: Property<Boolean>
     }
 
     private val shims = ConcurrentHashMap<String, Shim.Server>()
@@ -32,8 +40,10 @@ abstract class ShimManagerService : BuildService<ShimManagerService.Parameters>,
             val port = parameters.port.get()
             log.info("Creating new shim server for ${repository.url} (port: ${port})")
 
+            val offline = parameters.offline.getOrElse(false)
+
             when (repository) {
-                is PluginArtifactRepository -> PluginArtifactoryShim(repository, port)
+                is PluginArtifactRepository -> PluginArtifactoryShim(repository, port, offline)
                 else -> throw GradleException("Unsupported repository type: ${repository.javaClass.simpleName}")
             }.start()
         }
