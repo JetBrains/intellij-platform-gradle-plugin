@@ -619,7 +619,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             PrintBundledModulesTask,
             PrintBundledPluginsTask,
             PrintProductsReleasesTask,
-            SetupDependenciesTask,
         ).forEach {
             it.register(project)
         }
