@@ -37,6 +37,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.findEntry
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import java.nio.channels.FileChannel
 import java.nio.file.AtomicMoveNotSupportedException
+import java.nio.file.FileSystemException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
@@ -205,16 +206,43 @@ internal fun Path.writeTextAtomicallyIfChanged(text: String): Boolean {
             val temporaryFile = createTempFile(parent, "$name.", ".tmp")
             try {
                 temporaryFile.writeText(text)
-                try {
-                    Files.move(temporaryFile, this, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
-                } catch (_: AtomicMoveNotSupportedException) {
-                    Files.move(temporaryFile, this, StandardCopyOption.REPLACE_EXISTING)
-                }
+                moveReplacingWithRetry(temporaryFile, this)
             } finally {
                 temporaryFile.deleteIfExists()
             }
 
             true
+        }
+    }
+}
+
+/**
+ * Moves [source] onto [target], replacing it, preferring an atomic move and falling back to a plain replace when the
+ * filesystem doesn't support atomic moves.
+ *
+ * On Windows, replacing a file that a concurrent reader currently holds open fails with a sharing violation
+ * (surfaced as a [FileSystemException], e.g. `AccessDeniedException`), unlike POSIX where the rename succeeds
+ * immediately. Since readers hold the target only briefly, the move is retried a few times with a short backoff so
+ * that the no-truncation guarantee is preserved without ever exposing a half-written file.
+ */
+private fun moveReplacingWithRetry(source: Path, target: Path) {
+    val maxAttempts = 50
+    val backoffMillis = 10L
+
+    var attempt = 0
+    while (true) {
+        try {
+            try {
+                Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+            } catch (_: AtomicMoveNotSupportedException) {
+                Files.move(source, target, StandardCopyOption.REPLACE_EXISTING)
+            }
+            return
+        } catch (exception: FileSystemException) {
+            if (++attempt >= maxAttempts) {
+                throw exception
+            }
+            Thread.sleep(backoffMillis)
         }
     }
 }

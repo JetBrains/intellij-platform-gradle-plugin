@@ -23,7 +23,10 @@ import kotlin.io.path.isDirectory
 data class IvyModule(
     val version: String = "2.0",
     @XmlElement @XmlSerialName("info") val info: Info? = null,
-    @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration> = listOf(Configuration("default")),
+    @XmlElement @XmlChildrenName("conf") val configurations: List<Configuration> = listOf(
+        Configuration(IVY_DEFAULT_CONFIGURATION),
+        Configuration(IVY_SOURCES_CONFIGURATION),
+    ),
     @XmlElement @XmlChildrenName("artifact") val publications: List<Artifact> = emptyList(),
     @XmlElement @XmlChildrenName("dependency") val dependencies: List<Dependency> = emptyList(),
 ) {
@@ -47,7 +50,7 @@ data class IvyModule(
         val name: String? = null,
         val type: String? = null,
         val ext: String? = null,
-        val conf: String? = "default",
+        val conf: String? = IVY_DEFAULT_CONFIGURATION,
         // Doesn't seem to be supported by Gradle:
         // https://ant.apache.org/ivy/history/2.4.0/ivyfile/artifact.html
         // https://docs.gradle.org/current/javadoc/org/gradle/api/publish/ivy/IvyArtifact.html
@@ -60,6 +63,11 @@ data class IvyModule(
         @XmlSerialName("org") val organization: String? = null,
         @XmlSerialName("name") val name: String,
         @XmlSerialName("rev") val version: String,
+        // Map the dependency explicitly to the [IVY_DEFAULT_CONFIGURATION] only. Without an explicit configuration
+        // mapping, Ivy defaults to "*->*", which — now that the module also declares the [IVY_SOURCES_CONFIGURATION] —
+        // makes Gradle traverse every transitive edge once per configuration, duplicating bundled module/plugin
+        // dependencies in the resolved graph. The sources configuration never carries transitive dependencies.
+        @XmlSerialName("conf") val conf: String? = IVY_DEFAULT_CONFIGURATION,
         @XmlElement @XmlSerialName("artifact") val artifacts: List<Artifact> = emptyList(),
     ) {
 
@@ -160,6 +168,46 @@ internal fun Path.toIvyArtifacts(metadataRulesModeProvider: Provider<RulesMode>,
         // Otherwise fallback to the absolute paths, since the rule won't be registered.
         else -> listOf(toAbsolutePathIvyArtifact())
     }
+
+/** The Ivy configuration used for regular compile/runtime artifacts. */
+internal const val IVY_DEFAULT_CONFIGURATION = "default"
+
+/** The Ivy configuration recognized by Gradle's `SourcesArtifact` resolution. */
+internal const val IVY_SOURCES_CONFIGURATION = "sources"
+
+/**
+ * Creates Ivy artifacts pointing at the plugin public API source JARs bundled in the `lib/src` directory.
+ *
+ * The resulting artifacts are published in the Ivy [IVY_SOURCES_CONFIGURATION] configuration so Gradle's
+ * `ArtifactResolutionQuery` can surface them as sources without adding them to compile/runtime classpaths.
+ *
+ * @see toIvyArtifacts
+ * @see CollectorTransformer.collectSourceJars
+ */
+internal fun Path.toIvySourceArtifacts(metadataRulesModeProvider: Provider<RulesMode>, basePath: Path? = null) =
+    explodeIntoIvySourceArtifactsRelativeTo(
+        basePath = basePath.takeIf { metadataRulesModeProvider.get() == RulesMode.PREFER_PROJECT },
+    )
+
+private fun Path.explodeIntoIvySourceArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {
+    // The contract is that we're working with absolute normalized paths here.
+    val absNormalizedPath = this.absolute().normalize()
+    val absNormalizedBasePath = basePath?.absolute()?.normalize()
+
+    val sourceJars = when {
+        absNormalizedPath.isDirectory() -> CollectorTransformer.collectSourceJars(absNormalizedPath)
+        else -> emptyList()
+    }
+
+    return sourceJars
+        .map { it.absolute().normalize() }
+        .map { sourceJar ->
+            when (absNormalizedBasePath) {
+                null -> sourceJar.toAbsolutePathIvyArtifact()
+                else -> sourceJar.toArtifactRelativeTo(absNormalizedBasePath)
+            }.copy(conf = IVY_SOURCES_CONFIGURATION)
+        }
+}
 
 private fun Path.explodeIntoIvyJarsArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {
     // The contract is that we're working with absolute normalized paths here.

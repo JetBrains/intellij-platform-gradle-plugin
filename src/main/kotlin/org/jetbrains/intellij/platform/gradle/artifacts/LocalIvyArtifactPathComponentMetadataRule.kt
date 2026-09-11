@@ -6,6 +6,7 @@ import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
 import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.MutableVariantFilesMetadata
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.initialization.Settings
 import org.gradle.api.initialization.resolve.RulesMode
@@ -16,6 +17,9 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.extensions.parseIdeNotation
 import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
+import org.jetbrains.intellij.platform.gradle.models.IVY_DEFAULT_CONFIGURATION
+import org.jetbrains.intellij.platform.gradle.models.IVY_SOURCES_CONFIGURATION
+import org.jetbrains.intellij.platform.gradle.models.IvyModule
 import org.jetbrains.intellij.platform.gradle.models.IvyModulePublicationsOnly
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.models.type
@@ -118,50 +122,64 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
             return
         }
 
-        context.details.allVariants {
+        val publicationsByConfiguration = publications.groupBy { it.conf }
+
+        context.details.withVariant(IVY_DEFAULT_CONFIGURATION) {
             withFiles {
                 // Remove all existing artifacts because they have relative paths and won't be found.
                 removeAllFiles()
 
                 // Add new files (i.e., artifacts) with the correct absolute path.
-                publications.forEach { artifact ->
-                    val fileName = "${artifact.name}.${artifact.ext}"
-                    val absPathString = "$absNormalizedPlatformPath/${artifact.url}/$fileName"
+                publicationsByConfiguration[IVY_DEFAULT_CONFIGURATION].orEmpty().forEach { artifact -> addArtifactFile(artifact) }
+            }
+        }
 
-                    if (Path.of(absPathString).notExists()) {
-                        log.error("The following artifact of the $id module ${artifact.name} is not found: $absPathString")
-                        return@forEach
-                    }
-
-                    /**
-                     * It is important to pass in the name and absolute path as the second arg, instead of just `addFile(absPathString)`,
-                     * because when only the path is given, Gradle thinks it downloads a file from a URL and copied all artifacts into
-                     * `~/.gradle/caches/modules-2/files-2.1/`.
-                     */
-
-                    if (OperatingSystem.current().isWindows) {
-                        /**
-                         * On Windows we should add a leading slash because there absolute paths start from a drive letter, but if Gradle sees such path
-                         * (without a leading slash), it will treat it relative to the build dir and absPathString will become malformed like:
-                         * `C:/Users/user-name/AppData/Local/Temp/tmp2087252038786353695/D:/project/.gradle/caches/8.10.2/transforms/137db90ba7a52eac7de798d9291575dd/transformed/ideaIC-2022.3.3-win/plugins/copyright/lib/copyright.jar`
-                         *
-                         * But this option works well:
-                         * `/D:/project/.gradle/caches/8.10.2/transforms/137db90ba7a52eac7de798d9291575dd/transformed/ideaIC-2022.3.3-win/plugins/copyright/lib/copyright.jar`
-                         */
-                        addFile(fileName, "/$absPathString")
-                    } else {
-                        /**
-                         * On Linux and OSX absolute paths start from slash naturally.
-                         */
-                        addFile(fileName, absPathString)
-                    }
+        if (publicationsByConfiguration[IVY_SOURCES_CONFIGURATION].orEmpty().isNotEmpty()) {
+            context.details.withVariant(IVY_SOURCES_CONFIGURATION) {
+                withFiles {
+                    removeAllFiles()
+                    publicationsByConfiguration[IVY_SOURCES_CONFIGURATION].orEmpty().forEach { artifact -> addArtifactFile(artifact) }
                 }
             }
         }
     }
 
+    /**
+     * Adds a single Ivy [artifact] to the variant files, resolving its relative Ivy path against the absolute platform path.
+     *
+     * It is important to pass in the name and absolute path as the second arg, instead of just `addFile(absPathString)`,
+     * because when only the path is given, Gradle thinks it downloads a file from a URL and copies all artifacts into
+     * `~/.gradle/caches/modules-2/files-2.1/`.
+     */
+    private fun MutableVariantFilesMetadata.addArtifactFile(artifact: IvyModule.Artifact) {
+        val fileName = "${artifact.name}.${artifact.ext}"
+        val absPathString = "$absNormalizedPlatformPath/${artifact.url}/$fileName"
+
+        if (Path.of(absPathString).notExists()) {
+            log.error("The following artifact ${artifact.name} is not found: $absPathString")
+            return
+        }
+
+        if (OperatingSystem.current().isWindows) {
+            /**
+             * On Windows we should add a leading slash because there absolute paths start from a drive letter, but if Gradle sees such path
+             * (without a leading slash), it will treat it relative to the build dir and absPathString will become malformed like:
+             * `C:/Users/user-name/AppData/Local/Temp/tmp2087252038786353695/D:/project/.gradle/caches/8.10.2/transforms/137db90ba7a52eac7de798d9291575dd/transformed/ideaIC-2022.3.3-win/plugins/copyright/lib/copyright.jar`
+             *
+             * But this option works well:
+             * `/D:/project/.gradle/caches/8.10.2/transforms/137db90ba7a52eac7de798d9291575dd/transformed/ideaIC-2022.3.3-win/plugins/copyright/lib/copyright.jar`
+             */
+            addFile(fileName, "/$absPathString")
+        } else {
+            /**
+             * On Linux and OSX absolute paths start from slash naturally.
+             */
+            addFile(fileName, absPathString)
+        }
+    }
+
     companion object {
-        private val ivyPublicationsCache = ConcurrentHashMap<String, List<org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact>>()
+        private val ivyPublicationsCache = ConcurrentHashMap<String, List<IvyModule.Artifact>>()
 
         internal fun register(
             configuration: Configuration,
