@@ -161,6 +161,47 @@ internal fun Path.toIvyArtifacts(metadataRulesModeProvider: Provider<RulesMode>,
         else -> listOf(toAbsolutePathIvyArtifact())
     }
 
+/**
+ * The Ivy artifact type used to mark a publication as a plugin source JAR bundled in `lib/src`.
+ *
+ * Such artifacts are declared in the Ivy descriptor so that [org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule]
+ * can route them into a dedicated sources variant instead of the compile/runtime classpath.
+ */
+internal const val IVY_SOURCE_ARTIFACT_TYPE = "src"
+
+/**
+ * Creates Ivy artifacts pointing at the plugin public API source JARs bundled in the `lib/src` directory.
+ *
+ * The resulting artifacts are marked with the [IVY_SOURCE_ARTIFACT_TYPE] type so they can be surfaced only as sources
+ * (and never end up on the compile/runtime classpath).
+ *
+ * Sources are exposed only when [RulesMode.PREFER_PROJECT] is used, because the attachment relies on
+ * [org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule], which is registered only in that mode.
+ *
+ * @see toIvyArtifacts
+ * @see CollectorTransformer.collectSourceJars
+ */
+internal fun Path.toIvySourceArtifacts(metadataRulesModeProvider: Provider<RulesMode>, basePath: Path) =
+    when (metadataRulesModeProvider.get()) {
+        RulesMode.PREFER_PROJECT -> explodeIntoIvySourceArtifactsRelativeTo(basePath)
+        else -> emptyList()
+    }
+
+private fun Path.explodeIntoIvySourceArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {
+    // The contract is that we're working with absolute normalized paths here.
+    val absNormalizedPath = this.absolute().normalize()
+    val absNormalizedBasePath = basePath?.absolute()?.normalize()
+
+    val sourceJars = when {
+        absNormalizedPath.isDirectory() -> CollectorTransformer.collectSourceJars(absNormalizedPath)
+        else -> emptyList()
+    }
+
+    return sourceJars
+        .map { it.absolute().normalize() }
+        .map { it.toArtifactRelativeTo(absNormalizedBasePath).copy(type = IVY_SOURCE_ARTIFACT_TYPE) }
+}
+
 private fun Path.explodeIntoIvyJarsArtifactsRelativeTo(basePath: Path? = null): List<IvyModule.Artifact> {
     // The contract is that we're working with absolute normalized paths here.
     val absNormalizedPath = this.absolute().normalize()

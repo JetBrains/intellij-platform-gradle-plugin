@@ -98,6 +98,22 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
                 .flatMap { it.listDirectoryEntries("*.jar") }
         }
 
+        /**
+         * Collects the plugin public API source JARs bundled within the `lib/src` directory of a plugin distribution.
+         *
+         * These JARs must never be added to the compile/runtime classpath — they are meant to be surfaced only as
+         * sources so the IDE can attach them automatically to the plugin library.
+         *
+         * @see <a href="https://plugins.jetbrains.com/docs/intellij/bundling-plugin-openapi-sources.html">Bundling Plugin API Sources</a>
+         */
+        internal fun collectSourceJars(path: Path): List<Path> {
+            val libSrcPath = path.resolve(Sandbox.Plugin.LIB_SRC)
+
+            return listOfNotNull(libSrcPath.takeIfExists())
+                .filter { it.isDirectory() }
+                .flatMap { it.listDirectoryEntries("*.jar") }
+        }
+
         internal fun register(dependencies: DependencyHandler) {
             dependencies.registerTransform(CollectorTransformer::class) {
                 from

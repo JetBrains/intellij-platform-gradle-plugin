@@ -228,7 +228,9 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Sandbox$Plug
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants$Sandbox$Plugin;
 	public static final field LIB Ljava/lang/String;
 	public static final field LIB_MODULES Ljava/lang/String;
+	public static final field LIB_SRC Ljava/lang/String;
 	public static final field MODULES Ljava/lang/String;
+	public static final field SRC Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
@@ -640,7 +642,7 @@ public final class org/jetbrains/intellij/platform/gradle/argumentProviders/Spli
 
 public abstract class org/jetbrains/intellij/platform/gradle/artifacts/LocalIvyArtifactPathComponentMetadataRule : org/gradle/api/artifacts/ComponentMetadataRule {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/artifacts/LocalIvyArtifactPathComponentMetadataRule$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Lorg/gradle/api/model/ObjectFactory;)V
 	public synthetic fun execute (Ljava/lang/Object;)V
 	public fun execute (Lorg/gradle/api/artifacts/ComponentMetadataContext;)V
 }

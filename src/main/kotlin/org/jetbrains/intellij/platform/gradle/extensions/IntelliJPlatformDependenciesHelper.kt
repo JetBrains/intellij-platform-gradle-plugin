@@ -1180,7 +1180,8 @@ class IntelliJPlatformDependenciesHelper(
                     module = id,
                     revision = version,
                 ),
-                publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath),
+                publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath) +
+                        artifactPath.toIvySourceArtifacts(metadataRulesModeProvider, platformPath),
                 dependencies = collectBundledDependencies(plugin, ideLayoutIndex, platformPath),
             )
         }
@@ -1255,7 +1256,7 @@ class IntelliJPlatformDependenciesHelper(
                     val artifactPath = dependency.resolveArtifactPath(platformPath)
                     val publications = dependency.resolvePublicationPaths(platformPath).flatMap { path ->
                         path.toIvyArtifacts(metadataRulesModeProvider, platformPath)
-                    }
+                    } + artifactPath?.toIvySourceArtifacts(metadataRulesModeProvider, platformPath).orEmpty()
 
                     writeIvyModule(group, name, version, artifactPath) {
                         IvyModule(
