@@ -208,6 +208,11 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 description = "IntelliJ Platform plugin composed module",
             ) { isTransitive = false }
 
+            val composedJarLibraryElements = project.objects.named<LibraryElements>(Attributes.COMPOSED_JAR_NAME)
+            val requestComposedJar: AttributeContainer.() -> Unit = {
+                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, composedJarLibraryElements)
+            }
+
             listOf(
                 Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH,
                 Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH,
@@ -223,12 +228,7 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE,
             ).forEach {
                 named(it) {
-                    attributes {
-                        attribute(
-                            LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
-                            project.objects.named(Attributes.COMPOSED_JAR_NAME),
-                        )
-                    }
+                    attributes(requestComposedJar)
                 }
             }
 
@@ -239,12 +239,9 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             // dependency is safe: the previous configuration-wide forcing already requested `composed-jar` for
             // every project dependency reaching these classpaths, and `ComposedJarRule` keeps a plain `jar`
             // produced by a non-plugin project compatible with the request.
-            val composedJarLibraryElements = project.objects.named<LibraryElements>(Attributes.COMPOSED_JAR_NAME)
             matching { it.name in COMPOSED_JAR_PROJECT_DEPENDENCY_CONFIGURATIONS }.configureEach {
                 dependencies.withType<ProjectDependency>().configureEach {
-                    attributes {
-                        attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, composedJarLibraryElements)
-                    }
+                    attributes(requestComposedJar)
                 }
             }
 
