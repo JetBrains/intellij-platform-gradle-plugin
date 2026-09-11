@@ -149,6 +149,17 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
     object SelfUpdateCheck : GradleProperties<Boolean>(true)
 
     /**
+     * Specifies the path to an IntelliJ IDEA subscription key file used to activate IDE instances started with sandbox-producing tasks.
+     * The file is copied to `config/idea.key` in each prepared sandbox.
+     *
+     * The property can be set globally for all projects with the
+     * `ORG_GRADLE_PROJECT_org.jetbrains.intellij.platform.subscriptionKey` environment variable.
+     *
+     * Default value: empty string (subscription activation is disabled)
+     */
+    object SubscriptionKey : GradleProperties<String>("")
+
+    /**
      * Controls whether bundled plugins declared in `product-info.json` are added to the [TestIdeTask] classpath.
      *
      * Default value: `true`

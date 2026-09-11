@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.extensions
 import groovy.lang.Closure
 import groovy.lang.DelegatesTo
 import org.gradle.api.Action
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.ConfigurableFileCollection
@@ -120,6 +121,18 @@ abstract class IntelliJPlatformExtension @Inject constructor(
      * Default value: [Constants.CACHE_DIRECTORY]/[Sandbox.CONTAINER]/
      */
     abstract val sandboxContainer: DirectoryProperty
+
+    /**
+     * Specifies the IntelliJ IDEA subscription key file used by sandbox-producing tasks.
+     * The key is copied to `config/idea.key`, and `com.intellij.modules.ultimate` is removed from
+     * `config/disabled_plugins.txt` in each prepared sandbox.
+     *
+     * This value can be overridden for an individual sandbox task with [org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask.subscriptionKey].
+     *
+     * Default value: [GradleProperties.SubscriptionKey]
+     */
+    @get:Incubating
+    abstract val subscriptionKey: RegularFileProperty
 
     /**
      * Enables Split Mode when running the IDE.
@@ -1327,6 +1340,21 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 instrumentCode.convention(true)
                 projectName.convention(project.name)
                 sandboxContainer.convention(project.extensionProvider.flatMap { it.caching.path.dir(Sandbox.CONTAINER) })
+                val projectDirectory = project.layout.projectDirectory.asFile
+                subscriptionKey.convention(
+                    project.layout.file(
+                        project.providers[GradleProperties.SubscriptionKey].map { path ->
+                            path.takeUnless(String::isBlank)?.let {
+                                File(it.expandUserHome).let { file ->
+                                    when {
+                                        file.isAbsolute -> file
+                                        else -> projectDirectory.resolve(file.path)
+                                    }
+                                }
+                            }
+                        },
+                    ),
+                )
                 splitMode.convention(false)
                 splitModeTarget.conventionFrom(pluginInstallationTarget)
             }

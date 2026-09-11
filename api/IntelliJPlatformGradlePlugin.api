@@ -338,6 +338,10 @@ public final class org/jetbrains/intellij/platform/gradle/GradleProperties$ShimS
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$ShimServerPort;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/GradleProperties$SubscriptionKey : org/jetbrains/intellij/platform/gradle/GradleProperties {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$SubscriptionKey;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathEnabled : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathEnabled;
 }
@@ -1028,6 +1032,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/extensions/IntelliJ
 	public final fun getSigning ()Lorg/jetbrains/intellij/platform/gradle/extensions/IntelliJPlatformExtension$Signing;
 	public abstract fun getSplitMode ()Lorg/gradle/api/provider/Property;
 	public abstract fun getSplitModeTarget ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSubscriptionKey ()Lorg/gradle/api/file/RegularFileProperty;
 	public final fun nativeVariants (Lgroovy/lang/Closure;)V
 	public final fun nativeVariants (Lorg/gradle/api/Action;)V
 	public final fun pluginConfiguration (Lgroovy/lang/Closure;)V
@@ -3201,6 +3206,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/PrepareSandbo
 	public fun getSplitModeFrontendJoinLinkFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendPidFile ()Lorg/gradle/api/provider/Provider;
 	public fun getSplitModeFrontendProperties ()Lorg/gradle/api/provider/Provider;
+	public abstract fun getSubscriptionKey ()Lorg/gradle/api/file/RegularFileProperty;
 	public fun validateIntelliJPlatformVersion ()V
 	public fun validateSplitModeSupport ()V
 }

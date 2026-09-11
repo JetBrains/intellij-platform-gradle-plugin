@@ -117,6 +117,9 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
     private val disabledPluginsFile
         get() = sandbox.resolve("config/disabled_plugins.txt")
 
+    private val subscriptionKeyFile
+        get() = sandbox.resolve("config/idea.key")
+
     private val splitModeFrontendPropertiesFile
         get() = sandbox.resolve("frontend.properties")
 
@@ -425,6 +428,52 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
             )
         }
+    }
+
+    @Test
+    fun `configure subscription key in extension and override it for a task`() {
+        pluginXml write "<idea-plugin />"
+        dir.resolve("extension-subscription.key") write "extension-subscription-key"
+        dir.resolve("task-subscription.key") write "task-subscription-key"
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    subscriptionKey = layout.projectDirectory.file("extension-subscription.key")
+                }
+
+                tasks.prepareSandbox {
+                    disabledPlugins.set(setOf("com.intellij.modules.ultimate", "com.intellij.other"))
+                    subscriptionKey = layout.projectDirectory.file("task-subscription.key")
+                }
+                """.trimIndent()
+
+        build(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX)
+
+        assertFileContent(subscriptionKeyFile, "task-subscription-key")
+        assertFileContent(sandbox.resolve("config-test/idea.key"), "extension-subscription-key")
+        assertFileContent(disabledPluginsFile, "com.intellij.other")
+    }
+
+    @Test
+    fun `configure subscription key with Gradle property supplied through environment variable`() {
+        pluginXml write "<idea-plugin />"
+        val keyFile = dir.resolve("subscription.key").also { it write "environment-subscription-key" }
+        val environmentVariable = "ORG_GRADLE_PROJECT_${GradleProperties.SubscriptionKey}"
+        val environment = pluginTemplateEnvironment(environmentVariable to keyFile.invariantSeparatorsPathString)
+
+        build(
+            Tasks.PREPARE_SANDBOX,
+            Tasks.PREPARE_TEST_SANDBOX,
+            environment = environment,
+        )
+        buildWithConfigurationCache(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, environment = environment)
+        buildWithConfigurationCache(Tasks.PREPARE_SANDBOX, Tasks.PREPARE_TEST_SANDBOX, environment = environment) {
+            assertConfigurationCacheReused()
+        }
+
+        assertFileContent(subscriptionKeyFile, "environment-subscription-key")
+        assertFileContent(sandbox.resolve("config-test/idea.key"), "environment-subscription-key")
     }
 
     @Test
@@ -1099,11 +1148,15 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 """
                 <idea-plugin />
                 """.trimIndent()
+        dir.resolve("subscription.key") write "subscription-key"
 
         buildFile write //language=kotlin
                 """
                 intellijPlatform {
                     splitMode = true
+                }
+                tasks.prepareSandbox {
+                    subscriptionKey = layout.projectDirectory.file("subscription.key")
                 }
                 """.trimIndent()
 
@@ -1111,6 +1164,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
         val updatesLastModifiedTime = updatesFile.getLastModifiedTime()
         val disabledPluginsLastModifiedTime = disabledPluginsFile.getLastModifiedTime()
+        val subscriptionKeyLastModifiedTime = subscriptionKeyFile.getLastModifiedTime()
         val splitModeFrontendPropertiesLastModifiedTime = splitModeFrontendPropertiesFile.getLastModifiedTime()
 
         Thread.sleep(1_100)
@@ -1119,6 +1173,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
         assertEquals(updatesLastModifiedTime, updatesFile.getLastModifiedTime())
         assertEquals(disabledPluginsLastModifiedTime, disabledPluginsFile.getLastModifiedTime())
+        assertEquals(subscriptionKeyLastModifiedTime, subscriptionKeyFile.getLastModifiedTime())
         assertEquals(splitModeFrontendPropertiesLastModifiedTime, splitModeFrontendPropertiesFile.getLastModifiedTime())
     }
 

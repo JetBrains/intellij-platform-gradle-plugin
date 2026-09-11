@@ -132,6 +132,15 @@ class GradlePropertiesTest {
     }
 
     @Test
+    fun `subscription key property is empty by default`() {
+        val property = GradleProperties.SubscriptionKey
+
+        assertEquals("org.jetbrains.intellij.platform.subscriptionKey", property.toString())
+        assertEquals("", property.defaultValue)
+        assertEquals("", providers[property].get())
+    }
+
+    @Test
     fun `splitCommaSeparated trims values and skips empty entries`() {
         val provider = providers.provider { " com.intellij.foo,com.intellij.bar, , com.intellij.baz " }
 

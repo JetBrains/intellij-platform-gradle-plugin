@@ -6,6 +6,7 @@ import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.api.GradleException
+import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.file.*
 import org.gradle.api.plugins.JavaPlugin
@@ -29,6 +30,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformPlugins
 import org.jetbrains.intellij.platform.gradle.models.transformXml
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
+import java.nio.file.Files
 import javax.inject.Inject
 import kotlin.io.path.*
 
@@ -132,6 +134,19 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     abstract val pluginDirectory: DirectoryProperty
 
     /**
+     * Specifies the IntelliJ IDEA subscription key file used in this sandbox.
+     * The key is copied to `config/idea.key`, and `com.intellij.modules.ultimate` is removed from
+     * `config/disabled_plugins.txt`.
+     *
+     * Default value: [IntelliJPlatformExtension.subscriptionKey]
+     */
+    @get:Incubating
+    @get:InputFile
+    @get:Optional
+    @get:PathSensitive(PathSensitivity.NONE)
+    abstract val subscriptionKey: RegularFileProperty
+
+    /**
      * An internal field to hold a list of plugins to be disabled within the current sandbox.
      *
      * This property is controlled with [IntelliJPlatformPluginsExtension.disablePlugins].
@@ -188,6 +203,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
         log.info("testSandbox = ${testSandbox.get()}")
 
         disableIdeUpdate(sandboxConfigDirectory)
+        prepareSubscription(sandboxConfigDirectory)
         disabledPlugins(sandboxConfigDirectory)
 
         sandboxConfigDirectory.asPath.createDirectories()
@@ -251,9 +267,25 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     }
 
     private fun disabledPlugins(configDirectory: DirectoryProperty) {
+        val disabledPlugins = disabledPlugins.get().let {
+            when {
+                subscriptionKey.isPresent -> it - ULTIMATE_MODULE_ID
+                else -> it
+            }
+        }
+
         configDirectory.asPath
             .resolve("disabled_plugins.txt")
-            .writeTextIfChanged(disabledPlugins.get().joinToString(System.lineSeparator()))
+            .writeTextIfChanged(disabledPlugins.joinToString(System.lineSeparator()))
+    }
+
+    private fun prepareSubscription(configDirectory: DirectoryProperty) {
+        val source = subscriptionKey.orNull?.asFile?.toPath() ?: return
+        val target = configDirectory.asPath.resolve("idea.key")
+
+        if (target.notExists() || Files.mismatch(source, target) != -1L) {
+            source.copyTo(target, overwrite = true)
+        }
     }
 
     /**
@@ -350,9 +382,12 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     }
 
     companion object : Registrable {
+        private const val ULTIMATE_MODULE_ID = "com.intellij.modules.ultimate"
+
         override fun register(project: Project) =
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX) {
                 val composedJarTaskProvider = project.tasks.named<ComposedJarTask>(Tasks.COMPOSED_JAR)
+                subscriptionKey.convention(project.extensionProvider.flatMap { it.subscriptionKey })
 
                 sandboxSuffix.convention(
                     name
