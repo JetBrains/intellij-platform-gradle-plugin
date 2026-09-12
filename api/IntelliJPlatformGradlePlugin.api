@@ -436,6 +436,10 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUni
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5CodeInsight : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5CodeInsight;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Metrics : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Metrics;
 }

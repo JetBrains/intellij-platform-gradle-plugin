@@ -9,6 +9,7 @@
 - Add `intellijPlatform.nativeVariants` DSL and `buildPluginVariants` tasks for creating Linux, macOS, and Windows plugin distributions targeting `x86_64` and `arm64` architectures. Native variant compatibility must start at IntelliJ Platform 2026.1 (`since-build` 261).
 - Add `testFrameworks()` dependency helpers for configuring multiple `TestFrameworkType` values in one call JetBrains/intellij-platform-gradle-plugin#2194
 - Expand `TestFrameworkType.Plugin` with IJent, ML completion, navigation bar, Python, RD client, Rider, and statistics test frameworks.
+- Add `TestFrameworkType.JUnit5CodeInsight` for the `com.jetbrains.intellij.platform:test-framework-junit5-code-insight` library, which provides the JUnit 5 code-insight fixtures JetBrains/intellij-platform-gradle-plugin#2239
 - Add sandbox-specific runtime classpath configurations for applying dependency exclusions to every `PrepareSandboxTask` without changing project compile or test classpaths JetBrains/intellij-platform-gradle-plugin#2177
 - Add `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathEnabled` property to control whether bundled plugins declared in `product-info.json` are added to test classpaths. It defaults to `true`; set it to `false` to opt out.
 - Add `DumpProductsReleasesTask` to support dumping IntelliJ Platform product releases for Plugin DevKit plugin purposes
