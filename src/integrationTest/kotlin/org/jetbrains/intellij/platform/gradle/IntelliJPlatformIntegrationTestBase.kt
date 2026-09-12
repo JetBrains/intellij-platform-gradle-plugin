@@ -37,7 +37,7 @@ open class IntelliJPlatformIntegrationTestBase(
             if (initialDir != dir) {
                 initialDir.deleteRecursively()
             }
-            prepareReusableProjectDirectory()
+            pruneReusableProjectDirectory(dir, failOnFailure = true)
         }
 
         if (resourceName != null) {
@@ -58,7 +58,7 @@ open class IntelliJPlatformIntegrationTestBase(
             // transient content here (keeping the project-local `.gradle` cache for reuse) so these directories stop
             // accumulating across the suite. The deletion is tolerant and retrying: a file still locked by a
             // background Gradle process on Windows must not fail the test.
-            pruneReusableProjectDirectory()
+            pruneReusableProjectDirectory(dir, failOnFailure = false)
         } else {
             super.tearDown()
         }
@@ -140,41 +140,44 @@ open class IntelliJPlatformIntegrationTestBase(
             )
             .createDirectories()
 
-    private fun prepareReusableProjectDirectory() {
-        dir.listDirectoryEntries().forEach {
-            if (it.name != ".gradle") {
-                it.deleteRecursively()
-            }
-        }
+}
+
+/**
+ * Removes transient content from a reusable integration-test project while retaining its project-local `.gradle`
+ * cache. Setup uses strict mode because stale files would contaminate the next test; teardown uses best-effort mode so
+ * a briefly locked Windows file does not turn a successful test into a cleanup failure.
+ */
+@OptIn(ExperimentalPathApi::class)
+internal fun pruneReusableProjectDirectory(
+    projectDirectory: Path,
+    failOnFailure: Boolean,
+    maxAttempts: Int = if (System.getProperty("os.name").startsWith("Windows")) 20 else 5,
+    retryDelayMs: Long = if (System.getProperty("os.name").startsWith("Windows")) 250L else 100L,
+    deleteEntry: (Path) -> Unit = { it.deleteRecursively() },
+) {
+    if (projectDirectory.notExists()) {
+        return
     }
 
-    /**
-     * Tolerantly removes the transient content of the reused per-class project directory, keeping the project-local
-     * `.gradle` cache so subsequent test methods of the same class still reuse it. Each entry is deleted with retries
-     * to accommodate Windows keeping files briefly locked after a build; a still-locked entry is logged and skipped
-     * instead of failing the test.
-     */
-    private fun pruneReusableProjectDirectory() {
-        val projectDirectory = dir.takeIf { it.exists() } ?: return
-        val isWindows = System.getProperty("os.name").startsWith("Windows")
-        val maxAttempts = if (isWindows) 20 else 5
-        val retryDelayMs = if (isWindows) 250L else 100L
-
-        projectDirectory.listDirectoryEntries()
-            .filter { it.name != ".gradle" }
-            .forEach { entry ->
-                repeat(maxAttempts) { attempt ->
-                    try {
-                        entry.deleteRecursively()
-                        return@forEach
-                    } catch (exception: IOException) {
-                        if (attempt == maxAttempts - 1) {
-                            System.err.println("Failed to prune '$entry' after $maxAttempts attempts: ${exception.message}")
-                            return@forEach
+    projectDirectory.listDirectoryEntries()
+        .filter { it.name != ".gradle" }
+        .forEach { entry ->
+            repeat(maxAttempts) { attempt ->
+                try {
+                    deleteEntry(entry)
+                    return@forEach
+                } catch (exception: IOException) {
+                    if (attempt == maxAttempts - 1) {
+                        if (failOnFailure) {
+                            throw exception
                         }
+                        System.err.println("Failed to prune '$entry' after $maxAttempts attempts: ${exception.message}")
+                        return@forEach
+                    }
+                    if (retryDelayMs > 0) {
                         Thread.sleep(retryDelayMs)
                     }
                 }
             }
-    }
+        }
 }

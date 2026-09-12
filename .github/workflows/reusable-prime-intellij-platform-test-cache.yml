@@ -14,7 +14,7 @@ on:
       testName:
         type: string
         required: false
-        default: org.jetbrains.intellij.platform.gradle.tasks.PrintBundledPluginsTaskTest
+        default: org.jetbrains.intellij.platform.gradle.tasks.PrintBundledPluginsTaskTest.print bundled plugins
         description: 'Test filter used to populate the shared IntelliJ Platform test cache'
 
 jobs:
@@ -52,40 +52,35 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: .gradle/testGradleHome/.intellijPlatform
-          key: test-gradle-home-v5-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml', 'src/test/**/*.kt', 'src/test/resources/**', 'src/testFixtures/**/*.kt', 'src/integrationTest/**/*.kt', 'src/integrationTest/resources/**') }}
+          key: test-gradle-home-v6-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml', 'src/test/**/*.kt', 'src/test/resources/**', 'src/testFixtures/**/*.kt', 'src/integrationTest/**/*.kt', 'src/integrationTest/resources/**') }}
           restore-keys: |
-            test-gradle-home-v5-intellij-platform-${{ runner.os }}-
+            test-gradle-home-v6-intellij-platform-${{ runner.os }}-
 
-      # The downloaded module dependencies (modules-2, e.g. the multi-GB IDE installer) and the artifact transform
-      # outputs (transforms-*, e.g. the extracted IDE) live directly under caches/ and are shared across Gradle
-      # versions, so they are cached with an OS-only key and reused by every Gradle version on this OS.
       - name: Restore Gradle TestKit shared IDE cache
         id: gradle-testkit-ide-cache
         uses: actions/cache/restore@v6
         with:
           path: |
-            .gradle/testGradleHome/.testKit/caches/modules-2
-            .gradle/testGradleHome/.testKit/caches/transforms-*
-          key: test-gradle-home-v1-testkit-ide-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+            .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+            .gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
+          key: test-gradle-home-v2-testkit-ide-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v1-testkit-ide-${{ runner.os }}-
+            test-gradle-home-v2-testkit-ide-${{ runner.os }}-
 
-      # The remaining, Gradle-version-specific TestKit state (per-version caches/<version>/, daemon, wrapper, …) stays
-      # keyed by gradleVersion. The shared IDE artifacts above are excluded so they are not duplicated per version.
       - name: Restore Gradle TestKit cache
         id: gradle-testkit-cache
         uses: actions/cache/restore@v6
         with:
           path: |
             .gradle/testGradleHome/.testKit
-            !.gradle/testGradleHome/.testKit/caches/modules-2
-            !.gradle/testGradleHome/.testKit/caches/transforms-*
-          key: test-gradle-home-v3-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+            !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+            !.gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
+          key: test-gradle-home-v4-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v3-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-
+            test-gradle-home-v4-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-
 
       - name: Prime IntelliJ Platform test cache
-        if: ${{ steps.intellij-platform-cache.outputs.cache-hit != 'true' }}
+        if: ${{ steps.intellij-platform-cache.outputs.cache-hit != 'true' || steps.gradle-testkit-ide-cache.outputs.cache-hit != 'true' || steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           TEST_NAME: ${{ inputs.testName }}
@@ -127,7 +122,7 @@ jobs:
         id: gradle-testkit-ide-cache-path
         shell: bash
         run: |
-          if [ -d .gradle/testGradleHome/.testKit/caches/modules-2 ] && [ -n "$(find .gradle/testGradleHome/.testKit/caches/modules-2 -mindepth 1 -print -quit)" ]; then
+          if [ -d .gradle/testGradleHome/.testKit ] && [ -n "$(find .gradle/testGradleHome/.testKit -path '*/caches/modules-2/*' -print -quit)" ]; then
             echo "present=true" >> "$GITHUB_OUTPUT"
           else
             echo "present=false" >> "$GITHUB_OUTPUT"
@@ -138,8 +133,8 @@ jobs:
         uses: actions/cache/save@v6
         with:
           path: |
-            .gradle/testGradleHome/.testKit/caches/modules-2
-            .gradle/testGradleHome/.testKit/caches/transforms-*
+            .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+            .gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
           key: ${{ steps.gradle-testkit-ide-cache.outputs.cache-primary-key }}
 
       - name: Check Gradle TestKit cache
@@ -159,6 +154,6 @@ jobs:
         with:
           path: |
             .gradle/testGradleHome/.testKit
-            !.gradle/testGradleHome/.testKit/caches/modules-2
-            !.gradle/testGradleHome/.testKit/caches/transforms-*
+            !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+            !.gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
           key: ${{ steps.gradle-testkit-cache.outputs.cache-primary-key }}

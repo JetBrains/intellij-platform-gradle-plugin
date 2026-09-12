@@ -15,10 +15,79 @@ import org.jetbrains.intellij.platform.gradle.providers.DmgExtractorValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.resolvePlatformPath
+import java.nio.channels.FileChannel
+import java.nio.file.AtomicMoveNotSupportedException
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.StandardOpenOption.WRITE
+import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
+import kotlin.concurrent.withLock
 import kotlin.io.path.*
+
+internal const val EXTRACTION_COMPLETE_MARKER = ".intellij-platform-extracted"
+
+private val extractionLocks = Array(64) { ReentrantLock() }
+
+internal fun extractionCompleteMarker(targetDirectory: Path): Path =
+    targetDirectory.resolveSibling(".${targetDirectory.name}$EXTRACTION_COMPLETE_MARKER")
+
+/**
+ * Publishes extracted content only after [extract] completes successfully.
+ *
+ * A JVM-local lock prevents overlapping `FileChannel` locks in one process, while the sibling lock file serializes
+ * Gradle processes that share an IDE cache. Extraction happens in a sibling temporary directory so consumers never
+ * observe a partially populated target. A sibling completion marker is published after the directory move so cache
+ * metadata never becomes part of the extracted content.
+ *
+ * @return `true` when content was extracted, or `false` when a completed target was reused.
+ */
+@OptIn(ExperimentalPathApi::class)
+internal fun extractAtomically(targetDirectory: Path, extract: (Path) -> Unit): Boolean {
+    val target = targetDirectory.toAbsolutePath().normalize()
+    val parent = requireNotNull(target.parent) { "Extraction target '$target' has no parent directory." }
+    val lock = extractionLocks[Math.floorMod(target.hashCode(), extractionLocks.size)]
+
+    return lock.withLock {
+        parent.createDirectories()
+        val lockFile = target.resolveSibling(".${target.name}.lock")
+        val completionMarker = extractionCompleteMarker(target)
+
+        FileChannel.open(lockFile, CREATE, WRITE).use { channel ->
+            channel.lock().use {
+                if (target.isDirectory() && completionMarker.isRegularFile()) {
+                    return@use false
+                }
+
+                completionMarker.deleteIfExists()
+                val temporaryDirectory = Files.createTempDirectory(parent, ".${target.name}.tmp-")
+                try {
+                    extract(temporaryDirectory)
+
+                    if (target.exists()) {
+                        target.deleteRecursively()
+                    }
+
+                    try {
+                        Files.move(temporaryDirectory, target, ATOMIC_MOVE)
+                    } catch (_: AtomicMoveNotSupportedException) {
+                        Files.move(temporaryDirectory, target)
+                    }
+                    completionMarker.writeText("complete\n")
+                } finally {
+                    if (temporaryDirectory.exists()) {
+                        temporaryDirectory.deleteRecursively()
+                    }
+                }
+
+                true
+            }
+        }
+    }
+}
 
 abstract class ExtractorService @Inject constructor(
     private val archiveOperations: ArchiveOperations,
@@ -28,19 +97,33 @@ abstract class ExtractorService @Inject constructor(
 
     private val log = Logger(javaClass)
 
+    /**
+     * Extracts [path] into [targetDirectory], or reuses the target when its completion marker is present.
+     *
+     * @param path archive to extract.
+     * @param targetDirectory directory in which to publish the extracted content.
+     */
     fun extract(path: Path, targetDirectory: Path) {
-        // Skip extraction when the target directory is already materialized. Fingerprinted extraction directories
-        // (e.g., local plugins) encode the archive's content identity, so an existing, non-empty directory already
-        // holds identical content. Re-extracting it is not only wasteful but, on Windows, overwrites JARs that a
-        // previously-resolved classpath may still keep locked, causing AccessDenied failures and extraction hangs.
-        // The check runs inside this BuildService, so it is not recorded as a Gradle configuration-cache input and
-        // therefore cannot invalidate a freshly stored configuration-cache entry.
-        if (targetDirectory.isDirectory() && targetDirectory.listDirectoryEntries().isNotEmpty()) {
-            log.info("Archive '$path' is already extracted to directory '$targetDirectory'; reusing existing content.")
-            return
+        extract(targetDirectory) { path }
+    }
+
+    /**
+     * The lazy path variant lets cache-backed callers avoid resolving or downloading the archive when a completed
+     * extraction is already available. The completion check intentionally stays inside this BuildService so it is not
+     * captured as a configuration-cache input.
+     */
+    internal fun extract(targetDirectory: Path, path: () -> Path) {
+        val extracted = extractAtomically(targetDirectory) { temporaryDirectory ->
+            extractArchive(path(), temporaryDirectory)
         }
 
-        log.info("Extracting archive '$path' to directory '$targetDirectory'.")
+        if (!extracted) {
+            log.info("Reusing the completed archive extraction in '$targetDirectory'.")
+        }
+    }
+
+    private fun extractArchive(path: Path, targetDirectory: Path) {
+        log.info("Extracting archive '$path' to temporary directory '$targetDirectory'.")
 
         val name = path.nameWithoutExtension.removeSuffix(".tar")
         val extension = path.name.removePrefix("$name.")
@@ -99,6 +182,6 @@ abstract class ExtractorService @Inject constructor(
                 .forEach { it.deleteExisting() }
         }
 
-        log.info("Extracting to '$targetDirectory' completed.")
+        log.info("Preparing extraction in '$targetDirectory' completed.")
     }
 }

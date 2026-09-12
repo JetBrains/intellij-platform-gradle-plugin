@@ -51,6 +51,10 @@ import kotlin.io.path.*
 private fun RequestedIntelliJPlatform.requiresManagedLocalPath(splitMode: Boolean) =
     splitMode || productMode != ProductMode.MONOLITH
 
+// `useInstaller` and `useCache` select acquisition/storage mechanisms; they do not change the resulting IDE identity.
+private fun RequestedIntelliJPlatform.matchesPlatform(base: RequestedIntelliJPlatform?) =
+    base != null && type == base.type && version == base.version && productMode == base.productMode
+
 private data class LocalIntelliJPlatform(
     val platformPath: Path,
     val productInfo: ProductInfo,
@@ -383,17 +387,14 @@ class IntelliJPlatformDependenciesHelper(
                     reuseMatchingBasePlatform -> baseRequestProvider.orNull?.resolveLatestVersion()
                     else -> null
                 }
-                fun RequestedIntelliJPlatform.matchesBasePlatform() =
-                    baseRequest != null && type == baseRequest.type && version == baseRequest.version && productMode == baseRequest.productMode
-
                 requests
-                    .filter { it.matchesBasePlatform() || it.useCache || it.requiresManagedLocalPath(splitMode) }
+                    .filter { it.matchesPlatform(baseRequest) || it.useCache || it.requiresManagedLocalPath(splitMode) }
                     .map { request ->
                         when {
-                            request.matchesBasePlatform() -> {
+                            request.matchesPlatform(baseRequest) -> {
                                 val platformPath = resolveArtifactPath(basePlatformPathProvider.get())
                                 log.info("Reusing the base IntelliJ Platform at '$platformPath' for the requested IDE '${request.type}-${request.version}' instead of extracting a duplicate.")
-                                createIntelliJPlatformLocal(platformPath)
+                                dependencyFactory.create(objects.fileCollection().from(platformPath))
                             }
 
                             else -> {
@@ -420,11 +421,8 @@ class IntelliJPlatformDependenciesHelper(
                     reuseMatchingBasePlatform -> baseRequestProvider.orNull?.resolveLatestVersion()
                     else -> null
                 }
-                fun RequestedIntelliJPlatform.matchesBasePlatform() =
-                    baseRequest != null && type == baseRequest.type && version == baseRequest.version && productMode == baseRequest.productMode
-
                 requests
-                    .filterNot { it.matchesBasePlatform() || it.useCache || it.requiresManagedLocalPath(splitMode) }
+                    .filterNot { it.matchesPlatform(baseRequest) || it.useCache || it.requiresManagedLocalPath(splitMode) }
                     .map { createIntelliJPlatformDependency(it) }
             }.cached()
         )
