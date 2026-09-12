@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
+import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import kotlin.io.path.*
@@ -211,7 +212,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
         gradleProperties overwrite //language=properties
                 """
-                kotlin.stdlib.default.dependency = true
+                $KOTLIN_STDLIB_DEFAULT_DEPENDENCY = true
                 """.trimIndent()
 
         build(CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
@@ -224,11 +225,73 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
 
         gradleProperties overwrite //language=properties
                 """
-                kotlin.stdlib.default.dependency = false
+                $KOTLIN_STDLIB_DEFAULT_DEPENDENCY = false
                 """.trimIndent()
 
         build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertNotContains(HEADER, output)
+        }
+    }
+
+    @Test
+    fun `do not report Kotlin stdlib bundling disabled in subproject gradle properties`() {
+        settingsFile write //language=kotlin
+                """
+                include("plugin")
+                """.trimIndent()
+
+        gradleProperties overwrite //language=properties
+                """
+                org.jetbrains.intellij.platform.selfUpdateCheck = false
+                """.trimIndent()
+
+        dir.resolve("plugin/gradle.properties") write //language=properties
+                """
+                $KOTLIN_STDLIB_DEFAULT_DEPENDENCY = false
+                """.trimIndent()
+
+        dir.resolve("plugin/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform")
+                    id("org.jetbrains.kotlin.jvm")
+                }
+
+                kotlin {
+                    jvmToolchain(21)
+                }
+
+                repositories {
+                    mavenCentral()
+
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        ${intellijPlatformDependency().replace("\n", "\n                        ")}
+                    }
+                }
+
+                intellijPlatform {
+                    buildSearchableOptions = false
+                    instrumentCode = false
+                }
+                """.trimIndent()
+
+        dir.resolve("plugin/src/main/resources/META-INF/plugin.xml") write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                </idea-plugin>
+                """.trimIndent()
+
+        build(":plugin:${Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION}") {
+            assertNotContains("Kotlin stdlib dependency conflict", output)
         }
     }
 

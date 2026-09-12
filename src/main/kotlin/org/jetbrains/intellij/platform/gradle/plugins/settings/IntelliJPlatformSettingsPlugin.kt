@@ -4,12 +4,11 @@ package org.jetbrains.intellij.platform.gradle.plugins.settings
 
 import org.gradle.api.Plugin
 import org.gradle.api.initialization.Settings
+import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-
-private const val KOTLIN_STDLIB_DEFAULT_DEPENDENCY = "kotlin.stdlib.default.dependency"
 
 @Suppress("unused", "UnstableApiUsage")
 abstract class IntelliJPlatformSettingsPlugin : Plugin<Settings> {
