@@ -34,6 +34,18 @@ class TestFrameworkTypeTest {
     }
 
     @Test
+    fun `JUnit5 test framework types use published coordinates`() {
+        assertEquals(
+            listOf(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5")),
+            TestFrameworkType.JUnit5.coordinates.toList(),
+        )
+        assertEquals(
+            listOf(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5-code-insight")),
+            TestFrameworkType.JUnit5CodeInsight.coordinates.toList(),
+        )
+    }
+
+    @Test
     fun `Plugin test framework types use published coordinates`() {
         val coordinates = mapOf(
             TestFrameworkType.Plugin.IJent to Coordinates("com.jetbrains.intellij.platform", "ijent-test-framework"),
