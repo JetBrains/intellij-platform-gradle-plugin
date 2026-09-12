@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
+import java.io.IOException
 import java.nio.file.FileSystems
 import java.nio.file.Path
 import java.util.zip.ZipFile
@@ -50,7 +51,15 @@ open class IntelliJPlatformIntegrationTestBase(
 
     @AfterTest
     override fun tearDown() {
-        if (!reuseProjectState) {
+        if (reuseProjectState) {
+            // The reused per-class project directory (gradleHome/.integrationTestProjects/<class>) is intentionally
+            // kept across a class's test methods for speed, but it is never deleted by super.tearDown(), so every
+            // integration test class otherwise leaves its build outputs behind for the whole suite run. Prune the
+            // transient content here (keeping the project-local `.gradle` cache for reuse) so these directories stop
+            // accumulating across the suite. The deletion is tolerant and retrying: a file still locked by a
+            // background Gradle process on Windows must not fail the test.
+            pruneReusableProjectDirectory()
+        } else {
             super.tearDown()
         }
     }
@@ -137,5 +146,35 @@ open class IntelliJPlatformIntegrationTestBase(
                 it.deleteRecursively()
             }
         }
+    }
+
+    /**
+     * Tolerantly removes the transient content of the reused per-class project directory, keeping the project-local
+     * `.gradle` cache so subsequent test methods of the same class still reuse it. Each entry is deleted with retries
+     * to accommodate Windows keeping files briefly locked after a build; a still-locked entry is logged and skipped
+     * instead of failing the test.
+     */
+    private fun pruneReusableProjectDirectory() {
+        val projectDirectory = dir.takeIf { it.exists() } ?: return
+        val isWindows = System.getProperty("os.name").startsWith("Windows")
+        val maxAttempts = if (isWindows) 20 else 5
+        val retryDelayMs = if (isWindows) 250L else 100L
+
+        projectDirectory.listDirectoryEntries()
+            .filter { it.name != ".gradle" }
+            .forEach { entry ->
+                repeat(maxAttempts) { attempt ->
+                    try {
+                        entry.deleteRecursively()
+                        return@forEach
+                    } catch (exception: IOException) {
+                        if (attempt == maxAttempts - 1) {
+                            System.err.println("Failed to prune '$entry' after $maxAttempts attempts: ${exception.message}")
+                            return@forEach
+                        }
+                        Thread.sleep(retryDelayMs)
+                    }
+                }
+            }
     }
 }
