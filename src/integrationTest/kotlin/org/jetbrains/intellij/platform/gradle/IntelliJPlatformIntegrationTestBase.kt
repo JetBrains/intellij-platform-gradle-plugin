@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
-import java.io.IOException
 import java.nio.file.FileSystems
 import java.nio.file.Path
 import java.util.zip.ZipFile
@@ -37,7 +36,7 @@ open class IntelliJPlatformIntegrationTestBase(
             if (initialDir != dir) {
                 initialDir.deleteRecursively()
             }
-            pruneReusableProjectDirectory(dir, failOnFailure = true)
+            pruneReusableProjectDirectory(failOnFailure = true)
         }
 
         if (resourceName != null) {
@@ -58,7 +57,7 @@ open class IntelliJPlatformIntegrationTestBase(
             // transient content here (keeping the project-local `.gradle` cache for reuse) so these directories stop
             // accumulating across the suite. The deletion is tolerant and retrying: a file still locked by a
             // background Gradle process on Windows must not fail the test.
-            pruneReusableProjectDirectory(dir, failOnFailure = false)
+            pruneReusableProjectDirectory(failOnFailure = false)
         } else {
             super.tearDown()
         }
@@ -140,44 +139,10 @@ open class IntelliJPlatformIntegrationTestBase(
             )
             .createDirectories()
 
-}
-
-/**
- * Removes transient content from a reusable integration-test project while retaining its project-local `.gradle`
- * cache. Setup uses strict mode because stale files would contaminate the next test; teardown uses best-effort mode so
- * a briefly locked Windows file does not turn a successful test into a cleanup failure.
- */
-@OptIn(ExperimentalPathApi::class)
-internal fun pruneReusableProjectDirectory(
-    projectDirectory: Path,
-    failOnFailure: Boolean,
-    maxAttempts: Int = if (System.getProperty("os.name").startsWith("Windows")) 20 else 5,
-    retryDelayMs: Long = if (System.getProperty("os.name").startsWith("Windows")) 250L else 100L,
-    deleteEntry: (Path) -> Unit = { it.deleteRecursively() },
-) {
-    if (projectDirectory.notExists()) {
-        return
+    private fun pruneReusableProjectDirectory(failOnFailure: Boolean) {
+        val projectDirectory = dir.takeIf { it.exists() } ?: return
+        projectDirectory.listDirectoryEntries()
+            .filter { it.name != ".gradle" }
+            .forEach { it.deleteRecursivelyWithRetries(failOnFailure) }
     }
-
-    projectDirectory.listDirectoryEntries()
-        .filter { it.name != ".gradle" }
-        .forEach { entry ->
-            repeat(maxAttempts) { attempt ->
-                try {
-                    deleteEntry(entry)
-                    return@forEach
-                } catch (exception: IOException) {
-                    if (attempt == maxAttempts - 1) {
-                        if (failOnFailure) {
-                            throw exception
-                        }
-                        System.err.println("Failed to prune '$entry' after $maxAttempts attempts: ${exception.message}")
-                        return@forEach
-                    }
-                    if (retryDelayMs > 0) {
-                        Thread.sleep(retryDelayMs)
-                    }
-                }
-            }
-        }
 }

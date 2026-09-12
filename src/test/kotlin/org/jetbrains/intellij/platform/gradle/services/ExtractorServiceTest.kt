@@ -3,22 +3,22 @@
 package org.jetbrains.intellij.platform.gradle.services
 
 import org.gradle.testfixtures.ProjectBuilder
-import java.io.IOException
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicInteger
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createTempDirectory
+import kotlin.io.path.deleteExisting
 import kotlin.io.path.exists
 import kotlin.io.path.listDirectoryEntries
+import kotlin.io.path.name
 import kotlin.io.path.outputStream
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
+import kotlin.test.assertFails
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -26,17 +26,47 @@ import kotlin.test.assertTrue
 class ExtractorServiceTest {
 
     @Test
-    fun `extracts an archive through Gradle services and publishes the completed directory`() {
+    fun `extracts once and reuses the completed directory`() {
         val directory = createTempDirectory("extractor-service")
-        val archive = directory.resolve("archive.zip")
-        ZipOutputStream(archive.outputStream()).use { output ->
-            output.putNextEntry(ZipEntry("content.txt"))
-            output.write("content".toByteArray())
-            output.closeEntry()
-        }
-        val extractorService = ProjectBuilder.builder().build().objects.newInstance(ExtractorService::class.java)
+        val archive = directory.resolve("archive.zip").also { it.writeZip() }
         val target = directory.resolve("target")
+        val extractorService = extractorService()
 
+        extractorService.extract(archive, target)
+        archive.deleteExisting()
+        extractorService.extract(archive, target)
+
+        assertEquals("content", target.resolve("content.txt").readText())
+        assertEquals(listOf("content.txt"), target.listDirectoryEntries().map { it.name })
+        assertTrue(extractionCompleteMarker(target).exists())
+    }
+
+    @Test
+    fun `replaces an unmarked partial extraction`() {
+        val directory = createTempDirectory("extractor-service")
+        val archive = directory.resolve("archive.zip").also { it.writeZip() }
+        val target = directory.resolve("target").createDirectories()
+        target.resolve("partial.txt").writeText("partial")
+
+        extractorService().extract(archive, target)
+
+        assertFalse(target.resolve("partial.txt").exists())
+        assertEquals("content", target.resolve("content.txt").readText())
+        assertTrue(extractionCompleteMarker(target).exists())
+    }
+
+    @Test
+    fun `failed extraction can be retried`() {
+        val parent = createTempDirectory("extractor-service")
+        val archive = parent.resolve("invalid.zip").apply { writeText("not a zip") }
+        val target = parent.resolve("target").createDirectories()
+        target.resolve("partial.txt").writeText("old partial content")
+        val extractorService = extractorService()
+
+        assertFails { extractorService.extract(archive, target) }
+        assertFalse(extractionCompleteMarker(target).exists())
+
+        archive.writeZip()
         extractorService.extract(archive, target)
 
         assertEquals("content", target.resolve("content.txt").readText())
@@ -44,60 +74,11 @@ class ExtractorServiceTest {
     }
 
     @Test
-    fun `reuses only a completed extraction`() {
-        val target = createTempDirectory("extractor-service").resolve("target")
-        val invocations = AtomicInteger()
-
-        assertTrue(extractAtomically(target) {
-            invocations.incrementAndGet()
-            it.resolve("content.txt").writeText("complete")
-        })
-        assertFalse(extractAtomically(target) {
-            invocations.incrementAndGet()
-            it.resolve("content.txt").writeText("replaced")
-        })
-
-        assertEquals(1, invocations.get())
-        assertEquals("complete", target.resolve("content.txt").readText())
-        assertTrue(extractionCompleteMarker(target).exists())
-    }
-
-    @Test
-    fun `replaces an unmarked partial extraction`() {
-        val target = createTempDirectory("extractor-service").resolve("target").createDirectories()
-        target.resolve("partial.txt").writeText("partial")
-
-        assertTrue(extractAtomically(target) {
-            it.resolve("complete.txt").writeText("complete")
-        })
-
-        assertFalse(target.resolve("partial.txt").exists())
-        assertEquals("complete", target.resolve("complete.txt").readText())
-        assertTrue(extractionCompleteMarker(target).exists())
-    }
-
-    @Test
-    fun `failed extraction is never published`() {
-        val parent = createTempDirectory("extractor-service")
-        val target = parent.resolve("target").createDirectories()
-        target.resolve("partial.txt").writeText("old partial content")
-
-        assertFailsWith<IOException> {
-            extractAtomically(target) {
-                it.resolve("new-partial.txt").writeText("new partial content")
-                throw IOException("interrupted")
-            }
-        }
-
-        assertEquals("old partial content", target.resolve("partial.txt").readText())
-        assertFalse(extractionCompleteMarker(target).exists())
-        assertTrue(parent.listDirectoryEntries().none { it.fileName.toString().startsWith(".target.tmp-") })
-    }
-
-    @Test
     fun `concurrent callers publish one extraction`() {
-        val target = createTempDirectory("extractor-service").resolve("target")
-        val invocations = AtomicInteger()
+        val directory = createTempDirectory("extractor-service")
+        val archive = directory.resolve("archive.zip").also { it.writeZip() }
+        val target = directory.resolve("target")
+        val extractorService = extractorService()
         val failure = AtomicReference<Throwable?>(null)
         val start = CountDownLatch(1)
 
@@ -105,11 +86,7 @@ class ExtractorServiceTest {
             Thread {
                 start.await()
                 runCatching {
-                    extractAtomically(target) { temporaryDirectory ->
-                        invocations.incrementAndGet()
-                        Thread.sleep(100)
-                        temporaryDirectory.resolve("content.txt").writeText("complete")
-                    }
+                    extractorService.extract(archive, target)
                 }.onFailure { failure.compareAndSet(null, it) }
             }
         }
@@ -119,7 +96,16 @@ class ExtractorServiceTest {
         callers.forEach(Thread::join)
 
         assertNull(failure.get(), "A concurrent extraction failed: ${failure.get()}")
-        assertEquals(1, invocations.get())
-        assertEquals("complete", target.resolve("content.txt").readText())
+        assertEquals("content", target.resolve("content.txt").readText())
+        assertTrue(extractionCompleteMarker(target).exists())
+    }
+
+    private fun extractorService() =
+        ProjectBuilder.builder().build().objects.newInstance(ExtractorService::class.java)
+
+    private fun java.nio.file.Path.writeZip() = ZipOutputStream(outputStream()).use { output ->
+        output.putNextEntry(ZipEntry("content.txt"))
+        output.write("content".toByteArray())
+        output.closeEntry()
     }
 }

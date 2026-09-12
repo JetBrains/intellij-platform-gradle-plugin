@@ -51,8 +51,7 @@ import kotlin.io.path.*
 private fun RequestedIntelliJPlatform.requiresManagedLocalPath(splitMode: Boolean) =
     splitMode || productMode != ProductMode.MONOLITH
 
-// `useInstaller` and `useCache` select acquisition/storage mechanisms; they do not change the resulting IDE identity.
-private fun RequestedIntelliJPlatform.matchesPlatform(base: RequestedIntelliJPlatform?) =
+private fun RequestedIntelliJPlatform.matches(base: RequestedIntelliJPlatform?) =
     base != null && type == base.type && version == base.version && productMode == base.productMode
 
 private data class LocalIntelliJPlatform(
@@ -380,18 +379,13 @@ class IntelliJPlatformDependenciesHelper(
         val basePlatformPathProvider = platformPathProvider(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
 
         configurations[localArchivesConfigurationName].dependencies.addAllLater(
-            provider {
-                val requests = requestsProvider.get()
-                val splitMode = splitModeProvider.get()
-                val baseRequest = when {
-                    reuseMatchingBasePlatform -> baseRequestProvider.orNull?.resolveLatestVersion()
-                    else -> null
-                }
+            requestsProvider.zip(splitModeProvider) { requests, splitMode ->
+                val baseRequest = if (reuseMatchingBasePlatform) baseRequestProvider.orNull?.resolveLatestVersion() else null
                 requests
-                    .filter { it.matchesPlatform(baseRequest) || it.useCache || it.requiresManagedLocalPath(splitMode) }
+                    .filter { it.matches(baseRequest) || it.useCache || it.requiresManagedLocalPath(splitMode) }
                     .map { request ->
                         when {
-                            request.matchesPlatform(baseRequest) -> {
+                            request.matches(baseRequest) -> {
                                 val platformPath = resolveArtifactPath(basePlatformPathProvider.get())
                                 log.info("Reusing the base IntelliJ Platform at '$platformPath' for the requested IDE '${request.type}-${request.version}' instead of extracting a duplicate.")
                                 dependencyFactory.create(objects.fileCollection().from(platformPath))
@@ -414,15 +408,10 @@ class IntelliJPlatformDependenciesHelper(
         )
 
         configurations[dependencyArchivesConfigurationName].dependencies.addAllLater(
-            provider {
-                val requests = requestsProvider.get()
-                val splitMode = splitModeProvider.get()
-                val baseRequest = when {
-                    reuseMatchingBasePlatform -> baseRequestProvider.orNull?.resolveLatestVersion()
-                    else -> null
-                }
+            requestsProvider.zip(splitModeProvider) { requests, splitMode ->
+                val baseRequest = if (reuseMatchingBasePlatform) baseRequestProvider.orNull?.resolveLatestVersion() else null
                 requests
-                    .filterNot { it.matchesPlatform(baseRequest) || it.useCache || it.requiresManagedLocalPath(splitMode) }
+                    .filterNot { it.matches(baseRequest) || it.useCache || it.requiresManagedLocalPath(splitMode) }
                     .map { createIntelliJPlatformDependency(it) }
             }.cached()
         )

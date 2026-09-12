@@ -52,20 +52,18 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: .gradle/testGradleHome/.intellijPlatform
-          key: test-gradle-home-v6-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml', 'src/test/**/*.kt', 'src/test/resources/**', 'src/testFixtures/**/*.kt', 'src/integrationTest/**/*.kt', 'src/integrationTest/resources/**') }}
+          key: test-gradle-home-v5-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml', 'src/test/**/*.kt', 'src/test/resources/**', 'src/testFixtures/**/*.kt', 'src/integrationTest/**/*.kt', 'src/integrationTest/resources/**') }}
           restore-keys: |
-            test-gradle-home-v6-intellij-platform-${{ runner.os }}-
+            test-gradle-home-v5-intellij-platform-${{ runner.os }}-
 
-      - name: Restore Gradle TestKit shared IDE cache
-        id: gradle-testkit-ide-cache
+      - name: Restore Gradle TestKit shared dependency cache
+        id: gradle-testkit-dependencies-cache
         uses: actions/cache/restore@v6
         with:
-          path: |
-            .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
-            .gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
-          key: test-gradle-home-v2-testkit-ide-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          path: .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+          key: test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v2-testkit-ide-${{ runner.os }}-
+            test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-
 
       - name: Restore Gradle TestKit cache
         id: gradle-testkit-cache
@@ -74,13 +72,12 @@ jobs:
           path: |
             .gradle/testGradleHome/.testKit
             !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
-            !.gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
           key: test-gradle-home-v4-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
             test-gradle-home-v4-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-
 
       - name: Prime IntelliJ Platform test cache
-        if: ${{ steps.intellij-platform-cache.outputs.cache-hit != 'true' || steps.gradle-testkit-ide-cache.outputs.cache-hit != 'true' || steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
+        if: ${{ steps.intellij-platform-cache.outputs.cache-hit != 'true' || steps.gradle-testkit-dependencies-cache.outputs.cache-hit != 'true' || steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
           TEST_NAME: ${{ inputs.testName }}
@@ -117,9 +114,9 @@ jobs:
           path: .gradle/testGradleHome/.intellijPlatform
           key: ${{ steps.intellij-platform-cache.outputs.cache-primary-key }}
 
-      - name: Check Gradle TestKit shared IDE cache
-        if: ${{ always() && !cancelled() && steps.gradle-testkit-ide-cache.outputs.cache-hit != 'true' }}
-        id: gradle-testkit-ide-cache-path
+      - name: Check Gradle TestKit shared dependency cache
+        if: ${{ success() && steps.gradle-testkit-dependencies-cache.outputs.cache-hit != 'true' }}
+        id: gradle-testkit-dependencies-cache-path
         shell: bash
         run: |
           if [ -d .gradle/testGradleHome/.testKit ] && [ -n "$(find .gradle/testGradleHome/.testKit -path '*/caches/modules-2/*' -print -quit)" ]; then
@@ -128,14 +125,12 @@ jobs:
             echo "present=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Save Gradle TestKit shared IDE cache
-        if: ${{ always() && !cancelled() && steps.gradle-testkit-ide-cache.outputs.cache-hit != 'true' && steps.gradle-testkit-ide-cache-path.outputs.present == 'true' }}
+      - name: Save Gradle TestKit shared dependency cache
+        if: ${{ success() && steps.gradle-testkit-dependencies-cache.outputs.cache-hit != 'true' && steps.gradle-testkit-dependencies-cache-path.outputs.present == 'true' }}
         uses: actions/cache/save@v6
         with:
-          path: |
-            .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
-            .gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
-          key: ${{ steps.gradle-testkit-ide-cache.outputs.cache-primary-key }}
+          path: .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+          key: ${{ steps.gradle-testkit-dependencies-cache.outputs.cache-primary-key }}
 
       - name: Check Gradle TestKit cache
         if: ${{ always() && !cancelled() && steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
@@ -155,5 +150,4 @@ jobs:
           path: |
             .gradle/testGradleHome/.testKit
             !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
-            !.gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
           key: ${{ steps.gradle-testkit-cache.outputs.cache-primary-key }}

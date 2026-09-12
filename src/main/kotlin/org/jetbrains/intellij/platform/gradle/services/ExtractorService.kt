@@ -16,10 +16,7 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathReso
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.resolvePlatformPath
 import java.nio.channels.FileChannel
-import java.nio.file.AtomicMoveNotSupportedException
-import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.StandardCopyOption.ATOMIC_MOVE
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.nio.file.StandardOpenOption.CREATE
 import java.nio.file.StandardOpenOption.WRITE
@@ -28,72 +25,20 @@ import javax.inject.Inject
 import kotlin.concurrent.withLock
 import kotlin.io.path.*
 
-internal const val EXTRACTION_COMPLETE_MARKER = ".intellij-platform-extracted"
-
-private val extractionLocks = Array(64) { ReentrantLock() }
+private const val EXTRACTION_COMPLETE_MARKER = ".intellij-platform-extracted"
 
 internal fun extractionCompleteMarker(targetDirectory: Path): Path =
     targetDirectory.resolveSibling(".${targetDirectory.name}$EXTRACTION_COMPLETE_MARKER")
-
-/**
- * Publishes extracted content only after [extract] completes successfully.
- *
- * A JVM-local lock prevents overlapping `FileChannel` locks in one process, while the sibling lock file serializes
- * Gradle processes that share an IDE cache. Extraction happens in a sibling temporary directory so consumers never
- * observe a partially populated target. A sibling completion marker is published after the directory move so cache
- * metadata never becomes part of the extracted content.
- *
- * @return `true` when content was extracted, or `false` when a completed target was reused.
- */
-@OptIn(ExperimentalPathApi::class)
-internal fun extractAtomically(targetDirectory: Path, extract: (Path) -> Unit): Boolean {
-    val target = targetDirectory.toAbsolutePath().normalize()
-    val parent = requireNotNull(target.parent) { "Extraction target '$target' has no parent directory." }
-    val lock = extractionLocks[Math.floorMod(target.hashCode(), extractionLocks.size)]
-
-    return lock.withLock {
-        parent.createDirectories()
-        val lockFile = target.resolveSibling(".${target.name}.lock")
-        val completionMarker = extractionCompleteMarker(target)
-
-        FileChannel.open(lockFile, CREATE, WRITE).use { channel ->
-            channel.lock().use {
-                if (target.isDirectory() && completionMarker.isRegularFile()) {
-                    return@use false
-                }
-
-                completionMarker.deleteIfExists()
-                val temporaryDirectory = Files.createTempDirectory(parent, ".${target.name}.tmp-")
-                try {
-                    extract(temporaryDirectory)
-
-                    if (target.exists()) {
-                        target.deleteRecursively()
-                    }
-
-                    try {
-                        Files.move(temporaryDirectory, target, ATOMIC_MOVE)
-                    } catch (_: AtomicMoveNotSupportedException) {
-                        Files.move(temporaryDirectory, target)
-                    }
-                    completionMarker.writeText("complete\n")
-                } finally {
-                    if (temporaryDirectory.exists()) {
-                        temporaryDirectory.deleteRecursively()
-                    }
-                }
-
-                true
-            }
-        }
-    }
-}
 
 abstract class ExtractorService @Inject constructor(
     private val archiveOperations: ArchiveOperations,
     private val providerFactory: ProviderFactory,
     private val fileSystemOperations: FileSystemOperations,
 ) : BuildService<BuildServiceParameters.None> {
+
+    private companion object {
+        val EXTRACTION_LOCK = ReentrantLock()
+    }
 
     private val log = Logger(javaClass)
 
@@ -112,18 +57,44 @@ abstract class ExtractorService @Inject constructor(
      * extraction is already available. The completion check intentionally stays inside this BuildService so it is not
      * captured as a configuration-cache input.
      */
+    @OptIn(ExperimentalPathApi::class)
     internal fun extract(targetDirectory: Path, path: () -> Path) {
-        val extracted = extractAtomically(targetDirectory) { temporaryDirectory ->
-            extractArchive(path(), temporaryDirectory)
-        }
+        val target = targetDirectory.toAbsolutePath().normalize()
+        val parent = requireNotNull(target.parent) { "Extraction target '$target' has no parent directory." }
 
-        if (!extracted) {
-            log.info("Reusing the completed archive extraction in '$targetDirectory'.")
+        // FileChannel locks overlap within one JVM, so follow the local Ivy writer and serialize before acquiring one.
+        EXTRACTION_LOCK.withLock {
+            parent.createDirectories()
+            val completionMarker = extractionCompleteMarker(target)
+            val lockFile = target.resolveSibling(".${target.name}.lock")
+
+            FileChannel.open(lockFile, CREATE, WRITE).use { channel ->
+                channel.lock().use {
+                    if (target.isDirectory() && completionMarker.isRegularFile()) {
+                        log.info("Reusing the completed archive extraction in '$target'.")
+                        return@use
+                    }
+
+                    completionMarker.deleteIfExists()
+                    if (target.exists()) {
+                        target.deleteRecursively()
+                    }
+
+                    try {
+                        target.createDirectories()
+                        extractArchive(path(), target)
+                        completionMarker.writeText("complete\n")
+                    } catch (throwable: Throwable) {
+                        runCatching { target.deleteRecursively() }
+                        throw throwable
+                    }
+                }
+            }
         }
     }
 
     private fun extractArchive(path: Path, targetDirectory: Path) {
-        log.info("Extracting archive '$path' to temporary directory '$targetDirectory'.")
+        log.info("Extracting archive '$path' to directory '$targetDirectory'.")
 
         val name = path.nameWithoutExtension.removeSuffix(".tar")
         val extension = path.name.removePrefix("$name.")
@@ -182,6 +153,6 @@ abstract class ExtractorService @Inject constructor(
                 .forEach { it.deleteExisting() }
         }
 
-        log.info("Preparing extraction in '$targetDirectory' completed.")
+        log.info("Extracting to '$targetDirectory' completed.")
     }
 }

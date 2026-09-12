@@ -57,19 +57,17 @@ jobs:
         uses: actions/cache/restore@v6
         with:
           path: .gradle/testGradleHome/.intellijPlatform
-          key: test-gradle-home-v6-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml', 'src/test/**/*.kt', 'src/test/resources/**', 'src/testFixtures/**/*.kt', 'src/integrationTest/**/*.kt', 'src/integrationTest/resources/**') }}
+          key: test-gradle-home-v5-intellij-platform-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml', 'src/test/**/*.kt', 'src/test/resources/**', 'src/testFixtures/**/*.kt', 'src/integrationTest/**/*.kt', 'src/integrationTest/resources/**') }}
           restore-keys: |
-            test-gradle-home-v6-intellij-platform-${{ runner.os }}-
+            test-gradle-home-v5-intellij-platform-${{ runner.os }}-
 
-      - name: Restore Gradle TestKit shared IDE cache
+      - name: Restore Gradle TestKit shared dependency cache
         uses: actions/cache/restore@v6
         with:
-          path: |
-            .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
-            .gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
-          key: test-gradle-home-v2-testkit-ide-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          path: .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+          key: test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v2-testkit-ide-${{ runner.os }}-
+            test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-
 
       - name: Restore Gradle TestKit cache
         uses: actions/cache/restore@v6
@@ -77,7 +75,6 @@ jobs:
           path: |
             .gradle/testGradleHome/.testKit
             !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
-            !.gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
           key: test-gradle-home-v4-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
             test-gradle-home-v4-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-
