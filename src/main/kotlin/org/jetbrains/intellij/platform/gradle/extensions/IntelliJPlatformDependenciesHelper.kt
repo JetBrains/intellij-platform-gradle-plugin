@@ -51,6 +51,9 @@ import kotlin.io.path.*
 private fun RequestedIntelliJPlatform.requiresManagedLocalPath(splitMode: Boolean) =
     splitMode || productMode != ProductMode.MONOLITH
 
+private fun RequestedIntelliJPlatform.matches(base: RequestedIntelliJPlatform?) =
+    base != null && type == base.type && version == base.version && productMode == base.productMode
+
 private data class LocalIntelliJPlatform(
     val platformPath: Path,
     val productInfo: ProductInfo,
@@ -340,6 +343,7 @@ class IntelliJPlatformDependenciesHelper(
         localArchivesConfigurationName: String,
         requiredConfigurationName: String? = null,
         registerRequestedPlatform: Boolean = true,
+        reuseMatchingBasePlatform: Boolean = false,
     ) {
         markIntelliJPlatformDependencyExplicit(dependencyConfigurationName)
 
@@ -368,21 +372,36 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
+        // When enabled (used by the Plugin Verifier IDEs), a requested IDE that matches the base IntelliJ Platform by
+        // type, version, and product mode reuses the base platform's already-extracted directory instead of
+        // downloading and extracting a second, identical copy (into the Gradle transform cache or `.intellijPlatform/ides`).
+        val baseRequestProvider = requestedIntelliJPlatforms[Configurations.INTELLIJ_PLATFORM_DEPENDENCY]
+        val basePlatformPathProvider = platformPathProvider(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
+
         configurations[localArchivesConfigurationName].dependencies.addAllLater(
             requestsProvider.zip(splitModeProvider) { requests, splitMode ->
+                val baseRequest = if (reuseMatchingBasePlatform) baseRequestProvider.orNull?.resolveLatestVersion() else null
                 requests
-                    .filter { it.useCache || it.requiresManagedLocalPath(splitMode) }
+                    .filter { it.matches(baseRequest) || it.useCache || it.requiresManagedLocalPath(splitMode) }
                     .map { request ->
-                        request.let {
-                            val localPath = cacheResolver.resolve(localArchivesConfigurationName) {
-                                type = it.type
-                                version = it.version
-                                productMode = it.productMode
-                                useInstaller = it.useInstaller
-                                useCache = it.useCache
+                        when {
+                            request.matches(baseRequest) -> {
+                                val platformPath = resolveArtifactPath(basePlatformPathProvider.get())
+                                log.info("Reusing the base IntelliJ Platform at '$platformPath' for the requested IDE '${request.type}-${request.version}' instead of extracting a duplicate.")
+                                dependencyFactory.create(objects.fileCollection().from(platformPath))
                             }
-                            val platformPath = resolveArtifactPath(localPath)
-                            createIntelliJPlatformLocal(platformPath)
+
+                            else -> {
+                                val localPath = cacheResolver.resolve(localArchivesConfigurationName) {
+                                    type = request.type
+                                    version = request.version
+                                    productMode = request.productMode
+                                    useInstaller = request.useInstaller
+                                    useCache = request.useCache
+                                }
+                                val platformPath = resolveArtifactPath(localPath)
+                                createIntelliJPlatformLocal(platformPath)
+                            }
                         }
                     }
             }.cached()
@@ -390,8 +409,9 @@ class IntelliJPlatformDependenciesHelper(
 
         configurations[dependencyArchivesConfigurationName].dependencies.addAllLater(
             requestsProvider.zip(splitModeProvider) { requests, splitMode ->
+                val baseRequest = if (reuseMatchingBasePlatform) baseRequestProvider.orNull?.resolveLatestVersion() else null
                 requests
-                    .filterNot { it.useCache || it.requiresManagedLocalPath(splitMode) }
+                    .filterNot { it.matches(baseRequest) || it.useCache || it.requiresManagedLocalPath(splitMode) }
                     .map { createIntelliJPlatformDependency(it) }
             }.cached()
         )
