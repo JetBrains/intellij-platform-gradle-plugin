@@ -102,6 +102,9 @@ class WriteTextAtomicallyIfChangedTest {
                                 "Reader observed a truncated or half-written descriptor of length ${content.length}.",
                             )
                         }
+                        // Windows cannot replace a file while another process briefly holds it open. Avoid starving
+                        // the writers with an artificial zero-pause read loop while keeping reads concurrent.
+                        Thread.sleep(1)
                     }
                 } catch (throwable: Throwable) {
                     failure.compareAndSet(null, throwable)
