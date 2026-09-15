@@ -120,4 +120,12 @@ class VersionTest {
 
         assertEquals(JavaVersion.toVersion(25), productInfo.toPlatformJavaVersion())
     }
+
+    @Test
+    fun `latest EAP snapshot uses the first available platform Java version`() {
+        assertEquals(
+            JavaVersion.VERSION_25,
+            Version.parse("LATEST-EAP-SNAPSHOT").toPlatformJavaVersion(),
+        )
+    }
 }

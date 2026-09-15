@@ -17,7 +17,8 @@ val PlatformJavaVersions = mapOf(
 )
 
 internal fun Version.toPlatformJavaVersion() =
-    PlatformJavaVersions.entries.first { toPlatformBuildVersion() >= it.key }.value
+    PlatformJavaVersions.entries.firstOrNull { toPlatformBuildVersion() >= it.key }?.value
+        ?: PlatformJavaVersions.entries.first().value
 
 internal fun ProductInfo.toPlatformJavaVersion() =
     minRequiredJavaVersion

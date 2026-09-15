@@ -2,6 +2,12 @@
 
 ## [next]
 
+## Fixed
+
+- Fix `NoSuchElementException` when `LATEST-EAP-SNAPSHOT` is used as the IntelliJ Platform version by falling back to the first available platform Java version (`VERSION_25`) JetBrains/intellij-platform-gradle-plugin#2243
+
+## [2.19.0] - 2026-09-15
+
 ### Added
 
 - Add the incubating `subscriptionKey` file property to the `intellijPlatform` extension and `PrepareSandboxTask`. It copies the key to `config/idea.key` and enables the Ultimate module in the prepared sandbox. The `org.jetbrains.intellij.platform.subscriptionKey` Gradle property configures the project default.
@@ -45,12 +51,6 @@
 - Write local Ivy descriptors for platform artifacts atomically and guard them with a cross-process file lock, so a shared `localPlatformArtifacts` cache no longer produces truncated/empty descriptors (`unexpected end of file`, `Could not resolve bundledPlugin:…`) when multiple Gradle worker processes write concurrently with IntelliJ's parallel Gradle model fetching enabled. On Windows the atomic replace is retried with a short backoff when a concurrent reader still holds the descriptor open, avoiding sharing-violation failures without ever exposing a half-written file JetBrains/intellij-platform-gradle-plugin#2068
 - Resolve the `PY` product code to the unified `PyCharm` (installer `python/pycharm`) for 2025.3+ so that PyCharm targets requested via `platformType = PY` no longer fail with `Couldn't resolve PyCharmProfessional download URL for version`. Two enum entries share `code = "PY"`, and `associateBy` kept the last one, so `PY` always resolved to `PyCharmProfessional`, making the version-based downgrade unreachable. The unified `PyCharm` entry is now declared after `PyCharmProfessional` (mirroring how `IntellijIdea` follows `IntellijIdeaUltimate`), so `PY` resolves to `PyCharm` for 2025.3+ and downgrades to `PyCharmProfessional` only for earlier versions JetBrains/intellij-platform-gradle-plugin#2218
 - Store the serialized IDE layout index under the IDEs cache (honoring `org.jetbrains.intellij.platform.intellijPlatformIdesCache`) instead of the per-project `.intellijPlatform/layoutIndex`, so it lives beside the extracted IDEs and survives workspace cleaning; any index under the old path is orphaned and rebuilt once JetBrains/intellij-platform-gradle-plugin#2199
-
-## [2.18.1] - 2026-07-10
-
-### Fixed
-
-- Exclude the `org.jetbrains.plugins.vue` bundled plugin when composing tests classpath, as its LSP initializer fails in test environments and crashes tests JetBrains/intellij-platform-gradle-plugin#2183
 
 ## [2.18.1] - 2026-07-10
 
@@ -1857,7 +1857,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.1...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.19.0...HEAD
+[2.19.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.1...v2.19.0
 [2.18.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.0...v2.18.1
 [2.18.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.17.0...v2.18.0
 [2.17.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.16.0...v2.17.0
