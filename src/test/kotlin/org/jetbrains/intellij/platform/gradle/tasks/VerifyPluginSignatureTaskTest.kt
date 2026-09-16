@@ -9,6 +9,8 @@ import kotlin.test.Test
 
 class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
 
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
+
     private val tripleQuote = "\"\"\""
 
     @Test
@@ -132,6 +134,7 @@ class VerifyPluginSignatureTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
+        build(Tasks.VERIFY_PLUGIN_SIGNATURE)
         buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_SIGNATURE) {
             assertTaskOutcome(Tasks.VERIFY_PLUGIN_SIGNATURE, TaskOutcome.NO_SOURCE)
         }
