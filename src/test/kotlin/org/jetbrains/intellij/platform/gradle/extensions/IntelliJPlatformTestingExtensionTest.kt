@@ -373,4 +373,43 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
             assertNotContains("241.11111.11", output)
         }
     }
+
+    @Test
+    fun `custom testIde task with copyFromProject inherits project test bundled plugins and modules configurations`() {
+        buildFile write //language=kotlin
+                """
+                val customTest by intellijPlatformTesting.testIde.registering {
+                    copyFromProject()
+                }
+
+                println("INHERIT=" + customTest.get().inheritFromProject.get())
+                println("BUNDLED_PLUGINS_EXTENDS=" + configurations["intellijPlatformTestBundledPlugins_customTest"].extendsFrom.map { it.name })
+                println("BUNDLED_MODULES_EXTENDS=" + configurations["intellijPlatformTestBundledModules_customTest"].extendsFrom.map { it.name })
+                """.trimIndent()
+
+        build("help") {
+            assertContains("INHERIT=true", output)
+            assertContains("BUNDLED_PLUGINS_EXTENDS=[intellijPlatformTestBundledPlugins]", output)
+            assertContains("BUNDLED_MODULES_EXTENDS=[intellijPlatformTestBundledModules]", output)
+        }
+    }
+
+    @Test
+    fun `custom testIde task without copyFromProject does not inherit project test bundled plugins and modules configurations`() {
+        buildFile write //language=kotlin
+                """
+                val customTest by intellijPlatformTesting.testIde.registering {
+                }
+
+                println("INHERIT=" + customTest.get().inheritFromProject.get())
+                println("BUNDLED_PLUGINS_EXTENDS=" + configurations["intellijPlatformTestBundledPlugins_customTest"].extendsFrom.map { it.name })
+                println("BUNDLED_MODULES_EXTENDS=" + configurations["intellijPlatformTestBundledModules_customTest"].extendsFrom.map { it.name })
+                """.trimIndent()
+
+        build("help") {
+            assertContains("INHERIT=false", output)
+            assertContains("BUNDLED_PLUGINS_EXTENDS=[]", output)
+            assertContains("BUNDLED_MODULES_EXTENDS=[]", output)
+        }
+    }
 }
