@@ -241,7 +241,15 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             // produced by a non-plugin project compatible with the request.
             matching { it.name in COMPOSED_JAR_PROJECT_DEPENDENCY_CONFIGURATIONS }.configureEach {
                 dependencies.withType<ProjectDependency>().configureEach {
-                    attributes(requestComposedJar)
+                    // Gradle forbids attaching attributes to a dependency that pins an explicit target
+                    // configuration or artifacts (e.g. `project(":core", "testOutput")`) and fails the build with
+                    // "Cannot add attributes or capabilities on a dependency that specifies artifacts or
+                    // configuration information". Such dependencies already select a concrete variant, so the
+                    // composed-jar request does not apply to them.
+                    // See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2247
+                    if (targetConfiguration == null && artifacts.isEmpty()) {
+                        attributes(requestComposedJar)
+                    }
                 }
             }
 
