@@ -5,6 +5,7 @@
 ## Fixed
 
 - Fix `NoSuchElementException` when `LATEST-EAP-SNAPSHOT` is used as the IntelliJ Platform version by falling back to the first available platform Java version (`VERSION_25`) JetBrains/intellij-platform-gradle-plugin#2243
+- Stop failing the build with "Cannot add attributes or capabilities on a dependency that specifies artifacts or configuration information" when a project dependency pins an explicit target configuration or artifacts, such as `testImplementation(project(":core", "testOutput"))` used to share test classes between modules. Since `2.19.0` the module plugin requests the `composed-jar` library-elements attribute on every project dependency, which Gradle rejects for such dependencies; the request is now skipped for them, since they already select a concrete variant JetBrains/intellij-platform-gradle-plugin#2247
 
 ## [2.19.0] - 2026-09-15
 
