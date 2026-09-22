@@ -2,8 +2,9 @@
 
 ## [next]
 
-## Fixed
+### Fixed
 
+- Change duplicates strategy in PrepareSandboxTask to `EXCLUDE` JetBrains/intellij-platform-gradle-plugin#2191
 - Fix `NoSuchElementException` when `LATEST-EAP-SNAPSHOT` is used as the IntelliJ Platform version by falling back to the first available platform Java version (`VERSION_25`) JetBrains/intellij-platform-gradle-plugin#2243
 
 ## [2.19.0] - 2026-09-15

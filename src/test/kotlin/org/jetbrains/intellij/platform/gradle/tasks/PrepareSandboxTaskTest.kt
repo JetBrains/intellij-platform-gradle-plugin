@@ -151,7 +151,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     implementation(project("nestedProject"))
                 }
-                
+
                 intellijPlatform {
                     pluginConfiguration {
                         name = "myPluginName"
@@ -169,23 +169,23 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 plugins {
                     id("org.jetbrains.intellij.platform")
                 }
-                
+
                 version = "1.0.0"
-                
-                repositories { 
+
+                repositories {
                     mavenCentral()
-                    
+
                     intellijPlatform {
                         releases()
                     }
                 }
-                
+
                 dependencies {
                     intellijPlatform {
                         create("$intellijPlatformType", "$intellijPlatformVersion")
                     }
                 }
-                
+
                 intellijPlatform {
                     instrumentCode = false
                     pluginConfiguration {
@@ -264,12 +264,12 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 dependencies {
                     implementation(project(":nestedProject"))
                 }
-                
+
                 project(":nestedProject") {
                     intellijPlatform {
                         instrumentCode = false
                         pluginConfiguration {
-                            name = "myNestedPluginName"            
+                            name = "myNestedPluginName"
                         }
                     }
                 }
@@ -1403,6 +1403,36 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
                 "config/options/updates.xml",
                 "config/disabled_plugins.txt",
                 "plugins/projectName/lib/projectName-1.0.1.jar",
+            ),
+            collectPaths(sandbox),
+        )
+    }
+
+    @Test
+    fun `handle duplicate plugin files in pluginsClasspath`() {
+        val file1 = dir.resolve("plugin1/my-plugin/lib/some.jar")
+        file1.ensureExists()
+        file1.write("foo")
+        val file2 = dir.resolve("plugin2/my-plugin/lib/some.jar")
+        file2.ensureExists()
+        file2.write("bar")
+        writeJavaFile()
+
+        buildFile write //language=kotlin
+                """
+                tasks.named<org.jetbrains.intellij.platform.gradle.tasks.PrepareSandboxTask>("${Tasks.PREPARE_SANDBOX}") {
+                    pluginsClasspath.from(file("plugin1"), file("plugin2"))
+                }
+                """.trimIndent()
+
+        build(Tasks.PREPARE_SANDBOX)
+
+        assertEquals(
+            setOf(
+                "config/options/updates.xml",
+                "config/disabled_plugins.txt",
+                "plugins/projectName/lib/projectName-1.0.0.jar",
+                "plugins/my-plugin/lib/some.jar",
             ),
             collectPaths(sandbox),
         )

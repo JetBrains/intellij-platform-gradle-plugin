@@ -3,7 +3,6 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
-import groovy.lang.Closure
 import org.gradle.api.Action
 import org.gradle.api.GradleException
 import org.gradle.api.Incubating
@@ -372,7 +371,7 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
     init {
         group = null
         description = "Prepares a sandbox environment with the plugin and its dependencies installed."
-        duplicatesStrategy = DuplicatesStrategy.WARN
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     }
 
     internal fun includeCurrentNativeVariant() = with(project.currentNativeVariantFiles(name)) {
