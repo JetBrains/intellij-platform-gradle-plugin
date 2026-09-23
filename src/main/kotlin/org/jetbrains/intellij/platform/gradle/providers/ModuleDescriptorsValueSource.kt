@@ -120,12 +120,18 @@ private fun String.toCoordinatesOrNull(): Coordinates? {
     )
 }
 
-private val explicitExclusions = setOf(
-    Coordinates("junit", "junit"),
-    Coordinates("org.jetbrains", "jetCheck"),
-    Coordinates("org.hamcrest", "hamcrest-core"),
-    Coordinates("org.jetbrains.teamcity", "serviceMessages"),
-) + kotlinStdlib + coroutines
+private val explicitExclusions = buildSet {
+    addAll(
+        setOf(
+            Coordinates("junit", "junit"),
+            Coordinates("org.jetbrains", "jetCheck"),
+            Coordinates("org.hamcrest", "hamcrest-core"),
+            Coordinates("org.jetbrains.teamcity", "serviceMessages"),
+        )
+    )
+    addAll(kotlinStdlib)
+    addAll(coroutines)
+}
 
 private val fallbackExclusions = setOf(
     // TestFrameworkType.Platform
