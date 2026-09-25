@@ -8,6 +8,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        uses: jlumbroso/free-disk-space@v2.0.0
+        with:
+          preinstalled-runtimes: false
+          large-packages: false
+
       - name: Fetch Sources
         uses: actions/checkout@v7
         with:

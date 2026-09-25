@@ -32,9 +32,9 @@ jobs:
       # Free GitHub Actions Environment Disk Space
       - name: Maximize Build Space
         if: runner.os == 'Linux'
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@v2.0.0
         with:
-          tool-cache: false
+          preinstalled-runtimes: false
           large-packages: false
 
       - name: Fetch Sources
