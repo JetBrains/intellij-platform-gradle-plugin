@@ -117,35 +117,32 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
         log.info("Compiling forms and instrumenting code with nullability preconditions")
         val instrumentNotNull = prepareNotNullInstrumenting()
 
-        val outputDirPath = outputDirectory.asPath
-        val temporaryDirPath = temporaryDir
-            .toPath()
-            .also {
+        val outputDirPath = outputDirectory.asPath.also {
+            if (!inputChanges.isIncremental) {
                 it.deleteRecursively()
-                it.createDirectories()
             }
+            it.createDirectories()
+        }
+
+        val classesRoots = classesDirs.map { it.toPath() }
+        val sourceRoots = sourceDirs.map { it.toPath() }
 
         inputChanges.getFileChanges(formsDirs).forEach { change ->
+            if (change.changeType == ChangeType.REMOVED) {
+                return@forEach
+            }
             val path = change.file.toPath()
-            val sourceDir = sourceDirs
-                .find { path.startsWith(it.toPath()) }
-                ?.toPath()
+            val sourceDir = sourceRoots
+                .find { path.startsWith(it) }
                 ?: return@forEach
             val relativePath = sourceDir.relativize(path)
 
-            val compiledClassRelativePath = relativePath.toString().replace(".form", ".class")
-            val compiledClassPath = classesDirs.asFileTree
-                .find { it.endsWith(compiledClassRelativePath) }
-                ?.takeIf { it.exists() }
-                ?.toPath()
+            val compiledClassRelativePath = relativePath.resolveSibling("${relativePath.nameWithoutExtension}.class")
+            val compiledClassPath = classesRoots
+                .firstNotNullOfOrNull { it.resolve(compiledClassRelativePath).takeIf { classPath -> classPath.isRegularFile() } }
                 ?: return@forEach
-            val instrumentedClassPath = temporaryDirPath
-                .resolve(compiledClassRelativePath)
-                .also {
-                    if (!it.exists()) {
-                        it.createDirectories()
-                    }
-                }
+            val instrumentedClassPath = outputDirPath.resolve(compiledClassRelativePath)
+            instrumentedClassPath.parent?.createDirectories()
 
             Files.copy(compiledClassPath, instrumentedClassPath, StandardCopyOption.REPLACE_EXISTING)
         }
@@ -155,32 +152,21 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                 return@forEach
             }
             val path = change.file.toPath()
-            val sourceDir = classesDirs.find { classesDir ->
-                path.startsWith(classesDir.toPath())
-            }?.toPath() ?: return@forEach
+            val sourceDir = classesRoots.find { classesDir ->
+                path.startsWith(classesDir)
+            } ?: return@forEach
             val relativePath = sourceDir.relativize(path)
 
             when (change.changeType) {
-                ChangeType.REMOVED -> listOf(outputDirPath, temporaryDirPath).forEach {
-                    it.resolve(relativePath).deleteLogged()
-                }
-
-                else -> temporaryDirPath.resolve(relativePath).apply {
-                    parent.createDirectories()
+                ChangeType.REMOVED -> outputDirPath.resolve(relativePath).deleteLogged()
+                else -> outputDirPath.resolve(relativePath).apply {
+                    parent?.createDirectories()
                     Files.copy(path, this, StandardCopyOption.REPLACE_EXISTING)
                 }
             }
         }
 
-        instrumentCode(instrumentNotNull) {
-            Files.walk(temporaryDirPath).use { stream ->
-                stream.filter { !it.isDirectory() }.forEach { path ->
-                    val target = outputDirPath.resolve(temporaryDirPath.relativize(path))
-                    target.parent.createDirectories()
-                    Files.copy(path, target, StandardCopyOption.REPLACE_EXISTING)
-                }
-            }
-        }
+        instrumentCode(instrumentNotNull)
     }.onFailure {
         val message = when (it.cause) {
             is ClassNotFoundException -> "No Java Compiler dependency found."
@@ -238,7 +224,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
         }
     }
 
-    private fun instrumentCode(instrumentNotNull: Boolean, block: () -> Unit) {
+    private fun instrumentCode(instrumentNotNull: Boolean) {
         val headlessOldValue = System.setProperty("java.awt.headless", "true")
         try {
             // Builds up the Ant XML:
@@ -256,7 +242,7 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                     arrayOf(
                         mapOf(
                             "srcdir" to dirs.joinToString(":"),
-                            "destdir" to temporaryDir,
+                            "destdir" to outputDirectory.asPath.toFile(),
                             "classpath" to (sourceSetCompileClasspath + classesDirs).joinToString(":"),
                             "includeantruntime" to false,
                             "instrumentNotNull" to instrumentNotNull,
@@ -272,8 +258,6 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                 )
             }
         } finally {
-            block()
-
             if (headlessOldValue != null) {
                 System.setProperty("java.awt.headless", headlessOldValue)
             } else {

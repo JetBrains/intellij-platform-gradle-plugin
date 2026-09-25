@@ -5,8 +5,10 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.io.path.exists
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertFalse
 
 private const val ASSEMBLE = "assemble"
 private const val CLASSES = "classes"
@@ -128,6 +130,31 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
         build(ASSEMBLE) {
             assertTaskOutcome(CLASSES, TaskOutcome.UP_TO_DATE)
         }
+    }
+
+    @Test
+    fun `non-incremental instrumentation removes stale output files`() {
+        writeJavaFile()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    instrumentCode = true
+                }
+
+                tasks.named("instrumentCode") {
+                    doFirst {
+                        layout.buildDirectory.file("instrumented/instrumentCode/Stale.class").get().asFile.apply {
+                            parentFile.mkdirs()
+                            writeText("stale")
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build(ASSEMBLE)
+
+        assertFalse(dir.resolve("build/instrumented/instrumentCode/Stale.class").exists())
     }
 
     @Test

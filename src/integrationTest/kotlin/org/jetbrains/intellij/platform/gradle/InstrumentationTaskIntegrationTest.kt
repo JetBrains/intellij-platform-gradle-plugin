@@ -49,7 +49,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertExists(it)
                 assertEquals(683, it.fileSize())
             }
-            buildDirectory.resolve("tmp/instrumentCode/Main.class").let {
+            buildDirectory.resolve("instrumented/instrumentCode/Main.class").let {
                 assertExists(it)
                 assertEquals(1015, it.fileSize())
             }
@@ -57,7 +57,7 @@ class InstrumentationTaskIntegrationTest : IntelliJPlatformIntegrationTestBase(
                 assertExists(it)
                 assertEquals(482, it.fileSize())
             }
-            buildDirectory.resolve("tmp/instrumentCode/Form.class").let {
+            buildDirectory.resolve("instrumented/instrumentCode/Form.class").let {
                 assertExists(it)
                 assertEquals(1269, it.fileSize())
             }

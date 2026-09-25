@@ -6,6 +6,10 @@
 
 - Add `DumpBundledPluginsTask` and `DumpBundledModulesTask` to support dumping bundled plugins and modules for Plugin DevKit plugin purposes
 
+### Changed
+
+- Optimize `InstrumentCodeTask` file handling by resolving compiled classes directly by path for GUI Designer forms and instrumenting directly into the output directory, eliminating intermediate staging copies and redundant file-tree traversals.
+
 ### Fixed
 
 - Change duplicates strategy in PrepareSandboxTask to `EXCLUDE` JetBrains/intellij-platform-gradle-plugin#2191
