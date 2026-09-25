@@ -8,6 +8,7 @@
 
 ### Changed
 
+- Optimize `ExtractorTransformer` archive input sensitivity by replacing classpath normalization with `@PathSensitive(PathSensitivity.NAME_ONLY)`, avoiding expensive content hashing of multi-gigabyte IDE distribution archives on up-to-date checks.
 - Optimize `InstrumentCodeTask` file handling by resolving compiled classes directly by path for GUI Designer forms and instrumenting directly into the output directory, eliminating intermediate staging copies and redundant file-tree traversals.
 
 ### Fixed
