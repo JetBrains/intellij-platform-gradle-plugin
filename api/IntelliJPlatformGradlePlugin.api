@@ -238,6 +238,8 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field BUILD_SEARCHABLE_OPTIONS Ljava/lang/String;
 	public static final field CLEAN_SANDBOX Ljava/lang/String;
 	public static final field COMPOSED_JAR Ljava/lang/String;
+	public static final field DUMP_BUNDLED_MODULES Ljava/lang/String;
+	public static final field DUMP_BUNDLED_PLUGINS Ljava/lang/String;
 	public static final field DUMP_PRODUCTS_RELEASES Ljava/lang/String;
 	public static final field GENERATE_LEXER Ljava/lang/String;
 	public static final field GENERATE_MANIFEST Ljava/lang/String;
@@ -2995,6 +2997,36 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/ComposedJarTa
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/ComposedJarTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/DumpBundledModulesTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/DumpBundledModulesTask$Companion;
+	public fun <init> ()V
+	public final fun dumpBundledModules ()V
+	public abstract fun getIdeLayoutIndexCacheDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getOutputFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public fun validateIntelliJPlatformVersion ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/DumpBundledModulesTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/DumpBundledPluginsTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/DumpBundledPluginsTask$Companion;
+	public fun <init> ()V
+	public final fun dumpBundledPlugins ()V
+	public abstract fun getIdeLayoutIndexCacheDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getOutputFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public fun validateIntelliJPlatformVersion ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/DumpBundledPluginsTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
 	public fun register (Lorg/gradle/api/Project;)V
 }
 

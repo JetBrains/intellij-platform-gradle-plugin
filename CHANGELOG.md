@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Added
+
+- Add `DumpBundledPluginsTask` and `DumpBundledModulesTask` to support dumping bundled plugins and modules for Plugin DevKit plugin purposes
+
 ### Fixed
 
 - Change duplicates strategy in PrepareSandboxTask to `EXCLUDE` JetBrains/intellij-platform-gradle-plugin#2191
