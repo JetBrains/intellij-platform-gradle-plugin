@@ -1598,8 +1598,9 @@ public final class org/jetbrains/intellij/platform/gradle/models/Coordinates {
 public final class org/jetbrains/intellij/platform/gradle/models/CoordinatesKt {
 	public static final fun getCoroutines ()Ljava/util/Set;
 	public static final fun getKotlinStdlib ()Ljava/util/Set;
+	public static final fun resolveLatestVersion (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;Ljava/nio/file/Path;Z)Ljava/lang/String;
 	public static final fun resolveLatestVersion (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;Z)Ljava/lang/String;
-	public static synthetic fun resolveLatestVersion$default (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;ZILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun resolveLatestVersion$default (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;Ljava/nio/file/Path;ZILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule {
@@ -2757,6 +2758,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/providers/LatestPlu
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/providers/LatestPluginVersionValueSource$Parameters : org/gradle/api/provider/ValueSourceParameters {
+	public abstract fun getCacheDirectory ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
 }
 

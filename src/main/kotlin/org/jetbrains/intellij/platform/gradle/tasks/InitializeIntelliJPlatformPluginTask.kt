@@ -131,6 +131,7 @@ abstract class InitializeIntelliJPlatformPluginTask : DefaultTask(), ModuleAware
                 )
                 pluginVersion.convention(project.providers.of(CurrentPluginVersionValueSource::class) {})
                 latestPluginVersion.convention(project.providers.of(LatestPluginVersionValueSource::class) {
+                    parameters.cacheDirectory.set(cachePathProvider.map { it.asPath.toString() })
                     parameters.offline.set(project.gradle.startParameter.isOffline)
                 })
 

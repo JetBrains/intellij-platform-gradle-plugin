@@ -1,4 +1,4 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2026 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij.platform.gradle.shim
 
@@ -15,12 +15,17 @@ import org.gradle.kotlin.dsl.getCredentials
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.artifacts.repositories.PluginArtifactRepository
 import org.jetbrains.intellij.platform.gradle.models.IvyModule
+import org.jetbrains.intellij.platform.gradle.utils.Http
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import java.net.HttpURLConnection
 import java.net.URI
 import java.util.*
 
-class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int, private val offline: Boolean = false) : Shim(repository, port) {
+class PluginArtifactoryShim(
+    repository: PluginArtifactRepository,
+    port: Int,
+    private val offline: Boolean = false,
+) : Shim(repository, port) {
 
     private val log = Logger(javaClass)
 
@@ -34,21 +39,24 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int, pri
         }
 
         repository.url.toURL().let { url ->
-            url.openConnection().run {
-                repository.runCatching {
-                    getCredentials(PasswordCredentials::class).let {
-                        val encoded = Base64.getEncoder().encodeToString("${it.username}:${it.password}".toByteArray())
-                        setRequestProperty("Authorization", "Basic $encoded")
+            Http.openConnection(
+                url = url.toString(),
+                configure = {
+                    repository.runCatching {
+                        getCredentials(PasswordCredentials::class).let {
+                            val encoded = Base64.getEncoder().encodeToString("${it.username}:${it.password}".toByteArray())
+                            setRequestProperty("Authorization", "Basic $encoded")
+                        }
                     }
-                }
-                repository.runCatching {
-                    getCredentials(HttpHeaderCredentials::class).let {
-                        setRequestProperty(it.name, it.value)
+                    repository.runCatching {
+                        getCredentials(HttpHeaderCredentials::class).let {
+                            setRequestProperty(it.name, it.value)
+                        }
                     }
-                }
-
+                },
+            ) { connection ->
                 runCatching {
-                    getInputStream().use { inputStream ->
+                    connection.inputStream.use { inputStream ->
                         inputStream.reader().use { reader ->
                             CustomPluginRepositoryListingParser.parseListOfPlugins(
                                 reader.readText(),
@@ -59,12 +67,9 @@ class PluginArtifactoryShim(repository: PluginArtifactRepository, port: Int, pri
                         }
                     }
                 }.onFailure {
-                    throw when (this) {
-                        is HttpURLConnection -> {
-                            when {
-                                responseCode == 401 -> UnauthorizedException(it)
-                                else -> it
-                            }
+                    throw when {
+                        connection.responseCode == HttpURLConnection.HTTP_UNAUTHORIZED -> {
+                            UnauthorizedException(it)
                         }
 
                         else -> it

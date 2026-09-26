@@ -14,7 +14,6 @@ import org.jetbrains.intellij.platform.gradle.gradleProperties
 import org.jetbrains.intellij.platform.gradle.overwrite
 import org.jetbrains.intellij.platform.gradle.settingsFile
 import org.jetbrains.intellij.platform.gradle.write
-import java.time.LocalDate
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.readText
 import kotlin.test.Test
@@ -164,7 +163,7 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
                     plugins {
                         id("org.jetbrains.intellij.platform")
                     }
-                    
+
                     tasks {
                         ${Tasks.PRINT_PRODUCTS_RELEASES} {
                             types = listOf(org.jetbrains.intellij.platform.gradle.IntelliJPlatformType.IntellijIdea)
@@ -191,16 +190,14 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
         val cacheDirectory = dir.resolve(CACHE_DIRECTORY).resolve(CACHE_DIRECTORY_PRODUCT_RELEASES)
         val cacheFiles = cacheDirectory.listDirectoryEntries("*.json")
-        val lockFiles = cacheDirectory.listDirectoryEntries("*.lock")
 
         assertEquals(1, cacheFiles.size)
-        assertEquals(1, lockFiles.size)
-        assertEquals(LocalDate.now().toString(), lockFiles.single().readText().trim())
+        assertEquals(0, cacheDirectory.listDirectoryEntries("*.lock").size)
 
         listingFile overwrite //language=json
                 """not-json"""
 
-        build(":second:${Tasks.PRINT_PRODUCTS_RELEASES}") {
+        build(":second:${Tasks.PRINT_PRODUCTS_RELEASES}", "--offline") {
             assertContains(
                 """
                 > Task :second:${Tasks.PRINT_PRODUCTS_RELEASES}
@@ -214,11 +211,10 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
         }
 
         assertEquals(1, cacheDirectory.listDirectoryEntries("*.json").size)
-        assertEquals(1, cacheDirectory.listDirectoryEntries("*.lock").size)
+        assertEquals(0, cacheDirectory.listDirectoryEntries("*.lock").size)
 
         cacheFiles.single() overwrite //language=json
                 """not-json"""
-        lockFiles.single() overwrite LocalDate.now().minusDays(1).toString()
         listingFile overwrite listingContent
 
         build(":second:${Tasks.PRINT_PRODUCTS_RELEASES}") {
@@ -234,6 +230,6 @@ class PrintProductsReleasesTaskTest : IntelliJPluginTestBase() {
             )
         }
 
-        assertEquals(LocalDate.now().toString(), lockFiles.single().readText().trim())
+        assertEquals(listingContent.trim(), cacheFiles.single().readText().trim())
     }
 }

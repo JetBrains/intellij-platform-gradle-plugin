@@ -1,9 +1,12 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2026 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij.platform.gradle.models
 
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
-import java.net.URL
+import org.jetbrains.intellij.platform.gradle.utils.CachedHttpResource
+import org.jetbrains.intellij.platform.gradle.utils.Http
+import java.io.IOException
+import java.nio.file.Path
 
 data class Coordinates(val groupId: String, val artifactId: String) {
 
@@ -13,20 +16,55 @@ data class Coordinates(val groupId: String, val artifactId: String) {
 /**
  * Resolves the latest version of the given [Coordinates] from the `maven-metadata.xml` of [repositoryUrl].
  *
- * When [offline] is `true`, no network request is performed (as required by Gradle's `--offline` mode) and `null`
- * is returned. The [offline] flag must be captured at configuration time from [org.gradle.StartParameter.isOffline]
- * and passed in explicitly; this function never reads `gradle.startParameter` on its own.
+ * When [cacheDirectory] is provided, the metadata payload is cached and conditionally revalidated with ETag
+ * and Last-Modified headers. When [offline] is `true`, no network request is performed (as required by Gradle's
+ * `--offline` mode) and any previously cached version is returned (or `null` if none exists). The [offline]
+ * flag must be captured at configuration time from [org.gradle.StartParameter.isOffline] and passed in explicitly;
+ * this function never reads `gradle.startParameter` on its own.
  */
-fun Coordinates.resolveLatestVersion(repositoryUrl: String = Locations.MAVEN_REPOSITORY, offline: Boolean = false): String? {
-    if (offline) {
-        return null
-    }
-
+fun Coordinates.resolveLatestVersion(
+    repositoryUrl: String = Locations.MAVEN_REPOSITORY,
+    cacheDirectory: Path? = null,
+    offline: Boolean = false,
+): String? {
     val host = repositoryUrl.trimEnd('/')
     val path = toString().replace(':', '/').replace('.', '/')
-    val url = URL("$host/$path/maven-metadata.xml")
-    return decode<MavenMetadata>(url).versioning?.latest
+    val url = "$host/$path/maven-metadata.xml"
+
+    val content = when {
+        cacheDirectory != null -> {
+            CachedHttpResource.read(
+                url = url,
+                cacheDirectory = cacheDirectory,
+                extension = "xml",
+                offline = offline,
+            )
+        }
+        else -> {
+            if (offline) {
+                return null
+            }
+            Http.openConnection(url) { connection ->
+                if (connection.responseCode !in 200..299) {
+                    throw IOException(
+                        "Failed to fetch Maven metadata from URL: $url with response code: ${connection.responseCode}"
+                    )
+                }
+                connection.inputStream.bufferedReader().use { it.readText() }
+            }
+        }
+    }
+
+    return content?.let { decode<MavenMetadata>(it).versioning?.latest }
 }
+
+/**
+ * Resolves the latest version of the given [Coordinates] from the `maven-metadata.xml` of [repositoryUrl].
+ */
+fun Coordinates.resolveLatestVersion(
+    repositoryUrl: String,
+    offline: Boolean,
+) = resolveLatestVersion(repositoryUrl, cacheDirectory = null, offline = offline)
 
 /**
  * Coordinates of all Kotlin stdlib modules that should be excluded from dependencies.

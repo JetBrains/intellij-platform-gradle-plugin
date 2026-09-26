@@ -8,6 +8,8 @@
 
 ### Changed
 
+- Add conditional HTTP requests (`ETag` and `Last-Modified`) and `304 Not Modified` cache revalidation with offline and error fallbacks for product releases listings and latest plugin version resolution, eliminating redundant network transfers and improving build resilience.
+- Enforce explicit connect (10s) and read (30s) timeouts with deterministic socket and stream cleanup across all direct network operations (`ProductReleasesListingValueSource`, `LatestPluginVersionValueSource`, and `PluginArtifactoryShim`) to prevent Gradle configuration hangs.
 - Optimize `ExtractorTransformer` archive input sensitivity by replacing classpath normalization with `@PathSensitive(PathSensitivity.NAME_ONLY)`, avoiding expensive content hashing of multi-gigabyte IDE distribution archives on up-to-date checks.
 - Optimize `InstrumentCodeTask` file handling by resolving compiled classes directly by path for GUI Designer forms and instrumenting directly into the output directory, eliminating intermediate staging copies and redundant file-tree traversals.
 
