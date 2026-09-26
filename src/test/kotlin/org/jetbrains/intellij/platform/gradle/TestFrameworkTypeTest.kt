@@ -43,6 +43,18 @@ class TestFrameworkTypeTest {
             listOf(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5-code-insight")),
             TestFrameworkType.JUnit5CodeInsight.coordinates.toList(),
         )
+        assertEquals(
+            listOf(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5-eel")),
+            TestFrameworkType.JUnit5Eel.coordinates.toList(),
+        )
+        assertEquals(
+            listOf(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5-highlighting")),
+            TestFrameworkType.JUnit5Highlighting.coordinates.toList(),
+        )
+        assertEquals(
+            listOf(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5-project-structure")),
+            TestFrameworkType.JUnit5ProjectStructure.coordinates.toList(),
+        )
     }
 
     @Test

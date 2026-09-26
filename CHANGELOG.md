@@ -5,6 +5,7 @@
 ### Added
 
 - Add `DumpBundledPluginsTask` and `DumpBundledModulesTask` to support dumping bundled plugins and modules for Plugin DevKit plugin purposes
+- Add JUnit 5 test framework types `TestFrameworkType.JUnit5Eel`, `TestFrameworkType.JUnit5Highlighting`, and `TestFrameworkType.JUnit5ProjectStructure` JetBrains/intellij-platform-gradle-plugin#2251
 
 ### Changed
 

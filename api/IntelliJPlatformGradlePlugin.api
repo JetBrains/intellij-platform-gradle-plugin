@@ -442,6 +442,18 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUni
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5CodeInsight;
 }
 
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5Eel : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5Eel;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5Highlighting : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5Highlighting;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5ProjectStructure : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5ProjectStructure;
+}
+
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Metrics : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$Metrics;
 }

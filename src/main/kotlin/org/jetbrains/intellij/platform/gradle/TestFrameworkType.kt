@@ -21,6 +21,9 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
     object Platform : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework"))
     object JUnit5 : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5"))
     object JUnit5CodeInsight : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5-code-insight"))
+    object JUnit5Eel : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5-eel"))
+    object JUnit5Highlighting : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5-highlighting"))
+    object JUnit5ProjectStructure : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "test-framework-junit5-project-structure"))
     object Bundled : TestFrameworkType(Coordinates("bundled", "lib/testFramework.jar"))
     object Metrics : TestFrameworkType(
         Coordinates("com.jetbrains.intellij.tools", "ide-metrics-benchmark"),
