@@ -29,6 +29,17 @@ abstract class ExtractorService @Inject constructor(
     private val log = Logger(javaClass)
 
     fun extract(path: Path, targetDirectory: Path) {
+        // Skip extraction when the target directory is already materialized. Fingerprinted extraction directories
+        // (e.g., local plugins) encode the archive's content identity, so an existing, non-empty directory already
+        // holds identical content. Re-extracting it is not only wasteful but, on Windows, overwrites JARs that a
+        // previously-resolved classpath may still keep locked, causing AccessDenied failures and extraction hangs.
+        // The check runs inside this BuildService, so it is not recorded as a Gradle configuration-cache input and
+        // therefore cannot invalidate a freshly stored configuration-cache entry.
+        if (targetDirectory.isDirectory() && targetDirectory.listDirectoryEntries().isNotEmpty()) {
+            log.info("Archive '$path' is already extracted to directory '$targetDirectory'; reusing existing content.")
+            return
+        }
+
         log.info("Extracting archive '$path' to directory '$targetDirectory'.")
 
         val name = path.nameWithoutExtension.removeSuffix(".tar")

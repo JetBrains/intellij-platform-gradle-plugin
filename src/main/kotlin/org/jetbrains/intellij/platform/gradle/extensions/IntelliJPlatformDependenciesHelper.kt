@@ -156,6 +156,7 @@ class IntelliJPlatformDependenciesHelper(
 
     private companion object {
         val IVY_MODULE_WRITE_LOCK = ReentrantLock()
+        val LOCAL_PLUGIN_EXTRACTION_LOCK = ReentrantLock()
     }
 
     /**
@@ -1180,7 +1181,8 @@ class IntelliJPlatformDependenciesHelper(
                     module = id,
                     revision = version,
                 ),
-                publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath),
+                publications = artifactPath.toIvyArtifacts(metadataRulesModeProvider, platformPath) +
+                        artifactPath.toIvySourceArtifacts(metadataRulesModeProvider, platformPath),
                 dependencies = collectBundledDependencies(plugin, ideLayoutIndex, platformPath),
             )
         }
@@ -1255,7 +1257,7 @@ class IntelliJPlatformDependenciesHelper(
                     val artifactPath = dependency.resolveArtifactPath(platformPath)
                     val publications = dependency.resolvePublicationPaths(platformPath).flatMap { path ->
                         path.toIvyArtifacts(metadataRulesModeProvider, platformPath)
-                    }
+                    } + artifactPath?.toIvySourceArtifacts(metadataRulesModeProvider, platformPath).orEmpty()
 
                     writeIvyModule(group, name, version, artifactPath) {
                         IvyModule(
@@ -1323,11 +1325,8 @@ class IntelliJPlatformDependenciesHelper(
             .get()
             .resolve("extracted-plugins")
             .createDirectories()
+        val pluginPath = resolveLocalPluginPath(artifactPath, extractDirectory)
         val (pluginVersion, pluginName) = withIdePluginManager(extractDirectory) { pluginManager ->
-            val pluginPath = when {
-                artifactPath.isDirectory() -> artifactPath.resolvePluginPath()
-                else -> artifactPath
-            }
             val plugin = pluginManager.safelyCreatePlugin(pluginPath, suppressPluginProblems = true).getOrThrow()
 
             plugin.pluginVersion to (plugin.pluginId ?: artifactPath.name)
@@ -1347,11 +1346,42 @@ class IntelliJPlatformDependenciesHelper(
                     module = name,
                     revision = version,
                 ),
-                publications = listOf(artifactPath.toAbsolutePathIvyArtifact()),
+                publications = listOf(artifactPath.toAbsolutePathIvyArtifact()) +
+                        pluginPath.toIvySourceArtifacts(metadataRulesModeProvider),
             )
         }
 
         return dependencyFactory.create(group, name, version)
+    }
+
+    /**
+     * Resolves the plugin directory used to discover `lib/src` source JARs. Archive contents are kept in the
+     * project cache because Ivy source artifacts must remain available after plugin metadata has been created.
+     */
+    private fun resolveLocalPluginPath(artifactPath: Path, extractDirectory: Path): Path {
+        if (artifactPath.isDirectory()) {
+            return artifactPath.resolvePluginPath()
+        }
+        if (!artifactPath.extension.equals("zip", ignoreCase = true)) {
+            return artifactPath
+        }
+
+        val fingerprint = UUID.nameUUIDFromBytes(
+            "${artifactPath.safePathString}:${artifactPath.fileSize()}:${artifactPath.getLastModifiedTime()}".toByteArray(),
+        )
+        val targetDirectory = extractDirectory.resolve("${artifactPath.nameWithoutExtension}-$fingerprint")
+
+        LOCAL_PLUGIN_EXTRACTION_LOCK.withLock {
+            // The fingerprint above encodes the archive's content identity, so an already-materialized target
+            // directory holds identical content. ExtractorService.extract() skips re-extraction in that case
+            // (reusing the existing directory), which avoids overwriting JARs that Windows may still keep locked
+            // from a previously-resolved classpath. The reuse check lives inside the BuildService so it is not
+            // recorded as a configuration-cache input.
+            targetDirectory.createDirectories()
+            extractorServiceProvider.get().extract(artifactPath, targetDirectory)
+        }
+
+        return targetDirectory.resolvePluginPath()
     }
 
     /**
