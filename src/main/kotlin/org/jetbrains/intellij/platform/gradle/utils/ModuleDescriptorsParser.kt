@@ -6,7 +6,6 @@ import java.io.InputStream
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
 import java.util.jar.JarFile
-import javax.xml.stream.XMLInputFactory
 import javax.xml.stream.XMLStreamConstants
 
 /**
@@ -15,12 +14,6 @@ import javax.xml.stream.XMLStreamConstants
 internal object ModuleDescriptorsParser {
 
     private val cache = ConcurrentHashMap<String, Map<String, CollectedModuleDescriptor>>()
-    private val xmlInputFactory = ThreadLocal.withInitial {
-        XMLInputFactory.newFactory().apply {
-            runCatching { setProperty(XMLInputFactory.SUPPORT_DTD, false) }
-            runCatching { setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false) }
-        }
-    }
 
     fun load(moduleDescriptorsFile: Path) =
         cache.computeIfAbsent(moduleDescriptorsFile.safePathString) {

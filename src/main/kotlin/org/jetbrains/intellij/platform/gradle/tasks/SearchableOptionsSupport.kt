@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.intellij.utils.JDOMUtil
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ProjectDependency
 import org.gradle.api.provider.Provider
@@ -11,13 +10,14 @@ import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.findByType
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.withType
-import org.jdom2.Element
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
+import org.jetbrains.intellij.platform.gradle.utils.xmlInputFactory
 import java.io.File
 import java.nio.file.Path
+import javax.xml.stream.XMLStreamConstants
 import kotlin.io.path.exists
 import kotlin.io.path.inputStream
 
@@ -70,13 +70,73 @@ internal fun Path.hasSearchableOptionsContent(): Boolean {
 
     return runCatching {
         inputStream().use { inputStream ->
-            val rootElement = JDOMUtil.loadDocument(inputStream).rootElement
-            val hasSearchableOptionsContent = rootElement.hasConfigurableExtensionPointDeclaration() ||
-                    rootElement.hasConfigurableExtension()
+            val reader = xmlInputFactory.get().createXMLStreamReader(inputStream)
+            try {
+                val elements = ArrayDeque<PluginXmlElement>()
 
-            rootElement.name == IDEA_PLUGIN_ROOT && hasSearchableOptionsContent
+                while (reader.hasNext()) {
+                    when (reader.next()) {
+                        XMLStreamConstants.START_ELEMENT -> {
+                            val localName = reader.localName
+                            val element = when (val parent = elements.lastOrNull()) {
+                                null -> {
+                                    if (localName != IDEA_PLUGIN_ROOT) {
+                                        return@use false
+                                    }
+                                    PluginXmlElement.Root
+                                }
+
+                                PluginXmlElement.Root -> when (localName) {
+                                    EXTENSION_POINTS -> PluginXmlElement.ExtensionPoints
+                                    EXTENSIONS -> PluginXmlElement.Extensions(
+                                        reader.getAttributeValue(null, DEFAULT_EXTENSION_NAMESPACE)
+                                    )
+
+                                    else -> PluginXmlElement.Other
+                                }
+
+                                PluginXmlElement.ExtensionPoints -> {
+                                    if (localName == EXTENSION_POINT) {
+                                        for (i in 0 until reader.attributeCount) {
+                                            if (reader.getAttributeValue(i).contains(CONFIGURABLE_MARKER, ignoreCase = true)) {
+                                                return@use true
+                                            }
+                                        }
+                                    }
+                                    PluginXmlElement.Other
+                                }
+
+                                is PluginXmlElement.Extensions -> {
+                                    val qualifiedName = localName.toQualifiedExtensionPointName(parent.defaultNamespace)
+                                    if (qualifiedName in qualifiedConfigurableExtensionPointNames ||
+                                        qualifiedName.contains(CONFIGURABLE_MARKER, ignoreCase = true)
+                                    ) {
+                                        return@use true
+                                    }
+                                    PluginXmlElement.Other
+                                }
+
+                                PluginXmlElement.Other -> PluginXmlElement.Other
+                            }
+                            elements.addLast(element)
+                        }
+
+                        XMLStreamConstants.END_ELEMENT -> elements.removeLast()
+                    }
+                }
+                false
+            } finally {
+                reader.close()
+            }
         }
     }.getOrDefault(false)
+}
+
+private sealed interface PluginXmlElement {
+    data object Root : PluginXmlElement
+    data object ExtensionPoints : PluginXmlElement
+    data class Extensions(val defaultNamespace: String?) : PluginXmlElement
+    data object Other : PluginXmlElement
 }
 
 private fun Project.relevantSearchableOptionsModuleProjects(): List<Project> = listOf(
@@ -108,28 +168,6 @@ private fun Project.searchableOptionsDescriptorFilesFromMainResources(): List<Fi
 private fun File.xmlFiles() = listFiles { file -> file.isFile && file.extension == "xml" }
     .orEmpty()
     .toList()
-
-private fun Element.hasConfigurableExtensionPointDeclaration() = getChildren(EXTENSION_POINTS)
-    .any { extensionPoints ->
-        extensionPoints.children.any { child ->
-            child.name == EXTENSION_POINT && child.attributes.any { attribute ->
-                attribute.value.contains(CONFIGURABLE_MARKER, ignoreCase = true)
-            }
-        }
-    }
-
-private fun Element.hasConfigurableExtension() = getChildren(EXTENSIONS)
-    .any { extensions ->
-        val defaultExtensionNamespace = extensions.getAttributeValue(DEFAULT_EXTENSION_NAMESPACE)
-
-        extensions.children.any { child ->
-            val extensionPointName = child.name
-            val qualifiedExtensionPointName = extensionPointName.toQualifiedExtensionPointName(defaultExtensionNamespace)
-
-            qualifiedExtensionPointName in qualifiedConfigurableExtensionPointNames ||
-                    qualifiedExtensionPointName.contains(CONFIGURABLE_MARKER, ignoreCase = true)
-        }
-    }
 
 private fun String.toQualifiedExtensionPointName(defaultExtensionNamespace: String?) = when {
     contains('.') -> this

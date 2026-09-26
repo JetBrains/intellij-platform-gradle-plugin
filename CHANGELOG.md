@@ -12,6 +12,7 @@
 - Enforce explicit connect (10s) and read (30s) timeouts with deterministic socket and stream cleanup across all direct network operations (`ProductReleasesListingValueSource`, `LatestPluginVersionValueSource`, and `PluginArtifactoryShim`) to prevent Gradle configuration hangs.
 - Optimize `ExtractorTransformer` archive input sensitivity by replacing classpath normalization with `@PathSensitive(PathSensitivity.NAME_ONLY)`, avoiding expensive content hashing of multi-gigabyte IDE distribution archives on up-to-date checks.
 - Optimize `InstrumentCodeTask` file handling by resolving compiled classes directly by path for GUI Designer forms and instrumenting directly into the output directory, eliminating intermediate staging copies and redundant file-tree traversals.
+- Optimize plugin descriptor inspection in `SearchableOptionsSupport` with selective StAX parsing and reuse the thread-local XML input factory from `ModuleDescriptorsParser`, avoiding full JDOM construction for read-only scans.
 
 ### Fixed
 

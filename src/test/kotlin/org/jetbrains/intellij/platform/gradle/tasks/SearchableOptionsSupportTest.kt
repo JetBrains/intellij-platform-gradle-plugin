@@ -100,6 +100,25 @@ class SearchableOptionsSupportTest {
     }
 
     @Test
+    fun `ignore nested extensions declarations`() {
+        val pluginXml = createTempFile("plugin", ".xml").apply {
+            writeText(
+                """
+                <idea-plugin>
+                  <content>
+                    <extensions defaultExtensionNs="com.intellij">
+                      <projectConfigurable instance="example.Configurable" />
+                    </extensions>
+                  </content>
+                </idea-plugin>
+                """.trimIndent()
+            )
+        }
+
+        assertFalse(pluginXml.hasSearchableOptionsContent())
+    }
+
+    @Test
     fun `ignore plugin xml without searchable options content`() {
         val pluginXml = createTempFile("plugin", ".xml").apply {
             writeText(
