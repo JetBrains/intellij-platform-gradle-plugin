@@ -8,12 +8,27 @@ import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_STDLIB_DEFAULT_DE
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.utils.Version
 import kotlin.io.path.*
+import kotlin.test.BeforeTest
 import kotlin.test.Test
 
 private const val CLEAN = "clean"
 private const val HEADER = "The following plugin configuration issues were found"
 
 class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
+
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
+
+    @BeforeTest
+    override fun setup() {
+        super.setup()
+
+        buildFile write //language=kotlin
+                """
+                tasks.named<VerifyPluginProjectConfigurationTask>("verifyPluginProjectConfiguration") {
+                    runtimeMetadata.put("java.vendor", "JetBrains s.r.o.")
+                }
+                """.trimIndent()
+    }
 
     @Test
     fun `do not show errors when configuration is valid`() {
@@ -479,6 +494,7 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
                 </idea-plugin>
                 """.trimIndent()
 
+        build(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION)
         buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION)
 
         buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
