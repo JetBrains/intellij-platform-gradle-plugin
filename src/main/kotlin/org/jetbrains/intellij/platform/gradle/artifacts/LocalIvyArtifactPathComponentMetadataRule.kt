@@ -90,12 +90,18 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
 ) : ComponentMetadataRule {
 
     private val log = Logger(javaClass)
-    private val replacementGroups = listOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
 
     override fun execute(context: ComponentMetadataContext) {
         val id = context.details.id
         // Since we also need to fix transitive dependencies, we have to intercept everything and filter.
-        if (id.group !in replacementGroups) {
+        if (id.group !in REPLACEMENT_GROUPS) {
+            return
+        }
+
+        val (moduleType, moduleVersion) = id.version.parseIdeNotation()
+        val productInfo = Path.of(absNormalizedPlatformPath).productInfo()
+
+        if (moduleType != productInfo.type || moduleVersion != productInfo.buildNumber) {
             return
         }
 
@@ -110,12 +116,6 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
         val ivyXmlFile = File("$absNormalizedIvyPath/${id.version}/${id.group}-${id.name}-${id.version}.xml")
         val publications = ivyPublicationsCache.computeIfAbsent(ivyXmlFile.path) {
             decodeIvyModulePublications(ivyXmlFile.readText())
-        }
-        val (moduleType, moduleVersion) = id.version.parseIdeNotation()
-        val productInfo = Path.of(absNormalizedPlatformPath).productInfo()
-
-        if (moduleType != productInfo.type || moduleVersion != productInfo.buildNumber) {
-            return
         }
 
         context.details.allVariants {
@@ -161,6 +161,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
     }
 
     companion object {
+        private val REPLACEMENT_GROUPS = setOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
         private val ivyPublicationsCache = ConcurrentHashMap<String, List<org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact>>()
 
         internal fun register(
