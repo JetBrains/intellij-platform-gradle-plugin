@@ -9,6 +9,7 @@
 
 ### Changed
 
+- Optimize form files and classes directory input configuration in `InstrumentCodeTask` by using native Gradle pattern filtering for GUI forms and direct lazy binding of `sourceSet.output.classesDirs`, eliminating eager directory filtering during configuration.
 - Optimize `LocalIvyArtifactPathComponentMetadataRule` execution by using static set-based group filtering and evaluating IDE version matches prior to Ivy XML descriptor reads and caching.
 - Optimize plugin layout inspection in `resolvePluginLayout()` by avoiding scratch directory creation and teardown on disk when inspecting plugin structures.
 - Optimize input artifact sensitivity in `CollectorTransformer` and `LocalPluginsNormalizationTransformers` by replacing classpath normalization with `@PathSensitive(PathSensitivity.RELATIVE)`, avoiding full bytecode hashing of extracted IDE distributions and plugins during dependency transformation.

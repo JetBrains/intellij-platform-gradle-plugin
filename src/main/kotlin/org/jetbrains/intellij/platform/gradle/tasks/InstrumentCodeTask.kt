@@ -297,19 +297,11 @@ abstract class InstrumentCodeTask : DefaultTask(), JavaCompilerAware {
                         },
                     )
                     formsDirs.from(
-                        project.provider {
-                            sourceDirs.asFileTree.filter {
-                                it.toPath().extension == "form"
-                            }
+                        sourceDirs.asFileTree.matching {
+                            include("**/*.form")
                         },
                     )
-                    classesDirs.from(
-                        project.provider {
-                            (sourceSet.output.classesDirs as ConfigurableFileCollection).from.run {
-                                project.files(this).filter { it.exists() }
-                            }
-                        },
-                    )
+                    classesDirs.from(sourceSet.output.classesDirs)
 
                     sourceSetCompileClasspath.from(
                         project.provider {
