@@ -266,7 +266,7 @@ internal val String.expandUserHome: String
  * Creates an [IdePluginManager] with scoped archive and JAR file system caches.
  */
 internal inline fun <T> withIdePluginManager(
-    extractDirectory: Path,
+    extractDirectory: Path = Path.of(System.getProperty("java.io.tmpdir")),
     block: (IdePluginManager) -> T,
 ): T = PluginArchiveManager(extractDirectory).use { pluginArchiveManager ->
     CachingJarFileSystemProvider().use { fileSystemProvider ->

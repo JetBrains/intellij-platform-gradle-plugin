@@ -25,7 +25,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.nio.file.Path
 import java.util.jar.JarFile
-import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -127,18 +126,13 @@ internal fun Path.resolvePluginLayout(): PluginLayout? {
     ) {
         return null
     }
-    val temporaryDirectory = createTempDirectory()
 
-    return try {
-        withIdePluginManager(temporaryDirectory) { manager ->
-            manager
-                .safelyCreatePlugin(pluginPath, suppressPluginProblems = true)
-                .getOrNull()
-                ?.pluginId
-                ?.let { PluginLayout(it, pluginPath) }
-        }
-    } finally {
-        temporaryDirectory.toFile().deleteRecursively()
+    return withIdePluginManager { manager ->
+        manager
+            .safelyCreatePlugin(pluginPath, suppressPluginProblems = true)
+            .getOrNull()
+            ?.pluginId
+            ?.let { PluginLayout(it, pluginPath) }
     }
 }
 

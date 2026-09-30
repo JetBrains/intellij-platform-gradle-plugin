@@ -6,6 +6,7 @@ import org.jetbrains.intellij.platform.gradle.utils.ModuleDescriptorsParser
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.ExperimentalPathApi
+import kotlin.io.path.createDirectories
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.outputStream
@@ -14,6 +15,34 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 
 class CollectorTransformerTest {
+
+    @OptIn(ExperimentalPathApi::class)
+    @Test
+    fun `resolve plugin layout for extracted plugin directory`() {
+        val tempDir = createTempDirectory("plugin-layout-test")
+        try {
+            val pluginDir = tempDir.resolve("sample-plugin")
+            val libDir = pluginDir.resolve("lib").createDirectories()
+            val pluginJar = libDir.resolve("sample.jar")
+
+            pluginJar.writeModuleDescriptorsJar(
+                "META-INF/plugin.xml" to """
+                    <idea-plugin>
+                      <id>com.example.sample</id>
+                      <name>Sample Plugin</name>
+                      <version>1.0.0</version>
+                      <vendor>JetBrains</vendor>
+                    </idea-plugin>
+                """.trimIndent()
+            )
+
+            val layout = assertNotNull(tempDir.resolvePluginLayout())
+            assertEquals("com.example.sample", layout.id)
+            assertEquals(pluginDir, layout.path)
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
 
     @OptIn(ExperimentalPathApi::class)
     @Test
