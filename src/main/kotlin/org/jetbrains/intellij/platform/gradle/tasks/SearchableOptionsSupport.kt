@@ -143,26 +143,40 @@ private fun Project.relevantSearchableOptionsModuleProjects(): List<Project> = l
     Configurations.INTELLIJ_PLATFORM_PLUGIN_MODULE,
     Configurations.INTELLIJ_PLATFORM_PLUGIN_COMPOSED_MODULE,
 ).flatMap { configurationName ->
-    configurations[configurationName]
-        .allDependencies
-        .withType<ProjectDependency>()
-        .mapNotNull { dependency: ProjectDependency -> rootProject.findProject(dependency.path) }
+    configurations.findByName(configurationName)
+        ?.allDependencies
+        ?.withType<ProjectDependency>()
+        ?.mapNotNull { dependency: ProjectDependency ->
+            runCatching { rootProject.findProject(dependency.path) }.getOrNull()
+        }
+        .orEmpty()
 }.distinctBy { moduleProject: Project -> moduleProject.path }
 
 private fun Project.searchableOptionsDescriptorFilesFromMainResources(): List<File> {
-    val sourceSets = extensions.findByType<SourceSetContainer>() ?: return emptyList()
+    val resourceDirs = buildList {
+        runCatching {
+            extensions.findByType<SourceSetContainer>()
+                ?.findByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                ?.resources
+                ?.srcDirs
+                ?.let { addAll(it) }
+        }
+        if (isEmpty()) {
+            val defaultResourcesDir = projectDir.resolve("src/main/resources")
+            if (defaultResourcesDir.isDirectory) {
+                add(defaultResourcesDir)
+            }
+        }
+    }
 
-    return sourceSets.findByName(SourceSet.MAIN_SOURCE_SET_NAME)
-        ?.resources
-        ?.srcDirs
-        ?.flatMap { resourceDirectory ->
+    return resourceDirs
+        .flatMap { resourceDirectory ->
             buildList {
                 addAll(resourceDirectory.xmlFiles())
                 addAll(resourceDirectory.resolve("META-INF").xmlFiles())
             }
         }
-        ?.distinct()
-        .orEmpty()
+        .distinct()
 }
 
 private fun File.xmlFiles() = listFiles { file -> file.isFile && file.extension == "xml" }
