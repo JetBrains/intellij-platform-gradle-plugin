@@ -84,7 +84,7 @@ abstract class JarSearchableOptionsTask : Jar() {
             val runtimeElementsConfiguration = project.configurations[Configurations.External.RUNTIME_ELEMENTS]
             runtimeElementsConfiguration.outgoing.artifacts(buildSearchableOptionsEnabledProvider.map { enabled ->
                 when {
-                    enabled -> listOf(jarSearchableOptionsTaskProvider.flatMap { it.archiveFile }.get())
+                    enabled -> listOf(jarSearchableOptionsTaskProvider)
                     else -> emptyList()
                 }
             }) { builtBy(jarSearchableOptionsTaskProvider) }
