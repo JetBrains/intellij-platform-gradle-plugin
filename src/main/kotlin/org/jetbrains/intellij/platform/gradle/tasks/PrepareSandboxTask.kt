@@ -236,10 +236,18 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
             .createDirectories()
             .resolve("updates.xml")
 
-        val document = when {
-            updatesConfig.notExists() || updatesConfig.readText().trim().isEmpty() -> Document(Element("application"))
-            else -> updatesConfig.inputStream().use(JDOMUtil::loadDocument)
+        if (updatesConfig.notExists()) {
+            updatesConfig.writeTextIfChanged(DEFAULT_UPDATES_CONFIG)
+            return
         }
+
+        val text = updatesConfig.readText()
+        if (text.isBlank() || text.trim() == DEFAULT_UPDATES_CONFIG) {
+            updatesConfig.writeTextIfChanged(DEFAULT_UPDATES_CONFIG)
+            return
+        }
+
+        val document = text.byteInputStream().use(JDOMUtil::loadDocument)
         val application = document.rootElement.takeIf { it.name == "application" }
         requireNotNull(application) { "Invalid content of '$updatesConfig' – '<application>' root element was expected." }
 
@@ -261,8 +269,10 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
                     updatesConfigurable.addContent(this)
                 }
 
-        option.setAttribute("value", "false")
-        transformXml(document, updatesConfig)
+        if (option.getAttributeValue("value") != "false") {
+            option.setAttribute("value", "false")
+            transformXml(document, updatesConfig)
+        }
     }
 
     private fun disabledPlugins(configDirectory: DirectoryProperty) {
@@ -382,6 +392,14 @@ abstract class PrepareSandboxTask : Sync(), IntelliJPlatformVersionAware, Sandbo
 
     companion object : Registrable {
         private const val ULTIMATE_MODULE_ID = "com.intellij.modules.ultimate"
+        private val DEFAULT_UPDATES_CONFIG = //language=xml
+            """
+            <application>
+              <component name="UpdatesConfigurable">
+                <option name="CHECK_NEEDED" value="false" />
+              </component>
+            </application>
+            """.trimIndent()
 
         override fun register(project: Project) =
             project.registerTask<PrepareSandboxTask>(Tasks.PREPARE_SANDBOX) {

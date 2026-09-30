@@ -1218,7 +1218,7 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
 
         build(Tasks.PREPARE_SANDBOX) {
             updatesFile overwrite //language=xml
-                    """
+                """
                 <application>
                     <component name="UpdatesConfigurable">
                         <option name="SomeOption" value="false" />
