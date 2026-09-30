@@ -40,6 +40,7 @@ import java.security.MessageDigest
 import java.util.IdentityHashMap
 import java.util.HexFormat
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.set
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
@@ -233,18 +234,18 @@ private fun IdePlugin.toEntry(
         .map { platformPath.relativize(it).invariantSeparatorsPathString }
         .distinct(),
     // Dependencies are serialized by exact entry key to avoid collapsing duplicate IDs or aliases.
-    dependencies = (modulesDescriptors.asSequence()
+    dependencies = (sequenceOf<IdePlugin>(this) + modulesDescriptors.asSequence()
         .filter { it.moduleDefinition.loadingRule.required }
-        .map { it.name } +
-            dependsList.asSequence()
-                .filter { !it.isOptional }
-                .map { it.pluginId } +
-            pluginMainModuleDependencies.asSequence().map { it.pluginId } +
-            contentModuleDependencies.asSequence().map { it.moduleName })
+        .map { it.module })
+        .flatMap { module ->
+            module.dependsList.asSequence().filter { !it.isOptional }.map { it.pluginId } +
+                module.pluginMainModuleDependencies.asSequence().map { it.pluginId } +
+                module.contentModuleDependencies.asSequence().map { it.moduleName }
+        }
         .filter(String::isNotBlank)
         .distinct()
         .mapNotNull { ide.findPluginByIdOrModuleId(it)?.plugin }
-        .filterNot { it.pluginId == IDEA_CORE }
+        .filterNot { it.pluginId == IDEA_CORE || it == this } // skip dependency on the core and self-dependency
         .toSet()
         .mapNotNull { dependencyKeys[it] },
     definedModules = pluginAliases
