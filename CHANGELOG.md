@@ -9,6 +9,7 @@
 
 ### Changed
 
+- Optimize runtime dependency filtering in `TestIdeTask` classpath configuration by using lazy file collection subtraction (`classpath - runtimeDependencies`) instead of eager resolution during configuration.
 - Optimize form files and classes directory input configuration in `InstrumentCodeTask` by using native Gradle pattern filtering for GUI forms and direct lazy binding of `sourceSet.output.classesDirs`, eliminating eager directory filtering during configuration.
 - Optimize `LocalIvyArtifactPathComponentMetadataRule` execution by using static set-based group filtering and evaluating IDE version matches prior to Ivy XML descriptor reads and caching.
 - Optimize plugin layout inspection in `resolvePluginLayout()` by avoiding scratch directory creation and teardown on disk when inspecting plugin structures.

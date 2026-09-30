@@ -183,7 +183,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 otherPluginsLibsProvider,
                 intellijPlatformTestClasspathConfiguration - intellijPlatformClasspathConfiguration,
                 intellijPlatformClasspathConfiguration,
-                classpath.filter { it !in runtimeDependencies.files },
+                classpath - runtimeDependencies,
                 intellijPlatformTestRuntimeClasspathConfiguration,
                 intelliJPlatformTestRuntimeFixClasspathConfiguration,
                 bundledPluginsClasspathProvider,
