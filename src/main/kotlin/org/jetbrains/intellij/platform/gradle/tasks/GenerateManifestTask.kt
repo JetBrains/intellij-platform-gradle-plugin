@@ -104,7 +104,9 @@ abstract class GenerateManifestTask : DefaultTask(), KotlinMetadataAware {
                 gradleVersion.convention(project.provider { project.gradle.gradleVersion })
                 version.convention(project.extensionProvider.flatMap { it.pluginConfiguration.version })
 
-                generatedManifest = temporaryDir.resolve("MANIFEST.MF")
+                generatedManifest.convention(
+                    project.layout.buildDirectory.file("tmp/$name/MANIFEST.MF")
+                )
             }
     }
 }

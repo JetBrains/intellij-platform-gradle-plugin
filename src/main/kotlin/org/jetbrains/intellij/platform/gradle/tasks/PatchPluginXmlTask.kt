@@ -338,9 +338,11 @@ abstract class PatchPluginXmlTask : DefaultTask(), IntelliJPlatformVersionAware 
                         .map { it.resolve("META-INF/plugin.xml") }
                         .firstOrNull { it.exists() }
                 }))
-                outputFile.convention(project.layout.file(
-                    inputFile.map { temporaryDir.resolve(it.asPath.name) }
-                ))
+                outputFile.convention(
+                    project.layout.buildDirectory.file(
+                        inputFile.map { "tmp/$name/${it.asPath.name}" }
+                    )
+                )
 
                 pluginId.convention(pluginConfigurationProvider.flatMap { it.id })
                 pluginName.convention(pluginConfigurationProvider.flatMap { it.name })
