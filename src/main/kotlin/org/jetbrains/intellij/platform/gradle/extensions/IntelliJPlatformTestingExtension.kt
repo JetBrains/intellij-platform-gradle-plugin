@@ -340,6 +340,20 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
         )
         abstract val splitModeTarget: Property<SplitModeTarget>
 
+        /**
+         * Indicates whether this custom task inherits the project-level test bundled plugins and bundled modules,
+         * i.e., the `bundledPlugin(...)` and `bundledModule(...)` dependencies declared in the project
+         * `dependencies { intellijPlatform { ... } }` block, so they don't have to be re-declared for the task.
+         *
+         * It is `false` by default and is enabled with [copyFromProject]. Keep it opt-in: a custom task may target
+         * a different IntelliJ Platform than the project (its platform is intentionally not shared), and bundled
+         * plugin/module identifiers are resolved against the platform they were declared for, so an id available
+         * on the project IDE may not exist on a differently-targeted task IDE. Enable it only for same-platform tasks.
+         *
+         * @see copyFromProject
+         */
+        val inheritFromProject: Property<Boolean> = project.objects.property(Boolean::class.java).convention(false)
+
         internal val testDependenciesConfigurationName: Property<String> = project.objects.property(String::class.java)
         internal val intellijPlatformConfigurationName: Property<String> = project.objects.property(String::class.java)
             .convention(Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
@@ -350,6 +364,25 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
 
         fun plugins(configuration: Action<IntelliJPlatformPluginsExtension>) {
             configuration.execute(the<IntelliJPlatformPluginsExtension>())
+        }
+
+        /**
+         * Reuses the project's test bundled plugins and bundled modules setup for this custom task by wiring the
+         * task's bundled plugin and bundled module configurations to extend the matching project-level ones, so
+         * `bundledPlugin(...)` and `bundledModule(...)` dependencies declared for the project don't have to be
+         * repeated for the task.
+         *
+         * This is opt-in and safe only when the task targets the same IntelliJ Platform as the project, because
+         * bundled plugin/module identifiers are resolved against the platform they were declared for.
+         *
+         * @see inheritFromProject
+         */
+        fun copyFromProject() {
+            inheritFromProject.set(true)
+            project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS.withSuffix]
+                .extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_PLUGINS])
+            project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES.withSuffix]
+                .extendsFrom(project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES])
         }
 
         /**
