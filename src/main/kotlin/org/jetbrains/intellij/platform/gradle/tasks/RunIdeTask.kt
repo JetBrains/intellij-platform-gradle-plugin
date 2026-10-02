@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.gradle.api.GradleException
 import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
@@ -14,6 +15,7 @@ import org.gradle.api.tasks.options.Option
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.named
 import org.gradle.process.ExecOperations
+import org.gradle.process.ExecResult
 import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
@@ -29,6 +31,7 @@ import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
+import java.io.File
 import java.io.OutputStream
 import java.net.InetSocketAddress
 import java.net.ServerSocket
@@ -65,6 +68,15 @@ private const val SPLIT_MODE_NO_TIMEOUTS_ENV = "CWM_NO_TIMEOUTS"
 private const val SPLIT_MODE_SHARED_PASSWORD = "qwerty123"
 private const val SPLIT_MODE_PORT_PROBE_TIMEOUT_MS = 200
 private const val SPLIT_MODE_PID_POLL_INTERVAL_MS = 50L
+
+/**
+ * Makes the IDE exit with [SPLIT_MODE_BACKEND_RESTART_EXIT_CODE] instead of relaunching itself through the native
+ * `restarter` binary and the distribution launcher, which would drop the Gradle-provided JVM configuration (and fails on
+ * Windows when paths contain spaces). The relaunch is then handled by [RunIdeTask.runSplitModeBackend].
+ */
+private const val SPLIT_MODE_BACKEND_RESTART_ENV = "IDEA_RESTART_VIA_EXIT_CODE"
+internal const val SPLIT_MODE_BACKEND_RESTART_EXIT_CODE = 88
+internal const val SPLIT_MODE_BACKEND_MAX_RESTARTS = 10
 internal const val PURGE_OLD_LOG_DIRECTORIES_OPTION = "purge-old-log-directories"
 
 internal data class SplitModeSandboxPaths(
@@ -144,8 +156,14 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         prepareIdeExecution()
 
         when (executionMode.get()) {
-            ExecutionMode.SPLIT_MODE_BACKEND -> runSplitModeBackend(::runJavaExec)
-            else -> runJavaExec()
+            ExecutionMode.SPLIT_MODE_BACKEND -> {
+                val result = runSplitModeBackend(captureLaunchSpec())
+                if (!isIgnoreExitValue) {
+                    result.assertNormalExitValue()
+                }
+            }
+
+            else -> super.exec()
         }
     }
 
@@ -202,27 +220,24 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         systemPropertyDefault("idea.auto.reload.plugins", autoReload.get())
     }
 
-    private fun runJavaExec() {
-        super.exec()
-    }
-
-    internal fun copyJavaExecSpecTo(spec: JavaExecSpec) {
-        copyTo(spec as JavaForkOptions)
-        javaLauncher.orNull
-            ?.executablePath
-            ?.asFile
-            ?.absolutePath
-            ?.let { spec.executable = it }
-            ?: executable?.takeIf { it.isNotBlank() }?.let { spec.executable = it }
-        spec.jvmArgs(allJvmArgs)
-        spec.workingDir = workingDir
-        spec.classpath = classpath
-        spec.mainClass.set(mainClass)
-        spec.args = args
-        runCatching { spec.standardOutput = standardOutput }
-        runCatching { spec.errorOutput = errorOutput }
-        spec.isIgnoreExitValue = isIgnoreExitValue
-    }
+    /**
+     * Captures the current launch configuration of this task as an immutable [IdeLaunchSpec].
+     *
+     * All JVM arguments (including system properties, heap settings, debug options, and [jvmArgumentProviders]) and all
+     * application arguments (including [argumentProviders]) are resolved at this point, so later changes to this task
+     * do not affect processes launched from the returned spec.
+     */
+    internal fun captureLaunchSpec() = IdeLaunchSpec(
+        executable = javaLauncher.orNull?.executablePath?.asFile?.absolutePath ?: executable?.takeIf { it.isNotBlank() },
+        environment = environment.toMap(),
+        jvmArgs = allJvmArgs + jvmArguments.getOrElse(emptyList()),
+        workingDir = workingDir,
+        classpath = classpath.files.toList(),
+        mainClass = mainClass.orNull,
+        args = args + argumentProviders.flatMap { it.asArguments() },
+        standardOutput = runCatching { standardOutput }.getOrNull(),
+        errorOutput = runCatching { errorOutput }.getOrNull(),
+    )
 
     private fun validateSplitModeTaskArguments() {
         if (args.isNotEmpty()) {
@@ -255,15 +270,42 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
      *
      * The process itself is started by Gradle (not [ProcessBuilder]) because Gradle instruments direct process launches
      * in plugin code, which fails at task-execution time.
+     *
+     * When the backend requests a restart (e.g., on the first frontend join), it exits with
+     * [SPLIT_MODE_BACKEND_RESTART_EXIT_CODE] and is relaunched from the same [launchSpec], so the restarted backend
+     * keeps the very same Gradle-managed configuration.
+     *
+     * The exit value is not asserted; the caller decides which exit values are acceptable.
+     *
+     * @param launchSpec the backend launch configuration, see [captureLaunchSpec]
+     * @return the execution result of the last launched backend process
      */
-    internal fun runSplitModeBackend(launch: () -> Unit) {
+    internal fun runSplitModeBackend(launchSpec: IdeLaunchSpec): ExecResult {
         checkForConflictingSplitModeBackend()
 
+        repeat(SPLIT_MODE_BACKEND_MAX_RESTARTS + 1) { restart ->
+            if (restart > 0) {
+                log.lifecycle("Split-mode backend requested a restart; relaunching ($restart/$SPLIT_MODE_BACKEND_MAX_RESTARTS).")
+            }
+
+            val result = launchTrackedSplitModeBackend(launchSpec)
+            if (result.exitValue != SPLIT_MODE_BACKEND_RESTART_EXIT_CODE) {
+                return result
+            }
+        }
+
+        throw GradleException("Split-mode backend requested a restart more than $SPLIT_MODE_BACKEND_MAX_RESTARTS times; giving up.")
+    }
+
+    private fun launchTrackedSplitModeBackend(launchSpec: IdeLaunchSpec): ExecResult {
         val pidPath = splitModeBackendPidFile.asPath
         val trackerStopped = AtomicBoolean(false)
         val tracker = startSplitModeBackendPidTracker(pidPath, trackerStopped)
         try {
-            launch()
+            return execOperations.javaexec {
+                launchSpec.applyTo(this)
+                isIgnoreExitValue = true
+            }
         } finally {
             trackerStopped.set(true)
             tracker.interrupt()
@@ -638,7 +680,11 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
     private fun configureSplitModeSharedEnvironment() {
         environment(SPLIT_MODE_NO_TIMEOUTS_ENV, "1")
         when (executionMode.get()) {
-            ExecutionMode.SPLIT_MODE_BACKEND -> environment(SPLIT_MODE_HOST_PASSWORD_ENV, SPLIT_MODE_SHARED_PASSWORD)
+            ExecutionMode.SPLIT_MODE_BACKEND -> {
+                environment(SPLIT_MODE_HOST_PASSWORD_ENV, SPLIT_MODE_SHARED_PASSWORD)
+                environment(SPLIT_MODE_BACKEND_RESTART_ENV, SPLIT_MODE_BACKEND_RESTART_EXIT_CODE)
+            }
+
             ExecutionMode.SPLIT_MODE_FRONTEND -> environment(SPLIT_MODE_CLIENT_PASSWORD_ENV, SPLIT_MODE_SHARED_PASSWORD)
             ExecutionMode.STANDARD -> Unit
         }
@@ -794,6 +840,38 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         STANDARD,
         SPLIT_MODE_BACKEND,
         SPLIT_MODE_FRONTEND,
+    }
+}
+
+/**
+ * An immutable launch configuration of an IDE process, captured with [RunIdeTask.captureLaunchSpec].
+ *
+ * Split-mode processes are launched from such a snapshot rather than from the live task state, because
+ * [RunIdeSplitModeTask] reconfigures the same task for the frontend while the backend is still running, and the backend
+ * may need to be relaunched with its original configuration when it requests a restart.
+ */
+internal class IdeLaunchSpec(
+    private val executable: String?,
+    private val environment: Map<String, Any>,
+    private val jvmArgs: List<String>,
+    private val workingDir: File,
+    private val classpath: List<File>,
+    private val mainClass: String?,
+    private val args: List<String>,
+    private val standardOutput: OutputStream?,
+    private val errorOutput: OutputStream?,
+) {
+
+    fun applyTo(spec: JavaExecSpec) {
+        executable?.let { spec.executable = it }
+        spec.setEnvironment(environment)
+        spec.setJvmArgs(jvmArgs)
+        spec.workingDir = workingDir
+        spec.classpath(classpath)
+        spec.mainClass.set(mainClass)
+        spec.args = args
+        standardOutput?.let { spec.standardOutput = it }
+        errorOutput?.let { spec.errorOutput = it }
     }
 }
 

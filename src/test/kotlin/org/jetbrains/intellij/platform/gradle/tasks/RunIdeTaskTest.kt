@@ -2,19 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
-import org.jetbrains.intellij.platform.gradle.assertContains
-import org.jetbrains.intellij.platform.gradle.assertNotContains
-import org.jetbrains.intellij.platform.gradle.buildDirectory
-import org.jetbrains.intellij.platform.gradle.buildFile
-import org.jetbrains.intellij.platform.gradle.cacheDirectory
-import org.jetbrains.intellij.platform.gradle.currentVariant
-import org.jetbrains.intellij.platform.gradle.overwrite
-import org.jetbrains.intellij.platform.gradle.pluginXml
-import org.jetbrains.intellij.platform.gradle.variants
-import org.jetbrains.intellij.platform.gradle.write
 import javax.tools.ToolProvider
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
@@ -35,12 +25,12 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
     private fun configureNativeVariants(enabled: Boolean = true) {
         pluginXml write //language=xml
-                """
-                <idea-plugin>
-                  <name>MyPluginName</name>
-                  <vendor>JetBrains</vendor>
-                </idea-plugin>
-                """.trimIndent()
+            """
+            <idea-plugin>
+              <name>MyPluginName</name>
+              <vendor>JetBrains</vendor>
+            </idea-plugin>
+            """.trimIndent()
 
         variants.forEach { variant ->
             dir.resolve("native/${variant.os}-${variant.arch}/bin/${variant.os}-${variant.arch}.txt") write "${variant.os}-${variant.arch}"
@@ -48,20 +38,20 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         }
 
         buildFile write //language=kotlin
-                """
-                intellijPlatform {
-                    pluginConfiguration.ideaVersion.sinceBuild = "$nativeVariantsSinceBuild"
-                    nativeVariants {
-                        enabled = $enabled
-                        linux.x86_64.from(file("native/linux-x86_64"))
-                        linux.arm64.from(file("native/linux-arm64"))
-                        mac.x86_64.from(file("native/mac-x86_64"))
-                        mac.arm64.from(file("native/mac-arm64"))
-                        windows.x86_64.from(file("native/windows-x86_64"))
-                        windows.arm64.from(file("native/windows-arm64"))
-                    }
+            """
+            intellijPlatform {
+                pluginConfiguration.ideaVersion.sinceBuild = "$nativeVariantsSinceBuild"
+                nativeVariants {
+                    enabled = $enabled
+                    linux.x86_64.from(file("native/linux-x86_64"))
+                    linux.arm64.from(file("native/linux-arm64"))
+                    mac.x86_64.from(file("native/mac-x86_64"))
+                    mac.arm64.from(file("native/mac-arm64"))
+                    windows.x86_64.from(file("native/windows-x86_64"))
+                    windows.arm64.from(file("native/windows-arm64"))
                 }
-                """.trimIndent()
+            }
+            """.trimIndent()
     }
 
     private fun assertCurrentNativeVariant(pluginDirectory: java.nio.file.Path) {
@@ -105,13 +95,13 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         val prepareCurrentVariant = "${Tasks.PREPARE_PLUGIN_VARIANT}_${hostVariant.os}_${hostVariant.arch}"
         dir.resolve("base/bin/collision.txt") write "base"
         buildFile write //language=kotlin
-                """
-                tasks.named<PrepareSandboxTask>("$prepareRunIdeSandbox") {
-                    from("base") {
-                        into("projectName")
-                    }
+            """
+            tasks.named<PrepareSandboxTask>("$prepareRunIdeSandbox") {
+                from("base") {
+                    into("projectName")
                 }
-                """.trimIndent()
+            }
+            """.trimIndent()
 
         build(Tasks.RUN_IDE, args = listOf("--dry-run")) {
             assertTrue(":$prepareRunIdeSandbox SKIPPED" in output.lineSequence())
@@ -145,13 +135,13 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         configureNativeVariants()
         val customRunIde = "customRunIde"
         buildFile write //language=kotlin
-                """
-                val $customRunIde by intellijPlatformTesting.runIde.registering {
-                    task {
-                        enabled = false
-                    }
+            """
+            val $customRunIde by intellijPlatformTesting.runIde.registering {
+                task {
+                    enabled = false
                 }
-                """.trimIndent()
+            }
+            """.trimIndent()
 
         build(
             "${Tasks.PREPARE_SANDBOX}_${Tasks.RUN_IDE_BACKEND}",
@@ -169,9 +159,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         port: Int,
         joinLink: String,
     ) {
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named("${Tasks.RUN_IDE_FRONTEND}") {
                 doFirst {
                     val joinLinkFileProvider = javaClass
@@ -195,7 +184,6 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 }
             }
             """.trimIndent()
-        )
     }
 
     private fun configureFakeJavaLauncher() {
@@ -213,9 +201,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         val fakeLauncherClassesPath = fakeLauncherClasses.toRealPath().invariantSeparatorsPathString
         val fakeJavaDebugLogPath = fakeJdk.resolve("fake-java-debug.log").invariantSeparatorsPathString
 
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.withType<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>().configureEach {
                 val fakeJdk = layout.projectDirectory.dir("fake-jdk")
                 val realJavaExecutablePath = project.file("$realJavaExecutablePath")
@@ -247,7 +234,6 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 )
             }
             """.trimIndent()
-        )
     }
 
     private fun compileFakeJavaLauncherClasses(outputDirectory: java.nio.file.Path) {
@@ -262,173 +248,184 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         outputDirectory.createDirectories()
 
         helperSource overwrite //language=java
-                """
-                package fake.launcher;
-                
-                import java.lang.management.ManagementFactory;
-                import java.net.ServerSocket;
-                import java.nio.file.Files;
-                import java.nio.file.Path;
-                import java.nio.file.StandardOpenOption;
-                import java.util.ArrayList;
-                import java.util.Arrays;
-                import java.util.List;
-                
-                public final class FakeLauncher {
-                    private FakeLauncher() {}
-                
-                    public static void run(String mainClass, String[] args) throws Exception {
-                        var debugLines = new ArrayList<String>();
-                        debugLines.add("=== fake java start ===");
-                        debugLines.add("MAIN_CLASS=" + mainClass);
-                        debugLines.add("CWD=" + Path.of("").toAbsolutePath());
-                        for (var arg : args) {
-                            debugLines.add("ARG=" + arg);
+            """
+            package fake.launcher;
+
+            import java.lang.management.ManagementFactory;
+            import java.net.ServerSocket;
+            import java.nio.file.Files;
+            import java.nio.file.Path;
+            import java.nio.file.StandardOpenOption;
+            import java.util.ArrayList;
+            import java.util.Arrays;
+            import java.util.List;
+
+            public final class FakeLauncher {
+                private FakeLauncher() {}
+
+                public static void run(String mainClass, String[] args) throws Exception {
+                    var debugLines = new ArrayList<String>();
+                    debugLines.add("=== fake java start ===");
+                    debugLines.add("MAIN_CLASS=" + mainClass);
+                    debugLines.add("CWD=" + Path.of("").toAbsolutePath());
+                    for (var arg : args) {
+                        debugLines.add("ARG=" + arg);
+                    }
+
+                    printAndLog("JETBRAINS_CLIENT_JDK=" + getenv("JETBRAINS_CLIENT_JDK"), debugLines);
+                    printAndLog("JETBRAINS_CLIENT_VM_OPTIONS=" + getenv("JETBRAINS_CLIENT_VM_OPTIONS"), debugLines);
+                    printAndLog("JETBRAINS_CLIENT_PROPERTIES=" + getenv("JETBRAINS_CLIENT_PROPERTIES"), debugLines);
+                    printAndLog("IDEA_RESTART_VIA_EXIT_CODE=" + getenv("IDEA_RESTART_VIA_EXIT_CODE"), debugLines);
+                    printAndLog("JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_START", debugLines);
+                    readVmOptions(debugLines);
+                    printAndLog("JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_END", debugLines);
+                    printAndLog("MAIN_CLASS=" + mainClass, debugLines);
+
+                    var jvmArgs = String.join(" ", filteredInputArguments());
+                    if (!jvmArgs.isBlank()) {
+                        printAndLog("JVM_ARGS=" + jvmArgs, debugLines);
+                    }
+
+                    var appArgs = String.join(" ", args);
+                    if (!appArgs.isBlank()) {
+                        printAndLog("APP_ARGS=" + appArgs, debugLines);
+                    }
+
+                    var argsList = Arrays.asList(args);
+                    var exitCode = resolveExitCode(argsList);
+                    if (argsList.contains("serverMode")) {
+                        var port = 5990;
+                        var portOptionIndex = argsList.indexOf("-p");
+                        if (portOptionIndex >= 0 && portOptionIndex + 1 < args.length) {
+                            port = Integer.parseInt(args[portOptionIndex + 1]);
                         }
-                
-                        printAndLog("JETBRAINS_CLIENT_JDK=" + getenv("JETBRAINS_CLIENT_JDK"), debugLines);
-                        printAndLog("JETBRAINS_CLIENT_VM_OPTIONS=" + getenv("JETBRAINS_CLIENT_VM_OPTIONS"), debugLines);
-                        printAndLog("JETBRAINS_CLIENT_PROPERTIES=" + getenv("JETBRAINS_CLIENT_PROPERTIES"), debugLines);
-                        printAndLog("JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_START", debugLines);
-                        readVmOptions(debugLines);
-                        printAndLog("JETBRAINS_CLIENT_VM_OPTIONS_CONTENT_END", debugLines);
-                        printAndLog("MAIN_CLASS=" + mainClass, debugLines);
-                
-                        var jvmArgs = String.join(" ", filteredInputArguments());
-                        if (!jvmArgs.isBlank()) {
-                            printAndLog("JVM_ARGS=" + jvmArgs, debugLines);
-                        }
-                
-                        var appArgs = String.join(" ", args);
-                        if (!appArgs.isBlank()) {
-                            printAndLog("APP_ARGS=" + appArgs, debugLines);
-                        }
-                
-                        var argsList = Arrays.asList(args);
-                        var exitCode = resolveExitCode(argsList);
-                        if (argsList.contains("serverMode")) {
-                            var port = 5990;
-                            var portOptionIndex = argsList.indexOf("-p");
-                            if (portOptionIndex >= 0 && portOptionIndex + 1 < args.length) {
-                                port = Integer.parseInt(args[portOptionIndex + 1]);
-                            }
-                
-                            var aliveMs = System.getProperty("fake.backend.alive.ms");
-                            if (aliveMs != null && !aliveMs.isBlank()) {
-                                try (var serverSocket = new ServerSocket(port)) {
-                                    printAndLog("Join link: tcp://127.0.0.1:" + port + "#cb=fake", debugLines);
-                                    try {
-                                        Thread.sleep(Long.parseLong(aliveMs));
-                                    } catch (InterruptedException interrupted) {
-                                        Thread.currentThread().interrupt();
-                                    }
-                                }
-                            } else {
+
+                        var aliveMs = System.getProperty("fake.backend.alive.ms");
+                        if (aliveMs != null && !aliveMs.isBlank()) {
+                            try (var serverSocket = new ServerSocket(port)) {
                                 printAndLog("Join link: tcp://127.0.0.1:" + port + "#cb=fake", debugLines);
+                                try {
+                                    Thread.sleep(Long.parseLong(aliveMs));
+                                } catch (InterruptedException interrupted) {
+                                    Thread.currentThread().interrupt();
+                                }
                             }
+                        } else {
+                            printAndLog("Join link: tcp://127.0.0.1:" + port + "#cb=fake", debugLines);
                         }
-                
-                        debugLines.add("=== fake java end ===");
-                        writeDebugLog(debugLines);
-                        if (exitCode != 0) {
-                            System.exit(exitCode);
-                        }
-                    }
-                
-                    private static int resolveExitCode(List<String> argsList) {
-                        var propertyName = "fake.exit.code";
-                        if (argsList.contains("serverMode")) {
-                            propertyName = "fake.backend.exit.code";
-                        } else if (argsList.contains("thinClient")) {
-                            propertyName = "fake.frontend.exit.code";
-                        }
-                
-                        var configured = System.getProperty(propertyName, System.getProperty("fake.exit.code", "0"));
-                        if (configured == null || configured.isBlank()) {
-                            return 0;
-                        }
-                        return Integer.parseInt(configured);
-                    }
-                
-                    private static String getenv(String name) {
-                        return System.getenv().getOrDefault(name, "");
-                    }
-                
-                    private static void readVmOptions(List<String> debugLines) throws Exception {
-                        var vmOptions = getenv("JETBRAINS_CLIENT_VM_OPTIONS");
-                        if (vmOptions.isBlank()) {
-                            return;
-                        }
-                
-                        var vmOptionsPath = Path.of(vmOptions);
-                        if (!Files.exists(vmOptionsPath)) {
-                            return;
-                        }
-                
-                        for (var line : Files.readAllLines(vmOptionsPath)) {
-                            printAndLog(line, debugLines);
+
+                        var restartMarker = System.getProperty("fake.backend.restart.marker", "");
+                        var restartExitCode = getenv("IDEA_RESTART_VIA_EXIT_CODE");
+                        if (!restartMarker.isBlank() && !restartExitCode.isBlank() && !Files.exists(Path.of(restartMarker))) {
+                            Files.createFile(Path.of(restartMarker));
+                            printAndLog("FAKE_BACKEND_RESTART_REQUESTED=" + restartExitCode, debugLines);
+                            exitCode = Integer.parseInt(restartExitCode);
                         }
                     }
-                
-                    private static List<String> filteredInputArguments() {
-                        var fakeLauncherClasses = System.getProperty("fake.java.fakeLauncherClasses", "");
-                        var filtered = new ArrayList<String>();
-                        for (var argument : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
-                            if (argument.startsWith("-Dfake.java.")) {
-                                continue;
-                            }
-                            if (argument.startsWith("-Xbootclasspath/a:") && argument.contains(fakeLauncherClasses)) {
-                                continue;
-                            }
-                            filtered.add(argument);
-                        }
-                        return filtered;
-                    }
-                
-                    private static void printAndLog(String line, List<String> debugLines) {
-                        System.out.println(line);
-                        debugLines.add(line);
-                    }
-                
-                    private static void writeDebugLog(List<String> debugLines) throws Exception {
-                        var debugLog = System.getProperty("fake.java.debug.log", "");
-                        if (debugLog.isBlank()) {
-                            return;
-                        }
-                        Files.write(
-                            Path.of(debugLog),
-                            debugLines,
-                            StandardOpenOption.CREATE,
-                            StandardOpenOption.TRUNCATE_EXISTING,
-                            StandardOpenOption.WRITE
-                        );
+
+                    debugLines.add("=== fake java end ===");
+                    writeDebugLog(debugLines);
+                    if (exitCode != 0) {
+                        System.exit(exitCode);
                     }
                 }
-                """.trimIndent()
+
+                private static int resolveExitCode(List<String> argsList) {
+                    var propertyName = "fake.exit.code";
+                    if (argsList.contains("serverMode")) {
+                        propertyName = "fake.backend.exit.code";
+                    } else if (argsList.contains("thinClient")) {
+                        propertyName = "fake.frontend.exit.code";
+                    }
+
+                    var configured = System.getProperty(propertyName, System.getProperty("fake.exit.code", "0"));
+                    if (configured == null || configured.isBlank()) {
+                        return 0;
+                    }
+                    return Integer.parseInt(configured);
+                }
+
+                private static String getenv(String name) {
+                    return System.getenv().getOrDefault(name, "");
+                }
+
+                private static void readVmOptions(List<String> debugLines) throws Exception {
+                    var vmOptions = getenv("JETBRAINS_CLIENT_VM_OPTIONS");
+                    if (vmOptions.isBlank()) {
+                        return;
+                    }
+
+                    var vmOptionsPath = Path.of(vmOptions);
+                    if (!Files.exists(vmOptionsPath)) {
+                        return;
+                    }
+
+                    for (var line : Files.readAllLines(vmOptionsPath)) {
+                        printAndLog(line, debugLines);
+                    }
+                }
+
+                private static List<String> filteredInputArguments() {
+                    var fakeLauncherClasses = System.getProperty("fake.java.fakeLauncherClasses", "");
+                    var filtered = new ArrayList<String>();
+                    for (var argument : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+                        if (argument.startsWith("-Dfake.java.")) {
+                            continue;
+                        }
+                        if (argument.startsWith("-Xbootclasspath/a:") && argument.contains(fakeLauncherClasses)) {
+                            continue;
+                        }
+                        filtered.add(argument);
+                    }
+                    return filtered;
+                }
+
+                private static void printAndLog(String line, List<String> debugLines) {
+                    System.out.println(line);
+                    debugLines.add(line);
+                }
+
+                private static void writeDebugLog(List<String> debugLines) throws Exception {
+                    var debugLog = System.getProperty("fake.java.debug.log", "");
+                    if (debugLog.isBlank()) {
+                        return;
+                    }
+                    Files.write(
+                        Path.of(debugLog),
+                        debugLines,
+                        StandardOpenOption.CREATE,
+                        StandardOpenOption.TRUNCATE_EXISTING,
+                        StandardOpenOption.WRITE
+                    );
+                }
+            }
+            """.trimIndent()
+
         ideaMainSource overwrite //language=java
-                """
-                package com.intellij.idea;
-                
-                public final class Main {
-                    private Main() {}
-                
-                    public static void main(String[] args) throws Exception {
-                        fake.launcher.FakeLauncher.run(Main.class.getName(), args);
-                    }
+            """
+            package com.intellij.idea;
+
+            public final class Main {
+                private Main() {}
+
+                public static void main(String[] args) throws Exception {
+                    fake.launcher.FakeLauncher.run(Main.class.getName(), args);
                 }
-                """.trimIndent()
+            }
+            """.trimIndent()
+
         intellijLoaderSource overwrite //language=java
-                """
-                package com.intellij.platform.runtime.loader;
-                
-                public final class IntellijLoader {
-                    private IntellijLoader() {}
-                
-                    public static void main(String[] args) throws Exception {
-                        fake.launcher.FakeLauncher.run(IntellijLoader.class.getName(), args);
-                    }
+            """
+            package com.intellij.platform.runtime.loader;
+
+            public final class IntellijLoader {
+                private IntellijLoader() {}
+
+                public static void main(String[] args) throws Exception {
+                    fake.launcher.FakeLauncher.run(IntellijLoader.class.getName(), args);
                 }
-                """.trimIndent()
+            }
+            """.trimIndent()
 
         val compiler = checkNotNull(ToolProvider.getSystemJavaCompiler()) {
             "A JDK with the system Java compiler is required to run RunIdeTaskTest."
@@ -449,13 +446,13 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `propagate launcher override to split mode frontend`() {
         buildFile write //language=kotlin
-                """
-                tasks {
-                    runIde {
-                        splitMode = true
-                    }
+            """
+            tasks {
+                runIde {
+                    splitMode = true
                 }
-                """.trimIndent()
+            }
+            """.trimIndent()
         configureFakeJavaLauncher()
         val expectedJavaHome = dir.resolve("fake-jdk").toRealPath().invariantSeparatorsPathString
 
@@ -485,14 +482,12 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIde removes old log directories when requested`() {
         configureFakeJavaLauncher()
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<RunIdeTask>("${Tasks.RUN_IDE}") {
                 purgeOldLogDirectories.set(true)
             }
             """.trimIndent()
-        )
 
         val logDirectory = sandbox.resolve("${Sandbox.LOG}_${Tasks.RUN_IDE}")
         val staleLogFile = logDirectory.resolve("old-session/idea.log")
@@ -521,31 +516,82 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             .filter { it.name == "split-mode-frontend.join.link" }
             .toList()
 
-        kotlin.test.assertEquals(1, joinLinkFiles.size)
-        kotlin.test.assertEquals("tcp://127.0.0.1:5990#cb=fake", joinLinkFiles.single().readText().trim())
+        assertEquals(1, joinLinkFiles.size)
+        assertEquals("tcp://127.0.0.1:5990#cb=fake", joinLinkFiles.single().readText().trim())
+    }
+
+    @Test
+    fun `runIdeBackend relaunches backend when restart is requested`() {
+        configureFakeJavaLauncher()
+        val restartMarker = dir.resolve("backend-restart.marker")
+        buildFile write //language=kotlin
+            """
+            tasks.named<RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
+                jvmArgs("-Dfake.backend.restart.marker=${restartMarker.invariantSeparatorsPathString}")
+            }
+            """.trimIndent()
+
+        build(Tasks.RUN_IDE_BACKEND) {
+            assertContains("IDEA_RESTART_VIA_EXIT_CODE=$SPLIT_MODE_BACKEND_RESTART_EXIT_CODE", output)
+            assertContains("FAKE_BACKEND_RESTART_REQUESTED=$SPLIT_MODE_BACKEND_RESTART_EXIT_CODE", output)
+            assertContains(
+                "Split-mode backend requested a restart; relaunching (1/$SPLIT_MODE_BACKEND_MAX_RESTARTS).",
+                output,
+            )
+            assertEquals(2, output.lineSequence().count { it == "APP_ARGS=serverMode -p 5990" })
+        }
+
+        assertTrue(restartMarker.exists())
+    }
+
+    @Test
+    fun `runIdeSplitMode relaunches backend when restart is requested`() {
+        configureFakeJavaLauncher()
+        val restartMarker = dir.resolve("backend-restart.marker")
+        buildFile write //language=kotlin
+            """
+            tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
+                jvmArgs(
+                    "-Dfake.backend.alive.ms=1000",
+                    "-Dfake.backend.restart.marker=${restartMarker.invariantSeparatorsPathString}",
+                )
+            }
+            """.trimIndent()
+
+        build(Tasks.RUN_IDE_SPLIT_MODE) {
+            assertContains("FAKE_BACKEND_RESTART_REQUESTED=$SPLIT_MODE_BACKEND_RESTART_EXIT_CODE", output)
+            assertContains(
+                "Split-mode backend requested a restart; relaunching (1/$SPLIT_MODE_BACKEND_MAX_RESTARTS).",
+                output,
+            )
+            assertContains(
+                "APP_ARGS=thinClient tcp://127.0.0.1:5990#cb=fake&remoteId=Split%20Mode --refresh-split-mode-token=true",
+                output,
+            )
+            assertEquals(2, output.lineSequence().count { it == "APP_ARGS=serverMode -p 5990" })
+        }
     }
 
     @Test
     fun `runIdeSplitMode starts backend before frontend`() {
         configureFakeJavaLauncher()
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
                 jvmArgs("-Dfake.backend.alive.ms=1000")
             }
             """.trimIndent()
-        )
 
         build(Tasks.RUN_IDE_SPLIT_MODE) {
             val backendArgs = "APP_ARGS=serverMode -p 5990"
-            val frontendArgs = "APP_ARGS=thinClient tcp://127.0.0.1:5990#cb=fake&remoteId=Split%20Mode --refresh-split-mode-token=true"
+            val frontendArgs =
+                "APP_ARGS=thinClient tcp://127.0.0.1:5990#cb=fake&remoteId=Split%20Mode --refresh-split-mode-token=true"
 
             assertContains(backendArgs, output)
             assertContains(frontendArgs, output)
             assertTrue(
                 output.indexOf(backendArgs) < output.indexOf(frontendArgs),
-                "Expected backend launch output before frontend launch output."
+                "Expected backend launch output before frontend launch output.",
             )
             assertContains("Split-mode backend sandbox paths:", output)
             assertContains("config_${Tasks.RUN_IDE_BACKEND}", output)
@@ -582,9 +628,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIdeSplitMode keeps JVM debugging only on backend`() {
         configureFakeJavaLauncher()
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
                 jvmArgs("-Dfake.backend.alive.ms=1000")
                 debugOptions.enabled.set(true)
@@ -593,11 +638,11 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 debugOptions.suspend.set(false)
             }
             """.trimIndent()
-        )
 
         build(Tasks.RUN_IDE_SPLIT_MODE) {
             val backendArgs = "APP_ARGS=serverMode -p 5990"
-            val frontendArgs = "APP_ARGS=thinClient debug://localhost:5990#remoteId=Split%20Mode --refresh-split-mode-token=true"
+            val frontendArgs =
+                "APP_ARGS=thinClient debug://localhost:5990#remoteId=Split%20Mode --refresh-split-mode-token=true"
             val jvmArgLinesWithJdwp = output.lineSequence()
                 .filter { it.startsWith("JVM_ARGS=") && "jdwp" in it }
                 .toList()
@@ -607,23 +652,24 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertContains("-agentlib:jdwp=", jvmArgLinesWithJdwp.single())
             assertTrue(
                 output.indexOf(jvmArgLinesWithJdwp.single()) < output.indexOf(frontendArgs),
-                "Expected only backend launch to receive JDWP JVM arguments."
+                "Expected only backend launch to receive JDWP JVM arguments.",
             )
-            assertContains("Java debugging is disabled for the frontend process launched by `${Tasks.RUN_IDE_SPLIT_MODE}`.", output)
+            assertContains(
+                "Java debugging is disabled for the frontend process launched by `${Tasks.RUN_IDE_SPLIT_MODE}`.",
+                output,
+            )
         }
     }
 
     @Test
     fun `runIdeSplitMode reuses configuration cache`() {
         configureFakeJavaLauncher()
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
                 jvmArgs("-Dfake.backend.alive.ms=1000")
             }
             """.trimIndent()
-        )
 
         buildWithConfigurationCache(Tasks.RUN_IDE_SPLIT_MODE)
         buildWithConfigurationCache(Tasks.RUN_IDE_SPLIT_MODE) {
@@ -634,9 +680,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIdeSplitMode accepts expected shutdown exit code`() {
         configureFakeJavaLauncher()
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
                 jvmArgs(
                     "-Dfake.backend.alive.ms=1000",
@@ -645,7 +690,6 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 )
             }
             """.trimIndent()
-        )
 
         build(Tasks.RUN_IDE_SPLIT_MODE) {
             assertContains("Split-mode frontend process exited with expected shutdown code 193.", output)
@@ -656,9 +700,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIdeSplitMode fails on unexpected frontend exit code`() {
         configureFakeJavaLauncher()
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeSplitModeTask>("${Tasks.RUN_IDE_SPLIT_MODE}") {
                 jvmArgs(
                     "-Dfake.backend.alive.ms=1000",
@@ -666,7 +709,6 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
                 )
             }
             """.trimIndent()
-        )
 
         buildAndFail(Tasks.RUN_IDE_SPLIT_MODE) {
             assertContains("Process 'command", output)
@@ -677,14 +719,12 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIdeBackend selects a random free port when configured to zero`() {
         configureFakeJavaLauncher()
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
                 splitModeServerPort.set(0)
             }
             """.trimIndent()
-        )
 
         build(Tasks.RUN_IDE_BACKEND) {
             assertContains("`splitModeServerPort` is set to 0; selected random free port ", output)
@@ -708,14 +748,12 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     fun `runIdeBackend logs the launched backend process id`() {
         configureFakeJavaLauncher()
         // Keep the launched backend process alive long enough for the PID tracker to observe it deterministically.
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
                 jvmArgs("-Dfake.backend.alive.ms=5000")
             }
             """.trimIndent()
-        )
 
         build(Tasks.RUN_IDE_BACKEND) {
             assertContains("Started split-mode backend (PID ", output)
@@ -727,7 +765,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     fun `runIdeBackend fails when a split-mode backend is already running`() {
         configureFakeJavaLauncher()
 
-        val runtimeSandbox = dir.resolve(".intellijPlatform/sandbox/projectName/$intellijPlatformType-$intellijPlatformVersion")
+        val runtimeSandbox =
+            dir.resolve(".intellijPlatform/sandbox/projectName/$intellijPlatformType-$intellijPlatformVersion")
         runtimeSandbox.createDirectories()
         val currentPid = ProcessHandle.current().pid()
         runtimeSandbox.resolve("split-mode-backend.pid").toFile().writeText(currentPid.toString())
@@ -743,14 +782,12 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
         java.net.ServerSocket(0).use { serverSocket ->
             val port = serverSocket.localPort
-            buildFile.toFile().appendText(
+            buildFile write //language=kotlin
                 """
-
                 tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
                     splitModeServerPort.set($port)
                 }
                 """.trimIndent()
-            )
 
             build(Tasks.RUN_IDE_BACKEND) {
                 assertContains("Split-mode backend port $port appears to be in use", output)
@@ -764,7 +801,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     fun `runIdeBackend ignores a stale backend PID file`() {
         configureFakeJavaLauncher()
 
-        val runtimeSandbox = dir.resolve(".intellijPlatform/sandbox/projectName/$intellijPlatformType-$intellijPlatformVersion")
+        val runtimeSandbox =
+            dir.resolve(".intellijPlatform/sandbox/projectName/$intellijPlatformType-$intellijPlatformVersion")
         runtimeSandbox.createDirectories()
         // A PID that does not resolve to any live process must be treated as a stale marker, not a running backend.
         val deadPid = 999_999_999L
@@ -779,16 +817,14 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     fun `runIdeBackend writes debug frontend join link when backend debugging is enabled`() {
         configureFakeJavaLauncher()
         val debugPort = java.net.ServerSocket(0).use { it.localPort }
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<org.jetbrains.intellij.platform.gradle.tasks.RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
                 debugOptions.enabled.set(true)
                 debugOptions.port.set($debugPort)
                 debugOptions.suspend.set(false)
             }
             """.trimIndent()
-        )
 
         build(Tasks.RUN_IDE_BACKEND)
 
@@ -797,10 +833,10 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             .filter { it.name == "split-mode-frontend.join.link" }
             .toList()
 
-        kotlin.test.assertEquals(1, joinLinkFiles.size)
-        kotlin.test.assertEquals(
+        assertEquals(1, joinLinkFiles.size)
+        assertEquals(
             "debug://localhost:5990#remoteId=Split%20Mode",
-            joinLinkFiles.single().readText().trim()
+            joinLinkFiles.single().readText().trim(),
         )
     }
 
@@ -819,14 +855,12 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIdeBackend removes old log directories when requested`() {
         configureFakeJavaLauncher()
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<RunIdeTask>("${Tasks.RUN_IDE_BACKEND}") {
                 purgeOldLogDirectories.set(true)
             }
             """.trimIndent()
-        )
 
         val backendLogDirectory = sandbox.resolve("log_${Tasks.RUN_IDE_BACKEND}")
         val staleLogFile = backendLogDirectory.resolve("old-session/idea.log")
@@ -864,14 +898,14 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         configureFrontendJoinLinkProvider(
             delayMs = 0,
             port = 6092,
-            joinLink = "debug://localhost:6092#remoteId=Split%20Mode"
+            joinLink = "debug://localhost:6092#remoteId=Split%20Mode",
         )
 
         build(Tasks.RUN_IDE_FRONTEND) {
             assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
             assertContains(
                 "APP_ARGS=thinClient debug://localhost:6092#remoteId=Split%20Mode --refresh-split-mode-token=true",
-                output
+                output,
             )
         }
     }
@@ -885,7 +919,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
             assertContains(
                 "APP_ARGS=thinClient tcp://127.0.0.1:6093#cb=fake&remoteId=Split%20Mode --refresh-split-mode-token=true",
-                output
+                output,
             )
             assertContains("Split-mode frontend sandbox paths:", output)
             assertContains("idea.config.path=", output)
@@ -913,7 +947,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertNotContains("-Dplugin.path=", output)
             assertNotContains(
                 "APP_ARGS=thinClient tcp://127.0.0.1:6093#cb=fake&remoteId=Split%20Mode splitMode",
-                output
+                output,
             )
         }
     }
@@ -922,14 +956,12 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     fun `runIdeFrontend removes old frontend log directories when requested`() {
         configureFakeJavaLauncher()
         configureFrontendJoinLinkProvider(delayMs = 0, port = 6096, joinLink = "tcp://127.0.0.1:6096#cb=fake")
-        buildFile.toFile().appendText(
+        buildFile write //language=kotlin
             """
-
             tasks.named<RunIdeTask>("${Tasks.RUN_IDE_FRONTEND}") {
                 purgeOldLogDirectories.set(true)
             }
             """.trimIndent()
-        )
 
         val frontendLogDirectory = sandbox.resolve("log_${Tasks.RUN_IDE_FRONTEND}/frontend")
         val staleLogDirectoryOne = frontendLogDirectory.resolve("client-1")
@@ -949,22 +981,23 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `runIdeFrontend uses frontend sandbox plugins directory for BOTH target`() {
         buildFile write //language=kotlin
-                """
-                intellijPlatform {
-                    splitMode = true
-                    pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
-                }
+            """
+            intellijPlatform {
+                splitMode = true
+                pluginInstallationTarget = org.jetbrains.intellij.platform.gradle.tasks.aware.SplitModeAware.PluginInstallationTarget.BOTH
+            }
 
-                tasks.named("${Tasks.RUN_IDE_FRONTEND}") {
-                    doFirst {
-                        val sandboxPluginsDirectoryProvider = javaClass
-                            .getMethod("getSandboxPluginsDirectory")
-                            .invoke(this) as org.gradle.api.file.DirectoryProperty
-                        println("FRONTEND_SANDBOX_PLUGINS=" + sandboxPluginsDirectoryProvider.get().asFile.invariantSeparatorsPath)
-                    }
+            tasks.named("${Tasks.RUN_IDE_FRONTEND}") {
+                doFirst {
+                    val sandboxPluginsDirectoryProvider = javaClass
+                        .getMethod("getSandboxPluginsDirectory")
+                        .invoke(this) as org.gradle.api.file.DirectoryProperty
+                    println("FRONTEND_SANDBOX_PLUGINS=" + sandboxPluginsDirectoryProvider.get().asFile.invariantSeparatorsPath)
                 }
-                """.trimIndent()
-        configureFakeJavaLauncher()
+            }
+            """.trimIndent()
+
+            configureFakeJavaLauncher()
         configureFrontendJoinLinkProvider(delayMs = 0, port = 6095, joinLink = "tcp://127.0.0.1:6095#cb=both")
 
         build(Tasks.RUN_IDE_FRONTEND) {
@@ -983,7 +1016,7 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
             assertContains(
                 "APP_ARGS=thinClient tcp://127.0.0.1:6094#cb=delayed&remoteId=Split%20Mode --refresh-split-mode-token=true",
-                output
+                output,
             )
         }
     }
@@ -1001,11 +1034,11 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             assertContains("MAIN_CLASS=com.intellij.platform.runtime.loader.IntellijLoader", output)
             assertContains(
                 "APP_ARGS=thinClient tcp://127.0.0.1:6091#cb=fresh&remoteId=Split%20Mode --refresh-split-mode-token=true",
-                output
+                output,
             )
             assertNotContains(
                 "APP_ARGS=thinClient tcp://127.0.0.1:6090#cb=stale&remoteId=Split%20Mode --refresh-split-mode-token=true",
-                output
+                output,
             )
         }
     }
