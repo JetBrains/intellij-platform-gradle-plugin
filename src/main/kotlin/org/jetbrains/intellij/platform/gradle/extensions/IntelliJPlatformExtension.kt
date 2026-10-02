@@ -1092,6 +1092,7 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     localArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
                     requiredConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
                     registerRequestedPlatform = false,
+                    reuseMatchingBasePlatform = true,
                 )
             }
 

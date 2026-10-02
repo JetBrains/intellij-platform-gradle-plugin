@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
@@ -681,7 +682,11 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginVerification {
                         ides {
-                            create("$type", "$version")
+                            create("$type", "$version") {
+                                // Keep non-matching verifier IDE scenarios on their normal resolution path even when
+                                // CI enables the shared cache for the base test platform.
+                                useCache = false
+                            }
                         }
                     }
                 }
@@ -858,6 +863,34 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
             // Verify verification is not performed
             assertNotContains("Starting the IntelliJ Plugin Verifier", output)
         }
+    }
+
+    @Test
+    fun `matching verifier IDE reuses the base platform regardless of acquisition policy`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        ides {
+                            create("$intellijPlatformType", "$intellijPlatformVersion") {
+                                useInstaller = false
+                            }
+                        }
+                    }
+                }
+
+                tasks.register("checkVerifierIdeReuse") {
+                    doLast {
+                        val baseIde = configurations.getByName("${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}").singleFile.canonicalFile
+                        val verifierIde = tasks.named<VerifyPluginTask>("${Tasks.VERIFY_PLUGIN}").get().ides.singleFile.canonicalFile
+                        check(baseIde == verifierIde) {
+                            "Expected verifier IDE '${'$'}verifierIde' to reuse base IDE '${'$'}baseIde'"
+                        }
+                    }
+                }
+                """.trimIndent()
+
+        build("checkVerifierIdeReuse")
     }
 
     @Test

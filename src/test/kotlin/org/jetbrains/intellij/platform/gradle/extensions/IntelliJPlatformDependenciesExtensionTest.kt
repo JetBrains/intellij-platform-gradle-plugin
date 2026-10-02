@@ -6,6 +6,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import org.jetbrains.intellij.platform.gradle.services.extractionCompleteMarker
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.zip.GZIPOutputStream
@@ -208,7 +209,7 @@ class IntelliJPlatformDependenciesExtensionTest : IntelliJPluginTestBase() {
                     "productCode": "IC"
                 }
                 """.trimIndent()
-        cachedIde.resolve("cache-marker") overwrite "cached"
+        extractionCompleteMarker(cachedIde) overwrite "complete"
 
         buildFile write //language=kotlin
                 """

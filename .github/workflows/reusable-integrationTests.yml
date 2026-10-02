@@ -61,13 +61,23 @@ jobs:
           restore-keys: |
             test-gradle-home-v5-intellij-platform-${{ runner.os }}-
 
+      - name: Restore Gradle TestKit shared dependency cache
+        uses: actions/cache/restore@v6
+        with:
+          path: .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+          key: test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          restore-keys: |
+            test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-
+
       - name: Restore Gradle TestKit cache
         uses: actions/cache/restore@v6
         with:
-          path: .gradle/testGradleHome/.testKit
-          key: test-gradle-home-v2-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          path: |
+            .gradle/testGradleHome/.testKit
+            !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+          key: test-gradle-home-v4-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v2-testkit-${{ runner.os }}-
+            test-gradle-home-v4-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-
 
       - name: Run Tests
         env:

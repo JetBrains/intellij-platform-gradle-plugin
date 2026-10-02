@@ -2,8 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.utils
 
-import com.jetbrains.plugin.structure.base.utils.exists
-import com.jetbrains.plugin.structure.base.utils.listFiles
 import org.gradle.api.Incubating
 import org.gradle.api.artifacts.ConfigurationContainer
 import org.gradle.api.file.DirectoryProperty
@@ -148,20 +146,14 @@ class IntelliJPlatformCacheResolver internal constructor(
                 parameters.name.get().invoke(it)
             },
         ).asPath
-        if (targetDirectory.exists() && targetDirectory.listFiles().isNotEmpty()) {
-            return targetDirectory
+        extractorService.get().extract(targetDirectory) {
+            val configuration = configurations.create(Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withRandomSuffix)
+            dependenciesHelper.addIntelliJPlatformDependency(
+                requestedIntelliJPlatformProvider = requestedProvider,
+                configurationName = configuration.name,
+            )
+            configuration.files.single().toPath()
         }
-
-        val configuration = configurations.create(Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withRandomSuffix)
-        dependenciesHelper.addIntelliJPlatformDependency(
-            requestedIntelliJPlatformProvider = requestedProvider,
-            configurationName = configuration.name,
-        )
-
-        extractorService.get().extract(
-            path = configuration.files.single().toPath(),
-            targetDirectory = targetDirectory,
-        )
 
         return targetDirectory
     }
