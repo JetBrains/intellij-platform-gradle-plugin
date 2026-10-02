@@ -12,6 +12,7 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
+import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -33,6 +34,7 @@ import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.splitCommaSeparated
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import kotlin.io.path.name
 
 /**
@@ -146,7 +148,15 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
             val bundledPluginsClasspathExcludesProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathExcludes]
                 .map { it.splitCommaSeparated().toSet() }
-            val bundledPluginsClasspathEnabledProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathEnabled]
+            // Before 2026.2, adding all bundled plugins to the classpath breaks the plugin model (e.g., the Git frontend
+            // module is provided by both Git4Idea and the Remote Development plugin), so it is applied there only on request.
+            // See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2250
+            val bundledPluginsClasspathEnabledProvider = project.providers
+                .gradleProperty(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString())
+                .map { it.toBoolean() }
+                .orElse(platformPathProvider.map {
+                    it.productInfo().buildNumber.toVersion() >= Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER
+                })
             val bundledPluginsClasspathProvider = bundledPluginsClasspathEnabledProvider.flatMap { enabled ->
                 when {
                     enabled -> bundledPluginsClasspathExcludesProvider.map { bundledPluginsClasspathExcludes ->
@@ -176,7 +186,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // 6. Original classpath without runtime dependencies
             // 7. Test runtime classpath configuration
             // 8. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
-            // 9. Bundled plugins declared by product-info, when enabled
+            // 9. Bundled plugins declared by product-info, when enabled (by default, since 2026.2)
             classpath = project.files(
                 instrumentedTestCode,
                 currentPluginLibsProvider,

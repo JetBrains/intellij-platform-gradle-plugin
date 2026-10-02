@@ -7,7 +7,6 @@ import org.gradle.api.InvalidUserDataException
 import org.gradle.api.Project
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
-import org.gradle.api.file.DuplicatesStrategy
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.*
@@ -19,7 +18,6 @@ import org.gradle.process.ExecResult
 import org.gradle.process.JavaExecSpec
 import org.gradle.process.JavaForkOptions
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
-import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.argumentProviders.ComposeHotReloadArgumentProvider
 import org.jetbrains.intellij.platform.gradle.argumentProviders.SplitModeArgumentProvider
@@ -28,7 +26,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeD
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import org.jetbrains.intellij.platform.gradle.utils.extensionProvider
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 import java.io.File
@@ -152,7 +149,7 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
      * Executes the task, configures, and runs the IDE.
      */
     @TaskAction
-    override open fun exec() {
+    override fun exec() {
         prepareIdeExecution()
 
         when (executionMode.get()) {
@@ -581,11 +578,11 @@ abstract class RunIdeTask : JavaExec(), RunnableIdeAware, SplitModeAware, Plugin
         )
     }
 
-    private fun readAvailableSplitModeFrontendJoinLink(joinLinkPath: java.nio.file.Path) =
+    private fun readAvailableSplitModeFrontendJoinLink(joinLinkPath: Path) =
         readSplitModeFrontendJoinLink(joinLinkPath)
             ?.takeIf(::isSplitModeFrontendJoinLinkAvailable)
 
-    private fun readSplitModeFrontendJoinLink(joinLinkPath: java.nio.file.Path) = when {
+    private fun readSplitModeFrontendJoinLink(joinLinkPath: Path) = when {
         joinLinkPath.exists() -> joinLinkPath.readText()
             .trim()
             .takeIf { it.isNotEmpty() }
@@ -877,7 +874,7 @@ internal class IdeLaunchSpec(
 
 private class SplitModeJoinLinkOutputStream(
     private val delegate: OutputStream,
-    private val joinLinkPath: java.nio.file.Path,
+    private val joinLinkPath: Path,
     private val persistedJoinLinkOverride: String? = null,
 ) : OutputStream() {
 

@@ -61,6 +61,7 @@ object Constants {
         internal val MINIMAL_NATIVE_VARIANTS_BUILD_NUMBER = "261".toVersion()
         internal val MINIMAL_NATIVE_VARIANTS_VERSION = "2026.1".toVersion()
         val MINIMAL_SPLIT_MODE_BUILD_NUMBER = "241.14473".toVersion()
+        internal val MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER = "262".toVersion()
         val PRODUCT_STARTER_MINIMAL_BUILD_NUMBER = "262".toVersion()
         val UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER = "253".toVersion()
         val UNIFIED_INTELLIJ_IDEA_VERSION = "2025.3".toVersion()
