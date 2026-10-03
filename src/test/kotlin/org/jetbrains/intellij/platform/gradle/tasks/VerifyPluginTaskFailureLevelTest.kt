@@ -18,7 +18,8 @@ class VerifyPluginTaskFailureLevelTest {
     /**
      * A realistic per-category verdict fragment, matching the phrasing produced by the Plugin Verifier's
      * `PluginVerificationResult.verificationVerdict`. [FailureLevel.NOT_DYNAMIC] is intentionally absent because the
-     * verifier does not persist the dynamic plugin eligibility status.
+     * verifier does not encode the dynamic plugin eligibility status in the verdict (it is read from the Markdown
+     * report instead, see [VerifyPluginTaskNotDynamicReasonsTest]).
      */
     private val verdictSamples = mapOf(
         FailureLevel.MISSING_DEPENDENCIES to "1 missing mandatory dependency",
@@ -50,12 +51,12 @@ class VerifyPluginTaskFailureLevelTest {
     fun `every failure level except NOT_DYNAMIC is covered by a verdict sample, and NOT_DYNAMIC is not`() {
         // The verdict marker is intentionally private; its presence is proven indirectly: every covered level has a
         // realistic verdict sample that the first test requires to parse back to exactly that level (which is only
-        // possible with a matching marker). NOT_DYNAMIC has no sample because the verifier never persists it.
-        FailureLevel.values().forEach { level ->
+        // possible with a matching marker). NOT_DYNAMIC has no sample because the verifier never writes it into the verdict.
+        FailureLevel.entries.forEach { level ->
             when (level) {
                 FailureLevel.NOT_DYNAMIC -> assertFalse(
                     verdictSamples.containsKey(level),
-                    "$level must not have a verdict sample (the verifier does not persist it)",
+                    "$level must not have a verdict sample (the verifier does not encode it in the verdict)",
                 )
 
                 else -> assertTrue(
@@ -76,7 +77,7 @@ class VerifyPluginTaskFailureLevelTest {
 
     @Test
     fun `a compatible verdict reports no failure levels`() {
-        assertEquals(emptySet(), VerifyPluginTask.parseVerdict("Compatible"))
+        assertEquals(VerifyPluginTask.parseVerdict("Compatible"), emptySet())
     }
 
     @Test

@@ -150,15 +150,12 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
     /**
      * A flag that controls the output format - if set to `true`, the TeamCity compatible output will be returned to stdout.
      *
-     * This cannot be combined with the [FailureLevel.NOT_DYNAMIC] failure level (which is also part of
-     * [FailureLevel.ALL]): the IntelliJ Plugin Verifier neither persists the dynamic plugin eligibility status in its
-     * report files nor emits it as a TeamCity service message, so it cannot be detected in TeamCity output mode and the
-     * task fails fast if both are requested together.
+     * The verification outcome is derived from the report files written by the IntelliJ Plugin Verifier, so every
+     * [FailureLevel] (including [FailureLevel.NOT_DYNAMIC]) is detected regardless of the console output format.
      *
      * Default value: [IntelliJPlatformExtension.PluginVerification.teamCityOutputFormat]
      *
      * @see IntelliJPlatformExtension.PluginVerification.teamCityOutputFormat
-     * @see FailureLevel.NOT_DYNAMIC
      */
     @get:Input
     @get:Optional
@@ -177,6 +174,10 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
 
     /**
      * The output formats of the verification reports.
+     *
+     * When [failureLevel] contains [FailureLevel.NOT_DYNAMIC], the [VerificationReportsFormats.MARKDOWN] report is
+     * requested additionally, as it is the only report the IntelliJ Plugin Verifier persists the dynamic plugin
+     * eligibility status into.
      *
      * Default value: [IntelliJPlatformExtension.PluginVerification.verificationReportsFormats]
      *
@@ -265,19 +266,6 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
                     "${productInfo.listIdeNotation()} - ${platformPath.safePathString}"
                 }.let(::println)
             }
-        }
-
-        // The Plugin Verifier does not persist the dynamic plugin eligibility status into its report files, and it
-        // prints it only to the plain console output — never as a TeamCity service message. Detecting NOT_DYNAMIC is
-        // therefore impossible when TeamCity output is enabled, so fail fast instead of silently letting a
-        // NOT_DYNAMIC failure level pass. See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1739
-        if (teamCityOutputFormat.get() && FailureLevel.NOT_DYNAMIC in failureLevel.get()) {
-            throw GradleException(
-                "The '${FailureLevel.NOT_DYNAMIC}' failure level cannot be combined with 'teamCityOutputFormat = true': " +
-                    "the IntelliJ Plugin Verifier neither persists the dynamic plugin eligibility status in its report " +
-                    "files nor emits it as a TeamCity service message, so it cannot be detected. Remove " +
-                    "'${FailureLevel.NOT_DYNAMIC}' from the failure level or disable the TeamCity output format.",
-            )
         }
 
         val file = archiveFile.orNull?.asPath
@@ -375,9 +363,17 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             args.add("-offline")
         }
 
+        // The Markdown report is the only one the Plugin Verifier persists the dynamic plugin eligibility status into
+        // (the plain console output is not available with the TeamCity output format or without the PLAIN format),
+        // so it is requested whenever NOT_DYNAMIC has to be detected. See: #1739, #2255
+        val reportsFormats = verificationReportsFormats.get().toMutableSet()
+        if (FailureLevel.NOT_DYNAMIC in failureLevel.get()) {
+            reportsFormats += VerificationReportsFormats.MARKDOWN
+        }
+
         // TODO check PV version
         args.add("-verification-reports-formats")
-        args.add(verificationReportsFormats.get().joinToString(","))
+        args.add(reportsFormats.joinToString(","))
 
         if (ignoredProblemsFile.orNull != null) {
             args.add("-ignored-problems")
@@ -418,10 +414,13 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             failNoVerdict(output)
         }
 
-        // The dynamic plugin eligibility status is the only category the Plugin Verifier does not persist into its
-        // reports; it is printed to the plain console output only. Combining it with the TeamCity output format is
-        // rejected earlier in exec() because it can never be detected here.
-        val notDynamic = output.contains(FailureLevel.NOT_DYNAMIC.sectionHeading)
+        // The dynamic plugin eligibility status is the only category the Plugin Verifier does not encode in the verdict;
+        // it is persisted, together with the reasons, in the per-IDE Markdown report only, which is requested whenever
+        // NOT_DYNAMIC is part of the failure level. See: #1739, #2255
+        val notDynamicReasons = verdicts.map { it.ideVersion }.distinct().associateWith(::readNotDynamicReasons)
+        // Plugin Verifier versions predating the dynamic status section in the Markdown report print it to the plain
+        // console output only, where it cannot be attributed to a particular IDE.
+        val notDynamicUnattributed = notDynamicReasons.containsValue(null) && output.contains(FailureLevel.NOT_DYNAMIC.sectionHeading)
 
         val collectedProblems = linkedMapOf<String, MutableMap<FailureLevel, String>>()
         verdicts.forEach { (ideVersion, pluginDirectory, verdict) ->
@@ -429,8 +428,12 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             parseVerdict(verdict).forEach { level ->
                 ideProblems.putIfAbsent(level, detailsOf(level, pluginDirectory, verdict))
             }
-            if (notDynamic) {
-                ideProblems.putIfAbsent(FailureLevel.NOT_DYNAMIC, FailureLevel.NOT_DYNAMIC.message)
+            val reasons = when (val ideReasons = notDynamicReasons[ideVersion]) {
+                null -> emptyList<String>().takeIf { notDynamicUnattributed }
+                else -> ideReasons.takeIf { it.isNotEmpty() }
+            }
+            if (reasons != null) {
+                ideProblems.putIfAbsent(FailureLevel.NOT_DYNAMIC, reasons.joinToString("\n") { "- $it" })
             }
         }
 
@@ -468,7 +471,18 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             .intersect(failureLevels)
 
         if (verificationFailures.isNotEmpty()) {
-            throw GradleException("Verification failed with $verificationFailures problems. See the report at: $problemsReportUrl")
+            val message = buildString {
+                append("Verification failed with $verificationFailures problems. See the report at: $problemsReportUrl")
+
+                // Unlike other problems, the reasons for NOT_DYNAMIC are not available in the HTML report.
+                if (FailureLevel.NOT_DYNAMIC in verificationFailures) {
+                    collectedProblems.forEach { (ideVersion, ideProblems) ->
+                        val description = ideProblems[FailureLevel.NOT_DYNAMIC]?.takeIf { it.isNotBlank() } ?: return@forEach
+                        append("\n\n${FailureLevel.NOT_DYNAMIC.sectionHeading} ($ideVersion):\n$description")
+                    }
+                }
+            }
+            throw GradleException(message)
         }
     }
 
@@ -582,6 +596,25 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
             ?: verdict.trim()
     }
 
+    /**
+     * Reads the reasons why the plugin probably cannot be enabled or disabled without an IDE restart from the Markdown
+     * report the Plugin Verifier writes for the given [ideVersion] into [verificationReportsDirectory]:
+     * ```
+     * <reports>/<IDE version>/report.md
+     * ```
+     *
+     * @return `null` when the report (or the dynamic plugin status in it) is not available, an empty list when the
+     * plugin is dynamic, or the reasons otherwise
+     * @see parseNotDynamicReasons
+     */
+    private fun readNotDynamicReasons(ideVersion: String) =
+        verificationReportsDirectory.asPath
+            .resolve(ideVersion)
+            .resolve(MARKDOWN_REPORT_FILE_NAME)
+            .takeIf { it.exists() }
+            ?.readText()
+            ?.let(::parseNotDynamicReasons)
+
     private fun ProductInfo.listIdeNotation() =
         runCatching {
             productReleasesService.get()
@@ -615,12 +648,25 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
         private const val INVALID_PLUGIN_FILES_TEAMCITY_MARKER = "(invalid plugins)"
 
         /**
+         * The name of the per-IDE Markdown report written by the Plugin Verifier when the
+         * [VerificationReportsFormats.MARKDOWN] format is requested. It is the only report persisting the dynamic
+         * plugin eligibility status.
+         */
+        private const val MARKDOWN_REPORT_FILE_NAME = "report.md"
+
+        /**
+         * The heading of the dynamic plugin eligibility status section in the [MARKDOWN_REPORT_FILE_NAME] report.
+         */
+        private const val MARKDOWN_DYNAMIC_PLUGIN_STATUS_HEADING = "## Dynamic Plugin Status"
+
+        /**
          * Verifier-specific metadata for a [FailureLevel], kept out of the public [FailureLevel] enum so it does not
          * generate public (mangled) JVM getters for internal-only data.
          *
          * @property solution the suggested remediation reported through the Gradle Problems API
          * @property verdictMarker the stable phrase to look for in the `verification-verdict.txt` file, or `null` when
-         * the verifier does not persist this category into its reports (only [FailureLevel.NOT_DYNAMIC])
+         * the verifier does not encode this category in the verdict (only [FailureLevel.NOT_DYNAMIC], which is read
+         * from the Markdown report instead, see [parseNotDynamicReasons])
          * @property detailFileName the optional per-category detail file enriching the reported description, or `null`
          * when the category has no dedicated file
          */
@@ -715,13 +761,56 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
          *
          * This is a pure function over the verdict string: every [FailureLevel] whose metadata declares a verdict
          * marker is matched against the verdict independently, so the mapping can be unit-tested for each category
-         * without running the verifier. [FailureLevel.NOT_DYNAMIC] has no verdict marker because the verifier neither
-         * persists the dynamic plugin eligibility status into the reports nor emits it as a TeamCity service message.
+         * without running the verifier. [FailureLevel.NOT_DYNAMIC] has no verdict marker because the verifier does
+         * not encode the dynamic plugin eligibility status in the verdict; see [parseNotDynamicReasons] instead.
          */
         internal fun parseVerdict(verdict: String): Set<FailureLevel> =
-            FailureLevel.values()
+            FailureLevel.entries
                 .filter { level -> metadataOf(level).verdictMarker?.let { verdict.contains(it) } == true }
                 .toSet()
+
+        /**
+         * Extracts the dynamic plugin eligibility status from the content of a per-IDE Markdown report
+         * ([MARKDOWN_REPORT_FILE_NAME]) written by the Plugin Verifier — the only report it persists the status into.
+         *
+         * The verifier renders it within the results of each verified plugin as:
+         * ```
+         * # Plugin <plugin> against <IDE version>
+         * ...
+         * ## Dynamic Plugin Status
+         *
+         * Plugin probably cannot be enabled or disabled without IDE restart
+         *
+         * * Declares non-dynamic extensions: `com.intellij.nonDynamicEP`
+         * ```
+         *
+         * This is a pure function over the report content, so it can be unit-tested without running the verifier.
+         *
+         * @return `null` when the report contains no dynamic plugin status section (Plugin Verifier versions predating
+         * it), an empty list when the plugin is dynamic, or the reasons why it is not otherwise
+         */
+        internal fun parseNotDynamicReasons(markdown: String): List<String>? {
+            var statusAvailable = false
+            var inStatusSection = false
+            var notDynamic = false
+            val reasons = mutableListOf<String>()
+
+            for (line in markdown.lineSequence().map(String::trim)) {
+                when {
+                    line == MARKDOWN_DYNAMIC_PLUGIN_STATUS_HEADING -> {
+                        statusAvailable = true
+                        inStatusSection = true
+                    }
+
+                    // Any other heading closes the section.
+                    line.startsWith("#") -> inStatusSection = false
+                    inStatusSection && line == FailureLevel.NOT_DYNAMIC.sectionHeading -> notDynamic = true
+                    inStatusSection && notDynamic && line.startsWith("* ") -> reasons += line.removePrefix("* ").trim()
+                }
+            }
+
+            return reasons.takeIf { statusAvailable }
+        }
 
         override fun register(project: Project) =
             project.registerTask<VerifyPluginTask>(Tasks.VERIFY_PLUGIN) {
@@ -827,13 +916,11 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
         /**
          * The plugin probably cannot be enabled or disabled without an IDE restart.
          *
-         * The IntelliJ Plugin Verifier reports the dynamic plugin eligibility status only to the plain console output;
-         * it neither persists it into the report files nor emits it as a TeamCity service message. This category
-         * therefore cannot be detected when [teamCityOutputFormat] is enabled, and — since it is also part of
-         * [ALL] — combining `teamCityOutputFormat = true` with a failure level containing this value (including [ALL])
-         * fails the task fast rather than passing silently.
+         * The IntelliJ Plugin Verifier persists the dynamic plugin eligibility status (and the reasons behind it) in
+         * the Markdown report only, which is therefore requested additionally whenever this category is part of
+         * the [failureLevel], regardless of the configured [verificationReportsFormats].
          *
-         * @see teamCityOutputFormat
+         * @see verificationReportsFormats
          */
         NOT_DYNAMIC(
             sectionHeading = "Plugin probably cannot be enabled or disabled without IDE restart",

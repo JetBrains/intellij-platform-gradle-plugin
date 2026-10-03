@@ -426,9 +426,33 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `fail when NOT_DYNAMIC failure level is combined with TeamCity output format`() {
+    fun `fail on NOT_DYNAMIC with the reasons reported`() {
         writeJavaFile()
-        writePluginXmlFile()
+        writeNonDynamicPluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        failureLevel = listOf(FailureLevel.NOT_DYNAMIC)
+                    }
+                }
+                """.trimIndent()
+
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            // The reasons are persisted in the Markdown report only, so they have to be part of the failure. See: #2255
+            assertContains("Verification failed with [NOT_DYNAMIC] problems.", output)
+            assertContains("Plugin probably cannot be enabled or disabled without IDE restart (", output)
+            assertContains("- Declares application components: `App`", output)
+        }
+    }
+
+    @Test
+    fun `fail on NOT_DYNAMIC with TeamCity output format`() {
+        writeJavaFile()
+        writeNonDynamicPluginXmlFile()
         writePluginVerifierDependency()
         writePluginVerifierIde()
 
@@ -443,9 +467,37 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         buildAndFail(Tasks.VERIFY_PLUGIN) {
-            // The dynamic plugin eligibility status is not persisted in the reports nor emitted as a TeamCity
-            // message, so this combination is rejected up front instead of silently passing. See: #1739
-            assertContains("cannot be combined with 'teamCityOutputFormat = true'", output)
+            // With TeamCity output the dynamic plugin eligibility status is not printed to stdout, but it is read
+            // from the Markdown report requested for the NOT_DYNAMIC failure level. See: #1739, #2255
+            assertContains("##teamcity[", output)
+            assertContains("Verification failed with [NOT_DYNAMIC] problems.", output)
+            assertContains("- Declares application components: `App`", output)
+        }
+    }
+
+    @Test
+    fun `fail on NOT_DYNAMIC without the plain verification reports format`() {
+        writeJavaFile()
+        writeNonDynamicPluginXmlFile()
+        writePluginVerifierDependency()
+        writePluginVerifierIde()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginVerification {
+                        verificationReportsFormats = listOf(VerificationReportsFormats.HTML)
+                        failureLevel = listOf(FailureLevel.NOT_DYNAMIC)
+                    }
+                }
+                """.trimIndent()
+
+        buildAndFail(Tasks.VERIFY_PLUGIN) {
+            // Without the PLAIN format nothing is printed to stdout, but the Markdown report is requested additionally
+            // for the NOT_DYNAMIC failure level. See: #2255
+            assertNotContains("Dynamic Plugin Eligibility", output)
+            assertContains("Verification failed with [NOT_DYNAMIC] problems.", output)
+            assertContains("- Declares application components: `App`", output)
         }
     }
 
@@ -744,6 +796,26 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                     <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
                     <vendor>JetBrains</vendor>
                     <depends>com.intellij.modules.platform</depends>
+                </idea-plugin>
+                """.trimIndent()
+    }
+
+    /**
+     * Application components make the plugin non-dynamic, i.e., it cannot be enabled or disabled without IDE restart.
+     */
+    private fun writeNonDynamicPluginXmlFile() {
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>MyName</name>
+                    <description>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</description>
+                    <vendor>JetBrains</vendor>
+                    <depends>com.intellij.modules.platform</depends>
+                    <application-components>
+                        <component>
+                            <implementation-class>App</implementation-class>
+                        </component>
+                    </application-components>
                 </idea-plugin>
                 """.trimIndent()
     }
