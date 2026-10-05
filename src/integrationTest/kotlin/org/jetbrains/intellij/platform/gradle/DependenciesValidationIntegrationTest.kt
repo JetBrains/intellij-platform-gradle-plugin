@@ -34,7 +34,6 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform
-                [org.jetbrains.intellij.platform] Configuration 'intellijPlatformDependency' is empty. LocalIvyArtifactPathComponentMetadataRule will not be registered.
                 No dependencies
                 """.trimIndent(),
                 output,
@@ -185,7 +184,6 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
             assertContains(
                 """
                 intellijPlatformDependency - IntelliJ Platform
-                [org.jetbrains.intellij.platform] Configuration 'intellijPlatformDependency' has some resolution errors. LocalIvyArtifactPathComponentMetadataRule will not be registered.
                 \--- $artifactCoordinates FAILED
                 """.trimIndent(),
                 output,
@@ -430,6 +428,57 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
                 """.trimIndent(),
                 output,
             )
+        }
+    }
+
+    /**
+     * Gradle 9.8.0+ snapshots component metadata rules when a resolution starts.
+     * Resolving `compileClasspath` directly (like IDE sync does) realizes lazy bundled plugin dependencies,
+     * which resolves the IntelliJ Platform in the middle of that resolution, so the rule has to be registered before.
+     * The project must not use the Kotlin Gradle Plugin, as it realizes dependencies before the resolution starts.
+     */
+    @Test
+    fun `resolve bundled plugin jars when compile classpath is resolved during configuration in a Java-only project`() {
+        buildFile overwrite //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform")
+                }
+
+                java {
+                    toolchain {
+                        languageVersion = JavaLanguageVersion.of(17)
+                    }
+                }
+
+                repositories {
+                    mavenCentral()
+                    intellijPlatform {
+                        defaultRepositories()
+                    }
+                }
+
+                dependencies {
+                    intellijPlatform {
+                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                        bundledPlugin("com.intellij.java")
+                    }
+                }
+
+                intellijPlatform {
+                    buildSearchableOptions = false
+                    instrumentCode = false
+                }
+
+                afterEvaluate {
+                    configurations.compileClasspath.get().incoming.files.files.forEach {
+                        println("compileClasspath: " + it.name)
+                    }
+                }
+                """.trimIndent()
+
+        build("help") {
+            assertContains("compileClasspath: java-impl.jar", output)
         }
     }
 

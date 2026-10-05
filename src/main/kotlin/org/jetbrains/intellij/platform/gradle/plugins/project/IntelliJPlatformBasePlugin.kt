@@ -91,6 +91,14 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             }
         }
 
+        // Must happen before any configuration is resolved, as Gradle snapshots component metadata rules when a resolution starts.
+        LocalIvyArtifactPathComponentMetadataRule.register(
+            dependencies = project.dependencies,
+            providers = project.providers,
+            settings = project.settings,
+            rootProjectDirectory = project.rootProjectPath,
+        )
+
         with(project.configurations) configurations@{
             val intellijPlatformDependencyConfiguration = create(
                 name = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
@@ -136,14 +144,6 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
                         """.trimIndent(),
                     )
                 }
-
-                LocalIvyArtifactPathComponentMetadataRule.register(
-                    configuration = this,
-                    dependencies = project.dependencies,
-                    providers = project.providers,
-                    settings = project.settings,
-                    rootProjectDirectory = project.rootProjectPath,
-                )
             }
 
             val intellijPlatformPluginDependenciesConfiguration = create(
