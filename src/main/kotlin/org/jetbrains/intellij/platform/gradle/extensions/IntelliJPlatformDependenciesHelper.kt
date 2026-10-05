@@ -28,6 +28,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.IDEA_CORE
 import org.jetbrains.intellij.platform.gradle.Constants.Locations
 import org.jetbrains.intellij.platform.gradle.Constants.Locations.GITHUB_REPOSITORY
+import org.jetbrains.intellij.platform.gradle.artifacts.LocalIvyArtifactPathComponentMetadataRule
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.models.ProductRelease.Channel
 import org.jetbrains.intellij.platform.gradle.providers.*
@@ -133,6 +134,14 @@ class IntelliJPlatformDependenciesHelper(
                 .toSortedMap()
         }
     }
+
+    /**
+     * IntelliJ Platform locations already stored for Ivy versions of bundled plugins and modules.
+     * Like with [writtenIvyModules], the first location seen for a version is used.
+     *
+     * @see writePlatformPath
+     */
+    private val writtenPlatformPaths = ConcurrentHashMap<String, String>()
 
     /**
      * Key is an Ivy module XML filename.
@@ -1173,6 +1182,7 @@ class IntelliJPlatformDependenciesHelper(
         // Should be the same as [collectDependencies]
         val version = productInfo.fullVersion
 
+        writePlatformPath(version, platformPath)
         writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version, artifactPath) {
             IvyModule(
                 info = IvyModule.Info(
@@ -1293,6 +1303,7 @@ class IntelliJPlatformDependenciesHelper(
             platformPath.resolve(it).toIvyArtifacts(metadataRulesModeProvider, platformPath)
         }
 
+        writePlatformPath(version, platformPath)
         /**
          * For bundled modules, usually we don't have a path to their archive (jar), since we get them from [ProductInfo.layout], which does not have a path.
          * They're located in "IDE/lib/modules" and duplication shouldn't be an issue, so we can try to ignore the path comparison.
@@ -1605,6 +1616,41 @@ class IntelliJPlatformDependenciesHelper(
                 version {
                     prefer(resolvedVersion)
                 }
+        }
+    }
+
+    /**
+     * Stores the IntelliJ Platform location for the given Ivy [version] of bundled plugins and modules.
+     * It is required by [LocalIvyArtifactPathComponentMetadataRule] to resolve relative artifact paths in Ivy XML files,
+     * so it is needed only with [RulesMode.PREFER_PROJECT].
+     *
+     * @param version The Ivy version of bundled plugins and modules, like `IU-253.33813.55`.
+     * @param platformPath The path to the current IntelliJ Platform.
+     */
+    private fun writePlatformPath(version: String, platformPath: Path) {
+        if (metadataRulesModeProvider.get() != RulesMode.PREFER_PROJECT) {
+            return
+        }
+
+        // This is called for every bundled plugin and module, but writing takes a cross-process file lock and reads the file,
+        // so write it only once per version.
+        val newPlatformPathString = platformPath.safePathString
+        val cachedPlatformPathString = writtenPlatformPaths.putIfAbsent(version, newPlatformPathString)
+        if (cachedPlatformPathString != null) {
+            if (cachedPlatformPathString != newPlatformPathString) {
+                log.warn(
+                    """
+                    Storing IntelliJ Platform location for '$version' detected. Paths do not match: '$cachedPlatformPathString' vs '$newPlatformPathString'.
+                    The same IntelliJ Platform has been found in two different locations, the first one will be used: '$cachedPlatformPathString'.
+                    """.trimIndent(),
+                )
+            }
+            return
+        }
+
+        val ivyPath = providers.localPlatformArtifactsPath(rootProjectDirectory).get()
+        IVY_MODULE_WRITE_LOCK.withLock {
+            LocalIvyArtifactPathComponentMetadataRule.writePlatformPath(ivyPath, version, platformPath)
         }
     }
 

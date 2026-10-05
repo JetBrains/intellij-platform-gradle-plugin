@@ -2,6 +2,9 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts
 
+import org.jetbrains.intellij.platform.gradle.utils.safePathString
+import java.nio.file.Files
+import kotlin.io.path.readText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -28,5 +31,16 @@ class LocalIvyArtifactPathComponentMetadataRuleTest {
         assertEquals(1, result.size)
         assertEquals("groovy-psi", result.single().name)
         assertEquals("plugins/Groovy/lib", result.single().url)
+    }
+
+    @Test
+    fun `write platform path next to Ivy XML files of the given version`() {
+        val ivyPath = Files.createTempDirectory("localPlatformArtifacts")
+        val platformPath = Files.createTempDirectory("ide")
+
+        LocalIvyArtifactPathComponentMetadataRule.writePlatformPath(ivyPath, "IU-253.33813.55", platformPath)
+
+        val platformPathFile = ivyPath.resolve("IU-253.33813.55").resolve(LocalIvyArtifactPathComponentMetadataRule.PLATFORM_PATH_FILE_NAME)
+        assertEquals(platformPath.safePathString, platformPathFile.readText())
     }
 }
