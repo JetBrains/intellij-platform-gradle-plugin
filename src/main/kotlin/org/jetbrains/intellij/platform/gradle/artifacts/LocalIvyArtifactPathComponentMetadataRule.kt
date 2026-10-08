@@ -17,11 +17,11 @@ import org.jetbrains.intellij.platform.gradle.models.xml
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.writeTextAtomicallyIfChanged
-import java.io.File
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlin.io.path.notExists
+import kotlin.io.path.readText
 
 internal fun decodeIvyModulePublications(input: String) =
     xml.decodeFromString(IvyModulePublicationsOnly.serializer(), input).publications
@@ -100,9 +100,9 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
         }
 
         // Not cached, as the IntelliJ Platform location of the given version may change between builds.
-        val platformPathFile = File("$absNormalizedIvyPath/${id.version}/$PLATFORM_PATH_FILE_NAME")
-        if (!platformPathFile.exists()) {
-            log.error("The IntelliJ Platform location of the $id module is unknown, the following file is missing: ${platformPathFile.path}")
+        val platformPathFile = Path.of(absNormalizedIvyPath, id.version, PLATFORM_PATH_FILE_NAME)
+        if (platformPathFile.notExists()) {
+            log.error("The IntelliJ Platform location of the $id module is unknown, the following file is missing: ${platformPathFile.safePathString}")
             return
         }
         val absNormalizedPlatformPath = platformPathFile.readText()
@@ -115,8 +115,8 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
          * We only need publication artifacts for path fixing. Parsing the whole Ivy module is unnecessary
          * and may fail if dependency entries contain unexpected metadata.
          */
-        val ivyXmlFile = File("$absNormalizedIvyPath/${id.version}/${id.group}-${id.name}-${id.version}.xml")
-        val publications = ivyPublicationsCache.computeIfAbsent(ivyXmlFile.path) {
+        val ivyXmlFile = Path.of(absNormalizedIvyPath, id.version, "${id.group}-${id.name}-${id.version}.xml")
+        val publications = ivyPublicationsCache.computeIfAbsent(ivyXmlFile.safePathString) {
             decodeIvyModulePublications(ivyXmlFile.readText())
         }
 
