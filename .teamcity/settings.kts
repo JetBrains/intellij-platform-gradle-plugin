@@ -78,7 +78,7 @@ object UnitTests : BuildType({
                 "testGradleVersion",
                 listOf(
                     value("9.0.0"),
-                    value("9.7.1"),
+                    value("9.8.1"),
                     value("nightly"),
                 ),
             )
