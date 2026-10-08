@@ -13,6 +13,8 @@ import org.gradle.kotlin.dsl.all
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
 import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.models.IvyModulePublicationsOnly
+import org.jetbrains.intellij.platform.gradle.models.fullVersion
+import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.models.xml
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
@@ -106,6 +108,19 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
             return
         }
         val absNormalizedPlatformPath = platformPathFile.readText().trim()
+
+        // The stored location may be outdated, for example, if the IntelliJ Platform has been moved or removed since it was written.
+        val platformVersion = runCatching { Path.of(absNormalizedPlatformPath).productInfo().fullVersion }.getOrNull()
+        if (platformVersion != id.version) {
+            log.error(
+                "The IntelliJ Platform location of the $id module, stored in ${platformPathFile.safePathString}, is invalid: " +
+                        "'$absNormalizedPlatformPath' " + when (platformVersion) {
+                    null -> "doesn't contain a valid IntelliJ Platform."
+                    else -> "contains the '$platformVersion' version of the IntelliJ Platform."
+                }
+            )
+            return
+        }
 
         /**
          * Unfortunately, Gradle here doesn't expose anything from Ivy metadata, all we know is: group, name and version.
