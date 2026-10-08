@@ -105,7 +105,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
             log.error("The IntelliJ Platform location of the $id module is unknown, the following file is missing: ${platformPathFile.safePathString}")
             return
         }
-        val absNormalizedPlatformPath = platformPathFile.readText()
+        val absNormalizedPlatformPath = platformPathFile.readText().trim()
 
         /**
          * Unfortunately, Gradle here doesn't expose anything from Ivy metadata, all we know is: group, name and version.
