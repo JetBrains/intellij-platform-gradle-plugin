@@ -1182,8 +1182,7 @@ class IntelliJPlatformDependenciesHelper(
         // Should be the same as [collectDependencies]
         val version = productInfo.fullVersion
 
-        writePlatformPath(version, platformPath)
-        writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version, artifactPath) {
+        writeIvyModule(Dependencies.BUNDLED_PLUGIN_GROUP, id, version, artifactPath, platformPath) {
             IvyModule(
                 info = IvyModule.Info(
                     organisation = Dependencies.BUNDLED_PLUGIN_GROUP,
@@ -1267,7 +1266,7 @@ class IntelliJPlatformDependenciesHelper(
                         path.toIvyArtifacts(metadataRulesModeProvider, platformPath)
                     }
 
-                    writeIvyModule(group, name, version, artifactPath) {
+                    writeIvyModule(group, name, version, artifactPath, platformPath) {
                         IvyModule(
                             info = IvyModule.Info(group, name, version),
                             publications = publications,
@@ -1303,12 +1302,11 @@ class IntelliJPlatformDependenciesHelper(
             platformPath.resolve(it).toIvyArtifacts(metadataRulesModeProvider, platformPath)
         }
 
-        writePlatformPath(version, platformPath)
         /**
          * For bundled modules, usually we don't have a path to their archive (jar), since we get them from [ProductInfo.layout], which does not have a path.
          * They're located in "IDE/lib/modules" and duplication shouldn't be an issue, so we can try to ignore the path comparison.
          */
-        writeIvyModule(group, name, version, null) {
+        writeIvyModule(group, name, version, null, platformPath) {
             IvyModule(
                 info = IvyModule.Info(group, name, version),
                 publications = artifacts,
@@ -1662,6 +1660,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param version The version of the Ivy module.
      * @param block A lambda that returns an instance of IvyModule to be serialized into the file.
      * @param artifactPath Path of the IvyModule, stored in cache to prevent path conflicts for Ivy XML coordinates.
+     * @param platformPath The path to the current IntelliJ Platform, required for bundled plugins and modules.
      *
      * @see writtenIvyModules
      */
@@ -1670,8 +1669,14 @@ class IntelliJPlatformDependenciesHelper(
         artifact: String,
         version: String,
         artifactPath: Path?,
+        platformPath: Path? = null,
         block: () -> IvyModule,
     ): IvyModule {
+        // Done for every bundled plugin and module, even if its Ivy XML file is already written, so it always has the platform path stored next to it.
+        if (group in LocalIvyArtifactPathComponentMetadataRule.REPLACEMENT_GROUPS) {
+            writePlatformPath(version, requireNotNull(platformPath) { "The IntelliJ Platform location is required for the '$group:$artifact:$version' Ivy module." })
+        }
+
         val fileName = "$version/$group-$artifact-$version.xml"
 
         // See comments on writtenIvyModules
