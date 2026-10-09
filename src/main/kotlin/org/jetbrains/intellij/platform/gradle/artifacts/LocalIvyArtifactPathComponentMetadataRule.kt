@@ -202,7 +202,7 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
     }
 
     companion object {
-        private val REPLACEMENT_GROUPS = setOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
+        internal val REPLACEMENT_GROUPS = setOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
         private val ivyPublicationsCache = ConcurrentHashMap<String, List<org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact>>()
 
         /**
