@@ -15,6 +15,8 @@ import kotlin.test.assertTrue
 
 class ProductInfoPathResolverTest : IntelliJPluginTestBase() {
 
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
+
     /**
      * The currently used version is [intellijPlatformVersion].
      */
