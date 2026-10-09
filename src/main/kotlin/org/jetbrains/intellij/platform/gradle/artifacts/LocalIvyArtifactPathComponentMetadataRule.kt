@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.artifacts
 
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
+import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.initialization.Settings
 import org.gradle.api.initialization.resolve.RulesMode
@@ -19,9 +20,12 @@ import org.jetbrains.intellij.platform.gradle.models.xml
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.writeTextAtomicallyIfChanged
+import java.nio.file.NoSuchFileException
 import java.nio.file.Path
+import java.nio.file.attribute.FileTime
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
 import kotlin.io.path.readText
 
@@ -101,26 +105,8 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
             return
         }
 
-        // Not cached, as the IntelliJ Platform location of the given version may change between builds.
         val platformPathFile = Path.of(absNormalizedIvyPath, id.version, PLATFORM_PATH_FILE_NAME)
-        if (platformPathFile.notExists()) {
-            log.error("The IntelliJ Platform location of the $id module is unknown, the following file is missing: ${platformPathFile.safePathString}")
-            return
-        }
-        val absNormalizedPlatformPath = platformPathFile.readText().trim()
-
-        // The stored location may be outdated, for example, if the IntelliJ Platform has been moved or removed since it was written.
-        val platformVersion = runCatching { Path.of(absNormalizedPlatformPath).productInfo().fullVersion }.getOrNull()
-        if (platformVersion != id.version) {
-            log.error(
-                "The IntelliJ Platform location of the $id module, stored in ${platformPathFile.safePathString}, is invalid: " +
-                        "'$absNormalizedPlatformPath' " + when (platformVersion) {
-                    null -> "doesn't contain a valid IntelliJ Platform."
-                    else -> "contains the '$platformVersion' version of the IntelliJ Platform."
-                }
-            )
-            return
-        }
+        val absNormalizedPlatformPath = readPlatformPath(id, platformPathFile) ?: return
 
         /**
          * Unfortunately, Gradle here doesn't expose anything from Ivy metadata, all we know is: group, name and version.
@@ -177,9 +163,59 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
         }
     }
 
+    /**
+     * Reads the IntelliJ Platform location of the [id] module from the [platformPathFile] and validates it.
+     *
+     * @return The IntelliJ Platform location, or `null` if it is unknown or invalid, which is logged as an error.
+     * @see platformPathsCache
+     */
+    private fun readPlatformPath(id: ModuleVersionIdentifier, platformPathFile: Path): String? {
+        val lastModifiedTime = try {
+            platformPathFile.getLastModifiedTime()
+        } catch (e: NoSuchFileException) {
+            log.error("The IntelliJ Platform location of the $id module is unknown, the following file is missing: ${platformPathFile.safePathString}")
+            return null
+        }
+
+        platformPathsCache[platformPathFile]
+            ?.takeIf { (cachedLastModifiedTime) -> cachedLastModifiedTime == lastModifiedTime }
+            ?.let { (_, cachedPlatformPath) -> return cachedPlatformPath } // take from the cache
+
+        val absNormalizedPlatformPath = platformPathFile.readText().trim()
+
+        // The file may have been written by another build sharing the local Ivy repository, so the IntelliJ Platform
+        // it points to may have been moved, removed, or replaced with another version since then.
+        val platformVersion = runCatching { Path.of(absNormalizedPlatformPath).productInfo().fullVersion }.getOrNull()
+        if (platformVersion != id.version) {
+            log.error(
+                "The IntelliJ Platform location of the $id module, stored in ${platformPathFile.safePathString}, is invalid: " +
+                        "'$absNormalizedPlatformPath' " + when (platformVersion) {
+                    null -> "doesn't contain a valid IntelliJ Platform."
+                    else -> "contains the '$platformVersion' version of the IntelliJ Platform."
+                }
+            )
+            return null
+        }
+
+        platformPathsCache[platformPathFile] = lastModifiedTime to absNormalizedPlatformPath
+        return absNormalizedPlatformPath
+    }
+
     companion object {
         private val REPLACEMENT_GROUPS = setOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
         private val ivyPublicationsCache = ConcurrentHashMap<String, List<org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact>>()
+
+        /**
+         * Validated IntelliJ Platform locations, read from [PLATFORM_PATH_FILE_NAME] files, as the rule is executed for every bundled plugin
+         * and module, including transitive ones.
+         *
+         * Key is the [PLATFORM_PATH_FILE_NAME] file location, value is its last modification time and the IntelliJ Platform location it contains.
+         * The file location, not just the Ivy version, is used as a key, because different builds may use different local Ivy repositories.
+         *
+         * The cache outlives a single build in the Gradle daemon, and the IntelliJ Platform location of the given version may change between builds,
+         * so the cached value is used only if the file hasn't been modified since it was read.
+         */
+        private val platformPathsCache = ConcurrentHashMap<Path, Pair<FileTime, String>>()
 
         /**
          * Name of the file, stored next to the Ivy XML files of a given version, which contains the absolute path of the IntelliJ Platform
