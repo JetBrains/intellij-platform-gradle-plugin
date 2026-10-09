@@ -1633,22 +1633,21 @@ class IntelliJPlatformDependenciesHelper(
         // This is called for every bundled plugin and module, but writing takes a cross-process file lock and reads the file,
         // so write it only once per version.
         val newPlatformPathString = platformPath.safePathString
-        val cachedPlatformPathString = writtenPlatformPaths.putIfAbsent(version, newPlatformPathString)
-        if (cachedPlatformPathString != null) {
-            if (cachedPlatformPathString != newPlatformPathString) {
-                log.warn(
-                    """
-                    Storing IntelliJ Platform location for '$version' detected. Paths do not match: '$cachedPlatformPathString' vs '$newPlatformPathString'.
-                    The same IntelliJ Platform has been found in two different locations, the first one will be used: '$cachedPlatformPathString'.
-                    """.trimIndent(),
-                )
+        val cachedPlatformPathString = writtenPlatformPaths.computeIfAbsent(version) {
+            val ivyPath = providers.localPlatformArtifactsPath(rootProjectDirectory).get()
+            IVY_MODULE_WRITE_LOCK.withLock {
+                LocalIvyArtifactPathComponentMetadataRule.writePlatformPath(ivyPath, version, platformPath)
             }
-            return
+            newPlatformPathString
         }
 
-        val ivyPath = providers.localPlatformArtifactsPath(rootProjectDirectory).get()
-        IVY_MODULE_WRITE_LOCK.withLock {
-            LocalIvyArtifactPathComponentMetadataRule.writePlatformPath(ivyPath, version, platformPath)
+        if (cachedPlatformPathString != newPlatformPathString) {
+            log.warn(
+                """
+                Storing IntelliJ Platform location for '$version' detected. Paths do not match: '$cachedPlatformPathString' vs '$newPlatformPathString'.
+                The same IntelliJ Platform has been found in two different locations, the first one will be used: '$cachedPlatformPathString'.
+                """.trimIndent(),
+            )
         }
     }
 
