@@ -36,7 +36,7 @@ open class IntelliJPlatformIntegrationTestBase(
             if (initialDir != dir) {
                 initialDir.deleteRecursively()
             }
-            prepareReusableProjectDirectory()
+            pruneReusableProjectDirectory(failOnFailure = true)
         }
 
         if (resourceName != null) {
@@ -50,7 +50,15 @@ open class IntelliJPlatformIntegrationTestBase(
 
     @AfterTest
     override fun tearDown() {
-        if (!reuseProjectState) {
+        if (reuseProjectState) {
+            // The reused per-class project directory (gradleHome/.integrationTestProjects/<class>) is intentionally
+            // kept across a class's test methods for speed, but it is never deleted by super.tearDown(), so every
+            // integration test class otherwise leaves its build outputs behind for the whole suite run. Prune the
+            // transient content here (keeping the project-local `.gradle` cache for reuse) so these directories stop
+            // accumulating across the suite. The deletion is tolerant and retrying: a file still locked by a
+            // background Gradle process on Windows must not fail the test.
+            pruneReusableProjectDirectory(failOnFailure = false)
+        } else {
             super.tearDown()
         }
     }
@@ -131,11 +139,10 @@ open class IntelliJPlatformIntegrationTestBase(
             )
             .createDirectories()
 
-    private fun prepareReusableProjectDirectory() {
-        dir.listDirectoryEntries().forEach {
-            if (it.name != ".gradle") {
-                it.deleteRecursively()
-            }
-        }
+    private fun pruneReusableProjectDirectory(failOnFailure: Boolean) {
+        val projectDirectory = dir.takeIf { it.exists() } ?: return
+        projectDirectory.listDirectoryEntries()
+            .filter { it.name != ".gradle" }
+            .forEach { it.deleteRecursivelyWithRetries(failOnFailure) }
     }
 }
