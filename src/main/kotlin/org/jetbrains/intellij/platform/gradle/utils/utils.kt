@@ -36,6 +36,7 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtensi
 import org.jetbrains.intellij.platform.gradle.resolvers.path.findEntry
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import java.nio.channels.FileChannel
+import java.nio.file.AccessDeniedException
 import java.nio.file.AtomicMoveNotSupportedException
 import java.nio.file.FileSystemException
 import java.nio.file.Files
@@ -44,6 +45,7 @@ import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import java.util.*
 import kotlin.io.path.*
+import kotlin.random.Random
 
 val FileSystemLocation.asPath
     get() = asFile.toPath().absolute()
@@ -216,20 +218,27 @@ internal fun Path.writeTextAtomicallyIfChanged(text: String): Boolean {
     }
 }
 
+private const val MOVE_RETRY_TIMEOUT_MILLIS = 60_000L
+private const val MOVE_RETRY_INITIAL_BACKOFF_MILLIS = 5L
+private const val MOVE_RETRY_MAX_BACKOFF_MILLIS = 100L
+
 /**
  * Moves [source] onto [target], replacing it, preferring an atomic move and falling back to a plain replace when the
  * filesystem doesn't support atomic moves.
  *
- * On Windows, replacing a file that a concurrent reader currently holds open fails with a sharing violation
- * (surfaced as a [FileSystemException], e.g. `AccessDeniedException`), unlike POSIX where the rename succeeds
- * immediately. Since readers hold the target only briefly, the move is retried a few times with a short backoff so
- * that the no-truncation guarantee is preserved without ever exposing a half-written file.
+ * On Windows, replacing a file that a concurrent reader currently holds open fails with an [AccessDeniedException]
+ * (a [FileSystemException]), unlike POSIX where the rename succeeds immediately; on Windows Server the underlying
+ * `MoveFileEx` can even fail transiently on its own. Such contention is always short-lived — readers of the descriptor
+ * release it as soon as they finish parsing — so instead of giving up after a small fixed budget, the move is retried
+ * with an exponential, jittered backoff until it succeeds or a generous deadline elapses. The no-truncation guarantee
+ * is preserved regardless: the file is only ever swapped via an atomic move (or, on filesystems without atomic-move
+ * support, a single [StandardCopyOption.REPLACE_EXISTING] move), never by truncating and rewriting it in place, so a
+ * concurrent reader always observes either the previous or the next complete content.
  */
 private fun moveReplacingWithRetry(source: Path, target: Path) {
-    val maxAttempts = 50
-    val backoffMillis = 10L
+    val deadline = System.nanoTime() + MOVE_RETRY_TIMEOUT_MILLIS * 1_000_000
+    var backoffMillis = MOVE_RETRY_INITIAL_BACKOFF_MILLIS
 
-    var attempt = 0
     while (true) {
         try {
             try {
@@ -239,10 +248,12 @@ private fun moveReplacingWithRetry(source: Path, target: Path) {
             }
             return
         } catch (exception: FileSystemException) {
-            if (++attempt >= maxAttempts) {
+            if (System.nanoTime() >= deadline) {
                 throw exception
             }
-            Thread.sleep(backoffMillis)
+            // Jitter avoids retrying in lockstep with the readers repeatedly holding the target open.
+            Thread.sleep(backoffMillis + Random.nextLong(backoffMillis / 2 + 1))
+            backoffMillis = (backoffMillis * 2).coerceAtMost(MOVE_RETRY_MAX_BACKOFF_MILLIS)
         }
     }
 }
@@ -266,7 +277,7 @@ internal val String.expandUserHome: String
  * Creates an [IdePluginManager] with scoped archive and JAR file system caches.
  */
 internal inline fun <T> withIdePluginManager(
-    extractDirectory: Path,
+    extractDirectory: Path = Path.of(System.getProperty("java.io.tmpdir")),
     block: (IdePluginManager) -> T,
 ): T = PluginArchiveManager(extractDirectory).use { pluginArchiveManager ->
     CachingJarFileSystemProvider().use { fileSystemProvider ->

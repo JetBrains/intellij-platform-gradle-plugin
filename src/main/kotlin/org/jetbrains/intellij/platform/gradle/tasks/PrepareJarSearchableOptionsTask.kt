@@ -127,9 +127,7 @@ abstract class PrepareJarSearchableOptionsTask @Inject constructor(
                 libContainer.convention(prepareSandboxTaskProvider.flatMap { it.pluginDirectory.dir(Sandbox.Plugin.LIB) })
                 searchableOptionsDescriptors.from(project.searchableOptionsDescriptorFiles())
                 outputDirectory.convention(
-                    project.layout.dir(project.provider {
-                        temporaryDir
-                    })
+                    project.layout.buildDirectory.dir("tmp/$name")
                 )
 
                 inputs.property("intellijPlatform.buildSearchableOptions", buildSearchableOptionsEnabledProvider)

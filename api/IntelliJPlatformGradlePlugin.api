@@ -238,6 +238,8 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field BUILD_SEARCHABLE_OPTIONS Ljava/lang/String;
 	public static final field CLEAN_SANDBOX Ljava/lang/String;
 	public static final field COMPOSED_JAR Ljava/lang/String;
+	public static final field DUMP_BUNDLED_MODULES Ljava/lang/String;
+	public static final field DUMP_BUNDLED_PLUGINS Ljava/lang/String;
 	public static final field DUMP_PRODUCTS_RELEASES Ljava/lang/String;
 	public static final field GENERATE_LEXER Ljava/lang/String;
 	public static final field GENERATE_MANIFEST Ljava/lang/String;
@@ -434,6 +436,22 @@ public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Bund
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5 : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5CodeInsight : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5CodeInsight;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5Eel : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5Eel;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5Highlighting : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5Highlighting;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5ProjectStructure : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
+	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/TestFrameworkType$JUnit5ProjectStructure;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/TestFrameworkType$Metrics : org/jetbrains/intellij/platform/gradle/TestFrameworkType {
@@ -641,7 +659,7 @@ public final class org/jetbrains/intellij/platform/gradle/argumentProviders/Spli
 
 public abstract class org/jetbrains/intellij/platform/gradle/artifacts/LocalIvyArtifactPathComponentMetadataRule : org/gradle/api/artifacts/ComponentMetadataRule {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/artifacts/LocalIvyArtifactPathComponentMetadataRule$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public fun <init> (Ljava/lang/String;)V
 	public synthetic fun execute (Ljava/lang/Object;)V
 	public fun execute (Lorg/gradle/api/artifacts/ComponentMetadataContext;)V
 }
@@ -1592,8 +1610,9 @@ public final class org/jetbrains/intellij/platform/gradle/models/Coordinates {
 public final class org/jetbrains/intellij/platform/gradle/models/CoordinatesKt {
 	public static final fun getCoroutines ()Ljava/util/Set;
 	public static final fun getKotlinStdlib ()Ljava/util/Set;
+	public static final fun resolveLatestVersion (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;Ljava/nio/file/Path;Z)Ljava/lang/String;
 	public static final fun resolveLatestVersion (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;Z)Ljava/lang/String;
-	public static synthetic fun resolveLatestVersion$default (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;ZILjava/lang/Object;)Ljava/lang/String;
+	public static synthetic fun resolveLatestVersion$default (Lorg/jetbrains/intellij/platform/gradle/models/Coordinates;Ljava/lang/String;Ljava/nio/file/Path;ZILjava/lang/Object;)Ljava/lang/String;
 }
 
 public final class org/jetbrains/intellij/platform/gradle/models/IvyModule {
@@ -2751,6 +2770,7 @@ public abstract class org/jetbrains/intellij/platform/gradle/providers/LatestPlu
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/providers/LatestPluginVersionValueSource$Parameters : org/gradle/api/provider/ValueSourceParameters {
+	public abstract fun getCacheDirectory ()Lorg/gradle/api/provider/Property;
 	public abstract fun getOffline ()Lorg/gradle/api/provider/Property;
 }
 
@@ -2991,6 +3011,36 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/ComposedJarTa
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/ComposedJarTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/DumpBundledModulesTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/DumpBundledModulesTask$Companion;
+	public fun <init> ()V
+	public final fun dumpBundledModules ()V
+	public abstract fun getIdeLayoutIndexCacheDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getOutputFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public fun validateIntelliJPlatformVersion ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/DumpBundledModulesTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/DumpBundledPluginsTask : org/gradle/api/DefaultTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/DumpBundledPluginsTask$Companion;
+	public fun <init> ()V
+	public final fun dumpBundledPlugins ()V
+	public abstract fun getIdeLayoutIndexCacheDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getOutputFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public fun validateIntelliJPlatformVersion ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/DumpBundledPluginsTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
 	public fun register (Lorg/gradle/api/Project;)V
 }
 

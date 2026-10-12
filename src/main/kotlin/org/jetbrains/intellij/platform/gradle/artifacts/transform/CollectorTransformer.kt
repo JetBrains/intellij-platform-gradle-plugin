@@ -10,7 +10,8 @@ import org.gradle.api.artifacts.transform.TransformOutputs
 import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Classpath
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
@@ -24,7 +25,6 @@ import org.jetbrains.intellij.platform.gradle.resolvers.path.takeIfExists
 import org.jetbrains.intellij.platform.gradle.utils.*
 import java.nio.file.Path
 import java.util.jar.JarFile
-import kotlin.io.path.createTempDirectory
 import kotlin.io.path.exists
 import kotlin.io.path.isDirectory
 import kotlin.io.path.listDirectoryEntries
@@ -40,7 +40,7 @@ abstract class CollectorTransformer : TransformAction<TransformParameters.None> 
      * The input artifact provided for transformation.
      */
     @get:InputArtifact
-    @get:Classpath
+    @get:PathSensitive(PathSensitivity.RELATIVE)
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     private val log = Logger(javaClass)
@@ -126,18 +126,13 @@ internal fun Path.resolvePluginLayout(): PluginLayout? {
     ) {
         return null
     }
-    val temporaryDirectory = createTempDirectory()
 
-    return try {
-        withIdePluginManager(temporaryDirectory) { manager ->
-            manager
-                .safelyCreatePlugin(pluginPath, suppressPluginProblems = true)
-                .getOrNull()
-                ?.pluginId
-                ?.let { PluginLayout(it, pluginPath) }
-        }
-    } finally {
-        temporaryDirectory.toFile().deleteRecursively()
+    return withIdePluginManager { manager ->
+        manager
+            .safelyCreatePlugin(pluginPath, suppressPluginProblems = true)
+            .getOrNull()
+            ?.pluginId
+            ?.let { PluginLayout(it, pluginPath) }
     }
 }
 

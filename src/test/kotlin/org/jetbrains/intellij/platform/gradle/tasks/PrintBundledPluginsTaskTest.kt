@@ -37,7 +37,7 @@ class PrintBundledPluginsTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `stores layout index in shared IntelliJ Platform cache`() {
-        val layoutIndexDir = intellijPlatformCacheDir.resolve(LAYOUT_INDEX)
+        val layoutIndexDir = idesCacheDir.resolve(LAYOUT_INDEX)
 
         build(Tasks.PRINT_BUNDLED_PLUGINS)
 

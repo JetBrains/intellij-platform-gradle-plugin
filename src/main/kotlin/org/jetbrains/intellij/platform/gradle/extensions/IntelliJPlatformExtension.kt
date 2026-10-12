@@ -915,6 +915,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
         /**
          * The output formats of the verification reports.
          *
+         * When [failureLevel] contains [FailureLevel.NOT_DYNAMIC], the [VerificationReportsFormats.MARKDOWN] report is
+         * requested additionally, as it is the only report the IntelliJ Plugin Verifier persists the dynamic plugin
+         * eligibility status into.
+         *
          * Default value: ([VerificationReportsFormats.PLAIN], [VerificationReportsFormats.HTML])
          *
          * @see VerificationReportsFormats

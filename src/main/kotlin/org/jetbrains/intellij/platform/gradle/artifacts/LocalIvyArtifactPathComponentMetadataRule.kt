@@ -1,33 +1,33 @@
-// Copyright 2000-2025 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2026 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij.platform.gradle.artifacts
 
-import org.gradle.api.artifacts.CacheableRule
 import org.gradle.api.artifacts.ComponentMetadataContext
 import org.gradle.api.artifacts.ComponentMetadataRule
-import org.gradle.api.artifacts.Configuration
+import org.gradle.api.artifacts.ModuleVersionIdentifier
 import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.initialization.Settings
 import org.gradle.api.initialization.resolve.RulesMode
 import org.gradle.api.provider.ProviderFactory
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.all
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
-import org.jetbrains.intellij.platform.gradle.extensions.parseIdeNotation
 import org.jetbrains.intellij.platform.gradle.localPlatformArtifactsPath
 import org.jetbrains.intellij.platform.gradle.models.IvyModulePublicationsOnly
+import org.jetbrains.intellij.platform.gradle.models.fullVersion
 import org.jetbrains.intellij.platform.gradle.models.productInfo
-import org.jetbrains.intellij.platform.gradle.models.type
 import org.jetbrains.intellij.platform.gradle.models.xml
 import org.jetbrains.intellij.platform.gradle.utils.Logger
-import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
-import java.io.File
+import org.jetbrains.intellij.platform.gradle.utils.writeTextAtomicallyIfChanged
+import java.nio.file.NoSuchFileException
 import java.nio.file.Path
+import java.nio.file.attribute.FileTime
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.notExists
+import kotlin.io.path.readText
 
 internal fun decodeIvyModulePublications(input: String) =
     xml.decodeFromString(IvyModulePublicationsOnly.serializer(), input).publications
@@ -73,31 +73,40 @@ internal fun decodeIvyModulePublications(input: String) =
  * This is called after Ivy XML metadata is already found and parsed, so all dependencies and publications are known,
  * but not yet resolved on the file system, so we have a chance to fix the paths.
  *
- * A separate note on [org.gradle.api.artifacts.CacheableRule], since there is not enough information on it in the internet.
- * First, see the comments in [org.gradle.internal.resolve.caching.CachingRuleExecutor].
- * I tried to debug it, and it seems like rule parameters are taken into account.
- * It happens in [org.gradle.internal.resolve.caching.CrossBuildCachingRuleExecutor.computeExplicitInputsSnapshot]
- * Which should mean that we can use the caching, because if the paths change, it should be re-evaluated.
+ * The rule is registered once per project, eagerly, when the plugin is applied — see [register].
+ * Gradle (since 9.8.0) takes an immutable snapshot of the component metadata rules when a resolution starts,
+ * so a rule added later (for example, from an `afterResolve` of the IntelliJ Platform configuration, which may be resolved
+ * in the middle of the `compileClasspath` resolution while realizing lazy bundled plugin dependencies) is never applied
+ * to that resolution.
+ *
+ * Because the IntelliJ Platform location is not known at registration time, it is not passed as a rule parameter.
+ * Instead, the location of the IntelliJ Platform for the given Ivy version (like `IU-253.33813.55`) is stored in a
+ * [PLATFORM_PATH_FILE_NAME] file next to the Ivy XML files of that version, see [writePlatformPath].
+ * That file is not part of the Ivy metadata, so the Ivy XML files stay portable.
+ *
+ * The rule is intentionally not a [org.gradle.api.artifacts.CacheableRule]:
+ * its outcome depends on the [PLATFORM_PATH_FILE_NAME] file content, which is not a rule input known to Gradle,
+ * so a cached result could point to an outdated IntelliJ Platform location.
  *
  * @see org.jetbrains.intellij.platform.gradle.models.IvyModule
  * @see org.jetbrains.intellij.platform.gradle.plugins.project.IntelliJPlatformBasePlugin.apply
  */
 @Suppress("KDocUnresolvedReference")
-@CacheableRule
 abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
-    private val absNormalizedPlatformPath: String,
     private val absNormalizedIvyPath: String,
 ) : ComponentMetadataRule {
 
     private val log = Logger(javaClass)
-    private val replacementGroups = listOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
 
     override fun execute(context: ComponentMetadataContext) {
         val id = context.details.id
         // Since we also need to fix transitive dependencies, we have to intercept everything and filter.
-        if (id.group !in replacementGroups) {
+        if (id.group !in REPLACEMENT_GROUPS) {
             return
         }
+
+        val platformPathFile = Path.of(absNormalizedIvyPath, id.version, PLATFORM_PATH_FILE_NAME)
+        val absNormalizedPlatformPath = readPlatformPath(id, platformPathFile) ?: return
 
         /**
          * Unfortunately, Gradle here doesn't expose anything from Ivy metadata, all we know is: group, name and version.
@@ -107,15 +116,9 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
          * We only need publication artifacts for path fixing. Parsing the whole Ivy module is unnecessary
          * and may fail if dependency entries contain unexpected metadata.
          */
-        val ivyXmlFile = File("$absNormalizedIvyPath/${id.version}/${id.group}-${id.name}-${id.version}.xml")
-        val publications = ivyPublicationsCache.computeIfAbsent(ivyXmlFile.path) {
+        val ivyXmlFile = Path.of(absNormalizedIvyPath, id.version, "${id.group}-${id.name}-${id.version}.xml")
+        val publications = ivyPublicationsCache.computeIfAbsent(ivyXmlFile.safePathString) {
             decodeIvyModulePublications(ivyXmlFile.readText())
-        }
-        val (moduleType, moduleVersion) = id.version.parseIdeNotation()
-        val productInfo = Path.of(absNormalizedPlatformPath).productInfo()
-
-        if (moduleType != productInfo.type || moduleVersion != productInfo.buildNumber) {
-            return
         }
 
         context.details.allVariants {
@@ -160,40 +163,103 @@ abstract class LocalIvyArtifactPathComponentMetadataRule @Inject constructor(
         }
     }
 
+    /**
+     * Reads the IntelliJ Platform location of the [id] module from the [platformPathFile] and validates it.
+     *
+     * @return The IntelliJ Platform location, or `null` if it is unknown or invalid, which is logged as an error.
+     * @see platformPathsCache
+     */
+    private fun readPlatformPath(id: ModuleVersionIdentifier, platformPathFile: Path): String? {
+        val lastModifiedTime = try {
+            platformPathFile.getLastModifiedTime()
+        } catch (e: NoSuchFileException) {
+            log.error("The IntelliJ Platform location of the $id module is unknown, the following file is missing: ${platformPathFile.safePathString}")
+            return null
+        }
+
+        platformPathsCache[platformPathFile]
+            ?.takeIf { (cachedLastModifiedTime) -> cachedLastModifiedTime == lastModifiedTime }
+            ?.let { (_, cachedPlatformPath) -> return cachedPlatformPath } // take from the cache
+
+        val absNormalizedPlatformPath = platformPathFile.readText().trim()
+
+        // The file may have been written by another build sharing the local Ivy repository, so the IntelliJ Platform
+        // it points to may have been moved, removed, or replaced with another version since then.
+        val platformVersion = runCatching { Path.of(absNormalizedPlatformPath).productInfo().fullVersion }.getOrNull()
+        if (platformVersion != id.version) {
+            log.error(
+                "The IntelliJ Platform location of the $id module, stored in ${platformPathFile.safePathString}, is invalid: " +
+                        "'$absNormalizedPlatformPath' " + when (platformVersion) {
+                    null -> "doesn't contain a valid IntelliJ Platform."
+                    else -> "contains the '$platformVersion' version of the IntelliJ Platform."
+                }
+            )
+            return null
+        }
+
+        platformPathsCache[platformPathFile] = lastModifiedTime to absNormalizedPlatformPath
+        return absNormalizedPlatformPath
+    }
+
     companion object {
+        internal val REPLACEMENT_GROUPS = setOf(Dependencies.BUNDLED_PLUGIN_GROUP, Dependencies.BUNDLED_MODULE_GROUP)
         private val ivyPublicationsCache = ConcurrentHashMap<String, List<org.jetbrains.intellij.platform.gradle.models.IvyModule.Artifact>>()
 
+        /**
+         * Validated IntelliJ Platform locations, read from [PLATFORM_PATH_FILE_NAME] files, as the rule is executed for every bundled plugin
+         * and module, including transitive ones.
+         *
+         * Key is the [PLATFORM_PATH_FILE_NAME] file location, value is its last modification time and the IntelliJ Platform location it contains.
+         * The file location, not just the Ivy version, is used as a key, because different builds may use different local Ivy repositories.
+         *
+         * The cache outlives a single build in the Gradle daemon, and the IntelliJ Platform location of the given version may change between builds,
+         * so the cached value is used only if the file hasn't been modified since it was read.
+         */
+        private val platformPathsCache = ConcurrentHashMap<Path, Pair<FileTime, String>>()
+
+        /**
+         * Name of the file, stored next to the Ivy XML files of a given version, which contains the absolute path of the IntelliJ Platform
+         * that the bundled plugins and modules of this version belong to.
+         * It never matches the Ivy pattern of the local Ivy repository, so Gradle doesn't treat it as a metadata file.
+         */
+        internal const val PLATFORM_PATH_FILE_NAME = "platform-path.txt"
+
+        /**
+         * Stores the [platformPath] location for the given Ivy [version], so [LocalIvyArtifactPathComponentMetadataRule] can resolve
+         * relative artifact paths of bundled plugins and modules of that version.
+         *
+         * @param ivyPath The local Ivy repository location.
+         * @param version The Ivy version of bundled plugins and modules, like `IU-253.33813.55`.
+         * @param platformPath The IntelliJ Platform location.
+         */
+        internal fun writePlatformPath(ivyPath: Path, version: String, platformPath: Path) {
+            ivyPath.resolve(version).resolve(PLATFORM_PATH_FILE_NAME).writeTextAtomicallyIfChanged(platformPath.safePathString)
+        }
+
+        /**
+         * Registers the rule eagerly, before any configuration is resolved, so it is part of every resolution in the project.
+         */
         internal fun register(
-            configuration: Configuration,
             dependencies: DependencyHandler,
             providers: ProviderFactory,
             settings: Settings,
             rootProjectDirectory: Path
         ) {
-            configuration.incoming.afterResolve {
-                val log = Logger(javaClass)
-                val ruleName = LocalIvyArtifactPathComponentMetadataRule::class.simpleName
-                // Intentionally delaying the check just in case if it changes somehow late in the lifecycle.
-                val rulesMode = settings.dependencyResolutionManagement.rulesMode.get()
+            val log = Logger(javaClass)
+            val ruleName = LocalIvyArtifactPathComponentMetadataRule::class.simpleName
+            // Settings are fully evaluated before any project is configured, so the value is final here.
+            val rulesMode = settings.dependencyResolutionManagement.rulesMode.get()
 
-                if (RulesMode.PREFER_PROJECT == rulesMode) {
-                    if (configuration.allDependencies.isEmpty()) {
-                        log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' is empty. $ruleName will not be registered.")
-                    } else if (configuration.resolvedConfiguration.hasError()) {
-                        log.warn("Configuration '${Configurations.INTELLIJ_PLATFORM_DEPENDENCY}' has some resolution errors. $ruleName will not be registered.")
-                    } else {
-                        val artifactLocationPath = configuration.platformPath().safePathString
-                        val ivyLocationPath = providers.localPlatformArtifactsPath(rootProjectDirectory).get().safePathString
+            if (RulesMode.PREFER_PROJECT == rulesMode) {
+                val ivyLocationPath = providers.localPlatformArtifactsPath(rootProjectDirectory).get().safePathString
 
-                        dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
-                            params(artifactLocationPath, ivyLocationPath)
-                        }
-
-                        log.info("$ruleName has been registered.")
-                    }
-                } else {
-                    log.info("$ruleName can not be registered because '${rulesMode}' mode is used in settings.")
+                dependencies.components.all<LocalIvyArtifactPathComponentMetadataRule> {
+                    params(ivyLocationPath)
                 }
+
+                log.info("$ruleName has been registered.")
+            } else {
+                log.info("$ruleName can not be registered because '${rulesMode}' mode is used in settings.")
             }
         }
     }

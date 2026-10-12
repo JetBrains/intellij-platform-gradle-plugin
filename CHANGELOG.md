@@ -4,11 +4,47 @@
 
 ### Added
 
+- Add `DumpBundledPluginsTask` and `DumpBundledModulesTask` to support dumping bundled plugins and modules for Plugin DevKit plugin purposes
+- Add JUnit 5 test framework types `TestFrameworkType.JUnit5Eel`, `TestFrameworkType.JUnit5Highlighting`, and `TestFrameworkType.JUnit5ProjectStructure` JetBrains/intellij-platform-gradle-plugin#2251
+
+### Changed
+
+- Optimize outgoing artifact registration in `JarSearchableOptionsTask` by using lazy `TaskProvider` publishing without eager provider `.get()` unboxing.
+- Route task outputs to dedicated `buildDirectory` locations in `PatchPluginXmlTask`, `BuildSearchableOptionsTask`, `PrepareJarSearchableOptionsTask`, and `GenerateManifestTask`, eliminating dependencies on task `temporaryDir` for cacheable task outputs.
+- Optimize sandbox IDE update disabling in `PrepareSandboxTask` by verifying existing XML state and writing default configuration directly, eliminating redundant JDOM parsing and re-serialization.
+- Optimize module project descriptor lookup in searchable options support by safely resolving project dependencies with directory fallback, preventing cross-project model inspection failures.
+- Optimize runtime dependency filtering in `TestIdeTask` classpath configuration by using lazy file collection subtraction (`classpath - runtimeDependencies`) instead of eager resolution during configuration.
+- Optimize form files and classes directory input configuration in `InstrumentCodeTask` by using native Gradle pattern filtering for GUI forms and direct lazy binding of `sourceSet.output.classesDirs`, eliminating eager directory filtering during configuration.
+- Optimize `LocalIvyArtifactPathComponentMetadataRule` execution by using static set-based group filtering and evaluating IDE version matches prior to Ivy XML descriptor reads and caching.
+- Optimize plugin layout inspection in `resolvePluginLayout()` by avoiding scratch directory creation and teardown on disk when inspecting plugin structures.
+- Optimize input artifact sensitivity in `CollectorTransformer` and `LocalPluginsNormalizationTransformers` by replacing classpath normalization with `@PathSensitive(PathSensitivity.RELATIVE)`, avoiding full bytecode hashing of extracted IDE distributions and plugins during dependency transformation.
+- Add conditional HTTP requests (`ETag` and `Last-Modified`) and `304 Not Modified` cache revalidation with offline and error fallbacks for product releases listings and latest plugin version resolution, eliminating redundant network transfers and improving build resilience.
+- Enforce explicit connect (10s) and read (30s) timeouts with deterministic socket and stream cleanup across all direct network operations (`ProductReleasesListingValueSource`, `LatestPluginVersionValueSource`, and `PluginArtifactoryShim`) to prevent Gradle configuration hangs.
+- Optimize `ExtractorTransformer` archive input sensitivity by replacing classpath normalization with `@PathSensitive(PathSensitivity.NAME_ONLY)`, avoiding expensive content hashing of multi-gigabyte IDE distribution archives on up-to-date checks.
+- Optimize `InstrumentCodeTask` file handling by resolving compiled classes directly by path for GUI Designer forms and instrumenting directly into the output directory, eliminating intermediate staging copies and redundant file-tree traversals.
+- Optimize plugin descriptor inspection in `SearchableOptionsSupport` with selective StAX parsing and reuse the thread-local XML input factory from `ModuleDescriptorsParser`, avoiding full JDOM construction for read-only scans.
+
+### Fixed
+
+- Change duplicates strategy in PrepareSandboxTask to `EXCLUDE` JetBrains/intellij-platform-gradle-plugin#2191
+- Fix `NoSuchElementException` when `LATEST-EAP-SNAPSHOT` is used as the IntelliJ Platform version by falling back to the first available platform Java version (`VERSION_25`) JetBrains/intellij-platform-gradle-plugin#2243
+- Stop failing the build with "Cannot add attributes or capabilities on a dependency that specifies artifacts or configuration information" when a project dependency pins an explicit target configuration or artifacts, such as `testImplementation(project(":core", "testOutput"))` used to share test classes between modules. Since `2.19.0` the module plugin requests the `composed-jar` library-elements attribute on every project dependency, which Gradle rejects for such dependencies; the request is now skipped for them, since they already select a concrete variant JetBrains/intellij-platform-gradle-plugin#2247
+- Fix `runIdeSplitMode` and `runIdeBackend` hanging on "Connecting to remote host..." when the split-mode backend restarts itself on the first client join. The IDE relaunched itself through the native `restarter` and the distribution launcher, which dropped the Gradle-provided sandbox and JVM configuration and failed on Windows when the project path contained spaces. The backend now runs with `IDEA_RESTART_VIA_EXIT_CODE`, so a restart request makes it exit with a dedicated code and Gradle relaunches it with the very same configuration JetBrains/intellij-platform-gradle-plugin#2252
+- Fix extension points of bundled plugins (e.g., `Git4Idea`) not being loaded in tests targeting IntelliJ Platform older than 2026.2. Adding all bundled plugins declared in `product-info.json` to the `TestIdeTask` classpath made content modules conflict between plugins in those versions (e.g., `intellij.vcs.git.frontend` provided by both `Git4Idea` and the Remote Development plugin), so dependent plugins and modules were disabled. The bundled plugins classpath is now applied by default only when targeting IntelliJ Platform 2026.2 (`262`) or later; set `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathEnabled=true` to opt in for earlier versions JetBrains/intellij-platform-gradle-plugin#2250
+- Report the reasons why the plugin cannot be loaded dynamically when `verifyPlugin` fails on `NOT_DYNAMIC`, e.g., `Declares application components: ...`, in both the failure message and the Problems report. The dynamic plugin eligibility status is now read from the Plugin Verifier Markdown report (`report.md`), which is requested additionally whenever `NOT_DYNAMIC` is part of the `failureLevel` — the only report the verifier persists it into. As the detection no longer depends on the console output, `NOT_DYNAMIC` is detected with `teamCityOutputFormat` enabled or without the `PLAIN` verification reports format too, and the fail-fast rejection of combining `NOT_DYNAMIC` with `teamCityOutputFormat` introduced in `2.19.0` is lifted. Note that `NOT_DYNAMIC` (and `FailureLevel.ALL`) was silently never failing the build between `2.10.0` and `2.18.1`; the check was restored in `2.19.0` JetBrains/intellij-platform-gradle-plugin#2255
+- Fix `Could not find …jar (bundledPlugin:…)` errors with Gradle 9.8.0+ when `compileClasspath` is resolved before any task runs, for example during IDE Gradle sync of a Java-only project. Gradle 9.8.0 snapshots component metadata rules when a resolution starts, so `LocalIvyArtifactPathComponentMetadataRule`, registered only after the IntelliJ Platform got resolved, was never applied to bundled plugins and modules. The rule is now registered when the plugin is applied and reads the IntelliJ Platform location from a `platform-path.txt` file stored next to the local Ivy XML files.
+- Robustly retry the atomic replace of local Ivy platform descriptors on Windows. `Files.move(…, ATOMIC_MOVE, REPLACE_EXISTING)` throws `AccessDeniedException` while a concurrent reader briefly holds the target descriptor open, and the previous fixed retry budget (50 × 10ms = 500ms) could be exhausted under heavy read contention. The move is now retried with an exponential, jittered backoff until a generous deadline elapses, preserving the no-truncation guarantee without ever exposing a half-written descriptor JetBrains/intellij-platform-gradle-plugin#2068
+
+## [2.19.0] - 2026-09-15
+
+### Added
+
 - Add the incubating `subscriptionKey` file property to the `intellijPlatform` extension and `PrepareSandboxTask`. It copies the key to `config/idea.key` and enables the Ultimate module in the prepared sandbox. The `org.jetbrains.intellij.platform.subscriptionKey` Gradle property configures the project default.
 - Add per-plugin bundled-library exclusions with `plugin(...) { excludeBundledLibrary("*foo-.jar") }`, applied consistently to project classpaths and sandbox installations JetBrains/intellij-platform-gradle-plugin#587
 - Add `intellijPlatform.nativeVariants` DSL and `buildPluginVariants` tasks for creating Linux, macOS, and Windows plugin distributions targeting `x86_64` and `arm64` architectures. Native variant compatibility must start at IntelliJ Platform 2026.1 (`since-build` 261).
 - Add `testFrameworks()` dependency helpers for configuring multiple `TestFrameworkType` values in one call JetBrains/intellij-platform-gradle-plugin#2194
 - Expand `TestFrameworkType.Plugin` with IJent, ML completion, navigation bar, Python, RD client, Rider, and statistics test frameworks.
+- Add `TestFrameworkType.JUnit5CodeInsight` for the `com.jetbrains.intellij.platform:test-framework-junit5-code-insight` library, which provides the JUnit 5 code-insight fixtures JetBrains/intellij-platform-gradle-plugin#2239
 - Add sandbox-specific runtime classpath configurations for applying dependency exclusions to every `PrepareSandboxTask` without changing project compile or test classpaths JetBrains/intellij-platform-gradle-plugin#2177
 - Add `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathEnabled` property to control whether bundled plugins declared in `product-info.json` are added to test classpaths. It defaults to `true`; set it to `false` to opt out.
 - Add `DumpProductsReleasesTask` to support dumping IntelliJ Platform product releases for Plugin DevKit plugin purposes
@@ -46,12 +82,6 @@
 - Store the serialized IDE layout index under the IDEs cache (honoring `org.jetbrains.intellij.platform.intellijPlatformIdesCache`) instead of the per-project `.intellijPlatform/layoutIndex`, so it lives beside the extracted IDEs and survives workspace cleaning; any index under the old path is orphaned and rebuilt once JetBrains/intellij-platform-gradle-plugin#2199
 - Make archive extraction safely reusable: `ExtractorService.extract()` now serializes concurrent publishers with JVM and cross-process locks and marks a target complete only after successful extraction. Only completed targets are reused, so interrupted output is retried; the reuse check remains inside the extraction `BuildService` so it is not recorded as a configuration-cache input
 - Reuse the already-extracted base IntelliJ Platform for the IntelliJ Plugin Verifier when a requested verification IDE matches the base platform by type, version, and product mode, instead of downloading and extracting a second, identical copy of the IDE for `verifyPlugin`. IDEs that differ from the base platform are still resolved and extracted as before
-
-## [2.18.1] - 2026-07-10
-
-### Fixed
-
-- Exclude the `org.jetbrains.plugins.vue` bundled plugin when composing tests classpath, as its LSP initializer fails in test environments and crashes tests JetBrains/intellij-platform-gradle-plugin#2183
 
 ## [2.18.1] - 2026-07-10
 
@@ -1858,7 +1888,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.1...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.19.0...HEAD
+[2.19.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.1...v2.19.0
 [2.18.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.0...v2.18.1
 [2.18.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.17.0...v2.18.0
 [2.17.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.16.0...v2.17.0

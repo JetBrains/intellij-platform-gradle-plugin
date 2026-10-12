@@ -8,6 +8,7 @@ import org.jetbrains.intellij.platform.gradle.assertContains
 import org.jetbrains.intellij.platform.gradle.buildFile
 import org.jetbrains.intellij.platform.gradle.write
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class TestIdeTaskTest : IntelliJPluginTestBase() {
@@ -44,7 +45,7 @@ class TestIdeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
-    fun `bundled plugins classpath is enabled by default and can be disabled`() {
+    fun `bundled plugins classpath is disabled by default before 2026_2 and can be enabled`() {
         buildFile write //language=kotlin
                 """
                 tasks.register("printBundledPluginsClasspath") {
@@ -76,14 +77,23 @@ class TestIdeTaskTest : IntelliJPluginTestBase() {
             "printBundledPluginsClasspath",
             projectProperties = mapOf(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString() to false),
         ).output.bundledPluginsClasspathEntries()
+        val enabledClasspath = build(
+            "printBundledPluginsClasspath",
+            projectProperties = mapOf(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString() to true),
+        ).output.bundledPluginsClasspathEntries()
 
-        assertTrue(
-            defaultClasspath.containsAll(disabledClasspath),
-            "The default bundled plugins classpath should preserve the explicitly disabled test classpath",
+        assertEquals(
+            disabledClasspath,
+            defaultClasspath,
+            "The bundled plugins classpath should not be applied by default when targeting IntelliJ Platform older than 2026.2",
         )
         assertTrue(
-            defaultClasspath.size > disabledClasspath.size,
-            "The default bundled plugins classpath should contain entries from bundled plugins",
+            enabledClasspath.containsAll(disabledClasspath),
+            "The enabled bundled plugins classpath should preserve the explicitly disabled test classpath",
+        )
+        assertTrue(
+            enabledClasspath.size > disabledClasspath.size,
+            "The enabled bundled plugins classpath should contain entries from bundled plugins",
         )
     }
 

@@ -10,8 +10,9 @@ import org.gradle.api.artifacts.transform.TransformParameters
 import org.gradle.api.file.FileSystemLocation
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
-import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Internal
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.registerTransform
 import org.gradle.work.DisableCachingByDefault
@@ -37,7 +38,7 @@ abstract class ExtractorTransformer : TransformAction<ExtractorTransformer.Param
     }
 
     @get:InputArtifact
-    @get:Classpath
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
     abstract val inputArtifact: Provider<FileSystemLocation>
 
     private val log = Logger(javaClass)

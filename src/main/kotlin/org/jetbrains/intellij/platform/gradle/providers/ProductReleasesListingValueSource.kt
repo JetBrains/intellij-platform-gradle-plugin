@@ -6,16 +6,10 @@ import org.gradle.api.provider.Property
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
 import org.gradle.api.tasks.Input
+import org.jetbrains.intellij.platform.gradle.utils.CachedHttpResource
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.offlineResolutionErrorMessage
-import java.net.URI
 import java.nio.file.Path
-import java.security.MessageDigest
-import java.time.LocalDate
-import java.util.HexFormat
-import kotlin.io.path.createDirectories
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
 
 /**
  * Loads a raw product releases listing while hiding the cache file implementation details from configuration cache
@@ -43,49 +37,30 @@ internal abstract class ProductReleasesListingValueSource :
 
     override fun obtain(): String? {
         val url = parameters.url.get()
-        val cacheFile = cacheFile(url)
-        val lockFile = lockFile(cacheFile)
-        val today = LocalDate.now().toString()
-        val cachedContent = runCatching { cacheFile.readText() }.getOrNull()
-        val lastUpdate = runCatching { lockFile.readText().trim() }.getOrNull()
+        val cacheDirectory = Path.of(parameters.cacheDirectory.get())
+        val offline = parameters.offline.getOrElse(false)
 
-        if (cachedContent != null && lastUpdate == today) {
-            log.info("Reading product releases listing from cache: $cacheFile")
-            return cachedContent
-        }
-
-        if (parameters.offline.getOrElse(false)) {
-            if (cachedContent != null) {
-                log.info("Offline mode: reusing cached product releases listing: $cacheFile")
-                return cachedContent
-            }
-
-            log.warn(offlineResolutionErrorMessage("product releases listing from $url"))
-            return null
-        }
-
-        return try {
-            URI(url).toURL().readText().also {
+        return CachedHttpResource.read(
+            url = url,
+            cacheDirectory = cacheDirectory,
+            offline = offline,
+            onCacheHit = { file, is304 ->
+                if (is304) {
+                    log.info("Product releases listing not modified: $url (304), reusing cached listing: $file")
+                }
+            },
+            onRefresh = { _, _ ->
                 log.info("Reading product releases listing from URL: $url")
-                cacheFile.parent.createDirectories()
-                cacheFile.writeText(it)
-                lockFile.writeText(today)
-            }
-        } catch (e: Exception) {
-            if (cachedContent == null) {
-                throw e
-            }
-
-            log.warn("Failed to refresh product releases listing from URL: $url. Using cached listing: $cacheFile", e)
-            cachedContent
-        }
+            },
+            onOfflineCacheHit = { file ->
+                log.info("Offline mode: reusing cached product releases listing: $file")
+            },
+            onOfflineCacheMiss = {
+                log.warn(offlineResolutionErrorMessage("product releases listing from $url"))
+            },
+            onErrorFallback = { _, file, e ->
+                log.warn("Failed to refresh product releases listing from URL: $url. Using cached listing: $file", e)
+            },
+        )
     }
-
-    private fun cacheFile(url: String): Path {
-        val digest = MessageDigest.getInstance("SHA-256").digest(url.toByteArray())
-        val fileName = "${HexFormat.of().formatHex(digest)}.json"
-        return Path.of(parameters.cacheDirectory.get()).resolve(fileName)
-    }
-
-    private fun lockFile(cacheFile: Path) = cacheFile.resolveSibling("${cacheFile.fileName}.lock")
 }

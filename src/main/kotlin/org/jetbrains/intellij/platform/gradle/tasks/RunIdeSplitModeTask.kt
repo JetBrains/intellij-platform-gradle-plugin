@@ -67,15 +67,12 @@ abstract class RunIdeSplitModeTask : RunIdeTask() {
         executionMode.set(ExecutionMode.SPLIT_MODE_BACKEND)
         prepareIdeExecution()
 
+        // Captured before the task gets reconfigured for the frontend below.
+        val backendLaunchSpec = captureLaunchSpec()
         val backendThread = thread(name = "split-mode-backend-launcher") {
             runCatching {
-                runSplitModeBackend {
-                    val result = execOperations.javaexec {
-                        copyJavaExecSpecTo(this)
-                        isIgnoreExitValue = true
-                    }
-                    assertExpectedSplitModeExitCode("backend", result, backendLaunched.get())
-                }
+                val result = runSplitModeBackend(backendLaunchSpec)
+                assertExpectedSplitModeExitCode("backend", result, backendLaunched.get())
             }.onFailure {
                 backendFailure.set(it)
             }
@@ -98,8 +95,9 @@ abstract class RunIdeSplitModeTask : RunIdeTask() {
             prepareIdeExecution(frontendJoinLink, frontendSandboxPaths)
             writeSplitModeFrontendPropertiesFile()
 
+            val frontendLaunchSpec = captureLaunchSpec()
             val result = execOperations.javaexec {
-                copyJavaExecSpecTo(this)
+                frontendLaunchSpec.applyTo(this)
                 disableSplitModeFrontendJavaDebuggingIfNeeded()
                 useSplitModeFrontendPropertiesFile()
                 isIgnoreExitValue = true

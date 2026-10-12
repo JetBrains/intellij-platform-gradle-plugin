@@ -101,6 +101,13 @@ jobs:
         if: ${{ contains(needs.*.result, 'failure') }}
         run: exit 1
 
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        uses: jlumbroso/free-disk-space@v2.0.0
+        with:
+          preinstalled-runtimes: false
+          large-packages: false
+
       # Check out current repository
       - name: Fetch Sources
         uses: actions/checkout@v7
@@ -114,7 +121,7 @@ jobs:
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6.3.0
+        uses: gradle/actions/setup-gradle@v6.4.0
         with:
           cache-read-only: true
 

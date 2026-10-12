@@ -32,9 +32,9 @@ jobs:
       # Free GitHub Actions Environment Disk Space
       - name: Maximize Build Space
         if: runner.os == 'Linux'
-        uses: jlumbroso/free-disk-space@main
+        uses: jlumbroso/free-disk-space@v2.0.0
         with:
-          tool-cache: false
+          preinstalled-runtimes: false
           large-packages: false
 
       - name: Fetch Sources
@@ -47,7 +47,7 @@ jobs:
           java-version: 21
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v6.3.0
+        uses: gradle/actions/setup-gradle@v6.4.0
         with:
           cache-read-only: ${{ inputs.cacheReadOnly }}
 

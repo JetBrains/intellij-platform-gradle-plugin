@@ -61,13 +61,14 @@ object Constants {
         internal val MINIMAL_NATIVE_VARIANTS_BUILD_NUMBER = "261".toVersion()
         internal val MINIMAL_NATIVE_VARIANTS_VERSION = "2026.1".toVersion()
         val MINIMAL_SPLIT_MODE_BUILD_NUMBER = "241.14473".toVersion()
+        internal val MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER = "262".toVersion()
         val PRODUCT_STARTER_MINIMAL_BUILD_NUMBER = "262".toVersion()
         val UNIFIED_INTELLIJ_IDEA_BUILD_NUMBER = "253".toVersion()
         val UNIFIED_INTELLIJ_IDEA_VERSION = "2025.3".toVersion()
         val UNIFIED_PYCHARM_BUILD_NUMBER = "253".toVersion()
         val UNIFIED_PYCHARM_VERSION = "2025.3".toVersion()
 
-        const val COMPOSE_HOT_RELOAD_VERSION = "1.1.0-alpha03"
+        const val COMPOSE_HOT_RELOAD_VERSION = "1.2.0"
         const val GRAMMAR_KIT_VERSION = "2023.3.4"
         const val JFLEX_VERSION = "1.10.17"
     }
@@ -212,6 +213,8 @@ object Constants {
         const val BUILD_SEARCHABLE_OPTIONS = "buildSearchableOptions"
         const val CLEAN_SANDBOX = "cleanSandbox"
         const val COMPOSED_JAR = "composedJar"
+        const val DUMP_BUNDLED_MODULES = "dumpBundledModules"
+        const val DUMP_BUNDLED_PLUGINS = "dumpBundledPlugins"
         const val DUMP_PRODUCTS_RELEASES = "dumpProductsReleases"
         const val GENERATE_LEXER = "generateLexer"
         const val GENERATE_MANIFEST = "generateManifest"

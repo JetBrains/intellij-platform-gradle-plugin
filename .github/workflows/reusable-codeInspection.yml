@@ -8,11 +8,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+      # Free GitHub Actions Environment Disk Space
+      - name: Maximize Build Space
+        uses: jlumbroso/free-disk-space@v2.0.0
+        with:
+          preinstalled-runtimes: false
+          large-packages: false
+
       - name: Fetch Sources
         uses: actions/checkout@v7
         with:
           fetch-depth: 0 # only report issues that appeared in a PR
 
       - name: Qodana - Code Inspection
-        uses: JetBrains/qodana-action@v2026.2.1
+        uses: JetBrains/qodana-action@v2026.2.2
         if: ${{ false }}  # disable for now

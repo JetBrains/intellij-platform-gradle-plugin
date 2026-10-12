@@ -94,9 +94,7 @@ abstract class BuildSearchableOptionsTask : JavaExec(), RunnableIdeAware {
                 applySandboxFrom(prepareSandboxTaskProvider)
 
                 outputDirectory.convention(
-                    project.layout.dir(project.provider {
-                        temporaryDir
-                    })
+                    project.layout.buildDirectory.dir("tmp/$name")
                 )
                 pluginXmlService.convention(pluginXmlServiceProvider)
                 showPaidPluginWarning.convention(

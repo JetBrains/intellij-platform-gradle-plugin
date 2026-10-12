@@ -16,7 +16,6 @@ import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.writeTextIfChanged
 import java.io.InputStream
 import java.io.StringWriter
-import java.net.URL
 import java.nio.file.Path
 import kotlin.io.path.readText
 
@@ -49,8 +48,6 @@ private inline fun <reified T> obtainStringFormat(): StringFormat {
     }
 }
 
-internal inline fun <reified T> decode(url: URL) = decode<T>(url.openStream())
-
 internal inline fun <reified T> decode(path: Path): T = decode<T>(path.readText())
 
 internal inline fun <reified T> decode(inputStream: InputStream) = decode<T>(inputStream.bufferedReader().use { it.readText() })
@@ -62,17 +59,17 @@ internal inline fun <reified T> decode(input: String, stringFormat: StringFormat
                 """
                 Cannot parse the provided input as ${T::class.java.name}.
                 Please file an issue attaching the content and exception message to: $GITHUB_REPOSITORY/issues/new
-                
+
                 ## Model:
                 ```
                 ${T::class.java.name}
                 ```
-                
+
                 ## Content:
                 ```
                 ${input.replaceIndent("                ").trimStart()}
                 ```
-                
+
                 ## Exception:
                 ```
                 ${exception.stackTraceToString().replaceIndent("                ").trimStart()}
