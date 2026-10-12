@@ -72,9 +72,10 @@ jobs:
           path: |
             .gradle/testGradleHome/.testKit
             !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
-          key: test-gradle-home-v4-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+            !.gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
+          key: test-gradle-home-v5-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v4-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-
+            test-gradle-home-v5-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-
 
       - name: Prime IntelliJ Platform test cache
         if: ${{ steps.intellij-platform-cache.outputs.cache-hit != 'true' || steps.gradle-testkit-dependencies-cache.outputs.cache-hit != 'true' || steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
@@ -132,6 +133,19 @@ jobs:
           path: .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
           key: ${{ steps.gradle-testkit-dependencies-cache.outputs.cache-primary-key }}
 
+      # Avoid shipping multi-GB rebuildable transforms in the gradleVersion-keyed TestKit cache.
+      - name: Prune TestKit transforms cache before save
+        if: ${{ always() && !cancelled() && steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
+        shell: bash
+        run: |
+          if [ -d .gradle/testGradleHome/.testKit ]; then
+            find .gradle/testGradleHome/.testKit -type d -name 'transforms-*' -print 2>/dev/null \
+              | while IFS= read -r dir; do
+                  echo "Removing $dir"
+                  rm -rf "$dir" || true
+                done
+          fi
+
       - name: Check Gradle TestKit cache
         if: ${{ always() && !cancelled() && steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
         id: gradle-testkit-cache-path
@@ -150,4 +164,5 @@ jobs:
           path: |
             .gradle/testGradleHome/.testKit
             !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+            !.gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
           key: ${{ steps.gradle-testkit-cache.outputs.cache-primary-key }}
