@@ -3,9 +3,12 @@
 package org.jetbrains.intellij.platform.gradle.plugins.settings
 
 import org.gradle.api.Plugin
+import org.gradle.api.attributes.LibraryElements
 import org.gradle.api.initialization.Settings
+import org.gradle.kotlin.dsl.add
 import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
+import org.jetbrains.intellij.platform.gradle.attributes.ComposedJarRule
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformRepositoriesExtension
 import org.jetbrains.intellij.platform.gradle.plugins.checkGradleVersion
 import org.jetbrains.intellij.platform.gradle.utils.Logger
@@ -27,6 +30,15 @@ abstract class IntelliJPlatformSettingsPlugin : Plugin<Settings> {
                 !extraProperties.has(KOTLIN_STDLIB_DEFAULT_DEPENDENCY)
             ) {
                 extraProperties.set(KOTLIN_STDLIB_DEFAULT_DEPENDENCY, "false")
+            }
+
+            // The module plugin requests `composed-jar` per project dependency, and the request travels with the
+            // module's variant metadata to its consumers. Register the rule in every project, so consumers that
+            // don't apply the plugin still accept a plain `jar` from non-plugin projects in the dependency graph.
+            dependencies.attributesSchema {
+                attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE) {
+                    compatibilityRules.add(ComposedJarRule::class)
+                }
             }
         }
 
