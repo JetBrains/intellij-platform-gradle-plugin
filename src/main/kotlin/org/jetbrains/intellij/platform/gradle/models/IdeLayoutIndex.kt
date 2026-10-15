@@ -79,6 +79,6 @@ internal data class IdeLayoutIndex(
     )
 
     companion object {
-        const val SCHEMA_VERSION = 3
+        const val SCHEMA_VERSION = 4
     }
 }

@@ -20,7 +20,7 @@ import com.jetbrains.plugin.structure.intellij.platform.ProductInfoParser
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
-import com.jetbrains.plugin.structure.jar.CachingJarFileSystemProvider
+import com.jetbrains.plugin.structure.jar.SingletonCachingJarFileSystemProvider
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.gradle.api.services.BuildService
@@ -101,10 +101,11 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
         platformPath: Path,
         productInfo: ProductInfo,
         ideVersion: IdeVersion,
-    ) = CachingJarFileSystemProvider().use { jarFileSystemProvider ->
+    ): IdeLayoutIndex {
         val layoutComponents = ValidatingLayoutComponentsProvider(SKIP_SILENTLY)
             .resolveLayoutComponents(productInfo, platformPath)
-        ProductInfoBasedIde.of(
+        val jarFileSystemProvider = SingletonCachingJarFileSystemProvider
+        return ProductInfoBasedIde.of(
             platformPath,
             ideVersion,
             productInfo,

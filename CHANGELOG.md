@@ -26,6 +26,7 @@
 
 ### Fixed
 
+- Share the JAR filesystem cache with plugin readers when indexing bundled plugins, preventing `ClosedFileSystemException` and missing bundled plugins such as `com.intellij.java`. Rebuild older layout indices that may be incomplete. JetBrains/intellij-platform-gradle-plugin#2192
 - Register `ComposedJarRule` in every project when the settings plugin is applied, so projects that don't apply the IntelliJ Platform plugin can consume a module depending on a plain JVM project. Since `2.19.0` the module plugin requests `composed-jar` per project dependency, and this request is part of the module's variant metadata, so such consumers failed with "No matching variant of project ... was found".
 - Change duplicates strategy in PrepareSandboxTask to `EXCLUDE` JetBrains/intellij-platform-gradle-plugin#2191
 - Fix `NoSuchElementException` when `LATEST-EAP-SNAPSHOT` is used as the IntelliJ Platform version by falling back to the first available platform Java version (`VERSION_25`) JetBrains/intellij-platform-gradle-plugin#2243
