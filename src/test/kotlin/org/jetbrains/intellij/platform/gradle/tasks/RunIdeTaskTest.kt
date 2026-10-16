@@ -70,8 +70,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         pluginDirectory.resolve("lib/projectName-1.0.0.jar").toZip().use { jar ->
             val descriptor = fileText(jar, "META-INF/plugin.xml")
             assertContains("<version>1.0.0-${hostVariant.os}-${hostVariant.arch}</version>", descriptor)
-            assertContains("<depends>com.intellij.modules.os.${hostVariant.os}</depends>", descriptor)
-            assertContains("<depends>com.intellij.modules.arch.${hostVariant.arch}</depends>", descriptor)
+            assertContains("<plugin id=\"com.intellij.modules.os.${hostVariant.os}\" />", descriptor)
+            assertContains("<plugin id=\"com.intellij.modules.arch.${hostVariant.arch}\" />", descriptor)
         }
     }
 
@@ -83,8 +83,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
         pluginDirectory.resolve("lib/projectName-1.0.0.jar").toZip().use { jar ->
             val descriptor = fileText(jar, "META-INF/plugin.xml")
             assertContains("<version>1.0.0</version>", descriptor)
-            assertNotContains("<depends>com.intellij.modules.os.", descriptor)
-            assertNotContains("<depends>com.intellij.modules.arch.", descriptor)
+            assertNotContains("com.intellij.modules.os.", descriptor)
+            assertNotContains("com.intellij.modules.arch.", descriptor)
         }
     }
 
@@ -124,8 +124,8 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
             distribution.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
                 val descriptor = fileText(jar, "META-INF/plugin.xml")
                 assertContains("<version>1.0.0</version>", descriptor)
-                assertNotContains("<depends>com.intellij.modules.os.", descriptor)
-                assertNotContains("<depends>com.intellij.modules.arch.", descriptor)
+                assertNotContains("com.intellij.modules.os.", descriptor)
+                assertNotContains("com.intellij.modules.arch.", descriptor)
             }
         }
     }
@@ -222,7 +222,6 @@ class RunIdeTaskTest : IntelliJPluginTestBase() {
 
                             override fun getInstallationPath() = fakeJdk
 
-                            @Suppress("UnstableApiUsage")
                             override fun isCurrentJvm() = false
                         }
                     }
