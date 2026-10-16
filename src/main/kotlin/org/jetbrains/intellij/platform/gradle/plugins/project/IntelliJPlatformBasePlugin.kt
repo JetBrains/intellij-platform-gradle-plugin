@@ -43,6 +43,7 @@ import org.jetbrains.intellij.platform.gradle.plugins.setupChangelogConventions
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.*
+import org.jetbrains.intellij.platform.gradle.tasks.agent.*
 import org.jetbrains.intellij.platform.gradle.tasks.aware.*
 import org.jetbrains.intellij.platform.gradle.utils.*
 
@@ -615,6 +616,10 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
 
         listOf(
             InitializeIntelliJPlatformPluginTask,
+            IntelliJPlatformInfoTask,
+            IntelliJPlatformDoctorTask,
+            IntelliJPlatformDiscoverTask,
+            IntelliJPlatformSdkTask,
             DumpProductsReleasesTask,
             DumpBundledPluginsTask,
             DumpBundledModulesTask,
