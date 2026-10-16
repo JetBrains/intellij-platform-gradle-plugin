@@ -4,6 +4,7 @@
 
 ### Added
 
+- Add `intellijPlatformInfo`, `intellijPlatformDoctor`, `intellijPlatformDiscover`, and `intellijPlatformSdk` tasks with versioned JSON reports for project context, actionable configuration findings, filtered catalog discovery, and SDK file/ownership maps. See [CLI reports](./CLI_REPORTS.md).
 - Add `DumpBundledPluginsTask` and `DumpBundledModulesTask` to support dumping bundled plugins and modules for Plugin DevKit plugin purposes
 - Add JUnit 5 test framework types `TestFrameworkType.JUnit5Eel`, `TestFrameworkType.JUnit5Highlighting`, and `TestFrameworkType.JUnit5ProjectStructure` JetBrains/intellij-platform-gradle-plugin#2251
 

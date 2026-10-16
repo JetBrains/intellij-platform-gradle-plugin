@@ -250,6 +250,10 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field INSTRUMENTED_JAR Ljava/lang/String;
 	public static final field INSTRUMENT_CODE Ljava/lang/String;
 	public static final field INSTRUMENT_TEST_CODE Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_DISCOVER Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_DOCTOR Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_INFO Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_SDK Ljava/lang/String;
 	public static final field JAR_SEARCHABLE_OPTIONS Ljava/lang/String;
 	public static final field PATCH_PLUGIN_XML Ljava/lang/String;
 	public static final field PREPARE_JAR_SEARCHABLE_OPTIONS Ljava/lang/String;
@@ -3572,6 +3576,84 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/VerifyPluginTask$VerificationReportsFormats$Companion {
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask : org/gradle/api/DefaultTask {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask$Companion;
+	public fun <init> ()V
+	public abstract fun getOutputFile ()Lorg/gradle/api/file/RegularFileProperty;
+	public abstract fun getPluginVersion ()Lorg/gradle/api/provider/Property;
+	public abstract fun getProjectPath ()Lorg/gradle/api/provider/Property;
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask$Companion {
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDiscoverTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask, org/jetbrains/intellij/platform/gradle/providers/ProductReleasesFilterParameters, org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDiscoverTask$Companion;
+	public fun <init> ()V
+	public final fun channel (Ljava/lang/String;)V
+	public final fun discover ()V
+	public abstract fun getIdeLayoutIndexCacheDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getKind ()Lorg/gradle/api/provider/Property;
+	public abstract fun getPlatformFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getQuery ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSinceBuild ()Lorg/gradle/api/provider/Property;
+	public abstract fun getUntilBuild ()Lorg/gradle/api/provider/Property;
+	public final fun type (Ljava/lang/String;)V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDiscoverTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDoctorTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware, org/jetbrains/intellij/platform/gradle/tasks/aware/KotlinMetadataAware, org/jetbrains/intellij/platform/gradle/tasks/aware/PluginAware {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDoctorTask$Companion;
+	public fun <init> ()V
+	public final fun diagnose ()V
+	public abstract fun getCacheIgnored ()Lorg/gradle/api/provider/Property;
+	public abstract fun getFailOn ()Lorg/gradle/api/provider/Property;
+	public abstract fun getMutedMessages ()Lorg/gradle/api/provider/ListProperty;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public abstract fun getSourceCompatibility ()Lorg/gradle/api/provider/Property;
+	public abstract fun getTargetCompatibility ()Lorg/gradle/api/provider/Property;
+	public fun validateIntelliJPlatformVersion ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDoctorTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformInfoTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformInfoTask$Companion;
+	public fun <init> ()V
+	public abstract fun getPlatformFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getPluginFiles ()Lorg/gradle/api/file/ConfigurableFileCollection;
+	public abstract fun getResolve ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSnapshot ()Lorg/gradle/api/provider/Property;
+	public final fun report ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformInfoTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSdkTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSdkTask$Companion;
+	public fun <init> ()V
+	public abstract fun getCompileClasspath ()Lorg/gradle/api/provider/ListProperty;
+	public abstract fun getIdeLayoutIndexCacheDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public abstract fun getOwner ()Lorg/gradle/api/provider/Property;
+	public fun getPlatformPath ()Ljava/nio/file/Path;
+	public fun getProductInfo ()Lorg/jetbrains/intellij/platform/gradle/models/ProductInfo;
+	public abstract fun getRootProjectDirectory ()Lorg/gradle/api/file/DirectoryProperty;
+	public final fun report ()V
+	public fun validateIntelliJPlatformVersion ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSdkTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
 }
 
 public abstract interface class org/jetbrains/intellij/platform/gradle/tasks/aware/AutoReloadAware : org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformAware {
