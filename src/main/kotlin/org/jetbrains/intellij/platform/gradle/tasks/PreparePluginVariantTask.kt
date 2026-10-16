@@ -8,13 +8,7 @@ import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.Property
-import org.gradle.api.tasks.CacheableTask
-import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
-import org.gradle.api.tasks.OutputDirectory
-import org.gradle.api.tasks.PathSensitive
-import org.gradle.api.tasks.PathSensitivity
-import org.gradle.api.tasks.TaskAction
+import org.gradle.api.tasks.*
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.register
 import org.jdom2.Element
@@ -134,12 +128,24 @@ abstract class PreparePluginVariantTask : DefaultTask() {
         }
         version.text = pluginVersion.get()
 
+        val dependencies = pluginXml.getChild("dependencies")
+            ?: Element("dependencies")
+                .takeIf { pluginXml.getChildren("depends").isEmpty() }
+                ?.also { pluginXml.addContent(it) }
+
         listOf(
             "com.intellij.modules.os.${operatingSystem.get()}",
             "com.intellij.modules.arch.${architecture.get()}",
         ).forEach { dependency ->
-            if (pluginXml.getChildren("depends").none { it.textTrim == dependency }) {
-                pluginXml.addContent(Element("depends").setText(dependency))
+            when {
+                dependencies != null -> {
+                    if (dependencies.getChildren("plugin").none { it.getAttributeValue("id") == dependency }) {
+                        dependencies.addContent(Element("plugin").setAttribute("id", dependency))
+                    }
+                }
+                pluginXml.getChildren("depends").none { it.textTrim == dependency } -> {
+                    pluginXml.addContent(Element("depends").setText(dependency))
+                }
             }
         }
 

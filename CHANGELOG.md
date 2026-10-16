@@ -9,6 +9,7 @@
 
 ### Changed
 
+- Respect the existing plugin descriptor dependency format in `nativeVariants`: append native dependencies to `<dependencies>` when present, retain legacy `<depends>` otherwise, and use `<dependencies>` when neither format is declared.
 - Optimize outgoing artifact registration in `JarSearchableOptionsTask` by using lazy `TaskProvider` publishing without eager provider `.get()` unboxing.
 - Route task outputs to dedicated `buildDirectory` locations in `PatchPluginXmlTask`, `BuildSearchableOptionsTask`, `PrepareJarSearchableOptionsTask`, and `GenerateManifestTask`, eliminating dependencies on task `temporaryDir` for cacheable task outputs.
 - Optimize sandbox IDE update disabling in `PrepareSandboxTask` by verifying existing XML state and writing default configuration directly, eliminating redundant JDOM parsing and re-serialization.

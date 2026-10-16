@@ -172,8 +172,10 @@ class BuildPluginTaskTest : IntelliJPluginTestBase() {
                           <version>1.0.0-linux-arm64</version>
                           <name>MyPluginName</name>
                           <vendor>JetBrains</vendor>
-                          <depends>com.intellij.modules.os.linux</depends>
-                          <depends>com.intellij.modules.arch.arm64</depends>
+                          <dependencies>
+                            <plugin id="com.intellij.modules.os.linux" />
+                            <plugin id="com.intellij.modules.arch.arm64" />
+                          </dependencies>
                         </idea-plugin>
                         """.trimIndent(),
                         fileText(jar, "META-INF/plugin.xml"),
