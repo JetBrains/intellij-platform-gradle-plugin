@@ -18,6 +18,8 @@ import com.jetbrains.plugin.structure.ide.resolver.ValidatingLayoutComponentsPro
 import com.jetbrains.plugin.structure.intellij.platform.ProductInfo
 import com.jetbrains.plugin.structure.intellij.platform.ProductInfoParser
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
+import com.jetbrains.plugin.structure.intellij.plugin.ModuleDescriptor
+import com.jetbrains.plugin.structure.intellij.plugin.PluginProviderResult
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import com.jetbrains.plugin.structure.jar.SingletonCachingJarFileSystemProvider
@@ -208,6 +210,16 @@ private object NoOpLayoutComponentsPluginReader : ProductInfoBasedIdeManager.Plu
     override fun supports(pluginMetadataSource: Any) = true
 }
 
+/**
+ * Whether this content module's dependencies are required: either `loading="required"`, or any `required-if-available`.
+ * The `required-if-available` target is treated as available, as `product-info.json` doesn't expose the modules
+ * available in each product mode yet.
+ */
+private val ModuleDescriptor.isTreatedAsRequired: Boolean
+    get() = with(moduleDefinition) {
+        loadingRule.required || requiredIfAvailable != null
+    }
+
 private fun ProductInfo.toIdeVersion() = IdeVersion.createIdeVersion(
     buildString {
         if (productCode.isNotEmpty()) {
@@ -236,7 +248,7 @@ private fun IdePlugin.toEntry(
         .distinct(),
     // Dependencies are serialized by exact entry key to avoid collapsing duplicate IDs or aliases.
     dependencies = (sequenceOf<IdePlugin>(this) + modulesDescriptors.asSequence()
-        .filter { it.moduleDefinition.loadingRule.required }
+        .filter { it.isTreatedAsRequired }
         .map { it.module })
         .flatMap { module ->
             module.dependsList.asSequence().filter { !it.isOptional }.map { it.pluginId } +
