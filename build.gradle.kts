@@ -72,7 +72,7 @@ dependencies {
     api(libs.intellij.structure.intellij, commonExclusions)
     api(libs.intellij.pluginRepositoryRestClient, commonExclusions)
 
-    runtimeOnly(libs.xmlutil.core)
+    implementation(libs.xmlutil.core)
     api(libs.xmlutil.serialization) {
         exclude("io.github.pdvrieze.xmlutil", "core")
     }
