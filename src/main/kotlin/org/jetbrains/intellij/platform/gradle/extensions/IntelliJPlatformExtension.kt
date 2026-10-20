@@ -980,6 +980,10 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             fun create(configure: IntelliJPlatformDependencyConfiguration.() -> Unit) {
                 userConfigured.set(true)
                 val configuration = createConfiguration(configure)
+                dependenciesHelper.recordDeclaredIntelliJPlatforms(
+                    listOf(configuration),
+                    Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
+                )
                 val configurationsProvider = dependenciesHelper.provider { listOf(configuration) }
                 createDependencies(configurationsProvider)
             }

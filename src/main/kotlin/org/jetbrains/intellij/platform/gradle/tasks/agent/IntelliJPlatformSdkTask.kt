@@ -26,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.nio.file.Path
 import kotlin.io.path.*
 
+/** [owners] is presentation-filtered; classpath owner refs always come from the complete SDK layout catalog. */
 @Serializable
 internal data class SdkReport(
     val targetIde: TargetIde,
@@ -50,8 +51,9 @@ internal data class CompileArtifact(val path: String, val kind: String, val owne
 @UntrackedTask(because = "SDK reports describe the currently selected SDK and compiler environment")
 abstract class IntelliJPlatformSdkTask : AgentReportTask(), IntelliJPlatformVersionAware {
 
+    /** Filters the presented owner entries, not the classpath or its full-catalog ownership references. */
     @get:Internal
-    @get:Option(option = "owner", description = "Keep only the plugins or modules with this exact ID or alias.")
+    @get:Option(option = "owner", description = "Show only owners with this exact ID or alias; classpath ownership still uses the complete catalog.")
     abstract val owner: Property<String>
 
     @get:Internal
@@ -80,7 +82,6 @@ abstract class IntelliJPlatformSdkTask : AgentReportTask(), IntelliJPlatformVers
         val entries = ideLayoutIndexService.get().resolve(root, ideLayoutIndexCacheDirectory.asPath).layoutEntries()
         val owners = entries
             .map { entry -> entry.copy(archives = entry.archives.mapNotNull { root.resolve(it).normalize().sdkRelative() }.sorted()) }
-            .filter { owner == null || owner == it.id || owner in it.aliases }
         val ownersByArchive = owners.flatMap { entry -> entry.archives.map { it to entry.ref } }.groupBy({ it.first }, { it.second })
         val classpath = compileClasspath.orNull?.map { Path(it).toAbsolutePath().normalize() }?.distinct()?.map { file ->
             val relative = file.sdkRelative()
@@ -107,7 +108,10 @@ abstract class IntelliJPlatformSdkTask : AgentReportTask(), IntelliJPlatformVers
         write(
             type = "sdk",
             status = if (unavailable.isEmpty()) ReportStatus.complete else ReportStatus.partial,
-            data = SdkReport(TargetIde(product.productCode, product.version, product.buildNumber, root.safePathString, "resolved"), root.safePathString, owner, owners, classpath.orEmpty(), sources),
+            data = SdkReport(
+                TargetIde(product.productCode, product.version, product.buildNumber, root.safePathString, "resolved"), root.safePathString, owner,
+                owners.filter { owner == null || owner == it.id || owner in it.aliases }, classpath.orEmpty(), sources,
+            ),
             unavailable = unavailable,
         )
         if (classpath == null) throw GradleException("The main compilation classpath could not be resolved; see the JSON report.")

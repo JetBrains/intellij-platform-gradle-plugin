@@ -250,10 +250,15 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field INSTRUMENTED_JAR Ljava/lang/String;
 	public static final field INSTRUMENT_CODE Ljava/lang/String;
 	public static final field INSTRUMENT_TEST_CODE Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_COMPATIBILITY_MATRIX Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_DEPENDENCY_GRAPH Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_DISCOVER Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_DISTRIBUTION Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_DOCTOR Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_INFO Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_PROJECT_GRAPH Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_SDK Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_TEST_MATRIX Ljava/lang/String;
 	public static final field JAR_SEARCHABLE_OPTIONS Ljava/lang/String;
 	public static final field PATCH_PLUGIN_XML Ljava/lang/String;
 	public static final field PREPARE_JAR_SEARCHABLE_OPTIONS Ljava/lang/String;
@@ -272,6 +277,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field RUN_IDE_SPLIT_MODE Ljava/lang/String;
 	public static final field SIGN_PLUGIN Ljava/lang/String;
 	public static final field TEST_IDE_PERFORMANCE Ljava/lang/String;
+	public static final field TEST_UI Ljava/lang/String;
 	public static final field VERIFY_PLUGIN Ljava/lang/String;
 	public static final field VERIFY_PLUGIN_PROJECT_CONFIGURATION Ljava/lang/String;
 	public static final field VERIFY_PLUGIN_SIGNATURE Ljava/lang/String;
@@ -3589,6 +3595,31 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/AgentRe
 public final class org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask$Companion {
 }
 
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformCompatibilityMatrixTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformCompatibilityMatrixTask$Companion;
+	public fun <init> ()V
+	public abstract fun getSnapshot ()Lorg/gradle/api/provider/Property;
+	public final fun report ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformCompatibilityMatrixTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDependencyGraphTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDependencyGraphTask$Companion;
+	public fun <init> ()V
+	public abstract fun getConfigurationName ()Lorg/gradle/api/provider/Property;
+	public abstract fun getDependencyFilter ()Lorg/gradle/api/provider/Property;
+	public abstract fun getResolve ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSnapshot ()Lorg/gradle/api/provider/Property;
+	public final fun report ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDependencyGraphTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDiscoverTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask, org/jetbrains/intellij/platform/gradle/providers/ProductReleasesFilterParameters, org/jetbrains/intellij/platform/gradle/tasks/aware/ProductReleasesServiceAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDiscoverTask$Companion;
 	public fun <init> ()V
@@ -3604,6 +3635,19 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/Intelli
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDiscoverTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDistributionTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDistributionTask$Companion;
+	public fun <init> ()V
+	public abstract fun getArchivePath ()Lorg/gradle/api/provider/Property;
+	public abstract fun getInspect ()Lorg/gradle/api/provider/Property;
+	public abstract fun getSnapshot ()Lorg/gradle/api/provider/Property;
+	public final fun report ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformDistributionTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
@@ -3639,6 +3683,17 @@ public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPl
 	public fun register (Lorg/gradle/api/Project;)V
 }
 
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformProjectGraphTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformProjectGraphTask$Companion;
+	public fun <init> ()V
+	public abstract fun getSnapshot ()Lorg/gradle/api/provider/Property;
+	public final fun report ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformProjectGraphTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
 public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSdkTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask, org/jetbrains/intellij/platform/gradle/tasks/aware/IntelliJPlatformVersionAware {
 	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSdkTask$Companion;
 	public fun <init> ()V
@@ -3653,6 +3708,17 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/Intelli
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSdkTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformTestMatrixTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformTestMatrixTask$Companion;
+	public fun <init> ()V
+	public abstract fun getSnapshot ()Lorg/gradle/api/provider/Property;
+	public final fun report ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformTestMatrixTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
 	public fun register (Lorg/gradle/api/Project;)V
 }
 

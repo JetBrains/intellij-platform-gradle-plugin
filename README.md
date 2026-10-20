@@ -14,7 +14,7 @@ The IntelliJ Platform Gradle Plugin is a plugin for the Gradle build system to h
 The documentation of the IntelliJ Platform Gradle Plugin has moved to the IntelliJ Platform Plugin SDK Documentation:
 https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html
 
-For versioned JSON project context, diagnostics, discovery, and SDK file maps, see [CLI reports](./CLI_REPORTS.md). These tasks are suitable for humans, CI, and CLI-based assistants without an agent-specific server.
+For versioned JSON project context, project/dependency graphs, distribution contents, test and compatibility matrices, diagnostics, discovery, and SDK file maps, see [CLI reports](./CLI_REPORTS.md). These tasks are suitable for humans, CI, and CLI-based assistants without an agent-specific server.
 
 ### Installation
 To install the IntelliJ Platform Gradle Plugin in your project, follow the [Usage](https://plugins.jetbrains.com/docs/intellij/tools-intellij-platform-gradle-plugin.html#usage) section of the plugin documentation.

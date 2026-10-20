@@ -36,6 +36,16 @@ class IntelliJPlatformDoctorTaskTest : IntelliJPlatformTestBase() {
         assertTrue(issues().any { it.getValue("id").jsonPrimitive.content == "missing-plugin-descriptor" })
         assertTrue(issues().all { it.getValue("suggestedFix").jsonPrimitive.content.isNotBlank() && it.getValue("setting").jsonPrimitive.content.isNotBlank() })
         assertTrue(report().getValue("unavailable").jsonArray.any { it.jsonObject.getValue("observation").jsonPrimitive.content == "runtimeVendor" })
+        assertEquals(1, report().getValue("schemaVersion").jsonPrimitive.int)
+        val missing = issues().single { it.getValue("id").jsonPrimitive.content == "missing-plugin-descriptor" }
+        assertEquals("absent", missing.getValue("observedValue").jsonPrimitive.content)
+        assertEquals("pluginXml", missing.getValue("configurationLocation").jsonPrimitive.content)
+        assertEquals("blockingConfigurationError", missing.getValue("category").jsonPrimitive.content)
+        assertEquals("warning", missing.getValue("severity").jsonPrimitive.content)
+        assertEquals("./gradlew :${Tasks.INTELLIJ_PLATFORM_DOCTOR}", missing.getValue("verificationCommand").jsonPrimitive.content)
+        listOf("evidence", "provenance", "applicableIdeVersions").forEach { key ->
+            assertTrue(missing.getValue(key).jsonArray.isNotEmpty(), key)
+        }
     }
 
     @Test
@@ -45,6 +55,7 @@ class IntelliJPlatformDoctorTaskTest : IntelliJPlatformTestBase() {
         assertTrue(issues().isNotEmpty())
         build(Tasks.INTELLIJ_PLATFORM_DOCTOR, "--fail-on=warning", args = listOf("--offline"), projectProperties = mapOf(GradleProperties.VerifyPluginProjectConfigurationMutedMessages.toString() to "plugin.xml"))
         assertTrue(issues().all { it.getValue("suppressed").jsonPrimitive.boolean })
+        assertTrue(issues().all { it.getValue("evidence").jsonArray.isNotEmpty() })
         build(Tasks.INTELLIJ_PLATFORM_DOCTOR, "--fail-on=error", args = listOf("--offline"))
     }
 
@@ -75,5 +86,30 @@ class IntelliJPlatformDoctorTaskTest : IntelliJPlatformTestBase() {
         build(Tasks.INTELLIJ_PLATFORM_DOCTOR, args = listOf("--offline"))
         val ids = issues().map { it.getValue("id").jsonPrimitive.content }
         assertTrue(ids.containsAll(listOf("since-build-wildcard", "since-build-below-platform", "java-target-exceeds-since-build")), ids.toString())
+        val sinceBuild = issues().single { it.getValue("id").jsonPrimitive.content == "since-build-below-platform" }
+        assertEquals("241.*", sinceBuild.getValue("observedValue").jsonPrimitive.content)
+        assertEquals(">= 251", sinceBuild.getValue("expectedValue").jsonPrimitive.content)
+        assertEquals("intellijPlatform.pluginConfiguration.ideaVersion (effective plugin.xml)", sinceBuild.getValue("configurationLocation").jsonPrimitive.content)
+        assertTrue(sinceBuild.getValue("provenance").jsonArray.any { "plugin.xml" in it.jsonPrimitive.content })
+        assertTrue(sinceBuild.getValue("evidence").jsonArray.any { "since-build='241.*'" in it.jsonPrimitive.content })
+        val target = issues().single { it.getValue("id").jsonPrimitive.content == "java-target-exceeds-since-build" }
+        assertEquals("21", target.getValue("observedValue").jsonPrimitive.content)
+        assertEquals("<= 17", target.getValue("expectedValue").jsonPrimitive.content)
+        assertTrue(target.getValue("configurationLocation").jsonPrimitive.content.endsWith("build.gradle.kts: targetCompatibility"))
+    }
+
+    @Test
+    fun `effective Java release evidence needs neither compilation nor a runtime`() {
+        fixture(module = true)
+        dir.resolve("build.gradle.kts").appendText("\ntasks.withType<JavaCompile>().configureEach { options.release = 17 }\n")
+        val result = build(Tasks.INTELLIJ_PLATFORM_DOCTOR, args = listOf("--offline"))
+        assertEquals(listOf(":intellijPlatformDoctor"), result.tasks.map { it.path })
+        val source = issues().single()
+        assertEquals("java-source-below-platform", source.getValue("id").jsonPrimitive.content)
+        assertEquals("17", source.getValue("observedValue").jsonPrimitive.content)
+        assertEquals(">= 21", source.getValue("expectedValue").jsonPrimitive.content)
+        assertEquals("incompatibility", source.getValue("category").jsonPrimitive.content)
+        assertTrue(source.getValue("evidence").jsonArray.any { "251.28774.11" in it.jsonPrimitive.content })
+        assertTrue(source.getValue("provenance").jsonArray.any { "Gradle" in it.jsonPrimitive.content })
     }
 }

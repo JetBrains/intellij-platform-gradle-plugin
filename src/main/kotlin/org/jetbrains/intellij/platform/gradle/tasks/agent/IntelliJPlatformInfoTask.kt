@@ -22,6 +22,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_STDLIB_DEFAULT_DE
 import org.jetbrains.intellij.platform.gradle.Constants.Plugins
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.models.productInfo
@@ -43,14 +44,26 @@ internal data class ProjectInfo(
     val commands: List<String>,
     val resolvedIde: TargetIde? = null,
     val resolvedPlugins: List<String> = emptyList(),
+    val capabilities: List<Capability> = emptyList(),
+    val compilerSettings: Map<String, CompilerSettings> = emptyMap(),
 )
 
 @Serializable
 internal data class DependencyIdentity(val configuration: String, val group: String?, val name: String, val version: String?)
 
+/** Configured options are not evidence of a selected compiler, its defaults, or compatibility with an IDE. */
+@Serializable
+internal data class CompilerSettings(
+    val configured: Map<String, String?>,
+    val effective: Map<String, String?>,
+    val state: String,
+    val reason: String,
+)
+
 /**
- * Writes the project context: plugin identity, requested IntelliJ Platform, effective Java/Kotlin settings, declared
- * platform dependencies, and relevant commands. The IDE is resolved (and possibly downloaded) only with `--resolve`.
+ * Writes the project context: plugin identity, requested IntelliJ Platform, configured Java/Kotlin settings, declared
+ * platform dependencies, and available capabilities. Effective compiler settings remain unresolved; no JDK is provisioned.
+ * The IDE is resolved (and possibly downloaded) only with `--resolve`.
  */
 @UntrackedTask(because = "Reports describe the current project's environment")
 abstract class IntelliJPlatformInfoTask : AgentReportTask() {
@@ -78,7 +91,7 @@ abstract class IntelliJPlatformInfoTask : AgentReportTask() {
         var failure: Exception? = null
 
         if (info.requestedIde == null) {
-            unavailable += Unavailable("requestedIde", "unavailable", "No IntelliJ Platform dependency is declared, or a local IDE is used.")
+            unavailable += Unavailable("requestedIde", "unavailable", "No single directly declared IntelliJ Platform type and version are observable without evaluating providers; local and inherited IDEs are not inspected.")
         }
         when {
             !resolve.get() -> unavailable += Unavailable("resolvedIde", "notRequested", "Use --resolve to resolve the IDE and plugin artifacts.")
@@ -152,12 +165,6 @@ abstract class IntelliJPlatformInfoTask : AgentReportTask() {
             Configurations.INTELLIJ_PLATFORM_TEST_BUNDLED_MODULES,
         )
 
-        private val commands = listOf(
-            Tasks.INTELLIJ_PLATFORM_INFO, Tasks.INTELLIJ_PLATFORM_DOCTOR, Tasks.INTELLIJ_PLATFORM_DISCOVER, Tasks.INTELLIJ_PLATFORM_SDK,
-            Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION, Tasks.VERIFY_PLUGIN_STRUCTURE, Tasks.VERIFY_PLUGIN,
-            Tasks.BUILD_PLUGIN, Tasks.RUN_IDE, Tasks.External.TEST,
-        )
-
         private fun Project.projectInfo(): ProjectInfo {
             val extension = extensions.findByType<IntelliJPlatformExtension>()
             val pluginConfiguration = extension?.pluginConfiguration
@@ -178,6 +185,17 @@ abstract class IntelliJPlatformInfoTask : AgentReportTask() {
                 }
             }
 
+            val java = javaInfo()
+            val kotlin = kotlinInfo()
+            val capabilities = capabilities()
+            fun compilerSettings(configured: Map<String, String?>, applied: Boolean = true) = CompilerSettings(
+                configured = configured,
+                effective = configured.mapValues { null },
+                state = if (applied) "notResolved" else "notApplied",
+                reason = if (applied) "Only constant configured values are observed; lazy values, compiler defaults, and the effective toolchain remain unresolved to avoid provisioning a JDK."
+                else "The Kotlin JVM plugin is not applied.",
+            )
+
             return ProjectInfo(
                 name = name,
                 group = group.toString(),
@@ -189,14 +207,22 @@ abstract class IntelliJPlatformInfoTask : AgentReportTask() {
                     "name" to pluginConfiguration?.name?.orNull,
                     "version" to pluginConfiguration?.version?.orNull,
                 ),
-                requestedIde = dependenciesHelper.requestedIntelliJPlatforms[Configurations.INTELLIJ_PLATFORM_DEPENDENCY].orNull?.let {
-                    TargetIde(it.type.code, it.version, provenance = "requested")
+                // Normalized requests resolve release selectors and read artifact options; observe only constant raw identity.
+                requestedIde = dependenciesHelper.declaredIntelliJPlatforms().singleOrNull()?.let {
+                    val type = configuredValue(it.type) as? IntelliJPlatformType
+                    val version = configuredValue(it.version) as? String
+                    if (type != null && version != null) TargetIde(type.code, version, provenance = "requested") else null
                 },
-                java = javaInfo(),
-                kotlin = kotlinInfo(),
+                java = java,
+                kotlin = kotlin,
                 settings = settings.toSortedMap(),
                 dependencies = dependencies.distinct().sortedWith(compareBy({ it.configuration }, { it.group }, { it.name }, { it.version })),
-                commands = commands.filter { it in tasks.names }.map { "${path.trimEnd(':')}:$it" },
+                commands = capabilities.map { it.task },
+                capabilities = capabilities,
+                compilerSettings = mapOf(
+                    "java" to compilerSettings(java.filterKeys { it !in setOf("gradleJvm", "gradleJvmVendor") }),
+                    "kotlin" to compilerSettings(kotlin.filterKeys { it !in setOf("version", "status") }, kotlin["status"] != "notApplied"),
+                ),
             )
         }
 
@@ -206,11 +232,11 @@ abstract class IntelliJPlatformInfoTask : AgentReportTask() {
             fun declared(getter: String) = runCatching { extension?.javaClass?.getMethod(getter)?.invoke(extension)?.toString() }.getOrNull()
 
             return mapOf(
-                "release" to (tasks.findByName(Tasks.External.COMPILE_JAVA) as? JavaCompile)?.options?.release?.orNull?.toString(),
+                "release" to configuredValue((tasks.findByName(Tasks.External.COMPILE_JAVA) as? JavaCompile)?.options?.release)?.toString(),
                 "sourceCompatibility" to declared("getRawSourceCompatibility"),
                 "targetCompatibility" to declared("getRawTargetCompatibility"),
-                "toolchainLanguageVersion" to extension?.toolchain?.languageVersion?.orNull?.toString(),
-                "toolchainVendor" to extension?.toolchain?.vendor?.orNull?.toString(),
+                "toolchainLanguageVersion" to configuredValue(extension?.toolchain?.languageVersion)?.toString(),
+                "toolchainVendor" to configuredValue(extension?.toolchain?.vendor)?.toString(),
                 "gradleJvm" to JavaVersion.current().toString(),
                 "gradleJvmVendor" to providers.systemProperty("java.vendor").orNull,
             )
@@ -232,12 +258,23 @@ abstract class IntelliJPlatformInfoTask : AgentReportTask() {
             return mapOf("version" to version) + listOf("jvmTarget" to "target", "apiVersion" to "version", "languageVersion" to "version")
                 .associate { (name, valueProperty) ->
                     name to runCatching {
-                        when (val value = options?.withGroovyBuilder { getProperty(name) }.let { (it as? Provider<*>)?.orNull ?: it }) {
+                        when (val value = configuredValue(options?.withGroovyBuilder { getProperty(name) })) {
                             null, is String -> value
                             else -> value.withGroovyBuilder { getProperty(valueProperty) as String }
                         }
                     }.getOrNull()
                 }
+        }
+
+        internal fun configuredValue(value: Any?, depth: Int = 0): Any? = when {
+            value !is Provider<*> -> value
+            depth >= 16 -> null
+            // Gradle's public Provider getters can evaluate toolchain-backed conventions. Inspect only their constant suppliers.
+            value is Property<*> && value.javaClass.name == "org.gradle.api.internal.provider.DefaultProperty" -> runCatching {
+                configuredValue(value.javaClass.getMethod("getProvider").invoke(value), depth + 1)
+            }.getOrNull()
+            value.javaClass.name == "org.gradle.api.internal.provider.Providers\$FixedValueProvider" -> value.orNull
+            else -> null
         }
     }
 }

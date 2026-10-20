@@ -4,6 +4,7 @@
 
 ### Added
 
+- Add JSON reports for project structure, distribution contents, dependency resolution, test workflows, and IDE compatibility: `intellijPlatformProjectGraph`, `intellijPlatformDistribution`, `intellijPlatformDependencyGraph`, `intellijPlatformTestMatrix`, and `intellijPlatformCompatibilityMatrix`.
 - Add `intellijPlatformInfo`, `intellijPlatformDoctor`, `intellijPlatformDiscover`, and `intellijPlatformSdk` tasks with versioned JSON reports for project context, actionable configuration findings, filtered catalog discovery, and SDK file/ownership maps. See [CLI reports](./CLI_REPORTS.md).
 - Add `DumpBundledPluginsTask` and `DumpBundledModulesTask` to support dumping bundled plugins and modules for Plugin DevKit plugin purposes
 - Add JUnit 5 test framework types `TestFrameworkType.JUnit5Eel`, `TestFrameworkType.JUnit5Highlighting`, and `TestFrameworkType.JUnit5ProjectStructure` JetBrains/intellij-platform-gradle-plugin#2251
@@ -11,6 +12,7 @@
 
 ### Changed
 
+- Expose available task capabilities in `intellijPlatformInfo` and evidence-backed configuration diagnostics shared by `intellijPlatformDoctor` and `verifyPluginProjectConfiguration`.
 - Respect the existing plugin descriptor dependency format in `nativeVariants`: append native dependencies to `<dependencies>` when present, retain legacy `<depends>` otherwise, and use `<dependencies>` when neither format is declared.
 - Optimize outgoing artifact registration in `JarSearchableOptionsTask` by using lazy `TaskProvider` publishing without eager provider `.get()` unboxing.
 - Route task outputs to dedicated `buildDirectory` locations in `PatchPluginXmlTask`, `BuildSearchableOptionsTask`, `PrepareJarSearchableOptionsTask`, and `GenerateManifestTask`, eliminating dependencies on task `temporaryDir` for cacheable task outputs.
@@ -29,6 +31,8 @@
 
 ### Fixed
 
+- Use the owning project path, rather than the task path, in JSON report envelopes.
+- Preserve complete SDK classpath ownership metadata when `intellijPlatformSdk --owner` filters the displayed catalog.
 - Share the JAR filesystem cache with plugin readers when indexing bundled plugins, preventing `ClosedFileSystemException` and missing bundled plugins such as `com.intellij.java`. Rebuild older layout indices that may be incomplete. JetBrains/intellij-platform-gradle-plugin#2192
 - Register `ComposedJarRule` in every project when the settings plugin is applied, so projects that don't apply the IntelliJ Platform plugin can consume a module depending on a plain JVM project. Since `2.19.0` the module plugin requests `composed-jar` per project dependency, and this request is part of the module's variant metadata, so such consumers failed with "No matching variant of project ... was found".
 - Change duplicates strategy in PrepareSandboxTask to `EXCLUDE` JetBrains/intellij-platform-gradle-plugin#2191

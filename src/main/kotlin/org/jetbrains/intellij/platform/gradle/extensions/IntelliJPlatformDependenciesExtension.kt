@@ -89,13 +89,15 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
         dependencyConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         dependencyArchivesConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
         localArchivesConfigurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
-    ) =
+    ) {
+        dependenciesHelper.recordDeclaredIntelliJPlatforms(configurations, dependencyConfigurationName)
         dependenciesHelper.addIntelliJPlatformCacheableDependencies(
             configurationsProvider = dependenciesHelper.provider { configurations },
             dependencyConfigurationName = dependencyConfigurationName,
             dependencyArchivesConfigurationName = dependencyArchivesConfigurationName,
             localArchivesConfigurationName = localArchivesConfigurationName,
         )
+    }
 
     /**
      * Adds a dependency on the IntelliJ Platform.
