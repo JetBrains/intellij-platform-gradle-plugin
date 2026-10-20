@@ -36,6 +36,7 @@ private inline fun <reified T> obtainStringFormat(): StringFormat {
         IvyModule::class,
         MavenMetadata::class,
         ModuleDescriptor::class,
+        PluginDescriptor::class,
         ProductModules::class,
         -> xml
 

@@ -2,15 +2,18 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks.agent
 
-import org.w3c.dom.Element
-import org.xml.sax.ErrorHandler
-import org.xml.sax.SAXParseException
+import nl.adaptivity.xmlutil.EventType
+import nl.adaptivity.xmlutil.QName
+import nl.adaptivity.xmlutil.XmlDelegatingReader
+import nl.adaptivity.xmlutil.XmlReader
+import nl.adaptivity.xmlutil.newGenericReader
+import nl.adaptivity.xmlutil.xmlStreaming
+import org.jetbrains.intellij.platform.gradle.models.PluginDescriptor
+import org.jetbrains.intellij.platform.gradle.models.xml
 import java.io.File
 import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Path
-import javax.xml.XMLConstants
-import javax.xml.parsers.DocumentBuilderFactory
 
 internal const val DISTRIBUTION_PLUGIN_XML = "META-INF/plugin.xml"
 internal const val DISTRIBUTION_XML_LIMIT = 1024 * 1024
@@ -21,86 +24,84 @@ internal fun readDistributionBytes(input: InputStream): ByteArray = input.readNB
 }
 
 internal fun parseDistributionDescriptor(bytes: ByteArray, path: String, kind: String, provenance: String): DistributionDescriptor {
-    val factory = DocumentBuilderFactory.newDefaultInstance().apply {
-        isNamespaceAware = true
-        isXIncludeAware = false
-        isExpandEntityReferences = false
-        setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true)
-        setFeature("http://apache.org/xml/features/disallow-doctype-decl", true)
-        setFeature("http://xml.org/sax/features/external-general-entities", false)
-        setFeature("http://xml.org/sax/features/external-parameter-entities", false)
-        setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "")
-        setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "")
+    val reader = DistributionXmlReader(xmlStreaming.newGenericReader(bytes.inputStream()))
+    val descriptor = try {
+        while (reader.hasNext()) {
+            if (reader.next() == EventType.START_ELEMENT) break
+        }
+        require(reader.eventType == EventType.START_ELEMENT && (reader.localName == "idea-plugin" || kind == "include")) {
+            "Expected an idea-plugin descriptor."
+        }
+        xml.decodeFromReader(PluginDescriptor.serializer(), reader, QName(reader.namespaceURI, reader.localName, reader.prefix)).also {
+            while (reader.hasNext()) reader.next()
+        }
+    } finally {
+        reader.close()
     }
-    val builder = factory.newDocumentBuilder().apply {
-        setErrorHandler(object : ErrorHandler {
-            override fun warning(exception: SAXParseException) = throw exception
-            override fun error(exception: SAXParseException) = throw exception
-            override fun fatalError(exception: SAXParseException) = throw exception
-        })
-    }
-    val root = builder.parse(bytes.inputStream()).documentElement
-    require(root.localName == "idea-plugin" || kind == "include") { "Expected an idea-plugin descriptor." }
-    fun child(name: String) = root.elements().firstOrNull { it.localName == name }
-    fun text(name: String) = child(name)?.textContent?.trim()
     return DistributionDescriptor(
         path = path,
         kind = kind,
         provenance = provenance,
         state = "present",
         metadata = sortedMapOf(
-            "id" to text("id"),
-            "name" to text("name"),
-            "version" to text("version"),
-            "description" to text("description"),
-            "changeNotes" to text("change-notes"),
-            "sinceBuild" to child("idea-version")?.attribute("since-build"),
-            "untilBuild" to child("idea-version")?.attribute("until-build"),
-            "vendor" to text("vendor"),
-            "vendorEmail" to child("vendor")?.attribute("email"),
-            "vendorUrl" to child("vendor")?.attribute("url"),
-            "package" to root.attribute("package"),
-            "productCode" to child("product-descriptor")?.attribute("code"),
-            "releaseDate" to child("product-descriptor")?.attribute("release-date"),
-            "releaseVersion" to child("product-descriptor")?.attribute("release-version"),
-            "productOptional" to child("product-descriptor")?.attribute("optional"),
-            "productEap" to child("product-descriptor")?.attribute("eap"),
+            "id" to descriptor.id?.trim(),
+            "name" to descriptor.name?.trim(),
+            "version" to descriptor.version?.trim(),
+            "description" to descriptor.description?.value?.trim(),
+            "changeNotes" to descriptor.changeNotes?.value?.trim(),
+            "sinceBuild" to descriptor.ideaVersion?.sinceBuild,
+            "untilBuild" to descriptor.ideaVersion?.untilBuild,
+            "vendor" to descriptor.vendor?.value?.trim(),
+            "vendorEmail" to descriptor.vendor?.email,
+            "vendorUrl" to descriptor.vendor?.url,
+            "package" to descriptor.packageName,
+            "productCode" to descriptor.productDescriptor?.code,
+            "releaseDate" to descriptor.productDescriptor?.releaseDate,
+            "releaseVersion" to descriptor.productDescriptor?.releaseVersion,
+            "productOptional" to descriptor.productDescriptor?.optional,
+            "productEap" to descriptor.productDescriptor?.eap,
         ),
-        dependencies = root.descriptorDependencies(),
+        dependencies = descriptorDependencies(descriptor.depends, descriptor.dependencies),
         modules = buildList {
-            child("content")?.elements()?.filter { it.localName == "module" }?.forEach {
-                val inline = it.elements().isNotEmpty()
-                add(DistributionModule(it.attribute("name"), it.attribute("loading"), if (inline) null else it.attribute("name")?.let { name -> "META-INF/$name.xml" }, inline, it.descriptorDependencies()))
+            descriptor.content?.modules?.forEach {
+                add(DistributionModule(
+                    it.name,
+                    it.loading,
+                    if (it.inline) null else it.name?.let { name -> "META-INF/$name.xml" },
+                    it.inline,
+                    descriptorDependencies(it.depends, it.dependencies),
+                ))
             }
-            root.elements().filter { it.localName == "module" }.forEach {
-                add(DistributionModule(it.attribute("value"), null, null, false))
-            }
+            descriptor.modules.forEach { add(DistributionModule(it.value, null, null, false)) }
         }.sortedBy { it.name },
-        includes = buildList {
-            fun includes(element: Element) {
-                if (element.localName == "include" && element.namespaceURI == "http://www.w3.org/2001/XInclude") {
-                    element.attribute("href")?.let { add(it) }
-                }
-                element.elements().forEach(::includes)
-            }
-            includes(root)
-        }.sorted(),
+        includes = reader.includes.sorted(),
     )
 }
 
-private fun Element.elements() = (0 until childNodes.length).mapNotNull { childNodes.item(it) as? Element }
-private fun Element.attribute(name: String): String? = if (hasAttribute(name)) getAttribute(name) else null
-
-private fun Element.descriptorDependencies(): List<DistributionDescriptorDependency> = buildList {
-    elements().filter { it.localName == "depends" }.forEach {
-        add(DistributionDescriptorDependency("legacy", it.textContent.trim(), it.attribute("optional")?.toBooleanStrictOrNull(), it.attribute("config-file")))
+private fun descriptorDependencies(
+    legacy: List<PluginDescriptor.LegacyDependency>,
+    dependencies: PluginDescriptor.Dependencies?,
+): List<DistributionDescriptorDependency> = buildList {
+    legacy.forEach {
+        add(DistributionDescriptorDependency("legacy", it.id.trim(), it.optional?.toBooleanStrictOrNull(), it.configFile))
     }
-    elements().firstOrNull { it.localName == "dependencies" }?.elements()?.forEach {
-        if (it.localName in listOf("plugin", "module")) {
-            add(DistributionDescriptorDependency(it.localName, it.attribute("id") ?: it.attribute("name"), it.attribute("optional")?.toBooleanStrictOrNull(), it.attribute("config-file")))
+    listOf("module" to dependencies?.modules.orEmpty(), "plugin" to dependencies?.plugins.orEmpty()).forEach { (kind, entries) ->
+        entries.forEach {
+            add(DistributionDescriptorDependency(kind, it.id ?: it.name, it.optional?.toBooleanStrictOrNull(), it.configFile))
         }
     }
 }.sortedWith(compareBy({ it.kind }, { it.id }, { it.configFile }))
+
+private class DistributionXmlReader(reader: XmlReader) : XmlDelegatingReader(reader) {
+    val includes = mutableListOf<String>()
+
+    override fun next(): EventType = delegate.next().also {
+        require(it != EventType.DOCDECL) { "DTDs are not allowed in plugin descriptors." }
+        if (it == EventType.START_ELEMENT && localName == "include" && namespaceURI == "http://www.w3.org/2001/XInclude") {
+            getAttributeValue(null, "href")?.let(includes::add)
+        }
+    }
+}
 
 internal fun distributionResourcePath(value: String): String {
     val path = Path.of(value.replace('\\', '/').removePrefix("/"))

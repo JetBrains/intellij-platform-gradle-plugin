@@ -36,6 +36,140 @@ class DistributionInspectionTest : IntelliJPlatformTestBase() {
     }.toFile()
 
     @Test
+    fun `descriptor metadata preserves namespaces attributes and mixed text`() {
+        val descriptor = parseDistributionDescriptor("""
+            <idea-plugin xmlns="urn:plugin" package="example.plugin">
+              <id> example.id </id><name>Example &amp; Plugin</name><version>1.2.3</version>
+              <description>Before <![CDATA[<code>]]><b>bold</b><!-- ignored --> after</description>
+              <change-notes><![CDATA[<p>Changes</p>]]></change-notes>
+              <idea-version since-build="261" until-build="261.*"/>
+              <vendor email="plugins@example.invalid" url="https://example.invalid"> Example Vendor </vendor>
+              <product-descriptor code="EXAMPLE" release-date="20261020" release-version="20261" optional="true" eap="false"/>
+              <extensions><id>not.the.plugin.id</id><idea-version since-build="999"/></extensions>
+            </idea-plugin>
+        """.trimIndent().toByteArray(), "META-INF/plugin.xml", "main", "declared")
+
+        assertEquals("META-INF/plugin.xml", descriptor.path)
+        assertEquals("main", descriptor.kind)
+        assertEquals("declared", descriptor.provenance)
+        assertEquals("present", descriptor.state)
+        assertEquals(sortedMapOf(
+            "id" to "example.id",
+            "name" to "Example & Plugin",
+            "version" to "1.2.3",
+            "description" to "Before <code>bold after",
+            "changeNotes" to "<p>Changes</p>",
+            "sinceBuild" to "261",
+            "untilBuild" to "261.*",
+            "vendor" to "Example Vendor",
+            "vendorEmail" to "plugins@example.invalid",
+            "vendorUrl" to "https://example.invalid",
+            "package" to "example.plugin",
+            "productCode" to "EXAMPLE",
+            "releaseDate" to "20261020",
+            "releaseVersion" to "20261",
+            "productOptional" to "true",
+            "productEap" to "false",
+        ), descriptor.metadata)
+    }
+
+    @Test
+    fun `descriptor dependencies remain scoped to the root and inline modules`() {
+        val descriptor = parseDistributionDescriptor("""
+            <idea-plugin>
+              <depends optional="true" config-file="optional.xml"> legacy.plugin </depends>
+              <dependencies><plugin id="modern.plugin"/><module name="modern.module" optional="false"/></dependencies>
+              <content>
+                <module name="named.module" loading="required"/>
+                <module name="inline.module" loading="optional">
+                  <depends config-file="inline.xml">inline.legacy</depends>
+                  <dependencies><plugin id="inline.plugin"/><module name="inline.module.dependency"/></dependencies>
+                </module>
+                <module name="empty.inline"><!-- not a child element --></module>
+                <module name="extension.inline"><extensions/></module>
+              </content>
+              <extensions><depends>not.a.dependency</depends><module value="not.a.module"/></extensions>
+            </idea-plugin>
+        """.trimIndent().toByteArray(), "META-INF/plugin.xml", "main", "declared")
+
+        assertEquals(listOf(
+            DistributionDescriptorDependency("legacy", "legacy.plugin", true, "optional.xml"),
+            DistributionDescriptorDependency("module", "modern.module", false, null),
+            DistributionDescriptorDependency("plugin", "modern.plugin", null, null),
+        ), descriptor.dependencies)
+        assertEquals(listOf("empty.inline", "extension.inline", "inline.module", "named.module"), descriptor.modules.map { it.name })
+        val named = descriptor.modules.single { it.name == "named.module" }
+        assertEquals("META-INF/named.module.xml", named.descriptor)
+        assertEquals("required", named.loading)
+        assertFalse(named.inline)
+        val inline = descriptor.modules.single { it.name == "inline.module" }
+        assertEquals(listOf(
+            DistributionDescriptorDependency("legacy", "inline.legacy", null, "inline.xml"),
+            DistributionDescriptorDependency("module", "inline.module.dependency", null, null),
+            DistributionDescriptorDependency("plugin", "inline.plugin", null, null),
+        ), inline.dependencies)
+        assertTrue(inline.inline)
+        assertNull(inline.descriptor)
+        assertFalse(descriptor.modules.single { it.name == "empty.inline" }.inline)
+        assertTrue(descriptor.modules.single { it.name == "extension.inline" }.inline)
+    }
+
+    @Test
+    fun `includes are collected recursively without expanding them`() {
+        val descriptor = parseDistributionDescriptor("""
+            <extensions xmlns:xi="http://www.w3.org/2001/XInclude" xmlns:custom="urn:custom">
+              <xi:include href="z.xml"><xi:fallback><xi:include href="a.xml"/></xi:fallback></xi:include>
+              <custom:include href="ignored.xml"/>
+            </extensions>
+        """.trimIndent().toByteArray(), "META-INF/extensions.xml", "include", "declared")
+
+        assertEquals(listOf("a.xml", "z.xml"), descriptor.includes)
+        assertEquals(listOf("a.xml" to "include", "z.xml" to "include"), descriptor.references())
+        assertFails {
+            parseDistributionDescriptor("<extensions/>".toByteArray(), "META-INF/plugin.xml", "main", "declared")
+        }
+    }
+
+    @Test
+    fun `includes inside typed and ignored elements remain unexpanded references`() {
+        val descriptor = parseDistributionDescriptor("""
+            <idea-plugin xmlns:xi="http://www.w3.org/2001/XInclude">
+              <description>Before <xi:include href="description.xml"/> after</description>
+              <content><module name="inline.module"><xi:include href="module.xml"/></module></content>
+              <extensions><extension><xi:include href="extensions.xml"/></extension></extensions>
+            </idea-plugin>
+        """.trimIndent().toByteArray(), "META-INF/plugin.xml", "main", "declared")
+
+        assertEquals(listOf("description.xml", "extensions.xml", "module.xml"), descriptor.includes)
+        assertEquals("Before  after", descriptor.metadata["description"])
+        assertTrue(descriptor.modules.single().inline)
+        assertNull(descriptor.modules.single().descriptor)
+    }
+
+    @Test
+    fun `descriptor decoding honors the declared byte encoding`() {
+        val xml = """<?xml version="1.0" encoding="UTF-16"?><idea-plugin><name>Zażółć</name></idea-plugin>"""
+        val descriptor = parseDistributionDescriptor(xml.toByteArray(Charsets.UTF_16), "META-INF/plugin.xml", "main", "declared")
+
+        assertEquals("Zażółć", descriptor.metadata["name"])
+    }
+
+    @Test
+    fun `DTDs and malformed documents are rejected`() {
+        listOf(
+            "<!DOCTYPE idea-plugin><idea-plugin/>",
+            "<!DOCTYPE idea-plugin [<!ENTITY value 'expanded'>]><idea-plugin><name>&value;</name></idea-plugin>",
+            "<idea-plugin/><unexpected/>",
+            "<idea-plugin><name></idea-plugin>",
+            "",
+        ).forEach { xml ->
+            assertFails(xml) {
+                parseDistributionDescriptor(xml.toByteArray(), "META-INF/plugin.xml", "main", "declared")
+            }
+        }
+    }
+
+    @Test
     fun `inline content modules retain dependencies without inventing descriptor paths`() {
         val descriptor = parseDistributionDescriptor("""
             <idea-plugin>
