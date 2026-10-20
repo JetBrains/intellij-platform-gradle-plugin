@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.services
 import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.newInstance
 import org.gradle.testfixtures.ProjectBuilder
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.ProductMode
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependencyConfiguration
@@ -13,6 +14,8 @@ import kotlin.test.Test
 import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
 
 class RequestedIntelliJPlatformsServiceTest {
 
@@ -50,6 +53,33 @@ class RequestedIntelliJPlatformsServiceTest {
             exception.message.orEmpty(),
             "The 'intellijPlatformDependency' configuration already contains the following IntelliJ Platform dependency: IU-2026.1.2 [useInstaller=true, useCache=false, productMode=MONOLITH]",
         )
+    }
+
+    @Test
+    fun `raw declarations retain latest and do not evaluate artifact settings`() {
+        val service = service()
+        val configuration = configuration(version = "latest").apply {
+            useInstaller.set(providers.provider { error("Installer settings must not be observed") })
+            useCache.set(providers.provider { error("Cache settings must not be observed") })
+        }
+        service.recordDeclaredIntelliJPlatforms(listOf(configuration), Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
+
+        val declaration = service.declaredIntelliJPlatforms(Configurations.INTELLIJ_PLATFORM_DEPENDENCY).single()
+        assertSame(configuration, declaration)
+        assertEquals("latest", declaration.version.get())
+        assertTrue(service.declaredIntelliJPlatforms(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY).isEmpty())
+    }
+
+    @Test
+    fun `raw declarations append without conflating base and verifier targets`() {
+        val service = service()
+        val base = configuration()
+        val verifier = configuration(version = "2025.3")
+        service.recordDeclaredIntelliJPlatforms(listOf(base), Configurations.INTELLIJ_PLATFORM_DEPENDENCY)
+        service.recordDeclaredIntelliJPlatforms(listOf(verifier), Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY)
+
+        assertEquals(listOf(base), service.declaredIntelliJPlatforms(Configurations.INTELLIJ_PLATFORM_DEPENDENCY))
+        assertEquals(listOf(verifier), service.declaredIntelliJPlatforms(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY))
     }
 
     private fun service(): RequestedIntelliJPlatformsService {

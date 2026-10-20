@@ -172,6 +172,16 @@ class IntelliJPlatformDependenciesHelper(
      */
     private val requestedIntelliJPlatformPaths = ConcurrentHashMap<String, Provider<Path>>()
 
+    /** Records explicit DSL objects before dependency providers normalize versions or resolve a prerequisite IDE. */
+    internal fun recordDeclaredIntelliJPlatforms(
+        declarations: List<IntelliJPlatformDependencyConfiguration>,
+        configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+    ) = requestedIntelliJPlatforms.recordDeclaredIntelliJPlatforms(declarations, configurationName)
+
+    /** Raw declarations only: release selectors, recommended targets, and artifact providers are not evaluated. */
+    internal fun declaredIntelliJPlatforms(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) =
+        requestedIntelliJPlatforms.declaredIntelliJPlatforms(configurationName)
+
     /**
      * Helper function for accessing [ProviderFactory.provider] without exposing the whole [ProviderFactory].
      */

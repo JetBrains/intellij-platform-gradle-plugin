@@ -14,8 +14,6 @@ import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.api.tasks.options.Option
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
-import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER
-import org.jetbrains.intellij.platform.gradle.Constants.Constraints.MINIMAL_INTELLIJ_PLATFORM_VERSION
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.get
@@ -46,6 +44,12 @@ abstract class IntelliJPlatformDoctorTask : AgentReportTask(), IntelliJPlatformV
     abstract val targetCompatibility: Property<String>
 
     /**
+     * Known project build file used to locate effective settings, without claiming source line information.
+     */
+    @get:Internal
+    internal abstract val configurationFile: Property<String>
+
+    /**
      * Whether the IntelliJ Platform cache directory is listed in `.gitignore`; absent when the check is not applicable.
      */
     @get:Internal
@@ -66,80 +70,36 @@ abstract class IntelliJPlatformDoctorTask : AgentReportTask(), IntelliJPlatformV
         val product = productInfo
         val target = TargetIde(product.productCode, product.version, product.buildNumber, platformPath.safePathString, "resolved")
         val unavailable = mutableListOf<Unavailable>()
-        val issues = buildList {
-            fun issue(id: String, message: String, setting: String, fix: String, documentation: String? = null) {
-                add(Issue(id, "warning", message, setting, fix, documentation, suppressed = mutedMessages.get().any { it in message }))
-            }
-
-            val platformBuild = product.buildNumber.toVersion()
-            val platformJavaVersion = product.toPlatformJavaVersion()
-            val sourceJavaVersion = sourceCompatibility.get().toJavaVersion()
-            val targetJavaVersion = targetCompatibility.get().toJavaVersion()
-            val jvmTargetJavaVersion = kotlinJvmTarget.orNull?.toJavaVersion()
-            val kotlinVersion = kotlinVersion.orNull?.toVersion()
-            val platformKotlinVersion = platformBuild.platformKotlinVersion()
-
-            when {
-                module.get() -> unavailable += Unavailable("pluginXml", "notRequested", "Plugin descriptor checks do not apply to module projects.")
-                pluginXml.orNull == null -> issue("missing-plugin-descriptor", "The plugin.xml descriptor could not be found.", "pluginXml", "Create src/main/resources/META-INF/plugin.xml.")
-                else -> {
-                    val bean = pluginXml.get().asPath.parsePluginXml()
-                    val sinceBuild = bean.ideaVersion.sinceBuild.toVersion()
-                    val sinceBuildJavaVersion = sinceBuild.toPlatformJavaVersion()
-                    val sinceBuildKotlinVersion = sinceBuild.platformKotlinVersion()
-
-                    if ('*' in sinceBuild.version) {
-                        issue("since-build-wildcard", "The since-build='$sinceBuild' contains a wildcard, which is not supported.", "sinceBuild", "Use a specific build number like '${sinceBuild.major}'.")
-                    }
-                    if (sinceBuild.major < platformBuild.major) {
-                        issue("since-build-below-platform", "The since-build='$sinceBuild' is lower than the target platform major version '${platformBuild.major}'.", "sinceBuild", "Set since-build to '${platformBuild.major}' or higher.")
-                    }
-                    if (sinceBuild.major >= 243 && bean.ideaVersion.untilBuild != null) {
-                        issue("until-build-restricts-compatibility", "For IntelliJ Platform 2024.3+ (build 243+), until-build restricts compatibility with future IDE versions.", "untilBuild", "Remove the until-build property.")
-                    }
-                    if (sinceBuildJavaVersion < targetJavaVersion) {
-                        issue("java-target-exceeds-since-build", "Java targetCompatibility '$targetJavaVersion' exceeds Java '$sinceBuildJavaVersion' required by since-build='$sinceBuild'.", "targetCompatibility", "Lower targetCompatibility to '$sinceBuildJavaVersion' or increase since-build.")
-                    }
-                    if (jvmTargetJavaVersion != null && sinceBuildJavaVersion < jvmTargetJavaVersion) {
-                        issue("kotlin-jvm-target-exceeds-since-build", "Kotlin jvmTarget '$jvmTargetJavaVersion' exceeds Java '$sinceBuildJavaVersion' required by since-build='$sinceBuild'.", "kotlinJvmTarget", "Lower Kotlin jvmTarget to '$sinceBuildJavaVersion' or increase since-build.")
-                    }
-                    kotlinApiVersion.orNull?.toVersion()?.let {
-                        if (sinceBuildKotlinVersion != null && sinceBuildKotlinVersion < it) {
-                            issue("kotlin-api-exceeds-since-build", "Kotlin apiVersion '$it' exceeds Kotlin API '$sinceBuildKotlinVersion' bundled with since-build='$sinceBuild'.", "kotlinApiVersion", "Lower Kotlin apiVersion to '$sinceBuildKotlinVersion' or increase since-build.")
-                        }
-                    }
-                }
-            }
-            if (cacheIgnored.orNull == false) {
-                issue("cache-not-ignored", "The IntelliJ Platform cache directory '$CACHE_DIRECTORY' is not listed in .gitignore.", ".gitignore", "Add '$CACHE_DIRECTORY' to .gitignore.")
-            }
-            if (platformBuild < MINIMAL_INTELLIJ_PLATFORM_BUILD_NUMBER) {
-                issue("platform-version-too-old", "The target IntelliJ Platform ${product.version} (build $platformBuild) is older than the minimal supported $MINIMAL_INTELLIJ_PLATFORM_VERSION.", "platformVersion", "Update the IntelliJ Platform dependency to $MINIMAL_INTELLIJ_PLATFORM_VERSION or newer.")
-            }
-            if (kotlinVersion != null && platformBuild >= Version(251) && kotlinVersion < Version(2)) {
-                issue("kotlin-version-too-old", "IntelliJ Platform 2025.1+ requires Kotlin 2.0.0 or newer, but Kotlin $kotlinVersion is used.", "kotlinVersion", "Update Kotlin to 2.0.0 or newer.")
-            }
-            if (platformJavaVersion > sourceJavaVersion) {
-                issue("java-source-below-platform", "Java sourceCompatibility '$sourceJavaVersion' is lower than Java '$platformJavaVersion' required by IntelliJ Platform ${product.version}.", "sourceCompatibility", "Set sourceCompatibility to '$platformJavaVersion'.")
-            }
-            if (platformJavaVersion < targetJavaVersion) {
-                issue("java-target-exceeds-platform", "Java targetCompatibility '$targetJavaVersion' exceeds Java '$platformJavaVersion' supported by IntelliJ Platform ${product.version}.", "targetCompatibility", "Lower targetCompatibility to '$platformJavaVersion'.")
-            }
-            if (jvmTargetJavaVersion != null && platformJavaVersion < jvmTargetJavaVersion) {
-                issue("kotlin-jvm-target-exceeds-platform", "Kotlin jvmTarget '$jvmTargetJavaVersion' exceeds Java '$platformJavaVersion' supported by IntelliJ Platform ${product.version}.", "kotlinJvmTarget", "Lower Kotlin jvmTarget to '$platformJavaVersion'.")
-            }
-            kotlinLanguageVersion.orNull?.toVersion()?.let {
-                if (platformKotlinVersion != null && platformKotlinVersion > it) {
-                    issue("kotlin-language-below-platform", "Kotlin languageVersion '$it' is lower than Kotlin '$platformKotlinVersion' bundled with IntelliJ Platform ${product.version}.", "kotlinLanguageVersion", "Set Kotlin languageVersion to '$platformKotlinVersion'.")
-                }
-            }
-            if (kotlinPluginAvailable.get() && kotlinStdlibDefaultDependency.orNull != false) {
-                issue("kotlin-stdlib-dependency", "The Kotlin stdlib added by the Kotlin Gradle plugin may conflict with the version bundled in IntelliJ Platform.", "kotlin.stdlib.default.dependency", "Set 'kotlin.stdlib.default.dependency=false' in gradle.properties.", "https://jb.gg/intellij-platform-kotlin-stdlib")
-            }
-            if (kotlinxCoroutinesLibraryPresent.get()) {
-                issue("kotlin-coroutines-dependency", "The Kotlin Coroutines library is bundled with IntelliJ Platform and must not be added explicitly.", "dependencies", "Remove kotlinx-coroutines dependencies.", "https://jb.gg/intellij-platform-kotlin-coroutines")
+        val isModule = module.get()
+        val descriptor = if (isModule) {
+            unavailable += Unavailable("pluginXml", "notRequested", "Plugin descriptor checks do not apply to module projects.")
+            null
+        } else {
+            pluginXml.orNull?.asPath?.let { path ->
+                val bean = path.parsePluginXml()
+                DiagnosticPluginDescriptor(bean.ideaVersion.sinceBuild, bean.ideaVersion.untilBuild, path.safePathString)
             }
         }
+        val mutedMessagePatterns = mutedMessages.get()
+        val issues = evaluateProjectConfiguration(ProjectConfigurationDiagnosticInput(
+            platformVersion = product.version,
+            platformBuild = product.buildNumber.toVersion(),
+            platformJavaVersion = product.toPlatformJavaVersion(),
+            sourceCompatibility = sourceCompatibility.get().toJavaVersion(),
+            targetCompatibility = targetCompatibility.get().toJavaVersion(),
+            kotlinJvmTarget = kotlinJvmTarget.orNull?.toJavaVersion(),
+            kotlinApiVersion = kotlinApiVersion.orNull?.toVersion(),
+            kotlinLanguageVersion = kotlinLanguageVersion.orNull?.toVersion(),
+            kotlinVersion = kotlinVersion.orNull?.toVersion(),
+            kotlinPluginAvailable = kotlinPluginAvailable.get(),
+            kotlinStdlibDefaultDependency = kotlinStdlibDefaultDependency.orNull,
+            kotlinxCoroutinesLibraryPresent = kotlinxCoroutinesLibraryPresent.get(),
+            module = isModule,
+            descriptor = descriptor,
+            cacheIgnored = cacheIgnored.orNull,
+            buildFile = configurationFile.orNull,
+            verificationCommand = "./gradlew $path",
+        )).map { it.issue.copy(suppressed = mutedMessagePatterns.any { pattern -> pattern in it.issue.message }) }
         unavailable += Unavailable("runtimeVendor", "notRequested", "The JetBrains Runtime check requires resolving a runtime; run ${Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION} instead.")
 
         write("doctor", if (unavailable.any { it.state != "notRequested" }) ReportStatus.partial else ReportStatus.complete, DoctorReport(target), issues, unavailable)
@@ -148,8 +108,6 @@ abstract class IntelliJPlatformDoctorTask : AgentReportTask(), IntelliJPlatformV
             throw GradleException("IntelliJ Platform doctor found unsuppressed findings at the requested --fail-on threshold; see the JSON report.")
         }
     }
-
-    private fun Version.platformKotlinVersion() = PlatformKotlinVersions.entries.firstOrNull { this >= it.key }?.value?.run { Version(major, minor) }
 
     init {
         description = "Writes a JSON report with actionable plugin project configuration findings."
@@ -162,6 +120,7 @@ abstract class IntelliJPlatformDoctorTask : AgentReportTask(), IntelliJPlatformV
             val rootDirectory = project.rootProject.rootDir.toPath()
             val cacheDirectory = project.extensionProvider.flatMap { it.caching.path }
 
+            configurationFile.convention(project.buildFile.toPath().safePathString)
             sourceCompatibility.convention(compileJavaTaskProvider.map { it.options.release.orNull?.toString() ?: it.sourceCompatibility })
             targetCompatibility.convention(compileJavaTaskProvider.map { it.options.release.orNull?.toString() ?: it.targetCompatibility })
             cacheIgnored.convention(project.provider {

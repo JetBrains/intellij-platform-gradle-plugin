@@ -35,6 +35,19 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
     private val conventions = ConcurrentHashMap<String, Provider<RequestedIntelliJPlatform>>()
     private val explicitConfigurations = ConcurrentHashMap.newKeySet<String>()
     private val base = objectFactory.property<RequestedIntelliJPlatform>()
+    private val declaredIntelliJPlatformConfigurations =
+        ConcurrentHashMap<String, List<IntelliJPlatformDependencyConfiguration>>()
+
+    /** Keeps raw DSL declarations shared across helper instances without evaluating their providers. */
+    internal fun recordDeclaredIntelliJPlatforms(
+        declarations: List<IntelliJPlatformDependencyConfiguration>,
+        configurationName: String,
+    ) {
+        declaredIntelliJPlatformConfigurations.compute(configurationName) { _, previous -> previous.orEmpty() + declarations }
+    }
+
+    internal fun declaredIntelliJPlatforms(configurationName: String) =
+        declaredIntelliJPlatformConfigurations[configurationName].orEmpty()
 
     fun markExplicit(configurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY) {
         explicitConfigurations += configurationName

@@ -38,6 +38,11 @@ internal data class Report<T>(
 @Serializable
 internal enum class ReportStatus { complete, partial, failed }
 
+/**
+ * A finding with optional diagnostic evidence. Locations identify known files/settings, never inferred source lines.
+ * [category] is `warning`, `incompatibility`, or `blockingConfigurationError`; it does not change [severity].
+ * [applicableIdeVersions] describes build numbers/ranges, not a claim that plugin verification has been executed.
+ */
 @Serializable
 internal data class Issue(
     val id: String,
@@ -47,6 +52,14 @@ internal data class Issue(
     val suggestedFix: String? = null,
     val documentation: String? = null,
     val suppressed: Boolean = false,
+    val observedValue: String? = null,
+    val expectedValue: String? = null,
+    val configurationLocation: String? = null,
+    val evidence: List<String> = emptyList(),
+    val provenance: List<String> = emptyList(),
+    val category: String? = null,
+    val applicableIdeVersions: List<String> = emptyList(),
+    val verificationCommand: String? = null,
 )
 
 /** An observation that is deliberately or involuntarily missing from the report: notRequested, notResolved, or unavailable. */
@@ -107,7 +120,7 @@ abstract class AgentReportTask : DefaultTask() {
         internal inline fun <reified T : AgentReportTask> Project.registerAgentReportTask(name: String, noinline configuration: T.() -> Unit) =
             registerTask<T>(name) {
                 outputFile.convention(layout.buildDirectory.file("reports/intellij-platform/${name.removePrefix("intellijPlatform").lowercase()}.json"))
-                projectPath.convention(path)
+                projectPath.convention(this@registerAgentReportTask.path)
                 pluginVersion.convention(providers.of(CurrentPluginVersionValueSource::class) {})
                 configuration()
             }

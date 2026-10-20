@@ -46,6 +46,29 @@ class IntelliJPlatformSdkTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `owner presentation filtering preserves complete classpath ownership`() {
+        dir.resolve("build.gradle.kts").appendText("\ndependencies { intellijPlatform { bundledPlugin(\"com.intellij.java\") } }")
+        build(Tasks.INTELLIJ_PLATFORM_SDK)
+        val classpath = data().getValue("compileClasspath").jsonArray
+        val selectedOwners = data().getValue("owners").jsonArray.map { it.jsonObject }
+            .filter { it.getValue("id").jsonPrimitive.content == "com.intellij.java" || it.getValue("aliases").jsonArray.any { alias -> alias.jsonPrimitive.content == "com.intellij.java" } }
+            .map { it.getValue("ref").jsonPrimitive.content }
+        val otherOwners = classpath.flatMap { it.jsonObject.getValue("owners").jsonArray }
+            .map { it.jsonPrimitive.content }.filterNot { it in selectedOwners }
+        assertTrue(otherOwners.isNotEmpty(), "The regression needs classpath ownership outside the selected plugin.")
+
+        build(Tasks.INTELLIJ_PLATFORM_SDK, "--owner=com.intellij.java", args = listOf("--offline"))
+        val owners = data().getValue("owners").jsonArray.map { it.jsonObject }
+        assertTrue(owners.isNotEmpty())
+        assertTrue(owners.all { it.getValue("id").jsonPrimitive.content == "com.intellij.java" || it.getValue("aliases").jsonArray.any { alias -> alias.jsonPrimitive.content == "com.intellij.java" } })
+        assertEquals(classpath, data().getValue("compileClasspath").jsonArray)
+
+        build(Tasks.INTELLIJ_PLATFORM_SDK, "--owner=there-is-no-owner-9385", args = listOf("--offline"))
+        assertTrue(data().getValue("owners").jsonArray.isEmpty())
+        assertEquals(classpath, data().getValue("compileClasspath").jsonArray)
+    }
+
+    @Test
     fun `owner filtering local SDKs and configuration cache execute no unrelated tasks`() {
         build(Tasks.INTELLIJ_PLATFORM_SDK)
         val root = data().getValue("root").jsonPrimitive.content

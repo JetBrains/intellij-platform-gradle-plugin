@@ -1,7 +1,8 @@
-// Copyright 2000-2024 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
+// Copyright 2000-2026 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license.
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import kotlinx.serialization.json.*
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.CACHE_DIRECTORY
 import org.jetbrains.intellij.platform.gradle.Constants.KOTLIN_STDLIB_DEFAULT_DEPENDENCY
@@ -464,6 +465,49 @@ class VerifyPluginProjectConfigurationTaskTest : IntelliJPluginTestBase() {
         // Run again with muting - should not show the warning
         build(CLEAN, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
             assertNotContains("Invalid since-build version format The since-build='211.*'", output)
+        }
+    }
+
+    @Test
+    fun `Doctor and verifier share findings for the same effective configuration`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    pluginConfiguration {
+                        ideaVersion {
+                            sinceBuild = "211.*"
+                        }
+                    }
+                }
+                tasks.named<org.gradle.api.tasks.compile.JavaCompile>("compileJava") {
+                    options.release = 25
+                }
+                """.trimIndent()
+        pluginXml write //language=xml
+                """
+                <idea-plugin>
+                    <name>PluginName</name>
+                    <description>Lorem ipsum.</description>
+                    <vendor>JetBrains</vendor>
+                    <idea-version since-build="211" />
+                </idea-plugin>
+                """.trimIndent()
+
+        build(Tasks.INTELLIJ_PLATFORM_DOCTOR, Tasks.VERIFY_PLUGIN_PROJECT_CONFIGURATION) {
+            val report = Json.parseToJsonElement(dir.resolve("build/reports/intellij-platform/doctor.json").readText()).jsonObject
+            val issues = report.getValue("issues").jsonArray.map { it.jsonObject }.associateBy { it.getValue("id").jsonPrimitive.content }
+            mapOf(
+                "since-build-wildcard" to "Invalid since-build version format",
+                "since-build-below-platform" to "since-build is lower than target platform version",
+                "java-target-exceeds-since-build" to "Java targetCompatibility exceeds since-build requirements",
+                "java-target-exceeds-platform" to "Java targetCompatibility too high for target platform",
+            ).forEach { (id, label) ->
+                kotlin.test.assertTrue(id in issues, id)
+                assertContains("- $label ", output)
+            }
+            kotlin.test.assertEquals("211.*", issues.getValue("since-build-wildcard").getValue("observedValue").jsonPrimitive.content)
+            kotlin.test.assertEquals("25", issues.getValue("java-target-exceeds-platform").getValue("observedValue").jsonPrimitive.content)
+            kotlin.test.assertTrue(report.getValue("unavailable").jsonArray.any { it.jsonObject.getValue("observation").jsonPrimitive.content == "runtimeVendor" })
         }
     }
 
