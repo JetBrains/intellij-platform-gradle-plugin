@@ -242,6 +242,7 @@ object Constants {
         const val RUN_IDE_SPLIT_MODE = "runIdeSplitMode"
         const val SIGN_PLUGIN = "signPlugin"
         const val TEST_IDE_PERFORMANCE = "testIdePerformance" // TODO: check
+        const val TEST_UI = "testUi"
         const val VERIFY_PLUGIN = "verifyPlugin"
         const val VERIFY_PLUGIN_STRUCTURE = "verifyPluginStructure"
         const val VERIFY_PLUGIN_PROJECT_CONFIGURATION = "verifyPluginProjectConfiguration"

@@ -49,6 +49,7 @@ abstract class IntelliJPlatformPlugin : Plugin<Project> {
             BuildPluginTask,
 
             // Test
+            TestIdeUiTask,
             TestIdePerformanceTask,
 
             // Run

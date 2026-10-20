@@ -477,7 +477,6 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
             PrepareTestTask,
             TestCompanion,
             TestIdeTask,
-            TestIdeUiTask,
 
             // Verify Module
             VerifyPluginProjectConfigurationTask,
