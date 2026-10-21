@@ -132,6 +132,7 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
         val entryKeys = bundledPlugins
             .mapIndexed { index, (plugin, _) -> plugin to "entry-$index" }
             .toMap(IdentityHashMap())
+        val contentModuleOwnerKeys = getContentModuleOwnerKeys(bundledPlugins, entryKeys)
 
         return IdeLayoutIndex(
             fullVersion = productInfo.fullVersion,
@@ -141,9 +142,27 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
                     ide = this,
                     platformPath = platformPath,
                     dependencyKeys = entryKeys,
+                    owners = when (plugin) {
+                        is IdeModule -> contentModuleOwnerKeys[id].orEmpty()
+                        else -> emptyList()
+                    },
                 )
             },
         )
+    }
+
+    /**
+     * @return Map of each content module name to the entry keys of plugins whose `<content>` declares it.
+     */
+    private fun getContentModuleOwnerKeys(
+        bundledPlugins: List<Pair<IdePlugin, String>>,
+        entryKeys: IdentityHashMap<IdePlugin, String>,
+    ): Map<String, List<String>> {
+        return bundledPlugins
+            .map { (plugin, _) -> plugin }
+            .filterNot { it is IdeModule }
+            .flatMap { plugin -> plugin.contentModules.map { it.name to requireNotNull(entryKeys[plugin]) } }
+            .groupBy({ it.first }, { it.second })
     }
 
     private fun write(cacheFile: Path, index: IdeLayoutIndex) {
@@ -237,6 +256,7 @@ private fun IdePlugin.toEntry(
     ide: Ide,
     platformPath: Path,
     dependencyKeys: IdentityHashMap<IdePlugin, String>,
+    owners: List<String>,
 ) = IdeLayoutIndex.Entry(
     key = requireNotNull(dependencyKeys[this]),
     id = id,
@@ -267,5 +287,6 @@ private fun IdePlugin.toEntry(
         .plus(id)
         .filter(String::isNotBlank)
         .distinct()
-        .toList()
+        .toList(),
+    owners = owners,
 )
