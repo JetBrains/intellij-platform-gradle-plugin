@@ -15,6 +15,18 @@ The IntelliJ Platform reporting tasks expose plugin-development facts as JSON fi
 | `intellijPlatformSdk` | `sdk.json` | Resolved SDK files and classpath ownership |
 | `intellijPlatformSources` | `sources.json` | Source candidates and SDK-local archives; downloading and extraction are opt-in |
 
+## Task discovery
+
+All JSON report tasks belong to the `intellij platform reports` group, separate from the human-readable `print*` commands in `intellij platform info`:
+
+```bash
+./gradlew tasks --group="intellij platform reports"
+```
+
+Agents should use `intellijPlatformInfo` as their machine-readable entry point rather than parse task listings. Its capability catalog provides project-qualified commands, prerequisites, and execution costs. Task names, report paths, and JSON contracts are unchanged by the grouping.
+
+The group is not a promise of cheap or network-free execution: SDK inspection may acquire binaries, and source workflows may download and extract archives. Reports remain independent of `build` and `check`; there is no aggregate task that executes every report. Existing build, verification, and publishing groups and internal dump-task visibility are unchanged.
+
 ## Common contract (version 1)
 
 All reports are UTF-8 JSON with stable ordering, explicit nulls, and no timestamps:

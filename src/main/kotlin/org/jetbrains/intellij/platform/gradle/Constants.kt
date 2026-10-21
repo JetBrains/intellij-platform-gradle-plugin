@@ -33,6 +33,7 @@ object Constants {
         internal object Groups {
             const val VERIFICATION = "intellij platform verification"
             const val INFO = "intellij platform info"
+            const val REPORTS = "intellij platform reports"
         }
     }
 
