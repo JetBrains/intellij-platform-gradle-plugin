@@ -89,7 +89,7 @@ class IntelliJPlatformSdkTaskTest : IntelliJPluginTestBase() {
         val owners = data().getValue("owners").jsonArray.map { it.jsonObject }
         assertTrue(owners.isNotEmpty())
         assertTrue(owners.all { it.getValue("id").jsonPrimitive.content == "com.intellij.java" || it.getValue("aliases").jsonArray.any { alias -> alias.jsonPrimitive.content == "com.intellij.java" } })
-        assertEquals(root, data().getValue("root").jsonPrimitive.content)
+        assertEquals(Path(root), Path(data().getValue("root").jsonPrimitive.content))
         build(Tasks.INTELLIJ_PLATFORM_SDK, "--owner=there-is-no-owner-9385", "--output=build/custom reports/sdk.json", args = listOf("--offline"))
         assertTrue(report("build/custom reports/sdk.json").getValue("data").jsonObject.getValue("owners").jsonArray.isEmpty())
     }
