@@ -4,8 +4,10 @@ package org.jetbrains.intellij.platform.gradle.tasks.agent
 
 import kotlinx.serialization.Serializable
 import org.gradle.api.Project
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.file.Directory
 import org.gradle.api.file.RegularFile
+import org.gradle.api.internal.DefaultDomainObjectCollection
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.kotlin.dsl.findByType
@@ -128,9 +130,14 @@ internal class MatrixMetadata(private val project: Project) {
             .distinctBy { it.name }
             .sortedBy { it.name }
             .forEach { configuration ->
-                // Iteration would realize deferred declarations, including bundled libraries and verifier downloads.
-                configuration.dependencies.configureEach {
-                    result += MatrixDependency(configuration.name, group, name, version)
+                // Even configureEach can query pending collection sizes. Only visit already-materialized declarations.
+                val dependencies = configuration.dependencies.withType(Dependency::class.java)
+                val iterator = DefaultDomainObjectCollection::class.java.getDeclaredMethod("iteratorNoFlush")
+                    .apply { isAccessible = true }
+                    .invoke(dependencies) as Iterator<*>
+                iterator.forEach {
+                    val dependency = it as Dependency
+                    result += MatrixDependency(configuration.name, dependency.group, dependency.name, dependency.version)
                 }
             }
         return result.distinct().sortedWith(compareBy({ it.configuration }, { it.group }, { it.name }, { it.version }))

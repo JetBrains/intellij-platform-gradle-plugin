@@ -93,6 +93,29 @@ class IntelliJPlatformCompatibilityMatrixTaskTest : IntelliJPlatformTestBase() {
     }
 
     @Test
+    fun `materialized verifier dependencies do not realize deferred dependency lists`() {
+        fixture(extra = """
+            val deferredDependencies = objects.listProperty(org.gradle.api.artifacts.Dependency::class.java)
+            deferredDependencies.addAll(providers.provider<List<org.gradle.api.artifacts.Dependency>> {
+                error("Deferred verifier dependencies must not be evaluated")
+            })
+            configurations.named("intellijPluginVerifierIdesDependency") {
+                dependencies.add(project.dependencies.create("idea:ideaIC:2024.1.7"))
+                dependencies.addAllLater(deferredDependencies)
+            }
+        """.trimIndent())
+
+        build(Tasks.INTELLIJ_PLATFORM_COMPATIBILITY_MATRIX, args = listOf("--offline")) {
+            assertEquals(listOf(":intellijPlatformCompatibilityMatrix"), tasks.map { it.path })
+        }
+        val verifier = report().getValue("data").jsonObject.getValue("pluginVerifier").jsonObject
+        val target = verifier.getValue("targets").jsonArray.single().jsonObject
+        assertEquals("2024.1.7", target.getValue("ide").jsonObject.getValue("version").jsonPrimitive.content)
+        assertEquals("materializedVerifierDependency", target.getValue("ide").jsonObject.getValue("provenance").jsonPrimitive.content)
+        assertEquals("untested", target.getValue("executionStatus").jsonPrimitive.content)
+    }
+
+    @Test
     fun `explicit verifier identities are visible while selectors and lazy providers stay unresolved`() {
         fixture(extra = """
             dependencies { intellijPlatform { intellijIdeaUltimate("2025.1.6") } }
