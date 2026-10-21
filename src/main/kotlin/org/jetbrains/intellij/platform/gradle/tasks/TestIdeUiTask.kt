@@ -21,7 +21,7 @@ import org.jetbrains.intellij.platform.gradle.utils.dependenciesHelper
  * Runs the IDE instance with the developed plugin and Starter framework for UI testing.
  *
  * Creates or reuses an isolated source set matching the task name (`src/<taskName>`) and uses JUnit Platform by default.
- * The default `testIdeUi` task uses `src/testIdeUi`; a custom `extraUi` task uses `src/extraUi` and its own dependencies.
+ * The default `testUi` task uses `src/testUi`; a custom `extraUi` task uses `src/extraUi` and its own dependencies.
  * Starter and Driver dependencies are supplied automatically with the standard IDE-provided exclusions;
  * the source set compiles against the IntelliJ Platform classpath, and the host JVM classpath appends the task's
  * IntelliJ Platform classpath after its source set's runtime classpath, so excluded libraries are provided
@@ -66,6 +66,7 @@ abstract class TestIdeUiTask : Test(), TestableAware {
     }
 
     init {
+        project.the<JavaPluginExtension>().sourceSets.maybeCreate(name)
         group = Plugin.GROUP_NAME
         description = "Runs the IDE instance with the developed plugin and Starter framework for UI testing."
     }
@@ -78,7 +79,7 @@ abstract class TestIdeUiTask : Test(), TestableAware {
             }
 
             project.registerTask<TestIdeUiTask>(Tasks.TEST_UI) {
-                val testIdeUi = sourceSets.maybeCreate(name).also {
+                val testIdeUi = sourceSets.getByName(name).also {
                     it.compileClasspath += intellijPlatformClasspathConfiguration
                 }
                 project.dependenciesHelper.addTestFrameworkDependency(
