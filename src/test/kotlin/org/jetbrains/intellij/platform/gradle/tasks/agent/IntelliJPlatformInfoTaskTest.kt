@@ -7,6 +7,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformTestBase
 import org.jetbrains.intellij.platform.gradle.variants
+import kotlin.io.path.Path
 import kotlin.io.path.createDirectories
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.readText
@@ -271,7 +272,7 @@ class IntelliJPlatformInfoTaskTest : IntelliJPlatformTestBase() {
         val target = report().getValue("data").jsonObject.getValue("resolvedIde").jsonObject
         assertEquals("IU", target.getValue("productCode").jsonPrimitive.content)
         assertEquals("251.28774.11", target.getValue("buildNumber").jsonPrimitive.content)
-        assertEquals(sdk.invariantSeparatorsPathString, target.getValue("root").jsonPrimitive.content)
+        assertEquals(sdk, Path(target.getValue("root").jsonPrimitive.content))
     }
 
     @Test
