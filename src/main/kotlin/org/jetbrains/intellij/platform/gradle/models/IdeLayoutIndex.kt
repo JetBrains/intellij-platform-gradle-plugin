@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.models
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.jetbrains.intellij.platform.gradle.Constants.IDEA_CORE
 
 /**
  * Serialized snapshot of bundled IDE plugins and modules.
@@ -56,6 +57,54 @@ internal data class IdeLayoutIndex(
     val bundledModules
         get() = entries.asSequence().filter { it.isModule }
 
+    /**
+     * Returns plugins missing on [classpath] that declare the bundled modules present on it.
+     * The IDE loads a content module only with the plugin declaring it in `<content>`, e.g., only the plugin JAR has `META-INF/plugin.xml`.
+     *
+     * Modules owned by the core or by a plugin already present on [classpath] are skipped.
+     * When several plugins declare the same module, the one declaring the modules requiring it is picked, see [ownerOf].
+     *
+     * @param classpath Paths relative to the IntelliJ Platform root, like [Entry.classpath].
+     */
+    fun findMissingContentModuleOwners(classpath: Set<String>): List<Entry> {
+        // The owner's classpath contains its content modules,
+        // which may be present without it, so they don't prove the owner is present.
+        val contentModulesClasspath = bundledModules
+            .flatMap { module -> module.owners.map { it to module.classpath } }
+            .groupBy({ it.first }, { it.second })
+            .mapValues { (_, classpaths) -> classpaths.flatten().toSet() }
+        val isPresent = { owner: Entry ->
+            owner.id == IDEA_CORE ||
+                // any non-module JAR means the whole plugin was added to the classpath:
+                owner.classpath.any { it in classpath && it !in contentModulesClasspath[owner.key].orEmpty() }
+        }
+
+        val presentModules = bundledModules
+            // a module may consist of many JARs, and it is on the classpath only if its all JARs are on the classpath:
+            .filter { it.classpath.isNotEmpty() && classpath.containsAll(it.classpath) }
+            .toList()
+
+        return presentModules
+            .mapNotNull { module ->
+                val owners = module.owners.mapNotNull(::findByKey)
+                owners.takeUnless { it.any(isPresent) }?.let { ownerOf(module, it, presentModules) }
+            }
+            .distinctBy { it.key }
+    }
+
+    /**
+     * Resolves [module] to the one of its [owners] declaring the [presentModules] requiring it,
+     * as a private module may be declared by several plugins.
+     * Falls back to the first owner if no such module is present.
+     */
+    private fun ownerOf(module: Entry, owners: List<Entry>, presentModules: List<Entry>): Entry? {
+        val requiringModulesOwners = presentModules
+            .filter { module.key in it.dependencies }
+            .flatMap { it.owners }
+            .toSet()
+        return owners.firstOrNull { it.key in requiringModulesOwners } ?: owners.firstOrNull()
+    }
+
     @Serializable
     internal data class Entry(
         /**
@@ -76,9 +125,14 @@ internal data class IdeLayoutIndex(
          * All module aliases exported by this entry, including its primary [id].
          */
         val definedModules: List<String> = emptyList(),
+        /**
+         * For a bundled module, references by [key] to the plugins declaring it in their `<content>`.
+         * A private module may be declared by several plugins, e.g., `intellij.platform.commercial.verifier`.
+         */
+        val owners: List<String> = emptyList(),
     )
 
     companion object {
-        const val SCHEMA_VERSION = 4
+        const val SCHEMA_VERSION = 5
     }
 }

@@ -35,6 +35,8 @@ import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.splitCommaSeparated
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import kotlin.io.path.absolute
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.name
 
 /**
@@ -176,27 +178,55 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     else -> project.providers.provider { emptyList() }
                 }
             }
+            // As an alternative to bundledPluginsClasspathProvider,
+            // add only the plugins declaring the bundled modules on the test classpath,
+            // as the IDE loads a content module only with its plugin,
+            // e.g., the plugin declaring `intellij.platform.structureView` required by `com.intellij.java`.
+            val contentModuleOwnersClasspathProvider = bundledPluginsClasspathEnabledProvider.flatMap { enabled ->
+                when {
+                    enabled -> project.providers.provider { emptyList() }
+                    else -> (intellijPlatformTestClasspathConfiguration - intellijPlatformClasspathConfiguration).elements.map { elements ->
+                        val platformPath = platformPathProvider.get()
+                        val ideLayoutIndex = ideLayoutIndexService.get().resolve(
+                            platformPath = platformPath,
+                            cacheDirectory = ideLayoutIndexCacheDirectoryProvider.get(),
+                        )
+                        val normalizedPlatformPath = platformPath.absolute().normalize()
+                        val platformClasspath = elements
+                            .map { it.asPath.normalize() }
+                            .filter { it.startsWith(normalizedPlatformPath) }
+                            .map { normalizedPlatformPath.relativize(it).invariantSeparatorsPathString }
+                            .toSet()
 
-            // Build the classpath in the correct order:
-            // 1. Instrumented test code (if available)
-            // 2. Current plugin's libraries
-            // 3. Other plugins' libraries
-            // 4. Test classpath configuration without IntelliJ Platform base classpath
-            // 5. IntelliJ Platform base classpath
-            // 6. Original classpath without runtime dependencies
-            // 7. Test runtime classpath configuration
-            // 8. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
-            // 9. Bundled plugins declared by product-info, when enabled (by default, since 2026.2)
+                        ideLayoutIndex.findMissingContentModuleOwners(platformClasspath)
+                            .flatMap { it.classpath.map(platformPath::resolve) }
+                            .distinct()
+                    }
+                }
+            }
+
             classpath = project.files(
+                // Build the classpath in the correct order:
+                // 1. Instrumented test code (if available)
                 instrumentedTestCode,
+                // 2. Current plugin's libraries
                 currentPluginLibsProvider,
+                // 3. Other plugins' libraries
                 otherPluginsLibsProvider,
+                // 4. Test classpath configuration without IntelliJ Platform base classpath
                 intellijPlatformTestClasspathConfiguration - intellijPlatformClasspathConfiguration,
+                // 5. IntelliJ Platform base classpath
                 intellijPlatformClasspathConfiguration,
+                // 6. Original classpath without runtime dependencies
                 classpath - runtimeDependencies,
+                // 7. Test runtime classpath configuration
                 intellijPlatformTestRuntimeClasspathConfiguration,
+                // 8. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
                 intelliJPlatformTestRuntimeFixClasspathConfiguration,
+                // 9. Bundled plugins declared by product-info, when enabled (by default, since 2026.2)
                 bundledPluginsClasspathProvider,
+                // 10. Otherwise, plugins declaring the bundled modules present on the classpath, when missing
+                contentModuleOwnersClasspathProvider,
             )
 
             testClassesDirs = instrumentedTestCode + testClassesDirs
