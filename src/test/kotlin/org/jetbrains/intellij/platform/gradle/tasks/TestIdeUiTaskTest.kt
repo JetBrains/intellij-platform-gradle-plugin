@@ -3,12 +3,14 @@
 package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.jetbrains.intellij.platform.gradle.*
+import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.createDirectories
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.outputStream
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 class TestIdeUiTaskTest : IntelliJPluginTestBase() {
@@ -39,19 +41,20 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `UI test defaults are registered and isolated`() {
+        assertEquals("testUi", Tasks.TEST_UI)
         // Keeps the fixture offline: the resolvable configurations drop Starter (and its JUnit), leaving the IDE classpath visible.
         val hostGroups = TestFrameworkType.Starter.coordinates.map { it.groupId }.toSet()
         buildFile write """
-            val integration = sourceSets.getByName("testIdeUi")
+            val integration = sourceSets.getByName("${Tasks.TEST_UI}")
             check(sourceSets.findByName("integrationTest") == null)
-            check(integration.implementationConfigurationName == "testIdeUiImplementation")
-            check(integration.runtimeOnlyConfigurationName == "testIdeUiRuntimeOnly")
-            check(integration.compileClasspathConfigurationName == "testIdeUiCompileClasspath")
-            check(integration.runtimeClasspathConfigurationName == "testIdeUiRuntimeClasspath")
+            check(integration.implementationConfigurationName == "${Tasks.TEST_UI}Implementation")
+            check(integration.runtimeOnlyConfigurationName == "${Tasks.TEST_UI}RuntimeOnly")
+            check(integration.compileClasspathConfigurationName == "${Tasks.TEST_UI}CompileClasspath")
+            check(integration.runtimeClasspathConfigurationName == "${Tasks.TEST_UI}RuntimeClasspath")
             listOf(integration.compileClasspathConfigurationName, integration.runtimeClasspathConfigurationName).forEach { name ->
                 ${hostGroups.joinToString("\n                ") { """configurations.getByName(name).exclude(mapOf("group" to "$it"))""" }}
             }
-            val ui = tasks.named<TestIdeUiTask>("testIdeUi").get()
+            val ui = tasks.named<TestIdeUiTask>("${Tasks.TEST_UI}").get()
             val ideClasspath = configurations.getByName("intellijPlatformClasspath").files.toList()
             check(ideClasspath.any { it.name == "local-ide.jar" })
             check(configurations.getByName(integration.runtimeClasspathConfigurationName).files.isEmpty())
@@ -62,9 +65,9 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
             check(ui.options is org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions)
             check((ui.options as org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions).includeEngines.isEmpty())
             check((ui.options as org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions).excludeEngines.isEmpty())
-            check(integration.java.srcDirs.contains(file("src/testIdeUi/java")))
-            check(integration.resources.srcDirs.contains(file("src/testIdeUi/resources")))
-            check(integration.allSource.srcDirs.contains(file("src/testIdeUi/kotlin")))
+            check(integration.java.srcDirs.contains(file("src/${Tasks.TEST_UI}/java")))
+            check(integration.resources.srcDirs.contains(file("src/${Tasks.TEST_UI}/resources")))
+            check(integration.allSource.srcDirs.contains(file("src/${Tasks.TEST_UI}/kotlin")))
             check(ui.archiveFile.get() == tasks.named<BuildPluginTask>("buildPlugin").get().archiveFile.get())
             val implementation = configurations.getByName(integration.implementationConfigurationName)
             check(configurations.getByName("testImplementation") !in implementation.hierarchy)
@@ -84,7 +87,7 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
 
         build("build", "--dry-run") {
             assertContains("UI_DEFAULTS_OK", output)
-            assertFalse(output.contains(":testIdeUi"))
+            assertFalse(output.contains(":${Tasks.TEST_UI}"))
             assertContains(":test SKIPPED", output)
             assertContains(":check SKIPPED", output)
         }
@@ -93,11 +96,11 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
     @Test
     fun `UI test defaults allow overrides and extra testing registrations`() {
         buildFile write """
-            sourceSets.named("testIdeUi") {
+            sourceSets.named("${Tasks.TEST_UI}") {
                 java.setSrcDirs(listOf("custom-ui/java"))
                 resources.setSrcDirs(listOf("custom-ui/resources"))
             }
-            tasks.named<TestIdeUiTask>("testIdeUi") {
+            tasks.named<TestIdeUiTask>("${Tasks.TEST_UI}") {
                 archiveFile.set(layout.projectDirectory.file("custom.zip"))
                 classpath = files("custom-host.jar")
                 testClassesDirs = files("custom-classes")
@@ -106,12 +109,12 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
             intellijPlatformTesting.testIdeUi.register("extraUi") {
                 task { classpath = files("extra-host.jar") }
             }
-            val ui = tasks.named<TestIdeUiTask>("testIdeUi").get()
+            val ui = tasks.named<TestIdeUiTask>("${Tasks.TEST_UI}").get()
             check(ui.archiveFile.get().asFile == file("custom.zip"))
             check(ui.classpath.files == setOf(file("custom-host.jar")))
             check(ui.testClassesDirs.files == setOf(file("custom-classes")))
             check(ui.systemProperties["ide.test.version"] == "explicit-version")
-            check(sourceSets.getByName("testIdeUi").java.srcDirs == setOf(file("custom-ui/java")))
+            check(sourceSets.getByName("${Tasks.TEST_UI}").java.srcDirs == setOf(file("custom-ui/java")))
             check(tasks.named<TestIdeUiTask>("extraUi").get().classpath.files == setOf(file("extra-host.jar")))
             println("UI_OVERRIDES_OK")
         """.trimIndent()
@@ -127,7 +130,7 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
                 compileClasspath = files("integration-compile.jar")
                 runtimeClasspath = files("integration-runtime.jar")
             }
-            val ui = sourceSets.getByName("testIdeUi")
+            val ui = sourceSets.getByName("${Tasks.TEST_UI}")
             check(integration.java.srcDirs == setOf(file("custom-integration/java")))
             check(integration.compileClasspath.files == setOf(file("integration-compile.jar")))
             check(integration.runtimeClasspath.files == setOf(file("integration-runtime.jar")))
@@ -136,7 +139,7 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
             check(integrationImplementation.allDependencies.isEmpty())
             check(integrationImplementation !in uiImplementation.hierarchy)
             check(uiImplementation !in integrationImplementation.hierarchy)
-            check(tasks.named<TestIdeUiTask>("testIdeUi").get().testClassesDirs == ui.output.classesDirs)
+            check(tasks.named<TestIdeUiTask>("${Tasks.TEST_UI}").get().testClassesDirs == ui.output.classesDirs)
             check("integrationTest" !in tasks.names)
             println("UI_INTEGRATION_ISOLATION_OK")
         """.trimIndent()
@@ -149,7 +152,7 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
         val secondIde = createLocalIde("second-ide", build = "262.12345.2")
         val hostGroups = TestFrameworkType.Starter.coordinates.map { it.groupId }.toSet()
         buildFile write """
-            sourceSets.named("testIdeUi") {
+            sourceSets.named("${Tasks.TEST_UI}") {
                 runtimeClasspath = files("default-host.jar")
             }
             val custom = sourceSets.create("extraUi") {
@@ -162,7 +165,7 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
             ${hostGroups.joinToString("\n            ") { """configurations.getByName(custom.compileClasspathConfigurationName).exclude(mapOf("group" to "$it"))""" }}
             val extra = tasks.named<TestIdeUiTask>("extraUi").get()
             check(extra.testClassesDirs == custom.output.classesDirs)
-            check(extra.testClassesDirs != sourceSets.getByName("testIdeUi").output.classesDirs)
+            check(extra.testClassesDirs != sourceSets.getByName("${Tasks.TEST_UI}").output.classesDirs)
             check(custom.java.srcDirs == setOf(file("custom-ui/java")))
             val ideClasspath = configurations.getByName("intellijPlatformClasspath_extraUi").files.toList()
             check(custom.compileClasspath.files.toList() == ideClasspath)
@@ -171,7 +174,7 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
             check(files.any { it.name == "second-ide.jar" })
             check(files.none { it.name == "local-ide.jar" || it.name == "default-host.jar" })
             check(files == listOf(file("extra-host.jar")) + ideClasspath)
-            check(tasks.named<TestIdeUiTask>("testIdeUi").get().classpath.files.none { it.name == "second-ide.jar" })
+            check(tasks.named<TestIdeUiTask>("${Tasks.TEST_UI}").get().classpath.files.none { it.name == "second-ide.jar" })
             println("UI_CUSTOM_OK")
         """.trimIndent()
 
@@ -183,8 +186,10 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
         buildFile write """
             intellijPlatformTesting.testIdeUi.register("smokeUi")
             tasks.register<TestIdeUiTask>("directUi")
-            val defaultUi = sourceSets.getByName("testIdeUi")
+            val defaultUi = sourceSets.getByName("${Tasks.TEST_UI}")
             listOf("smokeUi", "directUi").forEach { name ->
+                check(sourceSets.findByName(name) == null)
+                val ui = tasks.named<TestIdeUiTask>(name).get()
                 val sources = sourceSets.getByName(name)
                 check(sources.java.srcDirs == setOf(file("src/" + name + "/java")))
                 check(sources.resources.srcDirs == setOf(file("src/" + name + "/resources")))
@@ -198,7 +203,6 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
                 check(host.count { it.name == "ide-starter-squashed" } == 1)
                 check(host.count { it.name == "driver-client" } == 1)
                 check(host.all { dependency -> dependency.excludeRules.none { it.group == "org.junit.vintage" } })
-                val ui = tasks.named<TestIdeUiTask>(name).get()
                 check(ui.testClassesDirs == sources.output.classesDirs)
                 check(ui.testClassesDirs != defaultUi.output.classesDirs)
                 check((ui.options as org.gradle.api.tasks.testing.junitplatform.JUnitPlatformOptions).includeEngines.isEmpty())
@@ -278,7 +282,8 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
                     }
                 }
             }
-            val integration = sourceSets.getByName("testIdeUi")
+            tasks.named<TestIdeUiTask>("${Tasks.TEST_UI}").get()
+            val integration = sourceSets.getByName("${Tasks.TEST_UI}")
             dependencies {
                 add(integration.runtimeOnlyConfigurationName, "example:custom-engine:$junitVersion")
                 add(integration.runtimeOnlyConfigurationName, "junit:junit:4.13.2")
@@ -319,7 +324,7 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
                 }
             }
         """.trimIndent()
-        dir.resolve("src/testIdeUi/java/HostTest.java") write """
+        dir.resolve("src/${Tasks.TEST_UI}/java/HostTest.java") write """
             import org.junit.jupiter.api.Test;
             import static org.junit.jupiter.api.Assertions.*;
 
@@ -339,7 +344,8 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
                 add(hostJunit.name, "org.junit.platform:junit-platform-launcher:1.11.4")
             }
             intellijPlatformTesting.testIdeUi.register("extraUi")
-            listOf("testIdeUi", "extraUi").forEach { name ->
+            listOf("${Tasks.TEST_UI}", "extraUi").forEach { name ->
+                tasks.named<TestIdeUiTask>(name).get()
                 sourceSets.named(name) {
                     compileClasspath = hostJunit
                     runtimeClasspath = output + hostJunit
@@ -353,18 +359,18 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
             }
         """.trimIndent()
 
-        build("testIdeUi", "extraUi")
-        buildWithConfigurationCache("testIdeUi", "extraUi")
-        buildWithConfigurationCache("testIdeUi", "extraUi") { assertContains("Reusing configuration cache.", output) }
-        buildWithConfigurationCache("testIdeUi", "extraUi", projectProperties = mapOf("uiVersion" to "explicit-version"))
+        build(Tasks.TEST_UI, "extraUi")
+        buildWithConfigurationCache(Tasks.TEST_UI, "extraUi")
+        buildWithConfigurationCache(Tasks.TEST_UI, "extraUi") { assertContains("Reusing configuration cache.", output) }
+        buildWithConfigurationCache(Tasks.TEST_UI, "extraUi", projectProperties = mapOf("uiVersion" to "explicit-version"))
     }
 
     @Test
     fun `module plugin does not register UI tests requiring a plugin archive`() {
         buildFile overwrite """
             plugins { id("org.jetbrains.intellij.platform.module") }
-            check("testIdeUi" !in tasks.names)
-            check(extensions.getByType<org.gradle.api.plugins.JavaPluginExtension>().sourceSets.findByName("testIdeUi") == null)
+            check("${Tasks.TEST_UI}" !in tasks.names)
+            check(extensions.getByType<org.gradle.api.plugins.JavaPluginExtension>().sourceSets.findByName("${Tasks.TEST_UI}") == null)
             println("MODULE_OK")
         """.trimIndent()
 
