@@ -74,6 +74,7 @@ internal fun Project.capabilities(): List<Capability> {
     }
     typed(IntelliJPlatformDoctorTask::class.java, "Diagnose project configuration against the selected IDE without compiling.", platform, resolution)
     typed(IntelliJPlatformSdkTask::class.java, "Inspect the selected SDK, archives, classpath ownership, and local sources without compiling.", platform, resolution)
+    typed(IntelliJPlatformSourcesTask::class.java, "Discover source candidates; --download resolves archives and --extract exposes searchable roots without compiling.", platform + "Source downloads require configured repositories or cached artifacts; extraction uses the persistent project cache.", resolution)
     typed(IntelliJPlatformDiscoverTask::class.java, "Discover SDK plugins/modules or product releases; release discovery does not acquire an IDE.", listOf("SDK discovery needs a declared platform; release discovery needs cached product listings when offline."), resolution)
 
     typed(AbstractCompile::class.java, "Compile configured sources.", compiler, compilation)

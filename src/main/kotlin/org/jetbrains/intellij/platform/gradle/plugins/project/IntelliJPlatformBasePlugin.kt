@@ -620,6 +620,7 @@ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
             IntelliJPlatformDoctorTask,
             IntelliJPlatformDiscoverTask,
             IntelliJPlatformSdkTask,
+            IntelliJPlatformSourcesTask,
             IntelliJPlatformProjectGraphTask,
             IntelliJPlatformDistributionTask,
             IntelliJPlatformDependencyGraphTask,

@@ -35,6 +35,7 @@ internal data class SdkReport(
     val owners: List<LayoutEntry>,
     val compileClasspath: List<CompileArtifact>,
     val sources: List<String>,
+    val sourcesTask: String,
 )
 
 /**
@@ -111,6 +112,7 @@ abstract class IntelliJPlatformSdkTask : AgentReportTask(), IntelliJPlatformVers
             data = SdkReport(
                 TargetIde(product.productCode, product.version, product.buildNumber, root.safePathString, "resolved"), root.safePathString, owner,
                 owners.filter { owner == null || owner == it.id || owner in it.aliases }, classpath.orEmpty(), sources,
+                "${projectPath.get().trimEnd(':')}:${Tasks.INTELLIJ_PLATFORM_SOURCES}",
             ),
             unavailable = unavailable,
         )

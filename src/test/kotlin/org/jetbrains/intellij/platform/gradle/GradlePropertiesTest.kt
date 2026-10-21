@@ -170,4 +170,12 @@ class GradlePropertiesTest {
         assertEquals(idesCachePath.resolve(Constants.LAYOUT_INDEX), layoutIndexPath)
         assertNotEquals(cachePath.resolve(Constants.LAYOUT_INDEX), layoutIndexPath)
     }
+
+    @Test
+    fun `source cache defaults to root project cache independently of the IDEs cache`() {
+        val sourceCache = providers.intellijPlatformSourcesCachePath(tempDir).get()
+
+        assertEquals(tempDir.resolve(".intellijPlatform/sources"), sourceCache)
+        assertNotEquals(providers.intellijPlatformIdesCachePath(tempDir).get().resolve("sources"), sourceCache)
+    }
 }

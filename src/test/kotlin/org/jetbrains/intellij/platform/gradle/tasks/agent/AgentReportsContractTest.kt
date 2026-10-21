@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks.agent
 import kotlinx.serialization.json.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformTestBase
+import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.test.Test
@@ -41,7 +42,11 @@ class AgentReportsContractTest : IntelliJPlatformTestBase() {
             """.trimIndent(),
         )
 
-        val properties = mapOf("publishToken" to "secret-not-for-reports")
+        val sourceCache = dir.resolve("unpopulated cache with spaces")
+        val properties = mapOf(
+            "publishToken" to "secret-not-for-reports",
+            "org.jetbrains.intellij.platform.intellijPlatformCache" to sourceCache.toString(),
+        )
         buildWithConfigurationCache(*metadataTasks.toTypedArray(), args = listOf("--offline"), projectProperties = properties) {
             assertEquals(metadataTasks.map { ":$it" }.toSet(), tasks.map { it.path }.toSet())
         }
@@ -57,6 +62,14 @@ class AgentReportsContractTest : IntelliJPlatformTestBase() {
             assertTrue(report.getValue("unavailable") is JsonArray)
             assertFalse(text.contains("secret-not-for-reports"))
         }
+        val context = Json.parseToJsonElement(first.getValue(Tasks.INTELLIJ_PLATFORM_INFO)).jsonObject.getValue("data").jsonObject
+        val sourcesTask = ":${Tasks.INTELLIJ_PLATFORM_SOURCES}"
+        assertTrue(context.getValue("commands").jsonArray.any { it.jsonPrimitive.content == sourcesTask })
+        val sourcesCapability = context.getValue("capabilities").jsonArray.map { it.jsonObject }
+            .single { it.getValue("task").jsonPrimitive.content == sourcesTask }
+        assertEquals(listOf("resolution"), sourcesCapability.getValue("executionCost").jsonArray.map { it.jsonPrimitive.content })
+        assertTrue(sourcesCapability.getValue("prerequisites").jsonArray.isNotEmpty())
+        assertFalse(sourceCache.resolve("sources").exists())
         if (platformVersion != null) {
             val info = Json.parseToJsonElement(first.getValue(Tasks.INTELLIJ_PLATFORM_INFO)).jsonObject.getValue("data").jsonObject
             assertEquals(platformVersion, info.getValue("requestedIde").jsonObject.getValue("version").jsonPrimitive.content)
@@ -66,6 +79,7 @@ class AgentReportsContractTest : IntelliJPlatformTestBase() {
             assertConfigurationCacheReused()
         }
         assertEquals(first, reports())
+        assertFalse(sourceCache.resolve("sources").exists())
     }
 
     @Test
