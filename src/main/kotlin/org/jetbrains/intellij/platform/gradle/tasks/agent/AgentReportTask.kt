@@ -108,7 +108,7 @@ abstract class AgentReportTask : DefaultTask() {
     }
 
     init {
-        group = Plugin.Groups.INFO
+        group = Plugin.Groups.REPORTS
     }
 
     companion object {

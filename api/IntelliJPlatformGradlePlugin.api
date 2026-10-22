@@ -8,6 +8,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants {
 	public static final field CACHE_DIRECTORY_IDES Ljava/lang/String;
 	public static final field CACHE_DIRECTORY_IVY Ljava/lang/String;
 	public static final field CACHE_DIRECTORY_PRODUCT_RELEASES Ljava/lang/String;
+	public static final field CACHE_DIRECTORY_SOURCES Ljava/lang/String;
 	public static final field DEFAULT_MAIN_CLASS Ljava/lang/String;
 	public static final field IDEA_CORE Ljava/lang/String;
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/Constants;
@@ -258,6 +259,7 @@ public final class org/jetbrains/intellij/platform/gradle/Constants$Tasks {
 	public static final field INTELLIJ_PLATFORM_INFO Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_PROJECT_GRAPH Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_SDK Ljava/lang/String;
+	public static final field INTELLIJ_PLATFORM_SOURCES Ljava/lang/String;
 	public static final field INTELLIJ_PLATFORM_TEST_MATRIX Ljava/lang/String;
 	public static final field JAR_SEARCHABLE_OPTIONS Ljava/lang/String;
 	public static final field PATCH_PLUGIN_XML Ljava/lang/String;
@@ -3708,6 +3710,19 @@ public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/Intelli
 }
 
 public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSdkTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
+	public fun register (Lorg/gradle/api/Project;)V
+}
+
+public abstract class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSourcesTask : org/jetbrains/intellij/platform/gradle/tasks/agent/AgentReportTask {
+	public static final field Companion Lorg/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSourcesTask$Companion;
+	public fun <init> ()V
+	public abstract fun getDownload ()Lorg/gradle/api/provider/Property;
+	public abstract fun getExtract ()Lorg/gradle/api/provider/Property;
+	public abstract fun getOwner ()Lorg/gradle/api/provider/Property;
+	public final fun report ()V
+}
+
+public final class org/jetbrains/intellij/platform/gradle/tasks/agent/IntelliJPlatformSourcesTask$Companion : org/jetbrains/intellij/platform/gradle/tasks/Registrable {
 	public fun register (Lorg/gradle/api/Project;)V
 }
 

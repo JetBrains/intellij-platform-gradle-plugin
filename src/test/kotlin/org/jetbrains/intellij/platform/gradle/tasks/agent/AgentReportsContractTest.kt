@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.tasks.agent
 import kotlinx.serialization.json.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformTestBase
+import kotlin.io.path.exists
 import kotlin.io.path.readText
 import kotlin.io.path.writeText
 import kotlin.test.Test
@@ -28,6 +29,43 @@ class AgentReportsContractTest : IntelliJPlatformTestBase() {
         dir.resolve("build/reports/intellij-platform/${task.removePrefix("intellijPlatform").lowercase()}.json").readText()
     }
 
+    private fun checkTaskGroups(plugin: String) {
+        dir.resolve("settings.gradle.kts").writeText("rootProject.name = \"report-groups\"")
+        dir.resolve("build.gradle.kts").writeText(
+            """
+            plugins { id("$plugin") }
+            java { toolchain.languageVersion = JavaLanguageVersion.of(17) }
+            configurations.configureEach {
+                incoming.beforeResolve { error("Task listing unexpectedly resolves " + name) }
+            }
+            """.trimIndent(),
+        )
+
+        val groups = mapOf(
+            "intellij platform reports" to metadataTasks + listOf(
+                Tasks.INTELLIJ_PLATFORM_DOCTOR,
+                Tasks.INTELLIJ_PLATFORM_DISCOVER,
+                Tasks.INTELLIJ_PLATFORM_SDK,
+                Tasks.INTELLIJ_PLATFORM_SOURCES,
+            ),
+            "intellij platform info" to listOf(
+                Tasks.PRINT_BUNDLED_MODULES,
+                Tasks.PRINT_BUNDLED_PLUGINS,
+                Tasks.PRINT_PRODUCTS_RELEASES,
+            ),
+        )
+        groups.forEach { (group, expectedTasks) ->
+            buildWithConfigurationCache("tasks", args = listOf("--group=$group", "--offline", "--console=plain")) {
+                val listedTasks = Regex("^(\\w+) - .+$", RegexOption.MULTILINE).findAll(output)
+                    .map { it.groupValues[1] }.toSet()
+                assertEquals(expectedTasks.toSet(), listedTasks)
+                assertEquals(listOf(":tasks"), tasks.map { it.path })
+            }
+        }
+        assertFalse(dir.resolve("build/reports/intellij-platform").exists())
+        assertFalse(dir.resolve(".intellijPlatform/sources").exists())
+    }
+
     private fun checkContract(plugin: String, platformVersion: String? = null) {
         dir.resolve("settings.gradle.kts").writeText("rootProject.name = \"metadata-contract\"")
         dir.resolve("build.gradle.kts").writeText(
@@ -41,7 +79,11 @@ class AgentReportsContractTest : IntelliJPlatformTestBase() {
             """.trimIndent(),
         )
 
-        val properties = mapOf("publishToken" to "secret-not-for-reports")
+        val sourceCache = dir.resolve("unpopulated cache with spaces")
+        val properties = mapOf(
+            "publishToken" to "secret-not-for-reports",
+            "org.jetbrains.intellij.platform.intellijPlatformCache" to sourceCache.toString(),
+        )
         buildWithConfigurationCache(*metadataTasks.toTypedArray(), args = listOf("--offline"), projectProperties = properties) {
             assertEquals(metadataTasks.map { ":$it" }.toSet(), tasks.map { it.path }.toSet())
         }
@@ -57,6 +99,14 @@ class AgentReportsContractTest : IntelliJPlatformTestBase() {
             assertTrue(report.getValue("unavailable") is JsonArray)
             assertFalse(text.contains("secret-not-for-reports"))
         }
+        val context = Json.parseToJsonElement(first.getValue(Tasks.INTELLIJ_PLATFORM_INFO)).jsonObject.getValue("data").jsonObject
+        val sourcesTask = ":${Tasks.INTELLIJ_PLATFORM_SOURCES}"
+        assertTrue(context.getValue("commands").jsonArray.any { it.jsonPrimitive.content == sourcesTask })
+        val sourcesCapability = context.getValue("capabilities").jsonArray.map { it.jsonObject }
+            .single { it.getValue("task").jsonPrimitive.content == sourcesTask }
+        assertEquals(listOf("resolution"), sourcesCapability.getValue("executionCost").jsonArray.map { it.jsonPrimitive.content })
+        assertTrue(sourcesCapability.getValue("prerequisites").jsonArray.isNotEmpty())
+        assertFalse(sourceCache.resolve("sources").exists())
         if (platformVersion != null) {
             val info = Json.parseToJsonElement(first.getValue(Tasks.INTELLIJ_PLATFORM_INFO)).jsonObject.getValue("data").jsonObject
             assertEquals(platformVersion, info.getValue("requestedIde").jsonObject.getValue("version").jsonPrimitive.content)
@@ -66,6 +116,17 @@ class AgentReportsContractTest : IntelliJPlatformTestBase() {
             assertConfigurationCacheReused()
         }
         assertEquals(first, reports())
+        assertFalse(sourceCache.resolve("sources").exists())
+    }
+
+    @Test
+    fun `plugin report tasks have a separate discoverable group`() {
+        checkTaskGroups("org.jetbrains.intellij.platform")
+    }
+
+    @Test
+    fun `module report tasks have a separate discoverable group`() {
+        checkTaskGroups("org.jetbrains.intellij.platform.module")
     }
 
     @Test

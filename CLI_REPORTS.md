@@ -13,6 +13,19 @@ The IntelliJ Platform reporting tasks expose plugin-development facts as JSON fi
 | `intellijPlatformDoctor` | `doctor.json` | Diagnostics against the resolved IDE |
 | `intellijPlatformDiscover` | `discover.json` | SDK catalog or release discovery |
 | `intellijPlatformSdk` | `sdk.json` | Resolved SDK files and classpath ownership |
+| `intellijPlatformSources` | `sources.json` | Source candidates and SDK-local archives; downloading and extraction are opt-in |
+
+## Task discovery
+
+All JSON report tasks belong to the `intellij platform reports` group, separate from the human-readable `print*` commands in `intellij platform info`:
+
+```bash
+./gradlew tasks --group="intellij platform reports"
+```
+
+Agents should use `intellijPlatformInfo` as their machine-readable entry point rather than parse task listings. Its capability catalog provides project-qualified commands, prerequisites, and execution costs. Task names, report paths, and JSON contracts are unchanged by the grouping.
+
+The group is not a promise of cheap or network-free execution: SDK inspection may acquire binaries, and source workflows may download and extract archives. Reports remain independent of `build` and `check`; there is no aggregate task that executes every report. Existing build, verification, and publishing groups and internal dump-task visibility are unchanged.
 
 ## Common contract (version 1)
 
@@ -32,7 +45,7 @@ All reports are UTF-8 JSON with stable ordering, explicit nulls, and no timestam
 ```
 
 - `status` is `complete`, `partial` (something could not be observed), or `failed` (the requested operation failed).
-- `unavailable` entries contain `observation`, `state` (`notRequested`, `notResolved`, or `unavailable`), and `reason`. Intentionally unrequested resolution is distinct from a failure.
+- `unavailable` entries contain `observation`, `state`, and `reason`. Common states are `notRequested`, `notResolved`, and `unavailable`; source-specific states are described below. Intentionally unrequested resolution is distinct from a failure.
 - `issues` contain a stable `id`, `severity`, `message`, nullable `setting`, `suggestedFix`, `documentation`, and `suppressed`. Optional diagnostic fields add `observedValue`, `expectedValue`, `configurationLocation`, `category`, `verificationCommand`, and lists of `evidence`, `provenance`, and `applicableIdeVersions`.
 - Additive fields are compatible within a schema version; consumers must ignore unknown fields. Breaking changes bump `schemaVersion`.
 
@@ -137,18 +150,83 @@ Doctor resolves the selected IDE and reads the effective (patched) `plugin.xml`,
 
 `--owner` filters presentation only: classpath entries and their ownership references always come from the complete SDK catalog. References can therefore identify owners omitted from a filtered `owners` list; obtain the unfiltered report when dereferencing the entire classpath catalog. An unknown owner produces an empty owner list without stripping classpath ownership information.
 
+`sourcesTask` is the project-qualified source-discovery command (for example, `:plugin:intellijPlatformSources`). It is a hint, not evidence that source discovery or downloading has run. The existing `sources` field remains an SDK-local archive list.
+
+## Headless source discovery and resolution
+
+```bash
+# Discover requirements and SDK-local source archives, without requesting source artifacts
+./gradlew :plugin:intellijPlatformSources
+
+# Resolve source artifacts and expose searchable Java/Kotlin files
+./gradlew :plugin:intellijPlatformSources --download --extract
+
+# Restrict inspection and source requests to an exact bundled owner ID or alias
+./gradlew :plugin:intellijPlatformSources --owner=com.intellij.java --download --extract
+
+# Extract only SDK-local archives, or additionally resolve archives from Gradle's offline cache
+./gradlew :plugin:intellijPlatformSources --offline --extract
+./gradlew :plugin:intellijPlatformSources --download --offline --extract
+
+./gradlew :plugin:intellijPlatformSources --output="build/custom reports/sources.json"
+```
+
+Source discovery inventories the selected platform classpath and declared bundled plugin/module binaries, not ordinary external/project dependencies. It reads `META-INF/maven/**/pom.properties` directly from JARs without unpacking binaries. Local candidates come from the same known SDK locations as the SDK report. Version-dependent product rules supply platform source candidates, including IDEA/PyCharm artifact transitions and exceptions such as RustRover using IDEA sources. Embedded Maven requests retain exact library versions; platform requests may use ordered compatible-build or snapshot fallbacks.
+
+Unlike metadata-only reports, **even discovery can acquire the selected SDK and binary dependencies** and populate inspection metadata. `--owner` selects matching layout archives **before Maven inspection and source resolution**; it does not avoid SDK acquisition or initial layout indexing. Matching is by exact ID or alias, with duplicate owners retained. An unknown owner yields an empty binary/source selection, not a whole-SDK fallback. This differs intentionally from the SDK report's presentation-only filter.
+
+`--download` alone opts into isolated, non-transitive source configurations. They do not extend or modify compilation/runtime classpaths. Only configured Gradle repositories, credentials, content restrictions, artifact caches, and `--offline` are used. No repository is added implicitly, embedded POM repositories are ignored, and private Gradle cache directories are never scanned. Configure an appropriate source-artifact repository using the normal repository DSL if candidates cannot resolve. `org.jetbrains.intellij.platform.downloadSources` still controls the IDEA-plugin preference only; it does not enable this task's downloads.
+
+### Source manifest (schema version 1)
+
+`reportType` is `sources`. Its `data` contains:
+
+- `targetIde`, absolute SDK `root`, selected `owner` (or null), and `inventoryFingerprint` identifying the selected SDK inputs, binary content, ownership, and discovery rules.
+- A self-contained `owners` catalog with report-local `ref`, `id`, `name`, `kind`, `aliases`, `dependencies`, and SDK-relative `archives`. Duplicate IDs remain distinct. Do not dereference these refs against another report.
+- `binaries` with stable `id`, SDK-relative `path`, `owners` refs, `exists`, content `fingerprint`, `inspection` outcome, `metadataEntries`, and sanitized `diagnostics`.
+- `sources` with stable `id`, associated `binaries` and `owners` refs, `origin` (`local`, `platformMapping`, or `embeddedMaven`), ordered `candidates`, `candidateProvenance`, nullable `selectedCoordinate`, `provenance`, `evidence`, `availability`, nullable absolute `archive`, `extraction`, and `diagnostics`. Coordinates include `group`, `artifact`, `version`, and `classifier`.
+- `extractedRoots`, an ordered list of absolute searchable directories for each source, and nullable `extractedRoot`, its primary root. Search **all** roots; one archive can require several portable roots. Binary/source/owner relationships are many-to-many, not one source archive per binary.
+
+Matching provenance is `exactCoordinate`, `compatibleFallback`, `snapshotFallback`, or `unverified`. Successful coordinate resolution is not verified class/package coverage: local archives, shading, relocation, proprietary classes, and product mappings prevent that inference. A local platform archive does not satisfy embedded third-party requests automatically.
+
+| `availability` | Meaning |
+| --- | --- |
+| `available` | An archive is currently present or resolved; this does not guarantee safe extraction or source coverage |
+| `notRequested` | Source-artifact resolution was intentionally skipped; use `--download` |
+| `missingOffline` | The requested artifact could not be obtained in this offline run; retry online |
+| `notFound` | Configured resolution reported a missing artifact; not proof that it was never published |
+| `unsupported` | No supported platform source mapping exists |
+| `resolutionError` | Resolution failed, for example because of repository setup, access, or availability |
+
+`extraction` is `notRequested`, `extracted`, or `failed`. Extraction failure retains the available archive and reports `Unavailable.state: "extractionFailed"`. Individual unavailable artifacts, malformed binary metadata, or failed extractions produce a `partial` report while keeping usable results. Intentionally skipped downloads use `Unavailable.state: "notRequested"` without making the report partial by themselves. `complete` means the requested observations succeeded, **not** complete source coverage. Caught fatal inventory/operation failures write `failed` before failing Gradle; configuration failures may prevent any report. Diagnostics never copy resolver exception messages or repository URLs.
+
+### Source caches and safe extraction
+
+- Downloaded archives remain in **Gradle's artifact cache**; no extra archive copies are stored in the project cache. SDK-local archives are not modified.
+- Rebuildable inspection metadata lives at `<cache-root>/sources/metadata/<scanner-schema>/<binary-content-fingerprint>.json`. It contains archive-intrinsic Maven metadata only, never stale owner associations or cached repository failures.
+- Completed extracted trees live at `<cache-root>/sources/extracted/<extractor-schema>/<archive-content-fingerprint>/`. Identical content is shared across owners/subprojects; different archives stay separate.
+- `<cache-root>` defaults to the **root project's `.intellijPlatform`**, shared by subprojects. The existing `org.jetbrains.intellij.platform.intellijPlatformCache` override applies; no new public setting or IDE-cache-enabled switch is required. For example, `-Porg.jetbrains.intellij.platform.intellijPlatformCache="/path/cache with spaces"` redirects derived source data too.
+- Ordinary `clean` removes reports under `build/`, not persistent source data. Rerunning rewrites the current report and reuses validated metadata/extractions. Deleting the source-cache subtree or encountering invalid/incomplete entries causes regeneration. Internal cache layouts/schema directories are not a consumer API.
+
+Extraction preserves package hierarchy, source roots, and licenses for JAR/ZIP archives. Exact duplicate names use their first occurrence and report a sanitized duplicate count. Distinct case/Unicode-colliding paths are partitioned deterministically into separate portable roots (at most eight), rather than losing files on case-insensitive filesystems. Unsafe paths, file/directory conflicts, links, special files, corrupt archives, and resource-limit violations are rejected. Private temporary directories, completion markers, bounded cross-process locking, and atomic publication prevent consumers seeing partial trees. Completed content is validated before reuse; extraction-cache presence alone never implies that an artifact is resolved or associated with a current owner. Offline misses and repository failures remain retryable on later runs.
+
+### Future DevKit consumption
+
+Agents can consume the manifest now without an IDE, source-matching heuristics, or decompilation. DevKit adoption is a separate follow-up: import the versioned manifest through Gradle tooling, negotiate schema/plugin support, and verify target SDK identity and inventory fingerprint before attaching archives. DevKit should own attachment/navigation, not depend on plugin implementation classes or scrape cache directories. Retain the existing DevKit resolver for older/unsupported plugins, non-Gradle projects, unsupported schemas, and unresolved entries until parity is established. This implementation does not change DevKit.
+
 ## Workflow recipe
 
 1. `intellijPlatformInfo` — learn the project identity, requested IDE, settings, and available commands without resolving anything.
 2. `intellijPlatformDoctor` — review unsuppressed `issues`, then apply the suggested fixes yourself; nothing is changed automatically.
 3. `intellijPlatformDiscover --kind=plugins|modules --query=…` — find exact bundled dependency IDs; `--kind=releases` — pick candidate target IDEs without downloading them.
-4. `intellijPlatformSdk --owner=…` — locate the archives and sources of the selected IDE and inspect them with ordinary tools.
+4. `intellijPlatformSdk --owner=…` — locate SDK binaries, ownership, SDK-local archives, and the qualified `sourcesTask` command.
+5. `intellijPlatformSources [--owner=…] --download --extract` — obtain available sources and search every reported `extractedRoots` directory, retaining provenance and unavailable entries.
 
 All commands are non-interactive and available on module projects. Use `./gradlew help --task <task>` for option help.
 
 ## Costs, safety, and failure semantics
 
-Reports do not compile, prepare sandboxes, launch IDEs, sign, publish, or edit project sources. Doctor patches `plugin.xml` into `build/`, like the verifier does. Resolution (doctor, SDK, discovery of plugins/modules, `info --resolve`, `dependencyGraph --resolve`) can download metadata, the IDE, or dependencies and write caches; Gradle's `--offline` is respected. Default project, distribution, dependency, and matrix reports do not resolve deferred dependencies; unavailable declarations are not silently forced into existence.
+Reports do not compile, prepare sandboxes, launch IDEs, sign, publish, or edit project sources. Doctor patches `plugin.xml` into `build/`, like the verifier does. Resolution (doctor, SDK, source discovery, discovery of plugins/modules, `info --resolve`, `dependencyGraph --resolve`) can download metadata, the IDE, or binary dependencies and write caches; source-artifact resolution additionally requires `sources --download`. Gradle's `--offline` is respected. Default project, distribution, dependency, and matrix reports do not resolve deferred dependencies; unavailable declarations are not silently forced into existence.
 
 Caught operational failures write a `failed` report before failing the task with ordinary Gradle semantics. A report cannot be guaranteed after build-script errors, plugin-application failures, or an unwritable destination.
 

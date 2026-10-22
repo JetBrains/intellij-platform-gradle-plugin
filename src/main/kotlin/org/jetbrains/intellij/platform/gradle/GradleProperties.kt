@@ -296,6 +296,9 @@ internal fun ProviderFactory.intellijPlatformIdeLayoutIndicesCachePath(rootProje
 internal fun ProviderFactory.intellijPlatformProductReleasesCachePath(rootProjectDirectory: Path) =
     intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(CACHE_DIRECTORY_PRODUCT_RELEASES) }
 
+internal fun ProviderFactory.intellijPlatformSourcesCachePath(rootProjectDirectory: Path) =
+    intellijPlatformCachePath(rootProjectDirectory).map { it.resolve(Constants.CACHE_DIRECTORY_SOURCES) }
+
 /**
  * Resolves the directory path from the given provider.
  */

@@ -211,6 +211,7 @@ class IntelliJPlatformInfoTaskTest : IntelliJPlatformTestBase() {
         fun costs(task: String) = byTask.getValue(":$task").getValue("executionCost").jsonArray.map { it.jsonPrimitive.content }
         assertEquals(listOf("metadata"), costs(Tasks.INTELLIJ_PLATFORM_INFO))
         assertEquals(listOf("resolution"), costs(Tasks.INTELLIJ_PLATFORM_SDK))
+        assertEquals(listOf("resolution"), costs(Tasks.INTELLIJ_PLATFORM_SOURCES))
         assertEquals(listOf("resolution", "compile"), costs(Tasks.External.COMPILE_JAVA))
         assertEquals(listOf("resolution", "compile", "ide"), costs("customRunIde"))
         assertEquals(listOf("resolution", "compile", "test"), costs("lateJvmTest"))
@@ -235,6 +236,7 @@ class IntelliJPlatformInfoTaskTest : IntelliJPlatformTestBase() {
         assertEquals(first, report("child/build/reports/intellij-platform/info.json").toString())
         val commands = project.getValue("commands").jsonArray.map { it.jsonPrimitive.content }
         assertTrue(":child:nestedJvmTest" in commands)
+        assertTrue(":child:${Tasks.INTELLIJ_PLATFORM_SOURCES}" in commands)
         assertTrue(commands.all { it.startsWith(":child:") })
         assertFalse(":child:${Tasks.PUBLISH_PLUGIN}" in commands)
         assertFalse(":child:${Tasks.RUN_IDE}" in commands)

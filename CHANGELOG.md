@@ -6,6 +6,7 @@
 
 - Add JSON reports for project structure, distribution contents, dependency resolution, test workflows, and IDE compatibility: `intellijPlatformProjectGraph`, `intellijPlatformDistribution`, `intellijPlatformDependencyGraph`, `intellijPlatformTestMatrix`, and `intellijPlatformCompatibilityMatrix`.
 - Add `intellijPlatformInfo`, `intellijPlatformDoctor`, `intellijPlatformDiscover`, and `intellijPlatformSdk` tasks with versioned JSON reports for project context, actionable configuration findings, filtered catalog discovery, and SDK file/ownership maps. See [CLI reports](./CLI_REPORTS.md).
+- Add `intellijPlatformSources` for headless source discovery, opt-in downloads (`--download`), and safe extraction (`--extract`) for the selected IntelliJ Platform, declared bundled dependencies, and embedded Maven libraries. Reports include binary/source ownership and availability; inspection metadata and extracted sources are cached under `.intellijPlatform`. Resolution respects configured Gradle repositories and `--offline`. See [CLI reports](./CLI_REPORTS.md).
 - Add `DumpBundledPluginsTask` and `DumpBundledModulesTask` to support dumping bundled plugins and modules for Plugin DevKit plugin purposes
 - Add JUnit 5 test framework types `TestFrameworkType.JUnit5Eel`, `TestFrameworkType.JUnit5Highlighting`, and `TestFrameworkType.JUnit5ProjectStructure` JetBrains/intellij-platform-gradle-plugin#2251
 - Configure isolated Starter UI testing with the new `testUi` task
@@ -31,6 +32,7 @@
 
 ### Fixed
 
+- Create custom `TestIdeUiTask` source sets during lazy task initialization, avoiding Gradle mutation-guard errors while preserving isolated `testUi` defaults.
 - Use the owning project path, rather than the task path, in JSON report envelopes.
 - Preserve complete SDK classpath ownership metadata when `intellijPlatformSdk --owner` filters the displayed catalog.
 - Share the JAR filesystem cache with plugin readers when indexing bundled plugins, preventing `ClosedFileSystemException` and missing bundled plugins such as `com.intellij.java`. Rebuild older layout indices that may be incomplete. JetBrains/intellij-platform-gradle-plugin#2192

@@ -29,6 +29,7 @@ class IntelliJPlatformSdkTaskTest : IntelliJPluginTestBase() {
         val result = build(Tasks.INTELLIJ_PLATFORM_SDK)
         assertEquals(listOf(":initializeIntellijPlatformPlugin", ":intellijPlatformSdk"), result.tasks.map { it.path })
         assertEquals("IU", data().getValue("targetIde").jsonObject.getValue("productCode").jsonPrimitive.content)
+        assertEquals(":${Tasks.INTELLIJ_PLATFORM_SOURCES}", data().getValue("sourcesTask").jsonPrimitive.content)
         val root = Path(data().getValue("root").jsonPrimitive.content)
         assertTrue(root.isDirectory())
         val owners = data().getValue("owners").jsonArray.map { it.jsonObject }
@@ -92,5 +93,27 @@ class IntelliJPlatformSdkTaskTest : IntelliJPluginTestBase() {
         assertEquals(Path(root), Path(data().getValue("root").jsonPrimitive.content))
         build(Tasks.INTELLIJ_PLATFORM_SDK, "--owner=there-is-no-owner-9385", "--output=build/custom reports/sdk.json", args = listOf("--offline"))
         assertTrue(report("build/custom reports/sdk.json").getValue("data").jsonObject.getValue("owners").jsonArray.isEmpty())
+
+        dir.resolve("settings.gradle.kts").writeText("rootProject.name = \"sdk-map\"; include(\"child\")")
+        dir.resolve("child").createDirectories().resolve("build.gradle.kts").writeText("""
+            plugins { id("org.jetbrains.intellij.platform.module") }
+            repositories { intellijPlatform { localPlatformArtifacts() } }
+            dependencies { intellijPlatform { local("$root") } }
+        """.trimIndent())
+        buildWithConfigurationCache(":child:${Tasks.INTELLIJ_PLATFORM_SDK}", args = listOf("--offline")) {
+            assertEquals(listOf(":child:${Tasks.INTELLIJ_PLATFORM_SDK}"), tasks.map { it.path })
+        }
+        val child = report("child/build/reports/intellij-platform/sdk.json").getValue("data").jsonObject
+        val command = child.getValue("sourcesTask").jsonPrimitive.content
+        assertEquals(":child:${Tasks.INTELLIJ_PLATFORM_SOURCES}", command)
+        assertEquals(data().getValue("sources"), child.getValue("sources"))
+        buildWithConfigurationCache(command, "--owner=there-is-no-owner-9385", "--output=build/custom reports/sources.json", args = listOf("--offline")) {
+            assertEquals(listOf(command), tasks.map { it.path })
+        }
+        val sources = report("child/build/custom reports/sources.json")
+        assertEquals(":child", sources.getValue("projectPath").jsonPrimitive.content)
+        assertEquals("sources", sources.getValue("reportType").jsonPrimitive.content)
+        assertEquals("complete", sources.getValue("status").jsonPrimitive.content)
+        assertTrue(sources.getValue("data").jsonObject.getValue("binaries").jsonArray.isEmpty())
     }
 }
