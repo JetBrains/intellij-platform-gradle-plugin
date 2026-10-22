@@ -4,7 +4,6 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import kotlin.test.Ignore
 import kotlin.test.Test
 
 private const val CLASSPATH_ENTRY_LABEL = "test-ide-content-modules: Test classpath entry:"
@@ -79,7 +78,6 @@ class TestIdeContentModulesIntegrationTest : IntelliJPlatformIntegrationTestBase
     }
 
     @Test
-    @Ignore("intellij.spellchecker requires intellij.libraries.lucene.common declared by intellij.libraries.misc.plugin, which is not added")
     fun `load plugin declaring bundled module`() {
         disableDebug()
 
@@ -97,7 +95,6 @@ class TestIdeContentModulesIntegrationTest : IntelliJPlatformIntegrationTestBase
     }
 
     @Test
-    @Ignore("intellij.spellchecker requires intellij.libraries.lucene.common declared by intellij.libraries.misc.plugin, which is not added")
     fun `load tested plugin without bundled plugins`() {
         disableDebug()
 

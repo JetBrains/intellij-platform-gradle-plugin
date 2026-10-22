@@ -40,6 +40,14 @@ internal data class IdeLayoutIndex(
         }
     }
 
+    @Transient
+    // The owner's classpath contains its content modules,
+    // which may be present without it, so they don't prove the owner is present.
+    private val contentModulesClasspath: Map<String, Set<String>> = bundledModules
+        .flatMap { module -> module.owners.map { it to module.classpath } }
+        .groupBy({ it.first }, { it.second })
+        .mapValues { (_, classpaths) -> classpaths.flatten().toSet() }
+
     fun findById(id: String) = entriesById[id]
 
     fun findByIdOrModuleId(id: String) = findById(id) ?: findByModuleId(id)
@@ -58,38 +66,111 @@ internal data class IdeLayoutIndex(
         get() = entries.asSequence().filter { it.isModule }
 
     /**
-     * Returns plugins missing on [classpath] that declare the bundled modules present on it.
-     * The IDE loads a content module only with the plugin declaring it in `<content>`, e.g., only the plugin JAR has `META-INF/plugin.xml`.
+     * Returns plugins and modules missing on [classpath] that the IDE needs to load the core and the bundled modules
+     * present on it.
      *
-     * Modules owned by the core or by a plugin already present on [classpath] are skipped.
+     * - The IDE loads a content module only with the plugin declaring it in `<content>`,
+     *   e.g., only the plugin JAR has `META-INF/plugin.xml`, so the plugins declaring the bundled modules present
+     *   on [classpath] are returned.
+     * - The IDE excludes a content module of the core when its dependencies are missing, and external plugins
+     *   depend on many of them implicitly, e.g., `intellij.spellchecker` requiring `intellij.libraries.lucene.common`,
+     *   so dependencies of the core and its content modules present on [classpath] are returned,
+     *   transitively, if [includeCoreDependencies] is set.
+     *
+     * The returned entries are dependencies of the returned plugins, too.
+     * A missing module is returned on its own when its owner is present, otherwise its owner is returned.
      * When several plugins declare the same module, the one declaring the modules requiring it is picked, see [ownerOf].
      *
      * @param classpath Paths relative to the IntelliJ Platform root, like [Entry.classpath].
+     * @param includeCoreDependencies Whether to return dependencies of the core and its content modules.
      */
-    fun findMissingContentModuleOwners(classpath: Set<String>): List<Entry> {
-        // The owner's classpath contains its content modules,
-        // which may be present without it, so they don't prove the owner is present.
-        val contentModulesClasspath = bundledModules
-            .flatMap { module -> module.owners.map { it to module.classpath } }
-            .groupBy({ it.first }, { it.second })
-            .mapValues { (_, classpaths) -> classpaths.flatten().toSet() }
-        val isPresent = { owner: Entry ->
-            owner.id == IDEA_CORE ||
-                // any non-module JAR means the whole plugin was added to the classpath:
-                owner.classpath.any { it in classpath && it !in contentModulesClasspath[owner.key].orEmpty() }
+    fun findMissingEntries(classpath: Set<String>, includeCoreDependencies: Boolean = true): List<Entry> {
+        val currentClasspath = classpath.toMutableSet()
+        val missingEntries = linkedMapOf<String, Entry>()
+
+        // Each found entry adds its classpath and dependencies, so repeat until nothing more is found.
+        do {
+            val missingEntriesCount = missingEntries.size
+            val presentModules = bundledModules.filter { isPresent(it, currentClasspath) }.toList()
+
+            requiredEntries(presentModules, missingEntries.values, includeCoreDependencies).forEach { entry ->
+                val missingEntry = findMissingEntry(entry, currentClasspath, presentModules) ?: return@forEach
+                if (missingEntries.putIfAbsent(missingEntry.key, missingEntry) == null) {
+                    currentClasspath += missingEntry.classpath
+                }
+            }
+        } while (missingEntries.size > missingEntriesCount)
+
+        return missingEntries.values.toList()
+    }
+
+    /**
+     * Returns the entries the IDE needs to load the [presentModules] and the [missingEntries] found so far:
+     * the [presentModules] themselves, and the dependencies of the [missingEntries], transitively.
+     * If [includeCoreDependencies] is set, the dependencies of the core and its [presentModules] are returned, too.
+     */
+    private fun requiredEntries(
+        presentModules: List<Entry>,
+        missingEntries: Collection<Entry>,
+        includeCoreDependencies: Boolean,
+    ): List<Entry> {
+        val roots = when {
+            includeCoreDependencies -> coreWithModules(presentModules) + missingEntries
+            else -> missingEntries
+        }
+        return presentModules + dependencyClosure(roots)
+    }
+
+    /**
+     * Returns the core with its content modules found in [presentModules].
+     */
+    private fun coreWithModules(presentModules: List<Entry>): List<Entry> {
+        val core = bundledPlugins.firstOrNull { it.id == IDEA_CORE } ?: return emptyList()
+        return listOf(core) + presentModules.filter { core.key in it.owners }
+    }
+
+    /**
+     * Returns the entry to add to [classpath], so the IDE can load [entry], or `null` if [entry] can be loaded already.
+     * For a module, its owner is returned when none of its owners is present, otherwise the module itself when missing.
+     */
+    private fun findMissingEntry(entry: Entry, classpath: Set<String>, presentModules: List<Entry>): Entry? {
+        if (!entry.isModule) {
+            return entry.takeUnless { isPresent(it, classpath) }
         }
 
-        val presentModules = bundledModules
-            // a module may consist of many JARs, and it is on the classpath only if its all JARs are on the classpath:
-            .filter { it.classpath.isNotEmpty() && classpath.containsAll(it.classpath) }
-            .toList()
+        val owners = entry.owners.mapNotNull(::findByKey)
+        return when {
+            owners.none { isPresent(it, classpath) } -> ownerOf(entry, owners, presentModules)
+            entry.classpath.isNotEmpty() && !isPresent(entry, classpath) -> entry
+            else -> null
+        }
+    }
 
-        return presentModules
-            .mapNotNull { module ->
-                val owners = module.owners.mapNotNull(::findByKey)
-                owners.takeUnless { it.any(isPresent) }?.let { ownerOf(module, it, presentModules) }
+    /**
+     * Whether [entry] is present on [classpath].
+     */
+    private fun isPresent(entry: Entry, classpath: Set<String>) = when {
+        // a module may consist of many JARs, and it is on the classpath only if its all JARs are on the classpath:
+        entry.isModule -> entry.classpath.isNotEmpty() && classpath.containsAll(entry.classpath)
+        else -> entry.id == IDEA_CORE ||
+            // any non-module JAR means the whole plugin was added to the classpath:
+            entry.classpath.any { it in classpath && it !in contentModulesClasspath[entry.key].orEmpty() }
+    }
+
+    /**
+     * Returns [entries] with all their [Entry.dependencies], transitively.
+     */
+    private fun dependencyClosure(entries: Collection<Entry>): Collection<Entry> {
+        val visited = linkedMapOf<String, Entry>()
+        val queue = ArrayDeque(entries)
+
+        while (queue.isNotEmpty()) {
+            val entry = queue.removeFirst()
+            if (visited.putIfAbsent(entry.key, entry) == null) {
+                queue += entry.dependencies.mapNotNull(::findByKey)
             }
-            .distinctBy { it.key }
+        }
+        return visited.values
     }
 
     /**
