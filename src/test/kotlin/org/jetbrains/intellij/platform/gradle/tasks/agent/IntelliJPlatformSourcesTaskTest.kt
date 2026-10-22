@@ -46,6 +46,59 @@ class IntelliJPlatformSourcesTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `downloaded source outcomes support configuration cache with a local repository`() {
+        dir.resolve("settings.gradle.kts").writeText("rootProject.name = \"source-download\"")
+        val sdk = dir.resolve("local SDK").createDirectories()
+        sdk.resolve("build.txt").writeText("IC-243.1")
+        sdk.resolve("product-info.json").writeText("""
+            {"name":"IDEA","version":"2024.3","buildNumber":"243.1","productCode":"IC",
+             "dataDirectoryName":"Idea","svgIconPath":"bin/idea.svg","productVendor":"JetBrains","modules":[],"bundledPlugins":[],
+             "launch":[{"os":"macOS","bootClassPathJarNames":["platform.jar"]},{"os":"Linux","bootClassPathJarNames":["platform.jar"]},{"os":"Windows","bootClassPathJarNames":["platform.jar"]}],
+             "layout":[{"name":"com.intellij","kind":"plugin","classPath":["lib/platform.jar"]}]}
+        """.trimIndent())
+        sdk.resolve("lib/platform.jar").archive(
+            "META-INF/plugin.xml" to "<idea-plugin><id>com.intellij</id><name>Platform</name><version>1</version><vendor>JetBrains</vendor></idea-plugin>",
+            "META-INF/maven/org.example/library/pom.properties" to "groupId=org.example\nartifactId=library\nversion=1.0",
+        )
+        sdk.resolve("modules/module-descriptors.jar").archive()
+        val repository = dir.resolve("source repository").createDirectories()
+        fun publish(group: String, artifact: String, version: String) {
+            val module = repository.resolve("${group.replace('.', '/')}/$artifact/$version").createDirectories()
+            module.resolve("$artifact-$version.pom").writeText("""
+                <project><modelVersion>4.0.0</modelVersion><groupId>$group</groupId><artifactId>$artifact</artifactId><version>$version</version></project>
+            """.trimIndent())
+            module.resolve("$artifact-$version-sources.jar").archive("org/example/Library.java" to "class Library {}")
+        }
+        publish("org.example", "library", "1.0")
+        dir.resolve("build.gradle.kts").writeText("""
+            plugins { id("org.jetbrains.intellij.platform.module") }
+            repositories {
+                intellijPlatform { localPlatformArtifacts() }
+                maven { url = uri("${repository.invariantSeparatorsPathString}") }
+            }
+            dependencies { intellijPlatform { local("${sdk.invariantSeparatorsPathString}") } }
+        """.trimIndent())
+        buildWithConfigurationCache(Tasks.INTELLIJ_PLATFORM_SOURCES, args = listOf("--download")) {
+            assertContains(output, "Configuration cache entry stored")
+        }
+        assertEquals("partial", report().getValue("status").jsonPrimitive.content)
+        assertEquals("available", data().getValue("sources").jsonArray.single {
+            it.jsonObject.getValue("origin").jsonPrimitive.content == "embeddedMaven"
+        }.jsonObject.getValue("availability").jsonPrimitive.content)
+        publish("com.jetbrains.intellij.idea", "ideaIC", "243.1")
+        repeat(2) { run ->
+            buildWithConfigurationCache(Tasks.INTELLIJ_PLATFORM_SOURCES, args = listOf("--download")) {
+                assertContains(output, if (run == 0) "Configuration cache entry stored" else "Configuration cache entry reused")
+            }
+            assertEquals("complete", report().getValue("status").jsonPrimitive.content)
+            val sources = data().getValue("sources").jsonArray.map { it.jsonObject }
+            assertEquals(setOf("embeddedMaven", "platformMapping"), sources.map { it.getValue("origin").jsonPrimitive.content }.toSet())
+            assertTrue(sources.all { it.getValue("availability").jsonPrimitive.content == "available" })
+            assertTrue(sources.all { Path(it.getValue("archive").jsonPrimitive.content).isRegularFile() })
+        }
+    }
+
+    @Test
     fun `local SDK changes at the same path remain fresh with configuration cache`() {
         dir.resolve("settings.gradle.kts").writeText("rootProject.name = \"local-sdk\"")
         val sdk = dir.resolve("local SDK").createDirectories()

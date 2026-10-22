@@ -142,13 +142,14 @@ abstract class IntelliJPlatformSourcesTask : AgentReportTask() {
             binaryPaths.convention(project.provider { configurations.flatMap { it.files }.map { it.absolutePath }.distinct().sorted() })
             ideLayoutIndexService.convention(project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class))
             val task = this
+            val layoutIndicesCache = project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
             discoveryResult.convention(project.providers.of(IntelliJPlatformSourcesValueSource::class) {
                 parameters.root.set(task.platformFiles.elements.map { taskFiles -> taskFiles.single().asFile.toPath().resolvePlatformPath().toString() })
                 parameters.binaryPaths.set(task.binaryPaths)
                 parameters.owner.set(task.owner)
                 parameters.owners.set(project.provider {
                     val root = Path(task.platformFiles.singleFile.toPath().resolvePlatformPath().toString())
-                    val cache = project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath).get()
+                    val cache = layoutIndicesCache.get()
                     Json.encodeToString(task.ideLayoutIndexService.get().resolve(root, cache).layoutEntries().map { entry ->
                         SourceOwner(entry.ref, entry.id, entry.name, entry.kind, entry.aliases, entry.dependencies,
                             entry.archives.mapNotNull { root.resolve(it).normalize().takeIf { path -> path.startsWith(root) }
