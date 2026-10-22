@@ -50,7 +50,7 @@ All releases are available in the [Releases](https://github.com/JetBrains/intell
 Please see [CONTRIBUTING](./CONTRIBUTING.md) on how to submit feedback and contribute to this project.
 
 ## License
-Licensed under the Apache License, Version 2.0 (the "License"), see [LICENCE](./LICENSE).
+Licensed under the Apache License, Version 2.0 (the "License"), see [LICENSE](./LICENSE).
 
 [gh:build]: https://github.com/JetBrains/intellij-platform-gradle-plugin/actions/workflows/build.yml
 [jb:github]: https://github.com/JetBrains#jetbrains-open-source
