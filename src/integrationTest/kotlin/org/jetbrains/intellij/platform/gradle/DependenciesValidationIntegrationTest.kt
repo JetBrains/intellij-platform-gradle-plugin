@@ -6,9 +6,13 @@ import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.models.Coordinates
 import org.jetbrains.intellij.platform.gradle.models.resolveLatestVersion
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 import kotlin.io.path.Path
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.test.Ignore
 import kotlin.test.Test
+import kotlin.test.assertTrue
 
 private const val DEPENDENCIES = "dependencies"
 
@@ -97,27 +101,74 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
 
     @Test
     fun `resolve IntelliJ Platform dependency through local IDE path in split mode without global cache`() {
-        buildFile write //language=kotlin
+        val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
+        val coordinates = requireNotNull(type.maven)
+        val repository = dir.resolve("repository")
+        val moduleDirectory = repository.resolve("${coordinates.groupId.replace('.', '/')}/${coordinates.artifactId}/$intellijPlatformVersion")
+        val artifactName = "${coordinates.artifactId}-$intellijPlatformVersion"
+
+        moduleDirectory.resolve("$artifactName.pom") write //language=xml
                 """
+                <project>
+                    <modelVersion>4.0.0</modelVersion>
+                    <groupId>${coordinates.groupId}</groupId>
+                    <artifactId>${coordinates.artifactId}</artifactId>
+                    <version>$intellijPlatformVersion</version>
+                    <packaging>zip</packaging>
+                </project>
+                """.trimIndent()
+
+        ZipOutputStream(moduleDirectory.resolve("$artifactName.zip").toFile().outputStream()).use {
+            it.putNextEntry(ZipEntry("product-info.json"))
+            it.write(
+                //language=json
+                """
+                {
+                    "name": "Dependency resolution fixture",
+                    "version": "$intellijPlatformVersion",
+                    "buildNumber": "$intellijPlatformBuildNumber",
+                    "productCode": "${type.code}"
+                }
+                """.trimIndent().toByteArray()
+            )
+            it.closeEntry()
+        }
+
+        buildFile overwrite //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.intellij.platform")
+                }
+
                 repositories {
+                    maven {
+                        url = uri("${repository.invariantSeparatorsPathString}")
+                    }
                     intellijPlatform {
-                        defaultRepositories()
+                        localPlatformArtifacts()
                     }
                 }
                 
                 dependencies {
                     intellijPlatform {
-                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                        create("$intellijPlatformType", "$intellijPlatformVersion") {
+                            useInstaller = false
+                        }
                     }
                 }
                 
                 intellijPlatform {
                     splitMode = true
+                    caching {
+                        ides {
+                            enabled = false
+                            path = layout.projectDirectory.dir("ides")
+                        }
+                    }
                 }
                 """.trimIndent()
 
-        build(DEPENDENCIES) {
-            val type = intellijPlatformType.toIntelliJPlatformType(intellijPlatformVersion)
+        build(DEPENDENCIES, "--configuration=intellijPlatformDependency") {
             val artifactCoordinates = "localIde:${type.code}:${type.code}-$intellijPlatformBuildNumber"
 
             assertContains(
@@ -127,7 +178,13 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
                 """.trimIndent(),
                 output,
             )
+            assertNotContains("FAILED", output)
         }
+
+        val extractedIde = dir.resolve("ides/${type.code}-$intellijPlatformVersion").toFile()
+        assertTrue(extractedIde.resolve("product-info.json").isFile, "Expected an extracted IDE at $extractedIde")
+        val extractedSize = extractedIde.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+        assertTrue(extractedSize < 1024 * 1024, "Dependency resolution fixture should stay below 1 MiB, but extracted $extractedSize bytes")
     }
 
     @Test
