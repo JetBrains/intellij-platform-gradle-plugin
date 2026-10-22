@@ -78,17 +78,26 @@ abstract class IntelliJPlatformTestBase {
 
     @OptIn(ExperimentalPathApi::class)
     private fun deleteTempDirectoryWithRetries() {
+        dir.deleteRecursivelyWithRetries()
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    protected fun Path.deleteRecursivelyWithRetries(failOnFailure: Boolean = true) {
         val isWindows = System.getProperty("os.name").startsWith("Windows")
         val maxAttempts = if (isWindows) 20 else 5
         val retryDelayMs = if (isWindows) 250L else 100L
         repeat(maxAttempts) { attempt ->
             try {
-                dir.deleteRecursively()
+                deleteRecursively()
                 return
             } catch (exception: IOException) {
                 if (attempt == maxAttempts - 1) {
-                    printDeletionFailureDiagnostics(exception)
-                    throw exception
+                    if (failOnFailure) {
+                        printDeletionFailureDiagnostics(this, exception)
+                        throw exception
+                    }
+                    System.err.println("Failed to delete '$this' after $maxAttempts attempts: ${exception.message}")
+                    return
                 }
                 Thread.sleep(retryDelayMs)
             }
@@ -307,11 +316,11 @@ abstract class IntelliJPlatformTestBase {
         const val CONFIGURATION_CACHE_ARGUMENT = "--configuration-cache"
     }
 
-    private fun printDeletionFailureDiagnostics(exception: IOException) {
+    private fun printDeletionFailureDiagnostics(directory: Path, exception: IOException) {
         val diagnostics = buildString {
             appendLine()
             appendLine("=== Test Directory Deletion Failure Start ===")
-            appendLine("Directory: $dir")
+            appendLine("Directory: $directory")
             appendLine(exception.stackTraceToString())
             appendLine("=== Test Directory Deletion Failure End ===")
         }

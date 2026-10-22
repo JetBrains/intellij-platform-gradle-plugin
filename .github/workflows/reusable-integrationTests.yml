@@ -38,6 +38,85 @@ jobs:
           preinstalled-runtimes: false
           large-packages: false
 
+      # Windows runners ship multi-GB unused toolchains; free space for IDE extracts in ITs.
+      # Best-effort only: locked paths / native rmdir / docker must never fail the job (tests still need to run).
+      - name: Maximize Build Space (Windows)
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Continue'
+          function Remove-PathIfExists([string]$Path) {
+            try {
+              if (Test-Path -LiteralPath $Path) {
+                Write-Host "Removing $Path"
+                cmd /c "rmdir /s /q `"$Path`"" 2>$null | Out-Null
+                $global:LASTEXITCODE = 0
+                if (Test-Path -LiteralPath $Path) {
+                  Remove-Item -LiteralPath $Path -Recurse -Force -ErrorAction SilentlyContinue
+                }
+              }
+            } catch {
+              Write-Host "Skipping $Path : $($_.Exception.Message)"
+            }
+          }
+
+          try {
+            Write-Host "=== Disk before cleanup ==="
+            Get-PSDrive -PSProvider FileSystem | Format-Table -AutoSize
+            @(
+              'C:\Android',
+              'C:\Program Files\Android',
+              'C:\Program Files (x86)\Android',
+              'C:\Program Files\dotnet',
+              'C:\Program Files\Microsoft SQL Server',
+              'C:\Program Files\MongoDB',
+              'C:\Program Files\MySQL',
+              'C:\Program Files\PostgreSQL',
+              'C:\Program Files\Microsoft Visual Studio',
+              'C:\Program Files (x86)\Microsoft Visual Studio',
+              'C:\Program Files\Microsoft SDKs',
+              'C:\Program Files (x86)\Microsoft SDKs',
+              'C:\Program Files (x86)\Microsoft DirectX SDK (June 2010)',
+              'C:\ProgramData\Chocolatey',
+              'C:\ProgramData\Microsoft\VisualStudio',
+              'C:\hostedtoolcache\windows\CodeQL',
+              'C:\hostedtoolcache\windows\Ruby',
+              'C:\hostedtoolcache\windows\go',
+              'C:\hostedtoolcache\windows\Python',
+              'C:\hostedtoolcache\windows\node',
+              'C:\hostedtoolcache\windows\Java',
+              'C:\miniconda',
+              'C:\tools\php',
+              'C:\Program Files\LLVM',
+              'C:\Program Files\Google',
+              'C:\Program Files (x86)\Google',
+              'C:\Program Files\Java\jdk-11*',
+              'C:\Program Files\Java\jdk-17*',
+              'C:\Program Files\Eclipse Adoptium'
+            ) | ForEach-Object {
+              if ($_ -match '\*') {
+                Get-Item $_ -ErrorAction SilentlyContinue | ForEach-Object { Remove-PathIfExists $_.FullName }
+              } else {
+                Remove-PathIfExists $_
+              }
+            }
+            try {
+              if (Get-Command docker -ErrorAction SilentlyContinue) {
+                docker system prune -af 2>$null | Out-Null
+              }
+            } catch {
+              Write-Host "docker prune skipped: $($_.Exception.Message)"
+            }
+            $global:LASTEXITCODE = 0
+            Write-Host "=== Disk after cleanup ==="
+            Get-PSDrive -PSProvider FileSystem | Format-Table -AutoSize
+          } catch {
+            Write-Host "Windows free-disk cleanup encountered an error (continuing): $($_.Exception.Message)"
+          }
+          $global:LASTEXITCODE = 0
+          exit 0
+
       - name: Fetch Sources
         uses: actions/checkout@v7
 
@@ -61,13 +140,39 @@ jobs:
           restore-keys: |
             test-gradle-home-v5-intellij-platform-${{ runner.os }}-
 
+      - name: Restore Gradle TestKit shared dependency cache
+        uses: actions/cache/restore@v6
+        with:
+          path: .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+          key: test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          restore-keys: |
+            test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-
+
+      # modules-2 is restored separately (shared). transforms-* are rebuildable and multi-GB;
+      # exclude them so IT restore leaves free disk for project-local IDE extracts (esp. Windows).
       - name: Restore Gradle TestKit cache
         uses: actions/cache/restore@v6
         with:
-          path: .gradle/testGradleHome/.testKit
-          key: test-gradle-home-v2-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          path: |
+            .gradle/testGradleHome/.testKit
+            !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+            !.gradle/testGradleHome/.testKit/worker-*/caches/transforms-*
+          key: test-gradle-home-v5-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v2-testkit-${{ runner.os }}-
+            test-gradle-home-v5-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-
+
+      # Drop rebuildable transforms after restore so project-local IDE extracts have free disk.
+      - name: Prune TestKit transforms cache
+        shell: bash
+        run: |
+          if [ -d .gradle/testGradleHome/.testKit ]; then
+            find .gradle/testGradleHome/.testKit -type d -name 'transforms-*' -print 2>/dev/null \
+              | while IFS= read -r dir; do
+                  echo "Removing $dir"
+                  rm -rf "$dir" || true
+                done
+          fi
+          df -h . 2>/dev/null || true
 
       - name: Run Tests
         env:
