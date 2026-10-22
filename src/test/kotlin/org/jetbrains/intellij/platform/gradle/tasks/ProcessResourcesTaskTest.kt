@@ -12,6 +12,8 @@ private const val PROCESS_RESOURCES = "processResources"
 
 class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
 
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
+
     private val outputPluginXml
         get() = buildDirectory.resolve("resources/main/META-INF/").listDirectoryEntries().first()
 
@@ -97,6 +99,7 @@ class ProcessResourcesTaskTest : IntelliJPluginTestBase() {
                 <idea-plugin />
                 """.trimIndent()
 
+        build(PROCESS_RESOURCES)
         buildWithConfigurationCache(PROCESS_RESOURCES)
 
         buildWithConfigurationCache(PROCESS_RESOURCES) {
