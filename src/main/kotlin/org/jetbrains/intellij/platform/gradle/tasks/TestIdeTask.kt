@@ -153,12 +153,13 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // Before 2026.2, adding all bundled plugins to the classpath breaks the plugin model (e.g., the Git frontend
             // module is provided by both Git4Idea and the Remote Development plugin), so it is applied there only on request.
             // See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2250
+            val bundledPluginsClasspathSupportedProvider = platformPathProvider.map {
+                it.productInfo().buildNumber.toVersion() >= Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER
+            }
             val bundledPluginsClasspathEnabledProvider = project.providers
                 .gradleProperty(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString())
                 .map { it.toBoolean() }
-                .orElse(platformPathProvider.map {
-                    it.productInfo().buildNumber.toVersion() >= Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER
-                })
+                .orElse(bundledPluginsClasspathSupportedProvider)
             val bundledPluginsClasspathProvider = bundledPluginsClasspathEnabledProvider.flatMap { enabled ->
                 when {
                     enabled -> bundledPluginsClasspathExcludesProvider.map { bundledPluginsClasspathExcludes ->
@@ -178,14 +179,15 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     else -> project.providers.provider { emptyList() }
                 }
             }
-            // As an alternative to bundledPluginsClasspathProvider,
-            // add only the plugins declaring the bundled modules on the test classpath,
-            // as the IDE loads a content module only with its plugin,
-            // e.g., the plugin declaring `intellij.platform.structureView` required by `com.intellij.java`.
-            val contentModuleOwnersClasspathProvider = bundledPluginsClasspathEnabledProvider.flatMap { enabled ->
+            // As an alternative to bundledPluginsClasspathProvider, add only the plugins and modules the IDE needs
+            // to load the IntelliJ Platform JARs on the test classpath, see IdeLayoutIndex.findMissingEntries.
+            // The test runtime fixes provide the core content modules, e.g., `lib/intellij.spellchecker.jar`.
+            // Before 2026.2, dependencies of the core are skipped for the reason above (issue #2250).
+            val platformClasspathConfigurations = intellijPlatformTestClasspathConfiguration + intelliJPlatformTestRuntimeFixClasspathConfiguration
+            val missingEntriesClasspathProvider = bundledPluginsClasspathEnabledProvider.flatMap { enabled ->
                 when {
                     enabled -> project.providers.provider { emptyList() }
-                    else -> (intellijPlatformTestClasspathConfiguration - intellijPlatformClasspathConfiguration).elements.map { elements ->
+                    else -> platformClasspathConfigurations.elements.map { elements ->
                         val platformPath = platformPathProvider.get()
                         val ideLayoutIndex = ideLayoutIndexService.get().resolve(
                             platformPath = platformPath,
@@ -198,7 +200,10 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                             .map { normalizedPlatformPath.relativize(it).invariantSeparatorsPathString }
                             .toSet()
 
-                        ideLayoutIndex.findMissingContentModuleOwners(platformClasspath)
+                        ideLayoutIndex.findMissingEntries(
+                            classpath = platformClasspath,
+                            includeCoreDependencies = bundledPluginsClasspathSupportedProvider.get(),
+                        )
                             .flatMap { it.classpath.map(platformPath::resolve) }
                             .distinct()
                     }
@@ -207,26 +212,26 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
 
             classpath = project.files(
                 // Build the classpath in the correct order:
-                // 1. Instrumented test code (if available)
+                // 1. Instrumented test code (if available):
                 instrumentedTestCode,
-                // 2. Current plugin's libraries
+                // 2. Current plugin's libraries:
                 currentPluginLibsProvider,
-                // 3. Other plugins' libraries
+                // 3. Other plugins' libraries:
                 otherPluginsLibsProvider,
-                // 4. Test classpath configuration without IntelliJ Platform base classpath
+                // 4. Test classpath configuration without IntelliJ Platform base classpath:
                 intellijPlatformTestClasspathConfiguration - intellijPlatformClasspathConfiguration,
-                // 5. IntelliJ Platform base classpath
+                // 5. IntelliJ Platform base classpath:
                 intellijPlatformClasspathConfiguration,
-                // 6. Original classpath without runtime dependencies
+                // 6. Original classpath without runtime dependencies:
                 classpath - runtimeDependencies,
-                // 7. Test runtime classpath configuration
+                // 7. Test runtime classpath configuration:
                 intellijPlatformTestRuntimeClasspathConfiguration,
-                // 8. Test runtime fixes classpath configuration, see: https://youtrack.jetbrains.com/issue/IJPL-180516
+                // 8. Test runtime fixes classpath configuration (https://youtrack.jetbrains.com/issue/IJPL-180516):
                 intelliJPlatformTestRuntimeFixClasspathConfiguration,
-                // 9. Bundled plugins declared by product-info, when enabled (by default, since 2026.2)
+                // 9. Bundled plugins declared by product-info, when enabled (by default, since 2026.2):
                 bundledPluginsClasspathProvider,
-                // 10. Otherwise, plugins declaring the bundled modules present on the classpath, when missing
-                contentModuleOwnersClasspathProvider,
+                // 10. Otherwise, plugins and modules required by the IntelliJ Platform JARs above, when missing:
+                missingEntriesClasspathProvider,
             )
 
             testClassesDirs = instrumentedTestCode + testClassesDirs

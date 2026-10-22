@@ -71,7 +71,7 @@ class IdeLayoutIndexServiceTest {
 
     @Test
     fun `find missing plugin declaring bundled module present on classpath`() {
-        val owners = createIndex().findMissingContentModuleOwners(
+        val owners = createIndex().findMissingEntries(
             setOf("plugins/structureView/lib/modules/intellij.platform.structureView.jar"),
         )
 
@@ -80,7 +80,7 @@ class IdeLayoutIndexServiceTest {
 
     @Test
     fun `find missing plugin when several of its content modules are present on classpath`() {
-        val owners = createIndex().findMissingContentModuleOwners(
+        val owners = createIndex().findMissingEntries(
             setOf(
                 "plugins/structureView/lib/modules/intellij.platform.structureView.jar",
                 "plugins/structureView/lib/modules/intellij.platform.structureView.impl.jar",
@@ -92,7 +92,7 @@ class IdeLayoutIndexServiceTest {
 
     @Test
     fun `skip bundled module whose owner is present on classpath`() {
-        val owners = createIndex().findMissingContentModuleOwners(
+        val owners = createIndex().findMissingEntries(
             setOf(
                 "plugins/structureView/lib/structureView.jar",
                 "plugins/structureView/lib/modules/intellij.platform.structureView.jar",
@@ -106,14 +106,46 @@ class IdeLayoutIndexServiceTest {
 
     @Test
     fun `skip bundled module owned by the core`() {
-        val owners = createIndex().findMissingContentModuleOwners(setOf("lib/intellij.spellchecker.jar"))
+        val owners = createIndex().findMissingEntries(
+            setOf(
+                "lib/intellij.spellchecker.jar",
+                "plugins/misc/lib/misc.jar",
+                "plugins/misc/lib/modules/intellij.libraries.lucene.common.jar",
+            ),
+        )
 
         assertEquals(emptyList(), owners)
     }
 
     @Test
+    fun `find missing plugins required by core module transitively`() {
+        val owners = createIndex().findMissingEntries(setOf("lib/intellij.spellchecker.jar"))
+
+        assertEquals(listOf("intellij.libraries.misc.plugin", "intellij.structureView.plugin"), owners.map { it.id })
+    }
+
+    @Test
+    fun `skip plugins required by core module when core dependencies are not included`() {
+        val owners = createIndex().findMissingEntries(setOf("lib/intellij.spellchecker.jar"), includeCoreDependencies = false)
+
+        assertEquals(emptyList(), owners)
+    }
+
+    @Test
+    fun `find missing module of present plugin required by core module`() {
+        val owners = createIndex().findMissingEntries(
+            setOf(
+                "lib/intellij.spellchecker.jar",
+                "plugins/misc/lib/misc.jar",
+            ),
+        )
+
+        assertEquals(listOf("intellij.libraries.lucene.common"), owners.map { it.id })
+    }
+
+    @Test
     fun `pick the first plugin declaring bundled module declared by several plugins`() {
-        val owners = createIndex().findMissingContentModuleOwners(
+        val owners = createIndex().findMissingEntries(
             setOf("plugins/javascript/lib/modules/intellij.platform.commercial.verifier.jar"),
         )
 
@@ -122,7 +154,7 @@ class IdeLayoutIndexServiceTest {
 
     @Test
     fun `pick the plugin declaring modules requiring bundled module declared by several plugins`() {
-        val owners = createIndex().findMissingContentModuleOwners(
+        val owners = createIndex().findMissingEntries(
             setOf(
                 "plugins/javascript/lib/modules/intellij.platform.commercial.verifier.jar",
                 "plugins/kubernetes/lib/modules/intellij.kubernetes.core.jar",
@@ -210,6 +242,16 @@ class IdeLayoutIndexServiceTest {
               "modules": [],
               "layout": [
                 { "name": "intellij.spellchecker", "kind": "productModuleV2", "classPath": ["lib/intellij.spellchecker.jar"] },
+                {
+                  "name": "intellij.libraries.lucene.common",
+                  "kind": "moduleV2",
+                  "classPath": ["plugins/misc/lib/modules/intellij.libraries.lucene.common.jar"]
+                },
+                {
+                  "name": "intellij.libraries.misc.plugin",
+                  "kind": "plugin",
+                  "classPath": ["plugins/misc/lib/misc.jar", "plugins/misc/lib/modules/intellij.libraries.lucene.common.jar"]
+                },
                 { "name": "JavaScript", "kind": "plugin", "classPath": ["plugins/javascript/lib/javascript.jar"] },
                 { "name": "com.intellij.kubernetes", "kind": "plugin", "classPath": ["plugins/kubernetes/lib/kubernetes.jar"] },
                 {
@@ -260,6 +302,10 @@ class IdeLayoutIndexServiceTest {
                 name = "intellij.spellchecker",
                 resourceRoot = "../lib/intellij.spellchecker.jar",
             ),
+            "intellij.libraries.lucene.common.xml" to moduleDescriptor(
+                name = "intellij.libraries.lucene.common",
+                resourceRoot = "../plugins/misc/lib/modules/intellij.libraries.lucene.common.jar",
+            ),
             "intellij.platform.commercial.verifier.xml" to moduleDescriptor(
                 name = "intellij.platform.commercial.verifier",
                 resourceRoot = "../plugins/javascript/lib/modules/intellij.platform.commercial.verifier.jar",
@@ -278,7 +324,20 @@ class IdeLayoutIndexServiceTest {
         )
         platformPath.writeJar(
             "lib/intellij.spellchecker.jar",
-            "intellij.spellchecker.xml" to "<idea-plugin />",
+            "intellij.spellchecker.xml" to
+                """<idea-plugin><dependencies><module name="intellij.libraries.lucene.common" /></dependencies></idea-plugin>""",
+        )
+        platformPath.writeJar(
+            "plugins/misc/lib/misc.jar",
+            "META-INF/plugin.xml" to pluginXml(
+                id = "intellij.libraries.misc.plugin",
+                content = """<module name="intellij.libraries.lucene.common" />""",
+                dependencies = """<plugin id="intellij.structureView.plugin" />""",
+            ),
+        )
+        platformPath.writeJar(
+            "plugins/misc/lib/modules/intellij.libraries.lucene.common.jar",
+            "intellij.libraries.lucene.common.xml" to "<idea-plugin />",
         )
         platformPath.writeJar(
             "plugins/structureView/lib/structureView.jar",
@@ -335,13 +394,16 @@ class IdeLayoutIndexServiceTest {
         </module>
         """.trimIndent()
 
-    private fun pluginXml(id: String, @Language("XML") content: String = "") =
+    private fun pluginXml(id: String, @Language("XML") content: String = "", @Language("XML") dependencies: String = "") =
         //language=XML
         """
         <idea-plugin>
           <id>$id</id>
           <name>$id</name>
           <vendor>JetBrains</vendor>
+          <dependencies>
+            $dependencies
+          </dependencies>
           <content>
             $content
           </content>
