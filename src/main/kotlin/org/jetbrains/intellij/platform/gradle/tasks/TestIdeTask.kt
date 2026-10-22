@@ -4,6 +4,9 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
+import org.gradle.api.file.FileCollection
+import org.gradle.api.file.FileSystemLocation
+import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.TaskAction
@@ -23,6 +26,7 @@ import org.jetbrains.intellij.platform.gradle.argumentProviders.SandboxArgumentP
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTestingExtension
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.intellijPlatformIdeLayoutIndicesCachePath
+import org.jetbrains.intellij.platform.gradle.models.IdeLayoutIndex
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.services.IdeLayoutIndexService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
@@ -35,6 +39,7 @@ import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.splitCommaSeparated
 import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.name
@@ -145,73 +150,14 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             // dependencies the first on the classpath.
             val currentPluginLibsProvider = getCurrentPluginLibs(pluginDirectory)
             val otherPluginsLibsProvider = getOtherPluginLibs(sandboxPluginsDirectory, pluginDirectory)
-            val ideLayoutIndexService = project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
-            val ideLayoutIndexCacheDirectoryProvider =
-                project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
-            val bundledPluginsClasspathExcludesProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathExcludes]
-                .map { it.splitCommaSeparated().toSet() }
-            // Before 2026.2, adding all bundled plugins to the classpath breaks the plugin model (e.g., the Git frontend
-            // module is provided by both Git4Idea and the Remote Development plugin), so it is applied there only on request.
-            // See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2250
-            val bundledPluginsClasspathSupportedProvider = platformPathProvider.map {
-                it.productInfo().buildNumber.toVersion() >= Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER
-            }
-            val bundledPluginsClasspathEnabledProvider = project.providers
-                .gradleProperty(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString())
-                .map { it.toBoolean() }
-                .orElse(bundledPluginsClasspathSupportedProvider)
-            val bundledPluginsClasspathProvider = bundledPluginsClasspathEnabledProvider.flatMap { enabled ->
-                when {
-                    enabled -> bundledPluginsClasspathExcludesProvider.map { bundledPluginsClasspathExcludes ->
-                        val platformPath = platformPathProvider.get()
-                        val ideLayoutIndex = ideLayoutIndexService.get().resolve(
-                            platformPath = platformPath,
-                            cacheDirectory = ideLayoutIndexCacheDirectoryProvider.get(),
-                        )
+            val bundledPluginsClasspathProvider = getBundledPluginsClasspath(
+                platformPathProvider,
+                // The test runtime fixes provide the core content modules, e.g., `lib/intellij.spellchecker.jar`.
+                intellijPlatformTestClasspathConfiguration + intelliJPlatformTestRuntimeFixClasspathConfiguration,
+            )
 
-                        platformPath.productInfo().bundledPlugins
-                            .minus(bundledPluginsClasspathExcludes)
-                            .mapNotNull(ideLayoutIndex::findByIdOrModuleId)
-                            .flatMap { it.classpath.map(platformPath::resolve) }
-                            .distinct()
-                    }
-
-                    else -> project.providers.provider { emptyList() }
-                }
-            }
-            // As an alternative to bundledPluginsClasspathProvider, add only the plugins and modules the IDE needs
-            // to load the IntelliJ Platform JARs on the test classpath, see IdeLayoutIndex.findMissingEntries.
-            // The test runtime fixes provide the core content modules, e.g., `lib/intellij.spellchecker.jar`.
-            // Before 2026.2, dependencies of the core are skipped for the reason above (issue #2250).
-            val platformClasspathConfigurations = intellijPlatformTestClasspathConfiguration + intelliJPlatformTestRuntimeFixClasspathConfiguration
-            val missingEntriesClasspathProvider = bundledPluginsClasspathEnabledProvider.flatMap { enabled ->
-                when {
-                    enabled -> project.providers.provider { emptyList() }
-                    else -> platformClasspathConfigurations.elements.map { elements ->
-                        val platformPath = platformPathProvider.get()
-                        val ideLayoutIndex = ideLayoutIndexService.get().resolve(
-                            platformPath = platformPath,
-                            cacheDirectory = ideLayoutIndexCacheDirectoryProvider.get(),
-                        )
-                        val normalizedPlatformPath = platformPath.absolute().normalize()
-                        val platformClasspath = elements
-                            .map { it.asPath.normalize() }
-                            .filter { it.startsWith(normalizedPlatformPath) }
-                            .map { normalizedPlatformPath.relativize(it).invariantSeparatorsPathString }
-                            .toSet()
-
-                        ideLayoutIndex.findMissingEntries(
-                            classpath = platformClasspath,
-                            includeCoreDependencies = bundledPluginsClasspathSupportedProvider.get(),
-                        )
-                            .flatMap { it.classpath.map(platformPath::resolve) }
-                            .distinct()
-                    }
-                }
-            }
-
+            // Build the classpath in the correct order:
             classpath = project.files(
-                // Build the classpath in the correct order:
                 // 1. Instrumented test code (if available):
                 instrumentedTestCode,
                 // 2. Current plugin's libraries:
@@ -228,10 +174,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 intellijPlatformTestRuntimeClasspathConfiguration,
                 // 8. Test runtime fixes classpath configuration (https://youtrack.jetbrains.com/issue/IJPL-180516):
                 intelliJPlatformTestRuntimeFixClasspathConfiguration,
-                // 9. Bundled plugins declared by product-info, when enabled (by default, since 2026.2):
+                // 9. Bundled plugins and modules, all or only the missing ones, see getBundledPluginsClasspath:
                 bundledPluginsClasspathProvider,
-                // 10. Otherwise, plugins and modules required by the IntelliJ Platform JARs above, when missing:
-                missingEntriesClasspathProvider,
             )
 
             testClassesDirs = instrumentedTestCode + testClassesDirs
@@ -266,6 +210,77 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     exclude("$pluginName/**")
                 }
             }
+
+        /**
+         * Returns the bundled plugins and modules to add to the test classpath:
+         * - if [GradleProperties.TestIdeBundledPluginsClasspathEnabled] is set (by default, since 2026.2),
+         *   all bundled plugins declared by product-info, except [GradleProperties.TestIdeBundledPluginsClasspathExcludes],
+         * - otherwise, only the plugins and modules the IDE needs to load the IntelliJ Platform JARs of [platformClasspath],
+         *   see [IdeLayoutIndex.findMissingEntries].
+         *
+         * Before 2026.2, adding all bundled plugins to the classpath breaks the plugin model (e.g., the Git frontend
+         * module is provided by both Git4Idea and the Remote Development plugin), so it is applied there only on request,
+         * and the dependencies of the core are not added for the same reason.
+         * See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2250
+         */
+        private fun Test.getBundledPluginsClasspath(
+            platformPathProvider: Provider<Path>,
+            platformClasspath: FileCollection,
+        ): Provider<List<Path>> {
+            val ideLayoutIndexService = project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
+            val ideLayoutIndexCacheDirectoryProvider =
+                project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
+            val excludesProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathExcludes]
+                .map { it.splitCommaSeparated().toSet() }
+            val supportedProvider = platformPathProvider.map {
+                it.productInfo().buildNumber.toVersion() >= Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER
+            }
+            val enabledProvider = project.providers
+                .gradleProperty(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString())
+                .map { it.toBoolean() }
+                .orElse(supportedProvider)
+
+            val entriesProvider = enabledProvider.flatMap { enabled ->
+                when {
+                    enabled -> excludesProvider.map { excludes ->
+                        // all bundled plugins
+                        val platformPath = platformPathProvider.get()
+                        val ideLayoutIndex = ideLayoutIndexService.get()
+                            .resolve(platformPath, ideLayoutIndexCacheDirectoryProvider.get())
+                        platformPath.productInfo().bundledPlugins
+                            .minus(excludes)
+                            .mapNotNull(ideLayoutIndex::findByIdOrModuleId)
+                    }
+
+                    else -> platformClasspath.elements.map { elements ->
+                        // only missing entries
+                        val platformPath = platformPathProvider.get()
+                        val ideLayoutIndex = ideLayoutIndexService.get()
+                            .resolve(platformPath, ideLayoutIndexCacheDirectoryProvider.get())
+                        ideLayoutIndex.findMissingEntries(
+                            classpath = elements.relativeTo(platformPath),
+                            includeCoreDependencies = supportedProvider.get(),
+                        )
+                    }
+                }
+            }
+
+            return entriesProvider.map { entries ->
+                val platformPath = platformPathProvider.get()
+                entries.flatMap { it.classpath.map(platformPath::resolve) }.distinct()
+            }
+        }
+
+        /**
+         * Returns the paths of the files located in [platformPath], relative to it, like [IdeLayoutIndex.Entry.classpath].
+         */
+        private fun Set<FileSystemLocation>.relativeTo(platformPath: Path): Set<String> {
+            val normalizedPlatformPath = platformPath.absolute().normalize()
+            return map { it.asPath.normalize() }
+                .filter { it.startsWith(normalizedPlatformPath) }
+                .map { normalizedPlatformPath.relativize(it).invariantSeparatorsPathString }
+                .toSet()
+        }
 
         override fun register(project: Project) =
             project.registerTask<TestIdeTask>(configuration = configuration)
