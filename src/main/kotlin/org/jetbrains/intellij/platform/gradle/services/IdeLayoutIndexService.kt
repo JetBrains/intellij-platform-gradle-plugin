@@ -18,6 +18,8 @@ import com.jetbrains.plugin.structure.ide.resolver.ValidatingLayoutComponentsPro
 import com.jetbrains.plugin.structure.intellij.platform.ProductInfo
 import com.jetbrains.plugin.structure.intellij.platform.ProductInfoParser
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
+import com.jetbrains.plugin.structure.intellij.plugin.ModuleDescriptor
+import com.jetbrains.plugin.structure.intellij.plugin.PluginProviderResult
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import com.jetbrains.plugin.structure.jar.SingletonCachingJarFileSystemProvider
@@ -40,6 +42,7 @@ import java.security.MessageDigest
 import java.util.IdentityHashMap
 import java.util.HexFormat
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.set
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
@@ -129,6 +132,7 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
         val entryKeys = bundledPlugins
             .mapIndexed { index, (plugin, _) -> plugin to "entry-$index" }
             .toMap(IdentityHashMap())
+        val contentModuleOwnerKeys = getContentModuleOwnerKeys(bundledPlugins, entryKeys)
 
         return IdeLayoutIndex(
             fullVersion = productInfo.fullVersion,
@@ -138,9 +142,27 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
                     ide = this,
                     platformPath = platformPath,
                     dependencyKeys = entryKeys,
+                    owners = when (plugin) {
+                        is IdeModule -> contentModuleOwnerKeys[id].orEmpty()
+                        else -> emptyList()
+                    },
                 )
             },
         )
+    }
+
+    /**
+     * @return Map of each content module name to the entry keys of plugins whose `<content>` declares it.
+     */
+    private fun getContentModuleOwnerKeys(
+        bundledPlugins: List<Pair<IdePlugin, String>>,
+        entryKeys: IdentityHashMap<IdePlugin, String>,
+    ): Map<String, List<String>> {
+        return bundledPlugins
+            .map { (plugin, _) -> plugin }
+            .filterNot { it is IdeModule }
+            .flatMap { plugin -> plugin.contentModules.map { it.name to requireNotNull(entryKeys[plugin]) } }
+            .groupBy({ it.first }, { it.second })
     }
 
     private fun write(cacheFile: Path, index: IdeLayoutIndex) {
@@ -207,6 +229,16 @@ private object NoOpLayoutComponentsPluginReader : ProductInfoBasedIdeManager.Plu
     override fun supports(pluginMetadataSource: Any) = true
 }
 
+/**
+ * Whether this content module's dependencies are required: either `loading="required"`, or any `required-if-available`.
+ * The `required-if-available` target is treated as available, as `product-info.json` doesn't expose the modules
+ * available in each product mode yet.
+ */
+private val ModuleDescriptor.isTreatedAsRequired: Boolean
+    get() = with(moduleDefinition) {
+        loadingRule.required || requiredIfAvailable != null
+    }
+
 private fun ProductInfo.toIdeVersion() = IdeVersion.createIdeVersion(
     buildString {
         if (productCode.isNotEmpty()) {
@@ -224,6 +256,7 @@ private fun IdePlugin.toEntry(
     ide: Ide,
     platformPath: Path,
     dependencyKeys: IdentityHashMap<IdePlugin, String>,
+    owners: List<String>,
 ) = IdeLayoutIndex.Entry(
     key = requireNotNull(dependencyKeys[this]),
     id = id,
@@ -234,18 +267,18 @@ private fun IdePlugin.toEntry(
         .map { platformPath.relativize(it).invariantSeparatorsPathString }
         .distinct(),
     // Dependencies are serialized by exact entry key to avoid collapsing duplicate IDs or aliases.
-    dependencies = (modulesDescriptors.asSequence()
-        .filter { it.moduleDefinition.loadingRule.required }
-        .map { it.name } +
-            dependsList.asSequence()
-                .filter { !it.isOptional }
-                .map { it.pluginId } +
-            pluginMainModuleDependencies.asSequence().map { it.pluginId } +
-            contentModuleDependencies.asSequence().map { it.moduleName })
+    dependencies = (sequenceOf<IdePlugin>(this) + modulesDescriptors.asSequence()
+        .filter { it.isTreatedAsRequired }
+        .map { it.module })
+        .flatMap { module ->
+            module.dependsList.asSequence().filter { !it.isOptional }.map { it.pluginId } +
+                module.pluginMainModuleDependencies.asSequence().map { it.pluginId } +
+                module.contentModuleDependencies.asSequence().map { it.moduleName }
+        }
         .filter(String::isNotBlank)
         .distinct()
         .mapNotNull { ide.findPluginByIdOrModuleId(it)?.plugin }
-        .filterNot { it.pluginId == IDEA_CORE }
+        .filterNot { it.pluginId == IDEA_CORE || it == this } // skip dependency on the core and self-dependency
         .toSet()
         .mapNotNull { dependencyKeys[it] },
     definedModules = pluginAliases
@@ -254,5 +287,6 @@ private fun IdePlugin.toEntry(
         .plus(id)
         .filter(String::isNotBlank)
         .distinct()
-        .toList()
+        .toList(),
+    owners = owners,
 )
