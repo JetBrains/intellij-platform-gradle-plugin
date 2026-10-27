@@ -13,18 +13,21 @@ internal class DetachedAuthenticationIvyArtifactRepository(
     private val authenticationRepository: IvyArtifactRepository,
 ) : IvyArtifactRepository by repository {
 
-    override fun getCredentials() = authenticationRepository.getCredentials()
+    override fun getCredentials() = authenticationRepository.credentials
 
-    override fun <T : Credentials> getCredentials(credentialsType: Class<T>) = authenticationRepository.getCredentials(credentialsType)
+    override fun <T : Credentials> getCredentials(credentialsType: Class<T>) =
+        authenticationRepository.getCredentials(credentialsType)
 
     override fun <T : Credentials> credentials(credentialsType: Class<T>, action: Action<in T>) =
         authenticationRepository.credentials(credentialsType, action)
 
     override fun credentials(action: Action<in PasswordCredentials>) = authenticationRepository.credentials(action)
 
-    override fun credentials(credentialsType: Class<out Credentials>) = authenticationRepository.credentials(credentialsType)
+    override fun credentials(credentialsType: Class<out Credentials>) =
+        authenticationRepository.credentials(credentialsType)
 
-    override fun getAuthentication() = authenticationRepository.getAuthentication()
+    override fun getAuthentication() = authenticationRepository.authentication
 
-    override fun authentication(action: Action<in AuthenticationContainer>) = authenticationRepository.authentication(action)
+    override fun authentication(action: Action<in AuthenticationContainer>) =
+        authenticationRepository.authentication(action)
 }

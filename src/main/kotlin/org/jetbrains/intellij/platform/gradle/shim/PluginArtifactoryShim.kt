@@ -5,10 +5,7 @@ package org.jetbrains.intellij.platform.gradle.shim
 import com.jetbrains.plugin.structure.intellij.repository.CustomPluginRepositoryListingParser
 import io.undertow.Handlers
 import io.undertow.server.HttpServerExchange
-import io.undertow.util.Headers
-import io.undertow.util.Methods
-import io.undertow.util.PathTemplateMatch
-import io.undertow.util.StatusCodes
+import io.undertow.util.*
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
 import org.gradle.kotlin.dsl.getCredentials
@@ -42,7 +39,7 @@ class PluginArtifactoryShim(
             Http.openConnection(
                 url = url.toString(),
                 configure = {
-                    authenticationHeaders.forEach(::setRequestProperty)
+                    authenticationHeaders.forEach { (name, value) -> setRequestProperty(name, value) }
                 },
             ) { connection ->
                 runCatching {
@@ -116,7 +113,7 @@ class PluginArtifactoryShim(
 
                 plugin.downloadUrl.host == repository.url.host -> {
                     authenticationHeaders.forEach { (name, value) ->
-                        exchange.requestHeaders.put(io.undertow.util.HttpString.tryFromString(name), value)
+                        exchange.requestHeaders.put(HttpString.tryFromString(name), value)
                     }
                     proxyHandler.handleRequest(exchange)
                 }

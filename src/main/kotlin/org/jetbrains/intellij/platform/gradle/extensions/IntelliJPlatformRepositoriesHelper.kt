@@ -64,7 +64,7 @@ class IntelliJPlatformRepositoriesHelper(
                 when (useCacheRedirector) {
                     true -> urlWithCacheRedirector
                     false -> url
-                }
+                },
             ) {
                 this.name = name
                 action()
@@ -99,7 +99,8 @@ class IntelliJPlatformRepositoriesHelper(
         repositoryType: CustomPluginRepositoryType,
         action: IvyRepositoryAction = {},
     ): PluginArtifactRepository {
-        val repository = objects.newInstance<PluginArtifactRepository>(repositoryName, URI(repositoryUrl), repositoryType, true)
+        val repository =
+            objects.newInstance<PluginArtifactRepository>(repositoryName, URI(repositoryUrl), repositoryType, true)
         val shimServer = shimManager.get().start(repository)
 
         val authenticationRepository = repositories.ivy {
@@ -133,7 +134,8 @@ class IntelliJPlatformRepositoriesHelper(
 
             action(DetachedAuthenticationIvyArtifactRepository(this, authenticationRepository))
 
-            when (val credentials = (authenticationRepository as AuthenticationSupportedInternal).configuredCredentials.orNull) {
+            when (val credentials =
+                (authenticationRepository as AuthenticationSupportedInternal).configuredCredentials.orNull) {
                 is PasswordCredentials -> if (credentials.username != null && credentials.password != null) {
                     repository.credentials(RepositoryPasswordCredentials::class) {
                         username = credentials.username
