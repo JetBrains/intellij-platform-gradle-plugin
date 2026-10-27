@@ -31,6 +31,7 @@
 
 ### Fixed
 
+- Avoid mutating custom plugin repository authentication when credentials are not configured, and forward configured credentials only to the remote repository. JetBrains/intellij-platform-gradle-plugin#2277
 - Use the owning project path, rather than the task path, in JSON report envelopes.
 - Preserve complete SDK classpath ownership metadata when `intellijPlatformSdk --owner` filters the displayed catalog.
 - Share the JAR filesystem cache with plugin readers when indexing bundled plugins, preventing `ClosedFileSystemException` and missing bundled plugins such as `com.intellij.java`. Rebuild older layout indices that may be incomplete. JetBrains/intellij-platform-gradle-plugin#2192

@@ -42,17 +42,7 @@ class PluginArtifactoryShim(
             Http.openConnection(
                 url = url.toString(),
                 configure = {
-                    repository.runCatching {
-                        getCredentials(PasswordCredentials::class).let {
-                            val encoded = Base64.getEncoder().encodeToString("${it.username}:${it.password}".toByteArray())
-                            setRequestProperty("Authorization", "Basic $encoded")
-                        }
-                    }
-                    repository.runCatching {
-                        getCredentials(HttpHeaderCredentials::class).let {
-                            setRequestProperty(it.name, it.value)
-                        }
-                    }
+                    authenticationHeaders.forEach(::setRequestProperty)
                 },
             ) { connection ->
                 runCatching {
@@ -124,11 +114,38 @@ class PluginArtifactoryShim(
             else -> when {
                 plugin == null -> exchange.statusCode = StatusCodes.NOT_FOUND
 
-                plugin.downloadUrl.host == repository.url.host -> proxyHandler.handleRequest(exchange)
+                plugin.downloadUrl.host == repository.url.host -> {
+                    authenticationHeaders.forEach { (name, value) ->
+                        exchange.requestHeaders.put(io.undertow.util.HttpString.tryFromString(name), value)
+                    }
+                    proxyHandler.handleRequest(exchange)
+                }
 
                 else -> {
                     exchange.statusCode = StatusCodes.TEMPORARY_REDIRECT
                     exchange.responseHeaders.put(Headers.LOCATION, plugin.downloadUrl.toString())
+                }
+            }
+        }
+    }
+
+    private val authenticationHeaders by lazy {
+        buildMap {
+            repository.runCatching {
+                getCredentials(PasswordCredentials::class).let { credentials ->
+                    val username = credentials.username
+                    val password = credentials.password
+                    if (username != null && password != null) {
+                        val encoded = Base64.getEncoder().encodeToString("$username:$password".toByteArray())
+                        put("Authorization", "Basic $encoded")
+                    }
+                }
+            }
+            repository.runCatching {
+                getCredentials(HttpHeaderCredentials::class).let { credentials ->
+                    val name = credentials.name
+                    val value = credentials.value
+                    if (name != null && value != null) put(name, value)
                 }
             }
         }

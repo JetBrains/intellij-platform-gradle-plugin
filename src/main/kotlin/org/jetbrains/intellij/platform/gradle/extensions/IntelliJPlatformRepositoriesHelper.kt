@@ -3,6 +3,7 @@
 package org.jetbrains.intellij.platform.gradle.extensions
 
 import org.gradle.api.artifacts.dsl.RepositoryHandler
+import org.gradle.api.artifacts.repositories.PasswordCredentials as RepositoryPasswordCredentials
 import org.gradle.api.credentials.HttpHeaderCredentials
 import org.gradle.api.credentials.PasswordCredentials
 import org.gradle.api.flow.FlowProviders
@@ -10,7 +11,7 @@ import org.gradle.api.flow.FlowScope
 import org.gradle.api.invocation.Gradle
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.ProviderFactory
-import org.gradle.authentication.http.HttpHeaderAuthentication
+import org.gradle.internal.artifacts.repositories.AuthenticationSupportedInternal
 import org.gradle.internal.os.OperatingSystem
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Dependencies
@@ -101,6 +102,11 @@ class IntelliJPlatformRepositoriesHelper(
         val repository = objects.newInstance<PluginArtifactRepository>(repositoryName, URI(repositoryUrl), repositoryType, true)
         val shimServer = shimManager.get().start(repository)
 
+        val authenticationRepository = repositories.ivy {
+            name = "$repositoryName (authentication)"
+        }
+        repositories.remove(authenticationRepository)
+
         flowScope.always(StopShimServerAction::class) {
             parameters.url = repository.url
             parameters.buildResult = flowProviders.buildWorkResult.map { !it.failure.isPresent }
@@ -125,24 +131,20 @@ class IntelliJPlatformRepositoriesHelper(
                 ignoreGradleMetadataRedirection()
             }
 
-            action()
+            action(DetachedAuthenticationIvyArtifactRepository(this, authenticationRepository))
 
-            runCatching {
-                getCredentials(PasswordCredentials::class.java).let {
-                    repository.credentials(PasswordCredentials::class) {
-                        username = it.username
-                        password = it.password
+            when (val credentials = (authenticationRepository as AuthenticationSupportedInternal).configuredCredentials.orNull) {
+                is PasswordCredentials -> if (credentials.username != null && credentials.password != null) {
+                    repository.credentials(RepositoryPasswordCredentials::class) {
+                        username = credentials.username
+                        password = credentials.password
                     }
                 }
-            }
-            runCatching {
-                getCredentials(HttpHeaderCredentials::class.java).let {
+
+                is HttpHeaderCredentials -> if (credentials.name != null && credentials.value != null) {
                     repository.credentials(HttpHeaderCredentials::class) {
-                        name = it.name
-                        value = it.value
-                    }
-                    repository.authentication {
-                        create<HttpHeaderAuthentication>("header")
+                        name = credentials.name
+                        value = credentials.value
                     }
                 }
             }
