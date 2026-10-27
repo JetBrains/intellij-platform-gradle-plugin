@@ -16,6 +16,8 @@ import kotlin.test.assertTrue
 
 class SignPluginTaskTest : IntelliJPluginTestBase() {
 
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
+
     private val tripleQuote = "\"\"\""
 
     @Test
@@ -375,6 +377,7 @@ class SignPluginTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
+        build(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment())
         buildWithConfigurationCache(Tasks.SIGN_PLUGIN, environment = pluginTemplateEnvironment()) {
             assertTaskOutcome(Tasks.SIGN_PLUGIN, TaskOutcome.SKIPPED)
         }
