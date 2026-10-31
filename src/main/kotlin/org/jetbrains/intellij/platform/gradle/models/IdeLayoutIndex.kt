@@ -66,84 +66,174 @@ internal data class IdeLayoutIndex(
         get() = entries.asSequence().filter { it.isModule }
 
     /**
-     * Returns plugins and modules missing on [classpath] that the IDE needs to load the core and the bundled modules
-     * present on it.
+     * Returns the JARs of [entry] the IDE loads in production, relative to the IntelliJ Platform root:
+     * - the JARs listed by the `product-info.json` [layout] for the entry, its content modules, and the core,
+     * - for an entry missing from the [layout], the JARs located directly in its `lib` directory,
+     *   and the JARs of its content modules located in `lib/modules`.
      *
-     * - The IDE loads a content module only with the plugin declaring it in `<content>`,
-     *   e.g., only the plugin JAR has `META-INF/plugin.xml`, so the plugins declaring the bundled modules present
-     *   on [classpath] are returned.
-     * - The IDE excludes a content module of the core when its dependencies are missing, and external plugins
-     *   depend on many of them implicitly, e.g., `intellij.spellchecker` requiring `intellij.libraries.lucene.common`,
-     *   so dependencies of the core and its content modules present on [classpath] are returned,
-     *   transitively, if [includeCoreDependencies] is set.
-     *
-     * The returned entries are dependencies of the returned plugins, too.
-     * A missing module is returned on its own when its owner is present, otherwise its owner is returned.
-     * When several plugins declare the same module, the one declaring the modules requiring it is picked, see [ownerOf].
+     * Other JARs of the plugin directory are skipped, e.g., JARs carrying descriptors of JetBrains Client plugins,
+     * which, when present on the classpath, are loaded as separate plugins conflicting with the bundled ones.
+     * See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2250
+     */
+    fun runtimeClasspath(entry: Entry, layout: Layout) = entry.classpath.filter { path ->
+        when {
+            !path.startsWith("plugins/") -> true
+            path in layout.classpath -> true
+            entry.id in layout.names -> false
+            else -> isLoadedFromPluginDirectory(entry, path)
+        }
+    }
+
+    /**
+     * Whether the IDE loads [path] for [entry] when the plugin is not described by the `product-info.json` layout:
+     * `plugins/<plugin>/lib/<name>.jar` or `plugins/<plugin>/lib/modules/<module>.jar` of a declared content module.
+     */
+    private fun isLoadedFromPluginDirectory(entry: Entry, path: String): Boolean {
+        val segments = path.split('/')
+        return when {
+            segments.size == 4 && segments[2] == "lib" -> true
+            segments.size == 5 && segments[2] == "lib" && segments[3] == "modules" ->
+                path in contentModulesClasspath[entry.key].orEmpty() ||
+                    segments[4].removeSuffix(".jar").let { it == entry.id || it in entry.definedModules }
+
+            else -> false
+        }
+    }
+
+    /**
+     * Returns the bundled plugins present on [classpath], and the plugins declaring the bundled modules present on it,
+     * as the IDE loads a content module only with the plugin declaring it in `<content>`.
+     * For a module declared by several plugins, none of them present, a single owner is returned, see [ownerOf].
+     * The core is never returned.
      *
      * @param classpath Paths relative to the IntelliJ Platform root, like [Entry.classpath].
-     * @param includeCoreDependencies Whether to return dependencies of the core and its content modules.
      */
-    fun findMissingEntries(classpath: Set<String>, includeCoreDependencies: Boolean = true): List<Entry> {
-        val currentClasspath = classpath.toMutableSet()
-        val missingEntries = linkedMapOf<String, Entry>()
+    fun findPresentPlugins(classpath: Set<String>): List<Entry> {
+        val presentPlugins = bundledPlugins.filter { isPresent(it, classpath) }.toList()
+        val presentKeys = presentPlugins.map { it.key }.toSet()
+        val presentModules = bundledModules.filter { isPresent(it, classpath) }.toList()
+        val presentModulesOwners = presentModules
+            .filterNot { module -> module.owners.any { it in presentKeys } }
+            .mapNotNull { module -> ownerOf(module, module.owners.mapNotNull(::findByKey), presentModules) }
+        return (presentPlugins + presentModulesOwners)
+            .filterNot { it.id == IDEA_CORE }
+            .distinctBy { it.key }
+    }
 
-        // Each found entry adds its classpath and dependencies, so repeat until nothing more is found.
-        do {
-            val missingEntriesCount = missingEntries.size
-            val presentModules = bundledModules.filter { isPresent(it, currentClasspath) }.toList()
+    /**
+     * Resolves [module] to the one of its [owners] declaring the [presentModules] requiring it,
+     * as a private module may be declared by several plugins.
+     * Falls back to the first owner if no such module is present.
+     */
+    private fun ownerOf(module: Entry, owners: List<Entry>, presentModules: List<Entry>): Entry? {
+        val requiringModulesOwners = presentModules
+            .filter { module.key in it.dependencies }
+            .flatMap { it.owners }
+            .toSet()
+        return owners.firstOrNull { it.key in requiringModulesOwners } ?: owners.firstOrNull()
+    }
 
-            requiredEntries(presentModules, missingEntries.values, includeCoreDependencies).forEach { entry ->
-                val missingEntry = findMissingEntry(entry, currentClasspath, presentModules) ?: return@forEach
-                if (missingEntries.putIfAbsent(missingEntry.key, missingEntry) == null) {
-                    currentClasspath += missingEntry.classpath
+    /**
+     * Resolves the bundled plugins to add to the test classpath.
+     *
+     * All [bundledPluginIds] are included, except:
+     * - the [excludes],
+     * - the plugins with [clashes], unless declared explicitly, see [declaredPlugins],
+     * - the plugins requiring an excluded plugin, transitively, see [dependencies].
+     *
+     * The [declaredPlugins] and [requiredPlugins], with all their dependencies, are never excluded.
+     *
+     * @param bundledPluginIds IDs of the bundled plugins, as listed in `product-info.json`, in the classpath order.
+     * @param excludes IDs or aliases of the excluded plugins, mapped to the reason of their exclusion.
+     * @param clashes Classes of the bundled plugins clashing with classes of the core ([IDEA_CORE])
+     * or of the bundled plugins coming earlier in [bundledPluginIds], by plugin ID and by the ID of the clashing counterpart.
+     * @param declaredPlugins Plugins declared explicitly as dependencies, already present on the classpath
+     * before the IntelliJ Platform JARs.
+     * @param requiredPlugins Plugins required by the plugin dependencies.
+     */
+    fun resolveTestPlugins(
+        bundledPluginIds: List<String>,
+        excludes: Map<String, String>,
+        clashes: Map<String, Map<String, List<String>>>,
+        declaredPlugins: Collection<Entry>,
+        requiredPlugins: Collection<Entry>,
+    ): TestPlugins {
+        val plugins = bundledPluginIds
+            .mapNotNull(::findByIdOrModuleId)
+            .distinctBy { it.key }
+        val declaredKeys = declaredPlugins.map { it.key }.toSet()
+        val protectedKeys = dependencyClosure(declaredPlugins + requiredPlugins).map { it.key }.toSet()
+        val excluded = linkedMapOf<String, TestPlugins.Exclusion>()
+        val kept = mutableListOf<TestPlugins.Exclusion>()
+        val clashing = mutableListOf<TestPlugins.Clash>()
+
+        fun exclude(exclusion: TestPlugins.Exclusion) {
+            when (exclusion.entry.key) {
+                in protectedKeys -> kept += exclusion
+                else -> excluded.putIfAbsent(exclusion.entry.key, exclusion)
+            }
+        }
+
+        excludes.forEach { (id, reason) ->
+            val entry = findByIdOrModuleId(id)?.takeUnless { it.isModule || it.id == IDEA_CORE } ?: return@forEach
+            exclude(TestPlugins.Exclusion(entry, reason))
+        }
+
+        plugins.forEach { plugin ->
+            clashes[plugin.id].orEmpty().forEach clash@{ (counterpartId, classes) ->
+                val counterpart = findByIdOrModuleId(counterpartId)?.takeUnless { it.id == IDEA_CORE }
+                if (classes.isEmpty() || plugin.key in excluded || counterpart?.key in excluded) {
+                    return@clash
+                }
+
+                // Classes of the declared plugins win, as they come before the IntelliJ Platform and other bundled plugins.
+                val shadowed = when {
+                    counterpart != null && plugin.key in declaredKeys && counterpart.key !in declaredKeys -> counterpart
+                    else -> plugin
+                }
+                val other = when {
+                    shadowed.key != plugin.key -> "'${plugin.id}'"
+                    counterpart != null -> "'${counterpart.id}'"
+                    else -> "the IntelliJ Platform"
+                }
+                when (shadowed.key) {
+                    in declaredKeys -> clashing += TestPlugins.Clash(shadowed, classes, declared = true)
+                    in protectedKeys -> clashing += TestPlugins.Clash(shadowed, classes, declared = false)
+                    else -> exclude(TestPlugins.Exclusion(shadowed, "${classes.size} obfuscated classes clash with $other", clashes = classes))
                 }
             }
-        } while (missingEntries.size > missingEntriesCount)
+        }
 
-        return missingEntries.values.toList()
+        // Each excluded plugin may make other plugins miss their dependencies, so repeat until nothing more is excluded.
+        do {
+            val excludedCount = excluded.size
+            plugins
+                .filterNot { it.key in excluded || it.key in protectedKeys }
+                .forEach { plugin ->
+                    val dependency = plugin.dependencies
+                        .mapNotNull(::findByKey)
+                        .firstOrNull { isExcluded(it, excluded.keys) }
+                        ?: return@forEach
+                    val root = excluded[dependency.key]?.let { it.root ?: it.entry }
+                        ?: dependency.owners.firstNotNullOfOrNull { excluded[it] }?.let { it.root ?: it.entry }
+                    excluded[plugin.key] = TestPlugins.Exclusion(plugin, "requires excluded '${dependency.id}'", root = root)
+                }
+        } while (excluded.size > excludedCount)
+
+        return TestPlugins(
+            included = plugins.filterNot { it.key in excluded },
+            excluded = excluded.values.toList(),
+            kept = kept,
+            clashes = clashing,
+        )
     }
 
     /**
-     * Returns the entries the IDE needs to load the [presentModules] and the [missingEntries] found so far:
-     * the [presentModules] themselves, and the dependencies of the [missingEntries], transitively.
-     * If [includeCoreDependencies] is set, the dependencies of the core and its [presentModules] are returned, too.
+     * Whether [entry] is unavailable because of the [excludedKeys]: an excluded plugin, or a module with all its owners excluded.
      */
-    private fun requiredEntries(
-        presentModules: List<Entry>,
-        missingEntries: Collection<Entry>,
-        includeCoreDependencies: Boolean,
-    ): List<Entry> {
-        val roots = when {
-            includeCoreDependencies -> coreWithModules(presentModules) + missingEntries
-            else -> missingEntries
-        }
-        return presentModules + dependencyClosure(roots)
-    }
-
-    /**
-     * Returns the core with its content modules found in [presentModules].
-     */
-    private fun coreWithModules(presentModules: List<Entry>): List<Entry> {
-        val core = bundledPlugins.firstOrNull { it.id == IDEA_CORE } ?: return emptyList()
-        return listOf(core) + presentModules.filter { core.key in it.owners }
-    }
-
-    /**
-     * Returns the entry to add to [classpath], so the IDE can load [entry], or `null` if [entry] can be loaded already.
-     * For a module, its owner is returned when none of its owners is present, otherwise the module itself when missing.
-     */
-    private fun findMissingEntry(entry: Entry, classpath: Set<String>, presentModules: List<Entry>): Entry? {
-        if (!entry.isModule) {
-            return entry.takeUnless { isPresent(it, classpath) }
-        }
-
-        val owners = entry.owners.mapNotNull(::findByKey)
-        return when {
-            owners.none { isPresent(it, classpath) } -> ownerOf(entry, owners, presentModules)
-            entry.classpath.isNotEmpty() && !isPresent(entry, classpath) -> entry
-            else -> null
-        }
+    private fun isExcluded(entry: Entry, excludedKeys: Set<String>) = when {
+        entry.isModule -> entry.owners.isNotEmpty() && entry.owners.all { it in excludedKeys }
+        else -> entry.key in excludedKeys
     }
 
     /**
@@ -159,31 +249,71 @@ internal data class IdeLayoutIndex(
 
     /**
      * Returns [entries] with all their [Entry.dependencies], transitively.
+     * As the IDE loads a content module only with the plugin declaring it, an owner of each module is included, too,
+     * unless the module is declared by the entry requiring it or by an entry already included.
      */
     private fun dependencyClosure(entries: Collection<Entry>): Collection<Entry> {
         val visited = linkedMapOf<String, Entry>()
-        val queue = ArrayDeque(entries)
+        val queue = ArrayDeque(entries.map { it to null as String? })
 
         while (queue.isNotEmpty()) {
-            val entry = queue.removeFirst()
-            if (visited.putIfAbsent(entry.key, entry) == null) {
-                queue += entry.dependencies.mapNotNull(::findByKey)
+            val (entry, requiredBy) = queue.removeFirst()
+            if (visited.putIfAbsent(entry.key, entry) != null) {
+                continue
+            }
+
+            queue += entry.dependencies.mapNotNull(::findByKey).map { it to entry.key }
+            if (entry.isModule && entry.owners.none { it == requiredBy || it in visited }) {
+                entry.owners.firstNotNullOfOrNull(::findByKey)?.let { queue += it to entry.key }
             }
         }
         return visited.values
     }
 
     /**
-     * Resolves [module] to the one of its [owners] declaring the [presentModules] requiring it,
-     * as a private module may be declared by several plugins.
-     * Falls back to the first owner if no such module is present.
+     * JARs and names of the components listed in the `product-info.json` layout.
      */
-    private fun ownerOf(module: Entry, owners: List<Entry>, presentModules: List<Entry>): Entry? {
-        val requiringModulesOwners = presentModules
-            .filter { module.key in it.dependencies }
-            .flatMap { it.owners }
-            .toSet()
-        return owners.firstOrNull { it.key in requiringModulesOwners } ?: owners.firstOrNull()
+    internal class Layout(productInfo: ProductInfo) {
+        val classpath = productInfo.layout.flatMap { it.classPath }.toSet()
+        val names = productInfo.layout.map { it.name }.toSet()
+    }
+
+    /**
+     * Bundled plugins resolved for the test classpath, see [resolveTestPlugins].
+     *
+     * @property included Plugins to add to the test classpath.
+     * @property excluded Plugins excluded from the test classpath.
+     * @property kept Plugins kept on the test classpath despite being excluded, as they are declared or required.
+     * @property clashes Plugins kept on the test classpath despite their obfuscated classes clashing with other classes.
+     */
+    internal data class TestPlugins(
+        val included: List<Entry>,
+        val excluded: List<Exclusion>,
+        val kept: List<Exclusion>,
+        val clashes: List<Clash>,
+    ) {
+
+        /**
+         * @property reason The reason of the exclusion.
+         * @property root The excluded plugin causing this exclusion, if excluded because of missing dependencies.
+         * @property clashes The obfuscated classes clashing with other classes, if excluded because of them.
+         */
+        data class Exclusion(
+            val entry: Entry,
+            val reason: String,
+            val root: Entry? = null,
+            val clashes: List<String> = emptyList(),
+        )
+
+        /**
+         * @property declared Whether the plugin is declared explicitly, so it is already present on the classpath
+         * before the IntelliJ Platform JARs.
+         */
+        data class Clash(
+            val entry: Entry,
+            val classes: List<String>,
+            val declared: Boolean,
+        )
     }
 
     @Serializable
@@ -215,5 +345,23 @@ internal data class IdeLayoutIndex(
 
     companion object {
         const val SCHEMA_VERSION = 5
+    }
+}
+
+/**
+ * Serialized obfuscated classes of the bundled plugins clashing with classes of the core or other bundled plugins.
+ *
+ * @property clashes The clashing class names by plugin ID and by the ID of the clashing counterpart:
+ * the core, or a bundled plugin coming earlier in `product-info.json`.
+ */
+@Serializable
+internal data class IdeClassClashes(
+    val schemaVersion: Int = SCHEMA_VERSION,
+    val fullVersion: String,
+    val clashes: Map<String, Map<String, List<String>>>,
+) {
+
+    companion object {
+        const val SCHEMA_VERSION = 1
     }
 }

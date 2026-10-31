@@ -6,7 +6,10 @@ class LoadedPluginsTest : BasePlatformTestCase() {
 
     fun testExpectedPluginsLoaded() {
         val expectedPlugins = System.getProperty("expectedPlugins").split(',').filter(String::isNotBlank)
-        val missingPlugins = expectedPlugins.filterNot { PluginManagerCore.isLoaded(PluginId.getId(it)) }
+        val missingPlugins = expectedPlugins.filter {
+            val descriptor = PluginManagerCore.getPlugin(PluginId.getId(it))
+            descriptor == null || !descriptor.isEnabled || descriptor.pluginClassLoader == null
+        }
 
         assertTrue("Expected plugins not loaded: $missingPlugins", missingPlugins.isEmpty())
     }

@@ -160,19 +160,13 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
     object SubscriptionKey : GradleProperties<String>("")
 
     /**
-     * Controls whether bundled plugins declared in `product-info.json` are added to the [TestIdeTask] classpath.
-     *
-     * When not set explicitly, it is enabled only when targeting IntelliJ Platform 2026.2 (`262`) or later,
-     * as earlier versions may fail to load bundled plugins and their extension points with all bundled plugins present on the classpath.
-     *
-     * Default value: `true` for IntelliJ Platform 2026.2+, `false` otherwise
-     */
-    object TestIdeBundledPluginsClasspathEnabled : GradleProperties<Boolean>(true)
-
-    /**
-     * Specifies the bundled plugin IDs or module IDs excluded from the [TestIdeTask] classpath when
-     * [TestIdeBundledPluginsClasspathEnabled] is enabled.
+     * Specifies the bundled plugin IDs or module IDs excluded from the [TestIdeTask] classpath,
+     * which contains all bundled plugins declared in `product-info.json` otherwise.
      * The property accepts a comma-separated list.
+     *
+     * Bundled plugins requiring an excluded plugin are excluded, too.
+     * Bundled plugins required by the tested plugin, its plugin dependencies, or explicitly declared bundled plugins and modules
+     * are never excluded.
      *
      * To include all bundled plugins, set it to an empty value:
      * ```

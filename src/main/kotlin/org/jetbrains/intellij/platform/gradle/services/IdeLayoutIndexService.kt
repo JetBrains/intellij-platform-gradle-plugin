@@ -2,15 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.services
 
-import com.jetbrains.plugin.structure.ide.Ide
-import com.jetbrains.plugin.structure.ide.ProductInfoBasedIde
-import com.jetbrains.plugin.structure.ide.ProductInfoBasedIdeManager
-import com.jetbrains.plugin.structure.ide.ProductInfoLayoutBasedPluginCollectionProvider
-import com.jetbrains.plugin.structure.ide.ProductInfoLayoutComponentsPluginCollectionSource
-import com.jetbrains.plugin.structure.ide.ProductInfoPluginCollectionSource
-import com.jetbrains.plugin.structure.ide.ProductInfoPluginReaderPluginCollectionProvider
-import com.jetbrains.plugin.structure.ide.UndeclaredInLayoutPluginReader
-import com.jetbrains.plugin.structure.ide.createIde
+import com.jetbrains.plugin.structure.ide.*
 import com.jetbrains.plugin.structure.ide.layout.LayoutComponentNameSource
 import com.jetbrains.plugin.structure.ide.layout.LayoutComponents
 import com.jetbrains.plugin.structure.ide.layout.MissingLayoutFileMode.SKIP_SILENTLY
@@ -19,35 +11,24 @@ import com.jetbrains.plugin.structure.intellij.platform.ProductInfo
 import com.jetbrains.plugin.structure.intellij.platform.ProductInfoParser
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import com.jetbrains.plugin.structure.intellij.plugin.ModuleDescriptor
-import com.jetbrains.plugin.structure.intellij.plugin.PluginProviderResult
 import com.jetbrains.plugin.structure.intellij.plugin.module.IdeModule
 import com.jetbrains.plugin.structure.intellij.version.IdeVersion
 import com.jetbrains.plugin.structure.jar.SingletonCachingJarFileSystemProvider
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import org.gradle.api.services.BuildService
 import org.gradle.api.services.BuildServiceParameters
 import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.Constants.IDEA_CORE
-import org.jetbrains.intellij.platform.gradle.models.IdeLayoutIndex
-import org.jetbrains.intellij.platform.gradle.models.fullVersion
-import org.jetbrains.intellij.platform.gradle.models.json
-import org.jetbrains.intellij.platform.gradle.models.productInfo
+import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.writeTextIfChanged
 import java.nio.file.Path
 import java.security.MessageDigest
-import java.util.IdentityHashMap
-import java.util.HexFormat
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.set
-import kotlin.io.path.createDirectories
-import kotlin.io.path.exists
-import kotlin.io.path.invariantSeparatorsPathString
-import kotlin.io.path.listDirectoryEntries
-import kotlin.io.path.readText
+import java.util.zip.ZipFile
+import kotlin.io.path.*
 
 /**
  * Builds and caches a compact, serializable view of an extracted IDE layout.
@@ -59,6 +40,8 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
 
     private val log = Logger(javaClass)
     private val indices = ConcurrentHashMap<String, IdeLayoutIndex>()
+    private val classClashes = ConcurrentHashMap<String, Map<String, Map<String, List<String>>>>()
+    private val loggedMessages = ConcurrentHashMap.newKeySet<String>()
     private val hexFormat = HexFormat.of()
     private val productInfoBasedIdeManager = ProductInfoBasedIdeManager(SKIP_SILENTLY)
 
@@ -72,6 +55,96 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
             load(cacheFile)
                 ?: create(platformPath).also { write(cacheFile, it) }
         }
+
+    /**
+     * Resolves the obfuscated classes of the bundled plugins in [platformPath] clashing with classes of the core
+     * or other bundled plugins, by plugin ID and by the ID of the clashing counterpart, preferring the in-memory instance,
+     * then the serialized cache on disk, stored next to the index.
+     *
+     * Classes are compared by name and CRC for the JARs loaded by the IDE, see [IdeLayoutIndex.runtimeClasspath].
+     * Only classes with names that look obfuscated are considered, i.e., `Z/Z/Z/Z/L.class` with every package segment
+     * and the simple name at most two characters long, as other duplicated classes, like copies of libraries,
+     * are expected to be compatible.
+     * The counterpart is the core ([IDEA_CORE]) or, for a clash between bundled plugins, the plugin coming earlier
+     * in `product-info.json`, i.e., on the test classpath, shadowing the classes of the reported one.
+     *
+     * See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2261
+     */
+    internal fun resolveClassClashes(platformPath: Path, cacheDirectory: Path) =
+        classClashes.computeIfAbsent(platformPath.safePathString) {
+            val cacheFile = cacheFile(platformPath, cacheDirectory, suffix = "-class-clashes")
+            val fullVersion = platformPath.productInfo().fullVersion
+            loadClassClashes(cacheFile)
+                ?: createClassClashes(platformPath, resolve(platformPath, cacheDirectory)).also { clashes ->
+                    cacheFile.parent.createDirectories()
+                    cacheFile.writeTextIfChanged(json.encodeToString(IdeClassClashes(fullVersion = fullVersion, clashes = clashes)))
+                }
+        }
+
+    /**
+     * Runs [block] with [message] only once per build, e.g., to log the same warning for many tasks just once.
+     */
+    internal fun once(message: String, block: (String) -> Unit) {
+        if (loggedMessages.add(message)) {
+            block(message)
+        }
+    }
+
+    private fun loadClassClashes(cacheFile: Path): Map<String, Map<String, List<String>>>? {
+        if (!cacheFile.exists()) {
+            return null
+        }
+
+        return runCatching {
+            json.decodeFromString<IdeClassClashes>(cacheFile.readText())
+                .takeIf { it.schemaVersion == IdeClassClashes.SCHEMA_VERSION }
+                ?.clashes
+        }.onFailure {
+            log.warn("Failed to load IDE class clashes from '$cacheFile', they will be computed again.")
+        }.getOrNull()
+    }
+
+    private fun createClassClashes(platformPath: Path, index: IdeLayoutIndex): Map<String, Map<String, List<String>>> {
+        log.info("Looking for clashing classes of bundled plugins in: $platformPath")
+
+        val productInfo = platformPath.productInfo()
+        val layout = IdeLayoutIndex.Layout(productInfo)
+        val libraryJars = runCatching { platformPath.resolve("lib").listDirectoryEntries("*.jar") }.getOrDefault(emptyList())
+        val coreJars = layout.classpath.filterNot { it.startsWith("plugins/") }.map(platformPath::resolve) + libraryJars
+        val coreClasses = hashMapOf<String, Long>()
+        coreJars.distinct().forEach { jar ->
+            jar.forEachObfuscatedClass { name, crc -> coreClasses.putIfAbsent(name, crc) }
+        }
+
+        val pluginClasses = hashMapOf<String, Pair<String, Long>>()
+        val clashes = linkedMapOf<String, MutableMap<String, MutableSet<String>>>()
+        fun clash(pluginId: String, counterpartId: String, name: String) {
+            clashes.getOrPut(pluginId) { linkedMapOf() }.getOrPut(counterpartId) { sortedSetOf() } +=
+                name.removeSuffix(".class").replace('/', '.')
+        }
+
+        // The bundled plugins are added to the test classpath in the order of product-info.json.
+        productInfo.bundledPlugins
+            .mapNotNull(index::findByIdOrModuleId)
+            .filterNot { it.isModule || it.id == IDEA_CORE }
+            .distinctBy { it.key }
+            .forEach { plugin ->
+                index.runtimeClasspath(plugin, layout)
+                    .filter { it.startsWith("plugins/") }
+                    .forEach { path ->
+                        platformPath.resolve(path).forEachObfuscatedClass { name, crc ->
+                            val coreCrc = coreClasses[name]
+                            val (owner, ownerCrc) = pluginClasses.getOrPut(name) { plugin.id to crc }
+                            when {
+                                coreCrc != null && coreCrc != crc -> clash(plugin.id, IDEA_CORE, name)
+                                owner != plugin.id && ownerCrc != crc -> clash(plugin.id, owner, name)
+                            }
+                        }
+                    }
+            }
+
+        return clashes.mapValues { (_, counterparts) -> counterparts.mapValues { (_, classes) -> classes.toList() } }
+    }
 
     private fun load(cacheFile: Path): IdeLayoutIndex? {
         if (!cacheFile.exists()) {
@@ -170,11 +243,11 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
         cacheFile.writeTextIfChanged(json.encodeToString(index))
     }
 
-    private fun cacheFile(platformPath: Path, cacheDirectory: Path): Path {
+    private fun cacheFile(platformPath: Path, cacheDirectory: Path, suffix: String = ""): Path {
         val productInfo = platformPath.productInfo()
         val fingerprint = fingerprint(platformPath)
 
-        return cacheDirectory.resolve("${productInfo.fullVersion}-${fingerprint.take(12)}.json")
+        return cacheDirectory.resolve("${productInfo.fullVersion}-${fingerprint.take(12)}$suffix.json")
     }
 
     /**
@@ -216,6 +289,37 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
         }
         return hexFormat.formatHex(MessageDigest.getInstance("SHA-256").digest(payload.toByteArray()))
     }
+}
+
+/**
+ * Calls [action] with the name and CRC of each class in this JAR with a name that looks obfuscated, see [isObfuscatedClass].
+ * Missing or unreadable JARs are skipped.
+ */
+private fun Path.forEachObfuscatedClass(action: (String, Long) -> Unit) {
+    if (!isRegularFile()) {
+        return
+    }
+
+    runCatching {
+        ZipFile(toFile()).use { zipFile ->
+            zipFile.entries().asSequence()
+                .filter { isObfuscatedClass(it.name) }
+                .forEach { action(it.name, it.crc) }
+        }
+    }
+}
+
+/**
+ * Whether the class file [name] looks obfuscated: it is located in a package, and all package segments
+ * and the simple name are at most two characters long, e.g., `Z/Z/Z/Z/L.class`.
+ */
+private fun isObfuscatedClass(name: String): Boolean {
+    if (!name.endsWith(".class")) {
+        return false
+    }
+
+    val segments = name.removeSuffix(".class").split('/')
+    return segments.size >= 2 && segments.all { it.length in 1..2 }
 }
 
 private object NoOpLayoutComponentsPluginReader : ProductInfoBasedIdeManager.PluginReader<LayoutComponents> {

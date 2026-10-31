@@ -7,7 +7,9 @@ import com.jetbrains.plugin.structure.jar.SingletonCachingJarFileSystemProvider
 import kotlinx.serialization.encodeToString
 import org.gradle.api.services.BuildServiceParameters
 import org.intellij.lang.annotations.Language
+import org.jetbrains.intellij.platform.gradle.Constants.IDEA_CORE
 import org.jetbrains.intellij.platform.gradle.models.IdeLayoutIndex
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.json
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
@@ -22,6 +24,7 @@ import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class IdeLayoutIndexServiceTest {
 
@@ -70,99 +73,190 @@ class IdeLayoutIndexServiceTest {
     }
 
     @Test
-    fun `find missing plugin declaring bundled module present on classpath`() {
-        val owners = createIndex().findMissingEntries(
-            setOf("plugins/structureView/lib/modules/intellij.platform.structureView.jar"),
-        )
-
-        assertEquals(listOf("intellij.structureView.plugin"), owners.map { it.id })
-    }
-
-    @Test
-    fun `find missing plugin when several of its content modules are present on classpath`() {
-        val owners = createIndex().findMissingEntries(
+    fun `find plugins present on classpath and plugins declaring modules present on it`() {
+        val plugins = createIndex().findPresentPlugins(
             setOf(
-                "plugins/structureView/lib/modules/intellij.platform.structureView.jar",
-                "plugins/structureView/lib/modules/intellij.platform.structureView.impl.jar",
-            ),
-        )
-
-        assertEquals(listOf("intellij.structureView.plugin"), owners.map { it.id })
-    }
-
-    @Test
-    fun `skip bundled module whose owner is present on classpath`() {
-        val owners = createIndex().findMissingEntries(
-            setOf(
-                "plugins/structureView/lib/structureView.jar",
-                "plugins/structureView/lib/modules/intellij.platform.structureView.jar",
                 "plugins/kubernetes/lib/kubernetes.jar",
-                "plugins/javascript/lib/modules/intellij.platform.commercial.verifier.jar",
-            ),
-        )
-
-        assertEquals(emptyList(), owners)
-    }
-
-    @Test
-    fun `skip bundled module owned by the core`() {
-        val owners = createIndex().findMissingEntries(
-            setOf(
+                "plugins/structureView/lib/modules/intellij.platform.structureView.jar",
                 "lib/intellij.spellchecker.jar",
-                "plugins/misc/lib/misc.jar",
-                "plugins/misc/lib/modules/intellij.libraries.lucene.common.jar",
             ),
         )
 
-        assertEquals(emptyList(), owners)
+        assertEquals(listOf("com.intellij.kubernetes", "intellij.structureView.plugin"), plugins.map { it.id }.sorted())
     }
 
     @Test
-    fun `find missing plugins required by core module transitively`() {
-        val owners = createIndex().findMissingEntries(setOf("lib/intellij.spellchecker.jar"))
+    fun `resolve all bundled plugins for tests`() {
+        val testPlugins = createIndex().resolveTestPlugins(bundledPluginIds)
 
-        assertEquals(listOf("intellij.libraries.misc.plugin", "intellij.structureView.plugin"), owners.map { it.id })
+        assertEquals(bundledPluginIds, testPlugins.included.map { it.id })
+        assertEquals(emptyList(), testPlugins.excluded)
     }
 
     @Test
-    fun `skip plugins required by core module when core dependencies are not included`() {
-        val owners = createIndex().findMissingEntries(setOf("lib/intellij.spellchecker.jar"), includeCoreDependencies = false)
+    fun `exclude plugins requiring excluded plugin transitively`() {
+        val testPlugins = createIndex().resolveTestPlugins(
+            bundledPluginIds,
+            excludes = mapOf("intellij.structureView.plugin" to "listed"),
+        )
 
-        assertEquals(emptyList(), owners)
+        assertEquals(listOf("JavaScript", "com.intellij.kubernetes"), testPlugins.included.map { it.id })
+        assertEquals(listOf("intellij.structureView.plugin", "intellij.libraries.misc.plugin"), testPlugins.excluded.map { it.entry.id })
+        val cascaded = testPlugins.excluded.single { it.entry.id == "intellij.libraries.misc.plugin" }
+        assertEquals("requires excluded 'intellij.structureView.plugin'", cascaded.reason)
+        assertEquals("intellij.structureView.plugin", cascaded.root?.id)
     }
 
     @Test
-    fun `find missing module of present plugin required by core module`() {
-        val owners = createIndex().findMissingEntries(
-            setOf(
-                "lib/intellij.spellchecker.jar",
-                "plugins/misc/lib/misc.jar",
+    fun `keep plugins requiring module declared by several plugins when one of them is excluded`() {
+        val testPlugins = createIndex().resolveTestPlugins(bundledPluginIds, excludes = mapOf("JavaScript" to "listed"))
+
+        assertEquals(
+            listOf("intellij.libraries.misc.plugin", "intellij.structureView.plugin", "com.intellij.kubernetes"),
+            testPlugins.included.map { it.id },
+        )
+        assertEquals(listOf("JavaScript"), testPlugins.excluded.map { it.entry.id })
+    }
+
+    @Test
+    fun `never exclude declared plugins and their dependencies`() {
+        val index = createIndex()
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds,
+            excludes = mapOf("intellij.structureView.plugin" to "listed"),
+            declaredPlugins = listOfNotNull(index.findById("intellij.libraries.misc.plugin")),
+        )
+
+        assertEquals(bundledPluginIds, testPlugins.included.map { it.id })
+        assertEquals(listOf("intellij.structureView.plugin"), testPlugins.kept.map { it.entry.id })
+    }
+
+    @Test
+    fun `never exclude plugins required by the tested plugin`() {
+        val index = createIndex()
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds,
+            excludes = mapOf("JavaScript" to "listed"),
+            requiredPlugins = listOfNotNull(index.findByIdOrModuleId("JavaScript")),
+        )
+
+        assertEquals(bundledPluginIds, testPlugins.included.map { it.id })
+        assertEquals(listOf("JavaScript"), testPlugins.kept.map { it.entry.id })
+    }
+
+    @Test
+    fun `exclude undeclared plugin with clashing classes along with plugins requiring it`() {
+        val testPlugins = createIndex().resolveTestPlugins(
+            bundledPluginIds,
+            clashes = mapOf("intellij.structureView.plugin" to mapOf(IDEA_CORE to listOf("Z.Z.L"))),
+        )
+
+        assertEquals(listOf("JavaScript", "com.intellij.kubernetes"), testPlugins.included.map { it.id })
+        assertEquals(listOf("Z.Z.L"), testPlugins.excluded.single { it.entry.id == "intellij.structureView.plugin" }.clashes)
+        assertEquals(
+            "intellij.structureView.plugin",
+            testPlugins.excluded.single { it.entry.id == "intellij.libraries.misc.plugin" }.root?.id,
+        )
+        assertEquals(emptyList(), testPlugins.clashes)
+    }
+
+    @Test
+    fun `keep declared plugin with clashing classes`() {
+        val index = createIndex()
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds,
+            clashes = mapOf("intellij.structureView.plugin" to mapOf(IDEA_CORE to listOf("Z.Z.L"))),
+            declaredPlugins = listOfNotNull(index.findById("intellij.structureView.plugin")),
+        )
+
+        assertEquals(bundledPluginIds, testPlugins.included.map { it.id })
+        assertEquals(emptyList(), testPlugins.excluded)
+        val clash = testPlugins.clashes.single()
+        assertEquals("intellij.structureView.plugin", clash.entry.id)
+        assertTrue(clash.declared)
+    }
+
+    @Test
+    fun `runtime classpath contains JARs listed in layout or loaded from the plugin directory`() {
+        val layout = IdeLayoutIndex.Layout(
+            ProductInfo(
+                layout = listOf(
+                    ProductInfo.LayoutItem("p", ProductInfo.LayoutItemKind.plugin, listOf("plugins/p/lib/p.jar")),
+                    ProductInfo.LayoutItem("p.module", ProductInfo.LayoutItemKind.moduleV2, listOf("plugins/p/lib/modules/p.module.jar")),
+                ),
+            ),
+        )
+        val index = IdeLayoutIndex(fullVersion = "IU-262.1", entries = emptyList())
+        val listed = IdeLayoutIndex.Entry(
+            key = "entry-0",
+            id = "p",
+            definedModules = listOf("p", "p.module"),
+            classpath = listOf(
+                "lib/core.jar",
+                "plugins/p/lib/p.jar",
+                "plugins/p/lib/modules/p.module.jar",
+                "plugins/p/lib/modules/intellij.p.frontend.split.jar",
+                "plugins/p/lib/frontend-split/p-frontend.jar",
+            ),
+        )
+        val unlisted = IdeLayoutIndex.Entry(
+            key = "entry-1",
+            id = "q",
+            definedModules = listOf("q", "q.module"),
+            classpath = listOf(
+                "plugins/q/lib/q.jar",
+                "plugins/q/lib/modules/q.module.jar",
+                "plugins/q/lib/modules/intellij.q.frontend.split.jar",
+                "plugins/q/lib/frontend-split/q-frontend.jar",
             ),
         )
 
-        assertEquals(listOf("intellij.libraries.lucene.common"), owners.map { it.id })
+        assertEquals(
+            listOf("lib/core.jar", "plugins/p/lib/p.jar", "plugins/p/lib/modules/p.module.jar"),
+            index.runtimeClasspath(listed, layout),
+        )
+        assertEquals(listOf("plugins/q/lib/q.jar", "plugins/q/lib/modules/q.module.jar"), index.runtimeClasspath(unlisted, layout))
     }
 
     @Test
-    fun `pick the first plugin declaring bundled module declared by several plugins`() {
-        val owners = createIndex().findMissingEntries(
-            setOf("plugins/javascript/lib/modules/intellij.platform.commercial.verifier.jar"),
+    fun `find obfuscated classes of bundled plugins clashing with the core`() {
+        val platformPath = createIde()
+        val cacheDirectory = temporaryFolder.newFolder("index").toPath()
+        platformPath.writeJar(
+            "lib/core.jar",
+            "Z/Z/L.class" to "core",
+            "Z/Z/M.class" to "same",
+            "com/example/Util.class" to "core",
+        )
+        platformPath.writeJar(
+            "plugins/java/lib/java-impl.jar",
+            "META-INF/plugin.xml" to pluginXml(id = "com.intellij.java"),
+            "Z/Z/L.class" to "plugin",
+            "Z/Z/M.class" to "same",
+            "com/example/Util.class" to "plugin",
         )
 
-        assertEquals(listOf("JavaScript"), owners.map { it.id })
+        val clashes = service().resolveClassClashes(platformPath, cacheDirectory)
+
+        assertEquals(mapOf("com.intellij.java" to mapOf(IDEA_CORE to listOf("Z.Z.L"))), clashes)
+        assertEquals(1, cacheDirectory.listDirectoryEntries("*-class-clashes.json").size)
+        assertEquals(clashes, service().resolveClassClashes(platformPath, cacheDirectory))
     }
 
-    @Test
-    fun `pick the plugin declaring modules requiring bundled module declared by several plugins`() {
-        val owners = createIndex().findMissingEntries(
-            setOf(
-                "plugins/javascript/lib/modules/intellij.platform.commercial.verifier.jar",
-                "plugins/kubernetes/lib/modules/intellij.kubernetes.core.jar",
-            ),
-        )
+    private val bundledPluginIds = listOf(
+        "intellij.libraries.misc.plugin",
+        "intellij.structureView.plugin",
+        "JavaScript",
+        "com.intellij.kubernetes",
+    )
 
-        assertEquals(listOf("com.intellij.kubernetes"), owners.map { it.id })
-    }
+    private fun IdeLayoutIndex.resolveTestPlugins(
+        bundledPluginIds: List<String>,
+        excludes: Map<String, String> = emptyMap(),
+        clashes: Map<String, Map<String, List<String>>> = emptyMap(),
+        declaredPlugins: List<IdeLayoutIndex.Entry> = emptyList(),
+        requiredPlugins: List<IdeLayoutIndex.Entry> = emptyList(),
+    ) = resolveTestPlugins(bundledPluginIds, excludes, clashes, declaredPlugins, requiredPlugins)
 
     private fun service() = object : IdeLayoutIndexService() {
         override fun getParameters(): BuildServiceParameters.None = error("This service has no parameters")

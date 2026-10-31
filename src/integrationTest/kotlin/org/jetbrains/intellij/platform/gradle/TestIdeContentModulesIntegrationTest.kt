@@ -21,14 +21,12 @@ class TestIdeContentModulesIntegrationTest : IntelliJPlatformIntegrationTestBase
         )
 
     private fun properties(
-        bundledPluginsClasspathEnabled: Boolean,
         bundledPlugins: List<String> = emptyList(),
-        bundledModules: List<String> = emptyList(),
+        marketplacePlugins: List<String> = emptyList(),
         expectedPlugins: List<String> = emptyList(),
     ) = defaultProjectProperties + mapOf(
-        GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString() to bundledPluginsClasspathEnabled,
         "bundledPlugins" to bundledPlugins.joinToString(","),
-        "bundledModules" to bundledModules.joinToString(","),
+        "marketplacePlugins" to marketplacePlugins.joinToString(","),
         "expectedPlugins" to (bundledPlugins + expectedPlugins + "org.jetbrains.plugins.integration-tests.test-ide-content-modules").joinToString(","),
     )
 
@@ -40,7 +38,6 @@ class TestIdeContentModulesIntegrationTest : IntelliJPlatformIntegrationTestBase
         disableDebug()
 
         val properties = properties(
-            bundledPluginsClasspathEnabled = false,
             bundledPlugins = listOf("com.intellij.java"),
             expectedPlugins = listOf("intellij.structureView.plugin"),
         )
@@ -53,51 +50,34 @@ class TestIdeContentModulesIntegrationTest : IntelliJPlatformIntegrationTestBase
     }
 
     @Test
-    fun `load bundled plugin with bundled plugins classpath enabled`() {
+    fun `load marketplace plugin requiring bundled JSON plugin`() {
         disableDebug()
 
+        dir.resolve("src/test/kotlin/GoFileTypeTest.kt") write //language=kotlin
+                """
+                import com.goide.GoFileType
+                import com.intellij.openapi.fileTypes.FileTypeManager
+                import com.intellij.testFramework.fixtures.BasePlatformTestCase
+
+                class GoFileTypeTest : BasePlatformTestCase() {
+                    fun testGoFileType() {
+                        assertSame(GoFileType.INSTANCE, FileTypeManager.getInstance().getFileTypeByExtension("go"))
+                        assertSame(GoFileType.INSTANCE, FileTypeManager.getInstance().getFileTypeByFileName("_.go"))
+                        assertSame(GoFileType.INSTANCE, myFixture.createFile("_.go", "").fileType)
+                    }
+                }
+                """.trimIndent()
+
+        // The Go plugin requires the JSON plugin, bundled since 2024.3: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1798
         val properties = properties(
-            bundledPluginsClasspathEnabled = true,
-            bundledPlugins = listOf("com.intellij.java"),
+            marketplacePlugins = listOf("org.jetbrains.plugins.go:243.28141.18"),
+            expectedPlugins = listOf("org.jetbrains.plugins.go", "com.intellij.modules.json"),
+        ) + mapOf(
+            "intellijPlatform.version" to "2024.3.7.1",
         )
 
-        build(Tasks.External.TEST, projectProperties = properties)
-    }
-
-    @Test
-    fun `load bundled plugin requiring content module declared by many plugins`() {
-        disableDebug()
-
-        // intellij.platform.commercial.verifier is declared by com.intellij.spring, JavaScript, and others
-        val properties = properties(
-            bundledPluginsClasspathEnabled = false,
-            bundledPlugins = listOf("com.intellij.spring"),
-        )
-
-        build(Tasks.External.TEST, projectProperties = properties)
-    }
-
-    @Test
-    fun `load plugin declaring bundled module`() {
-        disableDebug()
-
-        val properties = properties(
-            bundledPluginsClasspathEnabled = false,
-            bundledModules = listOf("intellij.platform.structureView"),
-            expectedPlugins = listOf("intellij.structureView.plugin"),
-        )
-
-        build(Tasks.External.TEST, projectProperties = properties) {
-            assert(entries.any { it.endsWith(STRUCTURE_VIEW_PLUGIN_JAR) }) {
-                "expect test classpath contains '$STRUCTURE_VIEW_PLUGIN_JAR'"
-            }
+        for (taskName in listOf(Tasks.External.TEST, "testIdeCustom")) {
+            build(taskName, projectProperties = properties)
         }
-    }
-
-    @Test
-    fun `load tested plugin without bundled plugins`() {
-        disableDebug()
-
-        build(Tasks.External.TEST, projectProperties = properties(bundledPluginsClasspathEnabled = false))
     }
 }

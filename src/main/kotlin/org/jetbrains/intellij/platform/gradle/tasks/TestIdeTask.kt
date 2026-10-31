@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
+import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import org.gradle.api.Project
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
@@ -15,7 +16,6 @@ import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.named
-import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -27,20 +27,24 @@ import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformTesting
 import org.jetbrains.intellij.platform.gradle.get
 import org.jetbrains.intellij.platform.gradle.intellijPlatformIdeLayoutIndicesCachePath
 import org.jetbrains.intellij.platform.gradle.models.IdeLayoutIndex
+import org.jetbrains.intellij.platform.gradle.models.fullVersion
 import org.jetbrains.intellij.platform.gradle.models.productInfo
 import org.jetbrains.intellij.platform.gradle.services.IdeLayoutIndexService
 import org.jetbrains.intellij.platform.gradle.services.registerClassLoaderScopedBuildService
 import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformVersionAware
 import org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
 import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
+import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
+import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
 import org.jetbrains.intellij.platform.gradle.utils.splitCommaSeparated
-import org.jetbrains.intellij.platform.gradle.utils.toVersion
+import org.jetbrains.intellij.platform.gradle.utils.withIdePluginManager
 import java.nio.file.Path
 import kotlin.io.path.absolute
+import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.name
 
@@ -67,6 +71,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
     }
 
     companion object : Registrable {
+        private val log = Logger(TestIdeTask::class.java)
+
         private val Test.sourceTask: TestableAware
             get() = when {
                 this is TestIdeTask -> this
@@ -174,7 +180,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 intellijPlatformTestRuntimeClasspathConfiguration,
                 // 8. Test runtime fixes classpath configuration (https://youtrack.jetbrains.com/issue/IJPL-180516):
                 intelliJPlatformTestRuntimeFixClasspathConfiguration,
-                // 9. Bundled plugins and modules, all or only the missing ones, see getBundledPluginsClasspath:
+                // 9. Bundled plugins, see getBundledPluginsClasspath:
                 bundledPluginsClasspathProvider,
             )
 
@@ -212,16 +218,21 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             }
 
         /**
-         * Returns the bundled plugins and modules to add to the test classpath:
-         * - if [GradleProperties.TestIdeBundledPluginsClasspathEnabled] is set (by default, since 2026.2),
-         *   all bundled plugins declared by product-info, except [GradleProperties.TestIdeBundledPluginsClasspathExcludes],
-         * - otherwise, only the plugins and modules the IDE needs to load the IntelliJ Platform JARs of [platformClasspath],
-         *   see [IdeLayoutIndex.findMissingEntries].
+         * Returns the JARs of the bundled plugins to add to the test classpath, as the IDE doesn't load bundled plugins
+         * from its `plugins` directory in tests: all bundled plugins declared in `product-info.json`, see [IdeLayoutIndex.resolveTestPlugins],
+         * with the JARs the IDE loads in production, see [IdeLayoutIndex.runtimeClasspath], except:
+         * - the plugins listed in [GradleProperties.TestIdeBundledPluginsClasspathExcludes],
+         * - the plugins with obfuscated classes clashing with classes of the IntelliJ Platform or other plugins,
+         *   unless declared explicitly, see [IdeLayoutIndexService.resolveClassClashes],
+         * - the plugins requiring an excluded plugin, transitively.
          *
-         * Before 2026.2, adding all bundled plugins to the classpath breaks the plugin model (e.g., the Git frontend
-         * module is provided by both Git4Idea and the Remote Development plugin), so it is applied there only on request,
-         * and the dependencies of the core are not added for the same reason.
+         * The bundled plugins and modules present on [platformClasspath], i.e., declared explicitly, and the plugins required
+         * by the plugin dependencies present on [platformClasspath] are never excluded, along with their dependencies.
+         * The descriptor of the tested plugin isn't read, as it is available only once the test sandbox is prepared.
+         *
+         * All bundled plugins share the core classloader, as test classes, loaded by it, can't access classes loaded by plugin classloaders.
          * See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2250
+         * See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2261
          */
         private fun Test.getBundledPluginsClasspath(
             platformPathProvider: Provider<Path>,
@@ -230,44 +241,124 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             val ideLayoutIndexService = project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
             val ideLayoutIndexCacheDirectoryProvider =
                 project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
-            val excludesProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathExcludes]
+            val excludesProperty = GradleProperties.TestIdeBundledPluginsClasspathExcludes
+            val excludesProvider = project.providers[excludesProperty]
                 .map { it.splitCommaSeparated().toSet() }
-            val supportedProvider = platformPathProvider.map {
-                it.productInfo().buildNumber.toVersion() >= Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER
+            val excludesDefinedProvider = project.providers.gradleProperty(excludesProperty.toString())
+                .map { true }
+                .orElse(false)
+
+            return platformClasspath.elements.map { elements ->
+                val service = ideLayoutIndexService.get()
+                val platformPath = platformPathProvider.get()
+                val normalizedPlatformPath = platformPath.absolute().normalize()
+                val cacheDirectory = ideLayoutIndexCacheDirectoryProvider.get()
+                val productInfo = platformPath.productInfo()
+                val ideLayoutIndex = service.resolve(platformPath, cacheDirectory)
+                val excludesDefined = excludesDefinedProvider.get()
+                val excludesReason = when {
+                    excludesDefined -> "listed in '$excludesProperty'"
+                    else -> "excluded by default, see '$excludesProperty'"
+                }
+                val requiredPluginIds = getRequiredPluginIds(
+                    elements.map { it.asPath.absolute().normalize() }.filterNot { it.startsWith(normalizedPlatformPath) },
+                )
+
+                val testPlugins = ideLayoutIndex.resolveTestPlugins(
+                    bundledPluginIds = productInfo.bundledPlugins,
+                    excludes = excludesProvider.get().associateWith { excludesReason },
+                    clashes = service.resolveClassClashes(platformPath, cacheDirectory),
+                    declaredPlugins = ideLayoutIndex.findPresentPlugins(elements.relativeTo(platformPath)),
+                    requiredPlugins = requiredPluginIds.mapNotNull(ideLayoutIndex::findByIdOrModuleId),
+                )
+                testPlugins.report(service, productInfo.fullVersion, excludesDefined)
+
+                val layout = IdeLayoutIndex.Layout(productInfo)
+                testPlugins.included
+                    .flatMap { ideLayoutIndex.runtimeClasspath(it, layout) }
+                    .map(platformPath::resolve)
+                    .distinct()
             }
-            val enabledProvider = project.providers
-                .gradleProperty(GradleProperties.TestIdeBundledPluginsClasspathEnabled.toString())
-                .map { it.toBoolean() }
-                .orElse(supportedProvider)
+        }
 
-            val entriesProvider = enabledProvider.flatMap { enabled ->
-                when {
-                    enabled -> excludesProvider.map { excludes ->
-                        // all bundled plugins
-                        val platformPath = platformPathProvider.get()
-                        val ideLayoutIndex = ideLayoutIndexService.get()
-                            .resolve(platformPath, ideLayoutIndexCacheDirectoryProvider.get())
-                        platformPath.productInfo().bundledPlugins
-                            .minus(excludes)
-                            .mapNotNull(ideLayoutIndex::findByIdOrModuleId)
-                    }
+        /**
+         * Returns IDs of the plugins and modules required by the plugins located in [paths]:
+         * non-optional `<depends>`, `<dependencies>` of the main module, and of content modules with `loading="required"`.
+         * Paths that aren't plugins, e.g., libraries, or don't exist, are skipped.
+         */
+        private fun getRequiredPluginIds(paths: List<Path>) = withIdePluginManager { pluginManager ->
+            paths.asSequence()
+                .distinct()
+                .filter { it.exists() }
+                .mapNotNull { runCatching { pluginManager.safelyCreatePlugin(it).getOrNull() }.getOrNull() }
+                .flatMap { plugin ->
+                    sequenceOf<IdePlugin>(plugin) + plugin.modulesDescriptors.asSequence()
+                        .filter { it.moduleDefinition.loadingRule.required }
+                        .map { it.module }
+                }
+                .flatMap { plugin ->
+                    plugin.dependsList.asSequence().filterNot { it.isOptional }.map { it.pluginId } +
+                        plugin.pluginMainModuleDependencies.asSequence().map { it.pluginId } +
+                        plugin.contentModuleDependencies.asSequence().map { it.moduleName }
+                }
+                .filter(String::isNotBlank)
+                .toSet()
+        }
 
-                    else -> platformClasspath.elements.map { elements ->
-                        // only missing entries
-                        val platformPath = platformPathProvider.get()
-                        val ideLayoutIndex = ideLayoutIndexService.get()
-                            .resolve(platformPath, ideLayoutIndexCacheDirectoryProvider.get())
-                        ideLayoutIndex.findMissingEntries(
-                            classpath = elements.relativeTo(platformPath),
-                            includeCoreDependencies = supportedProvider.get(),
-                        )
+        /**
+         * Logs the resolved bundled plugins: the exclusions with their reasons on the info level,
+         * and the warnings about clashing classes and about exclusions ignored for declared or required plugins.
+         * Ignored default exclusions are logged on the info level unless [excludesDefined] explicitly.
+         */
+        private fun IdeLayoutIndex.TestPlugins.report(service: IdeLayoutIndexService, version: String, excludesDefined: Boolean) {
+            val total = included.size + excluded.size
+            service.once("Test classpath includes ${included.size} of $total bundled plugins of $version", log::info)
+            excluded.forEach {
+                service.once("Bundled plugin '${it.entry.id}' is excluded from the test classpath: ${it.reason}", log::info)
+            }
+
+            excluded.filter { it.clashes.isNotEmpty() }.forEach { exclusion ->
+                val id = exclusion.entry.id
+                val dependents = excluded.filter { it.root?.key == exclusion.entry.key }.map { it.entry.id }
+                service.once(
+                    buildString {
+                        append("Bundled plugin '$id' is excluded from the test classpath because ${exclusion.clashes.size} of its obfuscated classes ")
+                        append("clash with classes of the IntelliJ Platform or other bundled plugins, e.g., '${exclusion.clashes.first()}'")
+                        if (dependents.isNotEmpty()) {
+                            append(", along with ${dependents.size} bundled plugins requiring it: ${dependents.joinToString()}")
+                        }
+                        append(". To keep it, declare it explicitly, e.g., with testBundledPlugin(\"$id\").")
+                    },
+                    log::warn,
+                )
+            }
+
+            clashes.forEach { clash ->
+                val id = clash.entry.id
+                val message = when {
+                    clash.declared ->
+                        "Bundled plugin '$id' shadows ${clash.classes.size} obfuscated classes of the IntelliJ Platform or other bundled plugins " +
+                            "on the test classpath, e.g., '${clash.classes.first()}', which may break tests."
+
+                    else ->
+                        "Bundled plugin '$id' is kept on the test classpath despite ${clash.classes.size} of its obfuscated classes clashing " +
+                            "with classes of the IntelliJ Platform or other bundled plugins, e.g., '${clash.classes.first()}', " +
+                            "as the plugin dependencies require it, which may break tests. " +
+                            "To put it before the IntelliJ Platform on the test classpath, declare it explicitly, e.g., with testBundledPlugin(\"$id\")."
+                }
+                service.once(message, log::warn)
+            }
+
+            kept.forEach {
+                service.once(
+                    "Bundled plugin '${it.entry.id}' is kept on the test classpath despite being ${it.reason}, " +
+                        "as it is declared explicitly, or the plugin dependencies require it.",
+                ) { message ->
+                    when {
+                        excludesDefined -> log.warn(message)
+                        else -> log.info(message)
                     }
                 }
-            }
-
-            return entriesProvider.map { entries ->
-                val platformPath = platformPathProvider.get()
-                entries.flatMap { it.classpath.map(platformPath::resolve) }.distinct()
             }
         }
 

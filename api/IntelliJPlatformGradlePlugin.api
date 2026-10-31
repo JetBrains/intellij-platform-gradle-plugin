@@ -355,10 +355,6 @@ public final class org/jetbrains/intellij/platform/gradle/GradleProperties$Subsc
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$SubscriptionKey;
 }
 
-public final class org/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathEnabled : org/jetbrains/intellij/platform/gradle/GradleProperties {
-	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathEnabled;
-}
-
 public final class org/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathExcludes : org/jetbrains/intellij/platform/gradle/GradleProperties {
 	public static final field INSTANCE Lorg/jetbrains/intellij/platform/gradle/GradleProperties$TestIdeBundledPluginsClasspathExcludes;
 }
