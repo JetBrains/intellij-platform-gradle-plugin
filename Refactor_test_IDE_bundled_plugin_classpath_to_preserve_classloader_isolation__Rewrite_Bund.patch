@@ -1,0 +1,787 @@
+Subject: [PATCH] Refactor test IDE bundled plugin classpath to preserve classloader isolation
+
+Rewrite BundledPluginsPathArgumentProvider to pass all shared plugins  
+via `plugin.path` with explicit `idea.load.plugins.id` selection instead  
+of relying on version-gated classpath flattening. The new approach  
+resolves plugin IDs from sandbox, shared classpath JARs, and bundled  
+plugin directories, then constrains loading to only those IDs plus the  
+core IntelliJ module.
+
+Key changes:
+- Replace version-based classpath switching with unified plugin.path
+  argument generation in BundledPluginsPathArgumentProvider
+- Add shared classpath and sandbox plugins directory inputs to the
+  argument provider for accurate plugin ID resolution
+- Extract test framework runtime (idea_rt.jar) separately without
+  pulling in its owning Java or JUnit plugins
+- Filter isolated bundled plugin discovery using
+  TestIdeBundledPluginsClasspathExcludes property
+- Update integration tests to verify isolation across multiple IDE
+  versions and configuration-cache reuse
+- Add tests for distribution metadata retention, framework runtime
+  loading, and Git extension compatibility without conflicting modules
+---
+Index: src/integrationTest/resources/test-ide-content-modules/src/test/kotlin/LoadedPluginsTest.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/integrationTest/resources/test-ide-content-modules/src/test/kotlin/LoadedPluginsTest.kt b/src/integrationTest/resources/test-ide-content-modules/src/test/kotlin/LoadedPluginsTest.kt
+--- a/src/integrationTest/resources/test-ide-content-modules/src/test/kotlin/LoadedPluginsTest.kt	(revision f1ab2f49d3ca220b08aefb8929cadcb4e6192892)
++++ b/src/integrationTest/resources/test-ide-content-modules/src/test/kotlin/LoadedPluginsTest.kt	(date 1793394437456)
+@@ -22,16 +22,26 @@
+             val runtimePluginsDirectory = Path.of(System.getProperty("idea.plugins.path")).toAbsolutePath().normalize()
+             val platformPluginsDirectory =
+                 Path.of(System.getProperty("idea.home.path"), "plugins").toAbsolutePath().normalize()
+-            assertFalse(
+-                "Runtime plugins must not use the cached IDE's plugins directory",
+-                runtimePluginsDirectory == platformPluginsDirectory,
++            assertEquals(
++                "Isolated plugins must be discovered in their original installation",
++                platformPluginsDirectory,
++                runtimePluginsDirectory,
+             )
++            val selectedIds = System.getProperty("idea.load.plugins.id").split(',')
++            assertTrue("Runtime plugins must be explicitly selected", selectedIds.containsAll(pluginIds))
+             val pluginPaths = System.getProperty("plugin.path").split(File.pathSeparatorChar, ',')
+                 .filter(String::isNotBlank).map { Path.of(it).toAbsolutePath().normalize() }
+             assertTrue(
+-                "Runtime plugins must be original individual plugin directories",
+-                pluginPaths.isNotEmpty() && pluginPaths.all { it != platformPluginsDirectory && it.startsWith(platformPluginsDirectory) },
++                "Shared plugins must be discovered from individual directories",
++                pluginPaths.isNotEmpty() && pluginPaths.none { it == platformPluginsDirectory },
+             )
++            for (pluginId in pluginIds) {
++                val descriptor = PluginManagerCore.getPlugin(PluginId.getId(pluginId))!!
++                assertFalse(
++                    "Isolated plugins must not be loaded through the shared plugin path",
++                    descriptor.pluginPath in pluginPaths,
++                )
++            }
+         }
+         for (pluginId in pluginIds) {
+             val descriptor = PluginManagerCore.getPlugin(PluginId.getId(pluginId))
+Index: src/main/kotlin/org/jetbrains/intellij/platform/gradle/plugins/project/IntelliJPlatformBasePlugin.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/plugins/project/IntelliJPlatformBasePlugin.kt b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/plugins/project/IntelliJPlatformBasePlugin.kt
+--- a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/plugins/project/IntelliJPlatformBasePlugin.kt	(revision f1ab2f49d3ca220b08aefb8929cadcb4e6192892)
++++ b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/plugins/project/IntelliJPlatformBasePlugin.kt	(date 1793394437486)
+@@ -11,7 +11,6 @@
+ import org.gradle.api.plugins.JavaLibraryPlugin
+ import org.gradle.api.plugins.JavaPluginExtension
+ import org.gradle.kotlin.dsl.apply
+-import org.gradle.kotlin.dsl.assign
+ import org.gradle.kotlin.dsl.get
+ import org.gradle.kotlin.dsl.getByType
+ import org.gradle.kotlin.dsl.named
+@@ -48,7 +47,7 @@
+ import org.jetbrains.intellij.platform.gradle.tasks.*
+ import org.jetbrains.intellij.platform.gradle.tasks.TestIdeTask.Companion.relativeTo
+ import org.jetbrains.intellij.platform.gradle.tasks.agent.*
+-import org.jetbrains.intellij.platform.gradle.tasks.aware.*
++import org.jetbrains.intellij.platform.gradle.tasks.aware.IntelliJPlatformAware
+ import org.jetbrains.intellij.platform.gradle.utils.*
+ 
+ abstract class IntelliJPlatformBasePlugin : Plugin<Project> {
+@@ -171,7 +170,10 @@
+                     attribute(Attributes.extracted, true)
+                     attribute(Attributes.pluginLibrariesFiltered, true)
+                     attribute(Attributes.localPluginsNormalized, true)
+-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
++                    attribute(
++                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
++                        project.objects.named(Attributes.DISTRIBUTION_NAME),
++                    )
+                 }
+ 
+                 extendsFrom(intellijPlatformPluginDependenciesConfiguration)
+@@ -189,7 +191,10 @@
+                     attribute(Attributes.extracted, true)
+                     attribute(Attributes.pluginLibrariesFiltered, true)
+                     attribute(Attributes.localPluginsNormalized, true)
+-                    attribute(LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE, project.objects.named(Attributes.DISTRIBUTION_NAME))
++                    attribute(
++                        LibraryElements.LIBRARY_ELEMENTS_ATTRIBUTE,
++                        project.objects.named(Attributes.DISTRIBUTION_NAME),
++                    )
+                 }
+ 
+                 extendsFrom(intellijPlatformPluginConfiguration)
+@@ -538,7 +543,10 @@
+                     .attribute(Attributes.pluginLibrariesFiltered, true)
+             }
+ 
+-            ExtractorTransformer.register(this, project.gradle.registerClassLoaderScopedBuildService(ExtractorService::class))
++            ExtractorTransformer.register(
++                this,
++                project.gradle.registerClassLoaderScopedBuildService(ExtractorService::class),
++            )
+             PluginLibrariesFilterTransformer.register(this, dependenciesHelper.pluginLibraryExclusionRules)
+             CollectorTransformer.register(this)
+             LocalPluginsNormalizationTransformers.register(this)
+@@ -561,7 +569,8 @@
+         // so dependency callbacks and afterEvaluate must not reapply its convention.
+         javaExtension.toolchain.languageVersion.convention(intellijPlatformJavaLanguageVersion)
+ 
+-        val requestedJavaLanguageVersion = javaExtension.toolchain.languageVersion.orElse(intellijPlatformJavaLanguageVersion)
++        val requestedJavaLanguageVersion =
++            javaExtension.toolchain.languageVersion.orElse(intellijPlatformJavaLanguageVersion)
+ 
+         // The target IntelliJ Platform Java version is applied only as the Java toolchain language-version
+         // convention above. We intentionally do NOT set an
+@@ -626,43 +635,57 @@
+                 it.name.startsWith("${Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_BUNDLED_PLUGINS}_")
+         }.configureEach {
+             val suffix = name.removePrefix(Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_BUNDLED_PLUGINS)
+-            val platformPathProvider = project.provider { project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY + suffix].platformPath() }
++            val platformPathProvider = project.provider {
++                project.configurations[Configurations.INTELLIJ_PLATFORM_DEPENDENCY + suffix].platformPath()
++            }
+             val platformClasspath = project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_CLASSPATH + suffix] +
+                 project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH + suffix]
+-            val sharedClasspath = platformClasspath + project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH + suffix] +
++            val sharedClasspath = platformClasspath +
++                project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH + suffix] +
+                 project.files(TestIdeTask.getBundledPluginsClasspath(project, platformPathProvider, platformClasspath))
+-            val ideLayoutIndexService = project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
+-            val cacheDirectoryProvider = project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
++            val ideLayoutIndexService =
++                project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
++            val cacheDirectoryProvider =
++                project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
++            val excludesProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathExcludes]
++                .map { it.splitCommaSeparated().toSet() }
+ 
+-            dependencies.add(project.dependencies.create(project.files(
+-                platformClasspath.elements.zip(sharedClasspath.elements) { elements, sharedElements ->
+-                    val platformPath = platformPathProvider.get()
+-                    val requiredIds = withIdePluginManager { pluginManager ->
+-                        elements.asSequence()
+-                            .filterNot { it.asPath.startsWith(platformPath) }
+-                            .mapNotNull { pluginManager.safelyCreatePlugin(it.asPath).getOrNull() }
+-                            .flatMap { plugin ->
+-                                plugin.dependsList.asSequence().filterNot { it.isOptional }.map { it.pluginId } +
+-                                    plugin.pluginMainModuleDependencies.asSequence().map { it.pluginId } +
+-                                    plugin.contentModuleDependencies.asSequence().map { it.moduleName }
+-                            }
+-                            .toSet()
+-                    }
++            dependencies.add(
++                project.dependencies.create(
++                    project.files(
++                        platformClasspath.elements.zip(sharedClasspath.elements) { elements, sharedElements ->
++                            val platformPath = platformPathProvider.get()
++                            val requiredIds = withIdePluginManager { pluginManager ->
++                                elements.asSequence()
++                                    .filterNot { it.asPath.startsWith(platformPath) }
++                                    .mapNotNull { pluginManager.safelyCreatePlugin(it.asPath).getOrNull() }
++                                    .flatMap { plugin ->
++                                        plugin.dependsList.asSequence().filterNot { it.isOptional }.map { it.pluginId } +
++                                            plugin.pluginMainModuleDependencies.asSequence().map { it.pluginId } +
++                                            plugin.contentModuleDependencies.asSequence().map { it.moduleName }
++                                    }
++                                    .toSet()
++                            }
+ 
+-                    val index = ideLayoutIndexService.get().resolve(platformPath, cacheDirectoryProvider.get())
+-                    val sharedPluginKeys = index.findPluginsOnClasspath(sharedElements.relativeTo(platformPath)).map { it.key }.toSet()
+-                    index.findMissingEntries(
+-                        classpath = elements.relativeTo(platformPath),
+-                        includeCoreDependencies = platformPath.productInfo().buildNumber.toVersion() >= Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER,
+-                        requiredIds = requiredIds,
+-                    )
+-                        .filter { !it.isModule && it.key !in sharedPluginKeys }
+-                        .flatMap { it.classpath }
+-                        .filter { it.startsWith("plugins/") }
+-                        .map { platformPath.resolve("plugins/${it.removePrefix("plugins/").substringBefore('/')}") }
+-                        .toSet()
+-                },
+-            )))
++                            val index = ideLayoutIndexService.get().resolve(platformPath, cacheDirectoryProvider.get())
++                            val excludes = excludesProvider.get()
++                            val sharedPluginKeys =
++                                index.findPluginsOnClasspath(sharedElements.relativeTo(platformPath)).map { it.key }
++                                    .toSet()
++                            index.findMissingEntries(
++                                classpath = elements.relativeTo(platformPath),
++                                includeCoreDependencies = platformPath.productInfo().buildNumber.toVersion() >= Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER,
++                                requiredIds = requiredIds,
++                            )
++                                .filter { !it.isModule && it.key !in sharedPluginKeys && it.id !in excludes }
++                                .flatMap { it.classpath }
++                                .filter { it.startsWith("plugins/") }
++                                .map { platformPath.resolve("plugins/${it.removePrefix("plugins/").substringBefore('/')}") }
++                                .toSet()
++                        },
++                    ),
++                ),
++            )
+         }
+ 
+         project.tasks
+Index: src/test/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTaskTest.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/test/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTaskTest.kt b/src/test/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTaskTest.kt
+--- a/src/test/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTaskTest.kt	(revision f1ab2f49d3ca220b08aefb8929cadcb4e6192892)
++++ b/src/test/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTaskTest.kt	(date 1793394437470)
+@@ -30,26 +30,21 @@
+                             "idea.home.path does not point to an IntelliJ Platform home: ${'$'}ideaHomePath"
+                         }
+ 
+-                        val productInfo = listOf(
+-                            ideaHomePath.resolve("product-info.json"),
+-                            ideaHomePath.resolve("Resources/product-info.json"),
+-                        ).first { it.isFile }
+-                        val buildNumber = com.jetbrains.plugin.structure.intellij.platform.ProductInfoParser()
+-                            .parse(productInfo.toPath()).buildNumber.substringBefore('.').toInt()
+                         val sandboxPluginsDirectory = tasks.named<PrepareSandboxTask>("prepareTestSandbox").get()
+                             .sandboxPluginsDirectory.get().asFile
+-                        check(arguments.filter { it.startsWith("-Didea.plugins.path=") }.all {
+-                            file(it.substringAfter("=")) == sandboxPluginsDirectory
+-                        }) { "Bundled plugin discovery must not redirect the sandbox plugins directory" }
+-                        if (buildNumber >= 262) {
+-                            val runtimePlugins = configurations.getByName("intellijPlatformTestRuntimeBundledPlugins").files
+-                            val pluginPath = arguments.last { it.startsWith("-Dplugin.path=") }.substringAfter("=")
+-                            check(pluginPath == runtimePlugins.joinToString(File.pathSeparator) { it.absolutePath })
+-                            check(runtimePlugins.all { it.toPath().startsWith(ideaHomePath.resolve("plugins").toPath()) })
+-                            check("-Didea.use.core.classloader.for.plugin.path=false" in arguments)
+-                        } else {
+-                            check("-Didea.use.core.classloader.for.plugin.path=true" in arguments)
+-                        }
++                        check(file(arguments.last { it.startsWith("-Didea.plugins.path=") }.substringAfter("=")) == ideaHomePath.resolve("plugins"))
++                        val runtimePlugins = configurations.getByName("intellijPlatformTestRuntimeBundledPlugins").files
++                        val pluginPath = arguments.last { it.startsWith("-Dplugin.path=") }.substringAfter("=")
++                            .split(File.pathSeparatorChar).filter(String::isNotBlank).map(::file)
++                        check(pluginPath.none { it in runtimePlugins }) { "Runtime plugins must not use the shared plugin path" }
++                        check(pluginPath.containsAll(sandboxPluginsDirectory.listFiles().orEmpty().toList())) {
++                            "The sandbox plugin directories must remain available for descriptor discovery"
++                        }
++                        check(arguments.last { it.startsWith("-Didea.load.plugins.id=") }.substringAfter("=").isNotBlank()) {
++                            "Scanning the original IDE plugins must be restricted to selected plugins"
++                        }
++                        check(runtimePlugins.all { it.toPath().startsWith(ideaHomePath.resolve("plugins").toPath()) })
++                        check("-Didea.use.core.classloader.for.plugin.path=true" in arguments)
+ 
+                         println("IDEA_HOME_PATH=${'$'}ideaHomePath")
+                     }
+@@ -61,6 +56,47 @@
+         }
+     }
+ 
++    @Test
++    fun `runtime bundled plugins include only required plugins except shared and excluded plugins`() {
++        buildFile write //language=kotlin
++            """
++                dependencies {
++                    intellijPlatform {
++                        bundledPlugin("com.intellij.java")
++                    }
++                }
++
++                tasks.register("verifyIndexedRuntimeBundledPlugins") {
++                    doLast {
++                        val arguments = tasks.named<org.gradle.api.tasks.testing.Test>("test").get()
++                            .jvmArgumentProviders.flatMap { it.asArguments() }
++                        val ideaHome = file(arguments.single { it.startsWith("-Didea.home.path=") }.substringAfter("="))
++                        val plugins = configurations.getByName("intellijPlatformTestRuntimeBundledPlugins").files
++                        check(plugins.all { it.isDirectory && it.parentFile == ideaHome.resolve("plugins") }) {
++                            "Runtime entries must be original individual plugin directories: ${'$'}plugins"
++                        }
++                        check(ideaHome.resolve("plugins/json") !in plugins) {
++                            "Unrelated indexed plugins must not be activated without a dependency on them"
++                        }
++                        check(ideaHome.resolve("plugins/java") !in plugins) {
++                            "Explicit plugins must retain their shared classloader"
++                        }
++                        check(ideaHome.resolve("plugins/gradle") !in plugins) {
++                            "Configured exclusions must also apply to isolated runtime plugins"
++                        }
++                        println("INDEXED_RUNTIME_BUNDLED_PLUGINS_VERIFIED")
++                    }
++                }
++                """.trimIndent()
++
++        build(
++            "verifyIndexedRuntimeBundledPlugins",
++            projectProperties = mapOf(GradleProperties.TestIdeBundledPluginsClasspathExcludes.toString() to "com.intellij.gradle"),
++        ) {
++            assertContains("INDEXED_RUNTIME_BUNDLED_PLUGINS_VERIFIED", output)
++        }
++    }
++
+     @Test
+     fun `runtime bundled plugins use separate lazy configurations without extra preparation tasks`() {
+         buildFile write //language=kotlin
+@@ -114,24 +150,24 @@
+                         ).forEach { (taskName, configurationName) ->
+                             val task = tasks.named(taskName).get() as org.jetbrains.intellij.platform.gradle.tasks.aware.TestableAware
+                             val configuration = configurations.getByName(configurationName)
+-                            check(task.runtimeBundledPlugins.from == setOf(configuration)) {
+-                                "${'$'}taskName sources: ${'$'}{task.runtimeBundledPlugins.from}; expected ${'$'}configuration"
++                            check(task.intellijPlatformTestRuntimeBundledPluginsConfiguration.from == setOf(configuration)) {
++                                "${'$'}taskName sources: ${'$'}{task.intellijPlatformTestRuntimeBundledPluginsConfiguration.from}; expected ${'$'}configuration"
+                             }
+ 
+                             val pluginDirectory = file("runtime-plugin-${'$'}taskName")
+-                            task.runtimeBundledPlugins.from(pluginDirectory)
+-                            check(task.runtimeBundledPlugins.from == setOf(configuration, pluginDirectory)) {
+-                                "${'$'}taskName did not extend its sources: ${'$'}{task.runtimeBundledPlugins.from}"
++                            task.intellijPlatformTestRuntimeBundledPluginsConfiguration.from(pluginDirectory)
++                            check(task.intellijPlatformTestRuntimeBundledPluginsConfiguration.from == setOf(configuration, pluginDirectory)) {
++                                "${'$'}taskName did not extend its sources: ${'$'}{task.intellijPlatformTestRuntimeBundledPluginsConfiguration.from}"
+                             }
+ 
+                             val replacementDirectory = file("replacement-plugin-${'$'}taskName")
+-                            task.runtimeBundledPlugins.setFrom(replacementDirectory)
+-                            check(task.runtimeBundledPlugins.files == setOf(replacementDirectory)) {
+-                                "${'$'}taskName did not replace its sources: ${'$'}{task.runtimeBundledPlugins.files}"
++                            task.intellijPlatformTestRuntimeBundledPluginsConfiguration.setFrom(replacementDirectory)
++                            check(task.intellijPlatformTestRuntimeBundledPluginsConfiguration.files == setOf(replacementDirectory)) {
++                                "${'$'}taskName did not replace its sources: ${'$'}{task.intellijPlatformTestRuntimeBundledPluginsConfiguration.files}"
+                             }
+-                            task.runtimeBundledPlugins.unset()
+-                            check(task.runtimeBundledPlugins.from == setOf(configurations.getByName("intellijPlatformTestRuntimeBundledPlugins"))) {
+-                                "${'$'}taskName did not restore its default convention: ${'$'}{task.runtimeBundledPlugins.from}"
++                            task.intellijPlatformTestRuntimeBundledPluginsConfiguration.unset()
++                            check(task.intellijPlatformTestRuntimeBundledPluginsConfiguration.from == setOf(configurations.getByName("intellijPlatformTestRuntimeBundledPlugins"))) {
++                                "${'$'}taskName did not restore its default convention: ${'$'}{task.intellijPlatformTestRuntimeBundledPluginsConfiguration.from}"
+                             }
+                             check(configuration.state == org.gradle.api.artifacts.Configuration.State.UNRESOLVED) {
+                                 "${'$'}configurationName was resolved"
+Index: src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask.kt b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask.kt
+--- a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask.kt	(revision f1ab2f49d3ca220b08aefb8929cadcb4e6192892)
++++ b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/TestIdeTask.kt	(date 1793394437493)
+@@ -37,6 +37,7 @@
+ import java.nio.file.Path
+ import kotlin.io.path.absolute
+ import kotlin.io.path.invariantSeparatorsPathString
++import kotlin.io.path.isRegularFile
+ import kotlin.io.path.name
+ 
+ /**
+@@ -80,8 +81,10 @@
+             val intelliJPlatformConfiguration = sourceTask.intelliJPlatformConfiguration
+             val intellijPlatformTestClasspathConfiguration = sourceTask.intellijPlatformTestClasspathConfiguration
+             val intellijPlatformClasspathConfiguration = sourceTask.intellijPlatformClasspathConfiguration
+-            val intellijPlatformTestRuntimeClasspathConfiguration = sourceTask.intellijPlatformTestRuntimeClasspathConfiguration
+-            val intelliJPlatformTestRuntimeFixClasspathConfiguration = sourceTask.intelliJPlatformTestRuntimeFixClasspathConfiguration
++            val intellijPlatformTestRuntimeClasspathConfiguration =
++                sourceTask.intellijPlatformTestRuntimeClasspathConfiguration
++            val intelliJPlatformTestRuntimeFixClasspathConfiguration =
++                sourceTask.intelliJPlatformTestRuntimeFixClasspathConfiguration
+             val coroutinesJavaAgentFile = sourceTask.coroutinesJavaAgentFile
+             val runtimeArchitecture = sourceTask.runtimeArchitecture
+             val runtimeDirectory = sourceTask.runtimeDirectory
+@@ -121,7 +124,6 @@
+             systemProperty("intellij.console.log.level", "warning")
+             systemProperty("intellij.testFramework.rethrow.logged.errors", "true")
+             systemProperty("rider.tests.plugin.home.path", project.rootProjectPath.safePathString)
+-            // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
+ 
+             val sourceSets = project.extensions.getByType<SourceSetContainer>()
+             val runtimeDependencies = sourceSets.getByName(SourceSet.MAIN_SOURCE_SET_NAME).runtimeClasspath
+@@ -150,11 +152,16 @@
+                 // The test runtime fixes provide the core content modules, e.g., `lib/intellij.spellchecker.jar`.
+                 intellijPlatformTestClasspathConfiguration + intelliJPlatformTestRuntimeFixClasspathConfiguration,
+             )
+-            val runtimeBundledPluginDirectories = sourceTask.intellijPlatformTestRuntimeBundledPluginsConfiguration
++
+             jvmArgumentProviders.add(
+                 BundledPluginsPathArgumentProvider(
++                    sourceTask.intellijPlatformTestRuntimeBundledPluginsConfiguration,
+                     intelliJPlatformConfiguration,
+-                    runtimeBundledPluginDirectories,
++                    intellijPlatformTestClasspathConfiguration + intellijPlatformTestRuntimeClasspathConfiguration +
++                        intelliJPlatformTestRuntimeFixClasspathConfiguration + project.files(
++                        bundledPluginsClasspathProvider,
++                    ),
++                    sandboxPluginsDirectory,
+                 ),
+             )
+ 
+@@ -178,20 +185,8 @@
+                 intelliJPlatformTestRuntimeFixClasspathConfiguration,
+                 // 9. Bundled plugins and modules, all or only the missing ones, see getBundledPluginsClasspath:
+                 bundledPluginsClasspathProvider,
+-                // 10. Required bundled dependencies retain the shared test classloader before 2026.2:
+-                /**
+-                 * TODO: REVIEW 4
+-                 */
+-                platformPathProvider.map {
+-                    when {
+-                        it.productInfo().buildNumber.toVersion() < Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER ->
+-                            runtimeBundledPluginDirectories.asFileTree.matching {
+-                                include("${Sandbox.Plugin.LIB}/*.jar", "${Sandbox.Plugin.LIB_MODULES}/*.jar")
+-                            }
+-
+-                        else -> emptyList<Path>()
+-                    }
+-                },
++                // 10. Shared test-framework runtime support, without sharing its owning plugin:
++                getTestFrameworkRuntimeClasspath(platformPathProvider),
+             )
+ 
+             testClassesDirs = instrumentedTestCode + testClassesDirs
+@@ -227,6 +222,16 @@
+                 }
+             }
+ 
++        private fun getTestFrameworkRuntimeClasspath(platformPathProvider: Provider<Path>) =
++            platformPathProvider.map { platformPath ->
++                // FileComparisonFailedError implements FileComparisonData from idea_rt.jar, moved into the Java plugin in 263.
++                (listOf("lib/idea_rt.jar") + platformPath.productInfo().layout.flatMap { it.classPath })
++                    .filter { it.endsWith("/idea_rt.jar") }
++                    .map { platformPath.resolve(it) }
++                    .filter { it.isRegularFile() }
++                    .toSet()
++            }
++
+         /**
+          * Returns the bundled plugins and modules to add to the test classpath:
+          * - if [GradleProperties.TestIdeBundledPluginsClasspathEnabled] is explicitly enabled,
+@@ -244,7 +249,8 @@
+             platformPathProvider: Provider<Path>,
+             platformClasspath: FileCollection,
+         ): Provider<List<Path>> {
+-            val ideLayoutIndexService = project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
++            val ideLayoutIndexService =
++                project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
+             val ideLayoutIndexCacheDirectoryProvider =
+                 project.providers.intellijPlatformIdeLayoutIndicesCachePath(project.rootProjectPath)
+             val excludesProvider = project.providers[GradleProperties.TestIdeBundledPluginsClasspathExcludes]
+@@ -277,7 +283,7 @@
+                         ideLayoutIndex.findMissingEntries(
+                             classpath = elements.relativeTo(platformPath),
+                             includeCoreDependencies = supportedProvider.get(),
+-                            moduleDependenciesOnly = supportedProvider.get(),
++                            moduleDependenciesOnly = true,
+                         )
+                     }
+                 }
+Index: src/main/kotlin/org/jetbrains/intellij/platform/gradle/argumentProviders/BundledPluginsPathArgumentProvider.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/argumentProviders/BundledPluginsPathArgumentProvider.kt b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/argumentProviders/BundledPluginsPathArgumentProvider.kt
+--- a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/argumentProviders/BundledPluginsPathArgumentProvider.kt	(revision f1ab2f49d3ca220b08aefb8929cadcb4e6192892)
++++ b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/argumentProviders/BundledPluginsPathArgumentProvider.kt	(date 1793394437480)
+@@ -2,41 +2,66 @@
+ 
+ package org.jetbrains.intellij.platform.gradle.argumentProviders
+ 
++import org.gradle.api.file.DirectoryProperty
+ import org.gradle.api.file.FileCollection
+ import org.gradle.api.tasks.InputFiles
++import org.gradle.api.tasks.Internal
+ import org.gradle.api.tasks.PathSensitive
+ import org.gradle.api.tasks.PathSensitivity.RELATIVE
+ import org.gradle.process.CommandLineArgumentProvider
+-import org.jetbrains.intellij.platform.gradle.Constants.Constraints
+-import org.jetbrains.intellij.platform.gradle.models.productInfo
++import org.jetbrains.intellij.platform.gradle.utils.asPath
+ import org.jetbrains.intellij.platform.gradle.utils.platformPath
+-import org.jetbrains.intellij.platform.gradle.utils.toVersion
++import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
++import org.jetbrains.intellij.platform.gradle.utils.withIdePluginManager
+ import java.io.File
++import java.util.zip.ZipFile
++import kotlin.io.path.exists
++import kotlin.io.path.listDirectoryEntries
+ 
+ /**
+  * Exposes bundled plugins to the unit-test descriptor loader without putting their JARs on the shared classpath.
+- * Runtime-only plugins are passed through `plugin.path`; shared plugins are discovered on the test classpath.
++ * Shared plugins retain directory-based discovery through `plugin.path`. Runtime-only plugins are selected
++ * from the original IDE plugins directory and use their own classloaders.
+  */
+ internal class BundledPluginsPathArgumentProvider(
++    @InputFiles
++    @PathSensitive(RELATIVE)
++    val pluginsDirectory: FileCollection,
++
+     @InputFiles
+     @PathSensitive(RELATIVE)
+     val intellijPlatformConfiguration: FileCollection,
+ 
+     @InputFiles
+     @PathSensitive(RELATIVE)
+-    val pluginsDirectory: FileCollection,
++    val sharedClasspath: FileCollection,
++
++    @Internal
++    val sandboxPluginsDirectory: DirectoryProperty,
+ ) : CommandLineArgumentProvider {
+ 
+     override fun asArguments(): List<String> {
+-        val platformPath = intellijPlatformConfiguration.platformPath()
+-        return when {
+-            platformPath.productInfo().buildNumber.toVersion() >= Constraints.MINIMAL_TEST_BUNDLED_PLUGINS_CLASSPATH_BUILD_NUMBER ->
+-                listOf(
+-                    "-Dplugin.path=${pluginsDirectory.files.joinToString(File.pathSeparator) { it.absolutePath }}",
+-                    "-Didea.use.core.classloader.for.plugin.path=false",
+-                )
+-
+-            else -> listOf("-Didea.use.core.classloader.for.plugin.path=true")
+-        }
++        val platformPlugins = intellijPlatformConfiguration.platformPath().resolve("plugins")
++        val sandboxPlugins = sandboxPluginsDirectory.orNull?.asPath
++            ?.takeIf { it.exists() }?.listDirectoryEntries().orEmpty()
++        val sharedPlugins = sharedClasspath.files.mapNotNull { file ->
++            file.toPath().takeIf { it.startsWith(platformPlugins) }
++                ?.takeIf {
++                    file.isFile && file.extension == "jar" && ZipFile(file).use { it.getEntry("META-INF/plugin.xml") != null }
++                }
++                ?.let { platformPlugins.resolve(platformPlugins.relativize(it).getName(0)) }
++        }.toSet()
++        val pluginIds = withIdePluginManager { pluginManager ->
++            (sandboxPlugins + sharedPlugins + pluginsDirectory.files.map { it.toPath() })
++                .mapNotNull { pluginManager.safelyCreatePlugin(it).getOrNull()?.pluginId }
++                .distinct()
++        }
++
++        return listOf(
++            "-Didea.plugins.path=$platformPlugins",
++            "-Didea.load.plugins.id=${(listOf("com.intellij") + pluginIds).distinct().joinToString(",")}",
++            "-Dplugin.path=${(sandboxPlugins + sharedPlugins).joinToString(File.pathSeparator)}",
++            "-Didea.use.core.classloader.for.plugin.path=true",
++        )
+     }
+ }
+Index: src/integrationTest/kotlin/org/jetbrains/intellij/platform/gradle/TestIdeContentModulesIntegrationTest.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/integrationTest/kotlin/org/jetbrains/intellij/platform/gradle/TestIdeContentModulesIntegrationTest.kt b/src/integrationTest/kotlin/org/jetbrains/intellij/platform/gradle/TestIdeContentModulesIntegrationTest.kt
+--- a/src/integrationTest/kotlin/org/jetbrains/intellij/platform/gradle/TestIdeContentModulesIntegrationTest.kt	(revision f1ab2f49d3ca220b08aefb8929cadcb4e6192892)
++++ b/src/integrationTest/kotlin/org/jetbrains/intellij/platform/gradle/TestIdeContentModulesIntegrationTest.kt	(date 1793394437464)
+@@ -49,9 +49,11 @@
+             expectedPlugins = listOf("intellij.structureView.plugin"),
+         )
+ 
+-        build(Tasks.External.TEST, projectProperties = properties) {
+-            assert(entries.any { it.endsWith(STRUCTURE_VIEW_PLUGIN_JAR) }) {
+-                "expect test classpath contains '$STRUCTURE_VIEW_PLUGIN_JAR'"
++        for (version in listOf("2026.2.1", "263.5153.40")) {
++            build(Tasks.External.TEST, projectProperties = properties + ("intellijPlatform.version" to version)) {
++                assert(entries.any { it.endsWith(STRUCTURE_VIEW_PLUGIN_JAR) }) {
++                    "expect test classpath contains '$STRUCTURE_VIEW_PLUGIN_JAR'"
++                }
+             }
+         }
+     }
+@@ -78,7 +80,9 @@
+             bundledPlugins = listOf("com.intellij.spring"),
+         )
+ 
+-        build(Tasks.External.TEST, projectProperties = properties)
++        for (version in listOf("2026.2.1", "263.5153.40")) {
++            build(Tasks.External.TEST, projectProperties = properties + ("intellijPlatform.version" to version))
++        }
+     }
+ 
+     @Test
+@@ -105,6 +109,102 @@
+         build(Tasks.External.TEST, projectProperties = properties(bundledPluginsClasspathEnabled = false))
+     }
+ 
++    @Test
++    fun `retain tested plugin distribution metadata with isolated bundled dependencies`() {
++        disableDebug()
++
++        dir.resolve("src/test/kotlin/DistributionMetadataTest.kt").writeText(
++            """
++            import com.intellij.ide.plugins.PluginMainDescriptor
++            import com.intellij.ide.plugins.PluginManagerCore
++            import com.intellij.openapi.extensions.PluginId
++            import com.intellij.testFramework.fixtures.BasePlatformTestCase
++            import java.nio.file.Files
++
++            class DistributionMetadataTest : BasePlatformTestCase() {
++                fun testDistributionClasspath() {
++                    val descriptor = PluginManagerCore.getPlugin(
++                        PluginId.getId("org.jetbrains.plugins.integration-tests.test-ide-content-modules")
++                    ) as PluginMainDescriptor
++                    assertNotNull("Directory-discovered plugins must retain their distribution classpath", descriptor.ownClassPath)
++                    assertTrue("The packaged plugin must contain JARs", descriptor.ownClassPath!!.isNotEmpty())
++                    assertTrue(descriptor.ownClassPath!!.all { Files.isRegularFile(it) && it.startsWith(descriptor.pluginPath) })
++                    assertSame("Distribution discovery must preserve shared test class identity", javaClass.classLoader, descriptor.pluginClassLoader)
++                    val unrelatedIds = setOf("com.intellij.spring", "org.jetbrains.kotlin")
++                    assertFalse("Directory discovery must not activate unrelated plugins",
++                        PluginManagerCore.loadedPlugins.any { it.pluginId.idString in unrelatedIds })
++                }
++            }
++            """.trimIndent(),
++        )
++        val properties = properties(
++            bundledPluginsClasspathEnabled = false,
++            bundledPlugins = listOf("com.intellij.xml"),
++            expectedPlugins = listOf("com.intellij.modules.ultimate"),
++        ) + mapOf(
++            "intellijPlatform.version" to "263.7307.44-EAP-SNAPSHOT",
++            "useInstaller" to false,
++            "expectedIsolatedPlugins" to "com.intellij.modules.ultimate",
++        )
++
++        for (taskName in listOf(Tasks.External.TEST, "testIdeCustom")) {
++            build(taskName, projectProperties = properties)
++            buildWithConfigurationCache(taskName, projectProperties = properties)
++            buildWithConfigurationCache(taskName, projectProperties = properties) {
++                assert(output.contains("Reusing configuration cache."))
++            }
++        }
++    }
++
++    @Test
++    fun `load test framework file comparison runtime without Java or JUnit plugins`() {
++        disableDebug()
++
++        dir.resolve("src/test/kotlin/FrameworkRuntimeTest.kt").writeText(
++            """
++            import org.junit.Assert.assertSame
++            import org.junit.Assert.assertTrue
++            import org.junit.Test
++
++            class FrameworkRuntimeTest {
++                @Test
++                fun testFileComparisonRuntime() {
++                    val error = Class.forName("com.intellij.platform.testFramework.core.FileComparisonFailedError")
++                    assertTrue(error.constructors.isNotEmpty())
++                    val data = Class.forName("com.intellij.rt.execution.junit.FileComparisonData")
++                    assertTrue(data.isAssignableFrom(error))
++                    assertSame(error.classLoader, data.classLoader)
++                }
++            }
++            """.trimIndent(),
++        )
++        val properties = properties(bundledPluginsClasspathEnabled = false) + mapOf(
++            "intellijPlatform.version" to "263.7307.44-EAP-SNAPSHOT",
++            "useInstaller" to false,
++        )
++
++        for (taskName in listOf(Tasks.External.TEST, "testIdeCustom")) {
++            build(taskName, "--tests", "FrameworkRuntimeTest", projectProperties = properties) {
++                assert(entries.any { it.endsWith("/idea_rt.jar") }) {
++                    "The shared test framework must have its runtime support JAR"
++                }
++                assert(
++                    entries.none {
++                        (it.contains("/plugins/java/") && !it.endsWith("/idea_rt.jar")) || it.contains("/plugins/junit/")
++                    },
++                ) {
++                    "Runtime support must not flatten Java or JUnit plugins onto the shared classpath"
++                }
++            }
++            buildWithConfigurationCache(taskName, "--tests", "FrameworkRuntimeTest", projectProperties = properties)
++            buildWithConfigurationCache(taskName, "--tests", "FrameworkRuntimeTest", projectProperties = properties) {
++                assert(output.contains("Reusing configuration cache.")) {
++                    "The shared test runtime must support configuration-cache reuse for $taskName"
++                }
++            }
++        }
++    }
++
+     @Test
+     fun `load marketplace plugin requiring bundled JSON before 2026_2`() {
+         disableDebug()
+@@ -130,10 +230,14 @@
+         ) + mapOf(
+             "intellijPlatform.version" to "2024.3.7.1",
+             "marketplacePlugins" to "org.jetbrains.plugins.go:243.28141.18",
++            "expectedIsolatedPlugins" to "com.intellij.modules.json",
+         )
+ 
+         for (taskName in listOf(Tasks.External.TEST, "testIdeCustom")) {
+             build(taskName, projectProperties = properties) {
++                assert(entries.none { it.contains("/plugins/json/") }) {
++                    "JSON must be loaded in isolation, not added to the shared test classpath"
++                }
+                 assert(entries.none { it.contains("/plugins/Git4Idea/") || it.contains("/plugins/remote-dev-server/") }) {
+                     "Only required bundled dependencies should be added to the test classpath"
+                 }
+@@ -141,6 +245,37 @@
+         }
+     }
+ 
++    @Test
++    fun `load Git extensions before 2026_2 without conflicting bundled modules`() {
++        disableDebug()
++
++        dir.resolve("src/test/kotlin/GitExtensionsTest.kt").writeText(
++            """
++            import com.intellij.openapi.vcs.ProjectLevelVcsManager
++            import com.intellij.testFramework.HeavyPlatformTestCase
++
++            class GitExtensionsTest : HeavyPlatformTestCase() {
++                fun testGitVcsRegistered() {
++                    val vcsNames = ProjectLevelVcsManager.getInstance(project).getAllVcss().map { it.name }
++                    assertTrue("Git VCS extension must be registered: ${'$'}vcsNames", "Git" in vcsNames)
++                }
++            }
++            """.trimIndent(),
++        )
++        val properties = properties(
++            bundledPluginsClasspathEnabled = false,
++            bundledPlugins = listOf("Git4Idea"),
++        ) + mapOf("intellijPlatform.version" to "2026.1.1")
++
++        for (taskName in listOf(Tasks.External.TEST, "testIdeCustom")) {
++            build(taskName, projectProperties = properties) {
++                assert(entries.none { it.contains("/plugins/remote-dev-server/") }) {
++                    "Remote Development must not introduce conflicting Git frontend modules"
++                }
++            }
++        }
++    }
++
+     @Test
+     fun `isolate automatically resolved bundled plugins`() {
+         disableDebug()
+Index: src/main/kotlin/org/jetbrains/intellij/platform/gradle/GradleProperties.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/GradleProperties.kt b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/GradleProperties.kt
+--- a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/GradleProperties.kt	(revision f1ab2f49d3ca220b08aefb8929cadcb4e6192892)
++++ b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/GradleProperties.kt	(date 1793394437475)
+@@ -173,6 +173,7 @@
+     /**
+      * Specifies the bundled plugin IDs or module IDs excluded from the [TestIdeTask] classpath when
+      * [TestIdeBundledPluginsClasspathEnabled] is enabled.
++     * These exclusions also apply to isolated bundled plugin discovery when it is disabled.
+      * The property accepts a comma-separated list.
+      *
+      * To include all bundled plugins, set it to an empty value:
+Index: src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/tasks.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/tasks.kt b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/tasks.kt
+--- a/src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/tasks.kt	(revision f1ab2f49d3ca220b08aefb8929cadcb4e6192892)
++++ b/src/main/kotlin/org/jetbrains/intellij/platform/gradle/tasks/tasks.kt	(date 1793394437499)
+@@ -431,8 +431,9 @@
+                 configurations.maybeCreate(Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_CLASSPATH)
+             intelliJPlatformTestRuntimeFixClasspathConfiguration =
+                 project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_FIX_CLASSPATH]
+-            intellijPlatformTestRuntimeBundledPluginsConfiguration =
+-                project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_BUNDLED_PLUGINS]
++            intellijPlatformTestRuntimeBundledPluginsConfiguration.convention(
++                project.configurations[Configurations.INTELLIJ_PLATFORM_TEST_RUNTIME_BUNDLED_PLUGINS],
++            )
+         }
+ 
+         if (this is ProductReleasesServiceAware) {
