@@ -162,6 +162,9 @@ internal fun collectIntelliJPlatformJars(productInfo: ProductInfo, intellijPlatf
                 .filter { it.name == IDEA_CORE }
                 .flatMap { it.classPath }
         )
+        // Since 2026.3, idea_rt.jar is shipped with the Java plugin instead of lib/ and is no longer
+        // listed in the boot classpath. The JUnit 5 test session listener still needs it at runtime.
+        .plus(listOf("plugins/java/lib/idea_rt.jar"))
         // exclude tests-related jars from the list as JUnit and Test Framework shouldn't be in the classpath
         .filterNot { it in listOf("lib/junit4.jar", "lib/junit.jar", "lib/testFramework.jar") }
         .map { intellijPlatformPath.resolve(it) }

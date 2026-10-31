@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.artifacts.transform
 
+import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.utils.ModuleDescriptorsParser
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
@@ -10,11 +11,47 @@ import kotlin.io.path.createDirectories
 import kotlin.io.path.createTempDirectory
 import kotlin.io.path.deleteRecursively
 import kotlin.io.path.outputStream
+import kotlin.io.path.writeBytes
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class CollectorTransformerTest {
+
+    @OptIn(ExperimentalPathApi::class)
+    @Test
+    fun `collect idea_rt jar moved to the Java plugin`() {
+        val tempDir = createTempDirectory("platform-jars")
+        try {
+            tempDir.resolve("lib").createDirectories()
+                .resolve("app.jar")
+                .writeBytes(byteArrayOf())
+            val ideaRtJar = tempDir.resolve("plugins/java/lib").createDirectories()
+                .resolve("idea_rt.jar")
+                .also { it.writeBytes(byteArrayOf()) }
+
+            val productInfo = ProductInfo(
+                buildNumber = "263.7031.23",
+                productCode = "IU",
+                launch = listOf(
+                    ProductInfo.Launch(
+                        os = ProductInfo.Launch.OS.current,
+                        bootClassPathJarNames = listOf("app.jar"),
+                    ),
+                ),
+            )
+
+            val jars = collectIntelliJPlatformJars(productInfo, tempDir)
+
+            assertTrue(
+                ideaRtJar in jars,
+                "idea_rt.jar from the Java plugin should be collected, got: $jars",
+            )
+        } finally {
+            tempDir.deleteRecursively()
+        }
+    }
 
     @OptIn(ExperimentalPathApi::class)
     @Test
