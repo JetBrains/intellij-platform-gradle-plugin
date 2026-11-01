@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle.services
 import com.jetbrains.plugin.structure.jar.FsHandleFileSystem
 import com.jetbrains.plugin.structure.jar.SingletonCachingJarFileSystemProvider
 import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.gradle.api.services.BuildServiceParameters
 import org.intellij.lang.annotations.Language
 import org.jetbrains.intellij.platform.gradle.Constants.IDEA_CORE
@@ -241,6 +242,52 @@ class IdeLayoutIndexServiceTest {
         assertEquals(mapOf("com.intellij.java" to mapOf(IDEA_CORE to listOf("Z.Z.L"))), clashes)
         assertEquals(1, cacheDirectory.listDirectoryEntries("*-class-clashes.json").size)
         assertEquals(clashes, service().resolveClassClashes(platformPath, cacheDirectory))
+    }
+
+    @Test
+    fun `record every conflicting owner even when earlier owners are excluded`() {
+        val platformPath = createIde()
+        val cacheDirectory = temporaryFolder.newFolder("index").toPath()
+        val pluginIds = listOf("com.intellij.java", "second", "third", "fourth")
+        val productInfoFile = platformPath.resolve("product-info.json")
+        val productInfo = json.decodeFromString<ProductInfo>(productInfoFile.readText())
+        productInfoFile.writeText(
+            Json(json) { encodeDefaults = true }.encodeToString(
+                productInfo.copy(
+                    bundledPlugins = pluginIds,
+                    layout = pluginIds.map { id ->
+                        ProductInfo.LayoutItem(id, ProductInfo.LayoutItemKind.plugin, listOf("plugins/$id/lib/plugin.jar"))
+                    },
+                ),
+            ),
+        )
+        pluginIds.zip(listOf("same", "same", "different", "another")).forEach { (id, contents) ->
+            platformPath.writeJar(
+                "plugins/$id/lib/plugin.jar",
+                "META-INF/plugin.xml" to pluginXml(id),
+                "Z/Z/L.class" to contents,
+            )
+        }
+        val service = service()
+        val clashes = service.resolveClassClashes(platformPath, cacheDirectory)
+
+        assertEquals(
+            mapOf(
+                "third" to mapOf("com.intellij.java" to listOf("Z.Z.L"), "second" to listOf("Z.Z.L")),
+                "fourth" to mapOf(
+                    "com.intellij.java" to listOf("Z.Z.L"),
+                    "second" to listOf("Z.Z.L"),
+                    "third" to listOf("Z.Z.L"),
+                ),
+            ),
+            clashes,
+        )
+        val resolved = service.resolve(platformPath, cacheDirectory).resolveTestPlugins(
+            pluginIds,
+            excludes = mapOf("com.intellij.java" to "listed"),
+            clashes = clashes,
+        )
+        assertEquals(listOf("second"), resolved.included.map { it.id })
     }
 
     private val bundledPluginIds = listOf(

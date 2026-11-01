@@ -116,7 +116,7 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
             jar.forEachObfuscatedClass { name, crc -> coreClasses.putIfAbsent(name, crc) }
         }
 
-        val pluginClasses = hashMapOf<String, Pair<String, Long>>()
+        val pluginClasses = hashMapOf<String, MutableSet<Pair<String, Long>>>()
         val clashes = linkedMapOf<String, MutableMap<String, MutableSet<String>>>()
         fun clash(pluginId: String, counterpartId: String, name: String) {
             clashes.getOrPut(pluginId) { linkedMapOf() }.getOrPut(counterpartId) { sortedSetOf() } +=
@@ -134,11 +134,16 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
                     .forEach { path ->
                         platformPath.resolve(path).forEachObfuscatedClass { name, crc ->
                             val coreCrc = coreClasses[name]
-                            val (owner, ownerCrc) = pluginClasses.getOrPut(name) { plugin.id to crc }
-                            when {
-                                coreCrc != null && coreCrc != crc -> clash(plugin.id, IDEA_CORE, name)
-                                owner != plugin.id && ownerCrc != crc -> clash(plugin.id, owner, name)
+                            if (coreCrc != null && coreCrc != crc) {
+                                clash(plugin.id, IDEA_CORE, name)
                             }
+                            val owners = pluginClasses.getOrPut(name) { linkedSetOf() }
+                            owners.forEach { (owner, ownerCrc) ->
+                                if (owner != plugin.id && ownerCrc != crc) {
+                                    clash(plugin.id, owner, name)
+                                }
+                            }
+                            owners += plugin.id to crc
                         }
                     }
             }

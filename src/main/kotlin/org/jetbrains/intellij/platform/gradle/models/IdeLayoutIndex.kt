@@ -362,6 +362,6 @@ internal data class IdeClassClashes(
 ) {
 
     companion object {
-        const val SCHEMA_VERSION = 1
+        const val SCHEMA_VERSION = 2
     }
 }
