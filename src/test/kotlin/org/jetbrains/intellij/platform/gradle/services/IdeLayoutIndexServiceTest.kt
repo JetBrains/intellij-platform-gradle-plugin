@@ -14,13 +14,19 @@ import org.jetbrains.intellij.platform.gradle.models.ProductInfo
 import org.jetbrains.intellij.platform.gradle.models.json
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption.ATOMIC_MOVE
+import java.nio.file.StandardCopyOption.REPLACE_EXISTING
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import kotlin.io.path.createDirectories
+import kotlin.io.path.fileSize
+import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.listDirectoryEntries
 import kotlin.io.path.outputStream
 import kotlin.io.path.readText
+import kotlin.io.path.setLastModifiedTime
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -288,6 +294,43 @@ class IdeLayoutIndexServiceTest {
             clashes = clashes,
         )
         assertEquals(listOf("second"), resolved.included.map { it.id })
+    }
+
+    @Test
+    fun `invalidate memory and disk clash caches when JAR contents change without metadata changes`() {
+        val platformPath = createIde()
+        val cacheDirectory = temporaryFolder.newFolder("index").toPath()
+        val pluginJar = "plugins/java/lib/java-impl.jar"
+        fun replaceJar(path: String, vararg entries: Pair<String, String>) {
+            platformPath.writeJar("$path.replacement", *entries)
+            Files.move(platformPath.resolve("$path.replacement"), platformPath.resolve(path), ATOMIC_MOVE, REPLACE_EXISTING)
+        }
+        fun writePlugin(contents: String) = replaceJar(
+            pluginJar,
+            "META-INF/plugin.xml" to pluginXml("com.intellij.java"),
+            "Z/Z/L.class" to contents,
+        )
+        replaceJar("lib/core.jar", "Z/Z/L.class" to "aaaa")
+        writePlugin("aaaa")
+        val service = service()
+        assertEquals(emptyMap(), service.resolveClassClashes(platformPath, cacheDirectory))
+        val jar = platformPath.resolve(pluginJar)
+        val timestamp = jar.getLastModifiedTime()
+        val size = jar.fileSize()
+
+        writePlugin("bbbb")
+        jar.setLastModifiedTime(timestamp)
+        assertEquals(size, jar.fileSize())
+        val expected = mapOf("com.intellij.java" to mapOf(IDEA_CORE to listOf("Z.Z.L")))
+        assertEquals(expected, service().resolveClassClashes(platformPath, cacheDirectory))
+        assertEquals(expected, service.resolveClassClashes(platformPath, cacheDirectory))
+
+        val coreJar = platformPath.resolve("lib/core.jar")
+        val coreTimestamp = coreJar.getLastModifiedTime()
+        replaceJar("lib/core.jar", "Z/Z/L.class" to "bbbb")
+        coreJar.setLastModifiedTime(coreTimestamp)
+        assertEquals(emptyMap(), service().resolveClassClashes(platformPath, cacheDirectory))
+        assertEquals(emptyMap(), service.resolveClassClashes(platformPath, cacheDirectory))
     }
 
     private val bundledPluginIds = listOf(

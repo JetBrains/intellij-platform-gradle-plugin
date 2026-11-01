@@ -70,16 +70,19 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
      *
      * See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2261
      */
-    internal fun resolveClassClashes(platformPath: Path, cacheDirectory: Path) =
-        classClashes.computeIfAbsent(platformPath.safePathString) {
-            val cacheFile = cacheFile(platformPath, cacheDirectory, suffix = "-class-clashes")
+    internal fun resolveClassClashes(platformPath: Path, cacheDirectory: Path): Map<String, Map<String, List<String>>> {
+        val classpath = classClashesClasspath(platformPath, resolve(platformPath, cacheDirectory))
+        val fingerprint = classClashesFingerprint(platformPath, classpath)
+        return classClashes.computeIfAbsent("${platformPath.safePathString}:$fingerprint") {
             val fullVersion = platformPath.productInfo().fullVersion
+            val cacheFile = cacheDirectory.resolve("$fullVersion-${fingerprint.take(12)}-class-clashes.json")
             loadClassClashes(cacheFile)
-                ?: createClassClashes(platformPath, resolve(platformPath, cacheDirectory)).also { clashes ->
+                ?: createClassClashes(platformPath, classpath).also { clashes ->
                     cacheFile.parent.createDirectories()
                     cacheFile.writeTextIfChanged(json.encodeToString(IdeClassClashes(fullVersion = fullVersion, clashes = clashes)))
                 }
         }
+    }
 
     /**
      * Runs [block] with [message] only once per build, e.g., to log the same warning for many tasks just once.
@@ -104,16 +107,50 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
         }.getOrNull()
     }
 
-    private fun createClassClashes(platformPath: Path, index: IdeLayoutIndex): Map<String, Map<String, List<String>>> {
-        log.info("Looking for clashing classes of bundled plugins in: $platformPath")
-
+    private fun classClashesClasspath(platformPath: Path, index: IdeLayoutIndex): Map<String, List<String>> {
         val productInfo = platformPath.productInfo()
         val layout = IdeLayoutIndex.Layout(productInfo)
-        val libraryJars = runCatching { platformPath.resolve("lib").listDirectoryEntries("*.jar") }.getOrDefault(emptyList())
-        val coreJars = layout.classpath.filterNot { it.startsWith("plugins/") }.map(platformPath::resolve) + libraryJars
+        val libraryJars = runCatching {
+            platformPath.resolve("lib").listDirectoryEntries("*.jar").map { "lib/${it.name}" }.sorted()
+        }.getOrDefault(emptyList())
+        return linkedMapOf(IDEA_CORE to (layout.classpath.filterNot { it.startsWith("plugins/") } + libraryJars).distinct()).apply {
+            productInfo.bundledPlugins
+                .mapNotNull(index::findByIdOrModuleId)
+                .filterNot { it.isModule || it.id == IDEA_CORE }
+                .distinctBy { it.key }
+                .forEach { plugin ->
+                    put(plugin.id, index.runtimeClasspath(plugin, layout).filter { it.startsWith("plugins/") })
+                }
+        }
+    }
+
+    /**
+     * Fingerprints the names and CRCs used by the clash scan, not just JAR sizes or timestamps:
+     * local builds and snapshot replacements may preserve both. Reading ZIP directories avoids hashing JAR contents.
+     */
+    private fun classClashesFingerprint(platformPath: Path, classpath: Map<String, List<String>>): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        fun update(value: String) = digest.update("$value\n".toByteArray())
+        update(fingerprint(platformPath))
+        update(IdeClassClashes.SCHEMA_VERSION.toString())
+        classpath.forEach { (id, paths) ->
+            update(id)
+            paths.forEach { path ->
+                update(path)
+                platformPath.resolve(path).forEachObfuscatedClass { name, crc ->
+                    update("$name:$crc")
+                }
+            }
+        }
+        return hexFormat.formatHex(digest.digest())
+    }
+
+    private fun createClassClashes(platformPath: Path, classpath: Map<String, List<String>>): Map<String, Map<String, List<String>>> {
+        log.info("Looking for clashing classes of bundled plugins in: $platformPath")
+
         val coreClasses = hashMapOf<String, Long>()
-        coreJars.distinct().forEach { jar ->
-            jar.forEachObfuscatedClass { name, crc -> coreClasses.putIfAbsent(name, crc) }
+        classpath[IDEA_CORE].orEmpty().forEach { path ->
+            platformPath.resolve(path).forEachObfuscatedClass { name, crc -> coreClasses.putIfAbsent(name, crc) }
         }
 
         val pluginClasses = hashMapOf<String, MutableSet<Pair<String, Long>>>()
@@ -124,29 +161,23 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
         }
 
         // The bundled plugins are added to the test classpath in the order of product-info.json.
-        productInfo.bundledPlugins
-            .mapNotNull(index::findByIdOrModuleId)
-            .filterNot { it.isModule || it.id == IDEA_CORE }
-            .distinctBy { it.key }
-            .forEach { plugin ->
-                index.runtimeClasspath(plugin, layout)
-                    .filter { it.startsWith("plugins/") }
-                    .forEach { path ->
-                        platformPath.resolve(path).forEachObfuscatedClass { name, crc ->
-                            val coreCrc = coreClasses[name]
-                            if (coreCrc != null && coreCrc != crc) {
-                                clash(plugin.id, IDEA_CORE, name)
-                            }
-                            val owners = pluginClasses.getOrPut(name) { linkedSetOf() }
-                            owners.forEach { (owner, ownerCrc) ->
-                                if (owner != plugin.id && ownerCrc != crc) {
-                                    clash(plugin.id, owner, name)
-                                }
-                            }
-                            owners += plugin.id to crc
+        classpath.filterKeys { it != IDEA_CORE }.forEach { (pluginId, paths) ->
+            paths.forEach { path ->
+                platformPath.resolve(path).forEachObfuscatedClass { name, crc ->
+                    val coreCrc = coreClasses[name]
+                    if (coreCrc != null && coreCrc != crc) {
+                        clash(pluginId, IDEA_CORE, name)
+                    }
+                    val owners = pluginClasses.getOrPut(name) { linkedSetOf() }
+                    owners.forEach { (owner, ownerCrc) ->
+                        if (owner != pluginId && ownerCrc != crc) {
+                            clash(pluginId, owner, name)
                         }
                     }
+                    owners += pluginId to crc
+                }
             }
+        }
 
         return clashes.mapValues { (_, counterparts) -> counterparts.mapValues { (_, classes) -> classes.toList() } }
     }
@@ -248,11 +279,11 @@ internal abstract class IdeLayoutIndexService : BuildService<BuildServiceParamet
         cacheFile.writeTextIfChanged(json.encodeToString(index))
     }
 
-    private fun cacheFile(platformPath: Path, cacheDirectory: Path, suffix: String = ""): Path {
+    private fun cacheFile(platformPath: Path, cacheDirectory: Path): Path {
         val productInfo = platformPath.productInfo()
         val fingerprint = fingerprint(platformPath)
 
-        return cacheDirectory.resolve("${productInfo.fullVersion}-${fingerprint.take(12)}$suffix.json")
+        return cacheDirectory.resolve("${productInfo.fullVersion}-${fingerprint.take(12)}.json")
     }
 
     /**
