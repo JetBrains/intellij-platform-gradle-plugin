@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import org.gradle.api.Project
+import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.file.FileCollection
 import org.gradle.api.file.FileSystemLocation
@@ -160,6 +161,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 platformPathProvider,
                 // The test runtime fixes provide the core content modules, e.g., `lib/intellij.spellchecker.jar`.
                 intellijPlatformTestClasspathConfiguration + intelliJPlatformTestRuntimeFixClasspathConfiguration,
+                getTestedPluginDirectory(pluginDirectory),
             )
 
             // Build the classpath in the correct order:
@@ -218,6 +220,23 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             }
 
         /**
+         * Returns the directory of the tested plugin in the test sandbox, as produced by the [PrepareSandboxTask] preparing the sandbox
+         * of this task, so the plugin descriptor is read only once the sandbox is prepared, also when the configuration cache is used.
+         * Falls back to [pluginDirectory] if no such task is registered.
+         */
+        private fun Test.getTestedPluginDirectory(pluginDirectory: DirectoryProperty): Provider<Directory> {
+            val prepareSandboxTaskName = when (this) {
+                is TestIdeTask -> "${Tasks.PREPARE_SANDBOX}_$name"
+                else -> Tasks.PREPARE_TEST_SANDBOX
+            }
+
+            return when (prepareSandboxTaskName) {
+                in project.tasks.names -> project.tasks.named<PrepareSandboxTask>(prepareSandboxTaskName).flatMap { it.pluginDirectory }
+                else -> pluginDirectory
+            }
+        }
+
+        /**
          * Returns the JARs of the bundled plugins to add to the test classpath, as the IDE doesn't load bundled plugins
          * from its `plugins` directory in tests: all bundled plugins declared in `product-info.json`, see [IdeLayoutIndex.resolveTestPlugins],
          * with the JARs the IDE loads in production, see [IdeLayoutIndex.runtimeClasspath], except:
@@ -227,8 +246,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
          * - the plugins requiring an excluded plugin, transitively.
          *
          * The bundled plugins and modules present on [platformClasspath], i.e., declared explicitly, and the plugins required
-         * by the plugin dependencies present on [platformClasspath] are never excluded, along with their dependencies.
-         * The descriptor of the tested plugin isn't read, as it is available only once the test sandbox is prepared.
+         * by the tested plugin located in [testedPluginDirectory] or by the plugin dependencies present on [platformClasspath]
+         * are never excluded, along with their dependencies.
          *
          * All bundled plugins share the core classloader, as test classes, loaded by it, can't access classes loaded by plugin classloaders.
          * See: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2250
@@ -237,6 +256,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
         private fun Test.getBundledPluginsClasspath(
             platformPathProvider: Provider<Path>,
             platformClasspath: FileCollection,
+            testedPluginDirectory: Provider<Directory>,
         ): Provider<List<Path>> {
             val ideLayoutIndexService = project.gradle.registerClassLoaderScopedBuildService(IdeLayoutIndexService::class)
             val ideLayoutIndexCacheDirectoryProvider =
@@ -247,8 +267,11 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             val excludesDefinedProvider = project.providers.gradleProperty(excludesProperty.toString())
                 .map { true }
                 .orElse(false)
+            // The elements of a file collection built by a task are resolved when the test task is executed, also with the configuration cache,
+            // unlike a value mapped from the task output, which can't be queried before the task is completed at all.
+            val testedPluginLocationsProvider = project.files(testedPluginDirectory).elements
 
-            return platformClasspath.elements.map { elements ->
+            return platformClasspath.elements.zip(testedPluginLocationsProvider) { elements, testedPluginLocations ->
                 val service = ideLayoutIndexService.get()
                 val platformPath = platformPathProvider.get()
                 val normalizedPlatformPath = platformPath.absolute().normalize()
@@ -261,7 +284,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     else -> "excluded by default, see '$excludesProperty'"
                 }
                 val requiredPluginIds = getRequiredPluginIds(
-                    elements.map { it.asPath.absolute().normalize() }.filterNot { it.startsWith(normalizedPlatformPath) },
+                    elements.map { it.asPath.absolute().normalize() }.filterNot { it.startsWith(normalizedPlatformPath) } +
+                        testedPluginLocations.map { it.asPath },
                 )
 
                 val testPlugins = ideLayoutIndex.resolveTestPlugins(
@@ -343,7 +367,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     else ->
                         "Bundled plugin '$id' is kept on the test classpath despite ${clash.classes.size} of its obfuscated classes clashing " +
                             "with classes of the IntelliJ Platform or other bundled plugins, e.g., '${clash.classes.first()}', " +
-                            "as the plugin dependencies require it, which may break tests. " +
+                            "as the tested plugin or its plugin dependencies require it, which may break tests. " +
                             "To put it before the IntelliJ Platform on the test classpath, declare it explicitly, e.g., with testBundledPlugin(\"$id\")."
                 }
                 service.once(message, log::warn)
@@ -352,7 +376,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             kept.forEach {
                 service.once(
                     "Bundled plugin '${it.entry.id}' is kept on the test classpath despite being ${it.reason}, " +
-                        "as it is declared explicitly, or the plugin dependencies require it.",
+                        "as it is declared explicitly, or the tested plugin or its plugin dependencies require it.",
                 ) { message ->
                     when {
                         excludesDefined -> log.warn(message)

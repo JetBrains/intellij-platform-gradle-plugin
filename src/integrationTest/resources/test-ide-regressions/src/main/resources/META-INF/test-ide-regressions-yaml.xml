@@ -1,0 +1,5 @@
+<idea-plugin>
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="org.jetbrains.plugins.regressions.YamlSupportService"/>
+    </extensions>
+</idea-plugin>

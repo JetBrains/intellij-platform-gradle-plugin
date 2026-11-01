@@ -173,7 +173,7 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      * org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes=
      * ```
      *
-     * Default value: `com.intellij.openRewrite,com.intellij.ja,com.intellij.ko,com.intellij.zh,org.jetbrains.plugins.vue`
+     * Default value: `com.intellij.openRewrite,com.intellij.ja,com.intellij.ko,com.intellij.zh,org.jetbrains.plugins.vue,org.jetbrains.plugins.clion.radler`
      */
     object TestIdeBundledPluginsClasspathExcludes : GradleProperties<String>(listOf(
         "com.intellij.openRewrite",
@@ -182,6 +182,9 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
         "com.intellij.zh",
         // See: #2183, https://youtrack.jetbrains.com/issue/WEB-78747
         "org.jetbrains.plugins.vue",
+        // CLion Nova starts the ReSharper backend and enables `CodeInsightSettings.AUTO_POPUP_JAVADOC_INFO` in its application
+        // initialized listener, so the first light test fails with "Code insight settings damaged" when tearing down.
+        "org.jetbrains.plugins.clion.radler",
     ).joinToString(","))
 
     /**

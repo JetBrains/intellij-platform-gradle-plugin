@@ -108,10 +108,18 @@ class GradlePropertiesTest {
     @Test
     fun `testIde bundled plugins classpath excludes property has openRewrite default`() {
         val property = GradleProperties.TestIdeBundledPluginsClasspathExcludes
+        val defaultValue = listOf(
+            "com.intellij.openRewrite",
+            "com.intellij.ja",
+            "com.intellij.ko",
+            "com.intellij.zh",
+            "org.jetbrains.plugins.vue",
+            "org.jetbrains.plugins.clion.radler",
+        )
 
         assertEquals("org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes", property.toString())
-        assertEquals("com.intellij.openRewrite,com.intellij.ja,com.intellij.ko,com.intellij.zh,org.jetbrains.plugins.vue", property.defaultValue)
-        assertEquals(listOf("com.intellij.openRewrite", "com.intellij.ja", "com.intellij.ko", "com.intellij.zh", "org.jetbrains.plugins.vue"), providers[property].get().splitCommaSeparated())
+        assertEquals(defaultValue.joinToString(","), property.defaultValue)
+        assertEquals(defaultValue, providers[property].get().splitCommaSeparated())
     }
 
     @Test

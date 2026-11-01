@@ -1,0 +1,12 @@
+<idea-plugin>
+    <id>org.jetbrains.plugins.integration-tests.test-ide-regressions</id>
+    <name>Test IDE Regressions</name>
+    <vendor>JetBrains</vendor>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends optional="true" config-file="test-ide-regressions-yaml.xml">org.jetbrains.plugins.yaml</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <internalFileTemplate name="RegressionTemplate"/>
+    </extensions>
+</idea-plugin>
