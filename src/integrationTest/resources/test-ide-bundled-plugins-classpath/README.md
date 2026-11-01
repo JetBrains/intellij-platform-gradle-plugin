@@ -16,16 +16,16 @@ property are excluded, together with the bundled plugins requiring them, unless 
 
 ## Approach
 
-The test project uses the IntelliJ Platform passed with the `intellijPlatform.type`, `intellijPlatform.version`, and
-`useInstaller` project properties, and declares bundled plugins passed with the `bundledPlugins` and `testBundledPlugins`
-project properties.
-The `testClasses` project property selects the project tests to run:
+`TestIdeBundledPluginsClasspathIntegrationTest` shares the [test-ide-regressions](../test-ide-regressions) resource project
+and `TestIdeIntegrationTestFixture` with `TestIdeRegressionsIntegrationTest`. There is no separate project in this directory.
+The common fixture configures IDE versions, bundled dependencies, test selection, and classpath reporting.
 
-- `LoadedPluginsTest` asserts that the tested plugin and the plugins passed with the `expectedPlugins` project property are loaded,
-- `FileComparisonFailedErrorTest` asserts that a failed file comparison throws `FileComparisonFailedError`,
+- `SmokeTest` asserts that the tested plugin and the plugins passed with the `expectedPlugins` project property are loaded,
+- `FileComparisonTest`, with `fileComparisonDataExpected=true`, asserts that a failed file comparison throws
+  `FileComparisonFailedError` implementing `FileComparisonData`,
 - `GitVcsTest`, added by the integration tests declaring `Git4Idea`, asserts that the Git VCS is registered.
 
 ## Verification
 
-1. The project tests pass.
+1. The selected project tests pass, with no duplicated classpath entries.
 2. The build output contains the expected warnings and the test classpath entries.

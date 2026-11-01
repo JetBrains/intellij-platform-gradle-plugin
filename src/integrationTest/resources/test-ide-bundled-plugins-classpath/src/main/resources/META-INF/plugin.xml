@@ -1,7 +1,0 @@
-<idea-plugin>
-    <id>org.jetbrains.plugins.integration-tests.test-ide-bundled-plugins-classpath</id>
-    <name>Any</name>
-    <vendor>Any</vendor>
-
-    <depends>com.intellij.modules.platform</depends>
-</idea-plugin>

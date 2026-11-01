@@ -36,8 +36,14 @@ val customTestIdeVersionProperty = providers.gradleProperty("customTestIde.versi
 val customTestIdeExpectedBuildProperty = providers.gradleProperty("customTestIde.expectedBuild").orElse("")
 
 // Gradle properties passed to the test JVM as system properties and verified by the tests, see SmokeTest
-val testSystemProperties = listOf("expectedPlugins", "unexpectedPlugins", "expectedFileTypes", "expectedServices", "yamlExpected")
-    .associateWith { providers.gradleProperty(it).orElse("") }
+val testSystemProperties = listOf(
+    "expectedPlugins",
+    "unexpectedPlugins",
+    "expectedFileTypes",
+    "expectedServices",
+    "yamlExpected",
+    "fileComparisonDataExpected",
+).associateWith { providers.gradleProperty(it).orElse("") }
 
 version = "1.0.0"
 

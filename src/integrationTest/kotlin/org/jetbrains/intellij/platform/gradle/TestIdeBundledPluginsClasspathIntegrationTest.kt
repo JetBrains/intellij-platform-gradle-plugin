@@ -3,81 +3,47 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.testkit.runner.BuildResult
-import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.io.path.readText
 import kotlin.test.Test
-import kotlin.test.assertNotNull
 
-private const val CLASSPATH_ENTRY_LABEL = "test-ide-bundled-plugins-classpath: Test classpath entry:"
 private const val GIT_FRONTEND_CLIENT_JAR = "plugins/cwm-plugin/lib/modules/intellij.vcs.git.frontend.split.jar"
 private const val ULTIMATE_PLUGIN_ID = "com.intellij.modules.ultimate"
 private const val ULTIMATE_PLUGIN_JAR = "plugins/ultimate-plugin/lib/ultimate-plugin.jar"
 private const val IDEA_RT_JAR = "plugins/java/lib/idea_rt.jar"
 
-class TestIdeBundledPluginsClasspathIntegrationTest : IntelliJPlatformIntegrationTestBase(
-    resourceName = "test-ide-bundled-plugins-classpath",
-) {
-
-    private fun properties(
-        testClasses: List<String>,
-        useInstaller: Boolean = true,
-        bundledPlugins: List<String> = emptyList(),
-        testBundledPlugins: List<String> = emptyList(),
-        expectedPlugins: List<String> = emptyList(),
-    ) = defaultProjectProperties + mapOf(
-        "testClasses" to testClasses.joinToString(","),
-        "useInstaller" to useInstaller,
-        "bundledPlugins" to bundledPlugins.joinToString(","),
-        "testBundledPlugins" to testBundledPlugins.joinToString(","),
-        "expectedPlugins" to expectedPlugins.joinToString(","),
-    )
-
-    private fun intellijIdeaUltimate(version: String) = mapOf(
-        "intellijPlatform.type" to "IU",
-        "intellijPlatform.version" to version,
-    )
+class TestIdeBundledPluginsClasspathIntegrationTest : TestIdeIntegrationTestFixture() {
 
     /**
      * Makes the tested plugin depend on Git4Idea, and adds the `GitVcsTest` test, which compiles only with Git4Idea declared,
      * as the VCS API is provided by a bundled plugin since 2026.3.
      */
     private fun useGit4Idea() {
-        pluginXml overwrite //language=xml
+        pluginXml overwrite pluginXml.readText().replace(
+            "<depends>com.intellij.modules.platform</depends>",
+            "<depends>com.intellij.modules.platform</depends>\n    <depends>Git4Idea</depends>",
+        )
+
+        dir.resolve("src/test/java/GitVcsTest.java") write //language=java
                 """
-                <idea-plugin>
-                    <id>org.jetbrains.plugins.integration-tests.test-ide-bundled-plugins-classpath</id>
-                    <name>Any</name>
-                    <vendor>Any</vendor>
+                import com.intellij.openapi.vcs.ProjectLevelVcsManager;
+                import com.intellij.testFramework.HeavyPlatformTestCase;
 
-                    <depends>com.intellij.modules.platform</depends>
-                    <depends>Git4Idea</depends>
-                </idea-plugin>
-                """.trimIndent()
+                import java.util.Arrays;
+                import java.util.List;
 
-        dir.resolve("src/test/kotlin/GitVcsTest.kt") write //language=kotlin
-                """
-                import com.intellij.openapi.vcs.ProjectLevelVcsManager
-                import com.intellij.testFramework.HeavyPlatformTestCase
+                public class GitVcsTest extends HeavyPlatformTestCase {
+                    public void testGitVcsRegistered() {
+                        List<String> vcsNames = Arrays.stream(ProjectLevelVcsManager.getInstance(getProject()).getAllVcss())
+                            .map(vcs -> vcs.getName()).toList();
 
-                class GitVcsTest : HeavyPlatformTestCase() {
-                    fun testGitVcsRegistered() {
-                        val vcsNames = ProjectLevelVcsManager.getInstance(project).allVcss.map { it.name }
-
-                        assertTrue("Expected the Git VCS to be registered, got: ${'$'}vcsNames", "Git" in vcsNames)
+                        assertTrue("Expected the Git VCS to be registered, got: " + vcsNames, vcsNames.contains("Git"));
                     }
                 }
                 """.trimIndent()
     }
 
     private val BuildResult.entries
-        get() = output.lines().filter { it.startsWith(CLASSPATH_ENTRY_LABEL) }
-
-    private fun BuildResult.assertBundledPluginsSummary(block: (included: Int, all: Int) -> Unit) {
-        val match = assertNotNull(
-            Regex("Test classpath includes (\\d+) of (\\d+) bundled plugins").find(output),
-            "expect the build output contains the bundled plugins summary",
-        )
-        block(match.groupValues[1].toInt(), match.groupValues[2].toInt())
-    }
+        get() = classpathEntries()
 
     @Test
     fun `register Git VCS with Git4Idea declared in 2026_1`() {
@@ -87,11 +53,12 @@ class TestIdeBundledPluginsClasspathIntegrationTest : IntelliJPlatformIntegratio
         // A JetBrains Client plugin JAR of the Remote Development plugin, not listed in the product-info.json layout,
         // declares a content module of Git4Idea, which used to disable it: https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2250
         val properties = properties(
+            version = "2026.1.1",
             testClasses = listOf("GitVcsTest"),
             bundledPlugins = listOf("Git4Idea"),
-        ) + intellijIdeaUltimate("2026.1.1")
+        )
 
-        build(Tasks.External.TEST, projectProperties = properties) {
+        smoke(properties) {
             assert(entries.none { it.endsWith(GIT_FRONTEND_CLIENT_JAR) }) {
                 "expect test classpath doesn't contain '$GIT_FRONTEND_CLIENT_JAR'"
             }
@@ -104,10 +71,12 @@ class TestIdeBundledPluginsClasspathIntegrationTest : IntelliJPlatformIntegratio
 
         // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2261
         val properties = properties(
-            testClasses = listOf("LoadedPluginsTest"),
-        ) + intellijIdeaUltimate("2026.2.3")
+            version = "2026.2.3",
+            testClasses = listOf("SmokeTest"),
+            unexpectedPlugins = defaultExcludes + ULTIMATE_PLUGIN_ID,
+        )
 
-        build(Tasks.External.TEST, projectProperties = properties) {
+        smoke(properties) {
             assertContains("is excluded from the test classpath because", output)
             assertContains("obfuscated classes clash", output)
             assert(entries.none { it.endsWith(ULTIMATE_PLUGIN_JAR) }) {
@@ -121,12 +90,13 @@ class TestIdeBundledPluginsClasspathIntegrationTest : IntelliJPlatformIntegratio
         disableDebug()
 
         val properties = properties(
-            testClasses = listOf("LoadedPluginsTest"),
+            version = "2026.2.3",
+            testClasses = listOf("SmokeTest"),
             testBundledPlugins = listOf(ULTIMATE_PLUGIN_ID),
             expectedPlugins = listOf(ULTIMATE_PLUGIN_ID),
-        ) + intellijIdeaUltimate("2026.2.3")
+        )
 
-        build(Tasks.External.TEST, projectProperties = properties) {
+        smoke(properties) {
             assertContains("shadows", output)
             assertContains("obfuscated classes", output)
             assert(entries.any { it.endsWith(ULTIMATE_PLUGIN_JAR) }) {
@@ -141,11 +111,13 @@ class TestIdeBundledPluginsClasspathIntegrationTest : IntelliJPlatformIntegratio
 
         // FileComparisonFailedError implements FileComparisonData of idea_rt.jar, provided by the Java plugin since 2026.3
         val properties = properties(
-            testClasses = listOf("FileComparisonFailedErrorTest"),
+            version = "263.7307.44-EAP-SNAPSHOT",
+            testClasses = listOf("FileComparisonTest"),
             useInstaller = false,
-        ) + intellijIdeaUltimate("263.7307.44-EAP-SNAPSHOT")
+            fileComparisonDataExpected = true,
+        )
 
-        build(Tasks.External.TEST, projectProperties = properties) {
+        smoke(properties) {
             assert(entries.any { it.endsWith(IDEA_RT_JAR) }) {
                 "expect test classpath contains '$IDEA_RT_JAR'"
             }
@@ -163,14 +135,15 @@ class TestIdeBundledPluginsClasspathIntegrationTest : IntelliJPlatformIntegratio
             "Git4Idea",
         )
         val properties = properties(
+            version = "263.7307.44-EAP-SNAPSHOT",
             testClasses = listOf("GitVcsTest"),
             useInstaller = false,
             bundledPlugins = listOf("Git4Idea"),
-        ) + intellijIdeaUltimate("263.7307.44-EAP-SNAPSHOT") + mapOf(
+        ) + mapOf(
             GradleProperties.TestIdeBundledPluginsClasspathExcludes.toString() to excludes.joinToString(","),
         )
 
-        build(Tasks.External.TEST, projectProperties = properties, args = listOf("--info")) {
+        smoke(properties, args = listOf("--info")) {
             assertContains("Bundled plugin 'org.jetbrains.plugins.yaml' is excluded from the test classpath", output)
             assert(output.lines().any { it.contains("is excluded from the test classpath: requires excluded '") }) {
                 "expect plugins requiring 'org.jetbrains.plugins.yaml' are excluded from the test classpath"

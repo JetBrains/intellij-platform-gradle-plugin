@@ -3,11 +3,8 @@
 package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.testkit.runner.BuildResult
-import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
 
 private const val TESTED_PLUGIN_ID = "org.jetbrains.plugins.integration-tests.test-ide-regressions"
 private const val YAML_PLUGIN_ID = "org.jetbrains.plugins.yaml"
@@ -30,86 +27,15 @@ private const val CUSTOM_TEST_IDE_TASK = "testIdeCustom"
  * - file comparison failures and file templates of the tested plugin work,
  * - the optional dependency of the tested plugin on the bundled YAML plugin is loaded.
  */
-class TestIdeRegressionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
-    resourceName = "test-ide-regressions",
-) {
-
-    private val excludesProperty = GradleProperties.TestIdeBundledPluginsClasspathExcludes.toString()
-    private val defaultExcludes = GradleProperties.TestIdeBundledPluginsClasspathExcludes.defaultValue.split(',')
-    private val smokeTests = listOf("SmokeTest", "HeavySmokeTest", "FileComparisonTest", "FileTemplateTest", "OptionalDependencyTest")
+class TestIdeRegressionsIntegrationTest : TestIdeIntegrationTestFixture() {
 
     private val ideaPlugins = listOf("com.intellij.java", "org.jetbrains.kotlin", YAML_PLUGIN_ID, "Git4Idea")
     private val ideaUltimatePlugins = ideaPlugins + listOf("JavaScript", "com.intellij.css", "com.intellij.database")
     private val ideaFileTypes = mapOf("java" to "JAVA", "kt" to "Kotlin", "xml" to "XML", "json" to "JSON", "yaml" to "YAML", "md" to "Markdown")
     private val ideaUltimateFileTypes = ideaFileTypes + mapOf("js" to "JavaScript", "css" to "CSS")
 
-    private fun properties(
-        type: String,
-        version: String,
-        useInstaller: Boolean = true,
-        javaRelease: Int = 21,
-        testClasses: List<String> = smokeTests,
-        expectedBuild: String = "",
-        expectedPlugins: List<String> = emptyList(),
-        unexpectedPlugins: List<String> = defaultExcludes,
-        expectedFileTypes: Map<String, String> = emptyMap(),
-        expectedServices: List<String> = emptyList(),
-        yamlExpected: Boolean = true,
-    ) = defaultProjectProperties + mapOf(
-        "intellijPlatform.type" to type,
-        "intellijPlatform.version" to version,
-        "useInstaller" to useInstaller,
-        "javaRelease" to javaRelease,
-        "testClasses" to testClasses.joinToString(","),
-        "expectedBuild" to expectedBuild,
-        "expectedPlugins" to expectedPlugins.joinToString(","),
-        "unexpectedPlugins" to unexpectedPlugins.joinToString(","),
-        "expectedFileTypes" to expectedFileTypes.entries.joinToString(",") { "${it.key}:${it.value}" },
-        "expectedServices" to expectedServices.joinToString(","),
-        "yamlExpected" to yamlExpected,
-    )
-
-    private fun smoke(
-        properties: Map<String, Any>,
-        vararg tasks: String = arrayOf(Tasks.External.TEST),
-        args: List<String> = emptyList(),
-        block: BuildResult.() -> Unit = {},
-    ) = build(*tasks, projectProperties = properties, args = args) {
-        // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2119
-        assertNotContains("it = com.jetbrains", output)
-
-        // Make sure the expected tests were executed
-        val testClasses = properties["testClasses"].toString().split(',').filter(String::isNotEmpty)
-        tasks.filterNot { it.startsWith("clean") }.forEach { taskName ->
-            assertEquals(TaskOutcome.SUCCESS, task(":$taskName")?.outcome, "expect task '$taskName' to succeed")
-            testClasses.forEach {
-                dir containsFile "build/test-results/$taskName/TEST-$it.xml"
-            }
-
-            // The same JAR added twice may break package-private access or resources lookup:
-            // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1640
-            // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2137
-            val entries = output.lines()
-                .filter { it.startsWith("test-ide-regressions: Test classpath entry [$taskName]: ") }
-                .map { it.substringAfter("]: ") }
-            assert(entries.isNotEmpty()) { "expect classpath entries of task '$taskName' printed" }
-            val duplicates = entries.groupBy { it }.filterValues { it.size > 1 }.keys
-            assert(duplicates.isEmpty()) { "expect no duplicated classpath entries of task '$taskName': $duplicates" }
-        }
-
-        block()
-    }
-
     private fun BuildResult.assertExcludedByDefault(id: String) {
         assertContains("Bundled plugin '$id' is excluded from the test classpath: excluded by default, see '$excludesProperty'", output)
-    }
-
-    private fun BuildResult.assertBundledPluginsSummary(block: (included: Int, all: Int) -> Unit) {
-        val match = assertNotNull(
-            Regex("Test classpath includes (\\d+) of (\\d+) bundled plugins").find(output),
-            "expect the build output contains the bundled plugins summary",
-        )
-        block(match.groupValues[1].toInt(), match.groupValues[2].toInt())
     }
 
     @Test
@@ -135,7 +61,6 @@ class TestIdeRegressionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
             javaRelease = 17,
             expectedBuild = "241.19416.15",
             expectedPlugins = ideaUltimatePlugins,
-            unexpectedPlugins = defaultExcludes + SWAGGER_PLUGIN_ID,
             expectedFileTypes = ideaUltimateFileTypes,
             expectedServices = listOf(DB_PSI_FACADE),
         )
@@ -144,15 +69,10 @@ class TestIdeRegressionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
     fun `run tests on IntelliJ IDEA Ultimate 2024_1 without the layout in product-info`() {
         disableDebug()
 
-        // The bundled Swagger plugin declares `SwVisualEditingActionsTestService` as a test service implementation, which isn't shipped with 2024.1,
-        // so its startup activity fails all tests with ClassNotFoundException, unless Swagger is excluded or disabled:
+        // Swagger declares a test service not shipped with 2024.1 and must be excluded by default:
         // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1844
-        val properties = ideaUltimate2024_1Properties + mapOf(
-            excludesProperty to (defaultExcludes + SWAGGER_PLUGIN_ID).joinToString(","),
-        )
-
-        smoke(properties, args = listOf("--info")) {
-            assertContains("Bundled plugin '$SWAGGER_PLUGIN_ID' is excluded from the test classpath: listed in '$excludesProperty'", output)
+        smoke(ideaUltimate2024_1Properties, args = listOf("--info")) {
+            assertExcludedByDefault(SWAGGER_PLUGIN_ID)
         }
     }
 
@@ -162,35 +82,34 @@ class TestIdeRegressionsIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
         // The workaround suggested in https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1844
         val properties = ideaUltimate2024_1Properties + mapOf(
+            "testBundledPlugins" to SWAGGER_PLUGIN_ID,
             "disabledPlugins" to SWAGGER_PLUGIN_ID,
         )
 
-        smoke(properties)
+        smoke(properties, args = listOf("--info")) {
+            assertContains("is kept on the test classpath despite", output)
+        }
     }
 
     @Test
     fun `run tests on IntelliJ IDEA Ultimate 2023_3 without the layout in product-info`() {
         disableDebug()
 
-        // The bundled Spring Boot plugin declares `TestSpringBootMetadataEditorNotificationsService` as a test service implementation,
-        // which isn't shipped with 2023.3, so its PSI listener fails tests modifying files with ClassNotFoundException,
-        // unless Spring Boot is excluded, along with Spring Cloud requiring it, like Swagger in 2024.1.
-        val excludes = defaultExcludes + SPRING_BOOT_PLUGIN_ID
+        // Spring Boot declares a test service not shipped with 2023.3 and must be excluded by default,
+        // along with Spring Cloud requiring it.
         val properties = properties(
             type = "IU",
             version = "2023.3.8",
             javaRelease = 17,
             expectedBuild = "233.15619.7",
             expectedPlugins = ideaUltimatePlugins,
-            unexpectedPlugins = excludes + SPRING_CLOUD_PLUGIN_ID,
+            unexpectedPlugins = defaultExcludes + SPRING_CLOUD_PLUGIN_ID,
             expectedFileTypes = ideaUltimateFileTypes,
             expectedServices = listOf(DB_PSI_FACADE),
-        ) + mapOf(
-            excludesProperty to excludes.joinToString(","),
         )
 
         smoke(properties, args = listOf("--info")) {
-            assertContains("Bundled plugin '$SPRING_BOOT_PLUGIN_ID' is excluded from the test classpath: listed in '$excludesProperty'", output)
+            assertExcludedByDefault(SPRING_BOOT_PLUGIN_ID)
             assertContains("Bundled plugin '$SPRING_CLOUD_PLUGIN_ID' is excluded from the test classpath: requires excluded '$SPRING_BOOT_PLUGIN_ID'", output)
         }
     }

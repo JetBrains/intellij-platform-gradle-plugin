@@ -2,6 +2,7 @@
 
 ## Intention
 
+This project is shared by `TestIdeRegressionsIntegrationTest` and `TestIdeBundledPluginsClasspathIntegrationTest`.
 The intention is to test that running tests still works for the setups reported in issues about running tests and the
 test classpath, now that the `test` task classpath contains all bundled plugins declared in `product-info.json`, on the
 IntelliJ Platform versions from the oldest supported 2023.3 (build 233) to the 2026.3 EAP, including:
@@ -21,7 +22,7 @@ IntelliJ Platform versions from the oldest supported 2023.3 (build 233) to the 2
   https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1798,
   https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2250,
   https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2273
-- bundled plugins failing in tests, which are excluded by default, or have to be excluded or disabled explicitly:
+- bundled plugins failing in tests, which are excluded by default or disabled explicitly:
   https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1844,
   https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2182,
   https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/2183,
@@ -58,11 +59,13 @@ The `testClasses` project property selects the project tests to run:
   `expectedPlugins` project property are loaded, the plugins passed with `unexpectedPlugins` aren't loaded, and that the file
   types passed with `expectedFileTypes` and the services passed with `expectedServices` are available,
 - `HeavySmokeTest` opens a project, which runs startup activities of all loaded plugins,
-- `FileComparisonTest` asserts that a failed file comparison throws the file comparison error,
+- `FileComparisonTest` asserts that a failed file comparison throws the file comparison error; with
+  `fileComparisonDataExpected=true`, it also checks the exact error class and the `FileComparisonData` interface,
 - `FileTemplateTest` asserts that the internal file template of the tested plugin is found once,
 - `OptionalDependencyTest` asserts that the optional YAML dependency is loaded unless the `yamlExpected` project property is `false`,
 - `JnaTest` asserts that JNA is loaded,
-- `JUnit5SmokeTest` and `JavaFixtureTest`, added by the integration tests using JUnit 5 and the Java test framework.
+- `JUnit5SmokeTest` and `JavaFixtureTest`, added by the integration tests using JUnit 5 and the Java test framework,
+- `GitVcsTest`, added by the bundled-plugin classpath tests declaring `Git4Idea`, asserts that the Git VCS is registered.
 
 ## Verification
 
