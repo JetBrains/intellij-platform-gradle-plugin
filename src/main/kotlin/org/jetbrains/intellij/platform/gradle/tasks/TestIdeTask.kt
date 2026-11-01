@@ -47,6 +47,7 @@ import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.exists
 import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.isRegularFile
 import kotlin.io.path.name
 
 /**
@@ -312,12 +313,25 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
         /**
          * Returns IDs of the plugins and modules required by the plugins located in [paths]:
          * non-optional `<depends>`, `<dependencies>` of the main module, and of content modules with `loading="required"`.
+         * Collected JARs under `lib` or `lib/modules` are read from the plugin directory to resolve split-JAR modules.
          * Paths that aren't plugins, e.g., libraries, or don't exist, are skipped.
          */
-        private fun getRequiredPluginIds(paths: List<Path>) = withIdePluginManager { pluginManager ->
+        internal fun getRequiredPluginIds(paths: List<Path>) = withIdePluginManager { pluginManager ->
             paths.asSequence()
-                .distinct()
                 .filter { it.exists() }
+                .map { path ->
+                    if (path.isRegularFile()) {
+                        val lib = when (path.parent?.name) {
+                            Sandbox.Plugin.LIB -> path.parent
+                            Sandbox.Plugin.MODULES -> path.parent.parent.takeIf { it?.name == Sandbox.Plugin.LIB }
+                            else -> null
+                        }
+                        lib?.parent ?: path
+                    } else {
+                        path
+                    }
+                }
+                .distinct()
                 .mapNotNull { runCatching { pluginManager.safelyCreatePlugin(it).getOrNull() }.getOrNull() }
                 .flatMap { plugin ->
                     plugin.requiredDependencyIds { it.moduleDefinition.loadingRule.required }

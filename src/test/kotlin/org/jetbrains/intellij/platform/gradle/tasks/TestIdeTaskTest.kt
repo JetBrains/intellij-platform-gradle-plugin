@@ -12,6 +12,10 @@ import org.jetbrains.intellij.platform.gradle.gradleProperties
 import org.jetbrains.intellij.platform.gradle.overwrite
 import org.jetbrains.intellij.platform.gradle.pluginXml
 import org.jetbrains.intellij.platform.gradle.write
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
+import kotlin.io.path.createDirectories
+import kotlin.io.path.outputStream
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
@@ -134,6 +138,60 @@ class TestIdeTaskTest : IntelliJPluginTestBase() {
         build("printYamlPluginClasspath") {
             assertContains("YAML_PLUGIN_CLASSPATH=", output)
             assertContains(keptMessage, output)
+        }
+    }
+
+    @Test
+    fun `bundled dependencies of required split-JAR modules in local plugins are kept on the classpath`() {
+        val yamlPluginId = "org.jetbrains.plugins.yaml"
+        val entries = mapOf(
+            "lib/plugin.jar" to ("META-INF/plugin.xml" to """
+                <idea-plugin>
+                    <id>local.dependency</id>
+                    <name>Local Dependency</name>
+                    <version>1</version>
+                    <vendor>JetBrains</vendor>
+                    <content><module name="required.module" loading="required" /></content>
+                </idea-plugin>
+            """.trimIndent()),
+            "lib/modules/required.module.jar" to ("required.module.xml" to """
+                <idea-plugin>
+                    <dependencies><plugin id="$yamlPluginId" /></dependencies>
+                </idea-plugin>
+            """.trimIndent()),
+        )
+        entries.forEach { (path, entry) ->
+            val jar = dir.resolve("dependency/$path")
+            jar.parent.createDirectories()
+            ZipOutputStream(jar.outputStream()).use { zip ->
+                zip.putNextEntry(ZipEntry(entry.first))
+                zip.write(entry.second.toByteArray())
+                zip.closeEntry()
+            }
+        }
+        gradleProperties write "${GradleProperties.TestIdeBundledPluginsClasspathExcludes}=$yamlPluginId"
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    intellijPlatform {
+                        localPlugin(file("dependency"))
+                    }
+                }
+
+                tasks.register("printSplitPluginDependencyClasspath") {
+                    dependsOn("${Tasks.PREPARE_TEST_SANDBOX}")
+                    doLast {
+                        tasks.named<org.gradle.api.tasks.testing.Test>("test").get().classpath.files
+                            .map { it.invariantSeparatorsPath }
+                            .filter { it.contains("/plugins/yaml/") }
+                            .forEach { println("YAML_PLUGIN_CLASSPATH=${'$'}it") }
+                    }
+                }
+                """.trimIndent()
+
+        build("printSplitPluginDependencyClasspath") {
+            assertContains("YAML_PLUGIN_CLASSPATH=", output)
+            assertContains("Bundled plugin '$yamlPluginId' is kept on the test classpath despite being listed in", output)
         }
     }
 
