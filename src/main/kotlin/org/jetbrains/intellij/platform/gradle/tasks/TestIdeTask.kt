@@ -283,6 +283,10 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                     excludesDefined -> "listed in '$excludesProperty'"
                     else -> "excluded by default, see '$excludesProperty'"
                 }
+                val excludes = when {
+                    excludesDefined -> excludesProvider.get()
+                    else -> excludesProperty.forBuild(productInfo.buildNumber)
+                }
                 val requiredPluginIds = getRequiredPluginIds(
                     elements.map { it.asPath.absolute().normalize() }.filterNot { it.startsWith(normalizedPlatformPath) } +
                         testedPluginLocations.map { it.asPath },
@@ -290,7 +294,7 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
 
                 val testPlugins = ideLayoutIndex.resolveTestPlugins(
                     bundledPluginIds = productInfo.bundledPlugins,
-                    excludes = excludesProvider.get().associateWith { excludesReason },
+                    excludes = excludes.associateWith { excludesReason },
                     clashes = service.resolveClassClashes(platformPath, cacheDirectory),
                     declaredPlugins = ideLayoutIndex.findPresentPlugins(elements.relativeTo(platformPath)),
                     requiredPlugins = requiredPluginIds.mapNotNull(ideLayoutIndex::findByIdOrModuleId),

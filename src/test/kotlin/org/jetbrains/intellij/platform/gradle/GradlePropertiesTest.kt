@@ -123,6 +123,22 @@ class GradlePropertiesTest {
     }
 
     @Test
+    fun `testIde bundled plugin defaults include only the affected version-specific exclusions`() {
+        val property = GradleProperties.TestIdeBundledPluginsClasspathExcludes
+        val defaults = property.defaultValue.splitCommaSeparated().toSet()
+
+        listOf("233.0", "233.15619.7").forEach { build ->
+            assertEquals(defaults + "com.intellij.spring.boot", property.forBuild(build))
+        }
+        listOf("241.0", "241.19416.15").forEach { build ->
+            assertEquals(defaults + "com.intellij.swagger", property.forBuild(build))
+        }
+        listOf("232.1", "234.0", "242.0", "243.28141.41", "262.10968.63").forEach { build ->
+            assertEquals(defaults, property.forBuild(build))
+        }
+    }
+
+    @Test
     fun `default sandbox exclusions property is enabled by default`() {
         val property = GradleProperties.UseDefaultSandboxExclusions
 

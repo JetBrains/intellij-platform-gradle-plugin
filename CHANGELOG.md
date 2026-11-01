@@ -37,6 +37,7 @@
 
 ### Fixed
 
+- Exclude bundled Spring Boot on 2023.3 and Swagger on 2024.1 from the test classpath by default because their test-service implementations are not shipped. Explicit exclusion settings and required-plugin protection still take precedence.
 - Invalidate bundled-plugin class-clash caches when scanned JAR classes change, even if local or snapshot IDE versions, JAR sizes, and timestamps remain unchanged.
 - Detect obfuscated class clashes against every bundled plugin owner, including when an earlier owner is excluded from the test classpath, and rebuild incomplete clash caches.
 - Avoid mutating custom plugin repository authentication when credentials are not configured, and forward configured credentials only to the remote repository. JetBrains/intellij-platform-gradle-plugin#2277

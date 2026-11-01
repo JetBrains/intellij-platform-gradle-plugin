@@ -22,6 +22,8 @@ import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginProjectConfigura
 import org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.expandUserHome
+import org.jetbrains.intellij.platform.gradle.utils.splitCommaSeparated
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 import java.nio.file.Path
 import kotlin.io.path.absolute
 import kotlin.io.path.createDirectories
@@ -174,6 +176,9 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      * ```
      *
      * Default value: `com.intellij.openRewrite,com.intellij.ja,com.intellij.ko,com.intellij.zh,org.jetbrains.plugins.vue,org.jetbrains.plugins.clion.radler`
+     * Additionally, the defaults exclude `com.intellij.spring.boot` on 2023.3 (build 233) and `com.intellij.swagger`
+     * on 2024.1 (build 241), whose test-service implementations are not shipped with those IDE versions.
+     * Setting this property explicitly replaces all defaults, including these version-specific exclusions.
      */
     object TestIdeBundledPluginsClasspathExcludes : GradleProperties<String>(listOf(
         "com.intellij.openRewrite",
@@ -185,7 +190,16 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
         // CLion Nova starts the ReSharper backend and enables `CodeInsightSettings.AUTO_POPUP_JAVADOC_INFO` in its application
         // initialized listener, so the first light test fails with "Code insight settings damaged" when tearing down.
         "org.jetbrains.plugins.clion.radler",
-    ).joinToString(","))
+    ).joinToString(",")) {
+
+        internal fun forBuild(buildNumber: String): Set<String> =
+            defaultValue.splitCommaSeparated().toSet() + when (buildNumber.toVersion().major) {
+                233 -> setOf("com.intellij.spring.boot")
+                // https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/1844
+                241 -> setOf("com.intellij.swagger")
+                else -> emptySet()
+            }
+    }
 
     /**
      * Controls whether dependencies provided by the IntelliJ Platform are excluded from sandbox runtime classpaths by default.
