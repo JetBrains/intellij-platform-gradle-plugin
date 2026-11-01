@@ -165,7 +165,14 @@ internal data class IdeLayoutIndex(
         val protectedKeys = dependencyClosure(declaredPlugins + requiredPlugins).map { it.key }.toSet()
         val excluded = linkedMapOf<String, TestPlugins.Exclusion>()
         val kept = mutableListOf<TestPlugins.Exclusion>()
-        val clashing = mutableListOf<TestPlugins.Clash>()
+
+        data class PluginClash(val shadowed: Entry, val counterpart: Entry?, val classes: List<String>) {
+            fun exclusion(entry: Entry = shadowed): TestPlugins.Exclusion {
+                val other = (if (entry.key == shadowed.key) counterpart else shadowed)
+                    ?.let { "'${it.id}'" } ?: "the IntelliJ Platform"
+                return TestPlugins.Exclusion(entry, "${classes.size} obfuscated classes clash with $other", clashes = classes)
+            }
+        }
 
         fun exclude(exclusion: TestPlugins.Exclusion) {
             when (exclusion.entry.key) {
@@ -178,12 +185,13 @@ internal data class IdeLayoutIndex(
             val entry = findByIdOrModuleId(id)?.takeUnless { it.isModule || it.id == IDEA_CORE } ?: return@forEach
             exclude(TestPlugins.Exclusion(entry, reason))
         }
+        val explicitExclusions = excluded.keys.toSet()
 
-        plugins.forEach { plugin ->
-            clashes[plugin.id].orEmpty().forEach clash@{ (counterpartId, classes) ->
+        val pluginClashes = plugins.flatMap { plugin ->
+            clashes[plugin.id].orEmpty().mapNotNull { (counterpartId, classes) ->
                 val counterpart = findByIdOrModuleId(counterpartId)?.takeUnless { it.id == IDEA_CORE }
-                if (classes.isEmpty() || plugin.key in excluded || counterpart?.key in excluded) {
-                    return@clash
+                if (classes.isEmpty()) {
+                    return@mapNotNull null
                 }
 
                 // Classes of the declared plugins win, as they come before the IntelliJ Platform and other bundled plugins.
@@ -191,38 +199,100 @@ internal data class IdeLayoutIndex(
                     counterpart != null && plugin.key in declaredKeys && counterpart.key !in declaredKeys -> counterpart
                     else -> plugin
                 }
-                val other = when {
-                    shadowed.key != plugin.key -> "'${plugin.id}'"
-                    counterpart != null -> "'${counterpart.id}'"
-                    else -> "the IntelliJ Platform"
-                }
-                when (shadowed.key) {
-                    in declaredKeys -> clashing += TestPlugins.Clash(shadowed, classes, declared = true)
-                    in protectedKeys -> clashing += TestPlugins.Clash(shadowed, classes, declared = false)
-                    else -> exclude(TestPlugins.Exclusion(shadowed, "${classes.size} obfuscated classes clash with $other", clashes = classes))
-                }
+                PluginClash(shadowed, if (shadowed.key == plugin.key) counterpart else plugin, classes)
             }
         }
+        val hardClashes = pluginClashes.filterNot { it.shadowed.key in protectedKeys }
 
-        // Each excluded plugin may make other plugins miss their dependencies, so repeat until nothing more is excluded.
-        do {
-            val excludedCount = excluded.size
-            plugins
-                .filterNot { it.key in excluded || it.key in protectedKeys }
-                .forEach { plugin ->
-                    val dependency = plugin.dependencies
-                        .mapNotNull(::findByKey)
-                        .firstOrNull { isExcluded(it, excluded.keys) }
-                        ?: return@forEach
-                    val root = excluded[dependency.key]?.let { it.root ?: it.entry }
-                        ?: dependency.owners.firstNotNullOfOrNull { excluded[it] }?.let { it.root ?: it.entry }
-                    excluded[plugin.key] = TestPlugins.Exclusion(plugin, "requires excluded '${dependency.id}'", root = root)
+        fun excludeDependents() {
+            // Each excluded plugin may make other plugins miss their dependencies, so repeat until nothing more is excluded.
+            do {
+                val excludedCount = excluded.size
+                plugins
+                    .filterNot { it.key in excluded || it.key in protectedKeys }
+                    .forEach { plugin ->
+                        val dependency = plugin.dependencies
+                            .mapNotNull(::findByKey)
+                            .firstOrNull { isExcluded(it, excluded.keys) }
+                            ?: return@forEach
+                        val root = excluded[dependency.key]?.let { it.root ?: it.entry }
+                            ?: dependency.owners.firstNotNullOfOrNull { excluded[it] }?.let { it.root ?: it.entry }
+                        excluded[plugin.key] = TestPlugins.Exclusion(plugin, "requires excluded '${dependency.id}'", root = root)
+                    }
+            } while (excluded.size > excludedCount)
+        }
+
+        hardClashes.forEach { clash ->
+            if (clash.shadowed.key !in excluded && clash.counterpart?.key !in excluded) {
+                exclude(clash.exclusion())
+            }
+        }
+        excludeDependents()
+
+        fun restore(entries: List<Entry>, restored: Set<String> = emptySet()): Set<String>? {
+            val queue = ArrayDeque(entries)
+            val restoredKeys = restored.toMutableSet()
+            while (queue.isNotEmpty()) {
+                val entry = queue.removeFirst()
+                if (entry.isModule) {
+                    if (!isExcluded(entry, excluded.keys - restoredKeys)) {
+                        continue
+                    }
+                    return entry.owners.mapNotNull(::findByKey)
+                        .firstNotNullOfOrNull { restore(listOf(it) + queue, restoredKeys) }
                 }
-        } while (excluded.size > excludedCount)
+                if (entry.key !in excluded || entry.key in restoredKeys) {
+                    continue
+                }
+                if (entry.key in explicitExclusions) {
+                    return null
+                }
+                restoredKeys += entry.key
+                if (hardClashes.any { clash ->
+                        (clash.shadowed.key !in excluded || clash.shadowed.key in restoredKeys) &&
+                            (clash.counterpart == null || clash.counterpart.key !in excluded || clash.counterpart.key in restoredKeys)
+                    }) {
+                    return null
+                }
+                queue.addAll(entry.dependencies.mapNotNull(::findByKey))
+            }
+            return restoredKeys
+        }
+
+        // Restore dependency-valid groups atomically. Survivors only grow, so dependency/clash cycles cannot oscillate.
+        plugins.filter { it.key in excluded }.forEach { plugin ->
+            restore(listOf(plugin))?.forEach { excluded.remove(it) }
+        }
+
+        val exclusionOrder = excluded.keys.toList()
+        val excludedKeys = excluded.keys.toSet()
+        excluded.keys.retainAll(explicitExclusions)
+        hardClashes.forEach { clash ->
+            if (clash.shadowed.key in excludedKeys && clash.counterpart?.key !in excludedKeys) {
+                excluded.putIfAbsent(clash.shadowed.key, clash.exclusion())
+            }
+        }
+        excludeDependents()
+        // A restored plugin is only a fallback clash cause, after winning clashes and their dependency cascades.
+        hardClashes.forEach { clash ->
+            if (clash.counterpart != null && clash.counterpart.key in excludedKeys && clash.shadowed.key !in excludedKeys) {
+                excluded.putIfAbsent(clash.counterpart.key, clash.exclusion(clash.counterpart))
+            }
+        }
+        excludeDependents()
+        // Remaining dependency cycles cannot be restored because their own required plugins clash.
+        while (excluded.size < excludedKeys.size) {
+            val entry = requireNotNull(findByKey(excludedKeys.first { it !in excluded }))
+            excluded[entry.key] = TestPlugins.Exclusion(entry, "required plugins have mutually clashing obfuscated classes")
+            excludeDependents()
+        }
+        val clashing = pluginClashes
+            .filter { it.shadowed.key !in excluded && it.counterpart?.key !in excluded }
+            .map { TestPlugins.Clash(it.shadowed, it.classes, declared = it.shadowed.key in declaredKeys) }
 
         return TestPlugins(
             included = plugins.filterNot { it.key in excluded },
-            excluded = excluded.values.toList(),
+            excluded = exclusionOrder.mapNotNull(excluded::get),
             kept = kept,
             clashes = clashing,
         )

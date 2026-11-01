@@ -186,6 +186,214 @@ class IdeLayoutIndexTest {
     }
 
     @Test
+    fun `plugins clashing with plugins requiring excluded dependencies remain included`() {
+        val index = index(plugin("A"), plugin("B", "plugin:A"), plugin("D"))
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds = listOf("A", "B", "D"),
+            excludes = mapOf("A" to "listed"),
+            clashes = mapOf("D" to mapOf("B" to listOf("Z.Z.L"))),
+            declaredPlugins = emptyList(),
+            requiredPlugins = emptyList(),
+        )
+
+        assertEquals(listOf("D"), testPlugins.includedIds)
+        assertEquals(listOf("A", "B"), testPlugins.excludedIds)
+        assertEquals("requires excluded 'A'", testPlugins.excluded.last().reason)
+        assertEquals("A", testPlugins.excluded.last().root?.id)
+        assertTrue(testPlugins.clashes.isEmpty())
+    }
+
+    @Test
+    fun `plugins clashing with plugins requiring modules without surviving owners remain included`() {
+        val index = index(plugin("A"), module("M", "A"), plugin("B", "module:M"), plugin("D"))
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds = listOf("A", "B", "D"),
+            excludes = mapOf("A" to "listed"),
+            clashes = mapOf("D" to mapOf("B" to listOf("Z.Z.L"))),
+            declaredPlugins = emptyList(),
+            requiredPlugins = emptyList(),
+        )
+
+        assertEquals(listOf("D"), testPlugins.includedIds)
+        assertEquals(listOf("A", "B"), testPlugins.excludedIds)
+        assertEquals("requires excluded 'M'", testPlugins.excluded.last().reason)
+        assertEquals("A", testPlugins.excluded.last().root?.id)
+    }
+
+    @Test
+    fun `clash exclusions are reconsidered when a later declared plugin excludes the counterpart`() {
+        val index = index(plugin("B"), plugin("D"), plugin("P"))
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds = listOf("B", "D", "P"),
+            excludes = emptyMap(),
+            clashes = mapOf(
+                "D" to mapOf("B" to listOf("Z.Z.L")),
+                "P" to mapOf("B" to listOf("Z.Z.Z")),
+            ),
+            declaredPlugins = listOfNotNull(index.findById("P")),
+            requiredPlugins = emptyList(),
+        )
+
+        assertEquals(listOf("D", "P"), testPlugins.includedIds)
+        assertEquals(listOf("B"), testPlugins.excludedIds)
+        assertEquals("1 obfuscated classes clash with 'P'", testPlugins.excluded.single().reason)
+        assertEquals(listOf("Z.Z.Z"), testPlugins.excluded.single().clashes)
+        assertTrue(testPlugins.clashes.isEmpty())
+    }
+
+    @Test
+    fun `clash exclusions are reconsidered when other clashes remove all module owners`() {
+        val index = index(
+            plugin("A"),
+            plugin("C"),
+            module("M", "A", "C"),
+            plugin("B", "module:M"),
+            plugin("D"),
+        )
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds = listOf("A", "C", "B", "D"),
+            excludes = emptyMap(),
+            clashes = mapOf(
+                "A" to mapOf(IDEA_CORE to listOf("Z.Z.A")),
+                "C" to mapOf(IDEA_CORE to listOf("Z.Z.C")),
+                "D" to mapOf("B" to listOf("Z.Z.L")),
+            ),
+            declaredPlugins = emptyList(),
+            requiredPlugins = emptyList(),
+        )
+
+        assertEquals(listOf("D"), testPlugins.includedIds)
+        assertEquals(listOf("A", "C", "B"), testPlugins.excludedIds)
+        assertEquals("requires excluded 'M'", testPlugins.excluded.last().reason)
+        assertEquals("A", testPlugins.excluded.last().root?.id)
+        assertEquals(listOf(listOf("Z.Z.A"), listOf("Z.Z.C"), emptyList()), testPlugins.excluded.map { it.clashes })
+    }
+
+    @Test
+    fun `protected plugins do not report clashes with dependency-invalid counterparts`() {
+        val index = index(plugin("A"), plugin("B", "plugin:A"), plugin("D"))
+        val clashes = mapOf("D" to mapOf("B" to listOf("Z.Z.L")))
+        val declared = index.resolveTestPlugins(
+            bundledPluginIds = listOf("A", "B", "D"),
+            excludes = mapOf("A" to "listed"),
+            clashes = clashes,
+            declaredPlugins = listOfNotNull(index.findById("D")),
+            requiredPlugins = emptyList(),
+        )
+        val required = index.resolveTestPlugins(
+            bundledPluginIds = listOf("A", "B", "D"),
+            excludes = mapOf("A" to "listed"),
+            clashes = clashes,
+            declaredPlugins = emptyList(),
+            requiredPlugins = listOfNotNull(index.findById("D")),
+        )
+
+        assertEquals(listOf("D"), declared.includedIds)
+        assertEquals(listOf("A", "B"), declared.excludedIds)
+        assertTrue(declared.clashes.isEmpty())
+        assertEquals(listOf("D"), required.includedIds)
+        assertEquals(listOf("A", "B"), required.excludedIds)
+        assertTrue(required.clashes.isEmpty())
+    }
+
+    @Test
+    fun `dependency cycles are restored together when their clash counterpart disappears`() {
+        val index = index(plugin("B"), plugin("D", "plugin:E"), plugin("E", "plugin:D"), plugin("P"))
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds = listOf("B", "D", "E", "P"),
+            excludes = emptyMap(),
+            clashes = mapOf(
+                "D" to mapOf("B" to listOf("Z.Z.L")),
+                "P" to mapOf("B" to listOf("Z.Z.Z")),
+            ),
+            declaredPlugins = listOfNotNull(index.findById("P")),
+            requiredPlugins = emptyList(),
+        )
+
+        assertEquals(listOf("D", "E", "P"), testPlugins.includedIds)
+        assertEquals(listOf("B"), testPlugins.excludedIds)
+        assertEquals("1 obfuscated classes clash with 'P'", testPlugins.excluded.single().reason)
+        assertEquals(listOf("Z.Z.Z"), testPlugins.excluded.single().clashes)
+        assertTrue(testPlugins.clashes.isEmpty())
+    }
+
+    @Test
+    fun `restoration can choose an alternative module owner whose clash counterpart disappears`() {
+        val index = index(plugin("X"), plugin("B"), plugin("D", "module:M"), plugin("Y"), module("M", "X", "Y"), plugin("P"))
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds = listOf("X", "B", "D", "Y", "P"),
+            excludes = emptyMap(),
+            clashes = mapOf(
+                "X" to mapOf(IDEA_CORE to listOf("Z.Z.X")),
+                "Y" to mapOf("B" to listOf("Z.Z.L")),
+                "P" to mapOf("B" to listOf("Z.Z.Z")),
+            ),
+            declaredPlugins = listOfNotNull(index.findById("P")),
+            requiredPlugins = emptyList(),
+        )
+
+        assertEquals(listOf("D", "Y", "P"), testPlugins.includedIds)
+        assertEquals(listOf("X", "B"), testPlugins.excludedIds)
+        assertEquals(listOf(listOf("Z.Z.X"), listOf("Z.Z.Z")), testPlugins.excluded.map { it.clashes })
+        assertTrue(testPlugins.clashes.isEmpty())
+    }
+
+    @Test
+    fun `a plugin cannot be restored with a dependency that clashes with it`() {
+        val index = index(plugin("A", "plugin:B"), plugin("B"))
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds = listOf("A", "B"),
+            excludes = emptyMap(),
+            clashes = mapOf("B" to mapOf("A" to listOf("Z.Z.L"))),
+            declaredPlugins = emptyList(),
+            requiredPlugins = emptyList(),
+        )
+
+        assertEquals(listOf("B"), testPlugins.includedIds)
+        assertEquals(listOf("A"), testPlugins.excludedIds)
+        assertEquals("1 obfuscated classes clash with 'B'", testPlugins.excluded.single().reason)
+        assertEquals(listOf("Z.Z.L"), testPlugins.excluded.single().clashes)
+        assertTrue(testPlugins.clashes.isEmpty())
+    }
+
+    @Test
+    fun `mutually dependent clashing plugins remain excluded without oscillating`() {
+        val index = index(plugin("A", "plugin:B"), plugin("B", "plugin:A"), plugin("D"))
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds = listOf("A", "B", "D"),
+            excludes = emptyMap(),
+            clashes = mapOf("B" to mapOf("A" to listOf("Z.Z.L"))),
+            declaredPlugins = emptyList(),
+            requiredPlugins = emptyList(),
+        )
+
+        assertEquals(listOf("D"), testPlugins.includedIds)
+        assertEquals(listOf("B", "A"), testPlugins.excludedIds)
+        assertEquals("required plugins have mutually clashing obfuscated classes", testPlugins.excluded.first().reason)
+        assertEquals("requires excluded 'B'", testPlugins.excluded.last().reason)
+        assertEquals("B", testPlugins.excluded.last().root?.id)
+        assertTrue(testPlugins.excluded.all { it.clashes.isEmpty() })
+        assertTrue(testPlugins.clashes.isEmpty())
+    }
+
+    @Test
+    fun `a required shadowed plugin reports its clash without excluding the counterpart`() {
+        val index = index(plugin("A"), plugin("B"))
+        val testPlugins = index.resolveTestPlugins(
+            bundledPluginIds = listOf("A", "B"),
+            excludes = emptyMap(),
+            clashes = mapOf("B" to mapOf("A" to listOf("Z.Z.L"))),
+            declaredPlugins = emptyList(),
+            requiredPlugins = listOfNotNull(index.findById("B")),
+        )
+
+        assertEquals(listOf("A", "B"), testPlugins.includedIds)
+        assertTrue(testPlugins.excluded.isEmpty())
+        assertEquals(listOf("B" to false), testPlugins.clashes.map { it.entry.id to it.declared })
+        assertEquals(listOf("Z.Z.L"), testPlugins.clashes.single().classes)
+    }
+
+    @Test
     fun `a module declared by several plugins resolves to a single present owner`() {
         val index = index(
             plugin("X", classpath = listOf("plugins/X/lib/X.jar", "plugins/X/lib/modules/M.jar")),

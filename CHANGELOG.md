@@ -38,6 +38,7 @@
 ### Fixed
 
 - Preserve bundled dependencies of required content modules stored in separate JARs of dependency plugins on the test classpath.
+- Reconsider bundled-plugin clash exclusions when their conflicting plugins are removed by dependency or other clash exclusions.
 - Exclude bundled Spring Boot on 2023.3 and Swagger on 2024.1 from the test classpath by default because their test-service implementations are not shipped. Explicit exclusion settings and required-plugin protection still take precedence.
 - Invalidate bundled-plugin class-clash caches when scanned JAR classes change, even if local or snapshot IDE versions, JAR sizes, and timestamps remain unchanged.
 - Detect obfuscated class clashes against every bundled plugin owner, including when an earlier owner is excluded from the test classpath, and rebuild incomplete clash caches.
