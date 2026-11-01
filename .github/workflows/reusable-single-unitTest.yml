@@ -60,14 +60,25 @@ jobs:
           restore-keys: |
             test-gradle-home-v5-intellij-platform-${{ runner.os }}-
 
+      - name: Restore Gradle TestKit shared dependency cache
+        id: gradle-testkit-dependencies-cache
+        uses: actions/cache/restore@v6
+        with:
+          path: .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+          key: test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          restore-keys: |
+            test-gradle-home-v1-testkit-dependencies-${{ runner.os }}-
+
       - name: Restore Gradle TestKit cache
         id: gradle-testkit-cache
         uses: actions/cache/restore@v6
         with:
-          path: .gradle/testGradleHome/.testKit
-          key: test-gradle-home-v2-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          path: |
+            .gradle/testGradleHome/.testKit
+            !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+          key: test-gradle-home-v4-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
-            test-gradle-home-v2-testkit-${{ runner.os }}-
+            test-gradle-home-v4-testkit-${{ runner.os }}-${{ inputs.gradleVersion }}-
 
       - name: Run Tests
         env:
@@ -81,11 +92,8 @@ jobs:
             TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
           fi
           [ -z "$TEST_NAME" ] && TESTS="" || TESTS="--tests $TEST_NAME"
-          if [ "$RUNNER_OS" = "Windows" ] && [ -z "$TEST_NAME" ]; then
-            TEST_MAX_PARALLEL_FORKS=2
-          else
-            TEST_MAX_PARALLEL_FORKS=1
-          fi
+          # The prime job seeds one worker-specific TestKit home.
+          TEST_MAX_PARALLEL_FORKS=1
           
           ./gradlew test \
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
@@ -94,6 +102,24 @@ jobs:
             $TESTS \
             --console=plain \
             --no-build-cache
+
+      - name: Check Gradle TestKit shared dependency cache
+        if: ${{ success() && !inputs.cacheReadOnly && steps.gradle-testkit-dependencies-cache.outputs.cache-hit != 'true' }}
+        id: gradle-testkit-dependencies-cache-path
+        shell: bash
+        run: |
+          if [ -d .gradle/testGradleHome/.testKit ] && [ -n "$(find .gradle/testGradleHome/.testKit -path '*/caches/modules-2/*' -print -quit)" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Save Gradle TestKit shared dependency cache
+        if: ${{ success() && !inputs.cacheReadOnly && steps.gradle-testkit-dependencies-cache.outputs.cache-hit != 'true' && steps.gradle-testkit-dependencies-cache-path.outputs.present == 'true' }}
+        uses: actions/cache/save@v6
+        with:
+          path: .gradle/testGradleHome/.testKit/worker-*/caches/modules-2
+          key: ${{ steps.gradle-testkit-dependencies-cache.outputs.cache-primary-key }}
 
       - name: Check Gradle TestKit cache
         if: ${{ always() && !cancelled() && !inputs.cacheReadOnly && steps.gradle-testkit-cache.outputs.cache-hit != 'true' }}
@@ -110,7 +136,9 @@ jobs:
         if: ${{ always() && !cancelled() && !inputs.cacheReadOnly && steps.gradle-testkit-cache.outputs.cache-hit != 'true' && steps.gradle-testkit-cache-path.outputs.present == 'true' }}
         uses: actions/cache/save@v6
         with:
-          path: .gradle/testGradleHome/.testKit
+          path: |
+            .gradle/testGradleHome/.testKit
+            !.gradle/testGradleHome/.testKit/worker-*/caches/modules-2
           key: ${{ steps.gradle-testkit-cache.outputs.cache-primary-key }}
 
       - name: Check IntelliJ Platform test cache

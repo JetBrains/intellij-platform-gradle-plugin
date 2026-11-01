@@ -733,7 +733,11 @@ class VerifyPluginTaskTest : IntelliJPluginTestBase() {
                 intellijPlatform {
                     pluginVerification {
                         ides {
-                            create("$type", "$version")
+                            create("$type", "$version") {
+                                // Keep non-matching verifier IDE scenarios on their normal resolution path even when
+                                // CI enables the shared cache for the base test platform.
+                                useCache = false
+                            }
                         }
                     }
                 }

@@ -15,10 +15,20 @@ import org.jetbrains.intellij.platform.gradle.providers.DmgExtractorValueSource
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.resolvePlatformPath
+import java.nio.channels.FileChannel
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption.REPLACE_EXISTING
+import java.nio.file.StandardOpenOption.CREATE
+import java.nio.file.StandardOpenOption.WRITE
+import java.util.concurrent.locks.ReentrantLock
 import javax.inject.Inject
+import kotlin.concurrent.withLock
 import kotlin.io.path.*
+
+private const val EXTRACTION_COMPLETE_MARKER = ".intellij-platform-extracted"
+
+internal fun extractionCompleteMarker(targetDirectory: Path): Path =
+    targetDirectory.resolveSibling(".${targetDirectory.name}$EXTRACTION_COMPLETE_MARKER")
 
 abstract class ExtractorService @Inject constructor(
     private val archiveOperations: ArchiveOperations,
@@ -26,9 +36,64 @@ abstract class ExtractorService @Inject constructor(
     private val fileSystemOperations: FileSystemOperations,
 ) : BuildService<BuildServiceParameters.None> {
 
+    private companion object {
+        val EXTRACTION_LOCK = ReentrantLock()
+    }
+
     private val log = Logger(javaClass)
 
+    /**
+     * Extracts [path] into [targetDirectory], or reuses the target when its completion marker is present.
+     *
+     * @param path archive to extract.
+     * @param targetDirectory directory in which to publish the extracted content.
+     */
     fun extract(path: Path, targetDirectory: Path) {
+        extract(targetDirectory) { path }
+    }
+
+    /**
+     * The lazy path variant lets cache-backed callers avoid resolving or downloading the archive when a completed
+     * extraction is already available. The completion check intentionally stays inside this BuildService so it is not
+     * captured as a configuration-cache input.
+     */
+    @OptIn(ExperimentalPathApi::class)
+    internal fun extract(targetDirectory: Path, path: () -> Path) {
+        val target = targetDirectory.toAbsolutePath().normalize()
+        val parent = requireNotNull(target.parent) { "Extraction target '$target' has no parent directory." }
+
+        // FileChannel locks overlap within one JVM, so follow the local Ivy writer and serialize before acquiring one.
+        EXTRACTION_LOCK.withLock {
+            parent.createDirectories()
+            val completionMarker = extractionCompleteMarker(target)
+            val lockFile = target.resolveSibling(".${target.name}.lock")
+
+            FileChannel.open(lockFile, CREATE, WRITE).use { channel ->
+                channel.lock().use {
+                    if (target.isDirectory() && completionMarker.isRegularFile()) {
+                        log.info("Reusing the completed archive extraction in '$target'.")
+                        return@use
+                    }
+
+                    completionMarker.deleteIfExists()
+                    if (target.exists()) {
+                        target.deleteRecursively()
+                    }
+
+                    try {
+                        target.createDirectories()
+                        extractArchive(path(), target)
+                        completionMarker.writeText("complete\n")
+                    } catch (throwable: Throwable) {
+                        runCatching { target.deleteRecursively() }
+                        throw throwable
+                    }
+                }
+            }
+        }
+    }
+
+    private fun extractArchive(path: Path, targetDirectory: Path) {
         log.info("Extracting archive '$path' to directory '$targetDirectory'.")
 
         val name = path.nameWithoutExtension.removeSuffix(".tar")
