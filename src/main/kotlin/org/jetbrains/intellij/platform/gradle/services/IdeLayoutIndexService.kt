@@ -21,6 +21,7 @@ import org.jetbrains.intellij.platform.gradle.Constants.IDEA_CORE
 import org.jetbrains.intellij.platform.gradle.models.*
 import org.jetbrains.intellij.platform.gradle.resolvers.path.ProductInfoPathResolver
 import org.jetbrains.intellij.platform.gradle.utils.Logger
+import org.jetbrains.intellij.platform.gradle.utils.requiredDependencyIds
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.writeTextIfChanged
 import java.nio.file.Path
@@ -407,16 +408,7 @@ private fun IdePlugin.toEntry(
         .map { platformPath.relativize(it).invariantSeparatorsPathString }
         .distinct(),
     // Dependencies are serialized by exact entry key to avoid collapsing duplicate IDs or aliases.
-    dependencies = (sequenceOf<IdePlugin>(this) + modulesDescriptors.asSequence()
-        .filter { it.isTreatedAsRequired }
-        .map { it.module })
-        .flatMap { module ->
-            module.dependsList.asSequence().filter { !it.isOptional }.map { it.pluginId } +
-                module.pluginMainModuleDependencies.asSequence().map { it.pluginId } +
-                module.contentModuleDependencies.asSequence().map { it.moduleName }
-        }
-        .filter(String::isNotBlank)
-        .distinct()
+    dependencies = requiredDependencyIds { it.isTreatedAsRequired }
         .mapNotNull { ide.findPluginByIdOrModuleId(it)?.plugin }
         .filterNot { it.pluginId == IDEA_CORE || it == this } // skip dependency on the core and self-dependency
         .toSet()

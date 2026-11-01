@@ -2,7 +2,6 @@
 
 package org.jetbrains.intellij.platform.gradle.tasks
 
-import com.jetbrains.plugin.structure.intellij.plugin.IdePlugin
 import org.gradle.api.Project
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -38,6 +37,7 @@ import org.jetbrains.intellij.platform.gradle.utils.IntelliJPlatformJavaLauncher
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
 import org.jetbrains.intellij.platform.gradle.utils.platformPath
+import org.jetbrains.intellij.platform.gradle.utils.requiredDependencyIds
 import org.jetbrains.intellij.platform.gradle.utils.rootProjectPath
 import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import org.jetbrains.intellij.platform.gradle.utils.safelyCreatePlugin
@@ -316,16 +316,8 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
                 .filter { it.exists() }
                 .mapNotNull { runCatching { pluginManager.safelyCreatePlugin(it).getOrNull() }.getOrNull() }
                 .flatMap { plugin ->
-                    sequenceOf<IdePlugin>(plugin) + plugin.modulesDescriptors.asSequence()
-                        .filter { it.moduleDefinition.loadingRule.required }
-                        .map { it.module }
+                    plugin.requiredDependencyIds { it.moduleDefinition.loadingRule.required }
                 }
-                .flatMap { plugin ->
-                    plugin.dependsList.asSequence().filterNot { it.isOptional }.map { it.pluginId } +
-                        plugin.pluginMainModuleDependencies.asSequence().map { it.pluginId } +
-                        plugin.contentModuleDependencies.asSequence().map { it.moduleName }
-                }
-                .filter(String::isNotBlank)
                 .toSet()
         }
 
