@@ -20,7 +20,6 @@ import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attribute
 import org.jetbrains.intellij.platform.gradle.services.ExtractorService
 import org.jetbrains.intellij.platform.gradle.utils.Logger
 import org.jetbrains.intellij.platform.gradle.utils.asPath
-import kotlin.io.path.nameWithoutExtension
 
 /**
  * A transformer used for extracting files from archive artifacts.
@@ -46,8 +45,7 @@ abstract class ExtractorTransformer : TransformAction<ExtractorTransformer.Param
     override fun transform(outputs: TransformOutputs) {
         runCatching {
             val path = inputArtifact.asPath
-            val name = path.nameWithoutExtension.removeSuffix(".tar")
-            val targetDirectory = outputs.dir(name).toPath()
+            val targetDirectory = outputs.dir("extracted").toPath()
 
             parameters.extractorService.get().extract(path, targetDirectory)
         }.onFailure {

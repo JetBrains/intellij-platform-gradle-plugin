@@ -47,7 +47,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
         build(randomTaskName, args = listOf("--debug")) {
             val jetbrainsRuntime = assertLogValue("jetbrainsRuntimePath: ") {
                 assertTrue(it.isNotEmpty())
-                assertTrue(it.endsWith(version))
+                assertTrue(it.endsWith("/extracted"))
             }
             assertLogValue("intellijPlatformPath: ") {
                 assertTrue(it.isNotEmpty())
@@ -71,7 +71,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
         build(randomTaskName, args = listOf("--debug")) {
             val jetbrainsRuntime = assertLogValue("jetbrainsRuntimePath: ") {
                 assertTrue(it.isNotEmpty())
-                assertTrue(it.endsWith(version))
+                assertTrue(it.endsWith("/extracted"))
             }
 
             assertLogValue("intellijPlatformPath: ") {
@@ -96,7 +96,7 @@ class JavaRuntimePathResolverTest : IntelliJPluginTestBase() {
         build(randomTaskName, args = listOf("--debug")) {
             val jetbrainsRuntime = assertLogValue("jetbrainsRuntimePath: ") {
                 assertTrue(it.isNotEmpty())
-                assertTrue(it.endsWith(version))
+                assertTrue(it.endsWith("/extracted"))
             }
             assertLogValue("intellijPlatformPath: ") {
                 assertTrue(it.isNotEmpty())
