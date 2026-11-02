@@ -363,6 +363,29 @@ abstract class IntelliJPlatformTestBase {
         }
 
         System.err.println(diagnostics)
+        preserveBuildFailureDiagnostics(diagnostics)
+    }
+
+    @OptIn(ExperimentalPathApi::class)
+    private fun preserveBuildFailureDiagnostics(diagnostics: String) {
+        runCatching {
+            val root = Path("build", "diagnostics", javaClass.simpleName).createDirectories()
+            val target = createTempDirectory(root, "failure-")
+            target.resolve("diagnostics.txt").writeText(diagnostics)
+
+            listOf("test-results", "reports/tests").forEach { path ->
+                val source = dir.resolve("build").resolve(path)
+                if (source.exists()) {
+                    val destination = target.resolve(path)
+                    destination.parent.createDirectories()
+                    source.copyToRecursively(destination, followLinks = false, overwrite = false)
+                }
+            }
+
+            System.err.println("TestKit failure diagnostics saved to: $target")
+        }.onFailure {
+            System.err.println("Could not preserve TestKit failure diagnostics: ${it.message}")
+        }
     }
 
     @PublishedApi

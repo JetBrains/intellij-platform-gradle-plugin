@@ -2,6 +2,7 @@
 
 package org.jetbrains.intellij.platform.gradle.providers
 
+import org.gradle.api.GradleException
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.provider.ValueSource
 import org.gradle.api.provider.ValueSourceParameters
@@ -96,13 +97,24 @@ abstract class JavaRuntimeMetadataValueSource : ValueSource<Map<String, String>,
      * ```
      */
     override fun obtain() = ByteArrayOutputStream().use { os ->
-        execOperations.exec {
-            commandLine(
-                parameters.executable.asPath.safePathString,
-                "-XshowSettings:properties",
-                "-version",
+        val executable = parameters.executable.asPath.safePathString
+        val stdout = ByteArrayOutputStream()
+        runCatching {
+            execOperations.exec {
+                commandLine(
+                    executable,
+                    "-XshowSettings:properties",
+                    "-version",
+                )
+                standardOutput = stdout
+                errorOutput = os
+                isIgnoreExitValue = true
+            }.assertNormalExitValue()
+        }.getOrElse {
+            throw GradleException(
+                "Failed to obtain Java runtime metadata from '$executable'.\nStandard output:\n$stdout\nStandard error:\n$os",
+                it,
             )
-            errorOutput = os
         }
 
         val separator = " = "

@@ -91,3 +91,13 @@ jobs:
             "${TESTS[@]}" \
             --console=plain \
             --no-build-cache
+
+      - name: Upload Failure Reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-reports-${{ matrix.os }}-${{ matrix.gradleVersion }}
+          path: |
+            build/diagnostics/
+            build/test-results/integrationTest/
+            build/reports/tests/integrationTest/
