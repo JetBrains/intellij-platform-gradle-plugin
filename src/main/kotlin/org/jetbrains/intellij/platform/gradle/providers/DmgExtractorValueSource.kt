@@ -19,8 +19,10 @@ import org.jetbrains.intellij.platform.gradle.utils.safePathString
 import java.io.ByteArrayOutputStream
 import java.nio.file.Path
 import javax.inject.Inject
+import kotlin.io.path.ExperimentalPathApi
 import kotlin.io.path.createDirectories
 import kotlin.io.path.createTempDirectory
+import kotlin.io.path.deleteRecursively
 import kotlin.io.path.pathString
 
 /**
@@ -46,6 +48,7 @@ abstract class DmgExtractorValueSource : ValueSource<Path, DmgExtractorValueSour
     private val log = Logger(javaClass)
     private val tempDirectory = createTempDirectory()
 
+    @OptIn(ExperimentalPathApi::class)
     override fun obtain(): Path {
         val path = parameters.path.asPath
         val targetDirectory = parameters.target.asPath.createDirectories()
@@ -87,23 +90,33 @@ abstract class DmgExtractorValueSource : ValueSource<Path, DmgExtractorValueSour
             )
         }
 
-        execOperations.exec {
-            commandLine(
-                "rsync",
-                "-av",
-                "--quiet",
-                "--exclude=Applications",
-                "--exclude=/.*",
-                "$tempDirectory/",
-                targetDirectory,
-            )
-            isIgnoreExitValue = true
+        val extraction = runCatching {
+            execOperations.exec {
+                commandLine(
+                    "rsync",
+                    "-av",
+                    "--quiet",
+                    "--exclude=Applications",
+                    "--exclude=/.*",
+                    "$tempDirectory/",
+                    targetDirectory,
+                )
+            }
         }
 
-        log.info("Unmounting DMG volume '$tempDirectory'.")
-        execOperations.exec {
-            commandLine("hdiutil", "detach", "-force", "-quiet", tempDirectory)
+        val unmount = runCatching {
+            log.info("Unmounting DMG volume '$tempDirectory'.")
+            execOperations.exec {
+                commandLine("hdiutil", "detach", "-force", "-quiet", tempDirectory)
+            }
         }
+
+        extraction.exceptionOrNull()?.let { error ->
+            unmount.exceptionOrNull()?.let(error::addSuppressed)
+            runCatching { targetDirectory.deleteRecursively() }.onFailure(error::addSuppressed)
+            throw error
+        }
+        unmount.getOrThrow()
 
         return targetDirectory
     }

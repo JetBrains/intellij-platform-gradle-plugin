@@ -37,6 +37,7 @@
 
 ### Fixed
 
+- Reject failed DMG copies, remove partial output, and preserve the original error while unmounting the image.
 - Shorten archive transform output paths so the Windows Java launcher can locate its JVM library in Gradle nightly caches.
 - Expose the actual Gradle user home to IDE test processes so VFS access checks allow dependency caches outside the user's home directory, including custom TestKit caches.
 - Flatten nested JetBrains Runtime archive directories to avoid Windows process launch failures caused by excessively long executable paths.
