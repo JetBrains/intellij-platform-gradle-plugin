@@ -34,6 +34,8 @@ import org.jetbrains.intellij.platform.gradle.Constants.Sandbox
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformDependenciesHelper
 import org.jetbrains.intellij.platform.gradle.extensions.IntelliJPlatformExtension
 import org.jetbrains.intellij.platform.gradle.resolvers.path.findEntry
+import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeDirectory
+import org.jetbrains.intellij.platform.gradle.resolvers.path.resolveJavaRuntimeExecutable
 import org.jetbrains.intellij.platform.gradle.services.RequestedIntelliJPlatform
 import java.nio.channels.FileChannel
 import java.nio.file.AccessDeniedException
@@ -120,6 +122,10 @@ internal fun Path.resolvePlatformPath() = deepResolve {
 
         // set the root to the directory containing `Resources/product-info.json`
         findEntry("Resources")?.findEntry("product-info.json") != null
+            -> this
+
+        // eliminate nested runtime directories before stopping at a plugin's `lib/`
+        runCatching { resolveJavaRuntimeDirectory()?.resolveJavaRuntimeExecutable() }.getOrNull() != null
             -> this
 
         // stop when `lib/` is inside, even if it's a singleton
