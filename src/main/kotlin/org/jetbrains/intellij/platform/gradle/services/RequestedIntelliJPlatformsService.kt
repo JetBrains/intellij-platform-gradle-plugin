@@ -101,7 +101,12 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
         zip(
             configuration.type,
             configuration.version,
-            configuration.useInstaller.orElse(parameters.useInstaller),
+            configuration.useInstaller.orElse(configuration.type.flatMap { type ->
+                when (type) {
+                    IntelliJPlatformType.Rider -> providerFactory.provider { false }
+                    else -> parameters.useInstaller
+                }
+            }),
             configuration.useCache,
             configuration.productMode,
         ) { type, version, useInstaller, useCache, productMode ->
@@ -121,16 +126,23 @@ abstract class RequestedIntelliJPlatformsService @Inject constructor(
                     }
                 }
 
+                val type = configuration.type
+                    .orElse(base.map { it.type })
+                    .orElse(errorProvider("type"))
+
                 zip(
-                    configuration.type
-                        .orElse(base.map { it.type })
-                        .orElse(errorProvider("type")),
+                    type,
                     configuration.version
                         .orElse(base.map { it.version })
                         .orElse(errorProvider("version")),
                     configuration.useInstaller
                         .orElse(base.map { it.useInstaller })
-                        .orElse(parameters.useInstaller),
+                        .orElse(type.flatMap { type ->
+                            when (type) {
+                                IntelliJPlatformType.Rider -> providerFactory.provider { false }
+                                else -> parameters.useInstaller
+                            }
+                        }),
                     configuration.useCache
                         .orElse(base.map { it.useCache })
                         .orElse(errorProvider("useCache")),
