@@ -30,6 +30,7 @@ import kotlin.io.path.setLastModifiedTime
 import kotlin.io.path.writeText
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -303,6 +304,16 @@ class IdeLayoutIndexServiceTest {
         val pluginJar = "plugins/java/lib/java-impl.jar"
         fun replaceJar(path: String, vararg entries: Pair<String, String>) {
             platformPath.writeJar("$path.replacement", *entries)
+            val jar = platformPath.resolve(path)
+            if (Files.exists(jar)) {
+                val delegate = SingletonCachingJarFileSystemProvider.getFileSystem(jar).use { fileSystem ->
+                    val handle = fileSystem as FsHandleFileSystem
+                    // Release this fixture's cached filesystem so Windows can replace the JAR.
+                    handle.onCacheRemoval()
+                    handle.delegateFileSystem
+                }
+                assertFalse(delegate.isOpen, "The cached JAR filesystem must be closed before replacing $path on Windows")
+            }
             Files.move(platformPath.resolve("$path.replacement"), platformPath.resolve(path), ATOMIC_MOVE, REPLACE_EXISTING)
         }
         fun writePlugin(contents: String) = replaceJar(
