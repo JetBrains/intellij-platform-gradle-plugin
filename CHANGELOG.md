@@ -37,6 +37,7 @@
 
 ### Fixed
 
+- Expose the actual Gradle user home to IDE test processes so VFS access checks allow dependency caches outside the user's home directory, including custom TestKit caches.
 - Flatten nested JetBrains Runtime archive directories to avoid Windows process launch failures caused by excessively long executable paths.
 - Preserve bundled dependencies of required content modules stored in separate JARs of dependency plugins on the test classpath.
 - Reconsider bundled-plugin clash exclusions when their conflicting plugins are removed by dependency or other clash exclusions.

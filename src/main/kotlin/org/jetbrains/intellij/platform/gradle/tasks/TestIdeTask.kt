@@ -90,6 +90,9 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
         internal val configuration: Test.() -> Unit = {
             enableAssertions = true
 
+            // VfsRootAccess permits dependency caches outside the user home via GRADLE_USER_HOME.
+            environment("GRADLE_USER_HOME", project.gradle.gradleUserHomeDir.absolutePath)
+
             val intelliJPlatformConfiguration = sourceTask.intelliJPlatformConfiguration
             val intellijPlatformTestClasspathConfiguration = sourceTask.intellijPlatformTestClasspathConfiguration
             val intellijPlatformClasspathConfiguration = sourceTask.intellijPlatformClasspathConfiguration

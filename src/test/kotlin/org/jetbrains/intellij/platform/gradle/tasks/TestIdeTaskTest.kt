@@ -22,6 +22,36 @@ import kotlin.test.assertTrue
 class TestIdeTaskTest : IntelliJPluginTestBase() {
 
     @Test
+    fun `test task exposes the actual Gradle user home to VFS access checks`() {
+        buildFile write //language=kotlin
+                """
+                val testTask = tasks.named<org.gradle.api.tasks.testing.Test>("test")
+                val gradleUserHome = gradle.gradleUserHomeDir.canonicalPath
+
+                tasks.register("verifyTestGradleUserHome") {
+                    doLast {
+                        val environment = testTask.get().environment
+                        val actual = environment["GRADLE_USER_HOME"]?.toString()?.let(::File)?.canonicalPath
+                        check(actual == gradleUserHome) {
+                            "Expected test GRADLE_USER_HOME to be ${'$'}gradleUserHome, got ${'$'}actual"
+                        }
+                        check(environment["NO_FS_ROOTS_ACCESS_CHECK"] == null)
+                        println("TEST_GRADLE_USER_HOME=${'$'}actual")
+                    }
+                }
+                """.trimIndent()
+
+        listOf(null, dir.resolve("unused-gradle-home").toString()).forEach { inheritedGradleUserHome ->
+            build(
+                "verifyTestGradleUserHome",
+                environment = mapOf("GRADLE_USER_HOME" to inheritedGradleUserHome, "NO_FS_ROOTS_ACCESS_CHECK" to null),
+            ) {
+                assertContains("TEST_GRADLE_USER_HOME=", output)
+            }
+        }
+    }
+
+    @Test
     fun `test task sets idea home path to target IntelliJ Platform`() {
         buildFile write //language=kotlin
                 """
