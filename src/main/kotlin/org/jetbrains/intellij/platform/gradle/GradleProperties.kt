@@ -185,6 +185,9 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
         "com.intellij.ja",
         "com.intellij.ko",
         "com.intellij.zh",
+        // Just a try to get rid of the Windows CI errors
+        "com.intellij.air",
+        "com.intellij.code.provenance",
         // See: #2183, https://youtrack.jetbrains.com/issue/WEB-78747
         "org.jetbrains.plugins.vue",
         // CLion Nova starts the ReSharper backend and enables `CodeInsightSettings.AUTO_POPUP_JAVADOC_INFO` in its application
