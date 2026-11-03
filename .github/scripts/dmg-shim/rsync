@@ -1,2 +1,7 @@
 #!/bin/bash
+for argument in "$@"; do
+  if [ "$argument" = "--server" ]; then
+    exec /usr/bin/rsync "$@"
+  fi
+done
 exec python3 "$DMG_DIAGNOSTICS_SCRIPT" copy "$@"
