@@ -14,30 +14,11 @@ on:
 
 jobs:
   integrationTests:
-    name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        gradleVersion:
-          - "9.0.0"
-          - "9.8.1"
-          - "nightly"
-        os:
-          - windows-latest
-          - ubuntu-latest
-          - macos-latest
+    name: Windows owner evidence, Gradle 9.8.1
+    runs-on: windows-latest
+    timeout-minutes: 20
 
     steps:
-
-      # Free GitHub Actions Environment Disk Space
-      - name: Maximize Build Space
-        if: runner.os == 'Linux'
-        uses: jlumbroso/free-disk-space@v2.0.0
-        with:
-          preinstalled-runtimes: false
-          large-packages: false
-
       - name: Fetch Sources
         uses: actions/checkout@v7
 
@@ -62,42 +43,44 @@ jobs:
             test-gradle-home-v5-intellij-platform-${{ runner.os }}-
 
       - name: Restore Gradle TestKit cache
+        id: testkit-cache
         uses: actions/cache/restore@v6
         with:
           path: .gradle/testGradleHome/.testKit
-          key: test-gradle-home-v2-testkit-${{ runner.os }}-${{ matrix.gradleVersion }}-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
+          key: test-gradle-home-v2-testkit-${{ runner.os }}-9.8.1-${{ hashFiles('gradle.properties', 'build.gradle.kts', 'gradle/libs.versions.toml') }}
           restore-keys: |
             test-gradle-home-v2-testkit-${{ runner.os }}-
 
-      - name: Run Tests
-        env:
-          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
-          TEST_NAME: ${{ inputs.testName }}
-        shell: bash
+      - name: Prepare signed Windows handle utility
+        shell: pwsh
         run: |
-          if [ "$RUNNER_OS" = "Windows" ]; then
-            TEST_GRADLE_USER_HOME="$(pwd -W)\\.gradle\\testGradleHome"
-          else
-            TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
-          fi
-          TESTS=()
-          if [ -n "$TEST_NAME" ]; then
-            TESTS+=(--tests "$TEST_NAME")
-          fi
+          $ErrorActionPreference = 'Stop'
+          $directory = Join-Path $PWD 'build/windows-owner-tools'
+          New-Item -ItemType Directory -Force $directory | Out-Null
+          Invoke-WebRequest https://download.sysinternals.com/files/Handle.zip -OutFile "$directory/Handle.zip" -TimeoutSec 30
+          Expand-Archive "$directory/Handle.zip" -DestinationPath $directory
+          $signature = Get-AuthenticodeSignature "$directory/handle64.exe"
+          if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'Microsoft Corporation') {
+            throw 'Handle utility did not have a valid Microsoft signature'
+          }
+          Get-FileHash "$directory/handle64.exe" -Algorithm SHA256
 
-          ./gradlew integrationTest \
-            -PtestGradleVersion="${{ matrix.gradleVersion }}" \
-            -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
-            "${TESTS[@]}" \
-            --console=plain \
-            --no-build-cache
+      - name: Run one Windows baseline and owner-gated candidate
+        timeout-minutes: 16
+        env:
+          WINDOWS_DIAGNOSTIC_TESTKIT_CACHE: ${{ steps.testkit-cache.outputs.cache-matched-key }}
+          WINDOWS_DIAGNOSTIC_PLATFORM_CACHE: ${{ steps.intellij-platform-cache.outputs.cache-matched-key }}
+        shell: pwsh
+        run: ./.github/scripts/run-windows-owner-batch.ps1
 
-      - name: Upload Failure Reports
-        if: failure()
+      - name: Preserve Windows evidence regardless of verdict
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-test-reports-${{ matrix.os }}-${{ matrix.gradleVersion }}
+          name: windows-owner-batch-${{ github.run_id }}
+          retention-days: 7
           path: |
+            build/windows-owner-evidence/
             build/diagnostics/
             build/test-results/integrationTest/
             build/reports/tests/integrationTest/

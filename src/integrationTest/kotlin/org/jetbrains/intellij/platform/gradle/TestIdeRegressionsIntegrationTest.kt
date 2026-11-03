@@ -216,7 +216,19 @@ class TestIdeRegressionsIntegrationTest : TestIdeIntegrationTestFixture() {
             expectedServices = listOf(DB_PSI_FACADE),
         )
 
-        smoke(properties)
+        try {
+            smoke(properties)
+        } finally {
+            System.getenv("WINDOWS_DIAGNOSTIC_EVIDENCE")?.let { evidence ->
+                val destination = java.io.File(evidence, System.getenv("WINDOWS_DIAGNOSTIC_PHASE"))
+                listOf("test-results", "reports").forEach { name ->
+                    val source = dir.resolve("build/$name").toFile()
+                    if (source.exists()) {
+                        source.copyRecursively(destination.resolve("nested-$name"), overwrite = true)
+                    }
+                }
+            }
+        }
     }
 
     private val clion2025_3Properties

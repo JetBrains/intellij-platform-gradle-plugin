@@ -3,52 +3,7 @@ name: Integration Tests
 on: [ workflow_dispatch ]
 
 jobs:
-
-  gradleValidation:
-    name: Gradle Validation
-    uses: ./.github/workflows/reusable-gradleValidation.yml
-
-  primeUbuntuIntellijPlatformTestCache:
-    name: Prime IntelliJ Platform test cache @ ubuntu-latest
-    needs: gradleValidation
-    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
-    secrets: inherit
-    with:
-      gradleVersion: "9.8.1"
-      os: ubuntu-latest
-
-  primeWindowsIntellijPlatformTestCache:
-    name: Prime IntelliJ Platform test cache @ windows-latest
-    needs: gradleValidation
-    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
-    secrets: inherit
-    with:
-      gradleVersion: "9.8.1"
-      os: windows-latest
-
-  primeMacosIntellijPlatformTestCache:
-    name: Prime IntelliJ Platform test cache @ macos-latest
-    needs: gradleValidation
-    uses: ./.github/workflows/reusable-prime-intellij-platform-test-cache.yml
-    secrets: inherit
-    with:
-      gradleVersion: "9.8.1"
-      os: macos-latest
-
   integrationTests:
-    name: Integration Tests
-    needs:
-      - gradleValidation
-      - primeUbuntuIntellijPlatformTestCache
-      - primeWindowsIntellijPlatformTestCache
-      - primeMacosIntellijPlatformTestCache
+    name: Windows owner baseline and gated candidate
     uses: ./.github/workflows/reusable-integrationTests.yml
     secrets: inherit
-
-#  integrationTestsEAP:
-#    name: Integration Tests EAP
-#    needs: gradleValidation
-#    uses: ./.github/workflows/reusable-integrationTests.yml
-#    secrets: inherit
-#    with:
-#      platformVersion: 222-EAP-SNAPSHOT

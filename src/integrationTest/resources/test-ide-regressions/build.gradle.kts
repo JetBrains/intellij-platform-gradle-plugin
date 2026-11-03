@@ -135,6 +135,12 @@ tasks {
 }
 
 tasks.withType<Test>().configureEach {
+    providers.environmentVariable("WINDOWS_DIAGNOSTIC_PHASE").orNull?.let { phase ->
+        if (phase == "candidate") {
+            systemProperty("code.provenance.chatter.analytics.enabled", "false")
+        }
+    }
+
     testLogging {
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
     }
