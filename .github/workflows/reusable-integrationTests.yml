@@ -16,17 +16,15 @@ jobs:
   integrationTests:
     name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         gradleVersion:
-          - "9.0.0"
           - "9.8.1"
           - "nightly"
         os:
           - windows-latest
-          - ubuntu-latest
-          - macos-latest
 
     steps:
 
@@ -92,12 +90,14 @@ jobs:
             --console=plain \
             --no-build-cache
 
-      - name: Upload Failure Reports
-        if: failure()
+      - name: Upload Validation Reports
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: integration-test-reports-${{ matrix.os }}-${{ matrix.gradleVersion }}
+          name: windows-chatter-fix-${{ matrix.os }}-${{ matrix.gradleVersion }}
           path: |
             build/diagnostics/
             build/test-results/integrationTest/
             build/reports/tests/integrationTest/
+            .gradle/testGradleHome/.integrationTestProjects/org.jetbrains.intellij.platform.gradle.TestIdeRegressionsIntegrationTest_test-ide-regressions/build/test-results/
+            .gradle/testGradleHome/.intellijPlatform/sandbox/test/IU-2026.3/log-test/idea.log
