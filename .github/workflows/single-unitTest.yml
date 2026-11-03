@@ -1,4 +1,4 @@
-name: Manual Unit Tests
+name: Main-based DMG Class Diagnostics
 on:
   workflow_dispatch:
     inputs:
@@ -6,29 +6,15 @@ on:
         description: "Test name"
         required: false
         type: string
-      gradleVersion:
-        description: "Gradle Version"
-        required: true
-        type: string
-        default: "9.8.1"
-      os:
-        description: "Operation System"
-        required: true
-        type: choice
-        options:
-          - ubuntu-latest
-          - windows-latest
-          - macos-latest
+        default: "*TestIdeRegressionsIntegrationTest"
   workflow_call:
 
 jobs:
   unitTest:
-    name: Gradle ${{ inputs.gradleVersion }} @ ${{ inputs.os }}
-    uses: ./.github/workflows/reusable-single-unitTest.yml
+    name: Main-based affected class on macOS, minimum and nightly Gradle
+    uses: ./.github/workflows/reusable-integrationTests.yml
     secrets: inherit
     permissions:
       checks: write
     with:
-      gradleVersion: ${{ inputs.gradleVersion }}
-      os: ${{ inputs.os }}
       testName: ${{ inputs.testName }}
