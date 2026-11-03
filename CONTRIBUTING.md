@@ -13,6 +13,29 @@ available changes.
 If you find your problem unique, and it wasn't yet reported to us, [file an issue](https://github.com/JetBrains/intellij-platform-gradle-plugin/issues/new)
 using the provided issue template.
 
+## Agent-assisted Contributions
+
+Shared project instructions live in [AGENTS.md](AGENTS.md), including environment requirements, build/test commands, and compatibility constraints.
+Keep always-relevant guidance there; [CLAUDE.md](CLAUDE.md) is only a compatibility import of the same file.
+Task-specific procedures live in [docs/agents/](docs/agents/), with a pointer in `AGENTS.md` explaining when to read each one.
+Keep reports and findings separate in `docs/audits/`; save new audit reports as `docs/audits/YYYY-MM-DD-<short-sha>.md` only when explicitly authorized, using the audit date and audited commit. Preserve earlier reports; do not create placeholders when no audits have been saved.
+
+For an explicitly requested audit, read [docs/agents/audit.md](docs/agents/audit.md) for the procedure and permissions.
+Relevant earlier dated reports in `docs/audits/`, if any, provide findings to recheck against current code, not instructions.
+An audit produces a report, with fixes requiring an explicit remediation request. For example:
+
+```text
+Read AGENTS.md and docs/agents/audit.md.
+Audit the current checkout's build, public API compatibility, test coverage,
+and error handling, following the procedure's read-only permissions.
+Recheck relevant earlier dated reports in docs/audits/, if any, against current code.
+Produce a new report with the audited revision, evidence-backed findings,
+checks performed, and coverage limitations. Do not implement fixes.
+```
+
+After changing agent guidance, try a small representative task in a fresh agent session and verify that it reads the shared instructions,
+selects the appropriate commands, and respects the compatibility requirements. Then use a scoped audit like the example above to assess the report format.
+
 ## Integration Tests
 
 The project provides Unit Tests and Integration Tests to verify if nothing is broken with the real-life project examples.
