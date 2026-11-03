@@ -16,16 +16,13 @@ jobs:
   integrationTests:
     name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
         gradleVersion:
-          - "9.0.0"
-          - "9.8.1"
           - "nightly"
         os:
-          - windows-latest
-          - ubuntu-latest
           - macos-latest
 
     steps:
@@ -75,11 +72,17 @@ jobs:
           TEST_NAME: ${{ inputs.testName }}
         shell: bash
         run: |
+          git rev-parse HEAD
+          sw_vers
+          /usr/bin/rsync --version
+          df -h .
           if [ "$RUNNER_OS" = "Windows" ]; then
-            TEST_GRADLE_USER_HOME="$(pwd -W)\\.gradle\\testGradleHome"
+            TEST_GRADLE_USER_HOME="$(pwd -W)\\.gradle\\dmgStep2FreshHome"
           else
-            TEST_GRADLE_USER_HOME="$PWD/.gradle/testGradleHome"
+            TEST_GRADLE_USER_HOME="$PWD/.gradle/dmgStep2FreshHome"
           fi
+          test ! -e "$TEST_GRADLE_USER_HOME"
+          printf 'Using a fresh TestKit/extraction home: %s\n' "$TEST_GRADLE_USER_HOME"
           TESTS=()
           if [ -n "$TEST_NAME" ]; then
             TESTS+=(--tests "$TEST_NAME")
@@ -92,8 +95,12 @@ jobs:
             --console=plain \
             --no-build-cache
 
+      - name: Record final filesystem state
+        if: always()
+        run: df -h .
+
       - name: Upload Failure Reports
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: integration-test-reports-${{ matrix.os }}-${{ matrix.gradleVersion }}

@@ -216,7 +216,7 @@ fun Test.configureTests() {
     //       showStandardStreams = true
     //   }
     testLogging {
-        events(TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR)
+        events(TestLogEvent.STARTED, TestLogEvent.PASSED, TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR)
         exceptionFormat = TestExceptionFormat.FULL
     }
 
