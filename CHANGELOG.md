@@ -4,6 +4,7 @@
 
 ### Added
 
+- Add `TestFrameworkType.Plugin.Execution` for the upcoming `com.jetbrains.intellij.platform:execution-test-framework` library.
 - Add JSON reports for project structure, distribution contents, dependency resolution, test workflows, and IDE compatibility: `intellijPlatformProjectGraph`, `intellijPlatformDistribution`, `intellijPlatformDependencyGraph`, `intellijPlatformTestMatrix`, and `intellijPlatformCompatibilityMatrix`.
 - Add `intellijPlatformInfo`, `intellijPlatformDoctor`, `intellijPlatformDiscover`, and `intellijPlatformSdk` tasks with versioned JSON reports for project context, actionable configuration findings, filtered catalog discovery, and SDK file/ownership maps. See [CLI reports](./CLI_REPORTS.md).
 - Add `DumpBundledPluginsTask` and `DumpBundledModulesTask` to support dumping bundled plugins and modules for Plugin DevKit plugin purposes
