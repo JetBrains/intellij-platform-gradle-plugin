@@ -113,6 +113,8 @@ class GradlePropertiesTest {
             "com.intellij.ja",
             "com.intellij.ko",
             "com.intellij.zh",
+            "com.intellij.air",
+            "com.intellij.code.provenance",
             "org.jetbrains.plugins.vue",
             "org.jetbrains.plugins.clion.radler",
         )
