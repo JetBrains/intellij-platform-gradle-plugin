@@ -296,3 +296,47 @@ changelog {
     groups.empty()
     repositoryUrl = "https://github.com/JetBrains/intellij-platform-gradle-plugin"
 }
+
+// Temporary diagnostic wiring for the isolated macOS DMG baseline branch.
+tasks.register("dmgCiEnvironment") {
+    doLast {
+        logger.lifecycle("[DMG-CI] OS: ${System.getProperty("os.name")}; architecture: ${System.getProperty("os.arch")}")
+        logger.lifecycle("[DMG-CI] Launcher Java: ${System.getProperty("java.version")}")
+        if (System.getProperty("os.name").startsWith("Mac")) {
+            listOf(
+                listOf("/usr/bin/sw_vers"),
+                listOf("/bin/sh", "-c", "command -v rsync"),
+                listOf("rsync", "--version"),
+                listOf("/usr/sbin/sysctl", "hw.memsize", "hw.ncpu"),
+                listOf("/usr/bin/vm_stat"),
+                listOf("/bin/df", "-h", "."),
+                listOf("/bin/sh", "-c", "ulimit -a"),
+            ).forEach { command ->
+                val process = ProcessBuilder(command).redirectErrorStream(true).start()
+                val output = process.inputStream.bufferedReader().use { it.readText() }
+                logger.lifecycle("[DMG-CI] ${command.joinToString(" ")}\n$output")
+                logger.lifecycle("[DMG-CI] Environment command exit code: ${process.waitFor()}")
+            }
+        }
+    }
+}
+
+tasks.named<Test>("integrationTest") {
+    dependsOn("dmgCiEnvironment")
+    filter {
+        includeTestsMatching("org.jetbrains.intellij.platform.gradle.TestIdeRegressionsIntegrationTest")
+    }
+    testLogging {
+        events(
+            TestLogEvent.STARTED,
+            TestLogEvent.PASSED,
+            TestLogEvent.FAILED,
+            TestLogEvent.SKIPPED,
+            TestLogEvent.STANDARD_ERROR,
+        )
+    }
+}
+
+tasks.named("test") {
+    dependsOn("integrationTest")
+}
