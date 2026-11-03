@@ -66,6 +66,7 @@ sealed class TestFrameworkType(vararg val coordinates: Coordinates) {
         object CLion : TestFrameworkType(Coordinates("com.jetbrains.intellij.clion", "clion-merged-test-framework"))
         object CSS : TestFrameworkType(Coordinates("com.jetbrains.intellij.css", "css-test-framework"))
         object Debugger : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "debugger-test-framework"))
+        object Execution : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "execution-test-framework"))
         object ExternalSystem : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "external-system-test-framework"))
         object Go : TestFrameworkType(Coordinates("com.jetbrains.intellij.go", "go-test-framework"))
         object IJent : TestFrameworkType(Coordinates("com.jetbrains.intellij.platform", "ijent-test-framework"))
