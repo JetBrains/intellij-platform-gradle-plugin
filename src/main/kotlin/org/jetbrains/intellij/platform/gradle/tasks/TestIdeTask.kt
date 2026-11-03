@@ -138,6 +138,9 @@ abstract class TestIdeTask : Test(), TestableAware, IntelliJPlatformVersionAware
             systemProperty("intellij.console.log.level", "warning")
             systemProperty("intellij.testFramework.rethrow.logged.errors", "true")
             systemProperty("rider.tests.plugin.home.path", project.rootProjectPath.safePathString)
+            // The bundled Code Provenance plugin runs its native `chatter` observer in the test project directory, which is
+            // the per-test temporary directory. On Windows, the still-running process prevents deleting it in the test teardown.
+            systemProperty("code.provenance.chatter.analytics.enabled", "false")
             // systemProperty("idea.use.core.classloader.for", pluginIds.joinToString(","))
 
             val sourceSets = project.extensions.getByType<SourceSetContainer>()

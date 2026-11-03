@@ -37,6 +37,7 @@
 
 ### Fixed
 
+- Disable the native `chatter` observer of the bundled Code Provenance plugin (IntelliJ Platform 2026.3+) in tests by setting `code.provenance.chatter.analytics.enabled=false` for `test` and `testIde` tasks. The observer ran in the light test project's directory, which is the per-test temporary directory, so on Windows the test teardown failed with "The process cannot access the file because it is being used by another process". The plugin stays loaded; set the system property explicitly to override.
 - Reject failed DMG copies, remove partial output, and preserve the original error while unmounting the image.
 - Shorten archive transform output paths so the Windows Java launcher can locate its JVM library in Gradle nightly caches.
 - Expose the actual Gradle user home to IDE test processes so VFS access checks allow dependency caches outside the user's home directory, including custom TestKit caches.

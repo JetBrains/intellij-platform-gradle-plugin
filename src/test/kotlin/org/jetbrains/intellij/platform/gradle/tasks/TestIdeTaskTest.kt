@@ -83,6 +83,35 @@ class TestIdeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `test task disables the Code Provenance chatter observer unless configured otherwise`() {
+        buildFile write //language=kotlin
+                """
+                tasks.register("printChatterAnalytics") {
+                    doLast {
+                        val value = tasks.named<org.gradle.api.tasks.testing.Test>("test").get()
+                            .systemProperties["code.provenance.chatter.analytics.enabled"]
+                        println("CHATTER_ANALYTICS=${'$'}value")
+                    }
+                }
+                """.trimIndent()
+
+        build("printChatterAnalytics") {
+            assertContains("CHATTER_ANALYTICS=false", output)
+        }
+
+        buildFile write //language=kotlin
+                """
+                tasks.named<org.gradle.api.tasks.testing.Test>("test") {
+                    systemProperty("code.provenance.chatter.analytics.enabled", "true")
+                }
+                """.trimIndent()
+
+        build("printChatterAnalytics") {
+            assertContains("CHATTER_ANALYTICS=true", output)
+        }
+    }
+
+    @Test
     fun `bundled plugins are added to the classpath`() {
         buildFile write //language=kotlin
                 """
