@@ -6,8 +6,11 @@ import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.IntelliJPluginTestBase
+import org.jetbrains.intellij.platform.gradle.buildFile
+import org.jetbrains.intellij.platform.gradle.write
 import kotlin.io.path.createDirectories
 import kotlin.io.path.exists
+import kotlin.io.path.invariantSeparatorsPathString
 import kotlin.io.path.readLines
 import kotlin.io.path.writeText
 import kotlin.test.Test
@@ -19,6 +22,36 @@ class DumpProductsReleasesTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `dump product releases`() {
+        assertDumpProductsReleases()
+    }
+
+    @Test
+    fun `dump product releases with IDE caching does not resolve dependencies`() {
+        buildFile write //language=kotlin
+                """
+                configurations.configureEach {
+                    incoming.beforeResolve {
+                        error("Product release listing must not resolve dependencies: " + name)
+                    }
+                }
+                intellijPlatform.pluginVerification.ides.select {
+                    types = listOf(IntelliJPlatformType.IntellijIdeaCommunity)
+                    sinceBuild = "233"
+                    untilBuild = "233.*"
+                }
+                configurations["intellijPluginVerifierIdes"].allDependencies.forEach { }
+                """.trimIndent()
+
+        assertDumpProductsReleases(
+            mapOf(
+                GradleProperties.IntellijPlatformIdesCacheEnabled.toString() to true,
+                GradleProperties.IntellijPlatformIdesCache.toString() to
+                        dir.resolve("ides-cache").invariantSeparatorsPathString,
+            ),
+        )
+    }
+
+    private fun assertDumpProductsReleases(projectProperties: Map<String, Any> = emptyMap()) {
         val listingsDirectory = dir.resolve("product-releases").createDirectories()
         val fallbackListing = resourceUrl("products-releases/jetbrains-product-releases-IC.json").readText()
 
@@ -40,7 +73,7 @@ class DumpProductsReleasesTaskTest : IntelliJPluginTestBase() {
                         listingsDirectory.resolve("IC.json").toUri().toString().replace("IC.json", "{type}.json"),
                 GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to
                         resourceUrl("products-releases/android-studio-releases-list.json").toString(),
-            ),
+            ) + projectProperties,
         )
 
         val outputFile = dir.resolve("build/tmp/${Tasks.DUMP_PRODUCTS_RELEASES}/product-releases.txt")

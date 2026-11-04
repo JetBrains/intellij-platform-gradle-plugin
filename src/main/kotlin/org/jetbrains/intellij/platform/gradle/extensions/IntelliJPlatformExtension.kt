@@ -8,6 +8,7 @@ import org.gradle.api.Action
 import org.gradle.api.Incubating
 import org.gradle.api.Project
 import org.gradle.api.artifacts.ConfigurationContainer
+import org.gradle.api.artifacts.Dependency
 import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.file.Directory
 import org.gradle.api.file.DirectoryProperty
@@ -1098,16 +1099,13 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                 configurationsProvider: Provider<List<IntelliJPlatformDependencyConfiguration>>,
                 dependenciesEnabled: Provider<Boolean> = dependenciesHelper.provider { true },
             ) {
-                dependenciesHelper.addIntelliJPlatformCacheableDependencies(
+                dependenciesHelper.addPluginVerifierIdeDependencies(
                     configurationsProvider = configurationsProvider,
-                    dependencyConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                    dependencyArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
-                    localArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
-                    requiredConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
-                    registerRequestedPlatform = false,
                     dependenciesEnabled = dependenciesEnabled,
                 )
             }
+
+            internal fun resolve(dependency: Dependency) = dependenciesHelper.resolvePluginVerifierIde(dependency)
 
             private fun createInstallerDependencies(
                 notationsProvider: Provider<List<String>>,

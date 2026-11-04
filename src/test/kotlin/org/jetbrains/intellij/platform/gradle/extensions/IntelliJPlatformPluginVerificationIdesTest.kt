@@ -106,6 +106,62 @@ class IntelliJPlatformPluginVerificationIdesTest : IntelliJPlatformTestBase() {
     }
 
     @Test
+    fun `verification IDE files use the shared cache and support configuration cache reuse`() {
+        val cacheDirectory = dir.resolve("ides-cache")
+        val cachedIde = cacheDirectory.resolve("IC-2023.3.8")
+        val listingsFile = dir.resolve("empty-listings.json")
+        listingsFile write "[]"
+        cachedIde.resolve("product-info.json") write //language=json
+                """
+                {
+                    "name": "IntelliJ IDEA Community Edition",
+                    "version": "2023.3.8",
+                    "buildNumber": "233.15619.7",
+                    "productCode": "IC"
+                }
+                """.trimIndent()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    caching.ides {
+                        enabled = true
+                        path = file("${cacheDirectory.invariantSeparatorsPathString}")
+                    }
+                    pluginVerification.ides.create("IC", "2023.3.8")
+                }
+
+                configurations.configureEach {
+                    incoming.beforeResolve {
+                        error("Cached verification IDE must not resolve archives: " + name)
+                    }
+                }
+
+                val verifierIdeFiles = tasks.named<org.jetbrains.intellij.platform.gradle.tasks.VerifyPluginTask>("verifyPlugin").get().ides
+                tasks.register("printVerifierIdeFiles") {
+                    inputs.files(verifierIdeFiles)
+                    doLast {
+                        println("VERIFIER_IDE_FILES=" + inputs.files.files.map { it.invariantSeparatorsPath })
+                    }
+                }
+                """.trimIndent()
+
+        repeat(2) { iteration ->
+            buildWithConfigurationCache(
+                "printVerifierIdeFiles",
+                projectProperties = mapOf(
+                    GradleProperties.ProductsReleasesCdnBuildsUrl.toString() to listingsFile.toUri().toString(),
+                ),
+            ) {
+                assertContains("VERIFIER_IDE_FILES=[${cachedIde.invariantSeparatorsPathString}]", output)
+                if (iteration == 1) {
+                    assertConfigurationCacheReused()
+                }
+            }
+        }
+    }
+
+    @Test
     fun `current ide skips automatic recommendations`() {
         rejectAutomaticRecommendations()
 

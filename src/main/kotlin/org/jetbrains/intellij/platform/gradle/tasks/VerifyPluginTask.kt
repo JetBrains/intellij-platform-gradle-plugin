@@ -18,7 +18,6 @@ import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.get
 import org.gradle.kotlin.dsl.named
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
-import org.jetbrains.intellij.platform.gradle.Constants.Configurations.Attributes
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
 import org.jetbrains.intellij.platform.gradle.GradleProperties
@@ -826,11 +825,7 @@ abstract class VerifyPluginTask : JavaExec(), RuntimeAware, PluginVerifierAware,
                                 val ideList = joinToString(", ") { "${it.group}:${it.name}:${it.version}" }
                                 log.warn("The ${Tasks.VERIFY_PLUGIN} task is about to resolve $size IDEs: $ideList")
                             }
-                            flatMap {
-                                project.configurations.detachedConfiguration(it).apply {
-                                    attributes { attribute(Attributes.extracted, true) }
-                                }.resolve()
-                            }
+                            flatMap { pluginVerificationProvider.get().ides.resolve(it) }
                         }
                     },
                 )

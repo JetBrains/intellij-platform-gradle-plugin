@@ -171,6 +171,9 @@ class IntelliJPlatformDependenciesHelper(
      * A thread-safe map that holds the paths associated with requested IntelliJ platform configurations.
      */
     private val requestedIntelliJPlatformPaths = ConcurrentHashMap<String, Provider<Path>>()
+    private val pluginVerifierIdeRequests = Collections.synchronizedMap(
+        IdentityHashMap<Dependency, RequestedIntelliJPlatform>(),
+    )
 
     /** Records explicit DSL objects before dependency providers normalize versions or resolve a prerequisite IDE. */
     internal fun recordDeclaredIntelliJPlatforms(
@@ -423,6 +426,58 @@ class IntelliJPlatformDependenciesHelper(
                     .map { createIntelliJPlatformDependency(it) }
             }.cached()
         )
+    }
+
+    internal fun addPluginVerifierIdeDependencies(
+        configurationsProvider: Provider<List<IntelliJPlatformDependencyConfiguration>>,
+        dependenciesEnabled: Provider<Boolean>,
+    ) {
+        val configurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY
+        markIntelliJPlatformDependencyExplicit(configurationName)
+
+        configurations[configurationName].dependencies.addAllLater(
+            dependenciesEnabled.flatMap { enabled ->
+                when {
+                    enabled -> configurationsProvider
+                    else -> provider { emptyList() }
+                }
+            }.map { configurations ->
+                configurations.map { configuration ->
+                    val request = requestedIntelliJPlatforms.request(configuration, configurationName)
+                        .get()
+                        .resolveLatestVersion()
+                    val coordinates = when {
+                        request.productMode == ProductMode.FRONTEND -> IntelliJPlatformType.JetBrainsClient.installer
+                        request.useInstaller -> request.type.installer
+                        else -> request.type.maven
+                    }
+                    requireNotNull(coordinates) { "Specified type '${request.type}' has no artifact coordinates available." }
+
+                    dependencyFactory.create(coordinates.groupId, coordinates.artifactId, request.version).also { dependency ->
+                        pluginVerifierIdeRequests[dependency] = request
+                    }
+                }
+            }.cached(),
+        )
+    }
+
+    internal fun resolvePluginVerifierIde(dependency: Dependency): Set<File> {
+        val request = pluginVerifierIdeRequests[dependency]
+        if (request != null && (request.useCache || request.requiresManagedLocalPath(extensionProvider.get().splitMode.get()))) {
+            val localPath = cacheResolver.resolve(Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE) {
+                type = request.type
+                version = request.version
+                productMode = request.productMode
+                useInstaller = request.useInstaller
+                useCache = request.useCache
+            }
+            return setOf(resolveArtifactPath(localPath).toFile())
+        }
+
+        val archiveDependency = request?.let(::createIntelliJPlatformDependency) ?: dependency
+        return configurations.detachedConfiguration(archiveDependency).apply {
+            attributes { attribute(Configurations.Attributes.extracted, true) }
+        }.resolve()
     }
 
     /**
