@@ -575,15 +575,15 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
             )
         }
 
-        // Test with Rider to verify intellij.rider dependency
+        // Test with Rider's default non-installer distribution
         build(
             DEPENDENCIES,
             projectProperties = properties + mapOf("intellijPlatform.type" to IntelliJPlatformType.Rider),
         ) {
             assertContains(
                 """
-                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
-                \--- bundledModule:intellij-platform-test-runtime:RD-243.21565.191
+                intellijPlatformDependencyArchive - IntelliJ Platform dependency archive
+                \--- com.jetbrains.intellij.rider:riderRD:2024.3
                 """.trimIndent(),
                 output,
             )
@@ -591,7 +591,7 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
             assertContains(
                 """
                 intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
-                \--- bundledModule:intellij-platform-test-runtime:RD-243.21565.191
+                \--- bundledModule:intellij-platform-test-runtime:RD-243.21565.192
                 """.trimIndent(),
                 output,
             )
@@ -604,9 +604,10 @@ class DependenciesValidationIntegrationTest : IntelliJPlatformIntegrationTestBas
                 """.trimIndent()
 
         build(DEPENDENCIES, projectProperties = properties) {
-            assertNotContains(
+            assertContains(
                 """
-                +--- bundledPlugin:com.intellij:IC-243.21565.193
+                intellijPlatformTestRuntimeFixClasspath - IntelliJ Platform Test Runtime Fix Classpath
+                No dependencies
                 """.trimIndent(),
                 output,
             )
