@@ -1069,11 +1069,12 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     this.type = type
                     this.version = version
                 },
-            ) = create(provider, isExplicit = true, configure)
+            ) = create(provider, isExplicit = true, configure = configure)
 
             private fun create(
                 provider: Provider<List<String>>,
                 isExplicit: Boolean,
+                dependenciesEnabled: Provider<Boolean> = dependenciesHelper.provider { true },
                 configure: IntelliJPlatformDependencyConfiguration.(String) -> Unit,
             ) {
                 if (isExplicit) {
@@ -1084,15 +1085,19 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                         createConfiguration { configure(item) }
                     }
                 }
-                createDependencies(configurationsProvider)
+                createDependencies(configurationsProvider, dependenciesEnabled)
             }
 
             /**
              * Creates and configures dependencies for IntelliJ platform components.
              *
              * @param configurationsProvider A provider that supplies a list of IntelliJ platform dependency configurations to be used for setting up the required dependencies.
+             * @param dependenciesEnabled Whether generated platform dependencies are needed for this configuration.
              */
-            private fun createDependencies(configurationsProvider: Provider<List<IntelliJPlatformDependencyConfiguration>>) {
+            private fun createDependencies(
+                configurationsProvider: Provider<List<IntelliJPlatformDependencyConfiguration>>,
+                dependenciesEnabled: Provider<Boolean> = dependenciesHelper.provider { true },
+            ) {
                 dependenciesHelper.addIntelliJPlatformCacheableDependencies(
                     configurationsProvider = configurationsProvider,
                     dependencyConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_DEPENDENCY,
@@ -1100,13 +1105,15 @@ abstract class IntelliJPlatformExtension @Inject constructor(
                     localArchivesConfigurationName = Configurations.INTELLIJ_PLUGIN_VERIFIER_IDES_LOCAL_INSTANCE,
                     requiredConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
                     registerRequestedPlatform = false,
+                    dependenciesEnabled = dependenciesEnabled,
                 )
             }
 
             private fun createInstallerDependencies(
                 notationsProvider: Provider<List<String>>,
                 isExplicit: Boolean = true,
-            ) = create(notationsProvider, isExplicit) { notation ->
+                dependenciesEnabled: Provider<Boolean> = dependenciesHelper.provider { true },
+            ) = create(notationsProvider, isExplicit, dependenciesEnabled) { notation ->
                 val (type, version) = notation.parseIdeNotation()
                 this.type = type
                 this.version = version
@@ -1114,18 +1121,16 @@ abstract class IntelliJPlatformExtension @Inject constructor(
             }
 
             private fun defaultRecommended() {
-                val notationsProvider = providers[GradleProperties.VerifyPluginDefaultRecommendedIdes]
-                    .flatMap { enabled ->
-                        when {
-                            enabled -> productReleaseNotations()
-                            else -> dependenciesHelper.provider { emptyList() }
-                        }
-                    }
-                    .zip(userConfigured) { notations, configured ->
-                        notations.takeUnless { configured }.orEmpty()
+                val dependenciesEnabled = providers[GradleProperties.VerifyPluginDefaultRecommendedIdes]
+                    .zip(userConfigured) { enabled, configured ->
+                        enabled && !configured
                     }
 
-                createInstallerDependencies(notationsProvider, isExplicit = false)
+                createInstallerDependencies(
+                    notationsProvider = productReleaseNotations(),
+                    isExplicit = false,
+                    dependenciesEnabled = dependenciesEnabled,
+                )
             }
 
             /**
