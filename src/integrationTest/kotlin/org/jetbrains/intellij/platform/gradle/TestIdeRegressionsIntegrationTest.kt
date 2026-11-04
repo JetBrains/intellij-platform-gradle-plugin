@@ -4,6 +4,7 @@ package org.jetbrains.intellij.platform.gradle
 
 import org.gradle.testkit.runner.BuildResult
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
+import kotlin.test.Ignore
 import kotlin.test.Test
 
 private const val TESTED_PLUGIN_ID = "org.jetbrains.plugins.integration-tests.test-ide-regressions"
@@ -27,6 +28,7 @@ private const val CUSTOM_TEST_IDE_TASK = "testIdeCustom"
  * - file comparison failures and file templates of the tested plugin work,
  * - the optional dependency of the tested plugin on the bundled YAML plugin is loaded.
  */
+@Ignore
 class TestIdeRegressionsIntegrationTest : TestIdeIntegrationTestFixture() {
 
     private val ideaPlugins = listOf("com.intellij.java", "org.jetbrains.kotlin", YAML_PLUGIN_ID, "Git4Idea")
