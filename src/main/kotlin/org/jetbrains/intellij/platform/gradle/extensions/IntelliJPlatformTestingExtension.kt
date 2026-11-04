@@ -62,6 +62,7 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                 val plugins = IntelliJPlatformPluginsExtension.register(dependenciesHelper, project.objects, target = this)
 
                 val customIntellijPlatformConfigurationName = Configurations.INTELLIJ_PLATFORM_DEPENDENCY.withSuffix
+                val hasExplicitCustomRequest = project.provider { type.isPresent || version.isPresent || useInstaller.isPresent }
 
                 val customIntelliJPlatformLocalConfiguration = project.configurations.create(
                     name = Configurations.INTELLIJ_PLATFORM_LOCAL.withSuffix,
@@ -87,6 +88,9 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     dependencyConfigurationName = customIntellijPlatformConfigurationName,
                     dependencyArchivesConfigurationName = customIntelliJPlatformDependencyConfiguration.name,
                     localArchivesConfigurationName = customIntelliJPlatformLocalConfiguration.name,
+                    dependenciesEnabled = project.provider {
+                        !localPath.isPresent && (hasExplicitCustomRequest.get() || baseIntelliJPlatformLocalConfiguration.dependencies.isEmpty())
+                    },
                 )
 
                 val customIntelliJPlatformConfiguration = project.configurations.create(
@@ -100,15 +104,14 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
                     defaultDependencies {
                         addAllLater(project.provider {
                             val customLocalDependencies = localDependenciesFrom(customIntelliJPlatformLocalConfiguration)
-                            val hasExplicitCustomRequest = type.isPresent || version.isPresent || useInstaller.isPresent
                             val baseLocalDependencies = when {
-                                customLocalDependencies.isNotEmpty() || hasExplicitCustomRequest -> emptyList()
+                                customLocalDependencies.isNotEmpty() || hasExplicitCustomRequest.get() -> emptyList()
                                 else -> localDependenciesFrom(baseIntelliJPlatformLocalConfiguration)
                             }
 
                             when {
                                 customLocalDependencies.isNotEmpty() -> customLocalDependencies
-                                hasExplicitCustomRequest -> customIntelliJPlatformDependencyConfiguration.dependencies.toList()
+                                hasExplicitCustomRequest.get() -> customIntelliJPlatformDependencyConfiguration.dependencies.toList()
                                 baseLocalDependencies.isNotEmpty() -> baseLocalDependencies
                                 else -> customIntelliJPlatformDependencyConfiguration.dependencies.toList()
                             }.takeLast(1)

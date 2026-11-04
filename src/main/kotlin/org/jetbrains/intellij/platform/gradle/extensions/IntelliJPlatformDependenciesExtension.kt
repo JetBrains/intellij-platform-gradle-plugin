@@ -83,12 +83,14 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
      * @param dependencyConfigurationName The name of the configuration that holds the requested IntelliJ Platform.
      * @param dependencyArchivesConfigurationName The name of the configuration that holds the IntelliJ Platform dependencies.
      * @param localArchivesConfigurationName The name of the configuration that holds the local IntelliJ Platform archives.
+     * @param dependenciesEnabled Whether generated platform dependencies are needed for this configuration.
      */
     internal fun create(
         configurations: List<IntelliJPlatformDependencyConfiguration>,
         dependencyConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
         dependencyArchivesConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY_ARCHIVE,
         localArchivesConfigurationName: String = Configurations.INTELLIJ_PLATFORM_LOCAL,
+        dependenciesEnabled: Provider<Boolean> = dependenciesHelper.provider { true },
     ) {
         dependenciesHelper.recordDeclaredIntelliJPlatforms(configurations, dependencyConfigurationName)
         dependenciesHelper.addIntelliJPlatformCacheableDependencies(
@@ -96,6 +98,7 @@ abstract class IntelliJPlatformDependenciesExtension @Inject constructor(
             dependencyConfigurationName = dependencyConfigurationName,
             dependencyArchivesConfigurationName = dependencyArchivesConfigurationName,
             localArchivesConfigurationName = localArchivesConfigurationName,
+            dependenciesEnabled = dependenciesEnabled,
         )
     }
 

@@ -47,6 +47,26 @@ class ProductReleaseCatalogEntryTest {
     }
 
     @Test
+    fun `Android Studio releases match prefixed and unprefixed build numbers`() {
+        val buildNumber = "261.26050.22.2614.14323296"
+        val release = ProductRelease(
+            name = "Android Studio",
+            channel = ProductRelease.Channel.CANARY,
+            type = IntelliJPlatformType.AndroidStudio,
+            version = "2026.1.4.7".toVersion(),
+            build = "AI-$buildNumber".toVersion(),
+        )
+
+        listOf(release, release.copy(build = buildNumber.toVersion())).forEach { entry ->
+            assertTrue(entry.matchesVersion(buildNumber.toVersion()))
+            assertTrue(entry.matchesVersion("AI-$buildNumber".toVersion()))
+            assertTrue(entry.matchesVersion("2026.1.4.7".toVersion()))
+            assertFalse(entry.matchesVersion("261.26050.22.2614.14323297".toVersion()))
+            assertFalse(entry.matchesVersion("IC-$buildNumber".toVersion()))
+        }
+    }
+
+    @Test
     fun `resolve Android Studio artifact with named release classifier`() {
         val (link, artifact) = currentAndroidStudioNamedReleaseArtifact()
 

@@ -7,6 +7,7 @@ import org.gradle.internal.os.OperatingSystem
 import org.jetbrains.intellij.platform.gradle.Constants
 import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
 import org.jetbrains.intellij.platform.gradle.utils.Version
+import org.jetbrains.intellij.platform.gradle.utils.toVersion
 
 data class ProductRelease(
     val name: String,
@@ -29,9 +30,12 @@ data class ProductRelease(
     val notation
         get() = "$type-$notationVersion"
 
-    internal fun matchesVersion(version: Version) = version == when {
-        version.isBuildNumber() -> build
-        else -> notationVersion
+    internal fun matchesVersion(version: Version) = when {
+        version.isBuildNumber() -> {
+            val prefix = "${type.code}-"
+            version.toString().removePrefix(prefix).toVersion() == build.toString().removePrefix(prefix).toVersion()
+        }
+        else -> version == notationVersion
     }
 
     enum class Channel {

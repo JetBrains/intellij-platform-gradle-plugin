@@ -350,6 +350,7 @@ class IntelliJPlatformDependenciesHelper(
      * @param dependencyArchivesConfigurationName The name of the configuration that holds the IntelliJ Platform dependencies.
      * @param localArchivesConfigurationName The name of the configuration that holds the local IntelliJ Platform archives.
      * @param requiredConfigurationName The name of the configuration that holds the required IntelliJ Platform to be resolved before creating a new dependency.
+     * @param dependenciesEnabled Whether generated platform dependencies are needed for this configuration.
      * @return A list of IntelliJ Platform requests.
      */
     internal fun addIntelliJPlatformCacheableDependencies(
@@ -359,6 +360,7 @@ class IntelliJPlatformDependenciesHelper(
         localArchivesConfigurationName: String,
         requiredConfigurationName: String? = null,
         registerRequestedPlatform: Boolean = true,
+        dependenciesEnabled: Provider<Boolean> = provider { true },
     ) {
         markIntelliJPlatformDependencyExplicit(dependencyConfigurationName)
 
@@ -387,8 +389,15 @@ class IntelliJPlatformDependenciesHelper(
             )
         }
 
+        val dependencyRequestsProvider = dependenciesEnabled.flatMap { enabled ->
+            when {
+                enabled -> requestsProvider
+                else -> provider { emptyList() }
+            }
+        }.cached()
+
         configurations[localArchivesConfigurationName].dependencies.addAllLater(
-            requestsProvider.zip(splitModeProvider) { requests, splitMode ->
+            dependencyRequestsProvider.zip(splitModeProvider) { requests, splitMode ->
                 requests
                     .filter { it.useCache || it.requiresManagedLocalPath(splitMode) }
                     .map { request ->
@@ -408,7 +417,7 @@ class IntelliJPlatformDependenciesHelper(
         )
 
         configurations[dependencyArchivesConfigurationName].dependencies.addAllLater(
-            requestsProvider.zip(splitModeProvider) { requests, splitMode ->
+            dependencyRequestsProvider.zip(splitModeProvider) { requests, splitMode ->
                 requests
                     .filterNot { it.useCache || it.requiresManagedLocalPath(splitMode) }
                     .map { createIntelliJPlatformDependency(it) }

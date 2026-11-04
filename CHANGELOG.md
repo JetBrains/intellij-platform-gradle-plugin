@@ -38,6 +38,7 @@
 
 ### Fixed
 
+- Avoid resolving remote IDE archives for custom testing tasks using a local IntelliJ Platform, and match Android Studio release build numbers with or without the `AI-` prefix [IJPL-259189](https://youtrack.jetbrains.com/issue/IJPL-259189).
 - Disable the native `chatter` observer of the bundled Code Provenance plugin (IntelliJ Platform 2026.3+) in tests by setting `code.provenance.chatter.analytics.enabled=false` for `test` and `testIde` tasks. The observer ran in the light test project's directory, which is the per-test temporary directory, so on Windows the test teardown failed with "The process cannot access the file because it is being used by another process". The plugin stays loaded; set the system property explicitly to override.
 - Default Rider plugin dependencies to non-installer distributions while respecting explicit `useInstaller` settings JetBrains/intellij-platform-gradle-plugin#1852
 - Reject failed DMG copies, remove partial output, and preserve the original error while unmounting the image.

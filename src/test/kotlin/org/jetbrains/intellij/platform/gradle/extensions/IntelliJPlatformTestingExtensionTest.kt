@@ -190,8 +190,8 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 """
                 {
                     "name": "Android Studio",
-                    "version": "2024.3.2.14",
-                    "buildNumber": "243.25659.59",
+                    "version": "2023.3.1",
+                    "buildNumber": "233.14475.28.2331.11543046",
                     "productCode": "AI"
                 }
                 """.trimIndent()
@@ -232,9 +232,27 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build("dependencies", "--configuration", "intellijPlatformDependency_customTest") {
-            assertContains("localIde:AI:AI-243.25659.59", output)
+        val properties = mapOf(
+            GradleProperties.ProductsReleasesAndroidStudioUrl.toString() to
+                    requireNotNull(resourceUrl("products-releases/android-studio-releases-list.json")).toString(),
+        )
+
+        build("dependencies", projectProperties = properties) {
+            assertContains("localIde:AI:AI-233.14475.28.2331.11543046", output)
             assertNotContains("com.google.android.studio:android-studio", output)
+        }
+
+        repeat(2) { iteration ->
+            buildWithConfigurationCache(
+                "dependencies",
+                projectProperties = properties,
+            ) {
+                assertContains("localIde:AI:AI-233.14475.28.2331.11543046", output)
+                assertNotContains("com.google.android.studio:android-studio", output)
+                if (iteration == 1) {
+                    assertContains("Reusing configuration cache.", output)
+                }
+            }
         }
     }
 
@@ -365,6 +383,10 @@ class IntelliJPlatformTestingExtensionTest : IntelliJPluginTestBase() {
                     }
                 }
                 """.trimIndent()
+
+        build("dependencies", "--configuration=intellijPlatformDependencyArchive_customTest") {
+            assertContains("No dependencies", output)
+        }
 
         build("dependencies", "--configuration", "intellijPlatformTestDependencies_customTest") {
             // The test-framework dependency must resolve against the custom task's own target platform (251), not the base (241).
