@@ -10,18 +10,18 @@ The IntelliJ Platform Gradle Plugin is a Kotlin Gradle plugin for building, test
 
 ## Development environment
 
-Run commands from the repository root using `./gradlew` (`gradlew.bat` on Windows). Use JDK 21 to match CI; compilation uses a Java 17 toolchain and Kotlin 2.2 language/API settings in `build.gradle.kts`. The Foojay resolver in `settings.gradle.kts` can provision the toolchain. The wrapper currently uses Gradle 9.8.1.
+Run commands from the repository root using `./gradlew` (`gradlew.bat` on Windows). Use JDK 21 to match CI; compilation uses a Java 17 toolchain and Kotlin 2.2 language/API settings in `build.gradle.kts`. The Foojay resolver in `settings.gradle.kts` can provision the toolchain. The wrapper currently uses Gradle 9.8.2.
 
 Initial setup and tests need network access for Gradle, toolchains, dependencies, and IDE distributions. TestKit suites can require substantial disk space and memory; the build configures an 8 GB Gradle heap and 4 GB test-worker heaps.
 
 ## Gradle sources
 
-When discussing issues, designing features, or changing Gradle integration, inspect the sources for the version pinned in `gradle/wrapper/gradle-wrapper.properties` (currently 9.8.1). This checkout's wrapper version is the development reference, rather than the minimum supported version or a floating latest Gradle release; fetching 9.0.0 sources is unnecessary.
+When discussing issues, designing features, or changing Gradle integration, inspect the sources for the version pinned in `gradle/wrapper/gradle-wrapper.properties` (currently 9.8.2). This checkout's wrapper version is the development reference, rather than the minimum supported version or a floating latest Gradle release; fetching 9.0.0 sources is unnecessary.
 
-- Reuse the wrapper's `-all.zip` distribution: it includes binaries, documentation, and sources. Sources are under `GRADLE_USER_HOME` (default `~/.gradle`) at `wrapper/dists/gradle-<version>-all/<hash>/gradle-<version>/src/`. For the current wrapper, the default path is `~/.gradle/wrapper/dists/gradle-9.8.1-all/<hash>/gradle-9.8.1/src/`. Discover the hash directory locally rather than hard-coding it.
+- Reuse the wrapper's `-all.zip` distribution: it includes binaries, documentation, and sources. Sources are under `GRADLE_USER_HOME` (default `~/.gradle`) at `wrapper/dists/gradle-<version>-all/<hash>/gradle-<version>/src/`. For the current wrapper, the default path is `~/.gradle/wrapper/dists/gradle-9.8.2-all/<hash>/gradle-9.8.2/src/`. Discover the hash directory locally rather than hard-coding it.
 - Search that source tree for the relevant types and follow their implementation and lifecycle. The `-all` layout is `src/<module>/<package>/...`, for example `src/core-api/org/gradle/api/Project.java`; Git repository and `-src.zip` paths instead retain directories such as `subprojects/<module>/src/main/java/` or `platforms/<area>/<module>/src/main/java/`.
-- For an uncached, one-off lookup, use the matching version's [Javadoc](https://docs.gradle.org/9.8.1/javadoc/) or [Gradle Git tag](https://github.com/gradle/gradle/tree/v9.8.1). For repeated local searches, `./gradlew --version` provisions the configured `-all` distribution if absent, without changing the wrapper; run it only when execution and downloads are authorized. Respect the audit procedure's read-only permissions.
-- Treat documented public APIs as the supported contract and implementation sources as supporting evidence, not permission to depend on internal APIs (`.internal.` packages or `Internal` types). Check the [API lifecycle](https://docs.gradle.org/9.8.1/userguide/feature_lifecycle.html) for incubating and deprecated APIs. Cite the inspected version and symbol; when the wrapper changes, use matching sources, documentation, and tags instead of `/current/` links.
+- For an uncached, one-off lookup, use the matching version's [Javadoc](https://docs.gradle.org/9.8.2/javadoc/) or [Gradle Git tag](https://github.com/gradle/gradle/tree/v9.8.2). For repeated local searches, `./gradlew --version` provisions the configured `-all` distribution if absent, without changing the wrapper; run it only when execution and downloads are authorized. Respect the audit procedure's read-only permissions.
+- Treat documented public APIs as the supported contract and implementation sources as supporting evidence, not permission to depend on internal APIs (`.internal.` packages or `Internal` types). Check the [API lifecycle](https://docs.gradle.org/9.8.2/userguide/feature_lifecycle.html) for incubating and deprecated APIs. Cite the inspected version and symbol; when the wrapper changes, use matching sources, documentation, and tags instead of `/current/` links.
 
 ## Commands
 
