@@ -5,6 +5,7 @@ package org.jetbrains.intellij.platform.gradle
 import org.gradle.api.GradleException
 import org.gradle.testkit.runner.BuildResult
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.UnexpectedBuildFailure
 import org.gradle.testkit.runner.UnexpectedBuildResultException
 import java.io.IOException
 import java.lang.management.ManagementFactory
@@ -344,7 +345,7 @@ abstract class IntelliJPlatformTestBase {
             if (args.isNotEmpty()) {
                 appendLine("Additional arguments: ${args.joinToString(separator = " ")}")
             }
-            appendLine("Failure: ${throwable::class.qualifiedName}: ${throwable.message}")
+            appendLine("Failure: ${throwable.stackTraceToString()}")
 
             collectDiagnosticFiles().takeIf { it.isNotEmpty() }?.let { files ->
                 appendLine("Relevant files:")
@@ -362,7 +363,28 @@ abstract class IntelliJPlatformTestBase {
             appendLine("=== TestKit Failure Diagnostics End ===")
         }
 
-        System.err.println(diagnostics)
+        val failureSummary =
+            buildResult?.takeIf { throwable is UnexpectedBuildFailure }?.output.orEmpty().lineSequence()
+                .dropWhile { it.trim() != "* What went wrong:" }
+                .drop(1)
+                .takeWhile { !it.trimStart().startsWith("* ") }
+                .filter(String::isNotBlank)
+                .take(12)
+                .joinToString(separator = "\n") { it.take(240) }
+                .trim()
+                .ifEmpty {
+                    val message = throwable.message.orEmpty().lineSequence().firstOrNull(String::isNotBlank).orEmpty()
+                    "${throwable::class.qualifiedName}: $message".take(240)
+                }
+        System.err.println(
+            """
+            |=== TestKit Build Failure ===
+            |Gradle version: $gradleVersion
+            |Tasks: ${tasks.joinToString(separator = " ")}
+            |Directory: $dir
+            |$failureSummary
+            """.trimMargin(),
+        )
         preserveBuildFailureDiagnostics(diagnostics)
     }
 
@@ -385,6 +407,7 @@ abstract class IntelliJPlatformTestBase {
             System.err.println("TestKit failure diagnostics saved to: $target")
         }.onFailure {
             System.err.println("Could not preserve TestKit failure diagnostics: ${it.message}")
+            System.err.println(diagnostics)
         }
     }
 

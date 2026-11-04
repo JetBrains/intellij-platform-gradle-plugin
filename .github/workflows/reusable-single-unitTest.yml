@@ -86,7 +86,7 @@ jobs:
           else
             TEST_MAX_PARALLEL_FORKS=1
           fi
-          
+
           ./gradlew test \
             -PtestGradleVersion="${{ inputs.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
@@ -130,3 +130,13 @@ jobs:
         with:
           path: .gradle/testGradleHome/.intellijPlatform
           key: ${{ steps.intellij-platform-cache.outputs.cache-primary-key }}
+
+      - name: Upload Failure Reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-reports-${{ inputs.os }}-${{ inputs.gradleVersion }}
+          path: |
+            build/diagnostics/
+            build/test-results/test/
+            build/reports/tests/test/

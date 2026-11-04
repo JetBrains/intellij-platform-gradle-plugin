@@ -120,3 +120,13 @@ jobs:
         with:
           path: .gradle/testGradleHome/.testKit
           key: ${{ steps.gradle-testkit-cache.outputs.cache-primary-key }}
+
+      - name: Upload Failure Reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-cache-prime-reports-${{ inputs.os }}-${{ inputs.gradleVersion }}
+          path: |
+            build/diagnostics/
+            build/test-results/test/
+            build/reports/tests/test/

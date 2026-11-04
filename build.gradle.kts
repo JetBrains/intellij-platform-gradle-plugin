@@ -217,7 +217,7 @@ fun Test.configureTests() {
     //   }
     testLogging {
         events(TestLogEvent.FAILED, TestLogEvent.STANDARD_ERROR)
-        exceptionFormat = TestExceptionFormat.FULL
+        exceptionFormat = TestExceptionFormat.SHORT
     }
 
 }

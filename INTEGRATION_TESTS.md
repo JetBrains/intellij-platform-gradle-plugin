@@ -67,6 +67,21 @@ class NewTestIntegrationTest : IntelliJPlatformIntegrationTestBase(
 
 ## Running Tests Locally
 
-To run all integration tests locally, invoke the `./gradlew integrationTests` task.
+To run all integration tests locally, invoke the `./gradlew integrationTest` task.
 
 It is also possible to run a single test class or just test by clicking the green play button next to its definition.
+
+## Failure Diagnostics
+
+At the default log level, the console shows a bounded failure summary and the location of the saved diagnostics instead of
+repeating the full nested build output. Assertions made after a build report the assertion failure, not an expected build error.
+
+Each failure gets a separate snapshot under `build/diagnostics/<TestClass>/failure-*/` before fixture cleanup:
+
+- `diagnostics.txt` contains the complete nested Gradle output, failure stack trace, build arguments, and relevant generated file contents.
+- `test-results/` and `reports/tests/` contain copies of the fixture's test results and HTML reports, when generated.
+
+The GitHub Actions unit-test workflows (including cache-priming runs) and integration-test workflow upload these snapshots alongside the outer test reports on failure.
+If snapshot preservation fails, the console prints a warning and the full textual diagnostics as a fallback; that output is intentionally not bounded.
+
+Run with `--info` when full test exception traces are needed in the console. This can also replay nested build output from exception messages.

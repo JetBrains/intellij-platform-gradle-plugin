@@ -12,6 +12,7 @@
 
 ### Changed
 
+- Keep TestKit failure output concise by default while preserving complete nested output, failure traces, and separate test-report snapshots; upload diagnostics and test reports from unit and integration workflows on failure, with full textual console diagnostics if preservation fails.
 - Always add all bundled plugins declared in `product-info.json` to the `testIde` and `test` classpath, regardless of the targeted IntelliJ Platform version, with only the JARs listed in the `product-info.json` layout. Bundled plugins requiring a plugin excluded with `org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes` are excluded, too, while explicitly declared bundled plugins and modules, and plugins required by the tested plugin or its plugin dependencies, are never excluded. Run tests with `--info` to list the excluded bundled plugins with the reasons.
 - Exclude the CLion Nova plugin (`org.jetbrains.plugins.clion.radler`) from the `testIde` and `test` classpath by default, as it starts the ReSharper backend and changes code insight settings, failing the first light test with "Code insight settings damaged".
 - Expose available task capabilities in `intellijPlatformInfo` and evidence-backed configuration diagnostics shared by `intellijPlatformDoctor` and `verifyPluginProjectConfiguration`.
