@@ -16,6 +16,8 @@ jobs:
   integrationTests:
     name: Gradle ${{ matrix.gradleVersion }} @ ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    # TEMPORARY macOS memory validation: hard cap for the single validation batch.
+    timeout-minutes: 110
     strategy:
       fail-fast: false
       matrix:
@@ -23,9 +25,8 @@ jobs:
           - "9.0.0"
           - "9.8.1"
           - "nightly"
+        # TEMPORARY macOS memory validation: macOS only.
         os:
-          - windows-latest
-          - ubuntu-latest
           - macos-latest
 
     steps:
@@ -69,6 +70,20 @@ jobs:
           restore-keys: |
             test-gradle-home-v2-testkit-${{ runner.os }}-
 
+      # TEMPORARY macOS memory validation: record memory, swap, disk and the largest processes every 30 seconds.
+      - name: Record Memory Timeline
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p build/memory-timeline
+          nohup bash -c 'while true; do
+            echo "=== $(date -u +%FT%TZ)"
+            vm_stat | grep -E "Pages (free|active|inactive|wired down|occupied by compressor)|Swapins|Swapouts"
+            sysctl vm.swapusage kern.num_files kern.memorystatus_level
+            df -k /System/Volumes/Data | tail -1
+            ps -axm -o pid=,rss=,command= | head -12 | cut -c1-240
+            sleep 30
+          done' > build/memory-timeline/timeline.log 2>&1 &
+
       # The macOS runners have 7 GB of memory, less than half of the Linux and Windows runners.
       # Compile in a separate single-use build so that no compiler daemon stays resident while the tests run.
       - name: Compile Tests
@@ -110,6 +125,13 @@ jobs:
             "${MEMORY[@]}" \
             --console=plain \
             --no-build-cache
+
+      - name: Upload Memory Timeline
+        if: always() && runner.os == 'macOS'
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-memory-timeline-${{ matrix.gradleVersion }}
+          path: build/memory-timeline/
 
       - name: Upload Failure Reports
         if: failure()
