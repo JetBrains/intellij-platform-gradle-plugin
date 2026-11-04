@@ -5,9 +5,10 @@ package org.jetbrains.intellij.platform.gradle.tasks
 import org.gradle.testkit.runner.TaskOutcome
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
-import kotlin.io.path.exists
+import kotlin.io.path.*
 import kotlin.test.BeforeTest
 import kotlin.test.Test
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 
 private const val ASSEMBLE = "assemble"
@@ -16,6 +17,7 @@ private const val CLASSES = "classes"
 class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
     private val defaultArgs = listOf("--info")
+    private val buildCacheArgs = listOf("--build-cache")
 
     @BeforeTest
     override fun setup() {
@@ -158,6 +160,118 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `instrumented test code does not keep classes of removed Kotlin tests when using build cache`() {
+        enableLocalBuildCache()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    testImplementation("junit:junit:4.13.2")
+                }
+
+                intellijPlatform {
+                    instrumentCode = true
+                }
+
+                tasks.test {
+                    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+                }
+                """.trimIndent()
+
+        writeTestFile()
+        val firstKotlinTest = writeKotlinTestFile("FirstKotlinTest")
+        writeKotlinTestFile("SecondKotlinTest")
+
+        buildWithConfigurationCache(Tasks.External.TEST, args = buildCacheArgs) {
+            assertTaskOutcome(Tasks.INSTRUMENT_TEST_CODE, TaskOutcome.SUCCESS)
+        }
+        assertInstrumentedClasses(
+            Tasks.INSTRUMENT_TEST_CODE,
+            "AppTest.class",
+            "pack/FirstKotlinTest.class",
+            "pack/SecondKotlinTest.class",
+        )
+        assertExecutedTests("AppTest", "pack.FirstKotlinTest", "pack.SecondKotlinTest")
+
+        // Store configuration after the first build creates the local platform artifacts.
+        buildWithConfigurationCache(Tasks.External.TEST, args = buildCacheArgs) {
+            assertTaskOutcome(Tasks.INSTRUMENT_TEST_CODE, TaskOutcome.UP_TO_DATE)
+        }
+
+        // Remove a single Kotlin test while the Kotlin classes directory still exists.
+        firstKotlinTest.deleteExisting()
+
+        buildWithConfigurationCache(Tasks.External.TEST, args = buildCacheArgs) {
+            assertConfigurationCacheReused()
+            assertTaskOutcome(Tasks.INSTRUMENT_TEST_CODE, TaskOutcome.SUCCESS)
+        }
+        assertInstrumentedClasses(Tasks.INSTRUMENT_TEST_CODE, "AppTest.class", "pack/SecondKotlinTest.class")
+        assertExecutedTests("AppTest", "pack.SecondKotlinTest")
+
+        // Remove all Kotlin tests, so compileTestKotlin deletes its whole classes directory.
+        delete("src/test/kotlin")
+
+        buildWithConfigurationCache(Tasks.External.TEST, args = buildCacheArgs) {
+            assertConfigurationCacheReused()
+            assertTaskOutcome(Tasks.INSTRUMENT_TEST_CODE, TaskOutcome.SUCCESS)
+        }
+        assertFalse(dir.resolve("build/classes/kotlin/test").exists())
+        assertInstrumentedClasses(Tasks.INSTRUMENT_TEST_CODE, "AppTest.class")
+        assertExecutedTests("AppTest")
+
+        deleteBuildOutputs()
+
+        buildWithConfigurationCache(Tasks.External.TEST, args = buildCacheArgs) {
+            assertConfigurationCacheReused()
+            assertTaskOutcome(Tasks.INSTRUMENT_TEST_CODE, TaskOutcome.FROM_CACHE)
+        }
+        assertInstrumentedClasses(Tasks.INSTRUMENT_TEST_CODE, "AppTest.class")
+        assertExecutedTests("AppTest")
+    }
+
+    @Test
+    fun `instrumented code does not keep classes of removed Kotlin sources when using build cache`() {
+        enableLocalBuildCache()
+
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    instrumentCode = true
+                }
+                """.trimIndent()
+
+        writeJavaFile()
+        dir.resolve("src/main/kotlin/pack/Removed.kt") write //language=kotlin
+                """
+                package pack
+
+                class Removed
+                """.trimIndent()
+
+        buildWithConfigurationCache(Tasks.INSTRUMENT_CODE, args = buildCacheArgs) {
+            assertTaskOutcome(Tasks.INSTRUMENT_CODE, TaskOutcome.SUCCESS)
+        }
+        assertInstrumentedClasses(Tasks.INSTRUMENT_CODE, "App.class", "pack/Removed.class")
+
+        delete("src/main/kotlin")
+
+        buildWithConfigurationCache(Tasks.INSTRUMENT_CODE, args = buildCacheArgs) {
+            assertConfigurationCacheReused()
+            assertTaskOutcome(Tasks.INSTRUMENT_CODE, TaskOutcome.SUCCESS)
+        }
+        assertFalse(dir.resolve("build/classes/kotlin/main").exists())
+        assertInstrumentedClasses(Tasks.INSTRUMENT_CODE, "App.class")
+
+        deleteBuildOutputs()
+
+        buildWithConfigurationCache(Tasks.INSTRUMENT_CODE, args = buildCacheArgs) {
+            assertConfigurationCacheReused()
+            assertTaskOutcome(Tasks.INSTRUMENT_CODE, TaskOutcome.FROM_CACHE)
+        }
+        assertInstrumentedClasses(Tasks.INSTRUMENT_CODE, "App.class")
+    }
+
+    @Test
     fun `serializes instrumentation tasks within a project`() {
         dir.resolve("src/alpha/java/Alpha.java") write "class Alpha {}"
         dir.resolve("src/beta/java/Beta.java") write "class Beta {}"
@@ -245,4 +359,45 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
             assertConfigurationCacheReused()
         }
     }
+
+    private fun enableLocalBuildCache() {
+        settingsFile write //language=kotlin
+                """
+                buildCache {
+                    local {
+                        directory = file("build-cache")
+                    }
+                }
+                """.trimIndent()
+    }
+
+    private fun writeKotlinTestFile(name: String) = dir.resolve("src/test/kotlin/pack/$name.kt") write //language=kotlin
+            """
+            package pack
+
+            import org.junit.Test
+
+            class $name {
+                @Test
+                fun testSomething() {}
+            }
+            """.trimIndent()
+
+    @OptIn(ExperimentalPathApi::class)
+    private fun delete(vararg paths: String) = paths.forEach {
+        dir.resolve(it).deleteRecursively()
+    }
+
+    private fun deleteBuildOutputs() = delete("build/classes", "build/instrumented", "build/test-results")
+
+    private fun assertInstrumentedClasses(taskName: String, vararg expected: String) = assertEquals(
+        expected.toSet(),
+        collectPaths(dir.resolve("build/instrumented/$taskName")).filter { it.endsWith(".class") }.toSet(),
+    )
+
+    private fun assertExecutedTests(vararg expected: String) = assertEquals(
+        expected.toSet(),
+        dir.resolve("build/test-results/test").listDirectoryEntries("TEST-*.xml")
+            .map { it.name.removePrefix("TEST-").removeSuffix(".xml") }.toSet(),
+    )
 }

@@ -38,6 +38,7 @@
 
 ### Fixed
 
+- Fix `instrumentCode` and `instrumentTestCode` retaining classes of removed sources when an entire classes directory is deleted, such as after removing all Kotlin sources, and storing those stale classes in the build cache JetBrains/intellij-platform-gradle-plugin#2283.
 - Defer Plugin Verifier IDE downloads until their files are requested, preventing Gradle sync and `dumpProductsReleases` from populating the shared IDE cache with verification targets JetBrains/intellij-platform-gradle-plugin#2278.
 - Skip automatic Plugin Verifier IDE recommendations and unnecessary base IDE resolution when explicit verification targets are configured or default recommendations are disabled.
 - Avoid resolving remote IDE archives for custom testing tasks using a local IntelliJ Platform, and match Android Studio release build numbers with or without the `AI-` prefix [IJPL-259189](https://youtrack.jetbrains.com/issue/IJPL-259189).
