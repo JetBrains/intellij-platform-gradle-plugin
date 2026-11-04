@@ -16,12 +16,23 @@ private const val CLASSES = "classes"
 class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
     private val defaultArgs = listOf("--info")
+    private val localDependency by lazy { localIntelliJPlatformDependency() }
+
+    override fun intellijPlatformDependency() = localDependency
 
     @BeforeTest
     override fun setup() {
         disableDebug()
 
         super.setup()
+
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    compileOnly("org.jetbrains:annotations:26.0.2")
+                    testCompileOnly("org.jetbrains:annotations:26.0.2")
+                }
+                """.trimIndent()
     }
 
     @Test
@@ -55,7 +66,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
                 }
                 """.trimIndent()
 
-        build(Tasks.External.TEST, args = defaultArgs) {
+        build(Tasks.INSTRUMENT_TEST_CODE, args = defaultArgs) {
             assertContains("Added @NotNull assertions to 1 files", output)
         }
     }
@@ -78,7 +89,15 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `do not instrument code on empty source sets`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    instrumentCode = true
+                }
+                """.trimIndent()
+
         build(ASSEMBLE, args = defaultArgs) {
+            assertTaskOutcome(Tasks.INSTRUMENT_CODE, TaskOutcome.NO_SOURCE)
             assertNotContains("Compiling forms and instrumenting code", output)
         }
     }
@@ -89,6 +108,10 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
         buildFile write //language=kotlin
                 """
+                dependencies {
+                    implementation(kotlin("stdlib"))
+                }
+
                 intellijPlatform {
                     instrumentCode = true
                 }
@@ -192,7 +215,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
                 dependencies {
                     extensions.configure<IntelliJPlatformDependenciesExtension> {
-                        create("$intellijPlatformType", "$intellijPlatformVersion")
+                        ${intellijPlatformDependency()}
                     }
                 }
 
@@ -231,6 +254,7 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
                 """.trimIndent()
 
         val args = listOf("--parallel", "--max-workers=2")
+        build("clean", "instrumentAlphaCode", "instrumentBetaCode", args = args)
         buildWithConfigurationCache("clean", "instrumentAlphaCode", "instrumentBetaCode", args = args)
         buildWithConfigurationCache("clean", "instrumentAlphaCode", "instrumentBetaCode", args = args) {
             assertConfigurationCacheReused()
@@ -239,6 +263,16 @@ class IntelliJInstrumentCodeTaskTest : IntelliJPluginTestBase() {
 
     @Test
     fun `reuses configuration cache`() {
+        buildFile write //language=kotlin
+                """
+                intellijPlatform {
+                    instrumentCode = true
+                }
+                """.trimIndent()
+
+        writeJavaFile()
+
+        build(ASSEMBLE, args = defaultArgs)
         buildWithConfigurationCache(ASSEMBLE, args = defaultArgs)
 
         buildWithConfigurationCache(ASSEMBLE, args = defaultArgs) {

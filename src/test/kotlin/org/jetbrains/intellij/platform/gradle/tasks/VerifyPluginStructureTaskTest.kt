@@ -9,6 +9,8 @@ import kotlin.test.Test
 
 class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
 
+    override fun intellijPlatformDependency() = localIntelliJPlatformDependency()
+
     @Test
     fun `do not fail on warning by default`() {
         buildFile write //language=kotlin
@@ -242,6 +244,7 @@ class VerifyPluginStructureTaskTest : IntelliJPluginTestBase() {
                 </idea-plugin>
                 """.trimIndent()
 
+        build(Tasks.VERIFY_PLUGIN_STRUCTURE)
         buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_STRUCTURE)
 
         buildWithConfigurationCache(Tasks.VERIFY_PLUGIN_STRUCTURE) {
