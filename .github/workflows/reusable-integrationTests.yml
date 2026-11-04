@@ -69,6 +69,19 @@ jobs:
           restore-keys: |
             test-gradle-home-v2-testkit-${{ runner.os }}-
 
+      # The macOS runners have 7 GB of memory, less than half of the Linux and Windows runners.
+      # Compile in a separate single-use build so that no compiler daemon stays resident while the tests run.
+      - name: Compile Tests
+        if: runner.os == 'macOS'
+        env:
+          DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
+        run: |
+          ./gradlew integrationTestClasses \
+            -Pkotlin.compiler.execution.strategy=in-process \
+            --no-daemon \
+            --console=plain \
+            --no-build-cache
+
       - name: Run Tests
         env:
           DEVELOCITY_ACCESS_KEY: ${{ secrets.DEVELOCITY_ACCESS_KEY }}
@@ -84,11 +97,17 @@ jobs:
           if [ -n "$TEST_NAME" ]; then
             TESTS+=(--tests "$TEST_NAME")
           fi
+          # Nested TestKit daemons grow toward their heap limit over hundreds of builds; keep them within the macOS runner memory.
+          MEMORY=()
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            MEMORY+=("-PtestGradleArguments=-Dorg.gradle.jvmargs=-Xmx2G")
+          fi
 
           ./gradlew integrationTest \
             -PtestGradleVersion="${{ matrix.gradleVersion }}" \
             -PtestGradleUserHome="$TEST_GRADLE_USER_HOME" \
             "${TESTS[@]}" \
+            "${MEMORY[@]}" \
             --console=plain \
             --no-build-cache
 
