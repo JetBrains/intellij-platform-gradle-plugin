@@ -175,7 +175,7 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
      * org.jetbrains.intellij.platform.testIdeBundledPluginsClasspathExcludes=
      * ```
      *
-     * Default value: `com.intellij.openRewrite,com.intellij.ja,com.intellij.ko,com.intellij.zh,org.jetbrains.plugins.vue,org.jetbrains.plugins.clion.radler`
+     * Default value: `com.intellij.openRewrite,com.intellij.ja,com.intellij.ko,com.intellij.zh,com.intellij.air,com.intellij.code.provenance,org.jetbrains.plugins.vue,org.jetbrains.plugins.clion.radler`
      * Additionally, the defaults exclude `com.intellij.spring.boot` on 2023.3 (build 233) and `com.intellij.swagger`
      * on 2024.1 (build 241), whose test-service implementations are not shipped with those IDE versions.
      * Setting this property explicitly replaces all defaults, including these version-specific exclusions.
@@ -185,6 +185,9 @@ sealed class GradleProperties<T : Any>(val defaultValue: T) {
         "com.intellij.ja",
         "com.intellij.ko",
         "com.intellij.zh",
+        // Just a try to get rid of the Windows CI errors
+        "com.intellij.air",
+        "com.intellij.code.provenance",
         // See: #2183, https://youtrack.jetbrains.com/issue/WEB-78747
         "org.jetbrains.plugins.vue",
         // CLion Nova starts the ReSharper backend and enables `CodeInsightSettings.AUTO_POPUP_JAVADOC_INFO` in its application
