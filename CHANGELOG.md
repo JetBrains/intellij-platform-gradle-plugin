@@ -2,6 +2,10 @@
 
 ## [next]
 
+### Fixed
+
+- Fix `Cannot mutate the dependencies of configuration ':testUiImplementation'` when Checkstyle observes UI test classpaths before `testUi` is created JetBrains/intellij-platform-gradle-plugin#2287.
+
 ## [2.20.0] - 2026-11-05
 
 ### Added

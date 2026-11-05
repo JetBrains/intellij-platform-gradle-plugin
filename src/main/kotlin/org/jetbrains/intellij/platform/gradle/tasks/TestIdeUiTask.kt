@@ -4,12 +4,14 @@ package org.jetbrains.intellij.platform.gradle.tasks
 
 import org.gradle.api.Incubating
 import org.gradle.api.Project
+import org.gradle.api.file.FileCollection
 import org.gradle.api.file.RegularFileProperty
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.tasks.*
 import org.gradle.api.tasks.testing.Test
 import org.gradle.kotlin.dsl.named
 import org.gradle.kotlin.dsl.the
+import org.jetbrains.intellij.platform.gradle.Constants.Configurations
 import org.jetbrains.intellij.platform.gradle.Constants.Constraints
 import org.jetbrains.intellij.platform.gradle.Constants.Plugin
 import org.jetbrains.intellij.platform.gradle.Constants.Tasks
@@ -74,19 +76,16 @@ abstract class TestIdeUiTask : Test(), TestableAware {
     companion object : Registrable {
         override fun register(project: Project) {
             val buildPluginTaskProvider = project.tasks.named<BuildPluginTask>(Tasks.BUILD_PLUGIN)
-            val sourceSets = project.the<JavaPluginExtension>().sourceSets.also {
-                it.maybeCreate(Tasks.TEST_UI)
-            }
+            val defaultSourceSet = project.configureUiSourceSet(
+                Tasks.TEST_UI,
+                project.configurations.getByName(Configurations.INTELLIJ_PLATFORM_CLASSPATH),
+            )
 
             project.registerTask<TestIdeUiTask>(Tasks.TEST_UI) {
-                val testIdeUi = sourceSets.getByName(name).also {
-                    it.compileClasspath += intellijPlatformClasspathConfiguration
+                val testIdeUi = when (name) {
+                    Tasks.TEST_UI -> defaultSourceSet
+                    else -> project.configureUiSourceSet(name, intellijPlatformClasspathConfiguration)
                 }
-                project.dependenciesHelper.addTestFrameworkDependency(
-                    type = TestFrameworkType.Starter,
-                    versionProvider = project.providers.provider { Constraints.CLOSEST_VERSION },
-                    configurationName = testIdeUi.implementationConfigurationName,
-                )
 
                 archiveFile.convention(buildPluginTaskProvider.flatMap { it.archiveFile })
                 testClassesDirs = testIdeUi.output.classesDirs
@@ -98,3 +97,13 @@ abstract class TestIdeUiTask : Test(), TestableAware {
         }
     }
 }
+
+private fun Project.configureUiSourceSet(name: String, platformClasspath: FileCollection) =
+    the<JavaPluginExtension>().sourceSets.maybeCreate(name).apply {
+        compileClasspath += platformClasspath
+        dependenciesHelper.addTestFrameworkDependency(
+            type = TestFrameworkType.Starter,
+            versionProvider = providers.provider { Constraints.CLOSEST_VERSION },
+            configurationName = implementationConfigurationName,
+        )
+    }

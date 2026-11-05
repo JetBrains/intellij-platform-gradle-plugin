@@ -46,6 +46,8 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
         val hostGroups = TestFrameworkType.Starter.coordinates.map { it.groupId }.toSet()
         buildFile write """
             val integration = sourceSets.getByName("${Tasks.TEST_UI}")
+            var uiRealized = false
+            tasks.named<TestIdeUiTask>("${Tasks.TEST_UI}") { uiRealized = true }
             check(sourceSets.findByName("integrationTest") == null)
             check(integration.implementationConfigurationName == "${Tasks.TEST_UI}Implementation")
             check(integration.runtimeOnlyConfigurationName == "${Tasks.TEST_UI}RuntimeOnly")
@@ -53,12 +55,14 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
             check(integration.runtimeClasspathConfigurationName == "${Tasks.TEST_UI}RuntimeClasspath")
             listOf(integration.compileClasspathConfigurationName, integration.runtimeClasspathConfigurationName).forEach { name ->
                 ${hostGroups.joinToString("\n                ") { """configurations.getByName(name).exclude(mapOf("group" to "$it"))""" }}
+                configurations.getByName(name).resolve()
             }
-            val ui = tasks.named<TestIdeUiTask>("${Tasks.TEST_UI}").get()
             val ideClasspath = configurations.getByName("intellijPlatformClasspath").files.toList()
             check(ideClasspath.any { it.name == "local-ide.jar" })
             check(configurations.getByName(integration.runtimeClasspathConfigurationName).files.isEmpty())
             check(integration.compileClasspath.files.toList() == ideClasspath)
+            check(!uiRealized)
+            val ui = tasks.named<TestIdeUiTask>("${Tasks.TEST_UI}").get()
             check(ui.testClassesDirs == integration.output.classesDirs)
             check(ui.classpath.files.toList() == integration.runtimeClasspath.files.toList() + ideClasspath)
             check(ui.classpath.files.toList().takeLast(ideClasspath.size) == ideClasspath)
@@ -72,8 +76,8 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
             val implementation = configurations.getByName(integration.implementationConfigurationName)
             check(configurations.getByName("testImplementation") !in implementation.hierarchy)
             val host = implementation.allDependencies.filterIsInstance<org.gradle.api.artifacts.ExternalModuleDependency>()
-            check(host.any { it.name == "ide-starter-squashed" })
-            check(host.any { it.name == "driver-client" })
+            check(host.count { it.name == "ide-starter-squashed" } == 1)
+            check(host.count { it.name == "driver-client" } == 1)
             check(host.filter { it.group?.startsWith("com.jetbrains.intellij") == true }.all { it.excludeRules.isNotEmpty() })
             check(host.filter { it.group?.startsWith("com.jetbrains.intellij") == true }.all { dependency -> dependency.excludeRules.any { it.group == "junit" && it.module == "junit" } })
             check(host.all { dependency -> dependency.excludeRules.none { it.group == "org.junit.vintage" } })
@@ -85,12 +89,39 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
             println("UI_DEFAULTS_OK")
         """.trimIndent()
 
-        build("build", "--dry-run") {
+        build("build", "--dry-run", "--offline") {
             assertContains("UI_DEFAULTS_OK", output)
             assertFalse(output.contains(":${Tasks.TEST_UI}"))
             assertContains(":test SKIPPED", output)
             assertContains(":check SKIPPED", output)
         }
+    }
+
+    @Test
+    fun `Checkstyle and test finalizers do not mutate observed UI dependencies`() {
+        directory("build")
+        val hostGroups = TestFrameworkType.Starter.coordinates.map { it.groupId }.toSet()
+        buildFile write """
+            apply(plugin = "checkstyle")
+            ${hostGroups.joinToString("\n            ") { """configurations.getByName("${Tasks.TEST_UI}CompileClasspath").exclude(mapOf("group" to "$it"))""" }}
+            val testTasks = tasks.withType<org.gradle.api.tasks.testing.Test>()
+            val fixJUnitXMLTimestamps = tasks.register("fixJUnitXMLTimestamps") {
+                mustRunAfter(testTasks)
+            }
+            testTasks.configureEach {
+                finalizedBy(fixJUnitXMLTimestamps)
+            }
+        """.trimIndent()
+
+        build("build", "--dry-run", "--offline") {
+            assertContains(":compileTestUiJava SKIPPED", output)
+            assertContains(":checkstyleTestUi SKIPPED", output)
+            assertContains(":fixJUnitXMLTimestamps SKIPPED", output)
+            assertContains(":build SKIPPED", output)
+            assertFalse(output.contains(":${Tasks.TEST_UI} "))
+        }
+        buildWithConfigurationCache("build", "--dry-run")
+        buildWithConfigurationCache("build", "--dry-run") { assertConfigurationCacheReused() }
     }
 
     @Test
