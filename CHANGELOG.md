@@ -2,7 +2,10 @@
 
 ## [next]
 
+## [2.20.0] - 2026-11-05
+
 ### Added
+
 - Add `TestFrameworkType.Plugin.Execution`
 - Add JSON reports for project structure, distribution contents, dependency resolution, test workflows, and IDE compatibility: `intellijPlatformProjectGraph`, `intellijPlatformDistribution`, `intellijPlatformDependencyGraph`, `intellijPlatformTestMatrix`, and `intellijPlatformCompatibilityMatrix`.
 - Add `intellijPlatformInfo`, `intellijPlatformDoctor`, `intellijPlatformDiscover`, and `intellijPlatformSdk` tasks with versioned JSON reports for project context, actionable configuration findings, filtered catalog discovery, and SDK file/ownership maps. See [CLI reports](./CLI_REPORTS.md).
@@ -1919,7 +1922,8 @@ The `2.0.0` release is completely rewritten. Please see [documentation page](htt
 
 - Support for attaching IntelliJ sources in IDEA
 
-[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.19.0...HEAD
+[next]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.20.0...HEAD
+[2.20.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.19.0...v2.20.0
 [2.19.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.1...v2.19.0
 [2.18.1]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.18.0...v2.18.1
 [2.18.0]: https://github.com/JetBrains/intellij-platform-gradle-plugin/compare/v2.17.0...v2.18.0
