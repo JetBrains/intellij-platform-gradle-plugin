@@ -101,7 +101,7 @@ abstract class TestIdeUiTask : Test(), TestableAware {
 private fun Project.configureUiSourceSet(name: String, platformClasspath: FileCollection) =
     the<JavaPluginExtension>().sourceSets.maybeCreate(name).apply {
         compileClasspath += platformClasspath
-        dependenciesHelper.addTestFrameworkDependency(
+        dependenciesHelper.addDefaultTestFrameworkDependency(
             type = TestFrameworkType.Starter,
             versionProvider = providers.provider { Constraints.CLOSEST_VERSION },
             configurationName = implementationConfigurationName,

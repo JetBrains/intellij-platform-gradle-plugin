@@ -98,6 +98,88 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
     }
 
     @Test
+    fun `dependency reporting does not require an IntelliJ Platform for UI test defaults`() {
+        buildFile overwrite """
+            plugins { id("org.jetbrains.intellij.platform") }
+            tasks.named("${Tasks.TEST_UI}") {
+                error("Dependency reporting must not realize UI tests")
+            }
+        """.trimIndent()
+        gradleProperties write "org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes=false"
+
+        build("dependencies", "--offline") {
+            assertContains("testUiImplementation", output)
+        }
+        buildWithConfigurationCache("dependencies", "--offline")
+        buildWithConfigurationCache("dependencies", "--offline") { assertConfigurationCacheReused() }
+    }
+
+    @Test
+    fun `UI dependency declarations do not resolve an IntelliJ Platform`() {
+        buildFile overwrite """
+            plugins { id("org.jetbrains.intellij.platform") }
+            var platformResolved = false
+            configurations.named("intellijPlatformDependency") {
+                incoming.beforeResolve { platformResolved = true }
+            }
+            dependencies.add("${Tasks.TEST_UI}Implementation", "example:ui-support:1.0")
+            val declared = configurations.getByName("${Tasks.TEST_UI}Implementation").dependencies.map { it.name }
+            check(declared == listOf("ui-support"))
+            check(!platformResolved) { "Listing UI dependency declarations must not resolve the IntelliJ Platform" }
+            println("UI_DECLARATIONS_LAZY_OK")
+        """.trimIndent()
+        gradleProperties write "org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes=false"
+
+        build("help", "--offline") { assertContains("UI_DECLARATIONS_LAZY_OK", output) }
+    }
+
+    @Test
+    fun `automatic UI defaults do not hide platform configuration errors`() {
+        buildFile overwrite """
+            plugins { id("org.jetbrains.intellij.platform") }
+            configurations.named("intellijPlatformDependency") {
+                incoming.beforeResolve { throw GradleException("Unexpected platform configuration failure") }
+            }
+            configurations.getByName("${Tasks.TEST_UI}Implementation").incoming.dependencies.toList()
+        """.trimIndent()
+        gradleProperties write "org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes=false"
+
+        buildAndFail("help", "--offline") {
+            assertContains("Unexpected platform configuration failure", output)
+        }
+    }
+
+    @Test
+    fun `explicit UI framework dependencies require an IntelliJ Platform`() {
+        buildFile overwrite """
+            import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+            plugins { id("org.jetbrains.intellij.platform") }
+            dependencies {
+                intellijPlatform {
+                    testFramework(TestFrameworkType.Starter, configurationName = "${Tasks.TEST_UI}Implementation")
+                }
+            }
+        """.trimIndent()
+        gradleProperties write "org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes=false"
+
+        buildAndFail("dependencies", "--offline") {
+            assertContains("No IntelliJ Platform dependency found", output)
+        }
+    }
+
+    @Test
+    fun `running UI tests requires an IntelliJ Platform`() {
+        buildFile overwrite """
+            plugins { id("org.jetbrains.intellij.platform") }
+        """.trimIndent()
+        gradleProperties write "org.jetbrains.intellij.platform.verifyPluginDefaultRecommendedIdes=false"
+
+        buildAndFail(Tasks.TEST_UI, "--offline") {
+            assertContains("No IntelliJ Platform dependency found", output)
+        }
+    }
+
+    @Test
     fun `Checkstyle and test finalizers do not mutate observed UI dependencies`() {
         directory("build")
         val hostGroups = TestFrameworkType.Starter.coordinates.map { it.groupId }.toSet()
@@ -230,9 +312,11 @@ class TestIdeUiTaskTest : IntelliJPluginTestBase() {
                 val implementation = configurations.getByName(sources.implementationConfigurationName)
                 check(configurations.getByName(defaultUi.implementationConfigurationName) !in implementation.hierarchy)
                 check(configurations.getByName("testImplementation") !in implementation.hierarchy)
-                val host = implementation.allDependencies.filterIsInstance<org.gradle.api.artifacts.ExternalModuleDependency>()
+                dependencies.add(implementation.name, "example:ui-support:1.0")
+                val host = implementation.incoming.dependencies.filterIsInstance<org.gradle.api.artifacts.ExternalModuleDependency>()
                 check(host.count { it.name == "ide-starter-squashed" } == 1)
                 check(host.count { it.name == "driver-client" } == 1)
+                check(host.count { it.name == "ui-support" } == 1)
                 check(host.all { dependency -> dependency.excludeRules.none { it.group == "org.junit.vintage" } })
                 check(ui.testClassesDirs == sources.output.classesDirs)
                 check(ui.testClassesDirs != defaultUi.output.classesDirs)

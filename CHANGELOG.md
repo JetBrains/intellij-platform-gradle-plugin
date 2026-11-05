@@ -5,6 +5,7 @@
 ### Fixed
 
 - Fix `Cannot mutate the dependencies of configuration ':testUiImplementation'` when Checkstyle observes UI test classpaths before `testUi` is created JetBrains/intellij-platform-gradle-plugin#2287.
+- Avoid resolving the IDE when listing UI dependency declarations, and keep dependency reports working when the IDE is unavailable.
 
 ## [2.20.0] - 2026-11-05
 

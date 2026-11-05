@@ -933,22 +933,30 @@ class IntelliJPlatformDependenciesHelper(
         val platformPath = platformPathProvider(intellijPlatformConfigurationName).orNull
         requireNotNull(platformPath) { "No IntelliJ Platform was resolved with the configuration name '${intellijPlatformConfigurationName}'." }
 
-        when (type) {
-            TestFrameworkType.Bundled -> type.coordinates.map {
-                createBundledLibrary(it.artifactId, platformPath)
-            }
-
-            else -> {
-                val version = versionProvider.orNull
-                requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
-
-                val buildNumber = platformPath.productInfo().buildNumber.toVersion()
-                type.coordinatesFor(buildNumber).map {
-                    createPlatformDependency(it, version, platformPath, intellijPlatformConfigurationName)
-                }
-            }
-        }.onEach(action)
+        createTestFrameworkDependencies(type, versionProvider, platformPath, intellijPlatformConfigurationName).onEach(action)
     }.cached())
+
+    /**
+     * Adds automatic test framework defaults when the configuration participates in resolution.
+     * Defaults use a lenient artifact view so dependency reports also work without an available IntelliJ Platform.
+     * Explicit declarations through [addTestFrameworkDependency] remain strict.
+     *
+     * @param type The TestFramework type.
+     * @param versionProvider The version of the TestFramework.
+     * @param configurationName The name of the configuration to add the dependencies to.
+     * @param intellijPlatformConfigurationName The IntelliJ Platform configuration used to derive the defaults.
+     */
+    internal fun addDefaultTestFrameworkDependency(
+        type: TestFrameworkType,
+        versionProvider: Provider<String>,
+        configurationName: String,
+        intellijPlatformConfigurationName: String = Configurations.INTELLIJ_PLATFORM_DEPENDENCY,
+    ) = configurations[configurationName].withDependencies {
+        val platform = configurations[intellijPlatformConfigurationName].asLenient
+        if (!platform.isEmpty) {
+            addAll(createTestFrameworkDependencies(type, versionProvider, platform.platformPath(), intellijPlatformConfigurationName))
+        }
+    }
 
     /**
      * Adds a dependency on the IntelliJ Platform dependency.
@@ -1811,6 +1819,27 @@ class IntelliJPlatformDependenciesHelper(
         }
 
         return newIvyModule
+    }
+
+    private fun createTestFrameworkDependencies(
+        type: TestFrameworkType,
+        versionProvider: Provider<String>,
+        platformPath: Path,
+        intellijPlatformConfigurationName: String,
+    ): List<Dependency> = when (type) {
+        TestFrameworkType.Bundled -> type.coordinates.map {
+            createBundledLibrary(it.artifactId, platformPath)
+        }
+
+        else -> {
+            val version = versionProvider.orNull
+            requireNotNull(version) { "The `intellijPlatform.testFramework` dependency helper was called with no `version` value provided." }
+
+            val buildNumber = platformPath.productInfo().buildNumber.toVersion()
+            type.coordinatesFor(buildNumber).map {
+                createPlatformDependency(it, version, platformPath, intellijPlatformConfigurationName)
+            }
+        }
     }
 
     /**
