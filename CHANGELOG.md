@@ -2,6 +2,12 @@
 
 ## [next]
 
+### Changed
+
+- Return public Gradle `TaskDependency` from `intellijPlatformTesting` parameters instead of internal
+  `DefaultTaskDependency`. This removes the concrete-return JVM method: consumers linked to it must be recompiled,
+  and source code using `DefaultTaskDependency`-specific methods must migrate to public APIs.
+
 ### Fixed
 
 - Fix `Cannot mutate the dependencies of configuration ':testUiImplementation'` when Checkstyle observes UI test classpaths before `testUi` is created JetBrains/intellij-platform-gradle-plugin#2287.

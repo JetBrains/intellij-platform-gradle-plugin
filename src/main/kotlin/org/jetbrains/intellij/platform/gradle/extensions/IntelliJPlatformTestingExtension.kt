@@ -6,10 +6,10 @@ import org.gradle.api.*
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.attributes.LibraryElements
 import org.gradle.api.file.DirectoryProperty
-import org.gradle.api.internal.tasks.DefaultTaskDependency
 import org.gradle.api.plugins.ExtensionAware
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.Provider
+import org.gradle.api.tasks.TaskDependency
 import org.gradle.kotlin.dsl.*
 import org.jetbrains.intellij.platform.gradle.*
 import org.jetbrains.intellij.platform.gradle.Constants.Configurations
@@ -429,7 +429,8 @@ abstract class IntelliJPlatformTestingExtension @Inject constructor(
 
         override fun getName() = name
 
-        override fun getBuildDependencies() = DefaultTaskDependency().add(task)
+        override fun getBuildDependencies(): TaskDependency =
+            project.objects.fileCollection().builtBy(task).buildDependencies
 
         internal val String.withSuffix get() = "${this}_${name}"
     }
