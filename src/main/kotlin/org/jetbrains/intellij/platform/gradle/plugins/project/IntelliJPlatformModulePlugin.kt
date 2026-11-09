@@ -445,17 +445,17 @@ abstract class IntelliJPlatformModulePlugin : Plugin<Project> {
                 .all(::addInferredPluginModuleDependency)
         }
 
-        intellijPlatformPluginModuleConfiguration.dependencies.addAllLater(
-            project.provider {
-                inferredPluginModuleDependencies.values
-                    .asSequence()
-                    .filterNot { it.path in pluginModuleDependencyPaths }
-                    .filterNot { it.path in pluginComposedModuleDependencyPaths }
-                    .filter { intellijPlatformProjects.isPureModuleProject(it.path) }
-                    .sortedBy { it.path }
-                    .toList()
-            },
-        )
+        // Dependency iteration during project configuration must not freeze inference before module plugins are applied.
+        intellijPlatformPluginModuleConfiguration.withDependencies {
+            val inferredDependencies = inferredPluginModuleDependencies.values
+                .asSequence()
+                .filterNot { it.path in pluginModuleDependencyPaths }
+                .filterNot { it.path in pluginComposedModuleDependencyPaths }
+                .filter { intellijPlatformProjects.isPureModuleProject(it.path) }
+                .sortedBy { it.path }
+                .toList()
+            addAllLater(project.provider { inferredDependencies })
+        }
 
         IntelliJPlatformTestingExtension.register(
             project = project,

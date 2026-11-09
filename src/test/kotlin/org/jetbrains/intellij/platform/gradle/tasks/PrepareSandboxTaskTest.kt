@@ -130,6 +130,160 @@ class PrepareSandboxTaskTest : IntelliJPluginTestBase() {
         }
 
     @Test
+    fun `prepare sandbox infers modules after dependencies are observed during configuration`() {
+        val repository = createPluginFixtureRepository()
+        configurePluginFixtureRepository(repository)
+        settingsFile write "include(\"myModule\")"
+        pluginXml write "<idea-plugin />"
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    implementation(project(":myModule"))
+                }
+
+                configurations.named("intellijPlatformPluginModule") {
+                    dependencies.iterator().hasNext()
+                }
+                """.trimIndent()
+        dir.resolve("myModule/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    id("org.jetbrains.kotlin.jvm")
+                    id("org.jetbrains.intellij.platform.module")
+                }
+
+                kotlin {
+                    jvmToolchain(21)
+                }
+
+                repositories {
+                    mavenCentral()
+
+                    intellijPlatform {
+                        localPlatformArtifacts()
+                    }
+                }
+
+                ${pluginFixtureRepository(repository)}
+
+                dependencies {
+                    intellijPlatform {
+                        plugin("$FILTER_TARGET_PLUGIN_ID", "$PLUGIN_FIXTURE_VERSION")
+                    }
+                }
+
+                intellijPlatform {
+                    instrumentCode = false
+                }
+                """.trimIndent()
+        dir.resolve("myModule/src/main/resources/module.txt") write "module"
+
+        build(Tasks.PREPARE_SANDBOX)
+
+        assertExists(sandbox.resolve("plugins/projectName/lib/modules/projectName.myModule.jar"))
+        assertFalse(sandbox.resolve("plugins/projectName/lib/projectName.myModule.jar").exists())
+        assertExists(sandbox.resolve("plugins/filter-target/lib/$FILTER_TARGET_MAIN_JAR"))
+    }
+
+    @Test
+    fun `build plugin infers module dependencies after subprojects are configured`() {
+        val modules = listOf(
+            "apiModule",
+            "myModule",
+            "runtimeModule",
+            "explicitModule",
+            "composedModule",
+            "compileOnlyModule",
+            "testModule",
+        )
+        settingsFile write //language=kotlin
+                """
+                include(${(modules + "library").joinToString { "\"$it\"" }})
+                """.trimIndent()
+        pluginXml write "<idea-plugin />"
+        buildFile write //language=kotlin
+                """
+                dependencies {
+                    api(project(":apiModule"))
+                    implementation(project(":myModule"))
+                    runtimeOnly(project(":myModule"))
+                    runtimeOnly(project(":runtimeModule"))
+                    implementation(project(":library"))
+                    compileOnly(project(":compileOnlyModule"))
+                    testImplementation(project(":testModule"))
+
+                    intellijPlatform {
+                        pluginModule(implementation(project(":explicitModule")))
+                        pluginComposedModule(implementation(project(":composedModule")))
+                    }
+                }
+                """.trimIndent()
+
+        modules.forEach { module ->
+            dir.resolve("$module/build.gradle.kts") write //language=kotlin
+                    """
+                    plugins {
+                        id("org.jetbrains.kotlin.jvm")
+                        id("org.jetbrains.intellij.platform.module")
+                    }
+
+                    kotlin {
+                        jvmToolchain(21)
+                    }
+
+                    repositories {
+                        mavenCentral()
+
+                        intellijPlatform {
+                            localPlatformArtifacts()
+                        }
+                    }
+
+                    intellijPlatform {
+                        instrumentCode = false
+                    }
+                    """.trimIndent()
+            dir.resolve("$module/src/main/resources/$module.txt") write module
+        }
+        dir.resolve("library/build.gradle.kts") write //language=kotlin
+                """
+                plugins {
+                    `java-library`
+                }
+                """.trimIndent()
+        dir.resolve("library/src/main/resources/library.txt") write "library"
+
+        val expectedJars = setOf(
+            "projectName/lib/projectName-1.0.0.jar",
+            "projectName/lib/library.jar",
+            "projectName/lib/modules/projectName.apiModule.jar",
+            "projectName/lib/modules/projectName.myModule.jar",
+            "projectName/lib/modules/projectName.runtimeModule.jar",
+            "projectName/lib/modules/projectName.explicitModule.jar",
+        )
+        fun assertPluginLayout() {
+            assertEquals(expectedJars, collectPaths(sandbox.resolve("plugins")).filter { it.endsWith(".jar") }.toSet())
+            buildDirectory.resolve("distributions/projectName-1.0.0.zip").toZip().use { zip ->
+                assertEquals(expectedJars, collectPaths(zip).filter { it.endsWith(".jar") }.toSet())
+                zip.extract("projectName/lib/projectName-1.0.0.jar").toZip().use { jar ->
+                    assertZipContent(jar, "composedModule.txt", "composedModule")
+                    assertFalse("myModule.txt" in collectPaths(jar))
+                }
+            }
+        }
+
+        build(Tasks.BUILD_PLUGIN)
+        assertPluginLayout()
+        buildWithConfigurationCache(Tasks.BUILD_PLUGIN)
+        assertPluginLayout()
+        sandbox.resolve("plugins/projectName").toFile().deleteRecursively()
+        buildWithConfigurationCache(Tasks.BUILD_PLUGIN) {
+            assertConfigurationCacheReused()
+        }
+        assertPluginLayout()
+    }
+
+    @Test
     @Ignore
     fun `prepare sandbox for two plugins`() {
         writeJavaFile()
