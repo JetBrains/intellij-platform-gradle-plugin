@@ -42,7 +42,7 @@ abstract class IntelliJPluginTestBase : IntelliJPlatformTestBase() {
                     val isCI = (System.getenv("CI") ?: "false").toBoolean()
                     
                     develocity {
-                        server = "https://ge.jetbrains.com"
+                        server = "https://develocity.jetbrains.com"
                     
                         buildScan {
                             if (isCI) {
