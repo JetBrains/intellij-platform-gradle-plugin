@@ -11,6 +11,12 @@ To apply the patch, change the root project
 accordingly, and delete the patch script.
 */
 changeProject(DslContext.projectId) {
+    params {
+        add {
+            password("env.DEVELOCITY_ACCESS_KEY", "credentialsJSON:5c4710cc-c37f-4d5d-a54d-0ac8c8182f9b")
+        }
+    }
+
     features {
         add {
             githubIssues {
