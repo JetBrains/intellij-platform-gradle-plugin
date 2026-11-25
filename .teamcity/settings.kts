@@ -1,8 +1,5 @@
 import jetbrains.buildServer.configs.kotlin.*
-import jetbrains.buildServer.configs.kotlin.buildFeatures.commitStatusPublisher
 import jetbrains.buildServer.configs.kotlin.buildSteps.gradle
-import jetbrains.buildServer.configs.kotlin.matrix
-import jetbrains.buildServer.configs.kotlin.projectFeatures.githubIssues
 import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
 /*
@@ -33,14 +30,6 @@ project {
     description = "Gradle plugin for building plugins for IntelliJ-based IDEs – https://github.com/JetBrains/intellij-platform-gradle-plugin"
 
     buildType(UnitTests)
-
-    features {
-        githubIssues {
-            id = "PROJECT_EXT_621"
-            displayName = "JetBrains/intellij-platform-gradle-plugin"
-            repositoryURL = "https://github.com/JetBrains/intellij-platform-gradle-plugin"
-        }
-    }
 }
 
 object UnitTests : BuildType({
@@ -78,19 +67,10 @@ object UnitTests : BuildType({
                 "testGradleVersion",
                 listOf(
                     value("9.0.0"),
-                    value("9.8.2"),
+                    value("9.9.2"),
                     value("nightly"),
                 ),
             )
-        }
-        commitStatusPublisher {
-            publisher = github {
-                githubUrl = "https://api.github.com"
-                authType = personalToken {
-                    token = "credentialsJSON:7b4ae65b-efad-4ea8-8ddf-b48502524605"
-                }
-            }
-            param("github_oauth_user", "hsz")
         }
     }
 })
