@@ -22,4 +22,10 @@ changeBuildType(RelativeId("UnitTests")) {
             }
         }
     }
+
+    requirements {
+        add {
+            endsWith("teamcity.agent.name", "-Medium")
+        }
+    }
 }
